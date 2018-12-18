@@ -1,0 +1,55 @@
+{
+  "name": "node-sql-parser",
+  "version": "0.0.2",
+  "description": "simple node sql parser",
+  "main": "index.js",
+  "scripts": {
+    "build": "mkdir -p build && pegjs -o build/pegjs-parser.js ./lib/sql.pegjs",
+    "test": "npm run lint && mocha",
+    "lint": "npm run build && eslint .",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taozhi8833998/node-sql-parser.git"
+  },
+  "pre-commit": "test",
+  "keywords": [
+    "sql",
+    "parser",
+    "ast",
+    "nodejs"
+  ],
+  "author": "taozhi8833998 <taozhi8833998@163.com>",
+  "files": [
+    "index.js",
+    "lib/",
+    "build/pegjs-parser.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/taozhi8833998/node-sql-parser/issues"
+  },
+  "homepage": "https://github.com/taozhi8833998/node-sql-parser#readme",
+  "engines": {
+    "node": ">=8"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.5",
+    "chai": "^4.2.0",
+    "eslint": "^5.10.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-strict": "^14.0.1",
+    "eslint-plugin-filenames": "^1.3.2",
+    "eslint-plugin-import": "^2.14.0",
+    "mocha": "^5.2.0",
+    "pegjs": "^0.10.0",
+    "pre-commit": "^1.2.2"
+  },
+  "dependencies": {
+    "has": "^1.0.3"
+  }
+}
