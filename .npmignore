@@ -1,0 +1,12 @@
+coverage
+.DS_Store
+test
+*.log
+.gitignore
+.vscode
+.npmignore
+lib/sql.pegjs
+.eslintrc
+.eslintrcignore
+.editorconfig
+.travis.yml

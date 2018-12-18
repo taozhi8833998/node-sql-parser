@@ -1,5 +1,6 @@
 # GanJiang SQL Parser
 
+[![](https://img.shields.io/badge/Powered%20by-ganjiang-brightgreen.svg)](https://github.com/taozhi8833998/node-sql-parser)
 [![Build Status](https://travis-ci.org/taozhi8833998/node-sql-parser.svg?branch=master)](https://travis-ci.org/taozhi8833998/node-sql-parser)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/taozhi8833998/node-sql-parser/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/node-sql-parser.svg)](https://badge.fury.io/js/node-sql-parser)
@@ -8,7 +9,7 @@
 [![issues](https://img.shields.io/github/issues/taozhi8833998/node-sql-parser.svg)](https://img.shields.io/github/issues/taozhi8833998/node-sql-parser)
 
 
-** Parse simple SQL statements into an abstract syntax tree (AST) with the visited tableList and convert it back to SQL. **
+**Parse simple SQL statements into an abstract syntax tree (AST) with the visited tableList and convert it back to SQL.**
 
 ## :star: Features
 
@@ -38,7 +39,7 @@ const { Parser } = require('node-sql-parser');
 const parser = new Parser();
 const tableList = parser.tableList('SELECT * FROM t');
 
-console.log(tableList); // ["select::null::t"] 
+console.log(tableList); // ["select::null::t"]
 ```
 
 ### Convert AST back to SQL
@@ -62,7 +63,7 @@ before running any query.
 
 ## :kissing_heart: Acknowledgement
 
-This project is based on the SQL parser extracted from [flora-sql-parser](https://github.com/godmodelabs/flora-sql-parser) module.  
+This project is based on the SQL parser extracted from [flora-sql-parser](https://github.com/godmodelabs/flora-sql-parser) module.
 
 ## License
 
