@@ -1,11 +1,10 @@
-coverage
+coverage/
 .DS_Store
-test
+test/
 *.log
 .gitignore
 .vscode
 .npmignore
-lib/sql.pegjs
 .eslintrc
 .eslintrcignore
 .editorconfig
