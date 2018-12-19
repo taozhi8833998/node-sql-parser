@@ -7,7 +7,8 @@
     "build": "mkdir -p build && pegjs -o build/pegjs-parser.js ./lib/sql.pegjs",
     "test": "npm run lint && mocha",
     "lint": "npm run build && eslint .",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "cover": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec test/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -40,11 +41,13 @@
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.5",
     "chai": "^4.2.0",
+    "coveralls": "^3.0.2",
     "eslint": "^5.10.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-strict": "^14.0.1",
     "eslint-plugin-filenames": "^1.3.2",
     "eslint-plugin-import": "^2.14.0",
+    "istanbul": "^0.4.5",
     "mocha": "^5.2.0",
     "pegjs": "^0.10.0",
     "pre-commit": "^1.2.2"
