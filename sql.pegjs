@@ -143,7 +143,7 @@
 
   // used for dependency analysis
   var varList = [];
-  
+
   const tableList = new Set();
   const columnList = new Set();
 }
@@ -152,17 +152,18 @@ start
   = multiple_stmt
   / crud_stmt
 
-crud_stmt 
+crud_stmt
   = union_stmt
   / update_stmt
   / replace_insert_stmt
   / delete_stmt
   / proc_stmts
- 
+
 multiple_stmt
   = head:crud_stmt tail:(__ SEMICOLON __ crud_stmt)+ {
       var cur = [head];
       for (var i = 0; i < tail.length; i++) {
+        if(!tail[i][3] || tail[i][3].length === 0) continue;
         cur.push(tail[i][3]);
       }
       return {
@@ -171,7 +172,7 @@ multiple_stmt
       	ast: cur
       }
     }
-    
+
 union_stmt
   = head:select_stmt tail:(__ KW_UNION __ select_stmt)* {
       var cur = [head];
