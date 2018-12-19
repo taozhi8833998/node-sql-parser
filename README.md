@@ -32,7 +32,7 @@ console.log(ast);
 
 ### Get the SQL visited tables
 
-- get the table list the sql visit
+- get the table list that the sql visited
 - the format is **{type}::{dbName}::{tableName}** // type could be select, update, delete or insert
 
 ```javascript
@@ -41,6 +41,16 @@ const parser = new Parser();
 const tableList = parser.tableList('SELECT * FROM t');
 
 console.log(tableList); // ["select::null::t"]
+```
+
+### Check the SQL with Authority List
+
+```javascript
+const { Parser } = require('node-sql-parser');
+const parser = new Parser();
+const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
+const whiteList = ['(select|update)::(.*)::(a|b)'] // array that contain multiple authorities
+parser.whiteListCheck(sql, whiteList) // if check failed, an error would be thrown with relevant error message, if passed it would return undefined
 ```
 
 ### Convert AST back to SQL
