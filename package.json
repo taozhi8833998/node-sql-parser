@@ -8,13 +8,13 @@
     "test": "npm run lint && mocha",
     "lint": "npm run build && eslint .",
     "prepublishOnly": "npm run build",
-    "cover": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec test/*.spec.js"
+    "cover": "npm run lint && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec test/*.spec.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/taozhi8833998/node-sql-parser.git"
   },
-  "pre-commit": "test",
+  "pre-commit": "cover",
   "keywords": [
     "sql",
     "parser",
