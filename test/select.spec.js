@@ -696,14 +696,13 @@ describe.only('select', () => {
       const sql = 'SELECT * FROM b'
       const whiteList = ['select::(.*)::a']
       const fun = parser.whiteListCheck.bind(parser, sql, whiteList)
-      expect(fun).to.throw(`SQL = '${sql}' is operating data on table with authority = 'select::null::b' that do not exist in whiteLis`)
-      // expect(fn).to.throwException(/matches the exception message/);
+      expect(fun).to.throw(`authority = 'select::null::b' is required in whiteList to execute SQL = '${sql}'`)
     })
     it('should fail the complex sql and regex check', () => {
       const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
       const whiteList = ['select::(.*)::(a|b)']
       const fun = parser.whiteListCheck.bind(parser, sql, whiteList)
-      expect(fun).to.throw(`SQL = '${sql}' is operating data on table with authority = 'update::null::a' that do not exist in whiteList`)
+      expect(fun).to.throw(`authority = 'update::null::a' is required in whiteList to execute SQL = '${sql}'`)
     })
   })
 });
