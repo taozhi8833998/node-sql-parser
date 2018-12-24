@@ -3,11 +3,11 @@
 const { expect } = require('chai');
 const { Parser } = require('../');
 
-describe.only('select', () => {
+describe('select', () => {
   const parser = new Parser();
 
   it('should be null if empty', () => {
-    const [ast] = parser.sqlToAst('SELECT a');
+    const ast = parser.sqlToAst('SELECT a');
     expect(ast.options).to.be.null;
     expect(ast.distinct).to.be.null;
     expect(ast.from).to.be.null;
@@ -18,7 +18,7 @@ describe.only('select', () => {
   });
 
   it('should have appropriate types', () => {
-    const [ast] = parser.sqlToAst('SELECT SQL_NO_CACHE DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 3');
+    const ast = parser.sqlToAst('SELECT SQL_NO_CACHE DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 3');
 
     expect(ast.options).to.be.an('array');
     expect(ast.distinct).to.equal('DISTINCT');
@@ -31,12 +31,12 @@ describe.only('select', () => {
 
   describe('column clause', () => {
     it('should parse "*" shorthand', () => {
-      const [ast] = parser.sqlToAst('SELECT * FROM t');
+      const ast = parser.sqlToAst('SELECT * FROM t');
       expect(ast.columns).to.equal('*');
     });
 
     it('should parse "table.*" column expressions', () => {
-      const [ast] = parser.sqlToAst('SELECT t.* FROM t');
+      const ast = parser.sqlToAst('SELECT t.* FROM t');
 
       expect(ast.columns).to.eql([
         { expr: { type: 'column_ref', 'table': 't', column: '*' }, as: null }
@@ -44,7 +44,7 @@ describe.only('select', () => {
     });
 
     it('should parse aliases w/o "AS" keyword', () => {
-      const [ast] = parser.sqlToAst('SELECT a aa FROM  t');
+      const ast = parser.sqlToAst('SELECT a aa FROM  t');
 
       expect(ast.columns).to.eql([
         { expr: { type: 'column_ref', table: null, column: 'a' }, as: 'aa' }
@@ -52,7 +52,7 @@ describe.only('select', () => {
     });
 
     it('should parse aliases w/ "AS" keyword', () => {
-      const [ast] = parser.sqlToAst('SELECT b.c as bc FROM t');
+      const ast = parser.sqlToAst('SELECT b.c as bc FROM t');
 
       expect(ast.columns).to.eql([
         { expr: { type: 'column_ref', table: 'b', column: 'c' },  as: 'bc' }
@@ -61,7 +61,7 @@ describe.only('select', () => {
 
     describe('functions', () => {
       it('should parse function expression', () => {
-        const [ast] = parser.sqlToAst('SELECT fun(d) FROM t');
+        const ast = parser.sqlToAst('SELECT fun(d) FROM t');
 
         expect(ast.columns).to.eql([
           {
@@ -88,7 +88,7 @@ describe.only('select', () => {
         'SYSTEM_USER'
       ].forEach((func) => {
         it(`should parse scalar function ${func}`, () => {
-          const [ast] = parser.sqlToAst(`SELECT ${func} FROM t`);
+          const ast = parser.sqlToAst(`SELECT ${func} FROM t`);
 
           expect(ast.columns).to.eql([
             {
@@ -108,7 +108,7 @@ describe.only('select', () => {
     });
 
     it('should parse multiple columns', () => {
-      const [ast] = parser.sqlToAst('SELECT b.c as bc, 1+3 FROM t');
+      const ast = parser.sqlToAst('SELECT b.c as bc, 1+3 FROM t');
 
       expect(ast.columns).to.eql([
         { expr: { type: 'column_ref', table: 'b', column: 'c' },  as: 'bc' },
@@ -127,28 +127,28 @@ describe.only('select', () => {
 
   describe('from clause', () => {
     it('should parse single table', () => {
-      const [ast] = parser.sqlToAst('SELECT * FROM t');
+      const ast = parser.sqlToAst('SELECT * FROM t');
       expect(ast.from).to.eql([{ db: null, table: 't', as: null }]);
     });
 
     it('should parse tables from other databases', () => {
-      const [ast] = parser.sqlToAst('SELECT * FROM u.t');
+      const ast = parser.sqlToAst('SELECT * FROM u.t');
       expect(ast.from).to.eql([{ db: 'u', table: 't', as: null }]);
     });
 
     it('should parse tables from other databases (ANSI identifier)', () => {
-      const [ast] = parser.sqlToAst('SELECT * FROM "u"."t"');
+      const ast = parser.sqlToAst('SELECT * FROM "u"."t"');
       expect(ast.from).to.eql([{ db: 'u', table: 't', as: null }]);
     });
 
 
     it('should parse subselect', () => {
-      const [ast] = parser.sqlToAst('SELECT * FROM (SELECT id FROM t1) someAlias');
+      const ast = parser.sqlToAst('SELECT * FROM (SELECT id FROM t1) someAlias');
       expect(ast.from).to.eql([{
         expr: {
           tableList: ["select::null::t1"],
           columnList: [],
-          ast: [{
+          ast: {
               with: null,
               type: 'select',
               options: null,
@@ -160,7 +160,7 @@ describe.only('select', () => {
               having: null,
               orderby: null,
               limit: null,
-          }],
+          },
           parentheses: true
         },
         as: 'someAlias'
@@ -169,7 +169,7 @@ describe.only('select', () => {
 
     describe('joins', () => {
       it('should parse implicit joins', () => {
-        const [ast] = parser.sqlToAst('SELECT * FROM t, a.b b, c.d as cd');
+        const ast = parser.sqlToAst('SELECT * FROM t, a.b b, c.d as cd');
 
         expect(ast.from).to.eql([
           { db: null, table: 't', as: null },
@@ -181,7 +181,7 @@ describe.only('select', () => {
       ['left', 'right', 'full'].forEach((join) => {
         [' ', ' outer '].forEach((outer) => {
           it(`should parse ${join}${outer}joins`, () => {
-            const [ast] = parser.sqlToAst(`SELECT * FROM t ${join} ${outer} join d on d.d = d.a`);
+            const ast = parser.sqlToAst(`SELECT * FROM t ${join} ${outer} join d on d.d = d.a`);
 
             expect(ast.from).to.eql([
               { db: null, table: 't', as: null },
@@ -203,7 +203,7 @@ describe.only('select', () => {
       });
 
       it('should parse joined subselect', () => {
-        const [ast] = parser.sqlToAst('SELECT * FROM t1 JOIN (SELECT id, col1 FROM t2) someAlias ON t1.id = someAlias.id');
+        const ast = parser.sqlToAst('SELECT * FROM t1 JOIN (SELECT id, col1 FROM t2) someAlias ON t1.id = someAlias.id');
 
         expect(ast.from).to.eql([
           { db: null, table: 't1', as: null },
@@ -211,7 +211,7 @@ describe.only('select', () => {
             expr: {
               tableList: ["select::null::t2", "select::null::t1"],
               columnList: [],
-              ast: [{
+              ast: {
                 with: null,
                 type: 'select',
                 options: null,
@@ -226,7 +226,7 @@ describe.only('select', () => {
                 having: null,
                 orderby: null,
                 limit: null,
-              }],
+              },
               parentheses: true
             },
             as: 'someAlias',
@@ -242,7 +242,7 @@ describe.only('select', () => {
       });
 
       it('should parse joins with USING (single column)', () => {
-        const [ast] = parser.sqlToAst('SELECT * FROM t1 JOIN t2 USING (id)');
+        const ast = parser.sqlToAst('SELECT * FROM t1 JOIN t2 USING (id)');
 
         expect(ast.from).to.eql([
           { db: null, table: 't1', as: null },
@@ -251,7 +251,7 @@ describe.only('select', () => {
       });
 
       it('should parse joins with USING (multiple columns)', () => {
-        const [ast] = parser.sqlToAst('SELECT * FROM t1 JOIN t2 USING (id1, id2)');
+        const ast = parser.sqlToAst('SELECT * FROM t1 JOIN t2 USING (id1, id2)');
 
         expect(ast.from).to.eql([
           { db: null, table: 't1', as: null },
@@ -261,14 +261,14 @@ describe.only('select', () => {
     });
 
     it('should parse DUAL table', () => {
-      const [ast] = parser.sqlToAst('SELECT * FROM DUAL');
+      const ast = parser.sqlToAst('SELECT * FROM DUAL');
       expect(ast.from).to.eql([{ type: 'dual' }]);
     });
   });
 
   describe('where clause', () => {
     it('should parse single condition', () => {
-      const [ast] = parser.sqlToAst('SELECT * FROM t where t.a > 0');
+      const ast = parser.sqlToAst('SELECT * FROM t where t.a > 0');
 
       expect(ast.where).to.eql({
         type: 'binary_expr',
@@ -279,7 +279,7 @@ describe.only('select', () => {
     });
 
     it('should parse parameters', () => {
-      const [ast] = parser.sqlToAst('SELECT * FROM t where t.a > :my_param');
+      const ast = parser.sqlToAst('SELECT * FROM t where t.a > :my_param');
 
       expect(ast.where).to.eql({
         type: 'binary_expr',
@@ -290,7 +290,7 @@ describe.only('select', () => {
     });
 
     it('should parse multiple conditions', () => {
-      const [ast] = parser.sqlToAst(`SELECT * FROM t where t.c between 1 and 't' AND Not true`);
+      const ast = parser.sqlToAst(`SELECT * FROM t where t.c between 1 and 't' AND Not true`);
 
       expect(ast.where).to.eql({
         type: 'binary_expr',
@@ -316,7 +316,7 @@ describe.only('select', () => {
     });
 
     it('should parse single condition with boolean', () => {
-      const [ast] = parser.sqlToAst('SELECT * FROM t where t.a = TRUE');
+      const ast = parser.sqlToAst('SELECT * FROM t where t.a = TRUE');
 
       expect(ast.where).to.eql({
         type: 'binary_expr',
@@ -328,7 +328,7 @@ describe.only('select', () => {
 
     ['is', 'is not'].forEach((operator) => {
       it(`should parse ${operator} condition`, () => {
-        const [ast] = parser.sqlToAst(`SELECT * FROM t WHERE "col" ${operator} NULL`);
+        const ast = parser.sqlToAst(`SELECT * FROM t WHERE "col" ${operator} NULL`);
 
         expect(ast.where).to.eql({
           type: 'binary_expr',
@@ -341,14 +341,14 @@ describe.only('select', () => {
 
     ['exists', 'not exists'].forEach((operator) => {
       it('should parse ' + operator.toUpperCase() + ' condition', () => {
-        const [ast] = parser.sqlToAst(`SELECT * FROM t WHERE ${operator} (SELECT 1)`);
+        const ast = parser.sqlToAst(`SELECT * FROM t WHERE ${operator} (SELECT 1)`);
         expect(ast.where).to.eql({
           type: 'unary_expr',
           operator: operator.toUpperCase(),
           expr: {
             tableList: ["select::null::t"],
             columnList: [],
-            ast: [{
+            ast: {
               with: null,
               type: 'select',
               options: null,
@@ -360,7 +360,7 @@ describe.only('select', () => {
               having: null,
               orderby: null,
               limit: null,
-            }],
+            },
             parentheses: true
           }
         });
@@ -370,7 +370,7 @@ describe.only('select', () => {
 
   describe('limit clause', () => {
     it('should be parsed w/o offset', () => {
-      const [ast] = parser.sqlToAst('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 3');
+      const ast = parser.sqlToAst('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 3');
 
       expect(ast.limit).eql([
         { type: 'number', value: 0 },
@@ -379,7 +379,7 @@ describe.only('select', () => {
     });
 
     it('should be parsed w/ offset', () => {
-      const [ast] = parser.sqlToAst('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 0, 3');
+      const ast = parser.sqlToAst('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 0, 3');
 
       expect(ast.limit).to.eql([
         {type: 'number', value: 0 },
@@ -390,13 +390,13 @@ describe.only('select', () => {
 
   describe('group by clause', () => {
     it('should parse single columns', () => {
-      const [ast] = parser.sqlToAst('SELECT a FROM b WHERE c = 0 GROUP BY d');
+      const ast = parser.sqlToAst('SELECT a FROM b WHERE c = 0 GROUP BY d');
 
       expect(ast.groupby).to.eql([{ type:'column_ref', table: null, column: 'd' }])
     });
 
     it('should parse multiple columns', () => {
-      const [ast] = parser.sqlToAst('SELECT a FROM b WHERE c = 0 GROUP BY d, t.b, t.c');
+      const ast = parser.sqlToAst('SELECT a FROM b WHERE c = 0 GROUP BY d, t.b, t.c');
 
       expect(ast.groupby).to.eql([
         { type: 'column_ref', table: null, column: 'd' },
@@ -408,7 +408,7 @@ describe.only('select', () => {
 
   describe('having clause', () => {
     it('should parse single conditions', () => {
-      const [ast] = parser.sqlToAst('SELECT col1 FROM t GROUP BY col2 HAVING COUNT(*) > 1');
+      const ast = parser.sqlToAst('SELECT col1 FROM t GROUP BY col2 HAVING COUNT(*) > 1');
 
       expect(ast.having).to.eql({
         type: 'binary_expr',
@@ -423,7 +423,7 @@ describe.only('select', () => {
     });
 
     it('should parse multiple conditions', () => {
-      const [ast] = parser.sqlToAst('SELECT col1 FROM t GROUP BY col2 HAVING SUM(col2) > 10 OR 1 = 1');
+      const ast = parser.sqlToAst('SELECT col1 FROM t GROUP BY col2 HAVING SUM(col2) > 10 OR 1 = 1');
 
       expect(ast.having).to.eql({
         type: 'binary_expr',
@@ -448,7 +448,7 @@ describe.only('select', () => {
     });
 
     it('should parse subselects', () => {
-      const [ast] = parser.sqlToAst('SELECT col1 FROM t GROUP BY col2 HAVING SUM(col2) > (SELECT 10)');
+      const ast = parser.sqlToAst('SELECT col1 FROM t GROUP BY col2 HAVING SUM(col2) > (SELECT 10)');
 
       expect(ast.having).to.eql({
         type: 'binary_expr',
@@ -478,7 +478,7 @@ describe.only('select', () => {
 
   describe('order by clause', () => {
     it('should parse single column', () => {
-      const [ast] = parser.sqlToAst('SELECT a FROM b WHERE c = 0 order BY d');
+      const ast = parser.sqlToAst('SELECT a FROM b WHERE c = 0 order BY d');
 
       expect(ast.orderby).to.eql([
         { expr: { type: 'column_ref', table: null, column: 'd' }, type: 'ASC' }
@@ -486,7 +486,7 @@ describe.only('select', () => {
     });
 
     it('should parse multiple columns', () => {
-      const [ast] = parser.sqlToAst('SELECT a FROM b WHERE c = 0 order BY d, t.b dEsc, t.c');
+      const ast = parser.sqlToAst('SELECT a FROM b WHERE c = 0 order BY d, t.b dEsc, t.c');
 
       expect(ast.orderby).to.eql([
         { expr: { type: 'column_ref', table: null, column: 'd' },  type: 'ASC' },
@@ -496,7 +496,7 @@ describe.only('select', () => {
     });
 
     it('should parse expressions', () => {
-      const [ast] = parser.sqlToAst("SELECT a FROM b WHERE c = 0 order BY d, SuM(e)");
+      const ast = parser.sqlToAst("SELECT a FROM b WHERE c = 0 order BY d, SuM(e)");
 
       expect(ast.orderby).to.eql([
         { expr: { type: 'column_ref', table: null, column: 'd' },  type: 'ASC' },
@@ -514,33 +514,33 @@ describe.only('select', () => {
 
   describe('MySQL SQL extensions', () => {
     it('should parse SQL_CALC_FOUND_ROWS', () => {
-      const [ast] = parser.sqlToAst('SELECT SQL_CALC_FOUND_ROWS col FROM t');
+      const ast = parser.sqlToAst('SELECT SQL_CALC_FOUND_ROWS col FROM t');
       expect(ast.options).to.eql(['SQL_CALC_FOUND_ROWS']);
     });
 
     it('should parse SQL_CACHE/SQL_NO_CACHE', () => {
-      const [ast] = parser.sqlToAst('SELECT SQL_CACHE col FROM t');
+      const ast = parser.sqlToAst('SELECT SQL_CACHE col FROM t');
       expect(ast.options).to.eql(['SQL_CACHE']);
 
-      const [otherAst] = parser.sqlToAst('SELECT SQL_NO_CACHE col FROM t');
+      const otherAst = parser.sqlToAst('SELECT SQL_NO_CACHE col FROM t');
       expect(otherAst.options).to.eql(['SQL_NO_CACHE']);
     });
 
     it('should parse SQL_SMALL_RESULT/SQL_BIG_RESULT', () => {
-      const [ast] = parser.sqlToAst('SELECT SQL_SMALL_RESULT col FROM t');
+      const ast = parser.sqlToAst('SELECT SQL_SMALL_RESULT col FROM t');
       expect(ast.options).to.eql(['SQL_SMALL_RESULT']);
 
-      const [otherAst] = parser.sqlToAst('SELECT SQL_BIG_RESULT col FROM t');
+      const otherAst = parser.sqlToAst('SELECT SQL_BIG_RESULT col FROM t');
       expect(otherAst.options).to.eql(['SQL_BIG_RESULT']);
     });
 
     it('should parse SQL_BUFFER_RESULT', () => {
-      const [ast] = parser.sqlToAst('SELECT SQL_BUFFER_RESULT col FROM t');
+      const ast = parser.sqlToAst('SELECT SQL_BUFFER_RESULT col FROM t');
       expect(ast.options).to.contain('SQL_BUFFER_RESULT');
     });
 
     it('should parse multiple options per query', () => {
-      const [ast] = parser.sqlToAst('SELECT SQL_CALC_FOUND_ROWS SQL_BIG_RESULT SQL_BUFFER_RESULT col FROM t');
+      const ast = parser.sqlToAst('SELECT SQL_CALC_FOUND_ROWS SQL_BIG_RESULT SQL_BUFFER_RESULT col FROM t');
       expect(ast.options).to.eql(['SQL_CALC_FOUND_ROWS', 'SQL_BIG_RESULT', 'SQL_BUFFER_RESULT']);
     });
   });
@@ -548,12 +548,12 @@ describe.only('select', () => {
   describe('literals', () => {
     describe('strings', () => {
       it('should parse single quoted strings', () => {
-        const [ast] = parser.sqlToAst(`SELECT 'string'`);
+        const ast = parser.sqlToAst(`SELECT 'string'`);
         expect(ast.columns).to.eql([{ expr: { type: 'string', value: 'string' }, as: null }]);
       });
 
       it('should parse keywords in single quotes as string', () => {
-        const [ast] = parser.sqlToAst(`SELECT 'select'`);
+        const ast = parser.sqlToAst(`SELECT 'select'`);
         expect(ast.columns).to.eql([{ expr: { type: 'string', value: 'select' }, as: null }]);
       });
     });
@@ -570,7 +570,7 @@ describe.only('select', () => {
 
         [type, type.toUpperCase()].forEach((t) => {
           it(t, () => {
-            const [ast] = parser.sqlToAst(`SELECT ${t} '${value}'`);
+            const ast = parser.sqlToAst(`SELECT ${t} '${value}'`);
             expect(ast.columns).to.eql([{ expr: { type, value }, as: null }]);
           });
         });
@@ -580,7 +580,7 @@ describe.only('select', () => {
 
   describe('row value constructor', () => {
     it('should parse simple values', () => {
-      const [ast] = parser.sqlToAst(`SELECT * FROM "user" WHERE (firstname, lastname) = ('John', 'Doe')`);
+      const ast = parser.sqlToAst(`SELECT * FROM "user" WHERE (firstname, lastname) = ('John', 'Doe')`);
 
       expect(ast.where).to.eql({
         type: 'binary_expr',
@@ -607,7 +607,7 @@ describe.only('select', () => {
 
   describe('common table expressions', () => {
     it('should parse single CTE', () => {
-      const [ast] = parser.sqlToAst(`WITH cte AS (SELECT 1)
+      const ast = parser.sqlToAst(`WITH cte AS (SELECT 1)
                 SELECT * FROM cte`);
 
       expect(ast).to.have.property('with')
@@ -622,7 +622,7 @@ describe.only('select', () => {
     });
 
     it('should parse multiple CTEs', () => {
-      const [ast] = parser.sqlToAst(`WITH cte1 AS (SELECT 1), cte2 AS (SELECT 2)
+      const ast = parser.sqlToAst(`WITH cte1 AS (SELECT 1), cte2 AS (SELECT 2)
                 SELECT * FROM cte1 UNION SELECT * FROM cte2`);
 
       expect(ast)
@@ -635,7 +635,7 @@ describe.only('select', () => {
     });
 
     it('should parse CTE with column', () => {
-      const [ast] = parser.sqlToAst(`WITH cte (col1) AS (SELECT 1)
+      const ast = parser.sqlToAst(`WITH cte (col1) AS (SELECT 1)
                 SELECT * FROM cte`);
 
       const cte = ast.with[0];
@@ -645,7 +645,7 @@ describe.only('select', () => {
     });
 
     it('should parse CTE with multiple columns', () => {
-      const [ast] = parser.sqlToAst(`WITH cte (col1, col2) AS (SELECT 1, 2)
+      const ast = parser.sqlToAst(`WITH cte (col1, col2) AS (SELECT 1, 2)
                 SELECT * FROM cte`);
 
       const cte = ast.with[0];
@@ -660,12 +660,27 @@ describe.only('select', () => {
               SELECT n + 1 FROM cte WHERE n < 5
             )
             SELECT * FROM cte`;
-      const [ast] = parser.sqlToAst(sql);
+      const ast = parser.sqlToAst(sql);
 
       const cte = ast.with[0];
       expect(cte).to.have.property('recursive', true);
     });
   });
+
+  describe('multiple statements', () => {
+    it('should parser multiple statements', () => {
+      const sql = 'SELECT * FROM a;SELECT id from b'
+      const ast = parser.sqlToAst(sql)
+      const [sqla, sqlb] = sql.split(';')
+      const astFirstSQL = parser.sqlToAst(sqla.trim())
+      const astSecondSQL = parser.sqlToAst(sqlb.trim())
+      expect(ast).to.have.lengthOf(2)
+      expect(ast[0].tableList).to.eql(['select::null::a'])
+      expect(ast[1].tableList).to.eql(['select::null::a', 'select::null::b'])
+      expect(ast[0].ast).to.eql(astFirstSQL)
+      expect(ast[1].ast).to.eql(astSecondSQL)
+    })
+  })
 
   describe('white list check', () => {
     it('should pass the same check', () => {

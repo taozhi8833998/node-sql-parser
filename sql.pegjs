@@ -161,8 +161,8 @@ crud_stmt
 
 multiple_stmt
   = head:crud_stmt tail:(__ SEMICOLON __ crud_stmt)+ {
-      var cur = [head];
-      for (var i = 0; i < tail.length; i++) {
+      const cur = [head];
+      for (let i = 0; i < tail.length; i++) {
         if(!tail[i][3] || tail[i][3].length === 0) continue;
         cur.push(tail[i][3]);
       }
@@ -175,14 +175,15 @@ multiple_stmt
 
 union_stmt
   = head:select_stmt tail:(__ KW_UNION __ select_stmt)* {
-      var cur = [head];
+      let cur = head;
       for (var i = 0; i < tail.length; i++) {
-        cur.push(tail[i][3]);
+        cur._next = tail[i][3];
+        cur = cur._next
       }
       return {
         tableList: Array.from(tableList),
         columnList: Array.from(columnList),
-      	ast: cur
+      	ast: head
       }
     }
 
