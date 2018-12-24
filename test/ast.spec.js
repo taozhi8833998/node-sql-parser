@@ -579,6 +579,24 @@ describe('AST', () => {
         });
     });
 
+    describe('multiple statements', () => {
+        it('should parser simple multiple statements', () => {
+            const sql = 'SELECT * FROM a;SELECT id FROM b'
+            const expectSQL = 'SELECT * FROM `a` ; SELECT `id` FROM `b`'
+            expect(getParsedSql(sql)).to.equal(expectSQL);
+        })
+        it('should parser simple multiple statements', () => {
+            const sql = 'SELECT * FROM a;SELECT id FROM b UNION SELECT id FROM c'
+            const expectSQL = 'SELECT * FROM `a` ; SELECT `id` FROM `b` UNION SELECT `id` FROM `c`'
+            expect(getParsedSql(sql)).to.equal(expectSQL);
+        })
+        it('should parser simple multiple statements', () => {
+            const sql = 'SELECT * FROM a;UPDATE b SET id = 1'
+            const expectSQL = 'SELECT * FROM `a` ; SELECT `id` FROM `b` UNION SELECT `id` FROM `c`'
+            expect(getParsedSql.bind(null, sql)).to.throw(Error, 'Only SELECT statements supported at the moment');
+        })
+    })
+
     describe('unsupported statements', () => {
         const unsupportedStatements = {
             insert: 'INSERT INTO t (col1, col2) VALUES (1, 2)',
@@ -587,9 +605,7 @@ describe('AST', () => {
 
         Object.keys(unsupportedStatements).forEach((stmtType) => {
             it(`should throw exception for ${stmtType} statements`, () => {
-                expect(() => {
-                    getParsedSql(unsupportedStatements[stmtType]);
-                }).to.throw(Error, 'Only SELECT statements supported at the moment');
+                expect(getParsedSql.bind(null, unsupportedStatements[stmtType])).to.throw(Error, 'Only SELECT statements supported at the moment');
             });
         });
     });
