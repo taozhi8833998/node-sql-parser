@@ -55,6 +55,8 @@ parser.whiteListCheck(sql, whiteList) // if check failed, an error would be thro
 
 ### Convert AST back to SQL
 
+- **Only SELECT SQL statements are supported for converting ast back to sql currently**
+
 ```javascript
 const { Parser, util } = require('node-sql-parser');
 const parser = new Parser()
@@ -64,13 +66,6 @@ const sql = util.astToSQL(ast);
 console.log(sql); // SELECT * FROM `t`
 ```
 
-The generated SQL is ANSI SQL compliant. To run those queries on MySQL, make sure you set correct SQL mode
-
-```sql
-SET SESSION sql_mode = 'ANSI';
-```
-
-before running any query.
 
 ## :kissing_heart: Acknowledgement
 
