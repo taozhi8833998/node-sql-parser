@@ -1,5 +1,5 @@
 {
-  var reservedMap = {
+  const reservedMap = {
     'ALL': true,
     'AND': true,
     'AS': true,
@@ -102,22 +102,22 @@
   }
 
   function createList(head, tail) {
-    var result = [head];
-    for (var i = 0; i < tail.length; i++) {
+    const result = [head];
+    for (let i = 0; i < tail.length; i++) {
       result.push(tail[i][3]);
     }
     return result;
   }
 
   function createBinaryExprChain(head, tail) {
-    var result = head;
-    for (var i = 0; i < tail.length; i++) {
+    let result = head;
+    for (let i = 0; i < tail.length; i++) {
       result = createBinaryExpr(tail[i][1], result, tail[i][3]);
     }
     return result;
   }
 
-  var cmpPrefixMap = {
+  const cmpPrefixMap = {
     '+': true,
     '-': true,
     '*': true,
@@ -142,7 +142,7 @@
   };
 
   // used for dependency analysis
-  var varList = [];
+  let varList = [];
 
   const tableList = new Set();
   const columnList = new Set();
@@ -176,7 +176,7 @@ multiple_stmt
 union_stmt
   = head:select_stmt tail:(__ KW_UNION __ select_stmt)* {
       let cur = head;
-      for (var i = 0; i < tail.length; i++) {
+      for (let i = 0; i < tail.length; i++) {
         cur._next = tail[i][3];
         cur = cur._next
       }
@@ -242,8 +242,8 @@ select_stmt_nake
 // MySQL extensions to standard SQL
 option_clause
   = head:query_option tail:(__ query_option)* {
-    var opts = [head];
-    for (var i = 0, l = tail.length; i < l; ++i) {
+    const opts = [head];
+    for (let i = 0, l = tail.length; i < l; ++i) {
       opts.push(tail[i][1]);
     }
     return opts;
@@ -353,7 +353,7 @@ join_op
 
 table_name
   = dt:ident tail:(__ DOT __ ident)? {
-      var obj = { db: null, table: dt };
+      const obj = { db: null, table: dt };
       if (tail !== null) {
         obj.db = dt;
         obj.table = tail[3];
@@ -393,7 +393,7 @@ order_by_list
 
 order_by_element
   = e:expr __ d:(KW_DESC / KW_ASC)? {
-    var obj = { expr: e, type: 'ASC' };
+    let obj = { expr: e, type: 'ASC' };
     if (d === 'DESC') obj.type = 'DESC';
     return obj;
   }
@@ -404,7 +404,7 @@ number_or_param
 
 limit_clause
   = KW_LIMIT __ i1:(number_or_param) __ tail:(COMMA __ number_or_param)? {
-      var res = [i1];
+      const res = [i1];
       if (tail === null) res.unshift({ type: 'number', value: 0 });
       else res.push(tail[2]);
       return res;
@@ -501,7 +501,7 @@ value_item
 
 expr_list
   = head:expr tail:(__ COMMA __ expr)* {
-      var el = { type: 'expr_list' };
+      const el = { type: 'expr_list' };
       el.value = createList(head, tail);
       return el;
     }
@@ -1186,8 +1186,8 @@ var_decl
 
 mem_chain
   = l:('.' ident_name)* {
-    var s = [];
-    for (var i = 0; i < l.length; i++) {
+    const s = [];
+    for (let i = 0; i < l.length; i++) {
       s.push(l[i][1]);
     }
     return s;
