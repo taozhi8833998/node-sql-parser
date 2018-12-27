@@ -432,6 +432,7 @@ update_stmt
 
 delete_stmt
   = KW_DELETE    __
+    t: table_ref_list? __
     f:from_clause __
     w:where_clause? {
       if(f) f.forEach(info => info.table && tableList.add(`delete::${info.db}::${info.table}`));
@@ -440,6 +441,7 @@ delete_stmt
         columnList: Array.from(columnList),
         ast: {
           type: 'delete',
+          tables: t,
           from: f,
           where: w
         }
