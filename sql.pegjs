@@ -393,7 +393,7 @@ order_by_list
 
 order_by_element
   = e:expr __ d:(KW_DESC / KW_ASC)? {
-    let obj = { expr: e, type: 'ASC' };
+    const obj = { expr: e, type: 'ASC' };
     if (d === 'DESC') obj.type = 'DESC';
     return obj;
   }
