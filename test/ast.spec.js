@@ -3,7 +3,7 @@
 const { expect } = require('chai');
 const { Parser, util } = require('../');
 
-describe('AST', () => {
+describe.only('AST', () => {
     const parser = new Parser();
     let sql;
 
@@ -595,6 +595,18 @@ describe('AST', () => {
             const expectSQL = 'SELECT * FROM `a` ; SELECT `id` FROM `b` UNION SELECT `id` FROM `c`'
             expect(getParsedSql.bind(null, sql)).to.throw(Error, 'Only SELECT statements supported at the moment');
         })
+    })
+
+    describe('delete statements', () => {
+        it('should surport delete', () => {
+            expect(getParsedSql('DELETE FROM a WHERE id = 1')).to.equal('DELETE FROM `a` WHERE `id` = 1')
+        })
+
+        it('should surport delete2', () => {
+            expect(getParsedSql('DELETE t1,t2 FROM t1 LEFT JOIN t2 ON t1.id=t2.id WHERE t1.id = 25'))
+            .to.equal('DELETE `t1`, `t2` FROM `t1` LEFT JOIN `t2` ON `t1`.`id` = `t2`.`id` WHERE `t1`.`id` = 25')
+        })
+
     })
 
     describe('unsupported statements', () => {
