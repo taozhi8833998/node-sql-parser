@@ -3,7 +3,7 @@
 const { expect } = require('chai');
 const { Parser, util } = require('../');
 
-describe.only('AST', () => {
+describe('AST', () => {
     const parser = new Parser();
     let sql;
 
@@ -585,40 +585,265 @@ describe.only('AST', () => {
             const expectSQL = 'SELECT * FROM `a` ; SELECT `id` FROM `b`'
             expect(getParsedSql(sql)).to.equal(expectSQL);
         })
-        it('should parser simple multiple statements', () => {
+        it('should parser simple multiple statements with same type', () => {
             const sql = 'SELECT * FROM a;SELECT id FROM b UNION SELECT id FROM c'
             const expectSQL = 'SELECT * FROM `a` ; SELECT `id` FROM `b` UNION SELECT `id` FROM `c`'
             expect(getParsedSql(sql)).to.equal(expectSQL);
         })
-        it('should parser simple multiple statements', () => {
+        it('should parser simple multiple statements with different types', () => {
             const sql = 'SELECT * FROM a;UPDATE b SET id = 1'
-            const expectSQL = 'SELECT * FROM `a` ; SELECT `id` FROM `b` UNION SELECT `id` FROM `c`'
-            expect(getParsedSql.bind(null, sql)).to.throw(Error, 'Only SELECT statements supported at the moment');
+            const expectSQL = 'SELECT * FROM `a` ; UPDATE `b` SET `id` = 1'
+            expect(getParsedSql(sql)).to.equal(expectSQL);
+            //expect(getParsedSql.bind(null, sql)).to.throw(Error, 'Only SELECT statements supported at the moment');
         })
     })
 
     describe('delete statements', () => {
-        it('should surport delete', () => {
-            expect(getParsedSql('DELETE FROM a WHERE id = 1')).to.equal('DELETE FROM `a` WHERE `id` = 1')
-        })
 
-        it('should surport delete2', () => {
+        describe('where clause', () => {
+            ['<', '<=', '=', '!=', '>=', '>'].forEach((operator) => {
+                it(`should support simple "${operator}" comparison`, () => {
+                    sql = `DELETE a fRom db.t wHERE "type" ${operator} 3`;
+                    expect(getParsedSql(sql)).to.equal(`DELETE \`a\` FROM db.\`t\` WHERE \`type\` ${operator} 3`);
+                });
+            });
+
+            const operatorMap = { '=': 'IN', '!=': 'NOT IN' };
+            Object.keys(operatorMap).forEach((operator) => {
+                const sqlOperator = operatorMap[operator];
+
+                it(`should convert "${operator}" to ${sqlOperator} operator for array values`, () => {
+                    const ast = {
+                        type: 'delete',
+                        options: null,
+                        distinct: null,
+                        columns: [{ expr: { type: 'column_ref', table: null, column: 'a' }, as: null }],
+                        from: [{ db: null, table: 't', as: null }],
+                        where: {
+                            type: 'binary_expr',
+                            operator: operator,
+                            left: { type: 'column_ref', table: null, column: 'id' },
+                            right: {
+                                type: 'expr_list',
+                                value: [{ type: 'number', value: 1 }, { type: 'number', value: 2 }]
+                            }
+                        },
+                        groupby: null,
+                        limit: null
+                    };
+
+                    expect(util.astToSQL(ast)).to.equal(`DELETE \`a\` FROM \`t\` WHERE \`id\` ${sqlOperator} (1, 2)`);
+                });
+            });
+
+            ['IN', 'NOT IN'].forEach((operator) => {
+                it(`should support ${operator} operator`, () => {
+                    sql = `DELETE a FROM t WHERE id ${operator.toLowerCase()} (1, 2, 3)`;
+                    expect(getParsedSql(sql)).to.equal(`DELETE \`a\` FROM \`t\` WHERE \`id\` ${operator} (1, 2, 3)`);
+                });
+            });
+
+            ['IS', 'IS NOT'].forEach((operator) => {
+                it(`should support ${operator} operator`, () => {
+                    sql = `DELETE a FROM t WHERE col ${operator.toLowerCase()} NULL`;
+                    expect(getParsedSql(sql)).to.equal(`DELETE \`a\` FROM \`t\` WHERE \`col\` ${operator} NULL`);
+                });
+            });
+
+            ['BETWEEN', 'NOT BETWEEN'].forEach((operator) => {
+                it(`should support ${operator} operator`, () => {
+                    sql = `DELETE a FROM t WHERE id ${operator.toLowerCase()} '1' and 1337`;
+                    expect(getParsedSql(sql)).to.equal(`DELETE \`a\` FROM \`t\` WHERE \`id\` ${operator} '1' AND 1337`);
+                });
+            });
+
+            it('should support boolean values', () => {
+                sql = 'DELETE col1 FROM t WHERE col2 = false';
+                expect(getParsedSql(sql)).to.equal('DELETE `col1` FROM `t` WHERE `col2` = FALSE');
+            });
+
+            it('should support string values', () => {
+                expect(getParsedSql(`DELETE col1 FROM t WHERE col2 = 'foobar'`))
+                    .to.equal(`DELETE \`col1\` FROM \`t\` WHERE \`col2\` = 'foobar'`);
+            });
+
+            it('should support null values', () => {
+                expect(getParsedSql('DELETE col1 FROM t WHERE col2 IS NULL'))
+                    .to.equal('DELETE `col1` FROM `t` WHERE `col2` IS NULL');
+            });
+
+            it('should support array values', () => {
+                expect(getParsedSql('DELETE col1 FROM t WHERE col2 IN (1, 3, 5, 7)'))
+                    .to.equal('DELETE `col1` FROM `t` WHERE `col2` IN (1, 3, 5, 7)');
+            });
+
+            ['EXISTS', 'NOT EXISTS'].forEach((operator) => {
+                it(`should support ${operator} operator`, () => {
+                    expect(getParsedSql(`DELETE a FROM t WHERE ${operator} (SELECT 1)`))
+                        .to.equal(`DELETE \`a\` FROM \`t\` WHERE ${operator} (SELECT 1)`);
+                });
+            })
+        });
+
+        it('should surport JOINs', () => {
             expect(getParsedSql('DELETE t1,t2 FROM t1 LEFT JOIN t2 ON t1.id=t2.id WHERE t1.id = 25'))
             .to.equal('DELETE `t1`, `t2` FROM `t1` LEFT JOIN `t2` ON `t1`.`id` = `t2`.`id` WHERE `t1`.`id` = 25')
         })
 
     })
 
-    describe('unsupported statements', () => {
-        const unsupportedStatements = {
-            insert: 'INSERT INTO t (col1, col2) VALUES (1, 2)',
-            update: 'UPDATE t SET col1 = 5 WHERE id = 1337'
-        };
+    describe('update statements', () => {
 
-        Object.keys(unsupportedStatements).forEach((stmtType) => {
-            it(`should throw exception for ${stmtType} statements`, () => {
-                expect(getParsedSql.bind(null, unsupportedStatements[stmtType])).to.throw(Error, 'Only SELECT statements supported at the moment');
+        it('should surport value is number', () => {
+            expect(getParsedSql('UPDATE t SET col1 = 5'))
+            .to.equal('UPDATE `t` SET `col1` = 5')
+        })
+
+        it('should surport value is string', () => {
+            expect(getParsedSql('UPDATE t SET col1 = "abc"'))
+            .to.equal('UPDATE `t` SET `col1` = `abc`')
+        })
+
+        it('should surport value is NULL ', () => {
+            expect(getParsedSql('UPDATE t SET name = null'))
+            .to.equal('UPDATE `t` SET `name` = NULL')
+        })
+
+        it('should surport multiple columns', () => {
+            expect(getParsedSql('UPDATE t SET id = 1, name = 2'))
+            .to.equal('UPDATE `t` SET `id` = 1, `name` = 2')
+        })
+
+        describe('where clause', () => {
+            ['<', '<=', '=', '!=', '>=', '>'].forEach((operator) => {
+                it(`should support simple "${operator}" comparison`, () => {
+                    sql = `UPDATE a SET col1 = 5 WHERE "type" ${operator} 3`;
+                    expect(getParsedSql(sql)).to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE \`type\` ${operator} 3`);
+                });
             });
+
+            const operatorMap = { '=': 'IN', '!=': 'NOT IN' };
+            Object.keys(operatorMap).forEach((operator) => {
+                const sqlOperator = operatorMap[operator];
+
+                it(`should convert "${operator}" to ${sqlOperator} operator for array values`, () => {
+                    const ast = {
+                        "type": "update",
+                        "db": null,
+                        "table": "a",
+                        "set": [
+                           {
+                              "column": "col1",
+                              "value": {
+                                 "type": "number",
+                                 "value": 5
+                              }
+                           }
+                        ],
+                        "where": {
+                           "type": "binary_expr",
+                           "operator": operator,
+                           "left": {
+                              "type": "column_ref",
+                              "table": null,
+                              "column": "id"
+                           },
+                           "right": {
+                              "type": "expr_list",
+                              "value": [
+                                 {
+                                    "type": "number",
+                                    "value": 1
+                                 },
+                                 {
+                                    "type": "number",
+                                    "value": 2
+                                 }
+                              ]
+                           }
+                        }
+                     }
+
+                    expect(util.astToSQL(ast)).to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE \`id\` ${sqlOperator} (1, 2)`);
+                });
+            });
+
+            ['IN', 'NOT IN'].forEach((operator) => {
+                it(`should support ${operator} operator`, () => {
+                    sql = `UPDATE a SET col1 = 5 WHERE id ${operator.toLowerCase()} (1, 2, 3)`;
+                    expect(getParsedSql(sql)).to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE \`id\` ${operator} (1, 2, 3)`);
+                });
+            });
+
+            ['IS', 'IS NOT'].forEach((operator) => {
+                it(`should support ${operator} operator`, () => {
+                    sql = `UPDATE a SET col1 = 5 WHERE col ${operator.toLowerCase()} NULL`;
+                    expect(getParsedSql(sql)).to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE \`col\` ${operator} NULL`);
+                });
+            });
+
+            ['BETWEEN', 'NOT BETWEEN'].forEach((operator) => {
+                it(`should support ${operator} operator`, () => {
+                    sql = `UPDATE a SET col1 = 5 WHERE id ${operator.toLowerCase()} '1' and 1337`;
+                    expect(getParsedSql(sql)).to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE \`id\` ${operator} '1' AND 1337`);
+                });
+            });
+
+            it('should support boolean values', () => {
+                sql = 'UPDATE t SET col1 = 5 WHERE col2 = false';
+                expect(getParsedSql(sql)).to.equal('UPDATE `t` SET \`col1\` = 5 WHERE `col2` = FALSE');
+            });
+
+            it('should support string values', () => {
+                expect(getParsedSql(`UPDATE t SET col1 = 5 WHERE col2 = 'foobar'`))
+                    .to.equal(`UPDATE \`t\` SET \`col1\` = 5 WHERE \`col2\` = 'foobar'`);
+            });
+
+            it('should support null values', () => {
+                expect(getParsedSql('UPDATE t SET col1 = 5 WHERE col2 IS NULL'))
+                    .to.equal('UPDATE `t` SET \`col1\` = 5 WHERE `col2` IS NULL');
+            });
+
+            it('should support array values', () => {
+                expect(getParsedSql('UPDATE t SET col1 = 5 WHERE col2 IN (1, 3, 5, 7)'))
+                    .to.equal('UPDATE `t` SET \`col1\` = 5 WHERE `col2` IN (1, 3, 5, 7)');
+            });
+
+            ['EXISTS', 'NOT EXISTS'].forEach((operator) => {
+                it(`should support ${operator} operator`, () => {
+                    expect(getParsedSql(`UPDATE a SET col1 = 5 WHERE ${operator} (SELECT 1)`))
+                        .to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE ${operator} (SELECT 1)`);
+                });
+            })
         });
-    });
+
+        
+        it('should surport function', () => {
+            expect(getParsedSql(`UPDATE t SET col1 = concat(name, '名字')`))
+            .to.equal("UPDATE `t` SET `col1` = concat(`name`, '名字')")
+        })
+
+    })
+
+    describe('insert statements', () => {
+
+        it('should surport insert', () => {
+            expect(getParsedSql('INSERT INTO t (col1, col2) VALUES (1, 2)'))
+            .to.equal('INSERT INTO `t` (`col1`, `col2`) VALUES (1,2)')
+        })
+
+    })
+
+
+    // describe('unsupported statements', () => {
+    //     const unsupportedStatements = {
+    //         drop: 'DROP table t'
+    //     };
+
+    //     Object.keys(unsupportedStatements).forEach((stmtType) => {
+    //         it(`should throw exception for ${stmtType} statements`, () => {
+    //             expect(getParsedSql.bind(null, unsupportedStatements[stmtType])).to.throw(Error, `${stmtType} statements not supported at the moment`);
+    //         });
+    //     });
+    // });
 });
