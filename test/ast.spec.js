@@ -835,15 +835,15 @@ describe('AST', () => {
     })
 
 
-    // describe('unsupported statements', () => {
-    //     const unsupportedStatements = {
-    //         drop: 'DROP table t'
-    //     };
+    describe('unsupported situation', () => {
 
-    //     Object.keys(unsupportedStatements).forEach((stmtType) => {
-    //         it(`should throw exception for ${stmtType} statements`, () => {
-    //             expect(getParsedSql.bind(null, unsupportedStatements[stmtType])).to.throw(Error, `${stmtType} statements not supported at the moment`);
-    //         });
-    //     });
-    // });
+        it(`should throw exception for INSERT SELECT INFO`, () => {
+            const sql = 'INSERT INTO t1 select * from t'
+            expect(getParsedSql.bind(null, sql)).to.throw(Error, `Error occurred while converting ‘${sql}’ into ast, cannot convert it!`);
+        });
+
+        it(`should throw exception for drop statements`, () => {
+            expect(util.astToSQL.bind(null, {type: 'Drop'})).to.throw(Error, `Drop statements not supported at the moment`);
+        });
+    });
 });

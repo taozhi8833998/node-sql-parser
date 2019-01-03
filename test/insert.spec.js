@@ -26,4 +26,10 @@ describe('insert', () => {
         }]
       }]);
     });
+
+    it('failed with INSERT SELECT INFO', () => {
+      const sql = 'INSERT INTO t1 SELECT * FROM t'
+      const fun = parser.parse.bind(parser, sql)
+      expect(fun).to.throw(`Error occurred while converting ‘${sql}’ into ast, cannot convert it!`)
+    })
 });
