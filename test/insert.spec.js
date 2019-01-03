@@ -27,9 +27,24 @@ describe('insert', () => {
       }]);
     });
 
+    it('should parse insert and select', () => {
+      const sql = 'INSERT INTO t1 values("1223", "name") ; SELECT * FROM t'
+      const [sqla, sqlb] = sql.split(';')
+      const astFirstSQL = parser.sqlToAst(sqla.trim())
+      const astSecondSQL = parser.sqlToAst(sqlb.trim())
+      const { tableList, columnList, ast } = parser.parse(sql)
+      expect(tableList).to.eql(['insert::null::t1', 'select::null::t'])
+      expect(columnList).to.eql([])
+      expect(ast).to.have.lengthOf(2)
+      expect(ast[0].tableList).to.eql(['insert::null::t1'])
+      expect(ast[1].tableList).to.eql(['insert::null::t1', 'select::null::t'])
+      expect(ast[0].ast).to.eql(astFirstSQL)
+      expect(ast[1].ast).to.eql(astSecondSQL)
+    })
+
     it('failed with INSERT SELECT INFO', () => {
       const sql = 'INSERT INTO t1 SELECT * FROM t'
       const fun = parser.parse.bind(parser, sql)
-      expect(fun).to.throw(`Error occurred while converting ‘${sql}’ into ast, cannot convert it!`)
+      expect(fun).to.throw('"(", "--", ".", "/*", "VALUES", or [ \\t\\n\\r] but "S" found')
     })
 });

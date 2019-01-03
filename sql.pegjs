@@ -156,6 +156,7 @@ crud_stmt
   = union_stmt
   / update_stmt
   / replace_insert_stmt
+  / insert_no_columns_stmt
   / delete_stmt
   / proc_stmts
 
@@ -477,6 +478,25 @@ replace_insert_stmt
           db: t.db,
           table: t.table,
           columns: c,
+          values: v
+        }
+      };
+    }
+
+insert_no_columns_stmt
+  = ri:replace_insert       __
+    KW_INTO                 __
+    t:table_name  __
+    v:value_clause {
+      if (t.table) tableList.add(`insert::${t.db}::${t.table}`)
+      return {
+        tableList: Array.from(tableList),
+        columnList: Array.from(columnList),
+        ast: {
+          type: ri,
+          db: t.db,
+          table: t.table,
+          columns: null,
           values: v
         }
       };

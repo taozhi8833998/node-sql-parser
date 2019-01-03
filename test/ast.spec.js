@@ -817,7 +817,7 @@ describe('AST', () => {
             })
         });
 
-        
+
         it('should surport function', () => {
             expect(getParsedSql(`UPDATE t SET col1 = concat(name, '名字')`))
             .to.equal("UPDATE `t` SET `col1` = concat(`name`, '名字')")
@@ -832,18 +832,29 @@ describe('AST', () => {
             .to.equal('INSERT INTO `t` (`col1`, `col2`) VALUES (1,2)')
         })
 
+        it('should surport insert with no columns', () => {
+            expect(getParsedSql('INSERT INTO t VALUES (1, 2)'))
+            .to.equal('INSERT INTO `t` VALUES (1,2)')
+        })
+
     })
 
 
     describe('unsupported situation', () => {
 
         it(`should throw exception for INSERT SELECT INFO`, () => {
-            const sql = 'INSERT INTO t1 select * from t'
-            expect(getParsedSql.bind(null, sql)).to.throw(Error, `Error occurred while converting ‘${sql}’ into ast, cannot convert it!`);
+          const sql = 'INSERT INTO t1 select * from t'
+          expect(getParsedSql.bind(null, sql)).to.throw(Error, '"(", "--", ".", "/*", "VALUES", or [ \\t\\n\\r] but "s" found');
         });
 
         it(`should throw exception for drop statements`, () => {
-            expect(util.astToSQL.bind(null, {type: 'Drop'})).to.throw(Error, `Drop statements not supported at the moment`);
+          expect(util.astToSQL.bind(null, {type: 'Drop'})).to.throw(Error, `Drop statements not supported at the moment`);
         });
+
+        it('Drop statement not surported!', () => {
+          const sql = 'DROP table t'
+          const fun = parser.parse.bind(parser, sql)
+          expect(fun).to.throw('"$", "(", "--", "/*", ";", "DELETE", "INSERT", "REPLACE", "SELECT", "UPDATE", "WITH", "return", [ \\t\\n\\r], or end of input but "D" found')
+        })
     });
 });

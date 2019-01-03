@@ -55,8 +55,6 @@ parser.whiteListCheck(sql, whiteList) // if check failed, an error would be thro
 
 ### Convert AST back to SQL
 
-- **Only SELECT SQL statements are supported for converting ast back to sql currently**
-
 ```javascript
 const { Parser, util } = require('node-sql-parser');
 const parser = new Parser()

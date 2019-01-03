@@ -89,11 +89,4 @@ describe('delete', () => {
          }
       });
     });
-
-   it('Drop statement not surported!', () => {
-      const sql = 'DROP table t'
-      const fun = parser.parse.bind(parser, sql)
-      expect(fun).to.throw(`Error occurred while converting ‘${sql}’ into ast, cannot convert it!`)
-   })
-
 });
