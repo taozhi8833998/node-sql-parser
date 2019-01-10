@@ -10,14 +10,13 @@
 [![Dependencies](https://img.shields.io/david/taozhi8833998/node-sql-parser.svg)](https://img.shields.io/david/taozhi8833998/node-sql-parser)
 [![issues](https://img.shields.io/github/issues/taozhi8833998/node-sql-parser.svg)](https://github.com/taozhi8833998/node-sql-parser/issues)
 
-
 **Parse simple SQL statements into an abstract syntax tree (AST) with the visited tableList and convert it back to SQL.**
 
 ## :star: Features
 
-- support multiple sql statement seperate by semicolon
-- support select, delete, update and insert type
-- output the table list that the sql visited with the corresponding authority
+  - support multiple sql statement seperate by semicolon
+  - support select, delete, update and insert type
+  - output the table list that the sql visited with the corresponding authority
 
 ## :rocket: Usage
 
@@ -33,8 +32,8 @@ console.log(ast);
 
 ### Get the SQL visited tables
 
-- get the table list that the sql visited
-- the format is **{type}::{dbName}::{tableName}** // type could be select, update, delete or insert
+  - get the table list that the sql visited
+  - the format is **{type}::{dbName}::{tableName}** // type could be select, update, delete or insert
 
 ```javascript
 const { Parser } = require('node-sql-parser');
@@ -64,7 +63,6 @@ const sql = util.astToSQL(ast);
 
 console.log(sql); // SELECT * FROM `t`
 ```
-
 
 ## :kissing_heart: Acknowledgement
 
