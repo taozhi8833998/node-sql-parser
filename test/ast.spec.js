@@ -18,6 +18,11 @@ describe('AST', () => {
                 .to.equal('SELECT SQL_CALC_FOUND_ROWS SQL_BUFFER_RESULT `col1` FROM `t`');
         });
 
+        it('should support double quotes MySQL query', () => {
+            expect(getParsedSql('select * from (select * from tb_user where user_id = "lmt") as tableA limit 0,2'))
+                .to.equal('SELECT * FROM (SELECT * FROM `tb_user` WHERE `user_id` = \'lmt\') AS `tableA` LIMIT 0,2');
+        });
+
         describe('common table expressions', () => {
             it('should support single CTE', () => {
                 const sql = `WITH cte AS (SELECT 1)
@@ -128,6 +133,10 @@ describe('AST', () => {
                     'SELECT CAST(col AS CHAR) FROM t',
                     'SELECT CAST(`col` AS CHAR) FROM `t`'
                 ],
+                'string casts':  [
+                    'SELECT CAST(\'col\' AS CHAR) FROM t',
+                    'SELECT CAST(\'col\' AS CHAR) FROM `t`'
+                ],
                 'signed integer casts': [
                     'SELECT CAST(col as unsigned integer) FROM t',
                     'SELECT CAST(`col` AS UNSIGNED INTEGER) FROM `t`'
@@ -146,7 +155,7 @@ describe('AST', () => {
                 ],
                 'json casts':  [
                     `SELECT CAST('{"foo":"bar"}' AS JSON) FROM dual`,
-                    `SELECT CAST('{\\"foo\\":\\"bar\\"}' AS JSON) FROM \`dual\``
+                    `SELECT CAST('{\\"foo\\":\\"bar\\"}' AS JSON) FROM DUAL`
                 ]
             };
             Object.keys(castQueries).forEach(cast => {
@@ -182,7 +191,7 @@ describe('AST', () => {
 
             it('should parse ANSI SQL compliant statements', () => {
                 sql = `SELECT "id", 'foo' AS "type" FROM "table"`;
-                expect(getParsedSql(sql)).to.equal('SELECT `id`, \'foo\' AS `type` FROM `table`');
+                expect(getParsedSql(sql)).to.equal('SELECT \'id\', \'foo\' AS `type` FROM `table`');
             });
 
             it('should parse DUAL table', () => {
@@ -259,7 +268,11 @@ describe('AST', () => {
             ['<', '<=', '=', '!=', '>=', '>'].forEach((operator) => {
                 it(`should support simple "${operator}" comparison`, () => {
                     sql = `SELECT a fRom db.t wHERE "type" ${operator} 3`;
-                    expect(getParsedSql(sql)).to.equal(`SELECT \`a\` FROM db.\`t\` WHERE \`type\` ${operator} 3`);
+                    expect(getParsedSql(sql)).to.equal(`SELECT \`a\` FROM db.\`t\` WHERE 'type' ${operator} 3`);
+                });
+                it(`should support simple "${operator}" comparison`, () => {
+                    sql = `SELECT a fRom db.t wHERE id ${operator} 3`;
+                    expect(getParsedSql(sql)).to.equal(`SELECT \`a\` FROM db.\`t\` WHERE \`id\` ${operator} 3`);
                 });
             });
 
@@ -501,7 +514,7 @@ describe('AST', () => {
                 right: {
                     type: 'binary_expr',
                     operator: '=',
-                    left: { type: 'column_ref', table: null, column: 'type' },
+                    left: { type: 'string', value: 'type' },
                     right: { type: 'string', value: 'foobar' }
                 }
             });
@@ -604,7 +617,11 @@ describe('AST', () => {
             ['<', '<=', '=', '!=', '>=', '>'].forEach((operator) => {
                 it(`should support simple "${operator}" comparison`, () => {
                     sql = `DELETE a fRom db.t wHERE "type" ${operator} 3`;
-                    expect(getParsedSql(sql)).to.equal(`DELETE \`a\` FROM db.\`t\` WHERE \`type\` ${operator} 3`);
+                    expect(getParsedSql(sql)).to.equal(`DELETE \`a\` FROM db.\`t\` WHERE 'type' ${operator} 3`);
+                });
+                it(`should support simple "${operator}" comparison`, () => {
+                    sql = `DELETE a fRom db.t wHERE id ${operator} 3`;
+                    expect(getParsedSql(sql)).to.equal(`DELETE \`a\` FROM db.\`t\` WHERE \`id\` ${operator} 3`);
                 });
             });
 
@@ -701,7 +718,7 @@ describe('AST', () => {
 
         it('should surport value is string', () => {
             expect(getParsedSql('UPDATE t SET col1 = "abc"'))
-            .to.equal('UPDATE `t` SET `col1` = `abc`')
+            .to.equal('UPDATE `t` SET `col1` = \'abc\'')
         })
 
         it('should surport value is NULL ', () => {
@@ -718,7 +735,11 @@ describe('AST', () => {
             ['<', '<=', '=', '!=', '>=', '>'].forEach((operator) => {
                 it(`should support simple "${operator}" comparison`, () => {
                     sql = `UPDATE a SET col1 = 5 WHERE "type" ${operator} 3`;
-                    expect(getParsedSql(sql)).to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE \`type\` ${operator} 3`);
+                    expect(getParsedSql(sql)).to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE 'type' ${operator} 3`);
+                });
+                it(`should support simple "${operator}" comparison`, () => {
+                    sql = `UPDATE a SET col1 = 5 WHERE id ${operator} 3`;
+                    expect(getParsedSql(sql)).to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE \`id\` ${operator} 3`);
                 });
             });
 

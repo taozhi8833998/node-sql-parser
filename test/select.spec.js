@@ -328,7 +328,7 @@ describe('select', () => {
 
     ['is', 'is not'].forEach((operator) => {
       it(`should parse ${operator} condition`, () => {
-        const ast = parser.sqlToAst(`SELECT * FROM t WHERE "col" ${operator} NULL`);
+        const ast = parser.sqlToAst(`SELECT * FROM t WHERE col ${operator} NULL`);
 
         expect(ast.where).to.eql({
           type: 'binary_expr',

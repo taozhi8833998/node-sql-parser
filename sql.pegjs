@@ -896,6 +896,12 @@ literal_string
         value: ca[1].join('')
       };
     }
+  / ca:("\"" single_quote_char* "\"") {
+      return {
+        type: 'string',
+        value: ca[1].join('')
+      };
+    }
 
 literal_datetime
   = type:(KW_TIME / KW_DATE / KW_TIMESTAMP) __ ca:("'" single_char* "'") {
@@ -904,6 +910,10 @@ literal_datetime
         value: ca[1].join('')
       };
     }
+
+single_quote_char
+  = [^"\\\0-\x1F\x7f]
+  / escape_char
 
 single_char
   = [^'\\\0-\x1F\x7f]
@@ -1061,7 +1071,7 @@ KW_VAR_PRE = '$'
 KW_RETURN = 'return'i
 KW_ASSIGN = ':='
 
-KW_DUAL = "DUAL"
+KW_DUAL = "DUAL"i
 
 // MySQL extensions to SQL
 OPT_SQL_CALC_FOUND_ROWS = "SQL_CALC_FOUND_ROWS"i
