@@ -260,7 +260,7 @@ query_option
     ) { return option; }
 
 column_clause
-  = (KW_ALL / (STAR !ident_start)) { return '*'; }
+  = (KW_ALL / (STAR !ident_start) / STAR) { return '*'; }
   / head:column_list_item tail:(__ COMMA __ column_list_item)* {
       return createList(head, tail);
     }

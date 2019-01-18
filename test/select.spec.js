@@ -17,6 +17,24 @@ describe('select', () => {
     expect(ast.limit).to.be.null;
   });
 
+  it('should support select *from', () => {
+    const ast = parser.sqlToAst('SELECT *from abc');
+    expect(ast.options).to.be.null;
+    expect(ast.distinct).to.be.null;
+    expect(ast.columns).to.be.eql('*');
+    expect(ast.from).to.be.eql([
+         {
+            "db": null,
+            "table": "abc",
+            "as": null
+         }
+      ]);
+    expect(ast.where).to.be.null;
+    expect(ast.groupby).to.be.null;
+    expect(ast.orderby).to.be.null;
+    expect(ast.limit).to.be.null;
+  });
+
   it('should have appropriate types', () => {
     const ast = parser.sqlToAst('SELECT SQL_NO_CACHE DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 3');
 

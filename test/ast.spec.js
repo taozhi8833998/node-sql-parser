@@ -18,6 +18,11 @@ describe('AST', () => {
                 .to.equal('SELECT SQL_CALC_FOUND_ROWS SQL_BUFFER_RESULT `col1` FROM `t`');
         });
 
+        it('should support select *from ast to sql', () => {
+             expect(getParsedSql('SELECT *FROM abc'))
+                .to.equal('SELECT * FROM `abc`');
+        });
+
         it('should support double quotes MySQL query', () => {
             expect(getParsedSql('select * from (select * from tb_user where user_id = "lmt") as tableA limit 0,2'))
                 .to.equal('SELECT * FROM (SELECT * FROM `tb_user` WHERE `user_id` = \'lmt\') AS `tableA` LIMIT 0,2');
