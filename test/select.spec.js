@@ -693,10 +693,8 @@ describe('select', () => {
       const astFirstSQL = parser.sqlToAst(sqla.trim())
       const astSecondSQL = parser.sqlToAst(sqlb.trim())
       expect(ast).to.have.lengthOf(2)
-      expect(ast[0].tableList).to.eql(['select::null::a'])
-      expect(ast[1].tableList).to.eql(['select::null::a', 'select::null::b'])
-      expect(ast[0].ast).to.eql(astFirstSQL)
-      expect(ast[1].ast).to.eql(astSecondSQL)
+      expect(ast[0]).to.eql(astFirstSQL)
+      expect(ast[1]).to.eql(astSecondSQL)
     })
   })
 

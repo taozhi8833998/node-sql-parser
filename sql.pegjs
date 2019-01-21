@@ -162,10 +162,10 @@ crud_stmt
 
 multiple_stmt
   = head:crud_stmt tail:(__ SEMICOLON __ crud_stmt)+ {
-      const cur = [head];
+      const cur = [head && head.ast || head];
       for (let i = 0; i < tail.length; i++) {
         if(!tail[i][3] || tail[i][3].length === 0) continue;
-        cur.push(tail[i][3]);
+        cur.push(tail[i][3] && tail[i][3].ast || tail[i][3]);
       }
       return {
         tableList: Array.from(tableList),

@@ -36,10 +36,8 @@ describe('insert', () => {
       expect(tableList).to.eql(['insert::null::t1', 'select::null::t'])
       expect(columnList).to.eql([])
       expect(ast).to.have.lengthOf(2)
-      expect(ast[0].tableList).to.eql(['insert::null::t1'])
-      expect(ast[1].tableList).to.eql(['insert::null::t1', 'select::null::t'])
-      expect(ast[0].ast).to.eql(astFirstSQL)
-      expect(ast[1].ast).to.eql(astSecondSQL)
+      expect(ast[0]).to.eql(astFirstSQL)
+      expect(ast[1]).to.eql(astSecondSQL)
     })
 
     it('failed with INSERT SELECT INFO', () => {
