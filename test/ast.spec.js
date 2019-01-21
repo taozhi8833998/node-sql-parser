@@ -17,6 +17,10 @@ describe('AST', () => {
             expect(getParsedSql('SELECT SQL_CALC_FOUND_ROWS SQL_BUFFER_RESULT col1 FROM t'))
                 .to.equal('SELECT SQL_CALC_FOUND_ROWS SQL_BUFFER_RESULT `col1` FROM `t`');
         });
+        it('should support MySQL query options', () => {
+            expect(getParsedSql(`SELECT xx.dd, Max(IF(stat_key = 'yys', stat_us, 0)) AS 'yys_users' FROM waf.t_cpkg WHERE stat_ty = 'waf_ty' GROUP BY dd;`))
+                .to.equal("SELECT `xx`.`dd`, MAX(IF(`stat_key` = 'yys', `stat_us`, 0)) AS `yys_users` FROM `waf`.`t_cpkg` WHERE `stat_ty` = 'waf_ty' GROUP BY `dd`");
+        });
 
         it('should support select *from ast to sql', () => {
              expect(getParsedSql('SELECT *FROM abc'))
@@ -245,7 +249,7 @@ describe('AST', () => {
             it('should support joins with tables from other databases', () => {
                 sql = 'SELECT col1 FROM t JOIN otherdb.awesome_table at ON t.id = at.tid';
                 expect(getParsedSql(sql))
-                    .to.equal('SELECT `col1` FROM `t` INNER JOIN otherdb.`awesome_table` AS `at` ON `t`.`id` = `at`.`tid`');
+                    .to.equal('SELECT `col1` FROM `t` INNER JOIN `otherdb`.`awesome_table` AS `at` ON `t`.`id` = `at`.`tid`');
             });
 
             it('should support aliases in joins', () => {
@@ -273,11 +277,11 @@ describe('AST', () => {
             ['<', '<=', '=', '!=', '>=', '>'].forEach((operator) => {
                 it(`should support simple "${operator}" comparison`, () => {
                     sql = `SELECT a fRom db.t wHERE "type" ${operator} 3`;
-                    expect(getParsedSql(sql)).to.equal(`SELECT \`a\` FROM db.\`t\` WHERE 'type' ${operator} 3`);
+                    expect(getParsedSql(sql)).to.equal(`SELECT \`a\` FROM \`db\`.\`t\` WHERE 'type' ${operator} 3`);
                 });
                 it(`should support simple "${operator}" comparison`, () => {
                     sql = `SELECT a fRom db.t wHERE id ${operator} 3`;
-                    expect(getParsedSql(sql)).to.equal(`SELECT \`a\` FROM db.\`t\` WHERE \`id\` ${operator} 3`);
+                    expect(getParsedSql(sql)).to.equal(`SELECT \`a\` FROM \`db\`.\`t\` WHERE \`id\` ${operator} 3`);
                 });
             });
 
@@ -622,11 +626,11 @@ describe('AST', () => {
             ['<', '<=', '=', '!=', '>=', '>'].forEach((operator) => {
                 it(`should support simple "${operator}" comparison`, () => {
                     sql = `DELETE a fRom db.t wHERE "type" ${operator} 3`;
-                    expect(getParsedSql(sql)).to.equal(`DELETE \`a\` FROM db.\`t\` WHERE 'type' ${operator} 3`);
+                    expect(getParsedSql(sql)).to.equal(`DELETE \`a\` FROM \`db\`.\`t\` WHERE 'type' ${operator} 3`);
                 });
                 it(`should support simple "${operator}" comparison`, () => {
                     sql = `DELETE a fRom db.t wHERE id ${operator} 3`;
-                    expect(getParsedSql(sql)).to.equal(`DELETE \`a\` FROM db.\`t\` WHERE \`id\` ${operator} 3`);
+                    expect(getParsedSql(sql)).to.equal(`DELETE \`a\` FROM \`db\`.\`t\` WHERE \`id\` ${operator} 3`);
                 });
             });
 
