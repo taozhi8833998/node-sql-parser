@@ -9,7 +9,7 @@ describe('update', () => {
     it('should parse baisc usage', () => {
       const { tableList, columnList, ast } = parser.parse('UPDATE a set id = 1');
       expect(tableList).to.eql(["update::null::a"]);
-      expect(columnList).to.eql([]);
+      expect(columnList).to.eql(["update::a::id"]);
       expect(ast.type).to.be.eql('update');
       expect(ast.db).to.be.null;
       expect(ast.table).to.be.eql('a');
@@ -26,7 +26,7 @@ describe('update', () => {
     it('should parse function expression', () => {
       const { tableList, columnList, ast } = parser.parse("UPDATE t SET col1 = concat(name, '名字')");
       expect(tableList).to.eql(["update::null::t"]);
-      expect(columnList).to.eql([]);
+      expect(columnList).to.eql(["select::null::name", "update::t::col1"]);
       expect(ast.type).to.be.eql('update');
       expect(ast.db).to.be.null;
       expect(ast.table).to.be.eql('t');

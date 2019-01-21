@@ -164,8 +164,8 @@ describe('select', () => {
       const ast = parser.sqlToAst('SELECT * FROM (SELECT id FROM t1) someAlias');
       expect(ast.from).to.eql([{
         expr: {
-          tableList: ["select::null::t1"],
-          columnList: [],
+          tableList: ['select::null::t1'],
+          columnList: ['select::null::(.*)', 'select::null::id'],
           ast: {
               with: null,
               type: 'select',
@@ -228,7 +228,7 @@ describe('select', () => {
           {
             expr: {
               tableList: ["select::null::t2", "select::null::t1"],
-              columnList: [],
+              columnList: ["select::null::(.*)", "select::null::id",  "select::null::col1", "select::t1::id", "select::someAlias::id"],
               ast: {
                 with: null,
                 type: 'select',
@@ -365,7 +365,7 @@ describe('select', () => {
           operator: operator.toUpperCase(),
           expr: {
             tableList: ["select::null::t"],
-            columnList: [],
+            columnList: ["select::null::(.*)"],
             ast: {
               with: null,
               type: 'select',
@@ -699,41 +699,88 @@ describe('select', () => {
   })
 
   describe('white list check', () => {
-    it('should pass the same check', () => {
-      const sql = 'SELECT * FROM a'
-      const whiteList = ['select::null::a']
-      const result = parser.whiteListCheck(sql, whiteList)
-      expect(result).to.be.eql(undefined)
+    describe('table mode', () => {
+      it('should pass the same check', () => {
+        const sql = 'SELECT * FROM a'
+        const whiteList = ['select::null::a']
+        const result = parser.whiteListCheck(sql, whiteList)
+        expect(result).to.be.eql(undefined)
+      })
+      it('should pass the regex check', () => {
+        const sql = 'SELECT * FROM a'
+        const whiteList = ['select::(.*)::a']
+        const result = parser.whiteListCheck(sql, whiteList)
+        expect(result).to.be.eql(undefined)
+      })
+      it('should pass the complex sql check', () => {
+        const sql = 'SELECT * FROM a;SELECT * FROM x.b'
+        const whiteList = ['select::(.*)::(a|b)']
+        const result = parser.whiteListCheck(sql, whiteList)
+        expect(result).to.be.eql(undefined)
+      })
+      it('should pass the complex sql and regex check', () => {
+        const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
+        const whiteList = ['(select|update)::(.*)::(a|b)']
+        const result = parser.whiteListCheck(sql, whiteList)
+        expect(result).to.be.eql(undefined)
+      })
+      it('should fail for simple check', () => {
+        const sql = 'SELECT * FROM b'
+        const whiteList = ['select::(.*)::a']
+        const fun = parser.whiteListCheck.bind(parser, sql, whiteList)
+        expect(fun).to.throw(`authority = 'select::null::b' is required in table whiteList to execute SQL = '${sql}'`)
+      })
+      it('should fail the complex sql and regex check', () => {
+        const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
+        const whiteList = ['select::(.*)::(a|b)']
+        const fun = parser.whiteListCheck.bind(parser, sql, whiteList)
+        expect(fun).to.throw(`authority = 'update::null::a' is required in table whiteList to execute SQL = '${sql}'`)
+      })
     })
-    it('should pass the regex check', () => {
-      const sql = 'SELECT * FROM a'
-      const whiteList = ['select::(.*)::a']
-      const result = parser.whiteListCheck(sql, whiteList)
-      expect(result).to.be.eql(undefined)
-    })
-    it('should pass the complex sql check', () => {
-      const sql = 'SELECT * FROM a;SELECT * FROM x.b'
-      const whiteList = ['select::(.*)::(a|b)']
-      const result = parser.whiteListCheck(sql, whiteList)
-      expect(result).to.be.eql(undefined)
-    })
-    it('should pass the complex sql and regex check', () => {
-      const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
-      const whiteList = ['(select|update)::(.*)::(a|b)']
-      const result = parser.whiteListCheck(sql, whiteList)
-      expect(result).to.be.eql(undefined)
-    })
-    it('should fail for simple check', () => {
-      const sql = 'SELECT * FROM b'
-      const whiteList = ['select::(.*)::a']
-      const fun = parser.whiteListCheck.bind(parser, sql, whiteList)
-      expect(fun).to.throw(`authority = 'select::null::b' is required in whiteList to execute SQL = '${sql}'`)
-    })
-    it('should fail the complex sql and regex check', () => {
-      const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
-      const whiteList = ['select::(.*)::(a|b)']
-      const fun = parser.whiteListCheck.bind(parser, sql, whiteList)
-      expect(fun).to.throw(`authority = 'update::null::a' is required in whiteList to execute SQL = '${sql}'`)
+    describe('column mode', () => {
+      const mode = 'column'
+      it('should pass the same check', () => {
+        const sql = 'SELECT * FROM a'
+        const whiteList = ['select::null::(.*)']
+        const result = parser.whiteListCheck(sql, whiteList, mode)
+        expect(result).to.be.eql(undefined)
+      })
+      it('should pass the regex check', () => {
+        const sql = 'SELECT * FROM a'
+        const whiteList = ['select::(.*)::(.*)']
+        const result = parser.whiteListCheck(sql, whiteList, mode)
+        expect(result).to.be.eql(undefined)
+      })
+      it('should pass the regex check with table prefix', () => {
+        const sql = 'SELECT a.id, a.name FROM a'
+        const whiteList = ['select::a::(id|name)']
+        const result = parser.whiteListCheck(sql, whiteList, mode)
+        expect(result).to.be.eql(undefined)
+      })
+      it('should pass the complex sql check', () => {
+        const sql = 'SELECT id FROM a;SELECT name FROM x.b'
+        const whiteList = ['select::(.*)::(id|name)']
+        const result = parser.whiteListCheck(sql, whiteList, mode)
+        expect(result).to.be.eql(undefined)
+      })
+      it('should pass the complex sql and regex check', () => {
+        const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
+        const whiteList = ['(select|update)::(.*)::(id|name)']
+        const result = parser.whiteListCheck(sql, whiteList, mode)
+        expect(result).to.be.eql(undefined)
+      })
+      it('should fail for simple check', () => {
+        const sql = 'SELECT b.id, b.name FROM b'
+        const whiteList = ['select::b::id']
+        const fun = parser.whiteListCheck.bind(parser, sql, whiteList, mode)
+        expect(fun).to.throw(`authority = 'select::b::name' is required in ${mode} whiteList to execute SQL = '${sql}'`)
+      })
+      it('should fail the complex sql and regex check', () => {
+        const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
+        const whiteList = ['select::(.*)::(id|name)']
+        const fun = parser.whiteListCheck.bind(parser, sql, whiteList, mode)
+        expect(fun).to.throw(`authority = 'update::a::id' is required in ${mode} whiteList to execute SQL = '${sql}'`)
+      })
     })
   })
 });

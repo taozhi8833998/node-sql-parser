@@ -9,7 +9,7 @@ describe('delete', () => {
     it('should parse baisc usage', () => {
       const { tableList, columnList, ast } = parser.parse('delete from a where id = 1');
       expect(tableList).to.eql(['delete::null::a']);
-      expect(columnList).to.eql([]);
+      expect(columnList).to.eql(['select::null::id', 'delete::a::(.*)']);
       expect(ast.type).to.be.eql('delete');
       expect(ast.tables).to.be.eql(null)
       expect(ast.from).to.eql([{
@@ -34,7 +34,7 @@ describe('delete', () => {
     it('should parse table in delete usage', () => {
       const { tableList, columnList, ast } = parser.parse('DELETE t1,t2 from t1 LEFT JOIN t2 ON t1.id=t2.id WHERE t1.id=25');
       expect(tableList).to.eql(['delete::null::t1', 'delete::null::t2']);
-      expect(columnList).to.eql([]);
+      expect(columnList).to.eql(['select::t1::id', 'select::t2::id', 'delete::t1::(.*)', 'delete::t2::(.*)']);
       expect(ast.type).to.be.eql('delete');
       expect(ast.tables).to.eql([
          {

@@ -8,8 +8,8 @@ describe('insert', () => {
 
     it('should parse baisc usage', () => {
       const { tableList, columnList, ast } = parser.parse('INSERT INTO t (col1, col2) VALUES (1, 2)');
-      expect(tableList).to.eql(["insert::null::t"]);
-      expect(columnList).to.eql([]);
+      expect(tableList).to.eql(['insert::null::t']);
+      expect(columnList).to.eql(['insert::t::col1', 'insert::t::col2']);
       expect(ast.type).to.be.eql('insert');
       expect(ast.db).to.be.null;
       expect(ast.table).to.be.eql('t');
@@ -34,7 +34,7 @@ describe('insert', () => {
       const astSecondSQL = parser.sqlToAst(sqlb.trim())
       const { tableList, columnList, ast } = parser.parse(sql)
       expect(tableList).to.eql(['insert::null::t1', 'select::null::t'])
-      expect(columnList).to.eql([])
+      expect(columnList).to.eql(['insert::t1::(.*)', 'select::null::(.*)'])
       expect(ast).to.have.lengthOf(2)
       expect(ast[0]).to.eql(astFirstSQL)
       expect(ast[1]).to.eql(astSecondSQL)

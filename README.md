@@ -11,13 +11,13 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/taozhi8833998/node-sql-parser/badge.svg?targetFile=package.json)](https://snyk.io/test/github/taozhi8833998/node-sql-parser?targetFile=package.json)
 [![issues](https://img.shields.io/github/issues/taozhi8833998/node-sql-parser.svg)](https://github.com/taozhi8833998/node-sql-parser/issues)
 
-**Parse simple SQL statements into an abstract syntax tree (AST) with the visited tableList and convert it back to SQL.**
+**Parse simple SQL statements into an abstract syntax tree (AST) with the visited tableList, columnList and convert it back to SQL.**
 
 ## :star: Features
 
   - support multiple sql statement seperate by semicolon
   - support select, delete, update and insert type
-  - output the table list that the sql visited with the corresponding authority
+  - output the table and column list that the sql visited with the corresponding authority
 
 ## :laughing: Install
 
@@ -48,14 +48,41 @@ const tableList = parser.tableList('SELECT * FROM t');
 console.log(tableList); // ["select::null::t"]
 ```
 
+### Get the SQL visited columns
+
+  - get the column list that the sql visited
+  - the format is **{type}::{tableName}::{columnName}** // type could be select, update, delete or insert
+  - for `select *`, `delete` and `insert into tableName values()` without specified columns, the `.*` column authority regex is required
+
+```javascript
+const { Parser } = require('node-sql-parser');
+const parser = new Parser();
+const columnList = parser.columnList('SELECT t.id FROM t');
+
+console.log(columnList); // ["select::t::id"]
+```
+
 ### Check the SQL with Authority List
+
+- check table authority
+- `whiteListCheck` function check on `table` mode by default
 
 ```javascript
 const { Parser } = require('node-sql-parser');
 const parser = new Parser();
 const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
-const whiteList = ['(select|update)::(.*)::(a|b)'] // array that contain multiple authorities
-parser.whiteListCheck(sql, whiteList) // if check failed, an error would be thrown with relevant error message, if passed it would return undefined
+const whiteTableList = ['(select|update)::(.*)::(a|b)'] // array that contain multiple authorities
+parser.whiteListCheck(sql, whiteTableList, 'table') // if check failed, an error would be thrown with relevant error message, if passed it would return undefined
+```
+
+- check column authority
+
+```javascript
+const { Parser } = require('node-sql-parser');
+const parser = new Parser();
+const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
+const whiteColumnList = ['select::null::name', 'update::a::id'] // array that contain multiple authorities
+parser.whiteListCheck(sql, whiteColumnList, 'column') // if check failed, an error would be thrown with relevant error message, if passed it would return undefined
 ```
 
 ### Convert AST back to SQL

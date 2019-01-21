@@ -260,13 +260,17 @@ query_option
     ) { return option; }
 
 column_clause
-  = (KW_ALL / (STAR !ident_start) / STAR) { return '*'; }
+  = (KW_ALL / (STAR !ident_start) / STAR) {
+      columnList.add('select::null::(.*)');
+      return '*';
+    }
   / head:column_list_item tail:(__ COMMA __ column_list_item)* {
       return createList(head, tail);
     }
 
 column_list_item
   = tbl:ident __ DOT __ STAR {
+      columnList.add(`select::${tbl}::(.*)`);
       return {
         expr: {
           type: 'column_ref',
@@ -417,7 +421,8 @@ update_stmt
     KW_SET       __
     l:set_list   __
     w:where_clause? {
-      if(t.table) tableList.add(`update::${t.db}::${t.table}`)
+      if(t.table) tableList.add(`update::${t.db}::${t.table}`);
+      if(l) l.forEach(col => columnList.add(`update::${t.table}::${col.column}`));
       return {
         tableList: Array.from(tableList),
         columnList: Array.from(columnList),
@@ -436,7 +441,10 @@ delete_stmt
     t: table_ref_list? __
     f:from_clause __
     w:where_clause? {
-      if(f) f.forEach(info => info.table && tableList.add(`delete::${info.db}::${info.table}`));
+      if(f) f.forEach(info => {
+        info.table && tableList.add(`delete::${info.db}::${info.table}`);
+        columnList.add(`delete::${info.table}::(.*)`);
+      });
       return {
         tableList: Array.from(tableList),
         columnList: Array.from(columnList),
@@ -469,7 +477,8 @@ replace_insert_stmt
     t:table_name  __ LPAREN __
     c:column_list  __ RPAREN __
     v:value_clause {
-      if (t.table) tableList.add(`insert::${t.db}::${t.table}`)
+      if (t.table) tableList.add(`insert::${t.db}::${t.table}`);
+      if (c) c.forEach(c => columnList.add(`insert::${t.table}::${c}`));
       return {
         tableList: Array.from(tableList),
         columnList: Array.from(columnList),
@@ -488,7 +497,8 @@ insert_no_columns_stmt
     KW_INTO                 __
     t:table_name  __
     v:value_clause {
-      if (t.table) tableList.add(`insert::${t.db}::${t.table}`)
+      if (t.table) tableList.add(`insert::${t.db}::${t.table}`);
+      columnList.add(`insert::${t.table}::(.*)`);
       return {
         tableList: Array.from(tableList),
         columnList: Array.from(columnList),
@@ -702,6 +712,7 @@ primary
 
 column_ref
   = tbl:ident __ DOT __ col:column {
+      columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
         table: tbl,
@@ -709,6 +720,7 @@ column_ref
       };
     }
   / col:column {
+      columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
         table: null,
