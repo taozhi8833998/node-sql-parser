@@ -19,9 +19,11 @@
   - support select, delete, update and insert type
   - output the table and column list that the sql visited with the corresponding authority
 
-## :laughing: Install
+## :tada: Install
 
-`npm install node-sql-parser`
+```bash
+npm install node-sql-parser --save
+```
 
 ## :rocket: Usage
 
