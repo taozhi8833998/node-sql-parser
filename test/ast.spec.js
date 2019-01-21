@@ -616,7 +616,6 @@ describe('AST', () => {
             const sql = 'SELECT * FROM a;UPDATE b SET id = 1'
             const expectSQL = 'SELECT * FROM `a` ; UPDATE `b` SET `id` = 1'
             expect(getParsedSql(sql)).to.equal(expectSQL);
-            //expect(getParsedSql.bind(null, sql)).to.throw(Error, 'Only SELECT statements supported at the moment');
         })
     })
 
