@@ -8,7 +8,7 @@
     "test": "npm run lint && mocha",
     "lint": "npm run build && eslint .",
     "prepublishOnly": "npm run build",
-    "cover": "npm run lint && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec test/*.spec.js"
+    "cover": "npm run lint && istanbul cover ./node_modules/mocha/bin/_mocha -x build/pegjs-parser.js --report lcovonly -- -R spec test/*.spec.js"
   },
   "repository": {
     "type": "git",
