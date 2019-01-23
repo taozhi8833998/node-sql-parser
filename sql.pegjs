@@ -285,7 +285,8 @@ column_list_item
     }
 
 alias_clause
-  = KW_AS? __ i:ident { return i; }
+  = KW_AS __ i:alias_ident { return i; }
+  / KW_AS? __ i:ident { return i; }
 
 from_clause
   = KW_FROM __ l:table_ref_list { return l; }
@@ -313,7 +314,7 @@ table_join
       t.on   = expr;
       return t;
     }
-  / op:join_op __ LPAREN __ stmt:union_stmt __ RPAREN __ KW_AS? __ alias:ident __ expr:on_clause? {
+  / op:join_op __ LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
     stmt.parentheses = true;
     return {
       expr: stmt,
@@ -330,7 +331,7 @@ table_base
         type: 'dual'
       };
   }
-  / t:table_name __ KW_AS? __ alias:ident? {
+  / t:table_name __ alias:alias_clause? {
       if (t.type === 'var') {
         t.as = alias;
         return t;
@@ -342,7 +343,7 @@ table_base
         };
       }
     }
-  / LPAREN __ stmt:union_stmt __ RPAREN __ KW_AS? __ alias:ident {
+  / LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? {
       stmt.parentheses = true;
       return {
         expr: stmt,
@@ -536,6 +537,16 @@ expr_list
       return el;
     }
 
+interval_expr
+  = KW_INTERVAL                    __
+    n:number                       __
+    u: interval_unit {
+      return {
+        type: 'interval',
+        value: [n, u]
+      }
+    }
+
 case_expr
   = KW_CASE                         __
     expr:expr?                      __
@@ -698,6 +709,7 @@ primary
   / aggr_func
   / func_call
   / case_expr
+  / interval_expr
   / column_ref
   / param
   / LPAREN __ e:expr __ RPAREN {
@@ -735,6 +747,17 @@ column_list
 
 ident
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
+      return name;
+    }
+  / name:quoted_ident {
+      return name;
+    }
+
+alias_ident
+  = name:ident_name !{
+      if (reservedMap[name.toUpperCase()] === true) throw new Error("Error: "+ JSON.stringify(name)+" is a reserved word, can not as alias clause");
+      return false
+    } {
       return name;
     }
   / name:quoted_ident {
@@ -1073,6 +1096,14 @@ KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_USER     = "USER"i     !ident_start { return 'USER'; }
 
 KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
+KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
+KW_INTERVAL         = "INTERVAL"i !ident_start { return 'INTERVAL'; }
+KW_UNIT_YEAR        = "YEAR"i !ident_start { return 'YEAR'; }
+KW_UNIT_MONTH       = "MONTH"i !ident_start { return 'MONTH'; }
+KW_UNIT_DAY         = "DAY"i !ident_start { return 'DAY'; }
+KW_UNIT_HOUR        = "HOUR"i !ident_start { return 'HOUR'; }
+KW_UNIT_MINUTE      = "MINUTE"i !ident_start { return 'MINUTE'; }
+KW_UNIT_SECOND      = "SECOND"i !ident_start { return 'SECOND'; }
 KW_CURRENT_TIME     = "CURRENT_TIME"i !ident_start { return 'CURRENT_TIME'; }
 KW_CURRENT_TIMESTAMP= "CURRENT_TIMESTAMP"i !ident_start { return 'CURRENT_TIMESTAMP'; }
 KW_CURRENT_USER     = "CURRENT_USER"i !ident_start { return 'CURRENT_USER'; }
@@ -1120,6 +1151,14 @@ line_comment
   = "--" (!EOL char)*
 
 char = .
+
+interval_unit
+  = KW_UNIT_YEAR
+  / KW_UNIT_MONTH
+  / KW_UNIT_DAY
+  / KW_UNIT_HOUR
+  / KW_UNIT_MINUTE
+  / KW_UNIT_SECOND
 
 whitespace =
   [ \t\n\r]

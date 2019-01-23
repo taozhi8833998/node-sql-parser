@@ -209,6 +209,17 @@ describe('AST', () => {
             });
         });
 
+        describe('date function', () => {
+            it('should support adddate function', () => {
+                expect(getParsedSql('SELECT ADDDATE(c, INTERVAL 10 DAY) as b FROM tableA'))
+                    .to.equal('SELECT ADDDATE(`c`, INTERVAL 10 DAY) AS `b` FROM `tableA`');
+            })
+            it('should support adddate function', () => {
+                expect(getParsedSql('SELECT ADDDATE(c, 10) as b FROM tableA'))
+                    .to.equal('SELECT ADDDATE(`c`, 10) AS `b` FROM `tableA`');
+            })
+        })
+
         describe('joins', () => {
             it('should support implicit joins', () => {
                 expect(getParsedSql('SELECT a.col , b.c FROM a ,b'))
