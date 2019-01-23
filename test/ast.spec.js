@@ -25,7 +25,7 @@ describe('AST', () => {
         it('should support select *from ast to sql', () => {
              expect(getParsedSql('SELECT *FROM abc'))
                 .to.equal('SELECT * FROM `abc`');
-        });
+        })
 
         it('should support double quotes MySQL query', () => {
             expect(getParsedSql('select * from (select * from tb_user where user_id = "lmt") as tableA limit 0,2'))
@@ -75,6 +75,18 @@ describe('AST', () => {
                 expect(getParsedSql(sql)).to.match(/^WITH RECURSIVE/);
             });
         });
+
+        describe('parentheses', () => {
+            it('should support select column parentheses ast to sql', () => {
+             expect(getParsedSql('SELECT (id) FROM abc'))
+                .to.equal('SELECT (`id`) FROM `abc`');
+            });
+
+            it('should support select column parentheses ast to sql', () => {
+             expect(getParsedSql('select (date(id)) from abc'))
+                .to.equal('SELECT (date(`id`)) FROM `abc`');
+            });
+        })
 
         describe('expression', () => {
             it('should support asterisk', () => {
@@ -142,6 +154,10 @@ describe('AST', () => {
                     'SELECT CAST(col AS CHAR) FROM t',
                     'SELECT CAST(`col` AS CHAR) FROM `t`'
                 ],
+                'null target casts':  [
+                    'SELECT CAST(col) FROM t',
+                    'SELECT CAST(`col`) FROM `t`'
+                ],
                 'string casts':  [
                     'SELECT CAST(\'col\' AS CHAR) FROM t',
                     'SELECT CAST(\'col\' AS CHAR) FROM `t`'
@@ -198,6 +214,58 @@ describe('AST', () => {
                 }).to.throw(Error)
             });
 
+            it('should createBinaryExpr using between', () => {
+                const expr =  util.createBinaryExpr(
+                        'BETWEEN',
+                       'id',
+                       [10, 100]
+                    )
+                expect(expr).to.be.eql({
+                  operator: 'BETWEEN',
+                  type: 'binary_expr',
+                  left: {
+                    type: 'string',
+                    value: 'id'
+                  },
+                  right: {
+                    type: 'expr_list',
+                    value: [
+                      {
+                        type: 'number',
+                        value: 10
+                      },
+                      {
+                        type: 'number',
+                        value: 100
+                      }
+                    ]
+                  }
+                })
+
+            });
+
+            it('should createBinaryExpr using between', () => {
+                const expr =  util.createBinaryExpr(
+                        '=',
+                       { type: 'column_ref', table: null, column: 'id' },
+                       {type: 'number', value: 10},
+                    )
+                expect(expr).to.be.eql({
+                  operator: '=',
+                  type: 'binary_expr',
+                  left: {
+                    type: 'column_ref',
+                    table: null,
+                    column: 'id'
+                  },
+                  right: {
+                    type: 'number',
+                    value: 10
+                  }
+                })
+
+            });
+
             it('should parse ANSI SQL compliant statements', () => {
                 sql = `SELECT "id", 'foo' AS "type" FROM "table"`;
                 expect(getParsedSql(sql)).to.equal('SELECT \'id\', \'foo\' AS `type` FROM `table`');
@@ -206,6 +274,11 @@ describe('AST', () => {
             it('should parse DUAL table', () => {
                 sql = `SELECT 'id' FROM DUAL`;
                 expect(getParsedSql(sql)).to.equal(sql);
+            });
+
+            it('should parse DUAL table column add str', () => {
+                sql = `SELECT id FROM DUAL`;
+                expect(getParsedSql(sql)).to.equal(`SELECT 'id' FROM DUAL`);
             });
         });
 
@@ -485,6 +558,12 @@ describe('AST', () => {
             sql = 'SELECT null';
             expect(getParsedSql(sql)).to.equal('SELECT NULL');
         });
+
+        it('should support params values', () => {
+            sql = 'SELECT :var_dname FROM dual';
+            expect(getParsedSql(sql)).to.equal('SELECT :var_dname FROM DUAL');
+        });
+
 
         describe('datetime', () => {
             const literals = {

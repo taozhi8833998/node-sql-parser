@@ -15,6 +15,25 @@ describe('update', () => {
       expect(ast.table).to.be.eql('a');
       expect(ast.set).to.eql([{
         column: 'id',
+        table: null,
+        value: {
+          type: 'number',
+          value: 1
+        }
+      }]);
+      expect(ast.where).to.be.null;
+    });
+
+    it('should parse baisc usage', () => {
+      const { tableList, columnList, ast } = parser.parse('UPDATE a set a.id = 1');
+      expect(tableList).to.eql(["update::null::a"]);
+      expect(columnList).to.eql(["update::a::id"]);
+      expect(ast.type).to.be.eql('update');
+      expect(ast.db).to.be.null;
+      expect(ast.table).to.be.eql('a');
+      expect(ast.set).to.eql([{
+        column: 'id',
+        table: 'a',
         value: {
           type: 'number',
           value: 1
@@ -33,6 +52,7 @@ describe('update', () => {
       expect(ast.set).to.eql([
         {
           column: "col1",
+          table: null,
           value: {
             type: "function",
             name: "concat",

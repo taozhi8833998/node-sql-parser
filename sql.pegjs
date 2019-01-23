@@ -468,8 +468,8 @@ set_list
  * 'col1 = (col2 > 3)'
  */
 set_item
-  = c:column_name __ '=' __ v:additive_expr {
-      return { column: c, value: v };
+  = tbl:(ident __ DOT)? __ c:column_name __ '=' __ v:additive_expr {
+      return { column: c, value: v, table: tbl && tbl[0] };
     }
 
 replace_insert_stmt

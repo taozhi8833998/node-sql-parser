@@ -13,23 +13,35 @@ describe('delete', () => {
       expect(ast.type).to.be.eql('delete');
       expect(ast.tables).to.be.eql(null)
       expect(ast.from).to.eql([{
-            db: null,
-            table: 'a',
-            as: null
-         }]);
+        db: null,
+        table: 'a',
+        as: null
+      }]);
       expect(ast.where).to.eql({
-         type: 'binary_expr',
-         operator: '=',
-         left: {
-            type: 'column_ref',
-            table: null,
-            column: 'id',
-         },
-         right: {
-            type: 'number',
-            value: 1,
-         }
+        type: 'binary_expr',
+        operator: '=',
+        left: {
+          type: 'column_ref',
+          table: null,
+          column: 'id',
+        },
+        right: {
+          type: 'number',
+          value: 1,
+        }
       });
+    });
+    it('should parse baisc usage', () => {
+      const { tableList, columnList, ast } = parser.parse('delete from a');
+      expect(tableList).to.eql(['delete::null::a']);
+      expect(columnList).to.eql(['delete::a::(.*)']);
+      expect(ast.type).to.be.eql('delete');
+      expect(ast.tables).to.be.eql(null)
+      expect(ast.from).to.eql([{
+        db: null,
+        table: 'a',
+        as: null
+      }]);
     });
     it('should parse table in delete usage', () => {
       const { tableList, columnList, ast } = parser.parse('DELETE t1,t2 from t1 LEFT JOIN t2 ON t1.id=t2.id WHERE t1.id=25');
