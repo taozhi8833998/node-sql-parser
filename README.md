@@ -33,7 +33,7 @@ npm install node-sql-parser --save
 ```javascript
 const { Parser } = require('node-sql-parser');
 const parser = new Parser();
-const ast = parser.sqlToAst('SELECT * FROM t');
+const ast = parser.astify('SELECT * FROM t');
 
 console.log(ast);
 ```
@@ -91,12 +91,20 @@ parser.whiteListCheck(sql, whiteColumnList, 'column') // if check failed, an err
 ### Convert AST back to SQL
 
 ```javascript
-const { Parser, util } = require('node-sql-parser');
+const { Parser } = require('node-sql-parser');
 const parser = new Parser()
-const ast = parser.sqlToAst('SELECT * FROM t');
-const sql = util.astToSQL(ast);
+const ast = parser.astify('SELECT * FROM t');
+const sql = parse.sqlify(ast);
 
 console.log(sql); // SELECT * FROM `t`
+```
+
+### TableList, ColumnList, Ast
+
+```javascript
+const { Parser } = require('node-sql-parser');
+const parser = new Parser()
+const { tableList, columnList, ast } = parser.parse('SELECT * FROM t');
 ```
 
 ## :kissing_heart: Acknowledgement

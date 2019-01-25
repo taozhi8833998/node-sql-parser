@@ -30,8 +30,8 @@ describe('insert', () => {
     it('should parse insert and select', () => {
       const sql = 'INSERT INTO t1 values("1223", "name") ; SELECT * FROM t'
       const [sqla, sqlb] = sql.split(';')
-      const astFirstSQL = parser.sqlToAst(sqla.trim())
-      const astSecondSQL = parser.sqlToAst(sqlb.trim())
+      const astFirstSQL = parser.astify(sqla.trim())
+      const astSecondSQL = parser.astify(sqlb.trim())
       const { tableList, columnList, ast } = parser.parse(sql)
       expect(tableList).to.eql(['insert::null::t1', 'select::null::t'])
       expect(columnList).to.eql(['insert::t1::(.*)', 'select::null::(.*)'])

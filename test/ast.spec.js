@@ -8,8 +8,8 @@ describe('AST', () => {
     let sql;
 
     function getParsedSql(sql) {
-        const ast = parser.sqlToAst(sql);
-        return util.astToSQL(ast);
+        const ast = parser.astify(sql);
+        return parser.sqlify(ast);
     }
 
     describe('select statement', () => {
@@ -393,7 +393,7 @@ describe('AST', () => {
                         limit: null
                     };
 
-                    expect(util.astToSQL(ast)).to.equal(`SELECT \`a\` FROM \`t\` WHERE \`id\` ${sqlOperator} (1, 2)`);
+                    expect(parser.sqlify(ast)).to.equal(`SELECT \`a\` FROM \`t\` WHERE \`id\` ${sqlOperator} (1, 2)`);
                 });
             });
 
@@ -586,7 +586,7 @@ describe('AST', () => {
         let ast;
 
         it('should replace single parameter', () => {
-            ast = parser.sqlToAst('SELECT col FROM t WHERE id = :id');
+            ast = parser.astify('SELECT col FROM t WHERE id = :id');
             ast = util.replaceParams(ast, { id: 1 });
 
             expect(ast.where).to.eql({
@@ -598,7 +598,7 @@ describe('AST', () => {
         });
 
         it('should replace multiple parameters', () => {
-            ast = parser.sqlToAst('SELECT col FROM t WHERE id = :id AND "type" = :type');
+            ast = parser.astify('SELECT col FROM t WHERE id = :id AND "type" = :type');
             ast = util.replaceParams(ast, { id: 1, type: 'foobar' });
 
             expect(ast.where).to.eql({
@@ -620,7 +620,7 @@ describe('AST', () => {
         });
 
         it('should set parameter with string', () => {
-            ast = parser.sqlToAst('SELECT col1 FROM t WHERE col2 = :name');
+            ast = parser.astify('SELECT col1 FROM t WHERE col2 = :name');
             ast = util.replaceParams(ast, { name: 'John Doe' });
 
             expect(ast.where).to.eql({
@@ -632,7 +632,7 @@ describe('AST', () => {
         });
 
         it('should set parameter with boolean value', () => {
-            ast = parser.sqlToAst('SELECT col1 FROM t WHERE isMain = :main');
+            ast = parser.astify('SELECT col1 FROM t WHERE isMain = :main');
             ast = util.replaceParams(ast, { main: true });
 
             expect(ast.where).to.eql({
@@ -644,7 +644,7 @@ describe('AST', () => {
         });
 
         it('should set parameter with null value', () => {
-            ast = parser.sqlToAst('SELECT col1 FROM t WHERE col2 = :param');
+            ast = parser.astify('SELECT col1 FROM t WHERE col2 = :param');
             ast = util.replaceParams(ast, { param: null });
 
             expect(ast.where).to.eql({
@@ -656,7 +656,7 @@ describe('AST', () => {
         });
 
         it('should set parameter with array as value', () => {
-            ast = parser.sqlToAst('SELECT col1 FROM t WHERE id = :ids');
+            ast = parser.astify('SELECT col1 FROM t WHERE id = :ids');
             ast = util.replaceParams(ast, { ids: [1, 3, 5, 7] });
 
             expect(ast.where).to.eql({
@@ -676,7 +676,7 @@ describe('AST', () => {
         });
 
         it('should throw an exception if no value for parameter is available', () => {
-            ast = parser.sqlToAst('SELECT col FROM t WHERE id = :id');
+            ast = parser.astify('SELECT col FROM t WHERE id = :id');
 
             expect(() => {
                 util.replaceParams(ast, { foo: 'bar' });
@@ -684,7 +684,7 @@ describe('AST', () => {
         });
 
         it('should return new AST object', () => {
-            ast = parser.sqlToAst('SELECT col FROM t WHERE id = :id');
+            ast = parser.astify('SELECT col FROM t WHERE id = :id');
             const resolvedParamAST = util.replaceParams(ast, { id: 1 });
 
             expect(ast).to.not.eql(resolvedParamAST);
@@ -747,7 +747,7 @@ describe('AST', () => {
                         limit: null
                     };
 
-                    expect(util.astToSQL(ast)).to.equal(`DELETE \`a\` FROM \`t\` WHERE \`id\` ${sqlOperator} (1, 2)`);
+                    expect(parser.sqlify(ast)).to.equal(`DELETE \`a\` FROM \`t\` WHERE \`id\` ${sqlOperator} (1, 2)`);
                 });
             });
 
@@ -883,7 +883,7 @@ describe('AST', () => {
                         }
                      }
 
-                    expect(util.astToSQL(ast)).to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE \`id\` ${sqlOperator} (1, 2)`);
+                    expect(parser.sqlify(ast)).to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE \`id\` ${sqlOperator} (1, 2)`);
                 });
             });
 
@@ -967,7 +967,7 @@ describe('AST', () => {
         });
 
         it(`should throw exception for drop statements`, () => {
-          expect(util.astToSQL.bind(null, {type: 'Drop'})).to.throw(Error, `Drop statements not supported at the moment`);
+          expect(parser.sqlify.bind(null, {type: 'Drop'})).to.throw(Error, `Drop statements not supported at the moment`);
         });
 
         it('Drop statement not surported!', () => {
