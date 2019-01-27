@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "simple node sql parser",
   "main": "index.js",
+  "type": "index.d.ts",
   "scripts": {
     "build": "mkdir -p build && pegjs -o build/pegjs-parser.js sql.pegjs",
     "test": "npm run lint && mocha",
