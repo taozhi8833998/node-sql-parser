@@ -12,7 +12,7 @@ declare module 'node-sql-parser' {
     columns?: any[]
   }
   type WhilteListCheckMode = 'table' | 'column'
-  export interface TableColumnAst {
+  interface TableColumnAst {
     tableList: string[],
     columnsList: string[],
     ast: AST[] | AST
@@ -22,33 +22,27 @@ declare module 'node-sql-parser' {
     table: string
     as: string | null
   }
-
   interface Dual {
     type: 'dual'
   }
-
   interface Limit {
     type: string,
     value: number
   }
-
   interface OrderBy {
     type: 'ASC' | 'DESC',
     expr: any
   }
-
   interface ColumnRef {
     type: 'column_ref',
     table: string | null,
     column: string
   }
-
   interface Set {
     column: string,
     value: any,
     table: string | null
   }
-
   interface Select {
     with: With | null,
     type: TYPE.SELECT,
@@ -62,7 +56,6 @@ declare module 'node-sql-parser' {
     orderby: OrderBy[] | null,
     limit: Limit[] | null
   }
-
   interface Insert_Replace {
     type: TYPE.INSERT | TYPE.REPLACE,
     db: string | null,
@@ -70,7 +63,6 @@ declare module 'node-sql-parser' {
     columns: string[] | null,
     values: { type: 'expr_list', value: any[]}[]
   }
-
   interface Update {
     type: TYPE.UPDATE,
     db: string | null,
@@ -78,14 +70,12 @@ declare module 'node-sql-parser' {
     set: Set[],
     where: any
   }
-
   interface Delete {
     type: TYPE.DELETE,
     tables: any,
     from: (From | Dual)[],
     where: any
   }
-
   export type AST = Select | Insert_Replace | Update | Delete
   export class Parser {
     constructor();
