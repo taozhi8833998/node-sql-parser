@@ -1,5 +1,5 @@
 declare module 'node-sql-parser' {
-  enum Type {
+  enum TYPE {
     SELECT='select',
     UPDATE='update',
     INSERT='insert',
@@ -11,39 +11,88 @@ declare module 'node-sql-parser' {
     stmt: any[],
     columns?: any[]
   }
-  enum WhilteListCheckMode {
-    TABLE='table',
-    COLUMN='column'
-  }
+  type WhilteListCheckMode = 'table' | 'column'
   export interface TableColumnAst {
     tableList: string[],
     columnsList: string[],
     ast: AST[] | AST
   }
+  interface From {
+    db: string | null,
+    table: string
+    as: string | null
+  }
+
+  interface Dual {
+    type: 'dual'
+  }
+
+  interface Limit {
+    type: string,
+    value: number
+  }
+
+  interface OrderBy {
+    type: 'ASC' | 'DESC',
+    expr: any
+  }
+
+  interface ColumnRef {
+    type: 'column_ref',
+    table: string | null,
+    column: string
+  }
+
+  interface Set {
+    column: string,
+    value: any,
+    table: string | null
+  }
+
   interface Select {
-    with?: With,
-    type: Type.SELECT | Type.UPDATE | Type.INSERT | Type.DELETE | Type.REPLACE,
-    options?: any[],
-    distinct?: 'DISTINCT',
+    with: With | null,
+    type: TYPE.SELECT,
+    options: any[] | null,
+    distinct: 'DISTINCT' | null,
     columns: any[] | '*',
-    from?: [],
-    where?: any,
-    groupby?: any[],
-    having?: any[],
-    orderby?: any[],
-    limit?: {type: string, value: number}[]
+    from: (From | Dual)[] | null,
+    where: any,
+    groupby: ColumnRef[] | null,
+    having: any[] | null,
+    orderby: OrderBy[] | null,
+    limit: Limit[] | null
   }
 
-  interface Insert {
-
+  interface Insert_Replace {
+    type: TYPE.INSERT | TYPE.REPLACE,
+    db: string | null,
+    table: string,
+    columns: string[] | null,
+    values: { type: 'expr_list', value: any[]}[]
   }
-  export type AST = Select | Insert
+
+  interface Update {
+    type: TYPE.UPDATE,
+    db: string | null,
+    table: string,
+    set: Set[],
+    where: any
+  }
+
+  interface Delete {
+    type: TYPE.DELETE,
+    tables: any,
+    from: (From | Dual)[],
+    where: any
+  }
+
+  export type AST = Select | Insert_Replace | Update | Delete
   export class Parser {
     constructor();
     parse(sql: string): TableColumnAst;
     astify(sql: string): AST[] | AST;
     sqlify(ast: AST[] | AST): string;
-    whiteListCheck(sql: string, whiteList: string[], type?: WhilteListCheckMode.TABLE | WhilteListCheckMode.COLUMN): Error | undefined;
+    whiteListCheck(sql: string, whiteList: string[], type?: WhilteListCheckMode): Error | undefined;
     tableList(sql: string): string[];
     columnList(sql: string): string[];
   }
