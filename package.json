@@ -1,9 +1,9 @@
 {
   "name": "node-sql-parser",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "simple node sql parser",
   "main": "index.js",
-  "type": "index.d.ts",
+  "types": "index.d.ts",
   "scripts": {
     "build": "mkdir -p build && pegjs -o build/pegjs-parser.js sql.pegjs",
     "test": "npm run lint && mocha",
