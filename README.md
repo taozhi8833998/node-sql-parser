@@ -9,6 +9,7 @@
 [![Coverage Status](https://img.shields.io/coveralls/github/taozhi8833998/node-sql-parser/master.svg)](https://coveralls.io/github/taozhi8833998/node-sql-parser?branch=master)
 [![](https://img.shields.io/gitter/room/taozhi8833998/node-sql-parser.svg)](https://gitter.im/node-sql-parser/community)
 [![Dependencies](https://img.shields.io/david/taozhi8833998/node-sql-parser.svg)](https://img.shields.io/david/taozhi8833998/node-sql-parser)
+[![TypeScript definitions on DefinitelyTyped](http://definitelytyped.org/badges/standard.svg)](http://definitelytyped.org)
 [![Known Vulnerabilities](https://snyk.io/test/github/taozhi8833998/node-sql-parser/badge.svg?targetFile=package.json)](https://snyk.io/test/github/taozhi8833998/node-sql-parser?targetFile=package.json)
 [![issues](https://img.shields.io/github/issues/taozhi8833998/node-sql-parser.svg)](https://github.com/taozhi8833998/node-sql-parser/issues)
 
@@ -19,11 +20,26 @@
 -  support multiple sql statement seperate by semicolon
 -  support select, delete, update and insert type
 -  output the table and column list that the sql visited with the corresponding authority
+-  support typescript
 
 ## :tada: Install
 
 ```bash
 npm install node-sql-parser --save
+
+or
+
+yarn add node-sql-parser
+```
+
+**Install the following type module for typescript usage**
+
+```bash
+npm install @types/node-sql-parser --save-dev
+
+or
+
+yarn add @types/node-sql-parser --dev
 ```
 
 ## :rocket: Usage
