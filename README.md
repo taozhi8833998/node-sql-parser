@@ -20,10 +20,10 @@
 
 ## :star: Features
 
--  support multiple sql statement seperate by semicolon
--  support select, delete, update and insert type
--  output the table and column list that the sql visited with the corresponding authority
--  support typescript
+  - support multiple sql statement seperate by semicolon
+  - support select, delete, update and insert type
+  - output the table and column list that the sql visited with the corresponding authority
+  - support typescript
 
 ## :tada: Install
 
@@ -55,7 +55,11 @@ const parser = new Parser();
 const ast = parser.astify('SELECT * FROM t');
 
 console.log(ast);
-/**
+```
+
+  - `ast` for `SELECT * FROM t`
+
+```json
 {
   "tableList": [
     "select::null::t"
@@ -83,7 +87,6 @@ console.log(ast);
     "limit": null
   }
 }
-**/
 ```
 
 ### Convert AST back to SQL
@@ -120,9 +123,9 @@ console.log(tableList); // ["select::null::t"]
 
 ### Get the SQL visited columns
 
--  get the column list that the sql visited
--  the format is **{type}::{tableName}::{columnName}** // type could be select, update, delete or insert
--  for `select *`, `delete` and `insert into tableName values()` without specified columns, the `.*` column authority regex is required
+  - get the column list that the sql visited
+  - the format is **{type}::{tableName}::{columnName}** // type could be select, update, delete or insert
+  - for `select *`, `delete` and `insert into tableName values()` without specified columns, the `.*` column authority regex is required
 
 ```javascript
 const { Parser } = require('node-sql-parser');
@@ -134,8 +137,8 @@ console.log(columnList); // ["select::t::id"]
 
 ### Check the SQL with Authority List
 
--  check table authority
--  `whiteListCheck` function check on `table` mode by default
+  - check table authority
+  - `whiteListCheck` function check on `table` mode by default
 
 ```javascript
 const { Parser } = require('node-sql-parser');
@@ -145,7 +148,7 @@ const whiteTableList = ['(select|update)::(.*)::(a|b)'] // array that contain mu
 parser.whiteListCheck(sql, whiteTableList, 'table') // if check failed, an error would be thrown with relevant error message, if passed it would return undefined
 ```
 
--  check column authority
+  - check column authority
 
 ```javascript
 const { Parser } = require('node-sql-parser');
