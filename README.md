@@ -55,6 +55,35 @@ const parser = new Parser();
 const ast = parser.astify('SELECT * FROM t');
 
 console.log(ast);
+/**
+{
+  "tableList": [
+    "select::null::t"
+  ],
+  "columnList": [
+    "select::null::(.*)"
+  ],
+  "ast": {
+    "with": null,
+    "type": "select",
+    "options": null,
+    "distinct": null,
+    "columns": "*",
+    "from": [
+      {
+        "db": null,
+        "table": "t",
+        "as": null
+      }
+    ],
+    "where": null,
+    "groupby": null,
+    "having": null,
+    "orderby": null,
+    "limit": null
+  }
+}
+**/
 ```
 
 ### Convert AST back to SQL
