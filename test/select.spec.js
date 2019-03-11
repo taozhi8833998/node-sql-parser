@@ -105,22 +105,28 @@ describe('select', () => {
         'USER',
         'SYSTEM_USER'
       ].forEach((func) => {
+        const columnAst = [
+          {
+            expr: {
+              type: 'function',
+              name: func,
+              args: {
+                type: 'expr_list',
+                value: []
+              }
+            },
+            as: null
+          }
+        ]
         it(`should parse scalar function ${func}`, () => {
           const ast = parser.astify(`SELECT ${func} FROM t`);
 
-          expect(ast.columns).to.eql([
-            {
-              expr: {
-                type: 'function',
-                name: func,
-                args: {
-                  type: 'expr_list',
-                  value: []
-                }
-              },
-              as: null
-            }
-          ]);
+          expect(ast.columns).to.eql(columnAst);
+        });
+        it(`should parse scalar function ${func}() with parentheses`, () => {
+          const ast = parser.astify(`SELECT ${func}() FROM t`);
+
+          expect(ast.columns).to.eql(columnAst);
         });
       });
     });

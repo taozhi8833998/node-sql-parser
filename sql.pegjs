@@ -842,7 +842,7 @@ func_call
         args: l ? l: { type: 'expr_list', value: [] }
       };
     }
-  / name:scalar_func {
+  / name:scalar_func (__ LPAREN RPAREN __)? {
       return {
         type: 'function',
         name: name,
