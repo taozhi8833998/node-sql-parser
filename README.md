@@ -164,4 +164,4 @@ This project is based on the SQL parser extracted from [flora-sql-parser](https:
 
 ## License
 
-[MIT](LICENSE)
+[GPLv2](LICENSE)

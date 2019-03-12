@@ -30,7 +30,7 @@
     "README.md",
     "LICENSE"
   ],
-  "license": "MIT",
+  "license": "GPLv2",
   "bugs": {
     "url": "https://github.com/taozhi8833998/node-sql-parser/issues"
   },
