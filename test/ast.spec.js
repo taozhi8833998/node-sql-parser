@@ -466,6 +466,13 @@ describe('AST', () => {
                 expect(getParsedSql('SELECT a FROM t GROUP BY t.b, t.c'))
                     .to.equal('SELECT `a` FROM `t` GROUP BY `t`.`b`, `t`.`c`');
             });
+
+            it('should not generate an empty GROUP BY clause on empty arrays', () => {
+                const sql = 'SELECT a FROM t';
+                const ast = parser.astify(sql);
+                ast.groupby = [];
+                expect(parser.sqlify(ast)).to.equal('SELECT `a` FROM `t`');
+            });
         });
 
         describe('having clause', () => {
@@ -499,6 +506,13 @@ describe('AST', () => {
             it('should support complex expressions', () => {
                 expect(getParsedSql('SELECT a FROM t ORDER BY rand() ASC'))
                     .to.equal('SELECT `a` FROM `t` ORDER BY rand() ASC');
+            });
+
+            it('should not generate an empty ORDER BY clause on empty arrays', () => {
+                const sql = 'SELECT a FROM t';
+                const ast = parser.astify(sql);
+                ast.orderby = [];
+                expect(parser.sqlify(ast)).to.equal('SELECT `a` FROM `t`');
             });
         });
 
@@ -562,6 +576,11 @@ describe('AST', () => {
         it('should support params values', () => {
             sql = 'SELECT :var_dname FROM dual';
             expect(getParsedSql(sql)).to.equal('SELECT :var_dname FROM DUAL');
+        });
+
+        it('should support trailing zeros',  () => {
+            expect(getParsedSql('SELECT 042')).equal('SELECT 42');
+            expect(getParsedSql('SELECT -042')).equal('SELECT -42');
         });
 
 
