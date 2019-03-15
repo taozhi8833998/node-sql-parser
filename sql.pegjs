@@ -271,7 +271,7 @@ column_clause
           },
           as: null
         };
-        return createList(head[0], tail)
+        return createList(head[0], tail);
       }
       return head[0];
     }
