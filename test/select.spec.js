@@ -17,6 +17,52 @@ describe('select', () => {
     expect(ast.limit).to.be.null;
   });
 
+  it('should support * with optional table prefix and other columns alias', () => {
+    [
+      {
+        sql: 'SELECT *, \'a\' as col2 FROM table1',
+        expected: 'SELECT *, \'a\' AS `col2` FROM `table1`'
+      },
+      {
+        sql: 'SELECT table1.*, \'a\' as col2 FROM table1',
+        expected: 'SELECT `table1`.*, \'a\' AS `col2` FROM `table1`'
+      }
+    ].forEach(({sql, expected}, index) => {
+      const ast = parser.astify(sql)
+      expect(ast.options).to.be.null;
+      expect(ast.distinct).to.be.null;
+      expect(ast.columns).to.be.eql([
+        {
+          "expr": {
+              "type": "column_ref",
+              "table": index === 0 ? null: "table1",
+              "column": "*"
+          },
+          "as": null
+        },
+        {
+          "expr": {
+              "type": "string",
+              "value": "a"
+          },
+          "as": "col2"
+        }
+      ]);
+      expect(ast.from).to.be.eql([
+        {
+          "db": null,
+          "table": "table1",
+          "as": null
+        }
+      ]);
+      expect(ast.where).to.be.null;
+      expect(ast.groupby).to.be.null;
+      expect(ast.orderby).to.be.null;
+      expect(ast.limit).to.be.null;
+      expect(parser.sqlify(ast)).to.be.eql(expected)
+    })
+  })
+
   it('should support select *from', () => {
     const ast = parser.astify('SELECT *from abc');
     expect(ast.options).to.be.null;

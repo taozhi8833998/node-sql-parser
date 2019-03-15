@@ -260,9 +260,20 @@ query_option
     ) { return option; }
 
 column_clause
-  = (KW_ALL / (STAR !ident_start) / STAR) {
+  = head: (KW_ALL / (STAR !ident_start) / STAR) tail:(__ COMMA __ column_list_item)* {
       columnList.add('select::null::(.*)');
-      return '*';
+      if (tail && tail.length > 0) {
+        head[0] = {
+          expr: {
+            type: 'column_ref',
+            table: null,
+            column: '*'
+          },
+          as: null
+        };
+        return createList(head[0], tail)
+      }
+      return head[0];
     }
   / head:column_list_item tail:(__ COMMA __ column_list_item)* {
       return createList(head, tail);
