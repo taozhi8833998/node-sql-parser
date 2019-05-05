@@ -36,7 +36,7 @@
   },
   "homepage": "https://github.com/taozhi8833998/node-sql-parser#readme",
   "engines": {
-    "node": ">=8"
+    "node": ">=10"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
