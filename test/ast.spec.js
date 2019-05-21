@@ -986,13 +986,13 @@ describe('AST', () => {
         });
 
         it(`should throw exception for drop statements`, () => {
-          expect(parser.sqlify.bind(null, {type: 'Drop'})).to.throw(Error, `Drop statements not supported at the moment`);
+          expect(parser.sqlify.bind(null, {type: 'Alter'})).to.throw(Error, `Alter statements not supported at the moment`);
         });
 
-        it('Drop statement not surported!', () => {
-          const sql = 'DROP table t'
+        it('Alter statement not surported!', () => {
+          const sql = 'alter table t comment "test"'
           const fun = parser.parse.bind(parser, sql)
-          expect(fun).to.throw('"$", "(", "--", "/*", ";", "DELETE", "INSERT", "REPLACE", "SELECT", "UPDATE", "WITH", "return", [ \\t\\n\\r], or end of input but "D" found')
+          expect(fun).to.throw('"$", "(", "--", "/*", ";", "DELETE", "DROP", "INSERT", "RENAME", "REPLACE", "SELECT", "TRUNCATE", "UPDATE", "WITH", "return", [ \\t\\n\\r], or end of input but "a" found')
         })
     });
 });

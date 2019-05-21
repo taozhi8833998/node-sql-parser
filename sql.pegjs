@@ -1,5 +1,6 @@
 {
   const reservedMap = {
+    'ALTER': true,
     'ALL': true,
     'AND': true,
     'AS': true,
@@ -57,6 +58,7 @@
     'OUTER': true,
 
     'RECURSIVE': true,
+    'RENAME': true,
     'REPLACE': true,
     'RIGHT': true,
 
@@ -70,6 +72,7 @@
     'TABLE': true,
     'THEN': true,
     'TRUE': true,
+    'TRUNCATE': true,
     'TYPE': true,   // reserved (MySQL)
 
     'UNION': true,
@@ -150,7 +153,12 @@
 
 start
   = multiple_stmt
+  / cmd_stmt
   / crud_stmt
+
+cmd_stmt
+  = drop_stmt
+  / rename_stmt
 
 crud_stmt
   = union_stmt
@@ -186,6 +194,39 @@ union_stmt
         columnList: Array.from(columnList),
       	ast: head
       }
+    }
+drop_stmt
+  = a: (KW_DROP / KW_TRUNCATE)  __
+    KW_TABLE __
+    t:table_name __ {
+      let type = a
+      if (Array.isArray(a)) type = a[0]
+      else type = a.toLowerCase()
+      if(t.table) tableList.add(`${type}::${t.db}::${t.table}`);
+      return {
+        tableList: Array.from(tableList),
+        columnList: Array.from(columnList),
+        ast: {
+          type,
+          db: t.db,
+          table: t.table
+        }
+      };
+    }
+
+rename_stmt
+  = KW_RENAME  __
+    KW_TABLE __
+    t: table_to_list {
+      t.forEach(tg => tg.forEach(dt => dt.table && tableList.add(`rename::${dt.db}::${dt.table}`)))
+      return {
+        tableList: Array.from(tableList),
+        columnList: Array.from(columnList),
+        ast: {
+          type: 'rename',
+          table: t
+        }
+      };
     }
 
 select_stmt
@@ -301,6 +342,16 @@ alias_clause
 
 from_clause
   = KW_FROM __ l:table_ref_list { return l; }
+
+table_to_list
+  = head:table_to_item tail:(__ COMMA __ table_to_item)* {
+      return createList(head, tail);
+    }
+
+table_to_item
+  = head:table_name __ KW_TO __ tail: ( table_name) {
+      return [head, tail]
+    }
 
 table_ref_list
   = head:table_base
@@ -1019,6 +1070,7 @@ e
 
 KW_NULL     = "NULL"i       !ident_start
 KW_TRUE     = "TRUE"i       !ident_start
+KW_TO       = "TO"i         !ident_start
 KW_FALSE    = "FALSE"i      !ident_start
 
 KW_SHOW     = "SHOW"i       !ident_start
@@ -1030,6 +1082,7 @@ KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
 KW_RECURSIVE= "RECURSIVE"   !ident_start
 KW_REPLACE  = "REPLACE"i    !ident_start
+KW_RENAME   = "RENAME"i     !ident_start
 KW_EXPLAIN  = "EXPLAIN"i    !ident_start
 
 KW_INTO     = "INTO"i       !ident_start
@@ -1103,6 +1156,7 @@ KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
+KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
 KW_USER     = "USER"i     !ident_start { return 'USER'; }
 
 KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
