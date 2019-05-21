@@ -22,6 +22,7 @@
 
 - support multiple sql statement seperate by semicolon
 - support select, delete, update and insert type
+- support drop, truncate and rename command
 - output the table and column list that the sql visited with the corresponding authority
 - support typescript
 
