@@ -67,5 +67,10 @@ describe('DROP AND TRUNCATE', () => {
         .to.equal('CALL sp(@firstParameter, @secondParameter)')
     })
 
+    it('should support MySQL call with multiple different type parameters', () => {
+      expect(getParsedSql('call sp(12, "test", @firstParameter)'))
+        .to.equal('CALL sp(12, \'test\', @firstParameter)')
+    })
+
   })
 })

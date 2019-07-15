@@ -665,8 +665,14 @@ case_else = KW_ELSE __ result:expr {
  */
 
 expr
-  = or_expr
+  = logic_operator_expr // support concatenation operator ||
+  / or_expr
   / select_stmt
+
+logic_operator_expr
+  = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ {
+    return createBinaryExprChain(head, tail);
+  }
 
 or_expr
   = head:and_expr tail:(__ KW_OR __ and_expr)* {
@@ -1219,6 +1225,11 @@ LBRAKE    = '['
 RBRAKE    = ']'
 
 SEMICOLON = ';'
+
+OPERATOR_CONCATENATION = '||'
+OPERATOR_AND = '&&'
+LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
+
 
 // separator
 __

@@ -32,6 +32,13 @@ describe('AST', () => {
                 .to.equal('SELECT * FROM (SELECT * FROM `tb_user` WHERE `user_id` = \'lmt\') AS `tableA` LIMIT 0,2');
         });
 
+        describe('logic operator', () => {
+            it('should support column concatenation operator', () => {
+              expect(getParsedSql('select "a" || "," || b as ab, t.cd && "ef" from t'))
+              .to.equal("SELECT 'a' || ',' || `b` AS `ab`, `t`.`cd` && 'ef' FROM `t`");
+            })
+        })
+
         describe('common table expressions', () => {
             it('should support single CTE', () => {
                 const sql = `WITH cte AS (SELECT 1)

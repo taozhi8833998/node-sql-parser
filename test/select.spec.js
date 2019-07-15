@@ -101,7 +101,6 @@ describe('select', () => {
 
     it('should parse "table.*" column expressions', () => {
       const ast = parser.astify('SELECT t.* FROM t');
-
       expect(ast.columns).to.eql([
         { expr: { type: 'column_ref', 'table': 't', column: '*' }, as: null }
       ]);
@@ -109,7 +108,6 @@ describe('select', () => {
 
     it('should parse aliases w/o "AS" keyword', () => {
       const ast = parser.astify('SELECT a aa FROM  t');
-
       expect(ast.columns).to.eql([
         { expr: { type: 'column_ref', table: null, column: 'a' }, as: 'aa' }
       ]);
@@ -117,11 +115,73 @@ describe('select', () => {
 
     it('should parse aliases w/ "AS" keyword', () => {
       const ast = parser.astify('SELECT b.c as bc FROM t');
-
       expect(ast.columns).to.eql([
         { expr: { type: 'column_ref', table: 'b', column: 'c' },  as: 'bc' }
       ]);
     });
+
+    describe('logic operator', () => {
+      it('should support column concatenation operator', () => {
+        const { tableList, columnList, ast } = parser.parse('SELECT "a" || "," || b as ab, t.cd && "ef" FROM t');
+        expect(tableList).to.eql(['select::null::t']);
+        expect(columnList).to.eql(['select::null::b', 'select::t::cd']);
+        expect(ast.columns).to.eql([
+          {
+            expr: {
+              type: 'binary_expr',
+              operator: '||',
+              left: {
+                type: 'binary_expr',
+                operator: '||',
+                left: {
+                  type: 'string',
+                  value: 'a'
+                },
+                right: {
+                  type: 'string',
+                  value: ','
+                }
+              },
+              right: {
+                type: 'column_ref',
+                table: null,
+                column: 'b'
+              }
+            },
+            as: 'ab'
+          },
+          {
+            expr: {
+              type: 'binary_expr',
+              operator: '&&',
+              left: {
+                 type: 'column_ref',
+                 table: 't',
+                 column: 'cd'
+              },
+              right: {
+                 type: 'string',
+                 value: 'ef'
+              }
+           },
+           "as": null
+          }
+        ]);
+        expect(ast.options).to.be.null;
+        expect(ast.distinct).to.be.null;
+        expect(ast.from).to.be.eql([
+            {
+              db: null,
+              table: 't',
+              as: null
+            }
+          ]);
+        expect(ast.where).to.be.null;
+        expect(ast.groupby).to.be.null;
+        expect(ast.orderby).to.be.null;
+        expect(ast.limit).to.be.null;
+      });
+    })
 
     describe('functions', () => {
       it('should parse function expression', () => {
