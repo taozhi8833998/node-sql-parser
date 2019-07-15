@@ -665,13 +665,19 @@ case_else = KW_ELSE __ result:expr {
  */
 
 expr
-  = logic_operator_expr // support concatenation operator ||
+  = logic_operator_expr // support concatenation operator || and &&
+  / unary_expr
   / or_expr
   / select_stmt
 
 logic_operator_expr
   = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ {
     return createBinaryExprChain(head, tail);
+  }
+
+unary_expr
+  = op: additive_operator tail: (__ primary)+ {
+    return createUnaryExpr(op, tail[0][1]);
   }
 
 or_expr
@@ -1229,7 +1235,6 @@ SEMICOLON = ';'
 OPERATOR_CONCATENATION = '||'
 OPERATOR_AND = '&&'
 LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
-
 
 // separator
 __

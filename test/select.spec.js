@@ -496,7 +496,48 @@ describe('select', () => {
         });
       });
     });
-  });
+
+    it(`should parse + and - unary`, () => {
+      const { tableList, columnList, ast } = parser.parse('select -1, -a, +b, +abc.e from abc')
+      expect(tableList).to.eql(['select::null::abc'])
+      expect(columnList).to.eql([
+        'select::null::a',
+        'select::null::b',
+        'select::abc::e'
+      ])
+      expect(ast.columns).to.eql([
+        {
+          expr: { type: 'unary_expr', operator: '-', expr: { type: 'number', value: 1 } },
+          as: null
+        },
+        {
+          expr: { type: 'unary_expr', operator: '-', expr: { type: 'column_ref', table: null, column: 'a' } } ,
+          as: null
+        },
+        {
+          expr: { type: 'unary_expr', operator: '+', expr: { type: 'column_ref', table: null, column: 'b' } },
+          as: null
+        },
+        {
+          expr: { type: 'unary_expr', operator: '+', expr: { type: 'column_ref', table: 'abc', column: 'e' } },
+          as: null
+        }
+      ])
+      expect(ast.options).to.be.null;
+      expect(ast.distinct).to.be.null;
+      expect(ast.from).to.eql([
+        {
+          db: null,
+          table: 'abc',
+          as: null
+        }
+      ]);
+      expect(ast.where).to.be.null;
+      expect(ast.groupby).to.be.null;
+      expect(ast.orderby).to.be.null;
+      expect(ast.limit).to.be.null;
+    })
+  })
 
   describe('limit clause', () => {
     it('should be parsed w/o offset', () => {

@@ -154,6 +154,8 @@ describe('AST', () => {
             it('should support unary operators', () => {
                 sql = 'SELECT (not true), !t.foo as foo FROM t';
                 expect(getParsedSql(sql)).to.equal('SELECT (NOT TRUE), NOT `t`.`foo` AS `foo` FROM `t`');
+                sql = 'select -1, -a, +b, +abc.e from abc'
+                expect(getParsedSql(sql)).to.equal('SELECT - 1, - `a`, + `b`, + `abc`.`e` FROM `abc`');
             });
 
             const castQueries = {
@@ -587,7 +589,7 @@ describe('AST', () => {
 
         it('should support trailing zeros',  () => {
             expect(getParsedSql('SELECT 042')).equal('SELECT 42');
-            expect(getParsedSql('SELECT -042')).equal('SELECT -42');
+            expect(getParsedSql('SELECT -042')).equal('SELECT - 42');
         });
 
 
