@@ -9,6 +9,7 @@
     'BETWEEN': true,
     'BY': true,
 
+    'CALL': true,
     'CASE': true,
     'CREATE': true,
     'CONTAINS': true,
@@ -159,6 +160,7 @@ start
 cmd_stmt
   = drop_stmt
   / rename_stmt
+  / call_stmt
 
 crud_stmt
   = union_stmt
@@ -228,6 +230,19 @@ rename_stmt
         }
       };
     }
+
+call_stmt
+  = KW_CALL __
+  e: proc_func_call {
+    return {
+      tableList: Array.from(tableList),
+      columnList: Array.from(columnList),
+      ast: {
+        type: 'call',
+        expr: e
+      }
+    }
+  }
 
 select_stmt
   = select_stmt_nake
@@ -1135,6 +1150,8 @@ KW_MIN      = "MIN"i        !ident_start { return 'MIN'; }
 KW_SUM      = "SUM"i        !ident_start { return 'SUM'; }
 KW_AVG      = "AVG"i        !ident_start { return 'AVG'; }
 
+KW_CALL     = "CALL"i       !ident_start { return 'CALL'; }
+
 KW_CASE     = "CASE"i       !ident_start
 KW_WHEN     = "WHEN"i       !ident_start
 KW_THEN     = "THEN"i       !ident_start
@@ -1174,7 +1191,10 @@ KW_CURRENT_USER     = "CURRENT_USER"i !ident_start { return 'CURRENT_USER'; }
 KW_SESSION_USER     = "SESSION_USER"i !ident_start { return 'SESSION_USER'; }
 KW_SYSTEM_USER      = "SYSTEM_USER"i !ident_start { return 'SYSTEM_USER'; }
 
-KW_VAR_PRE = '$'
+KW_VAR__PRE_AT = '@'
+KW_VAR_PRE_DOLLAR = '$'
+KW_VAR_PRE
+  = KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR
 KW_RETURN = 'return'i
 KW_ASSIGN = ':='
 
@@ -1296,7 +1316,7 @@ proc_primary
     }
 
 proc_func_call
-  = name:ident __ LPAREN __ l:proc_primary_list __ RPAREN {
+  = name:ident __ LPAREN __ l:proc_primary_list? __ RPAREN {
       //compatible with original func_call
       return {
         type: 'function',
@@ -1307,6 +1327,13 @@ proc_func_call
         }
       };
     }
+  / name:ident __ {
+    return {
+        type: 'function',
+        name: name,
+        args: null
+      };
+  }
 
 proc_primary_list
   = head:proc_primary tail:(__ COMMA __ proc_primary)* {
@@ -1319,13 +1346,14 @@ proc_array =
   }
 
 var_decl
-  = KW_VAR_PRE name:ident_name m:mem_chain {
+  = p: KW_VAR_PRE name:ident_name m:mem_chain {
     //push for analysis
     varList.push(name);
     return {
       type: 'var',
       name: name,
-      members: m
+      members: m,
+      prefix: p
     };
   }
 

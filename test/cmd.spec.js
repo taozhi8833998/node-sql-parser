@@ -45,4 +45,27 @@ describe('DROP AND TRUNCATE', () => {
         .to.equal('RENAME TABLE `d`.`a` TO `d`.`b`, `d`.`c` TO `d`.`d`');
     });
   })
+
+  describe('call', () => {
+    it('should support MySQL call', () => {
+      expect(getParsedSql('call sp(1, "123")'))
+        .to.equal('CALL sp(1, \'123\')')
+    })
+
+    it('should support MySQL call with no parameters', () => {
+      expect(getParsedSql('call sp()'))
+        .to.equal('CALL sp()')
+    })
+
+    it('should support MySQL call without parentheses and parameters', () => {
+      expect(getParsedSql('call sp'))
+        .to.equal('CALL sp')
+    })
+
+    it('should support MySQL call without dynamic value', () => {
+      expect(getParsedSql('call sp(@firstParameter, @secondParameter)'))
+        .to.equal('CALL sp(@firstParameter, @secondParameter)')
+    })
+
+  })
 })

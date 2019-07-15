@@ -992,7 +992,7 @@ describe('AST', () => {
         it('Alter statement not surported!', () => {
           const sql = 'alter table t comment "test"'
           const fun = parser.parse.bind(parser, sql)
-          expect(fun).to.throw('"$", "(", "--", "/*", ";", "DELETE", "DROP", "INSERT", "RENAME", "REPLACE", "SELECT", "TRUNCATE", "UPDATE", "WITH", "return", [ \\t\\n\\r], or end of input but "a" found')
+          expect(fun).to.throw('"$", "(", "--", "/*", ";", "@", "CALL", "DELETE", "DROP", "INSERT", "RENAME", "REPLACE", "SELECT", "TRUNCATE", "UPDATE", "WITH", "return", [ \\t\\n\\r], or end of input but "a" found')
         })
     });
 });
