@@ -62,31 +62,23 @@ console.log(ast);
 
 ```json
 {
-  "tableList": [
-    "select::null::t"
+  "with": null,
+  "type": "select",
+  "options": null,
+  "distinct": null,
+  "columns": "*",
+  "from": [
+    {
+      "db": null,
+      "table": "t",
+      "as": null
+    }
   ],
-  "columnList": [
-    "select::null::(.*)"
-  ],
-  "ast": {
-    "with": null,
-    "type": "select",
-    "options": null,
-    "distinct": null,
-    "columns": "*",
-    "from": [
-      {
-        "db": null,
-        "table": "t",
-        "as": null
-      }
-    ],
-    "where": null,
-    "groupby": null,
-    "having": null,
-    "orderby": null,
-    "limit": null
-  }
+  "where": null,
+  "groupby": null,
+  "having": null,
+  "orderby": null,
+  "limit": null
 }
 ```
 
@@ -101,7 +93,7 @@ const sql = parse.sqlify(ast);
 console.log(sql); // SELECT * FROM `t`
 ```
 
-### TableList, ColumnList, Ast
+### Get TableList, ColumnList, Ast by `parse` function
 
 ```javascript
 const { Parser } = require('node-sql-parser');
