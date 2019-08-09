@@ -200,7 +200,8 @@ union_stmt
 drop_stmt
   = a: (KW_DROP / KW_TRUNCATE)  __
     KW_TABLE __
-    t:table_name __ {
+    t:table_name __
+    s:SEMICOLON? {
       let type = a
       if (Array.isArray(a)) type = a[0]
       else type = a.toLowerCase()
@@ -211,7 +212,8 @@ drop_stmt
         ast: {
           type,
           db: t.db,
-          table: t.table
+          table: t.table,
+          semicolon: s
         }
       };
     }

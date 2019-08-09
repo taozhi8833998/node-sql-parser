@@ -25,6 +25,11 @@ describe('DROP AND TRUNCATE', () => {
           .to.equal(`${action.toUpperCase()} TABLE \`dbA\`.\`tableA\``);
       });
 
+      it(`should support MySQL ${action} with semicolon suffix`, () => {
+        expect(getParsedSql(`${action} table dbA.tableA;`))
+          .to.equal(`${action.toUpperCase()} TABLE \`dbA\`.\`tableA\`;`);
+      });
+
     })
 
   })
