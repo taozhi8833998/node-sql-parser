@@ -78,4 +78,18 @@ describe('DROP AND TRUNCATE', () => {
     })
 
   })
+
+  describe('use', () => {
+    it(`should support MySQL use`, () => {
+      expect(getParsedSql('use databaseA'))
+        .to.equal('USE `databaseA`');
+    });
+
+    it(`should support MySQL use with semicolon`, () => {
+      expect(getParsedSql('use databaseA;'))
+        .to.equal('USE `databaseA`;');
+    });
+
+  })
+
 })

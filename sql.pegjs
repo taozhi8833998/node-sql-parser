@@ -161,6 +161,7 @@ cmd_stmt
   = drop_stmt
   / rename_stmt
   / call_stmt
+  / use_stmt
 
 crud_stmt
   = union_stmt
@@ -213,6 +214,22 @@ drop_stmt
           type,
           db: t.db,
           table: t.table,
+          semicolon: s
+        }
+      };
+    }
+
+use_stmt
+  = KW_USE  __
+    d:ident __
+    s:SEMICOLON? {
+      tableList.add(`use::${d}::null`);
+      return {
+        tableList: Array.from(tableList),
+        columnList: Array.from(columnList),
+        ast: {
+          type: 'use',
+          db: d,
           semicolon: s
         }
       };
@@ -1104,6 +1121,7 @@ KW_FALSE    = "FALSE"i      !ident_start
 
 KW_SHOW     = "SHOW"i       !ident_start
 KW_DROP     = "DROP"i       !ident_start
+KW_USE      = "USE"i       !ident_start
 KW_SELECT   = "SELECT"i     !ident_start
 KW_UPDATE   = "UPDATE"i     !ident_start
 KW_CREATE   = "CREATE"i     !ident_start
