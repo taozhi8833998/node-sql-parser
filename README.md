@@ -185,3 +185,6 @@ Donate money by [paypal](https://www.paypal.me/taozhi8833998/5) to my account [t
 ### Explain
 
 If you have made a donation, you can leave your name and email in the issue, your name will be written to the donation list.
+
+
+## [Donation list](https://github.com/taozhi8833998/node-sql-parser/blob/master/DONATIONLIST.md)
