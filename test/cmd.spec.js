@@ -101,4 +101,18 @@ describe('DROP AND TRUNCATE', () => {
 
   })
 
+  describe('multiple statement with cmd', () => {
+    it(`should support cmd multiple use`, () => {
+      expect(getParsedSql('use databaseA;drop table tableA;truncate table tableB; call sp'))
+        .to.equal('USE `databaseA` ; DROP TABLE `tableA` ; TRUNCATE TABLE `tableB` ; CALL sp');
+
+    });
+
+    it(`should support cmd and crud multiple use`, () => {
+      expect(getParsedSql('select * from tableD;use databaseA;drop table tableA;truncate table tableB; call sp;delete from tableC'))
+        .to.equal('SELECT * FROM `tableD` ; USE `databaseA` ; DROP TABLE `tableA` ; TRUNCATE TABLE `tableB` ; CALL sp ; DELETE FROM `tableC`');
+
+    });
+  })
+
 })
