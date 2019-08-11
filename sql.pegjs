@@ -1351,8 +1351,17 @@ proc_primary
       return e;
     }
 
+proc_func_name
+  = dt:ident tail:(__ DOT __ ident)? {
+      let name = dt
+      if (tail !== null) {
+        name = `${dt}.${tail[3]}`
+      }
+      return name;
+    }
+
 proc_func_call
-  = name:ident __ LPAREN __ l:proc_primary_list? __ RPAREN {
+  = name:proc_func_name __ LPAREN __ l:proc_primary_list? __ RPAREN {
       //compatible with original func_call
       return {
         type: 'function',
@@ -1363,7 +1372,7 @@ proc_func_call
         }
       };
     }
-  / name:ident __ {
+  / name:proc_func_name __ {
     return {
         type: 'function',
         name: name,

@@ -77,6 +77,15 @@ describe('DROP AND TRUNCATE', () => {
         .to.equal('CALL sp(12, \'test\', @firstParameter)')
     })
 
+    it('should support MySQL call cross database', () => {
+      expect(getParsedSql('call db.sp(12, "test", @firstParameter)'))
+        .to.equal('CALL db.sp(12, \'test\', @firstParameter)')
+      expect(getParsedSql('call `db`.`sp`(12, "test", @firstParameter)'))
+        .to.equal('CALL db.sp(12, \'test\', @firstParameter)')
+      expect(getParsedSql('call `db`.`sp`'))
+        .to.equal('CALL db.sp')
+    })
+
   })
 
   describe('use', () => {
