@@ -252,13 +252,15 @@ rename_stmt
 
 call_stmt
   = KW_CALL __
-  e: proc_func_call {
+  e: proc_func_call
+  s: SEMICOLON? {
     return {
       tableList: Array.from(tableList),
       columnList: Array.from(columnList),
       ast: {
         type: 'call',
-        expr: e
+        expr: e,
+        semicolon: s
       }
     }
   }
