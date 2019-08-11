@@ -158,3 +158,30 @@ This project is based on the SQL parser extracted from [flora-sql-parser](https:
 ## License
 
 [GPLv2](LICENSE)
+
+## Buy me a Coffee
+
+If you like my project, **Star** in the corresponding project right corner. Your support is my biggest encouragement! ^_^
+
+You can also scan the qr code below or open paypal link to donation to Author.
+
+### Paypal
+
+Donate money by [paypal](https://www.paypal.me/taozhi8833998/5) to my account [taozhi8833998@163.com](taozhi8833998@163.com)
+
+### AliPay(支付宝)
+
+<p align="center">
+    <img src="https://github.com/taozhi8833998/node-sql-parser/blob/master/img/alipay.jpg" width="300" hight="300">
+</p>
+
+
+### Wechat(微信)
+
+<p align="center">
+    <img src="https://github.com/taozhi8833998/node-sql-parser/blob/master/img/wechat_pay.jpg" width="300" hight="300">
+</p>
+
+### Explain
+
+If you have made a donation, you can leave your name and email in the issue, your name will be written to the donation list.
