@@ -27,7 +27,7 @@ describe('DROP AND TRUNCATE', () => {
 
       it(`should support MySQL ${action} with semicolon suffix`, () => {
         expect(getParsedSql(`${action} table dbA.tableA;`))
-          .to.equal(`${action.toUpperCase()} TABLE \`dbA\`.\`tableA\`;`);
+          .to.equal(`${action.toUpperCase()} TABLE \`dbA\`.\`tableA\``);
       });
 
     })
@@ -81,7 +81,7 @@ describe('DROP AND TRUNCATE', () => {
       expect(getParsedSql('call db.sp(12, "test", @firstParameter)'))
         .to.equal('CALL db.sp(12, \'test\', @firstParameter)')
       expect(getParsedSql('call `db`.`sp`(12, "test", @firstParameter);'))
-        .to.equal('CALL db.sp(12, \'test\', @firstParameter);')
+        .to.equal('CALL db.sp(12, \'test\', @firstParameter)')
       expect(getParsedSql('call `db`.`sp`'))
         .to.equal('CALL db.sp')
     })
@@ -96,7 +96,7 @@ describe('DROP AND TRUNCATE', () => {
 
     it(`should support MySQL use with semicolon`, () => {
       expect(getParsedSql('use databaseA;'))
-        .to.equal('USE `databaseA`;');
+        .to.equal('USE `databaseA`');
     });
 
   })

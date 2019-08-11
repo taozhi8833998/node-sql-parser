@@ -169,6 +169,7 @@ crud_stmt
   / replace_insert_stmt
   / insert_no_columns_stmt
   / delete_stmt
+  / cmd_stmt
   / proc_stmts
 
 multiple_stmt
@@ -201,8 +202,7 @@ union_stmt
 drop_stmt
   = a: (KW_DROP / KW_TRUNCATE)  __
     KW_TABLE __
-    t:table_name __
-    s:SEMICOLON? {
+    t:table_name __ {
       let type = a
       if (Array.isArray(a)) type = a[0]
       else type = a.toLowerCase()
@@ -213,24 +213,21 @@ drop_stmt
         ast: {
           type,
           db: t.db,
-          table: t.table,
-          semicolon: s
+          table: t.table
         }
       };
     }
 
 use_stmt
   = KW_USE  __
-    d:ident __
-    s:SEMICOLON? {
+    d:ident __ {
       tableList.add(`use::${d}::null`);
       return {
         tableList: Array.from(tableList),
         columnList: Array.from(columnList),
         ast: {
           type: 'use',
-          db: d,
-          semicolon: s
+          db: d
         }
       };
     }
@@ -252,15 +249,13 @@ rename_stmt
 
 call_stmt
   = KW_CALL __
-  e: proc_func_call
-  s: SEMICOLON? {
+  e: proc_func_call {
     return {
       tableList: Array.from(tableList),
       columnList: Array.from(columnList),
       ast: {
         type: 'call',
-        expr: e,
-        semicolon: s
+        expr: e
       }
     }
   }
