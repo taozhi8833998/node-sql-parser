@@ -544,6 +544,15 @@ delete_stmt
         info.table && tableList.add(`delete::${info.db}::${info.table}`);
         columnList.add(`delete::${info.table}::(.*)`);
       });
+      if (t === null && f.length === 1) {
+        const tableInfo = f[0]
+        t = [{
+          db: tableInfo.db,
+          table: tableInfo.table,
+          as: tableInfo.as,
+          addition: true
+        }]
+      }
       return {
         tableList: Array.from(tableList),
         columnList: Array.from(columnList),

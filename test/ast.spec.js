@@ -760,7 +760,7 @@ describe('AST', () => {
                         type: 'delete',
                         options: null,
                         distinct: null,
-                        columns: [{ expr: { type: 'column_ref', table: null, column: 'a' }, as: null }],
+                        tables: [{ db: null, table: 't', as: null }],
                         from: [{ db: null, table: 't', as: null }],
                         where: {
                             type: 'binary_expr',
@@ -775,7 +775,9 @@ describe('AST', () => {
                         limit: null
                     };
 
-                    expect(parser.sqlify(ast)).to.equal(`DELETE \`a\` FROM \`t\` WHERE \`id\` ${sqlOperator} (1, 2)`);
+                    expect(parser.sqlify(ast)).to.equal(`DELETE \`t\` FROM \`t\` WHERE \`id\` ${sqlOperator} (1, 2)`);
+                    ast.tables[0].addition = true
+                    expect(parser.sqlify(ast)).to.equal(`DELETE FROM \`t\` WHERE \`id\` ${sqlOperator} (1, 2)`);
                 });
             });
 
