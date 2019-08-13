@@ -11,7 +11,7 @@ describe('delete', () => {
       expect(tableList).to.eql(['delete::null::a']);
       expect(columnList).to.eql(['select::null::id', 'delete::a::(.*)']);
       expect(ast.type).to.be.eql('delete');
-      expect(ast.tables).to.be.eql([{
+      expect(ast.table).to.be.eql([{
         db: null,
         table: 'a',
         as: null,
@@ -41,7 +41,7 @@ describe('delete', () => {
       expect(tableList).to.eql(['delete::null::a']);
       expect(columnList).to.eql(['delete::a::(.*)']);
       expect(ast.type).to.be.eql('delete');
-      expect(ast.tables).to.be.eql([{
+      expect(ast.table).to.be.eql([{
          db: null,
          table: 'a',
          as: null,
@@ -58,7 +58,7 @@ describe('delete', () => {
       expect(tableList).to.eql(['delete::null::t1', 'delete::null::t2']);
       expect(columnList).to.eql(['select::t1::id', 'select::t2::id', 'delete::t1::(.*)', 'delete::t2::(.*)']);
       expect(ast.type).to.be.eql('delete');
-      expect(ast.tables).to.eql([
+      expect(ast.table).to.eql([
          {
             db: null,
             table: 't1',

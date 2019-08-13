@@ -121,6 +121,28 @@
     return result;
   }
 
+  function queryTableAlias(tableName) {
+    const alias = tableAlias[tableName]
+    if (alias) return alias
+    if (tableName) return tableName
+    return null
+  }
+
+  function columnListTableAlias(columnList) {
+    const columns = []
+    const symbolChar = '::'
+    for(let column of columnList.keys()) {
+      const columnInfo = column.split(symbolChar)
+      if (!columnInfo) {
+        columns.push(column)
+        break
+      }
+      if (columnInfo && columnInfo[1]) columnInfo[1] = queryTableAlias(columnInfo[1])
+      columns.push(columnInfo.join(symbolChar))
+    }
+    return columns
+  }
+
   const cmpPrefixMap = {
     '+': true,
     '-': true,
@@ -150,6 +172,7 @@
 
   const tableList = new Set();
   const columnList = new Set();
+  const tableAlias = {};
 }
 
 start
@@ -181,7 +204,7 @@ multiple_stmt
       }
       return {
         tableList: Array.from(tableList),
-        columnList: Array.from(columnList),
+        columnList: columnListTableAlias(columnList),
       	ast: cur
       }
     }
@@ -195,7 +218,7 @@ union_stmt
       }
       return {
         tableList: Array.from(tableList),
-        columnList: Array.from(columnList),
+        columnList: columnListTableAlias(columnList),
       	ast: head
       }
     }
@@ -209,7 +232,7 @@ drop_stmt
       if(t.table) tableList.add(`${type}::${t.db}::${t.table}`);
       return {
         tableList: Array.from(tableList),
-        columnList: Array.from(columnList),
+        columnList: columnListTableAlias(columnList),
         ast: {
           type,
           db: t.db,
@@ -224,7 +247,7 @@ use_stmt
       tableList.add(`use::${d}::null`);
       return {
         tableList: Array.from(tableList),
-        columnList: Array.from(columnList),
+        columnList: columnListTableAlias(columnList),
         ast: {
           type: 'use',
           db: d
@@ -239,7 +262,7 @@ rename_stmt
       t.forEach(tg => tg.forEach(dt => dt.table && tableList.add(`rename::${dt.db}::${dt.table}`)))
       return {
         tableList: Array.from(tableList),
-        columnList: Array.from(columnList),
+        columnList: columnListTableAlias(columnList),
         ast: {
           type: 'rename',
           table: t
@@ -252,7 +275,7 @@ call_stmt
   e: proc_func_call {
     return {
       tableList: Array.from(tableList),
-      columnList: Array.from(columnList),
+      columnList: columnListTableAlias(columnList),
       ast: {
         type: 'call',
         expr: e
@@ -388,6 +411,11 @@ table_ref_list
   = head:table_base
     tail:table_ref* {
       tail.unshift(head);
+      tail.forEach(tableInfo => {
+        const { table, as } = tableInfo
+        tableAlias[table] = table
+        if (as) tableAlias[as] = table
+      })
       return tail;
     }
 
@@ -511,19 +539,23 @@ limit_clause
 
 update_stmt
   = KW_UPDATE    __
-    t:table_name __
+    t:table_ref_list __
     KW_SET       __
     l:set_list   __
     w:where_clause? {
-      if(t.table) tableList.add(`update::${t.db}::${t.table}`);
-      if(l) l.forEach(col => columnList.add(`update::${t.table}::${col.column}`));
+      if (t) t.forEach(tableInfo => {
+        const { db, as, table } = tableInfo
+        tableList.add(`update::${db}::${table}`)
+      });
+      if(l) {
+        l.forEach(col => columnList.add(`update::${col.table}::${col.column}`));
+      }
       return {
         tableList: Array.from(tableList),
-        columnList: Array.from(columnList),
+        columnList: columnListTableAlias(columnList),
         ast: {
           type: 'update',
-          db: t.db,
-          table: t.table,
+          table: t,
           set: l,
           where: w
         }
@@ -550,10 +582,10 @@ delete_stmt
       }
       return {
         tableList: Array.from(tableList),
-        columnList: Array.from(columnList),
+        columnList: columnListTableAlias(columnList),
         ast: {
           type: 'delete',
-          tables: t,
+          table: t,
           from: f,
           where: w
         }
@@ -584,7 +616,7 @@ replace_insert_stmt
       if (c) c.forEach(c => columnList.add(`insert::${t.table}::${c}`));
       return {
         tableList: Array.from(tableList),
-        columnList: Array.from(columnList),
+        columnList: columnListTableAlias(columnList),
         ast: {
           type: ri,
           db: t.db,
@@ -604,7 +636,7 @@ insert_no_columns_stmt
       columnList.add(`insert::${t.table}::(.*)`);
       return {
         tableList: Array.from(tableList),
-        columnList: Array.from(columnList),
+        columnList: columnListTableAlias(columnList),
         ast: {
           type: ri,
           db: t.db,

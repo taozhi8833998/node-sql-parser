@@ -942,7 +942,7 @@ describe('select', () => {
         const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
         const whiteList = ['select::(.*)::(id|name)']
         const fun = parser.whiteListCheck.bind(parser, sql, whiteList, mode)
-        expect(fun).to.throw(`authority = 'update::a::id' is required in ${mode} whiteList to execute SQL = '${sql}'`)
+        expect(fun).to.throw(`authority = 'update::null::id' is required in ${mode} whiteList to execute SQL = '${sql}'`)
       })
     })
   })

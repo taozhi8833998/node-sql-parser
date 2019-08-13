@@ -760,7 +760,7 @@ describe('AST', () => {
                         type: 'delete',
                         options: null,
                         distinct: null,
-                        tables: [{ db: null, table: 't', as: null }],
+                        table: [{ db: null, table: 't', as: null }],
                         from: [{ db: null, table: 't', as: null }],
                         where: {
                             type: 'binary_expr',
@@ -776,7 +776,7 @@ describe('AST', () => {
                     };
 
                     expect(parser.sqlify(ast)).to.equal(`DELETE \`t\` FROM \`t\` WHERE \`id\` ${sqlOperator} (1, 2)`);
-                    ast.tables[0].addition = true
+                    ast.table[0].addition = true
                     expect(parser.sqlify(ast)).to.equal(`DELETE FROM \`t\` WHERE \`id\` ${sqlOperator} (1, 2)`);
                 });
             });
@@ -830,7 +830,7 @@ describe('AST', () => {
             })
         });
 
-        it('should surport JOINs', () => {
+        it('should support JOINs', () => {
             expect(getParsedSql('DELETE t1,t2 FROM t1 LEFT JOIN t2 ON t1.id=t2.id WHERE t1.id = 25'))
             .to.equal('DELETE `t1`, `t2` FROM `t1` LEFT JOIN `t2` ON `t1`.`id` = `t2`.`id` WHERE `t1`.`id` = 25')
         })
@@ -839,24 +839,29 @@ describe('AST', () => {
 
     describe('update statements', () => {
 
-        it('should surport value is number', () => {
+        it('should support value is number', () => {
             expect(getParsedSql('UPDATE t SET col1 = 5'))
             .to.equal('UPDATE `t` SET `col1` = 5')
         })
 
-        it('should surport value is string', () => {
+        it('should support value is string', () => {
             expect(getParsedSql('UPDATE t SET col1 = "abc"'))
             .to.equal('UPDATE `t` SET `col1` = \'abc\'')
         })
 
-        it('should surport value is NULL ', () => {
+        it('should support value is NULL ', () => {
             expect(getParsedSql('UPDATE t SET name = null'))
             .to.equal('UPDATE `t` SET `name` = NULL')
         })
 
-        it('should surport multiple columns', () => {
+        it('should support multiple columns', () => {
             expect(getParsedSql('UPDATE t SET id = 1, name = 2'))
             .to.equal('UPDATE `t` SET `id` = 1, `name` = 2')
+        })
+
+        it('should support cross-table update', () => {
+            expect(getParsedSql('UPDATE Reservations r JOIN Train t ON (r.Train = t.TrainID) SET t.Capacity = t.Capacity + r.NoSeats WHERE r.ReservationID = 12'))
+            .to.equal('UPDATE `Reservations` AS `r` INNER JOIN `Train` AS `t` ON (`r`.`Train` = `t`.`TrainID`) SET `t`.`Capacity` = `t`.`Capacity` + `r`.`NoSeats` WHERE `r`.`ReservationID` = 12')
         })
 
         describe('where clause', () => {
@@ -878,8 +883,13 @@ describe('AST', () => {
                 it(`should convert "${operator}" to ${sqlOperator} operator for array values`, () => {
                     const ast = {
                         "type": "update",
-                        "db": null,
-                        "table": "a",
+                        "table": [
+                          {
+                            "db": null,
+                            "table": "a",
+                            "as": null
+                          }
+                        ],
                         "set": [
                            {
                               "column": "col1",
@@ -967,7 +977,7 @@ describe('AST', () => {
         });
 
 
-        it('should surport function', () => {
+        it('should support function', () => {
             expect(getParsedSql(`UPDATE t SET col1 = concat(name, '名字')`))
             .to.equal("UPDATE `t` SET `col1` = concat(`name`, '名字')")
         })
@@ -976,12 +986,12 @@ describe('AST', () => {
 
     describe('insert statements', () => {
 
-        it('should surport insert', () => {
+        it('should support insert', () => {
             expect(getParsedSql('INSERT INTO t (col1, col2) VALUES (1, 2)'))
             .to.equal('INSERT INTO `t` (`col1`, `col2`) VALUES (1,2)')
         })
 
-        it('should surport insert with no columns', () => {
+        it('should support insert with no columns', () => {
             expect(getParsedSql('INSERT INTO t VALUES (1, 2)'))
             .to.equal('INSERT INTO `t` VALUES (1,2)')
         })
@@ -1000,7 +1010,7 @@ describe('AST', () => {
           expect(parser.sqlify.bind(null, {type: 'Alter'})).to.throw(Error, `Alter statements not supported at the moment`);
         });
 
-        it('Alter statement not surported!', () => {
+        it('Alter statement not supported!', () => {
           const sql = 'alter table t comment "test"'
           const fun = parser.parse.bind(parser, sql)
           expect(fun).to.throw('"$", "(", "--", "/*", ";", "@", "CALL", "DELETE", "DROP", "INSERT", "RENAME", "REPLACE", "SELECT", "TRUNCATE", "UPDATE", "USE", "WITH", "return", [ \\t\\n\\r], or end of input but "a" found')
