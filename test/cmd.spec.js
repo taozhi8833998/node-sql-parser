@@ -147,6 +147,8 @@ describe('Command SQL', () => {
 
   describe('set', () => {
     it('should support set variable definde', () => {
+      expect(getParsedSql(`set @a = 123;`))
+        .to.equal(`SET @a = 123`);
       expect(getParsedSql(`set @a = 123; set @b = "mm"`))
         .to.equal(`SET @a = 123 ; SET @b = 'mm'`);
       expect(getParsedSql(`set @a.id = 123; set @b.yy.xx = "mm"`))
