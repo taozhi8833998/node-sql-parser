@@ -1003,17 +1003,17 @@ describe('AST', () => {
 
         it(`should throw exception for INSERT SELECT INFO`, () => {
           const sql = 'INSERT INTO t1 select * from t'
-          expect(getParsedSql.bind(null, sql)).to.throw(Error, '"(", "--", ".", "/*", "VALUES", or [ \\t\\n\\r] but "s" found');
+          expect(getParsedSql.bind(null, sql)).to.throw(Error, 'Expected [A-Za-z0-9_] but " " found');
         });
 
         it(`should throw exception for drop statements`, () => {
           expect(parser.sqlify.bind(null, {type: 'Alter'})).to.throw(Error, `Alter statements not supported at the moment`);
         });
 
-        it('Alter statement not supported!', () => {
-          const sql = 'alter table t comment "test"'
+        it('Alter index statement not supported!', () => {
+          const sql = 'alter table t add index "test"'
           const fun = parser.parse.bind(parser, sql)
-          expect(fun).to.throw('"$", "(", "--", "/*", ";", "@", "CALL", "DELETE", "DROP", "INSERT", "RENAME", "REPLACE", "SELECT", "TRUNCATE", "UPDATE", "USE", "WITH", "return", [ \\t\\n\\r], or end of input but "a" found')
+          expect(fun).to.throw('Expected [A-Za-z0-9_:] but " " found')
         })
     });
 });

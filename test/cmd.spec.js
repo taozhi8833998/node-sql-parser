@@ -4,7 +4,7 @@ const { expect } = require('chai');
 const { Parser } = require('../');
 
 
-describe('DROP AND TRUNCATE', () => {
+describe('Command SQL', () => {
   const parser = new Parser();
   let sql;
 
@@ -113,6 +113,57 @@ describe('DROP AND TRUNCATE', () => {
         .to.equal('SELECT * FROM `tableD` ; USE `databaseA` ; DROP TABLE `tableA` ; TRUNCATE TABLE `tableB` ; CALL sp ; DELETE FROM `tableC` ; INSERT INTO `tableE` VALUES (\'123\') ; UPDATE `tableF` SET `id` = \'333\'');
 
     });
+  })
+
+  describe('alter', () => {
+    const KEYWORDS = ['', 'COLUMN ']
+    it(`should support MySQL alter add column`, () => {
+      KEYWORDS.forEach(keyword => {
+        expect(getParsedSql(`alter table a add ${keyword}xxx int`))
+        .to.equal(`ALTER TABLE \`a\` ADD ${keyword}xxx INT`);
+        expect(getParsedSql(`alter table a add ${keyword}yyy varchar(128)`))
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword}yyy VARCHAR(128)`);
+        expect(getParsedSql(`alter table a add ${keyword}zzz varchar(128), add aaa date`))
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword}zzz VARCHAR(128), ADD aaa DATE`);
+      })
+    });
+
+    it(`should support MySQL alter drop column`, () => {
+      KEYWORDS.forEach(keyword => {
+        expect(getParsedSql(`alter table a drop ${keyword}xxx`))
+        .to.equal(`ALTER TABLE \`a\` DROP ${keyword}xxx`);
+        expect(getParsedSql(`alter table a drop ${keyword}xxx, drop ${keyword}yyy`))
+        .to.equal(`ALTER TABLE \`a\` DROP ${keyword}xxx, DROP ${keyword}yyy`);
+      })
+    });
+
+    it('should support MySQL alter mix action', () => {
+      KEYWORDS.forEach(keyword => {
+        expect(getParsedSql(`alter table a drop ${keyword}xxx, add ${keyword}yyy varchar(256), add ${keyword}zzz date, drop ${keyword} aaa`))
+        .to.equal(`ALTER TABLE \`a\` DROP ${keyword}xxx, ADD ${keyword}yyy VARCHAR(256), ADD ${keyword}zzz DATE, DROP ${keyword}aaa`);
+      })
+    })
+  })
+
+  describe('set', () => {
+    it('should support set variable definde', () => {
+      expect(getParsedSql(`set @a = 123;`))
+        .to.equal(`SET @a = 123`);
+      expect(getParsedSql(`set @a = 123; set @b = "mm"`))
+        .to.equal(`SET @a = 123 ; SET @b = 'mm'`);
+      expect(getParsedSql(`set @a.id = 123; set @b.yy.xx = "mm"`))
+        .to.equal(`SET @a.id = 123 ; SET @b.yy.xx = 'mm'`);
+    })
+
+    it('should support set keyword variable definde', () => {
+      const KEYWORDS = ['GLOBAL', 'SESSION', 'LOCAL', 'PERSIST', 'PERSIST_ONLY']
+      KEYWORDS.forEach(keyword => {
+        expect(getParsedSql(`set ${keyword} xx.yy = 123; set ${keyword} yy = "abc"`))
+        .to.equal(`SET ${keyword} xx.yy = 123 ; SET ${keyword} yy = 'abc'`);
+        expect(getParsedSql(`set @@${keyword}.id = 123; set @@${keyword}.yy.xx = "abcd"`))
+        .to.equal(`SET @@${keyword}.id = 123 ; SET @@${keyword}.yy.xx = 'abcd'`);
+      })
+    })
   })
 
 })

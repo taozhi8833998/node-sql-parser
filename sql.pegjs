@@ -2,6 +2,7 @@
   const reservedMap = {
     'ALTER': true,
     'ALL': true,
+    'ADD': true,
     'AND': true,
     'AS': true,
     'ASC': true,
@@ -85,7 +86,13 @@
 
     'WITH': true,
     'WHEN': true,
-    'WHERE': true
+    'WHERE': true,
+
+    'GLOBAL': true,
+    'SESSION': true,
+    'LOCAL': true,
+    'PERSIST': true,
+    'PERSIST_ONLY': true,
   };
 
   function createUnaryExpr(op, e) {
@@ -185,6 +192,11 @@ cmd_stmt
   / rename_stmt
   / call_stmt
   / use_stmt
+  / alter_stmt
+  / set_stmt
+
+alter_stmt
+  = alter_table_stmt
 
 crud_stmt
   = union_stmt
@@ -225,18 +237,17 @@ union_stmt
 drop_stmt
   = a: (KW_DROP / KW_TRUNCATE)  __
     KW_TABLE __
-    t:table_name __ {
+    t:table_ref_list __ {
       let type = a
       if (Array.isArray(a)) type = a[0]
       else type = a.toLowerCase()
-      if(t.table) tableList.add(`${type}::${t.db}::${t.table}`);
+      if(t) t.forEach(tt => tableList.add(`${type}::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type,
-          db: t.db,
-          table: t.table
+          table: t
         }
       };
     }
@@ -255,10 +266,65 @@ use_stmt
       };
     }
 
+alter_table_stmt
+  = KW_ALTER  __
+    KW_TABLE __
+    t:table_ref_list __
+    e:alter_action_list {
+      if (t.table) tableList.add(`alter::${t.db}::${t.table}`);
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          table: t,
+          expr: e
+        }
+      };
+    }
+
+alter_action_list
+  = head:alter_action tail:(__ COMMA __ alter_action)* {
+      return createList(head, tail);
+    }
+
+alter_action
+  = ALTER_ADD_COLUMN
+  / ALTER_DROP_COLUMN
+
+ALTER_ADD_COLUMN
+  = KW_ADD __
+    kc:KW_COLUMN? __
+    c:column __
+    d:data_type {
+      return {
+        action: 'ADD',
+        column: c,
+        definition: d,
+        keyword: kc,
+        resource: 'column',
+        type: 'alter',
+      }
+    }
+
+ALTER_DROP_COLUMN
+  = KW_DROP __
+    kc:KW_COLUMN? __
+    c:column __ {
+      return {
+        action: 'DROP',
+        column: c,
+        keyword: kc,
+        resource: 'column',
+        type: 'alter',
+      }
+    }
+
+
 rename_stmt
   = KW_RENAME  __
     KW_TABLE __
-    t: table_to_list {
+    t:table_to_list {
       t.forEach(tg => tg.forEach(dt => dt.table && tableList.add(`rename::${dt.db}::${dt.table}`)))
       return {
         tableList: Array.from(tableList),
@@ -269,6 +335,21 @@ rename_stmt
         }
       };
     }
+
+set_stmt
+  = KW_SET __
+  kw: (KW_GLOBAL / KW_SESSION / KW_LOCAL / KW_PERSIST / KW_PERSIST_ONLY)? __
+  a: assign_stmt {
+    a.keyword = kw
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'set',
+        expr: a
+      }
+    }
+  }
 
 call_stmt
   = KW_CALL __
@@ -609,18 +690,21 @@ set_item
 replace_insert_stmt
   = ri:replace_insert       __
     KW_INTO                 __
-    t:table_name  __ LPAREN __
+    t:table_ref_list  __ LPAREN __
     c:column_list  __ RPAREN __
     v:value_clause {
-      if (t.table) tableList.add(`insert::${t.db}::${t.table}`);
-      if (c) c.forEach(c => columnList.add(`insert::${t.table}::${c}`));
+      if (t) t.forEach(tt => tableList.add(`insert::${tt.db}::${tt.table}`));
+      if (c) {
+        let table = null
+        if (t && t.length === 1) table = t[0].table
+        c.forEach(c => columnList.add(`insert::${table}::${c}`));
+      }
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: ri,
-          db: t.db,
-          table: t.table,
+          table: t,
           columns: c,
           values: v
         }
@@ -630,17 +714,18 @@ replace_insert_stmt
 insert_no_columns_stmt
   = ri:replace_insert       __
     KW_INTO                 __
-    t:table_name  __
+    t:table_ref_list  __
     v:value_clause {
-      if (t.table) tableList.add(`insert::${t.db}::${t.table}`);
-      columnList.add(`insert::${t.table}::(.*)`);
+      if (t) t.forEach(tt => {
+        tableList.add(`insert::${tt.db}::${tt.table}`)
+        columnList.add(`insert::${tt.table}::(.*)`);
+      });
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: ri,
-          db: t.db,
-          table: t.table,
+          table: t,
           columns: null,
           values: v
         }
@@ -1159,7 +1244,8 @@ KW_FALSE    = "FALSE"i      !ident_start
 
 KW_SHOW     = "SHOW"i       !ident_start
 KW_DROP     = "DROP"i       !ident_start
-KW_USE      = "USE"i       !ident_start
+KW_USE      = "USE"i        !ident_start
+KW_ALTER    = "ALTER"i      !ident_start
 KW_SELECT   = "SELECT"i     !ident_start
 KW_UPDATE   = "UPDATE"i     !ident_start
 KW_CREATE   = "CREATE"i     !ident_start
@@ -1261,14 +1347,26 @@ KW_CURRENT_USER     = "CURRENT_USER"i !ident_start { return 'CURRENT_USER'; }
 KW_SESSION_USER     = "SESSION_USER"i !ident_start { return 'SESSION_USER'; }
 KW_SYSTEM_USER      = "SYSTEM_USER"i !ident_start { return 'SYSTEM_USER'; }
 
+KW_GLOBAL         = "GLOBAL"i    !ident_start { return 'GLOBAL'; }
+KW_SESSION        = "SESSION"i   !ident_start { return 'SESSION'; }
+KW_LOCAL          = "LOCAL"i     !ident_start { return 'LOCAL'; }
+KW_PERSIST        = "PERSIST"i   !ident_start { return 'PERSIST'; }
+KW_PERSIST_ONLY   = "PERSIST_ONLY"i   !ident_start { return 'PERSIST_ONLY'; }
+
 KW_VAR__PRE_AT = '@'
+KW_VAR__PRE_AT_AT = '@@'
 KW_VAR_PRE_DOLLAR = '$'
 KW_VAR_PRE
-  = KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR
+  = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR
 KW_RETURN = 'return'i
 KW_ASSIGN = ':='
+KW_ASSIGIN_EQUAL = '='
 
 KW_DUAL = "DUAL"i
+
+// MySQL Alter
+KW_ADD     = "ADD"i     !ident_start { return 'ADD'; }
+KW_COLUMN  = "COLUMN"i  !ident_start { return 'COLUMN'; }
 
 // MySQL extensions to SQL
 OPT_SQL_CALC_FOUND_ROWS = "SQL_CALC_FOUND_ROWS"i
@@ -1337,13 +1435,15 @@ proc_stmt
     }
 
 assign_stmt
-  = va:var_decl __ KW_ASSIGN __ e:proc_expr {
+  = va:(var_decl / without_prefix_var_decl) __ s: (KW_ASSIGN / KW_ASSIGIN_EQUAL) __ e:proc_expr {
     return {
       type: 'assign',
       left: va,
+      symbol: s,
       right: e
     };
   }
+
 
 return_stmt
   = KW_RETURN __ e:proc_expr {
@@ -1429,14 +1529,24 @@ proc_array =
   }
 
 var_decl
-  = p: KW_VAR_PRE name:ident_name m:mem_chain {
+  = p: KW_VAR_PRE d: without_prefix_var_decl {
+    //push for analysis
+    return {
+      type: 'var',
+      ...d,
+      prefix: p
+    };
+  }
+
+without_prefix_var_decl
+  = name:ident_name m:mem_chain {
     //push for analysis
     varList.push(name);
     return {
       type: 'var',
       name: name,
       members: m,
-      prefix: p
+      prefix: null,
     };
   }
 

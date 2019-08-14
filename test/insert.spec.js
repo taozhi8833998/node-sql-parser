@@ -11,8 +11,7 @@ describe('insert', () => {
       expect(tableList).to.eql(['insert::null::t']);
       expect(columnList).to.eql(['insert::t::col1', 'insert::t::col2']);
       expect(ast.type).to.be.eql('insert');
-      expect(ast.db).to.be.null;
-      expect(ast.table).to.be.eql('t');
+      expect(ast.table).to.be.eql([ { db: null, table: 't', as: null } ]);
       expect(ast.columns).to.be.eql(["col1", "col2"]);
       expect(ast.values).to.eql([{
         type: "expr_list",
@@ -43,6 +42,6 @@ describe('insert', () => {
     it('failed with INSERT SELECT INFO', () => {
       const sql = 'INSERT INTO t1 SELECT * FROM t'
       const fun = parser.parse.bind(parser, sql)
-      expect(fun).to.throw('"(", "--", ".", "/*", "VALUES", or [ \\t\\n\\r] but "S" found')
+      expect(fun).to.throw('Expected [A-Za-z0-9_] but " " found')
     })
 });
