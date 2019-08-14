@@ -86,7 +86,13 @@
 
     'WITH': true,
     'WHEN': true,
-    'WHERE': true
+    'WHERE': true,
+
+    'GLOBAL': true,
+    'SESSION': true,
+    'LOCAL': true,
+    'PERSIST': true,
+    'PERSIST_ONLY': true,
   };
 
   function createUnaryExpr(op, e) {
@@ -187,6 +193,7 @@ cmd_stmt
   / call_stmt
   / use_stmt
   / alter_stmt
+  / set_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -328,6 +335,21 @@ rename_stmt
         }
       };
     }
+
+set_stmt
+  = KW_SET __
+  kw: (KW_GLOBAL / KW_SESSION / KW_LOCAL / KW_PERSIST / KW_PERSIST_ONLY)? __
+  a: assign_stmt {
+    a.keyword = kw
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'set',
+        expr: a
+      }
+    }
+  }
 
 call_stmt
   = KW_CALL __
@@ -1325,12 +1347,20 @@ KW_CURRENT_USER     = "CURRENT_USER"i !ident_start { return 'CURRENT_USER'; }
 KW_SESSION_USER     = "SESSION_USER"i !ident_start { return 'SESSION_USER'; }
 KW_SYSTEM_USER      = "SYSTEM_USER"i !ident_start { return 'SYSTEM_USER'; }
 
+KW_GLOBAL         = "GLOBAL"i    !ident_start { return 'GLOBAL'; }
+KW_SESSION        = "SESSION"i   !ident_start { return 'SESSION'; }
+KW_LOCAL          = "LOCAL"i     !ident_start { return 'LOCAL'; }
+KW_PERSIST        = "PERSIST"i   !ident_start { return 'PERSIST'; }
+KW_PERSIST_ONLY   = "PERSIST_ONLY"i   !ident_start { return 'PERSIST_ONLY'; }
+
 KW_VAR__PRE_AT = '@'
+KW_VAR__PRE_AT_AT = '@@'
 KW_VAR_PRE_DOLLAR = '$'
 KW_VAR_PRE
-  = KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR
+  = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR
 KW_RETURN = 'return'i
 KW_ASSIGN = ':='
+KW_ASSIGIN_EQUAL = '='
 
 KW_DUAL = "DUAL"i
 
@@ -1405,13 +1435,15 @@ proc_stmt
     }
 
 assign_stmt
-  = va:var_decl __ KW_ASSIGN __ e:proc_expr {
+  = va:(var_decl / without_prefix_var_decl) __ s: (KW_ASSIGN / KW_ASSIGIN_EQUAL) __ e:proc_expr {
     return {
       type: 'assign',
       left: va,
+      symbol: s,
       right: e
     };
   }
+
 
 return_stmt
   = KW_RETURN __ e:proc_expr {
@@ -1497,14 +1529,24 @@ proc_array =
   }
 
 var_decl
-  = p: KW_VAR_PRE name:ident_name m:mem_chain {
+  = p: KW_VAR_PRE d: without_prefix_var_decl {
+    //push for analysis
+    return {
+      type: 'var',
+      ...d,
+      prefix: p
+    };
+  }
+
+without_prefix_var_decl
+  = name:ident_name m:mem_chain {
     //push for analysis
     varList.push(name);
     return {
       type: 'var',
       name: name,
       members: m,
-      prefix: p
+      prefix: null,
     };
   }
 

@@ -145,4 +145,23 @@ describe('Command SQL', () => {
     })
   })
 
+  describe('set', () => {
+    it('should support set variable definde', () => {
+      expect(getParsedSql(`set @a = 123; set @b = "mm"`))
+        .to.equal(`SET @a = 123 ; SET @b = 'mm'`);
+      expect(getParsedSql(`set @a.id = 123; set @b.yy.xx = "mm"`))
+        .to.equal(`SET @a.id = 123 ; SET @b.yy.xx = 'mm'`);
+    })
+
+    it('should support set keyword variable definde', () => {
+      const KEYWORDS = ['GLOBAL', 'SESSION', 'LOCAL', 'PERSIST', 'PERSIST_ONLY']
+      KEYWORDS.forEach(keyword => {
+        expect(getParsedSql(`set ${keyword} xx.yy = 123; set ${keyword} yy = "abc"`))
+        .to.equal(`SET ${keyword} xx.yy = 123 ; SET ${keyword} yy = 'abc'`);
+        expect(getParsedSql(`set @@${keyword}.id = 123; set @@${keyword}.yy.xx = "abcd"`))
+        .to.equal(`SET @@${keyword}.id = 123 ; SET @@${keyword}.yy.xx = 'abcd'`);
+      })
+    })
+  })
+
 })
