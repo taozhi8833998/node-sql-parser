@@ -4,7 +4,7 @@ const { expect } = require('chai');
 const { Parser } = require('../');
 
 
-describe('DROP AND TRUNCATE', () => {
+describe('Command SQL', () => {
   const parser = new Parser();
   let sql;
 
@@ -113,6 +113,36 @@ describe('DROP AND TRUNCATE', () => {
         .to.equal('SELECT * FROM `tableD` ; USE `databaseA` ; DROP TABLE `tableA` ; TRUNCATE TABLE `tableB` ; CALL sp ; DELETE FROM `tableC` ; INSERT INTO `tableE` VALUES (\'123\') ; UPDATE `tableF` SET `id` = \'333\'');
 
     });
+  })
+
+  describe('alter', () => {
+    const KEYWORDS = ['', 'COLUMN ']
+    it(`should support MySQL alter add column`, () => {
+      KEYWORDS.forEach(keyword => {
+        expect(getParsedSql(`alter table a add ${keyword}xxx int`))
+        .to.equal(`ALTER TABLE \`a\` ADD ${keyword}xxx INT`);
+        expect(getParsedSql(`alter table a add ${keyword}yyy varchar(128)`))
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword}yyy VARCHAR(128)`);
+        expect(getParsedSql(`alter table a add ${keyword}zzz varchar(128), add aaa date`))
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword}zzz VARCHAR(128), ADD aaa DATE`);
+      })
+    });
+
+    it(`should support MySQL alter drop column`, () => {
+      KEYWORDS.forEach(keyword => {
+        expect(getParsedSql(`alter table a drop ${keyword}xxx`))
+        .to.equal(`ALTER TABLE \`a\` DROP ${keyword}xxx`);
+        expect(getParsedSql(`alter table a drop ${keyword}xxx, drop ${keyword}yyy`))
+        .to.equal(`ALTER TABLE \`a\` DROP ${keyword}xxx, DROP ${keyword}yyy`);
+      })
+    });
+
+    it('should support MySQL alter mix action', () => {
+      KEYWORDS.forEach(keyword => {
+        expect(getParsedSql(`alter table a drop ${keyword}xxx, add ${keyword}yyy varchar(256), add ${keyword}zzz date, drop ${keyword} aaa`))
+        .to.equal(`ALTER TABLE \`a\` DROP ${keyword}xxx, ADD ${keyword}yyy VARCHAR(256), ADD ${keyword}zzz DATE, DROP ${keyword}aaa`);
+      })
+    })
   })
 
 })
