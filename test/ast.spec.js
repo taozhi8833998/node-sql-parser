@@ -998,6 +998,49 @@ describe('AST', () => {
 
     })
 
+    describe('sql comment', () => {
+        it('should support # symbol', () => {
+            expect(getParsedSql('select * from app limit 0,1; # comment here'))
+            .to.equal('SELECT * FROM `app` LIMIT 0,1')
+        })
+
+        it('should support -- symbol', () => {
+            expect(getParsedSql('select * from app limit 0,1; -- comment here'))
+            .to.equal('SELECT * FROM `app` LIMIT 0,1')
+        })
+
+        it('should support /**/ symbol', () => {
+            expect(getParsedSql(`SELECT contact_id, last_name, first_name
+            /* Author: TechOnTheNet.com */
+            FROM contacts;`))
+            .to.equal('SELECT `contact_id`, `last_name`, `first_name` FROM `contacts`')
+        })
+
+        it('should support comment symbol in middle', () => {
+            expect(getParsedSql(`SELECT  /* Author: TechOnTheNet.com */  contact_id, last_name, first_name
+            FROM contacts;`))
+            .to.equal('SELECT `contact_id`, `last_name`, `first_name` FROM `contacts`')
+            expect(getParsedSql(`SELECT contact_id, last_name, first_name  -- Author: TechOnTheNet.com
+            FROM contacts;`))
+            .to.equal('SELECT `contact_id`, `last_name`, `first_name` FROM `contacts`')
+            expect(getParsedSql(`SELECT contact_id, last_name, first_name  # Author: TechOnTheNet.com
+            FROM contacts;`))
+            .to.equal('SELECT `contact_id`, `last_name`, `first_name` FROM `contacts`')
+        })
+
+        it('should support comment multiple lines', () => {
+            expect(getParsedSql(`SELECT contact_id, last_name, first_name
+            /*
+             * Author: TechOnTheNet.com
+             * Purpose: To show a comment that spans multiple lines in your SQL
+             * statement in MySQL.
+             */
+            FROM contacts;`))
+            .to.equal('SELECT `contact_id`, `last_name`, `first_name` FROM `contacts`')
+        })
+
+    })
+
 
     describe('unsupported situation', () => {
 

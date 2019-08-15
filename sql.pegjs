@@ -1399,12 +1399,16 @@ __
 comment
   = block_comment
   / line_comment
+  / pound_sign_comment
 
 block_comment
   = "/*" (!"*/" char)* "*/"
 
 line_comment
   = "--" (!EOL char)*
+
+pound_sign_comment
+  = "#" (!EOL char)*
 
 char = .
 
