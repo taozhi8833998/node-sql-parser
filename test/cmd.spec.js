@@ -32,6 +32,11 @@ describe('Command SQL', () => {
 
     })
 
+    it(`should truncate TABLE optional`, () => {
+      expect(getParsedSql('truncate  dbA.tableA'))
+          .to.equal('TRUNCATE `dbA`.`tableA`');
+    })
+
   })
 
   describe('rename', () => {

@@ -189,6 +189,7 @@ start
 
 cmd_stmt
   = drop_stmt
+  / truncate_stmt
   / rename_stmt
   / call_stmt
   / use_stmt
@@ -235,18 +236,31 @@ union_stmt
       }
     }
 drop_stmt
-  = a: (KW_DROP / KW_TRUNCATE)  __
+  = a:KW_DROP __
     KW_TABLE __
     t:table_ref_list __ {
-      let type = a
-      if (Array.isArray(a)) type = a[0]
-      else type = a.toLowerCase()
-      if(t) t.forEach(tt => tableList.add(`${type}::${tt.db}::${tt.table}`));
+      if(t) t.forEach(tt => tableList.add(`${a}::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
-          type,
+          type: a.toLowerCase(),
+          table: t
+        }
+      };
+    }
+
+truncate_stmt
+  = a:KW_TRUNCATE  __
+    kw:KW_TABLE? __
+    t:table_ref_list __ {
+      if(t) t.forEach(tt => tableList.add(`${a}::${tt.db}::${tt.table}`));
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: kw,
           table: t
         }
       };
@@ -1243,7 +1257,7 @@ KW_TO       = "TO"i         !ident_start
 KW_FALSE    = "FALSE"i      !ident_start
 
 KW_SHOW     = "SHOW"i       !ident_start
-KW_DROP     = "DROP"i       !ident_start
+KW_DROP     = "DROP"i       !ident_start { return 'DROP'; }
 KW_USE      = "USE"i        !ident_start
 KW_ALTER    = "ALTER"i      !ident_start
 KW_SELECT   = "SELECT"i     !ident_start
@@ -1261,7 +1275,7 @@ KW_FROM     = "FROM"i       !ident_start
 KW_SET      = "SET"i        !ident_start
 
 KW_AS       = "AS"i         !ident_start
-KW_TABLE    = "TABLE"i      !ident_start
+KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
 
 KW_ON       = "ON"i       !ident_start
 KW_LEFT     = "LEFT"i     !ident_start
