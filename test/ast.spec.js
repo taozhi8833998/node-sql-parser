@@ -844,6 +844,11 @@ describe('AST', () => {
             .to.equal('UPDATE `t` SET `col1` = 5')
         })
 
+        it('should support backticks', () => {
+            expect(getParsedSql('UPDATE `t` SET `col1` = 5'))
+            .to.equal('UPDATE `t` SET `col1` = 5')
+        })
+
         it('should support value is string', () => {
             expect(getParsedSql('UPDATE t SET col1 = "abc"'))
             .to.equal('UPDATE `t` SET `col1` = \'abc\'')
