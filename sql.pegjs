@@ -47,6 +47,8 @@
     'JOIN': true,
     'JSON': true,
 
+    'KEY': true,
+
     'LEFT': true,
     'LIKE': true,
     'LIMIT': true,
@@ -285,7 +287,7 @@ alter_table_stmt
     KW_TABLE __
     t:table_ref_list __
     e:alter_action_list {
-      if (t.table) tableList.add(`alter::${t.db}::${t.table}`);
+      if (t && t.length > 0) t.forEach(table => tableList.add(`alter::${table.db}::${table.table}`));
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -305,6 +307,7 @@ alter_action_list
 alter_action
   = ALTER_ADD_COLUMN
   / ALTER_DROP_COLUMN
+  / ALTER_ADD_INDEX_OR_KEY
 
 ALTER_ADD_COLUMN
   = KW_ADD __
@@ -334,6 +337,24 @@ ALTER_DROP_COLUMN
       }
     }
 
+ALTER_ADD_INDEX_OR_KEY
+  = KW_ADD __
+    kc:(KW_INDEX / KW_KEY) __
+    c:column? __
+    t: index_type? __
+    de: cte_column_definition __
+    id: index_option? __
+     {
+      return {
+        action: 'ADD',
+        index: c,
+        definition: de,
+        keyword: kc,
+        index_type: t,
+        index_option: id,
+        type: 'alter',
+      }
+    }
 
 rename_stmt
   = KW_RENAME  __
@@ -498,9 +519,45 @@ table_to_list
     }
 
 table_to_item
-  = head:table_name __ KW_TO __ tail: ( table_name) {
+  = head:table_name __ KW_TO __ tail: (table_name) {
       return [head, tail]
     }
+
+index_type
+  = KW_USING __
+  t: ("BTREE"i / "HASH"i){
+    return {
+      keyword: 'USING',
+      type: t,
+    }
+  }
+
+index_option
+  = k:KW_KEY_BLOCK_SIZE __ e:(KW_ASSIGIN_EQUAL)? __ kbs:literal_numeric {
+    return {
+      type: k,
+      kw: e,
+      expr: kbs
+    };
+  }
+  / index_type
+  / "WITH"i __ "PARSER"i __ pn:ident_name {
+    return {
+      type: 'WITH PARSER',
+      expr: pn
+    }
+  }
+  / k:KW_COMMENT __ c:quoted_ident {
+    return {
+      type: k,
+      expr: c
+    }
+  }
+  / k:("VISIBLE"i / "INVISIBLE"i) {
+    return {
+      type: k
+    }
+  }
 
 table_ref_list
   = head:table_base
@@ -1381,6 +1438,15 @@ KW_DUAL = "DUAL"i
 // MySQL Alter
 KW_ADD     = "ADD"i     !ident_start { return 'ADD'; }
 KW_COLUMN  = "COLUMN"i  !ident_start { return 'COLUMN'; }
+KW_INDEX   = "INDEX"i  !ident_start { return 'INDEX'; }
+KW_KEY     = "KEY"i  !ident_start { return 'KEY'; }
+KW_FULLTEXT = "FULLTEXT"i  !ident_start { return 'FULLTEXT'; }
+KW_SPATIAL  = "SPATIAL"i  !ident_start { return 'SPATIAL'; }
+KW_UNIQUE     = "KEY"i  !ident_start { return 'UNIQUE'; }
+KW_KEY_BLOCK_SIZE = "KEY_BLOCK_SIZE" !ident_start { return 'KEY_BLOCK_SIZE'; }
+KW_COMMENT     = "COMMENT"i  !ident_start { return 'COMMENT'; }
+
+
 
 // MySQL extensions to SQL
 OPT_SQL_CALC_FOUND_ROWS = "SQL_CALC_FOUND_ROWS"i
