@@ -161,11 +161,28 @@ describe('Command SQL', () => {
           .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`)`);
         expect(getParsedSql(`ALTER TABLE \`a\` ADD ${keyword} name_idx using btree ("name", "alias")`))
           .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()} name_idx USING BTREE (\`name\`, \`alias\`)`);
-          expect(getParsedSql(`alter table a add ${keyword} name_idx using hash ("name", "alias") KEY_BLOCK_SIZE = 324`))
+        expect(getParsedSql(`alter table a add ${keyword} name_idx ("name", "alias") KEY_BLOCK_SIZE = 324`))
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`) KEY_BLOCK_SIZE = 324`);
+        expect(getParsedSql(`alter table a add ${keyword} name_idx using hash ("name", "alias") KEY_BLOCK_SIZE = 324`))
           .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()} name_idx USING HASH (\`name\`, \`alias\`) KEY_BLOCK_SIZE = 324`);
         expect(getParsedSql(`alter table a add ${keyword} name_idx using hash ("name", "alias") KEY_BLOCK_SIZE 123`))
           .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()
           } name_idx USING HASH (\`name\`, \`alias\`) KEY_BLOCK_SIZE 123`);
+        expect(getParsedSql(`alter table a add ${keyword} name_idx using hash ("name", "alias") with parser parser_name`))
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()
+          } name_idx USING HASH (\`name\`, \`alias\`) WITH PARSER parser_name`);
+        expect(getParsedSql(`alter table a add ${keyword} name_idx using hash ("name", "alias") visible`))
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()
+          } name_idx USING HASH (\`name\`, \`alias\`) VISIBLE`);
+        expect(getParsedSql(`alter table a add ${keyword} name_idx using hash ("name", "alias") invisible`))
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()
+          } name_idx USING HASH (\`name\`, \`alias\`) INVISIBLE`);
+        expect(getParsedSql(`alter table a add ${keyword} name_idx ("name", "alias") using hash`))
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()
+          } name_idx (\`name\`, \`alias\`) USING HASH`);
+        expect(getParsedSql(`alter table a add ${keyword} name_idx ("name", "alias") using btree`))
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()
+          } name_idx (\`name\`, \`alias\`) USING BTREE`);
       })
     });
 
@@ -180,6 +197,12 @@ describe('Command SQL', () => {
             .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`) KEY_BLOCK_SIZE = 324`);
           expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias") KEY_BLOCK_SIZE 123`))
             .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`) KEY_BLOCK_SIZE 123`);
+          expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias") with parser parser_name`))
+            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`) WITH PARSER parser_name`);
+          expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias") invisible`))
+            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`) INVISIBLE`);
+          expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias")`))
+            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`)`);
         })
       });
     })
