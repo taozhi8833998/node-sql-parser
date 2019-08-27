@@ -1057,11 +1057,5 @@ describe('AST', () => {
         it(`should throw exception for drop statements`, () => {
           expect(parser.sqlify.bind(null, {type: 'Alter'})).to.throw(Error, `Alter statements not supported at the moment`);
         });
-
-        it('Alter index statement not supported!', () => {
-          const sql = 'alter table t add index "test"'
-          const fun = parser.parse.bind(parser, sql)
-          expect(fun).to.throw('Expected [A-Za-z0-9_:] but " " found')
-        })
     });
 });
