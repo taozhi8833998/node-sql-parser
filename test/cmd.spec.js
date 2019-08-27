@@ -153,20 +153,36 @@ describe('Command SQL', () => {
       })
     })
 
-    it.skip(`should support MySQL alter add index or key`, () => {
+    it(`should support MySQL alter add index or key`, () => {
       ["index", "key"].forEach(keyword => {
         expect(getParsedSql(`alter table a add ${keyword} ("name", "alias")`))
-        .to.equal(`ALTER TABLE \`a\` ADD ${keyword} (\`name\`, \`alias\`)`);
+        .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()} (\`name\`, \`alias\`)`);
         expect(getParsedSql(`alter table a add ${keyword} name_idx ("name", "alias")`))
-          .to.equal(`ALTER TABLE \`a\` ADD ${keyword} name_idx (\`name\`, \`alias\`)`);
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`)`);
         expect(getParsedSql(`ALTER TABLE \`a\` ADD ${keyword} name_idx using btree ("name", "alias")`))
-          .to.equal(`ALTER TABLE \`a\` ADD ${keyword} name_idx USING BTREE (\`name\`, \`alias\`)`);
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()} name_idx USING BTREE (\`name\`, \`alias\`)`);
           expect(getParsedSql(`alter table a add ${keyword} name_idx using hash ("name", "alias") KEY_BLOCK_SIZE = 324`))
-          .to.equal(`ALTER TABLE \`a\` ADD ${keyword} name_idx USING HASH (\`name\`, \`alias\`) KEY_BLOCK_SIZE = 324`);
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()} name_idx USING HASH (\`name\`, \`alias\`) KEY_BLOCK_SIZE = 324`);
         expect(getParsedSql(`alter table a add ${keyword} name_idx using hash ("name", "alias") KEY_BLOCK_SIZE 123`))
-          .to.equal(`ALTER TABLE \`a\` ADD ${keyword} name_idx USING HASH (\`name\`, \`alias\`) KEY_BLOCK_SIZE 123`);
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()
+          } name_idx USING HASH (\`name\`, \`alias\`) KEY_BLOCK_SIZE 123`);
       })
     });
+
+    ["fulltext", "spatial"].forEach(kc => {
+      it(`should support MySQL alter add ${kc} index or key`, () => {
+        ["index", "key"].forEach(keyword => {
+          expect(getParsedSql(`alter table a add ${kc}  ("name", "alias")`))
+          .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} (\`name\`, \`alias\`)`);
+          expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias")`))
+            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`)`);
+          expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias") KEY_BLOCK_SIZE = 324`))
+            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`) KEY_BLOCK_SIZE = 324`);
+          expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias") KEY_BLOCK_SIZE 123`))
+            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`) KEY_BLOCK_SIZE 123`);
+        })
+      });
+    })
   })
 
   describe('set', () => {

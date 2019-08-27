@@ -308,6 +308,7 @@ alter_action
   = ALTER_ADD_COLUMN
   / ALTER_DROP_COLUMN
   / ALTER_ADD_INDEX_OR_KEY
+  / ALTER_ADD_FULLETXT_SPARITAL_INDEX
 
 ALTER_ADD_COLUMN
   = KW_ADD __
@@ -315,7 +316,7 @@ ALTER_ADD_COLUMN
     c:column __
     d:data_type {
       return {
-        action: 'ADD',
+        action: 'add',
         column: c,
         definition: d,
         keyword: kc,
@@ -329,7 +330,7 @@ ALTER_DROP_COLUMN
     kc:KW_COLUMN? __
     c:column __ {
       return {
-        action: 'DROP',
+        action: 'drop',
         column: c,
         keyword: kc,
         resource: 'column',
@@ -346,12 +347,32 @@ ALTER_ADD_INDEX_OR_KEY
     id: index_option? __
      {
       return {
-        action: 'ADD',
+        action: 'add',
         index: c,
         definition: de,
         keyword: kc,
         index_type: t,
+        resource: 'index',
         index_option: id,
+        type: 'alter',
+      }
+    }
+
+ALTER_ADD_FULLETXT_SPARITAL_INDEX
+  = KW_ADD __
+    p: (KW_FULLTEXT / KW_SPATIAL) __
+    kc:(KW_INDEX / KW_KEY)? __
+    c:column? __
+    de: cte_column_definition __
+    id: index_option? __
+     {
+      return {
+        action: 'add',
+        index: c,
+        definition: de,
+        keyword: kc && `${p} ${kc}` || p,
+        index_option: id,
+        resource: 'index',
         type: 'alter',
       }
     }
@@ -527,7 +548,7 @@ index_type
   = KW_USING __
   t: ("BTREE"i / "HASH"i){
     return {
-      keyword: 'USING',
+      keyword: 'using',
       type: t,
     }
   }
@@ -536,26 +557,26 @@ index_option
   = k:KW_KEY_BLOCK_SIZE __ e:(KW_ASSIGIN_EQUAL)? __ kbs:literal_numeric {
     return {
       type: k,
-      kw: e,
+      symbol: e,
       expr: kbs
     };
   }
   / index_type
   / "WITH"i __ "PARSER"i __ pn:ident_name {
     return {
-      type: 'WITH PARSER',
+      type: 'with parser',
       expr: pn
     }
   }
   / k:KW_COMMENT __ c:quoted_ident {
     return {
-      type: k,
+      type: k.toLowerCase(),
       expr: c
     }
   }
   / k:("VISIBLE"i / "INVISIBLE"i) {
     return {
-      type: k
+      type: k.toLowerCase()
     }
   }
 
