@@ -201,6 +201,8 @@ describe('Command SQL', () => {
             .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`) WITH PARSER parser_name`);
           expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias") invisible`))
             .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`) INVISIBLE`);
+          expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias") visible`))
+            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`) VISIBLE`);
           expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias")`))
             .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`)`);
         })
