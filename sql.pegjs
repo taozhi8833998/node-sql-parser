@@ -191,12 +191,16 @@ start
 
 cmd_stmt
   = drop_stmt
+  / create_stmt
   / truncate_stmt
   / rename_stmt
   / call_stmt
   / use_stmt
   / alter_stmt
   / set_stmt
+
+create_stmt
+  = create_table_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -237,6 +241,71 @@ union_stmt
       	ast: head
       }
     }
+
+
+create_table_stmt
+  = a:KW_CREATE __
+    tp:KW_TEMPORARY? __
+    KW_TABLE __
+    ife:KW_IF_NOT_EXISTS? __
+    t:table_ref_list __
+    c:create_table_definition __
+    to:table_options? __ {
+      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'table',
+          temporary: tp && tp[0].toLowerCase(),
+          if_not_exists: ife && ife[0].toLowerCase(),
+          table: t,
+          create_definitions: c,
+          table_options: to
+        }
+      };
+    }
+
+create_table_definition
+  = LPAREN __ head:create_definition tail:(__ COMMA __ create_definition)* __ RPAREN {
+      return createList(head, tail);
+    }
+
+create_definition
+  = create_column_definition
+  / create_index_definition
+  / create_fulltext_spatial_index_definition
+  / create_constraint_definition
+
+create_column_definition
+  = c:column_ref __
+    d:data_type __
+    n:(literal_not_null / literal_null)? __
+    df:default_expr? __
+    a:('AUTO_INCREMENT'i)? __
+    u:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i)? __
+    co:keyword_comment? __ {
+      columnList.add(`create::${c.table}::${c.column}`)
+      return {
+        column: c,
+        definition: d,
+        nullable: n,
+        default_val: df,
+        auto_increment: a && a.toLowerCase(),
+        unique_or_primary: u && `${u[0]} ${u[2]}`,
+        comment: co,
+        resource: 'column'
+      }
+    }
+
+default_expr
+  = KW_DEFAULT __ ce: (literal / expr) {
+    return {
+      type: 'default',
+      value: ce
+    }
+  }
 drop_stmt
   = a:KW_DROP __
     KW_TABLE __
@@ -340,40 +409,192 @@ ALTER_DROP_COLUMN
 
 ALTER_ADD_INDEX_OR_KEY
   = KW_ADD __
-    kc:(KW_INDEX / KW_KEY) __
+    id:create_index_definition
+     {
+      return {
+        action: 'add',
+        type: 'alter',
+        ...id,
+      }
+    }
+
+create_index_definition
+  = kc:(KW_INDEX / KW_KEY) __
     c:column? __
     t: index_type? __
     de: cte_column_definition __
     id: index_option? __
      {
       return {
-        action: 'add',
         index: c,
         definition: de,
         keyword: kc,
         index_type: t,
         resource: 'index',
         index_option: id,
-        type: 'alter',
       }
     }
 
-ALTER_ADD_FULLETXT_SPARITAL_INDEX
-  = KW_ADD __
-    p: (KW_FULLTEXT / KW_SPATIAL) __
+create_fulltext_spatial_index_definition
+  = p: (KW_FULLTEXT / KW_SPATIAL) __
     kc:(KW_INDEX / KW_KEY)? __
     c:column? __
     de: cte_column_definition __
     id: index_option? __
      {
       return {
-        action: 'add',
         index: c,
         definition: de,
         keyword: kc && `${p} ${kc}` || p,
         index_option: id,
         resource: 'index',
+      }
+    }
+
+create_constraint_definition
+  = create_constraint_primary
+  / create_constraint_unique
+  / create_constraint_foreign
+
+create_constraint_primary
+  = kc:(KW_CONSTRAINT __ c:ident_name __)? __
+  p:('PRIMARY KEY'i) __
+  t:index_type? __
+  de:cte_column_definition __
+  id:index_option? __ {
+    return {
+        constraint: c,
+        definition: de,
+        constraint_type: p,
+        keyword: kc,
+        index_type: t,
+        resource: 'constraint',
+        index_option: id,
+      }
+  }
+
+create_constraint_unique
+  = kc:(KW_CONSTRAINT __ c:ident_name __)? __
+  u:KW_UNIQUE __
+  p:(KW_INDEX / KW_KEY)? __
+  i:column? __
+  t:index_type? __
+  de:cte_column_definition __
+  id:index_option? __ {
+    return {
+        constraint: c,
+        definition: de,
+        constraint_type: p && `${u} ${p}` || u,
+        keyword: kc,
+        index_type: t,
+        index: i,
+        resource: 'constraint',
+        option: id
+      }
+  }
+
+create_constraint_foreign
+  = kc:(KW_CONSTRAINT __ c:ident_name __)? __
+  p:('FOREGIN KEY'i) __
+  i:column? __
+  de:cte_column_definition __
+  id:reference_definition? __ {
+    return {
+        constraint: c,
+        definition: de,
+        constraint_type: p,
+        keyword: kc,
+        type: t,
+        index: i,
+        resource: 'constraint',
+        reference_definition: id
+      }
+  }
+
+reference_definition
+  = kc:KW_REFERENCES __
+  t:table_ref_list __
+  de:cte_column_definition __
+  m:('MATCH FULL'i / 'MATCH PARTIAL'i / 'MATCH SIMPLE')? __
+  d:('ON DELETE' __ dr:reference_option)? __
+  u:('ON UPDATE' __ ur:reference_option)? __ {
+    return {
+        definition: de,
+        table: t,
+        keyword: kc,
+        match:m,
+        on_delete: d,
+        on_update: u
+      }
+  }
+
+on_reference
+  = kw: ('ON DELETE'i / 'ON UPDATE'i) __ ro:reference_option __ {
+    return {
+      keyword: kw,
+      type: 'reference_definition',
+      reference_option: ro
+    }
+  }
+reference_option
+  = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i) __ {
+    return {
+      type: kc,
+      value: kc
+    }
+  }
+
+table_options
+  = head:table_option tail:(__ COMMA? __ table_option)* {
+      return createList(head, tail);
+    }
+
+table_option
+  = kw:('AUTO_INCREMENT'i / 'AVG_ROW_LENGTH'i / 'KEY_BLOCK_SIZE'i / 'MAX_ROWS'i / 'MIN_ROWS'i / 'STATS_SAMPLE_PAGES'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:literal_numeric {
+    return {
+      keyword: kw.toLowerCase(),
+      symbol: s,
+      value: v
+    }
+  }
+  / kw:KW_DEFAULT? __ t:('CHARACTER SET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
+    return {
+      keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
+      symbol: s,
+      value: v
+    }
+  }
+  / kw:(KW_COMMENT / 'CONNECTION'i) __ s:(KW_ASSIGIN_EQUAL)? __ c:ident_name {
+    return {
+      keyword: kw.toLowerCase(),
+      symbol: s,
+      value: c
+    }
+  }
+  / kw:'COMPRESSION'i __ s:(KW_ASSIGIN_EQUAL)? __ v:('ZLIB'i / 'LZ4'i / 'NONE'i) {
+    return {
+      keyword: kw.toLowerCase(),
+      symbol: s,
+      value: v
+    }
+  }
+  / kw:'ENGINE'i __ s:(KW_ASSIGIN_EQUAL)? __ c:ident_name {
+    return {
+      keyword: kw.toLowerCase(),
+      symbol: s,
+      value: c
+    }
+  }
+
+
+ALTER_ADD_FULLETXT_SPARITAL_INDEX
+  = KW_ADD __
+    fsid:create_fulltext_spatial_index_definition
+     {
+      return {
+        action: 'add',
         type: 'alter',
+        ...fsid,
       }
     }
 
@@ -568,12 +789,7 @@ index_option
       expr: pn
     }
   }
-  / k:KW_COMMENT __ c:quoted_ident {
-    return {
-      type: k.toLowerCase(),
-      expr: c
-    }
-  }
+  / keyword_comment
   / k:("VISIBLE"i / "INVISIBLE"i) {
     return {
       type: k.toLowerCase()
@@ -1239,6 +1455,14 @@ literal_null
       return { type: 'null', value: null };
     }
 
+literal_not_null
+  = KW_NOT_NULL {
+    return {
+      type: 'not null',
+      value: 'not null',
+    }
+  }
+
 literal_bool
   = KW_TRUE {
       return { type: 'bool', value: true };
@@ -1330,6 +1554,8 @@ e
 
 
 KW_NULL     = "NULL"i       !ident_start
+KW_DEFAULT  = "DEFAULT"i    !ident_start
+KW_NOT_NULL = "NOT NULL"i   !ident_start
 KW_TRUE     = "TRUE"i       !ident_start
 KW_TO       = "TO"i         !ident_start
 KW_FALSE    = "FALSE"i      !ident_start
@@ -1341,6 +1567,8 @@ KW_ALTER    = "ALTER"i      !ident_start
 KW_SELECT   = "SELECT"i     !ident_start
 KW_UPDATE   = "UPDATE"i     !ident_start
 KW_CREATE   = "CREATE"i     !ident_start
+KW_TEMPORARY = "TEMPORARY"i !ident_start
+KW_IF_NOT_EXISTS = "IF NOT EXISTS"i !ident_start
 KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
 KW_RECURSIVE= "RECURSIVE"   !ident_start
@@ -1466,6 +1694,8 @@ KW_SPATIAL  = "SPATIAL"i  !ident_start { return 'SPATIAL'; }
 KW_UNIQUE     = "KEY"i  !ident_start { return 'UNIQUE'; }
 KW_KEY_BLOCK_SIZE = "KEY_BLOCK_SIZE" !ident_start { return 'KEY_BLOCK_SIZE'; }
 KW_COMMENT     = "COMMENT"i  !ident_start { return 'COMMENT'; }
+KW_CONSTRAINT  = "CONSTRAINT"i  !ident_start { return 'CONSTRAINT'; }
+KW_REFERENCES  = "REFERENCES"i  !ident_start { return 'REFERENCES'; }
 
 
 
@@ -1510,6 +1740,14 @@ line_comment
 
 pound_sign_comment
   = "#" (!EOL char)*
+
+keyword_comment
+  = k:KW_COMMENT __ c:quoted_ident {
+    return {
+      type: k.toLowerCase(),
+      expr: c
+    }
+  }
 
 char = .
 
@@ -1678,7 +1916,9 @@ character_string_type
   / t:KW_VARCHAR { return { dataType: t }; }
 
 numeric_type
-  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT) { return { dataType: t }; }
+  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT) __ LPAREN __ l:[0-9]+ __ RPAREN __  { return { dataType: t, length: parseInt(l.join(''), 10) }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT) { return { dataType: t }; }
+
 
 datetime_type
   = t:(KW_DATE / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }

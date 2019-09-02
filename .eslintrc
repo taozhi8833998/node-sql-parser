@@ -106,7 +106,7 @@
     "no-underscore-dangle": 0,
     "no-plusplus": 0,
     "no-console": [
-      2,
+      0,
       {
         "allow": [
           "warn",
@@ -124,6 +124,8 @@
         "argsIgnorePattern": "next|receiver"
       }
     ],
-    "import/no-dynamic-require": 1
+    "import/no-dynamic-require": 1,
+    "import/no-cycle": 0,
+    "import/prefer-default-export": 0
   }
 }

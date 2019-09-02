@@ -1,15 +1,16 @@
 {
   "name": "node-sql-parser",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "simple node sql parser",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "build": "mkdir -p build && pegjs -o build/pegjs-parser.js sql.pegjs",
+    "build": "mkdir -p build && pegjs -o build/pegjs-parser.js sql.pegjs && npm run compile",
     "test": "npm run lint && mocha",
-    "lint": "npm run build && eslint .",
+    "compile": "babel src -d lib",
+    "lint": "npm run build && eslint src/",
     "prepublishOnly": "npm run build",
-    "cover": "npm run lint && istanbul cover ./node_modules/mocha/bin/_mocha -x build/pegjs-parser.js --report lcovonly -- -R spec test/*.spec.js"
+    "cover": "npm run build && istanbul cover ./node_modules/mocha/bin/_mocha -x build/pegjs-parser.js --report lcovonly -- -R spec test/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -41,6 +42,10 @@
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.5",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "chai": "^4.2.0",
     "coveralls": "^3.0.2",
     "eslint": "^6.1.0",

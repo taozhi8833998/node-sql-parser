@@ -1,4 +1,16 @@
-'use strict'
+import has from 'has'
+
+const escapeMap = {
+  '\0'   : '\\0',
+  '\''   : '\\\'',
+  '"'    : '\\"',
+  '\b'   : '\\b',
+  '\n'   : '\\n',
+  '\r'   : '\\r',
+  '\t'   : '\\t',
+  '\x1a' : '\\Z',
+  '\\'   : '\\\\',
+}
 
 /**
  * @param {(Array|boolean|string|number|null)} value
@@ -48,7 +60,7 @@ function createBinaryExpr(operator, left, right) {
  * @param {Object} keys   - Keys = parameter names, values = parameter values
  * @return {Object}     - Newly created AST object
  */
-function replaceParams(ast, keys) {
+function replaceParamsInner(ast, keys) {
   Object.keys(ast)
     .filter(key => {
       const value = ast[key]
@@ -57,7 +69,7 @@ function replaceParams(ast, keys) {
     .forEach(key => {
       const expr = ast[key]
 
-      if (!(typeof expr === 'object' && expr.type === 'param')) return replaceParams(expr, keys)
+      if (!(typeof expr === 'object' && expr.type === 'param')) return replaceParamsInner(expr, keys)
 
       if (typeof keys[expr.value] === 'undefined') throw new Error(`no value for parameter :${expr.value} found`)
       ast[key] = createValueExpr(keys[expr.value])
@@ -67,8 +79,56 @@ function replaceParams(ast, keys) {
   return ast
 }
 
-module.exports = {
+function escape(str) {
+  const res = []
+
+  for (let i = 0, len = str.length; i < len; ++i) {
+    let char = str[i]
+    const escaped = escapeMap[char]
+    if (escaped) char = escaped
+    res.push(char)
+  }
+
+  return res.join('')
+}
+
+function identifierToSql(ident, isDual) {
+  if (isDual === true) return `'${ident}'`
+  return `\`${ident}\``
+}
+
+function literalToSQL(literal) {
+  const { type } = literal
+  let { value } = literal
+
+  if (type === 'number') {
+    /* nothing */
+  } else if (type === 'string') value = `'${escape(value)}'`
+  else if (type === 'bool') value = value ? 'TRUE' : 'FALSE'
+  else if (type === 'null') value = 'NULL'
+  else if (type === 'star') value = '*'
+  else if (['time', 'date', 'timestamp'].includes(type)) value = `${type.toUpperCase()} '${value}'`
+  else if (type === 'param') value = `:${value}`
+
+  return literal.parentheses ? `(${value})` : value
+}
+
+function replaceParams(ast, params) {
+  return replaceParamsInner(JSON.parse(JSON.stringify(ast)), params)
+}
+
+function columnRefToSQL(expr) {
+  let str = expr.column === '*' ? '*' : identifierToSql(expr.column, expr.isDual)
+  if (has(expr, 'table') && expr.table !== null) str = `${identifierToSql(expr.table)}.${str}`
+  return expr.parentheses ? `(${str})` : str
+}
+
+export {
+  columnRefToSQL,
   createBinaryExpr,
   createValueExpr,
-  replaceParams : (ast, params) => replaceParams(JSON.parse(JSON.stringify(ast)), params),
+  escape,
+  literalToSQL,
+  identifierToSql,
+  replaceParams,
 }

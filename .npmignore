@@ -9,3 +9,4 @@ test/
 .eslintrcignore
 .editorconfig
 .travis.yml
+src
