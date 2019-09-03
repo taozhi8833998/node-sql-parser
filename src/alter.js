@@ -1,7 +1,8 @@
 import { columnDataType } from './column'
-import { indexDefinitionToSQL } from './index-definition'
+import { indexTypeAndOptionToSQL } from './index-definition'
 import { tablesToSQL } from './tables'
 import { exprToSQL } from './expr'
+import { hasVal } from './util'
 
 function alterToSQL(stmt) {
   const { type, table, expr = [] } = stmt
@@ -22,7 +23,7 @@ function alterExprToSQL(expr) {
       dataType = columnDataType(expr.definition)
       break
     case 'index':
-      dataType = indexDefinitionToSQL(expr)
+      dataType = indexTypeAndOptionToSQL(expr)
       break
     default:
       break
@@ -31,7 +32,7 @@ function alterExprToSQL(expr) {
   alterArray.push(keyWordUpper)
   alterArray.push(name)
   alterArray.push(dataType)
-  return alterArray.filter(hasVal => hasVal).join(' ')
+  return alterArray.filter(hasVal).join(' ')
 }
 
 export {

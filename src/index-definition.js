@@ -1,4 +1,5 @@
-import { literalToSQL, identifierToSql } from './util'
+import { literalToSQL, identifierToSql, toUpper, hasVal } from './util'
+import { commentToSQL } from './comment'
 
 function indexTypeToSQL(indexType) {
   if (!indexType) return
@@ -12,7 +13,7 @@ function indexOptionToSQL(indexOpt) {
   const upperType = type.toUpperCase()
   const indexOptArray = []
   indexOptArray.push(upperType)
-  switch (upperType) {
+  switch (upperType.toUpperCase()) {
     case 'KEY_BLOCK_SIZE':
       if (symbol) indexOptArray.push(symbol)
       indexOptArray.push(literalToSQL(expr))
@@ -28,27 +29,44 @@ function indexOptionToSQL(indexOpt) {
     case 'VISIBLE':
     case 'INVISIBLE':
       break
+    case 'COMMENT':
+      indexOptArray.shift()
+      indexOptArray.push(commentToSQL(indexOpt))
+      break
     default:
       break
   }
   return indexOptArray.join(' ')
 }
 
-function indexDefinitionToSQL(indexDefinition) {
+function indexTypeAndOptionToSQL(indexDefinition) {
   const {
     index_type: indexType,
-    index_option: indexOptions,
+    index_options: indexOptions = [],
     definition,
   } = indexDefinition
   const dataType = []
   dataType.push(indexTypeToSQL(indexType))
   if (definition && definition.length) dataType.push(`(${definition.map(col => identifierToSql(col)).join(', ')})`)
-  dataType.push(indexOptionToSQL(indexOptions))
-  return dataType.filter(hasVal => hasVal).join(' ')
+  dataType.push(indexOptions && indexOptions.map(indexOptionToSQL).join(' '))
+  return dataType.filter(hasVal).join(' ')
+}
+
+function indexDefinitionToSQL(indexDefinition) {
+  const indexSQL = []
+  const {
+    keyword,
+    index,
+  } = indexDefinition
+  indexSQL.push(toUpper(keyword))
+  indexSQL.push(index)
+  indexSQL.push(indexTypeAndOptionToSQL(indexDefinition))
+  return indexSQL.filter(hasVal).join(' ')
 }
 
 export {
   indexDefinitionToSQL,
   indexTypeToSQL,
   indexOptionToSQL,
+  indexTypeAndOptionToSQL,
 }

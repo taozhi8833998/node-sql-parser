@@ -242,7 +242,6 @@ union_stmt
       }
     }
 
-
 create_table_stmt
   = a:KW_CREATE __
     tp:KW_TEMPORARY? __
@@ -250,7 +249,10 @@ create_table_stmt
     ife:KW_IF_NOT_EXISTS? __
     t:table_ref_list __
     c:create_table_definition __
-    to:table_options? __ {
+    to:table_options? __
+    ir: (KW_IGNORE / KW_REPLACE)? __
+    as: KW_AS? __
+    qe: union_stmt? __ {
       if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
@@ -261,11 +263,48 @@ create_table_stmt
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists: ife && ife[0].toLowerCase(),
           table: t,
+          ignore_replace: ir && ir[0].toLowerCase(),
+          as: as && as[0].toLowerCase(),
+          query_expr: qe && qe.ast,
           create_definitions: c,
           table_options: to
         }
-      };
+      }
     }
+  / a:KW_CREATE __
+    tp:KW_TEMPORARY? __
+    KW_TABLE __
+    ife:KW_IF_NOT_EXISTS? __
+    t:table_ref_list __
+    lt:create_like_table __ {
+      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'table',
+          temporary: tp && tp[0].toLowerCase(),
+          if_not_exists: ife && ife[0].toLowerCase(),
+          table: t,
+          like: lt
+        }
+      }
+    }
+
+crate_like_table_simple
+  = KW_LIKE __ t: table_ref_list __ {
+    return {
+      type: 'like',
+      table: t
+    }
+  }
+create_like_table
+  = crate_like_table_simple
+  / LPAREN __ e:create_like_table  __ RPAREN {
+      e.parentheses = true;
+      return e;
+  }
 
 create_table_definition
   = LPAREN __ head:create_definition tail:(__ COMMA __ create_definition)* __ RPAREN {
@@ -285,7 +324,11 @@ create_column_definition
     df:default_expr? __
     a:('AUTO_INCREMENT'i)? __
     u:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i)? __
-    co:keyword_comment? __ {
+    co:keyword_comment? __
+    ca:collate_expr? __
+    cf:column_format? __
+    s:storage? __
+    re:reference_definition? __ {
       columnList.add(`create::${c.table}::${c.column}`)
       return {
         column: c,
@@ -293,12 +336,37 @@ create_column_definition
         nullable: n,
         default_val: df,
         auto_increment: a && a.toLowerCase(),
-        unique_or_primary: u && `${u[0]} ${u[2]}`,
+        unique_or_primary: u && `${u[0].toLowerCase()} ${u[2].toLowerCase()}`,
         comment: co,
+        collate: ca,
+        column_format: cf,
+        storage:s,
+        reference_definition: re,
         resource: 'column'
       }
     }
 
+collate_expr
+  = KW_COLLATE __ ca:ident_name __ {
+    return {
+      type: 'collate',
+      value: ca,
+    }
+  }
+column_format
+  = k:'COLUMN_FORMAT'i __ f:('FIXED'i / 'DYNAMIC'i / 'DEFAULT'i) __ {
+    return {
+      type: 'column_format',
+      value: f.toLowerCase()
+    }
+  }
+storage
+  = k:'STORAGE'i __ s:('DISK'i / 'MEMORY'i) __ {
+    return {
+      type: 'storage',
+      value: s.toLowerCase()
+    }
+  }
 default_expr
   = KW_DEFAULT __ ce: (literal / expr) {
     return {
@@ -421,17 +489,17 @@ ALTER_ADD_INDEX_OR_KEY
 create_index_definition
   = kc:(KW_INDEX / KW_KEY) __
     c:column? __
-    t: index_type? __
-    de: cte_column_definition __
-    id: index_option? __
+    t:index_type? __
+    de:cte_column_definition __
+    id:index_options? __
      {
       return {
         index: c,
         definition: de,
-        keyword: kc,
+        keyword: kc.toLowerCase(),
         index_type: t,
         resource: 'index',
-        index_option: id,
+        index_options: id,
       }
     }
 
@@ -440,13 +508,13 @@ create_fulltext_spatial_index_definition
     kc:(KW_INDEX / KW_KEY)? __
     c:column? __
     de: cte_column_definition __
-    id: index_option? __
+    id: index_options? __
      {
       return {
         index: c,
         definition: de,
-        keyword: kc && `${p} ${kc}` || p,
-        index_option: id,
+        keyword: kc && `${p.toLowerCase()} ${kc.toLowerCase()}` || p.toLowerCase(),
+        index_options: id,
         resource: 'index',
       }
     }
@@ -456,20 +524,28 @@ create_constraint_definition
   / create_constraint_unique
   / create_constraint_foreign
 
+constraint_name
+  = kc:KW_CONSTRAINT? __
+  c:ident_name? __ {
+    return {
+      keyword: kc.toLowerCase(),
+      constraint: c
+    }
+  }
 create_constraint_primary
-  = kc:(KW_CONSTRAINT __ c:ident_name __)? __
+  = kc:constraint_name? __
   p:('PRIMARY KEY'i) __
   t:index_type? __
   de:cte_column_definition __
-  id:index_option? __ {
+  id:index_options? __ {
     return {
-        constraint: c,
+        constraint: kc && kc.constraint,
         definition: de,
         constraint_type: p,
-        keyword: kc,
+        keyword: kc && kc.keyword,
         index_type: t,
         resource: 'constraint',
-        index_option: id,
+        index_options: id,
       }
   }
 
@@ -515,33 +591,29 @@ reference_definition
   = kc:KW_REFERENCES __
   t:table_ref_list __
   de:cte_column_definition __
-  m:('MATCH FULL'i / 'MATCH PARTIAL'i / 'MATCH SIMPLE')? __
-  d:('ON DELETE' __ dr:reference_option)? __
-  u:('ON UPDATE' __ ur:reference_option)? __ {
+  m:('MATCH FULL'i / 'MATCH PARTIAL'i / 'MATCH SIMPLE'i)? __
+  od: on_reference? __
+  ou: on_reference? __ {
     return {
         definition: de,
         table: t,
-        keyword: kc,
-        match:m,
-        on_delete: d,
-        on_update: u
+        keyword: kc.toLowerCase(),
+        match:m && m.toLowerCase(),
+        on_delete: od,
+        on_update: ou,
       }
   }
 
 on_reference
   = kw: ('ON DELETE'i / 'ON UPDATE'i) __ ro:reference_option __ {
     return {
-      keyword: kw,
-      type: 'reference_definition',
-      reference_option: ro
+      type: kw.toLowerCase(),
+      value: ro
     }
   }
 reference_option
   = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i) __ {
-    return {
-      type: kc,
-      value: kc
-    }
+    return kc.toLowerCase()
   }
 
 table_options
@@ -582,7 +654,7 @@ table_option
     return {
       keyword: kw.toLowerCase(),
       symbol: s,
-      value: c
+      value: c.toUpperCase()
     }
   }
 
@@ -767,34 +839,44 @@ table_to_item
 
 index_type
   = KW_USING __
-  t: ("BTREE"i / "HASH"i){
+  t:("BTREE"i / "HASH"i) __ {
     return {
       keyword: 'using',
-      type: t,
+      type: t.toLowerCase(),
     }
   }
 
+index_options
+  = head:index_option tail:(__ index_option)* {
+    const result = [head];
+    for (let i = 0; i < tail.length; i++) {
+      result.push(tail[i][1]);
+    }
+    return result;
+  }
+
 index_option
-  = k:KW_KEY_BLOCK_SIZE __ e:(KW_ASSIGIN_EQUAL)? __ kbs:literal_numeric {
+  = k:KW_KEY_BLOCK_SIZE __ e:(KW_ASSIGIN_EQUAL)? __ kbs:literal_numeric __ {
     return {
-      type: k,
+      type: k.toLowerCase(),
       symbol: e,
       expr: kbs
     };
   }
   / index_type
-  / "WITH"i __ "PARSER"i __ pn:ident_name {
+  / "WITH"i __ "PARSER"i __ pn:ident_name __ {
     return {
       type: 'with parser',
       expr: pn
     }
   }
-  / keyword_comment
-  / k:("VISIBLE"i / "INVISIBLE"i) {
+  / k:("VISIBLE"i / "INVISIBLE"i) __ {
     return {
-      type: k.toLowerCase()
+      type: k.toLowerCase(),
+      expr: k.toLowerCase()
     }
   }
+  / keyword_comment
 
 table_ref_list
   = head:table_base
@@ -1574,6 +1656,7 @@ KW_INSERT   = "INSERT"i     !ident_start
 KW_RECURSIVE= "RECURSIVE"   !ident_start
 KW_REPLACE  = "REPLACE"i    !ident_start
 KW_RENAME   = "RENAME"i     !ident_start
+KW_IGNORE   = "IGNORE"i     !ident_start
 KW_EXPLAIN  = "EXPLAIN"i    !ident_start
 
 KW_INTO     = "INTO"i       !ident_start
@@ -1582,6 +1665,7 @@ KW_SET      = "SET"i        !ident_start
 
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
+KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
 
 KW_ON       = "ON"i       !ident_start
 KW_LEFT     = "LEFT"i     !ident_start
@@ -1692,7 +1776,7 @@ KW_KEY     = "KEY"i  !ident_start { return 'KEY'; }
 KW_FULLTEXT = "FULLTEXT"i  !ident_start { return 'FULLTEXT'; }
 KW_SPATIAL  = "SPATIAL"i  !ident_start { return 'SPATIAL'; }
 KW_UNIQUE     = "KEY"i  !ident_start { return 'UNIQUE'; }
-KW_KEY_BLOCK_SIZE = "KEY_BLOCK_SIZE" !ident_start { return 'KEY_BLOCK_SIZE'; }
+KW_KEY_BLOCK_SIZE = "KEY_BLOCK_SIZE"i !ident_start { return 'KEY_BLOCK_SIZE'; }
 KW_COMMENT     = "COMMENT"i  !ident_start { return 'COMMENT'; }
 KW_CONSTRAINT  = "CONSTRAINT"i  !ident_start { return 'CONSTRAINT'; }
 KW_REFERENCES  = "REFERENCES"i  !ident_start { return 'REFERENCES'; }
@@ -1742,10 +1826,12 @@ pound_sign_comment
   = "#" (!EOL char)*
 
 keyword_comment
-  = k:KW_COMMENT __ c:quoted_ident {
+  = k:KW_COMMENT __ s:KW_ASSIGIN_EQUAL? __ c:literal_string {
     return {
       type: k.toLowerCase(),
-      expr: c
+      keyword: k.toLowerCase(),
+      symbol: s,
+      value: c,
     }
   }
 

@@ -123,7 +123,26 @@ function columnRefToSQL(expr) {
   return expr.parentheses ? `(${str})` : str
 }
 
+function toUpper(val) {
+  if (!val) return
+  return val.toUpperCase()
+}
+
+function hasVal(val) {
+  return val
+}
+
+function commonTypeValue(opt) {
+  const result = []
+  if (!opt) return result
+  const { type, value } = opt
+  result.push(type.toUpperCase())
+  result.push(value.toUpperCase())
+  return result
+}
+
 export {
+  commonTypeValue,
   columnRefToSQL,
   createBinaryExpr,
   createValueExpr,
@@ -131,4 +150,6 @@ export {
   literalToSQL,
   identifierToSql,
   replaceParams,
+  hasVal,
+  toUpper,
 }

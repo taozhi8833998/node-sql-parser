@@ -231,26 +231,4 @@ describe('Command SQL', () => {
     })
   })
 
-  describe('create table', () => {
-    it('should support create table', () => {
-      expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key) ENGINE = MEMORY`))
-        .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY');
-    })
-
-    it('should support create temporary table', () => {
-      expect(getParsedSql(`create temporary table dbname.tableName (id INT primary key) ENGINE = MEMORY`))
-        .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT PRIMARY KEY) ENGINE = MEMORY');
-    })
-
-    it('should support create if not exists table', () => {
-      expect(getParsedSql(`create table if not exists dbname.tableName (id INT(11) primary key) ENGINE = MEMORY`))
-        .to.equal('CREATE TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY');
-    })
-
-    it('should support create temporary if not exists table', () => {
-      expect(getParsedSql(`create temporary table if not exists dbname.tableName (id INT(11) primary key) ENGINE = MEMORY`))
-        .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY');
-    })
-  })
-
 })

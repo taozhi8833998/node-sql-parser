@@ -1,10 +1,32 @@
 import { exprToSQL } from './expr'
-import { identifierToSql, columnRefToSQL } from './util'
+import { identifierToSql, commonTypeValue, columnRefToSQL, toUpper, hasVal } from './util'
+import { tablesToSQL } from './tables'
+import { commentToSQL } from './comment'
 
 function columnDataType(definition) {
   const dataType = definition && definition.dataType
   if (definition && definition.length) return `${dataType}(${definition.length})`
   return dataType
+}
+
+function columnReferenceDefinitionToSQL(referenceDefinition) {
+  const reference = []
+  if (!referenceDefinition) return reference
+  const {
+    definition,
+    keyword,
+    match,
+    table,
+    on_delete: onDelete,
+    on_update: onUpdate,
+  } = referenceDefinition
+  reference.push(keyword.toUpperCase())
+  reference.push(tablesToSQL(table))
+  reference.push(`(${definition.map(identifierToSql).join(', ')})`)
+  reference.push(toUpper(match))
+  reference.push(...commonTypeValue(onDelete))
+  reference.push(...commonTypeValue(onUpdate))
+  return reference.filter(hasVal)
 }
 
 function columnOption(definition) {
@@ -15,21 +37,26 @@ function columnOption(definition) {
     auto_increment: autoIncrement,
     unique_or_primary: uniquePrimary,
     comment,
+    collate,
+    column_format: columnFormat,
+    storage,
+    reference_definition: referenceDefinition,
   } = definition
-  if (nullable) columnOpt.push(nullable.value.toUpperCase())
+
+  columnOpt.push(toUpper(nullable && nullable.value))
   if (defaultOpt) {
     const { type, value } = defaultOpt
     columnOpt.push(type.toUpperCase())
     columnOpt.push(exprToSQL(value))
   }
-  if (autoIncrement) columnOpt.push(autoIncrement.toUpperCase())
-  if (uniquePrimary) columnOpt.push(uniquePrimary.toUpperCase())
-  if (comment) {
-    const { type, expr } = comment
-    columnOpt.push(type.toUpperCase())
-    columnOpt.push(exprToSQL(expr))
-  }
-  return columnOpt.filter(hasVal => hasVal).join(' ')
+  columnOpt.push(toUpper(autoIncrement))
+  columnOpt.push(toUpper(uniquePrimary))
+  columnOpt.push(commentToSQL(comment))
+  columnOpt.push(...commonTypeValue(collate))
+  columnOpt.push(...commonTypeValue(columnFormat))
+  columnOpt.push(...commonTypeValue(storage))
+  columnOpt.push(...columnReferenceDefinitionToSQL(referenceDefinition))
+  return columnOpt.filter(hasVal).join(' ')
 }
 
 function columnDefinitionToSQL(columnDefinition) {
@@ -40,7 +67,7 @@ function columnDefinitionToSQL(columnDefinition) {
   column.push(dataType)
   const columnOpt = columnOption(columnDefinition)
   column.push(columnOpt)
-  return column.filter(hasVal => hasVal).join(' ')
+  return column.filter(hasVal).join(' ')
 }
 
 /**
