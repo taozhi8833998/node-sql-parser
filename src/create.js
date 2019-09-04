@@ -3,7 +3,7 @@ import { indexDefinitionToSQL } from './index-definition'
 import { columnDefinitionToSQL } from './column'
 import { constraintDefinitionToSQL } from './constrain'
 import { tablesToSQL, tableOptionToSQL } from './tables'
-import { selectToSQL } from './select'
+import { unionToSQL } from './union'
 
 function createDefinitionToSQL(definition) {
   const { resource } = definition
@@ -53,11 +53,11 @@ function createToSQL(stmt) {
   }
   if (tableOptions) {
     const tableOptionList = tableOptions.map(tableOptionToSQL)
-    sql.push(tableOptionList.join(', '))
+    sql.push(tableOptionList.join(' '))
   }
   if (ignoreReplace) sql.push(ignoreReplace.toUpperCase())
   if (as) sql.push(as.toUpperCase())
-  if (queryExpr) sql.push(selectToSQL(queryExpr))
+  if (queryExpr) sql.push(unionToSQL(queryExpr))
   return sql.join(' ')
 }
 

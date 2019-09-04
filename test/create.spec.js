@@ -14,15 +14,15 @@ describe('create', () => {
       expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128))`))
         .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT, `name` VARCHAR(128))');
 
-      expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key) ENGINE = MEMORY`))
-        .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY');
-      expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key, name varchar(128) unique key) ENGINE = MEMORY`))
-        .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY, `name` VARCHAR(128) UNIQUE KEY) ENGINE = MEMORY');
+      expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key) ENGINE = MEMORY default character SET = utf8 comment = 'comment test'`))
+        .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY DEFAULT CHARACTER SET = utf8 COMMENT = \'comment test\'');
+      expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key, name varchar(128) unique key) ENGINE = MEMORY compression = 'zlib'`))
+        .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY, `name` VARCHAR(128) UNIQUE KEY) ENGINE = MEMORY COMPRESSION = \'ZLIB\'');
     })
 
     it('should support create temporary table', () => {
-      expect(getParsedSql(`create temporary table dbname.tableName (id INT primary key) ENGINE = MEMORY`))
-        .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT PRIMARY KEY) ENGINE = MEMORY');
+      expect(getParsedSql(`create temporary table dbname.tableName (id INT primary key) ENGINE = MEMORY min_rows 10 max_rows 100`))
+        .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT PRIMARY KEY) ENGINE = MEMORY MIN_ROWS 10 MAX_ROWS 100');
     })
 
     it('should support create if not exists table', () => {
@@ -81,8 +81,8 @@ describe('create', () => {
     describe('create index or key', () => {
       ['index', 'key'].forEach(type => {
         it(`should support create table ${type}`, () => {
-          expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} idx_name using hash (name) key_block_size 128)`))
-            .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} idx_name USING HASH (\`name\`) KEY_BLOCK_SIZE 128)`);
+          expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} idx_name using hash (name) key_block_size 128) engine = innodb auto_increment = 10`))
+            .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} idx_name USING HASH (\`name\`) KEY_BLOCK_SIZE 128) ENGINE = INNODB AUTO_INCREMENT = 10`);
 
           expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} using btree (name) key_block_size = 128 visible)`))
             .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} USING BTREE (\`name\`) KEY_BLOCK_SIZE = 128 VISIBLE)`);
@@ -138,6 +138,25 @@ describe('create', () => {
       it(`should support foreign key`, () => {
         expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} idx_name foreign key index_name (name) references rdb.rta (name_alias) match simple on delete cascade on update set default)`))
           .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} idx_name FOREIGN KEY index_name (\`name\`) REFERENCES \`rdb\`.\`rta\` (\`name_alias\`) MATCH SIMPLE ON DELETE CASCADE ON UPDATE SET DEFAULT)`);
+      })
+    })
+
+    describe('create table from like', () => {
+      it('should support create table', () => {
+        expect(getParsedSql(`create temporary table if not exists  dbname.tableName like odb.ota`))
+          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` LIKE `odb`.`ota`');
+      })
+    })
+
+    describe('create table from query', () => {
+      it('should support create table from simple select', () => {
+        expect(getParsedSql(`create temporary table if not exists  dbname.tableName (id int, name varchar(128)) engine = innodb ignore as select id, name from qdb.qta`))
+          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT, `name` VARCHAR(128)) ENGINE = INNODB IGNORE AS SELECT `id`, `name` FROM `qdb`.`qta`');
+      })
+
+      it('should support create table from union', () => {
+        expect(getParsedSql(`create temporary table if not exists  dbname.tableName (id int, name varchar(128)) engine = innodb ignore as select id, name from qdb.qta union select ab as id, cd as name from qdb.qtc`))
+          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT, `name` VARCHAR(128)) ENGINE = INNODB IGNORE AS SELECT `id`, `name` FROM `qdb`.`qta` UNION SELECT `ab` AS `id`, `cd` AS `name` FROM `qdb`.`qtc`');
       })
     })
   })

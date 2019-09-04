@@ -617,15 +617,15 @@ reference_option
 
 table_options
   = head:table_option tail:(__ COMMA? __ table_option)* {
-      return createList(head, tail);
-    }
+    return createList(head, tail)
+  }
 
 table_option
   = kw:('AUTO_INCREMENT'i / 'AVG_ROW_LENGTH'i / 'KEY_BLOCK_SIZE'i / 'MAX_ROWS'i / 'MIN_ROWS'i / 'STATS_SAMPLE_PAGES'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:literal_numeric {
     return {
       keyword: kw.toLowerCase(),
       symbol: s,
-      value: v
+      value: v.value
     }
   }
   / kw:KW_DEFAULT? __ t:('CHARACTER SET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
@@ -635,18 +635,18 @@ table_option
       value: v
     }
   }
-  / kw:(KW_COMMENT / 'CONNECTION'i) __ s:(KW_ASSIGIN_EQUAL)? __ c:ident_name {
+  / kw:(KW_COMMENT / 'CONNECTION'i) __ s:(KW_ASSIGIN_EQUAL)? __ c:literal_string {
     return {
       keyword: kw.toLowerCase(),
       symbol: s,
-      value: c
+      value: `'${c.value}'`
     }
   }
-  / kw:'COMPRESSION'i __ s:(KW_ASSIGIN_EQUAL)? __ v:('ZLIB'i / 'LZ4'i / 'NONE'i) {
+  / kw:'COMPRESSION'i __ s:(KW_ASSIGIN_EQUAL)? __ v:("'"('ZLIB'i / 'LZ4'i / 'NONE'i)"'") {
     return {
       keyword: kw.toLowerCase(),
       symbol: s,
-      value: v
+      value: v.join('').toUpperCase()
     }
   }
   / kw:'ENGINE'i __ s:(KW_ASSIGIN_EQUAL)? __ c:ident_name {
