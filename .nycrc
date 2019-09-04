@@ -7,10 +7,11 @@
     "functions": 99,
     "branches": 99,
     "include": [
-      "src/**/*.js"
+      "src/**/*.js",
+      "index.js"
     ],
     "exclude": [
-      "build/pegjs-parser.js",
+      "**/build/**",
       "lib/**/*.js",
       "test/**/*.spec.js"
     ],

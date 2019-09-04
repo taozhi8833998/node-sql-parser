@@ -24,6 +24,7 @@ function alterExprToSQL(expr) {
       break
     case 'index':
       dataType = indexTypeAndOptionToSQL(expr)
+      dataType = dataType.filter(hasVal).join(' ')
       break
     default:
       break

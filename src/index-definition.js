@@ -54,7 +54,7 @@ function indexTypeAndOptionToSQL(indexDefinition) {
   dataType.push(indexTypeToSQL(indexType))
   if (definition && definition.length) dataType.push(`(${definition.map(col => identifierToSql(col)).join(', ')})`)
   dataType.push(indexOptions && indexOptions.map(indexOptionToSQL).join(' '))
-  return dataType.filter(hasVal).join(' ')
+  return dataType
 }
 
 function indexDefinitionToSQL(indexDefinition) {
@@ -65,7 +65,7 @@ function indexDefinitionToSQL(indexDefinition) {
   } = indexDefinition
   indexSQL.push(toUpper(keyword))
   indexSQL.push(index)
-  indexSQL.push(indexTypeAndOptionToSQL(indexDefinition))
+  indexSQL.push(...indexTypeAndOptionToSQL(indexDefinition))
   return indexSQL.filter(hasVal).join(' ')
 }
 

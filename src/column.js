@@ -102,4 +102,5 @@ export {
   columnDefinitionToSQL,
   columnsToSQL,
   columnDataType,
+  columnReferenceDefinitionToSQL,
 }

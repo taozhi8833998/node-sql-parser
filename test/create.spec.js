@@ -120,6 +120,26 @@ describe('create', () => {
         })
       })
     })
+
+    describe('create constraint', () => {
+      const type = 'constraint'
+      it(`should support primary key`, () => {
+        expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} idx_name primary key using hash (name) key_block_size 128)`))
+          .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} idx_name PRIMARY KEY USING HASH (\`name\`) KEY_BLOCK_SIZE 128)`);
+      })
+
+      it(`should support unique key`, () => {
+        ['index', 'key'].forEach(kind => {
+          expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} idx_name unique ${kind} index_name using btree (name) key_block_size 128)`))
+          .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} idx_name UNIQUE ${kind.toUpperCase()} index_name USING BTREE (\`name\`) KEY_BLOCK_SIZE 128)`);
+        })
+      })
+
+      it(`should support foreign key`, () => {
+        expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} idx_name foreign key index_name (name) references rdb.rta (name_alias) match simple on delete cascade on update set default)`))
+          .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} idx_name FOREIGN KEY index_name (\`name\`) REFERENCES \`rdb\`.\`rta\` (\`name_alias\`) MATCH SIMPLE ON DELETE CASCADE ON UPDATE SET DEFAULT)`);
+      })
+    })
   })
 })
 

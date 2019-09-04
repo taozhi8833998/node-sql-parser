@@ -1,5 +1,3 @@
-'use strict'
-
 import { parse as parseFn } from '../build/pegjs-parser'
 import astToSQL from './sql'
 

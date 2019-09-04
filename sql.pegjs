@@ -541,7 +541,7 @@ create_constraint_primary
     return {
         constraint: kc && kc.constraint,
         definition: de,
-        constraint_type: p,
+        constraint_type: p.toLowerCase(),
         keyword: kc && kc.keyword,
         index_type: t,
         resource: 'constraint',
@@ -550,37 +550,36 @@ create_constraint_primary
   }
 
 create_constraint_unique
-  = kc:(KW_CONSTRAINT __ c:ident_name __)? __
+  = kc:constraint_name? __
   u:KW_UNIQUE __
   p:(KW_INDEX / KW_KEY)? __
   i:column? __
   t:index_type? __
   de:cte_column_definition __
-  id:index_option? __ {
+  id:index_options? __ {
     return {
-        constraint: c,
+        constraint: kc && kc.constraint,
         definition: de,
-        constraint_type: p && `${u} ${p}` || u,
-        keyword: kc,
+        constraint_type: p && `${u.toLowerCase()} ${p.toLowerCase()}` || u.toLowerCase(),
+        keyword: kc && kc.keyword,
         index_type: t,
         index: i,
         resource: 'constraint',
-        option: id
+        index_options: id
       }
   }
 
 create_constraint_foreign
-  = kc:(KW_CONSTRAINT __ c:ident_name __)? __
-  p:('FOREGIN KEY'i) __
+  = kc:constraint_name? __
+  p:('FOREIGN KEY'i) __
   i:column? __
   de:cte_column_definition __
   id:reference_definition? __ {
     return {
-        constraint: c,
+        constraint: kc && kc.constraint,
         definition: de,
         constraint_type: p,
-        keyword: kc,
-        type: t,
+        keyword: kc && kc.keyword,
         index: i,
         resource: 'constraint',
         reference_definition: id
@@ -1775,7 +1774,7 @@ KW_INDEX   = "INDEX"i  !ident_start { return 'INDEX'; }
 KW_KEY     = "KEY"i  !ident_start { return 'KEY'; }
 KW_FULLTEXT = "FULLTEXT"i  !ident_start { return 'FULLTEXT'; }
 KW_SPATIAL  = "SPATIAL"i  !ident_start { return 'SPATIAL'; }
-KW_UNIQUE     = "KEY"i  !ident_start { return 'UNIQUE'; }
+KW_UNIQUE     = "UNIQUE"i  !ident_start { return 'UNIQUE'; }
 KW_KEY_BLOCK_SIZE = "KEY_BLOCK_SIZE"i !ident_start { return 'KEY_BLOCK_SIZE'; }
 KW_COMMENT     = "COMMENT"i  !ident_start { return 'COMMENT'; }
 KW_CONSTRAINT  = "CONSTRAINT"i  !ident_start { return 'CONSTRAINT'; }
