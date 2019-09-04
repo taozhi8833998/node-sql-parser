@@ -77,6 +77,7 @@ function columnDefinitionToSQL(columnDefinition) {
  */
 function columnsToSQL(columns, tables) {
   if (!columns) return
+  if (columns === '*') return columns
   const baseTable = Array.isArray(tables) && tables[0]
   let isDual = false
   if (baseTable && baseTable.type === 'dual') isDual = true

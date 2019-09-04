@@ -4,8 +4,10 @@ import { columnDefinitionToSQL } from './column'
 import { constraintDefinitionToSQL } from './constrain'
 import { tablesToSQL, tableOptionToSQL } from './tables'
 import { unionToSQL } from './union'
+import { toUpper, hasVal } from './util'
 
 function createDefinitionToSQL(definition) {
+  if (!definition) return []
   const { resource } = definition
   switch (resource) {
     case 'column':
@@ -21,31 +23,23 @@ function createDefinitionToSQL(definition) {
 
 function createToSQL(stmt) {
   const {
-    type,
-    keyword,
+    type, keyword, table, like, as,
     temporary,
     if_not_exists: ifNotExists,
-    table,
-    like,
     create_definitions: createDefinition,
     table_options: tableOptions,
     ignore_replace: ignoreReplace,
-    as,
     query_expr: queryExpr,
   } = stmt
-  const action = type.toUpperCase()
-  const sql = [action]
-  if (temporary) sql.push(temporary.toUpperCase())
-  sql.push(keyword.toUpperCase())
-  if (ifNotExists) sql.push(ifNotExists.toUpperCase())
+  const sql = [toUpper(type), toUpper(temporary), toUpper(keyword), toUpper(ifNotExists)]
   const tableName = tablesToSQL(table)
   sql.push(tableName)
   if (like) {
     const { type: likeType, table: likeTable } = like
-    sql.push(likeType.toUpperCase())
+    sql.push(toUpper(likeType))
     const likeTableName = tablesToSQL(likeTable)
     sql.push(likeTableName)
-    return sql.join(' ')
+    return sql.filter(hasVal).join(' ')
   }
   if (createDefinition) {
     const createDefinitionList = createDefinition.map(createDefinitionToSQL)
@@ -55,10 +49,10 @@ function createToSQL(stmt) {
     const tableOptionList = tableOptions.map(tableOptionToSQL)
     sql.push(tableOptionList.join(' '))
   }
-  if (ignoreReplace) sql.push(ignoreReplace.toUpperCase())
-  if (as) sql.push(as.toUpperCase())
+  sql.push(toUpper(ignoreReplace))
+  sql.push(toUpper(as))
   if (queryExpr) sql.push(unionToSQL(queryExpr))
-  return sql.join(' ')
+  return sql.filter(hasVal).join(' ')
 }
 
 export {

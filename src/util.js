@@ -12,22 +12,34 @@ const escapeMap = {
   '\\'   : '\\\\',
 }
 
+function commonOptionConnector(keyword, action, opt) {
+  if (!opt) return
+  return `${keyword.toUpperCase()} ${action(opt)}`
+}
+
+function connector(keyword, str) {
+  if (!str) return
+  return `${keyword.toUpperCase()} ${str}`
+}
+
 /**
  * @param {(Array|boolean|string|number|null)} value
  * @return {Object}
  */
 function createValueExpr(value) {
-  let expr = {}
   const type = typeof value
-
-  if (Array.isArray(value)) expr = { type: 'expr_list', value: value.map(createValueExpr) }
-  else if (type === 'boolean') expr = { type: 'bool', value }
-  else if (type === 'string') expr = { type: 'string', value }
-  else if (type === 'number') expr = { type: 'number', value }
-  else if (value === null) expr = { type: 'null', value: null }
-  else throw new Error(`Cannot convert value  "${value}" to SQL`)
-
-  return expr
+  if (Array.isArray(value)) return { type: 'expr_list', value: value.map(createValueExpr) }
+  if (value === null) return { type: 'null', value: null }
+  switch (type) {
+    case 'boolean':
+      return { type: 'bool', value }
+    case 'string':
+      return { type: 'string', value }
+    case 'number':
+      return { type: 'number', value }
+    default:
+      throw new Error(`Cannot convert value  "${value}" to SQL`)
+  }
 }
 
 /**
@@ -38,18 +50,15 @@ function createValueExpr(value) {
  */
 function createBinaryExpr(operator, left, right) {
   const expr = { operator, type: 'binary_expr' }
-
-  expr.left = left && left.type ? expr.left = left : createValueExpr(left)
-
+  expr.left = has(left, 'type') ? left : createValueExpr(left)
   if (operator === 'BETWEEN' || operator === 'NOT BETWEEN') {
     expr.right = {
       type  : 'expr_list',
       value : [createValueExpr(right[0]), createValueExpr(right[1])],
     }
-  } else {
-    expr.right = right && right.type ? expr.right = right : expr.right = createValueExpr(right)
+    return expr
   }
-
+  expr.right = has(right, 'type') ? right : createValueExpr(right)
   return expr
 }
 
@@ -94,23 +103,39 @@ function escape(str) {
 
 function identifierToSql(ident, isDual) {
   if (isDual === true) return `'${ident}'`
+  if (!ident) return
   return `\`${ident}\``
 }
 
 function literalToSQL(literal) {
-  const { type } = literal
-  let { value } = literal
-
-  if (type === 'number') {
-    /* nothing */
-  } else if (type === 'string') value = `'${escape(value)}'`
-  else if (type === 'bool') value = value ? 'TRUE' : 'FALSE'
-  else if (type === 'null') value = 'NULL'
-  else if (type === 'star') value = '*'
-  else if (['time', 'date', 'timestamp'].includes(type)) value = `${type.toUpperCase()} '${value}'`
-  else if (type === 'param') value = `:${value}`
-
-  return literal.parentheses ? `(${value})` : value
+  const { type, parentheses, value } = literal
+  let str = value
+  switch (type) {
+    case 'string':
+      str = `'${escape(value)}'`
+      break
+    case 'boolean':
+    case 'bool':
+      str = value ? 'TRUE' : 'FALSE'
+      break
+    case 'null':
+      str = 'NULL'
+      break
+    case 'star':
+      str = '*'
+      break
+    case 'param':
+      str = `:${value}`
+      break
+    case 'time':
+    case 'date':
+    case 'timestamp':
+      str = `${type.toUpperCase()} '${value}'`
+      break
+    default:
+      break
+  }
+  return parentheses ? `(${str})` : str
 }
 
 function replaceParams(ast, params) {
@@ -152,6 +177,8 @@ function commentToSQL(comment) {
 }
 
 export {
+  commonOptionConnector,
+  connector,
   commonTypeValue,
   columnRefToSQL,
   commentToSQL,

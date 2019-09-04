@@ -1,5 +1,5 @@
 import has from 'has'
-import { tablesToSQL } from './tables'
+import { tablesToSQL, tableToSQL } from './tables'
 import { identifierToSql } from './util'
 import { exprToSQL } from './expr'
 
@@ -23,21 +23,16 @@ function truncateToSQL(stmt) {
 }
 
 function renameToSQL(stmt) {
-  const type = `${stmt.type && stmt.type.toUpperCase()} TABLE `
+  const { type, table } = stmt
   const clauses = []
-  if (has(stmt, 'table') && stmt.table !== null) {
-    for (const tables of stmt.table) {
-      const renameInfo = []
-      for (const tableInfo of tables) {
-        let str = ''
-        if (has(tableInfo, 'db') && tableInfo.db !== null) str += `${identifierToSql(tableInfo.db)}.`
-        if (has(tableInfo, 'table') && tableInfo.table !== null) str += identifierToSql(tableInfo.table, false)
-        renameInfo.push(str)
-      }
+  const prefix = `${type && type.toUpperCase()} TABLE`
+  if (table) {
+    for (const tables of table) {
+      const renameInfo = tables.map(tableToSQL)
       clauses.push(renameInfo.join(' TO '))
     }
   }
-  return type + clauses.join(', ')
+  return `${prefix} ${clauses.join(', ')}`
 }
 
 function useToSQL(stmt) {

@@ -1,6 +1,14 @@
-import has from 'has'
-import { identifierToSql } from './util'
+import { identifierToSql, hasVal } from './util'
 import { exprToSQL } from './expr'
+
+function tableToSQL(tableInfo) {
+  const { table, db, as, expr } = tableInfo
+  const database = identifierToSql(db)
+  const tableName = table ? identifierToSql(table) : exprToSQL(expr)
+  const str = database ? `${database}.${tableName}` : tableName
+  if (as) return `${str} AS ${identifierToSql(as)}`
+  return str
+}
 
 /**
  * @param {Array} tables
@@ -10,33 +18,18 @@ function tablesToSQL(tables) {
   const baseTable = tables[0]
   const clauses = []
   if (baseTable.type === 'dual') return 'DUAL'
-  let str = baseTable.table ? identifierToSql(baseTable.table) : exprToSQL(baseTable.expr)
-
-  if (baseTable.db && baseTable.db !== null) str = `${identifierToSql(baseTable.db)}.${str}`
-  if (baseTable.as !== null) str = `${str} AS ${identifierToSql(baseTable.as)}`
-
-  clauses.push(str)
-
+  clauses.push(tableToSQL(baseTable))
   for (let i = 1; i < tables.length; ++i) {
     const joinExpr = tables[i]
-
-    str = (joinExpr.join && joinExpr.join !== null) ? ` ${joinExpr.join} ` : str = ', '
-
-    if (joinExpr.table) {
-      if (joinExpr.db !== null) str = `${str}${identifierToSql(joinExpr.db)}.`
-      str = `${str}${identifierToSql(joinExpr.table)}`
-    } else {
-      str = `${str}${exprToSQL(joinExpr.expr)}`
-    }
-
-    if (joinExpr.as !== null) str = `${str} AS ${identifierToSql(joinExpr.as)}`
-    if (has(joinExpr, 'on') && joinExpr.on !== null) str = `${str} ON ${exprToSQL(joinExpr.on)}`
-    if (has(joinExpr, 'using')) str = `${str} USING (${joinExpr.using.map(identifierToSql).join(', ')})`
-
-    clauses.push(str)
+    const { on, using, join } = joinExpr
+    const str = []
+    str.push(join ? ` ${join}` : ',')
+    str.push(tableToSQL(joinExpr))
+    if (on) str.push(`ON ${exprToSQL(on)}`)
+    if (using) str.push(`USING (${using.map(identifierToSql).join(', ')})`)
+    clauses.push(str.join(' '))
   }
-
-  return clauses.join('')
+  return clauses.filter(hasVal).join('')
 }
 
 function tableOptionToSQL(tableOption) {
@@ -50,4 +43,5 @@ function tableOptionToSQL(tableOption) {
 export {
   tablesToSQL,
   tableOptionToSQL,
+  tableToSQL,
 }
