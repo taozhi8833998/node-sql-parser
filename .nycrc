@@ -1,0 +1,34 @@
+{
+  "nyc": {
+    "check-coverage": true,
+    "per-file": true,
+    "lines": 99,
+    "statements": 99,
+    "functions": 99,
+    "branches": 99,
+    "include": [
+      "src/**/*.js"
+    ],
+    "exclude": [
+      "build/pegjs-parser.js",
+      "lib/**/*.js",
+      "test/**/*.spec.js"
+    ],
+    "ignore-class-method": "methodToIgnore",
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ],
+    "require": [
+      "babel-register"
+    ],
+    "extension": [
+      ".js"
+    ],
+    "sourceMap": true,
+    "instrument": true,
+    "cache": true,
+    "all": true,
+    "report-dir": "./coverage"
+  }
+}

@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const { Parser } = require('../');
+const Parser = require('../src/parser').default
 
 describe('create', () => {
   const parser = new Parser();

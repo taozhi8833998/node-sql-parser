@@ -1,5 +1,10 @@
-import { literalToSQL, identifierToSql, toUpper, hasVal } from './util'
-import { commentToSQL } from './comment'
+import {
+  literalToSQL,
+  identifierToSql,
+  toUpper,
+  hasVal,
+  commentToSQL,
+} from './util'
 
 function indexTypeToSQL(indexType) {
   if (!indexType) return

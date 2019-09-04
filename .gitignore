@@ -3,3 +3,5 @@ build/
 coverage/
 lib/
 index.d.ts
+.nyc_output/
+.coveralls.yml

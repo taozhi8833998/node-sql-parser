@@ -141,9 +141,20 @@ function commonTypeValue(opt) {
   return result
 }
 
+function commentToSQL(comment) {
+  if (!comment) return
+  const result = []
+  const { keyword, symobl, value } = comment
+  result.push(keyword.toUpperCase())
+  if (symobl) result.push(symobl)
+  result.push(literalToSQL(value))
+  return result.join(' ')
+}
+
 export {
   commonTypeValue,
   columnRefToSQL,
+  commentToSQL,
   createBinaryExpr,
   createValueExpr,
   escape,

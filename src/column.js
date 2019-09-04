@@ -1,7 +1,6 @@
 import { exprToSQL } from './expr'
-import { identifierToSql, commonTypeValue, columnRefToSQL, toUpper, hasVal } from './util'
 import { tablesToSQL } from './tables'
-import { commentToSQL } from './comment'
+import { identifierToSql, commonTypeValue, columnRefToSQL, toUpper, hasVal, commentToSQL } from './util'
 
 function columnDataType(definition) {
   const dataType = definition && definition.dataType

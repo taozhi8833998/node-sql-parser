@@ -1,4 +1,4 @@
-import { exprToSQL } from './expr'
+import { literalToSQL } from './util'
 
 function commentToSQL(comment) {
   if (!comment) return
@@ -6,7 +6,7 @@ function commentToSQL(comment) {
   const { keyword, symobl, value } = comment
   result.push(keyword.toUpperCase())
   if (symobl) result.push(symobl)
-  result.push(exprToSQL(value))
+  result.push(literalToSQL(value))
   return result.join(' ')
 }
 
