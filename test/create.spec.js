@@ -14,6 +14,9 @@ describe('create', () => {
       expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128))`))
         .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT, `name` VARCHAR(128))');
 
+      expect(getParsedSql(`create temporary table dbname.tableName (id int not null default 1, name varchar(128) null default "xx")`))
+        .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT NOT NULL DEFAULT 1, `name` VARCHAR(128) NULL DEFAULT \'xx\')');
+
       expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key) ENGINE = MEMORY default character SET = utf8 comment = 'comment test'`))
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY DEFAULT CHARACTER SET = utf8 COMMENT = \'comment test\'');
       expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key, name varchar(128) unique key) ENGINE = MEMORY compression = 'zlib'`))
@@ -157,6 +160,54 @@ describe('create', () => {
       it('should support create table from union', () => {
         expect(getParsedSql(`create temporary table if not exists  dbname.tableName (id int, name varchar(128)) engine = innodb ignore as select id, name from qdb.qta union select ab as id, cd as name from qdb.qtc`))
           .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT, `name` VARCHAR(128)) ENGINE = INNODB IGNORE AS SELECT `id`, `name` FROM `qdb`.`qta` UNION SELECT `ab` AS `id`, `cd` AS `name` FROM `qdb`.`qtc`');
+      })
+    })
+
+    describe('create table unknow resource', () => {
+      it('should throw error, when reosurce unkonw', () => {
+        const columnDefinition = [{
+          "column": {
+            "type": "column_ref",
+            "table": null,
+            "column": "id"
+          },
+          "definition": {
+            "dataType": "INT"
+          },
+          "nullable": null,
+          "default_val": null,
+          "auto_increment": null,
+          "unique_or_primary": null,
+          "comment": null,
+          "collate": null,
+          "column_format": null,
+          "storage": null,
+          "reference_definition": null,
+          "resource": "xx"
+        }]
+        const ast = {
+          "type": "create",
+          "keyword": "table",
+          "temporary": "temporary",
+          "if_not_exists": null,
+          "table": [
+            {
+                "db": "dbname",
+                "table": "tableName",
+                "as": null
+            }
+          ],
+          "ignore_replace": null,
+          "as": null,
+          "query_expr": null,
+          "create_definitions": [],
+          "table_options": null
+        }
+        expect(parser.sqlify(ast)).to.be.eql('CREATE TEMPORARY TABLE `dbname`.`tableName` ()')
+        ast.create_definitions = []
+        expect(parser.sqlify(ast)).to.be.eql('CREATE TEMPORARY TABLE `dbname`.`tableName` ()')
+        ast.create_definitions = columnDefinition
+        expect(parser.sqlify.bind(parser, ast)).to.throw('unknow resource = xx type')
       })
     })
   })

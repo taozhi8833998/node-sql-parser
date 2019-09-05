@@ -42,8 +42,7 @@ function columnOption(definition) {
   columnOpt.push(toUpper(nullable && nullable.value))
   if (defaultOpt) {
     const { type, value } = defaultOpt
-    columnOpt.push(type.toUpperCase())
-    columnOpt.push(exprToSQL(value))
+    columnOpt.push(type.toUpperCase(), exprToSQL(value))
   }
   columnOpt.push(toUpper(autoIncrement), toUpper(uniquePrimary), commentToSQL(comment))
   columnOpt.push(...commonTypeValue(collate))

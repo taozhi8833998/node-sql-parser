@@ -330,6 +330,7 @@ create_column_definition
     s:storage? __
     re:reference_definition? __ {
       columnList.add(`create::${c.table}::${c.column}`)
+      if (n && !n.value) n.value = 'null'
       return {
         column: c,
         definition: d,
