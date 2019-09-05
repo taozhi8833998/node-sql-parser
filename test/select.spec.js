@@ -851,6 +851,12 @@ describe('select', () => {
 
   describe('white list check', () => {
     describe('table mode', () => {
+      it('should failed without whitelist', () => {
+        const sql = 'SELECT * FROM a'
+        const result = parser.whiteListCheck(sql)
+        expect(result).to.be.eql(undefined)
+        expect(parser.whiteListCheck(sql, [])).to.be.eql(undefined)
+      })
       it('should pass the same check', () => {
         const sql = 'SELECT * FROM a'
         const whiteList = ['select::null::a']
@@ -941,6 +947,13 @@ describe('select', () => {
         const whiteList = ['select::(.*)::(id|name)']
         const fun = parser.whiteListCheck.bind(parser, sql, whiteList, mode)
         expect(fun).to.throw(`authority = 'update::null::id' is required in ${mode} whiteList to execute SQL = '${sql}'`)
+      })
+    })
+    describe('unknow type check', () => {
+      it('should throw error', () => {
+        const sql = 'SELECT * FROM a'
+        const whiteList = ['select::null::(.*)']
+        expect(parser.whiteListCheck.bind(parser, sql, whiteList, 'unknow')).to.throw('unknow is not valid check mode')
       })
     })
   })

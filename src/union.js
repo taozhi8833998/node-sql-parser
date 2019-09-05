@@ -1,5 +1,3 @@
-'use strict'
-
 import { createToSQL } from './create'
 import { alterToSQL } from './alter'
 import { selectToSQL } from './select'

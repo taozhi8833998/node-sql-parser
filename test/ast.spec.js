@@ -1,6 +1,8 @@
 const { expect } = require('chai')
 const Parser = require('../src/parser').default
 const util = require('../src/util')
+const { varToSQL } = require('../src/expr')
+const { multipleToSQL } = require('../src/union')
 
 describe('AST', () => {
     const parser = new Parser();
@@ -542,6 +544,33 @@ describe('AST', () => {
                 expect(getParsedSql(sql)).to.equal(`SELECT 1 UNION SELECT '1' UNION SELECT \`a\` FROM \`t\` UNION SELECT TRUE`);
             });
 
+            it('should support sqlify without ast', () => {
+                const ast = [{
+                    ast: {
+                        "with": null,
+                        "type": "select",
+                        "options": null,
+                        "distinct": null,
+                        "columns": [
+                            {
+                                "expr": {
+                                "type": "number",
+                                "value": 1
+                                },
+                                "as": null
+                            }
+                        ],
+                        "from": null,
+                        "where": null,
+                        "groupby": null,
+                        "having": null,
+                        "orderby": null,
+                        "limit": null
+                    }
+                }]
+                expect(multipleToSQL(ast)).to.equal('SELECT 1')
+            })
+
             it('should be supported in expressions', () => {
                 sql = `select * from (select 1 union select 2) t`;
                 expect(getParsedSql(sql)).to.equal(`SELECT * FROM (SELECT 1 UNION SELECT 2) AS \`t\``);
@@ -585,6 +614,10 @@ describe('AST', () => {
             sql = 'SELECT :var_dname FROM dual';
             expect(getParsedSql(sql)).to.equal('SELECT :var_dname FROM DUAL');
         });
+
+        it('should support without prefix', () => {
+            expect(varToSQL({ name: "test" })).to.equal('@test')
+        })
 
         it('should support trailing zeros',  () => {
             expect(getParsedSql('SELECT 042')).equal('SELECT 42');
@@ -1056,5 +1089,9 @@ describe('AST', () => {
         it(`should throw exception for drop statements`, () => {
           expect(parser.sqlify.bind(null, {type: 'Alter'})).to.throw(Error, `Alter statements not supported at the moment`);
         });
+
+        it(`should throw exception for drop statements`, () => {
+            expect(parser.sqlify.bind(null, {ast: {type: 'Alter'}})).to.throw(Error, `Alter statements not supported at the moment`);
+          });
     });
 });

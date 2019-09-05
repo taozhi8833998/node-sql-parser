@@ -38,7 +38,7 @@ function createValueExpr(value) {
     case 'number':
       return { type: 'number', value }
     default:
-      throw new Error(`Cannot convert value  "${value}" to SQL`)
+      throw new Error(`Cannot convert value "${type}" to SQL`)
   }
 }
 
@@ -165,9 +165,9 @@ function commonTypeValue(opt) {
 function commentToSQL(comment) {
   if (!comment) return
   const result = []
-  const { keyword, symobl, value } = comment
+  const { keyword, symbol, value } = comment
   result.push(keyword.toUpperCase())
-  if (symobl) result.push(symobl)
+  if (symbol) result.push(symbol)
   result.push(literalToSQL(value))
   return result.join(' ')
 }

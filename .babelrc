@@ -1,18 +1,19 @@
 {
   "presets": [
     [
-      "env",
+      "@babel/preset-env",
       {
         "targets": {
           "node": "10.16.3"
         },
         "modules": "commonjs",
-        "useBuiltIns": true,
+        "useBuiltIns": "entry",
+        "corejs": 3,
         "debug": false
       }
     ]
   ],
   "plugins": [
-    "transform-object-rest-spread"
+    "@babel/plugin-proposal-object-rest-spread"
   ]
 }

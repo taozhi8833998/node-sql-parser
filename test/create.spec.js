@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const Parser = require('../src/parser').default
+const { indexOptionToSQL, indexTypeAndOptionToSQL } = require('../src/index-definition')
 
 describe('create', () => {
   const parser = new Parser();
@@ -122,6 +123,14 @@ describe('create', () => {
           })
         })
       })
+      it('should support empty index option', () => {
+        expect(indexOptionToSQL()).to.equal(undefined)
+        const indexOpt = {
+          type: 'unknow',
+        }
+        expect(indexOptionToSQL(indexOpt)).to.equal(indexOpt.type.toUpperCase())
+        expect(indexTypeAndOptionToSQL({})).to.be.eql([ undefined, '' ])
+      })
     })
 
     describe('create constraint', () => {
@@ -200,12 +209,13 @@ describe('create', () => {
           "ignore_replace": null,
           "as": null,
           "query_expr": null,
-          "create_definitions": [],
           "table_options": null
         }
-        expect(parser.sqlify(ast)).to.be.eql('CREATE TEMPORARY TABLE `dbname`.`tableName` ()')
+        expect(parser.sqlify(ast)).to.be.eql('CREATE TEMPORARY TABLE `dbname`.`tableName`')
         ast.create_definitions = []
         expect(parser.sqlify(ast)).to.be.eql('CREATE TEMPORARY TABLE `dbname`.`tableName` ()')
+        ast.create_definitions = ['', null]
+        expect(parser.sqlify(ast)).to.be.eql('CREATE TEMPORARY TABLE `dbname`.`tableName` (, )')
         ast.create_definitions = columnDefinition
         expect(parser.sqlify.bind(parser, ast)).to.throw('unknow resource = xx type')
       })

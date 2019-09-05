@@ -18,7 +18,7 @@ function indexOptionToSQL(indexOpt) {
   const upperType = type.toUpperCase()
   const indexOptArray = []
   indexOptArray.push(upperType)
-  switch (upperType.toUpperCase()) {
+  switch (upperType) {
     case 'KEY_BLOCK_SIZE':
       if (symbol) indexOptArray.push(symbol)
       indexOptArray.push(literalToSQL(expr))

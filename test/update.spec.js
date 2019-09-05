@@ -108,6 +108,8 @@ describe('update', () => {
         "where": null
       }
       expect(parser.sqlify(ast)).to.be.equal('UPDATE `a`')
+      ast.set = []
+      expect(parser.sqlify(ast)).to.be.equal('UPDATE `a` SET ')
       ast.set = set
       expect(parser.sqlify(ast)).to.be.equal('UPDATE `a` SET `id`')
       set[0].value = value

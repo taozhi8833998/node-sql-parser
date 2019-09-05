@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const Parser = require('../src/parser').default
+const { renameToSQL } = require('../src/command')
 
 
 describe('Command SQL', () => {
@@ -45,6 +46,10 @@ describe('Command SQL', () => {
     it(`should support MySQL rename`, () => {
       expect(getParsedSql('rename table a to b'))
         .to.equal('RENAME TABLE `a` TO `b`');
+    });
+
+    it(`should support MySQL rename empty table`, () => {
+      expect(renameToSQL({ type: 'rename'})).to.equal('RENAME TABLE ')
     });
 
     it(`should support MySQL rename multiples`, () => {

@@ -6,7 +6,7 @@
   "types": "index.d.ts",
   "scripts": {
     "build": "mkdir -p build && pegjs -o build/pegjs-parser.js sql.pegjs && npm run compile",
-    "test": "npm run lint && mocha --require babel-register",
+    "test": "NODE_ENV=test npm run lint && mocha --require @babel/register",
     "compile": "babel src -d lib",
     "lint": "npm run build && eslint src/",
     "prepublishOnly": "npm run build",
@@ -40,13 +40,13 @@
     "node": ">=10"
   },
   "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/register": "^7.5.5",
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.5",
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-register": "^6.26.0",
     "chai": "^4.2.0",
     "coveralls": "^3.0.6",
     "eslint": "^6.1.0",

@@ -69,4 +69,5 @@ export {
   exprToSQLConvertFn,
   exprToSQL,
   getExprListSQL,
+  varToSQL,
 }
