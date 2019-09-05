@@ -1,7 +1,5 @@
-'use strict';
-
 const { expect } = require('chai');
-const { Parser } = require('../');
+const Parser = require('../src/parser').default
 
 describe('insert', () => {
     const parser = new Parser();
@@ -37,6 +35,37 @@ describe('insert', () => {
       expect(ast).to.have.lengthOf(2)
       expect(ast[0]).to.eql(astFirstSQL)
       expect(ast[1]).to.eql(astSecondSQL)
+    })
+
+    it('should parser no columns', () => {
+      const ast = {
+        "type": "insert",
+        "table": [
+          {
+            "db": null,
+            "table": "t",
+            "as": null
+          }
+        ],
+        "values": [
+          {
+            "type": "expr_list",
+            "value": [
+              {
+                "type": "number",
+                "value": 1
+              },
+              {
+                "type": "number",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      }
+      expect(parser.sqlify(ast)).to.be.eql('INSERT INTO `t` VALUES (1,2)')
+      ast.columns = ['col1', 'col2']
+      expect(parser.sqlify(ast)).to.be.eql('INSERT INTO `t` (`col1`, `col2`) VALUES (1,2)')
     })
 
     it('failed with INSERT SELECT INFO', () => {

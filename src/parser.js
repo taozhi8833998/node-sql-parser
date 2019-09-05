@@ -1,7 +1,5 @@
-'use strict'
-
-const parseFn = require('../build/pegjs-parser').parse
-const astToSQL = require('./sql')
+import { parse as parseFn } from '../build/pegjs-parser'
+import astToSQL from './sql'
 
 class Parser {
   astify(sql) {
@@ -53,4 +51,4 @@ class Parser {
   }
 }
 
-module.exports = Parser
+export default Parser

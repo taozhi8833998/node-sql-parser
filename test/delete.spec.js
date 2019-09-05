@@ -1,7 +1,6 @@
-'use strict';
-
 const { expect } = require('chai');
-const { Parser } = require('../');
+const Parser = require('../src/parser').default
+const { deleteToSQL } = require('../src/delete')
 
 describe('delete', () => {
     const parser = new Parser();
@@ -53,6 +52,9 @@ describe('delete', () => {
         as: null
       }]);
     });
+    it('should sqlify delete without table', () => {
+       expect(deleteToSQL({})).to.equal('DELETE')
+    })
     it('should parse table in delete usage', () => {
       const { tableList, columnList, ast } = parser.parse('DELETE t1,t2 from t1 LEFT JOIN t2 ON t1.id=t2.id WHERE t1.id=25');
       expect(tableList).to.eql(['delete::null::t1', 'delete::null::t2']);

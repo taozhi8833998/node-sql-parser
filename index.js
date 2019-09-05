@@ -1,4 +1,4 @@
-const Parser = require('./lib/parser')
+const Parser = require('./lib/parser').default
 const util = require('./lib/util')
 
 module.exports = {

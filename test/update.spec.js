@@ -1,7 +1,5 @@
-'use strict';
-
 const { expect } = require('chai');
-const { Parser } = require('../');
+const Parser = require('../src/parser').default
 
 describe('update', () => {
     const parser = new Parser();
@@ -86,6 +84,37 @@ describe('update', () => {
      ]);
     expect(ast.where).to.be.null;
     });
+
+    it('should parser set is null', () => {
+      const set =  [
+        {
+          "column": "id",
+          "table": null
+        }
+      ]
+      const value = {
+        "type": "number",
+        "value": 1
+      }
+      const ast = {
+        "type": "update",
+        "table": [
+          {
+            "db": null,
+            "table": "a",
+            "as": null
+          }
+        ],
+        "where": null
+      }
+      expect(parser.sqlify(ast)).to.be.equal('UPDATE `a`')
+      ast.set = []
+      expect(parser.sqlify(ast)).to.be.equal('UPDATE `a` SET ')
+      ast.set = set
+      expect(parser.sqlify(ast)).to.be.equal('UPDATE `a` SET `id`')
+      set[0].value = value
+      expect(parser.sqlify(ast)).to.be.equal('UPDATE `a` SET `id` = 1')
+    })
 
     it('should parse cross-table update', () => {
       const { tableList, columnList, ast } = parser.parse("UPDATE Reservations r JOIN Train t ON (r.Train = t.TrainID) SET t.Capacity = t.Capacity + r.NoSeats WHERE r.ReservationID = 12");
