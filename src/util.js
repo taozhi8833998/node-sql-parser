@@ -77,9 +77,7 @@ function replaceParamsInner(ast, keys) {
     })
     .forEach(key => {
       const expr = ast[key]
-
       if (!(typeof expr === 'object' && expr.type === 'param')) return replaceParamsInner(expr, keys)
-
       if (typeof keys[expr.value] === 'undefined') throw new Error(`no value for parameter :${expr.value} found`)
       ast[key] = createValueExpr(keys[expr.value])
       return null
@@ -90,14 +88,12 @@ function replaceParamsInner(ast, keys) {
 
 function escape(str) {
   const res = []
-
   for (let i = 0, len = str.length; i < len; ++i) {
     let char = str[i]
     const escaped = escapeMap[char]
     if (escaped) char = escaped
     res.push(char)
   }
-
   return res.join('')
 }
 

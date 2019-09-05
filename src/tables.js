@@ -1,5 +1,6 @@
-import { identifierToSql, hasVal } from './util'
+import { identifierToSql, hasVal, commonOptionConnector } from './util'
 import { exprToSQL } from './expr'
+
 
 function tableToSQL(tableInfo) {
   const { table, db, as, expr } = tableInfo
@@ -25,9 +26,9 @@ function tablesToSQL(tables) {
     const str = []
     str.push(join ? ` ${join}` : ',')
     str.push(tableToSQL(joinExpr))
-    if (on) str.push(`ON ${exprToSQL(on)}`)
+    str.push(commonOptionConnector('ON', exprToSQL, on))
     if (using) str.push(`USING (${using.map(identifierToSql).join(', ')})`)
-    clauses.push(str.join(' '))
+    clauses.push(str.filter(hasVal).join(' '))
   }
   return clauses.filter(hasVal).join('')
 }

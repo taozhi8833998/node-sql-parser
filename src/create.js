@@ -23,34 +23,27 @@ function createDefinitionToSQL(definition) {
 
 function createToSQL(stmt) {
   const {
-    type, keyword, table, like, as,
-    temporary,
+    type, keyword, table, like, as, temporary,
     if_not_exists: ifNotExists,
     create_definitions: createDefinition,
     table_options: tableOptions,
     ignore_replace: ignoreReplace,
     query_expr: queryExpr,
   } = stmt
-  const sql = [toUpper(type), toUpper(temporary), toUpper(keyword), toUpper(ifNotExists)]
-  const tableName = tablesToSQL(table)
-  sql.push(tableName)
+  const sql = [toUpper(type), toUpper(temporary), toUpper(keyword), toUpper(ifNotExists), tablesToSQL(table)]
   if (like) {
     const { type: likeType, table: likeTable } = like
-    sql.push(toUpper(likeType))
     const likeTableName = tablesToSQL(likeTable)
-    sql.push(likeTableName)
+    sql.push(toUpper(likeType), likeTableName)
     return sql.filter(hasVal).join(' ')
   }
   if (createDefinition) {
-    const createDefinitionList = createDefinition.map(createDefinitionToSQL)
-    sql.push(`(${createDefinitionList.join(', ')})`)
+    sql.push(`(${createDefinition.map(createDefinitionToSQL).join(', ')})`)
   }
   if (tableOptions) {
-    const tableOptionList = tableOptions.map(tableOptionToSQL)
-    sql.push(tableOptionList.join(' '))
+    sql.push(tableOptions.map(tableOptionToSQL).join(' '))
   }
-  sql.push(toUpper(ignoreReplace))
-  sql.push(toUpper(as))
+  sql.push(toUpper(ignoreReplace), toUpper(as))
   if (queryExpr) sql.push(unionToSQL(queryExpr))
   return sql.filter(hasVal).join(' ')
 }

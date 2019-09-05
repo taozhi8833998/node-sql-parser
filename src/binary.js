@@ -3,16 +3,26 @@ import { exprToSQL } from './expr'
 function binaryToSQL(expr) {
   let { operator } = expr
   let rstr = exprToSQL(expr.right)
-
+  let isBetween = false
   if (Array.isArray(rstr)) {
-    if (operator === '=') operator = 'IN'
-    if (operator === '!=') operator = 'NOT IN'
-    if (operator === 'BETWEEN' || operator === 'NOT BETWEEN') rstr = `${rstr[0]} AND ${rstr[1]}`
-    else rstr = `(${rstr.join(', ')})`
+    switch (operator) {
+      case '=':
+        operator = 'IN'
+        break
+      case '!=':
+        operator = 'NOT IN'
+        break
+      case 'BETWEEN':
+      case 'NOT BETWEEN':
+        isBetween = true
+        rstr = `${rstr[0]} AND ${rstr[1]}`
+        break
+      default:
+        break
+    }
+    if (!isBetween) rstr = `(${rstr.join(', ')})`
   }
-
   const str = `${exprToSQL(expr.left)} ${operator} ${rstr}`
-
   return expr.parentheses ? `(${str})` : str
 }
 

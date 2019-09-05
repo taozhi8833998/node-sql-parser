@@ -1,25 +1,15 @@
-import has from 'has'
-import { tablesToSQL, tableToSQL } from './tables'
-import { identifierToSql } from './util'
+import { identifierToSql, hasVal } from './util'
 import { exprToSQL } from './expr'
+import { tablesToSQL, tableToSQL } from './tables'
 
 function dropToSQL(stmt) {
-  const clauses = ['DROP TABLE']
-  let str = ''
-  if (has(stmt, 'table')) str = tablesToSQL(stmt.table)
-  if (has(stmt, 'db') && stmt.db !== null) str = `${identifierToSql(stmt.db)}.${str}`
-  clauses.push(str)
-  return `${clauses.join(' ')}`
+  const clauses = ['DROP TABLE', tablesToSQL(stmt.table)]
+  return clauses.join(' ')
 }
 
 function truncateToSQL(stmt) {
-  const clauses = ['TRUNCATE']
-  if (stmt.keyword) clauses.push(stmt.keyword)
-  let str = ''
-  if (has(stmt, 'table')) str = tablesToSQL(stmt.table)
-  if (has(stmt, 'db') && stmt.db !== null) str = `${identifierToSql(stmt.db)}.${str}`
-  clauses.push(str)
-  return `${clauses.join(' ')}`
+  const clauses = ['TRUNCATE', stmt.keyword, tablesToSQL(stmt.table)]
+  return clauses.filter(hasVal).join(' ')
 }
 
 function renameToSQL(stmt) {

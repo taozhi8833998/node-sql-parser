@@ -1,7 +1,7 @@
 import has from 'has'
 import { tablesToSQL } from './tables'
 import { exprToSQL } from './expr'
-
+import { hasVal, identifierToSql } from './util'
 
 /**
  * @param {Array} sets
@@ -13,7 +13,7 @@ function setToSQL(sets) {
   for (const set of sets) {
     let str = ''
     const { table, column, value } = set
-    if (column) str = table ? `\`${table}\`.\`${column}\`` : `\`${column}\``
+    str = [table, column].filter(hasVal).map(info => identifierToSql(info)).join('.')
     if (value) str = `${str} = ${exprToSQL(value)}`
     clauses.push(str)
   }

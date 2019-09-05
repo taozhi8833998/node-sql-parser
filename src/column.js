@@ -31,14 +31,11 @@ function columnReferenceDefinitionToSQL(referenceDefinition) {
 function columnOption(definition) {
   const columnOpt = []
   const {
-    nullable,
+    nullable, comment, collate, storage,
     default_val: defaultOpt,
     auto_increment: autoIncrement,
     unique_or_primary: uniquePrimary,
-    comment,
-    collate,
     column_format: columnFormat,
-    storage,
     reference_definition: referenceDefinition,
   } = definition
 
@@ -48,9 +45,7 @@ function columnOption(definition) {
     columnOpt.push(type.toUpperCase())
     columnOpt.push(exprToSQL(value))
   }
-  columnOpt.push(toUpper(autoIncrement))
-  columnOpt.push(toUpper(uniquePrimary))
-  columnOpt.push(commentToSQL(comment))
+  columnOpt.push(toUpper(autoIncrement), toUpper(uniquePrimary), commentToSQL(comment))
   columnOpt.push(...commonTypeValue(collate))
   columnOpt.push(...commonTypeValue(columnFormat))
   columnOpt.push(...commonTypeValue(storage))
