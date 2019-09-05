@@ -37,6 +37,37 @@ describe('insert', () => {
       expect(ast[1]).to.eql(astSecondSQL)
     })
 
+    it('should parser no columns', () => {
+      const ast = {
+        "type": "insert",
+        "table": [
+          {
+            "db": null,
+            "table": "t",
+            "as": null
+          }
+        ],
+        "values": [
+          {
+            "type": "expr_list",
+            "value": [
+              {
+                "type": "number",
+                "value": 1
+              },
+              {
+                "type": "number",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      }
+      expect(parser.sqlify(ast)).to.be.eql('INSERT INTO `t` VALUES (1,2)')
+      ast.columns = ['col1', 'col2']
+      expect(parser.sqlify(ast)).to.be.eql('INSERT INTO `t` (`col1`, `col2`) VALUES (1,2)')
+    })
+
     it('failed with INSERT SELECT INFO', () => {
       const sql = 'INSERT INTO t1 SELECT * FROM t'
       const fun = parser.parse.bind(parser, sql)

@@ -1,7 +1,6 @@
-import has from 'has'
 import { tablesToSQL } from './tables'
 import { exprToSQL } from './expr'
-import { identifierToSql } from './util'
+import { identifierToSql, commonOptionConnector, hasVal } from './util'
 
 /**
  * @param {Array} values
@@ -13,13 +12,12 @@ function valuesToSQL(values) {
 }
 
 function insertToSQL(stmt) {
-  const clauses = ['INSERT INTO']
-  if (has(stmt, 'table')) clauses.push(tablesToSQL(stmt.table))
-  if (Array.isArray(stmt.columns)) clauses.push(`(${stmt.columns.map(identifierToSql).join(', ')})`)
-  if (Array.isArray(stmt.values)) clauses.push('VALUES', valuesToSQL(stmt.values))
-  if (stmt.where) clauses.push(`WHERE ${exprToSQL(stmt.where)}`)
-
-  return clauses.join(' ')
+  const { table, columns, values, where } = stmt
+  const clauses = ['INSERT INTO', tablesToSQL(table)]
+  if (Array.isArray(columns)) clauses.push(`(${columns.map(identifierToSql).join(', ')})`)
+  clauses.push(commonOptionConnector('VALUES', valuesToSQL, values))
+  clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
+  return clauses.filter(hasVal).join(' ')
 }
 
 export {

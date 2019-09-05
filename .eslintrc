@@ -126,6 +126,7 @@
     ],
     "import/no-dynamic-require": 1,
     "import/no-cycle": 0,
-    "import/prefer-default-export": 0
+    "import/prefer-default-export": 0,
+    "array-element-newline": 0
   }
 }

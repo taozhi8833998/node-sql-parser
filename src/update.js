@@ -1,7 +1,6 @@
-import has from 'has'
 import { tablesToSQL } from './tables'
 import { exprToSQL } from './expr'
-import { hasVal, identifierToSql } from './util'
+import { hasVal, identifierToSql, commonOptionConnector } from './util'
 
 /**
  * @param {Array} sets
@@ -21,12 +20,14 @@ function setToSQL(sets) {
 }
 
 function updateToSQL(stmt) {
-  const clauses = ['UPDATE']
-  // cross-table update
-  if (has(stmt, 'table') && stmt.table !== null) clauses.push(tablesToSQL(stmt.table))
-  if (Array.isArray(stmt.set)) clauses.push('SET', setToSQL(stmt.set))
-  if (has(stmt, 'where') && stmt.where !== null) clauses.push(`WHERE ${exprToSQL(stmt.where)}`)
-  return clauses.join(' ')
+  const { table, set, where } = stmt
+  const clauses = [
+    'UPDATE',
+    tablesToSQL(table),
+    commonOptionConnector('SET', setToSQL, set),
+    commonOptionConnector('WHERE', exprToSQL, where),
+  ]
+  return clauses.filter(hasVal).join(' ')
 }
 
 export {
