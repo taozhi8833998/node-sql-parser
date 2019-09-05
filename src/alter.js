@@ -9,7 +9,8 @@ function alterToSQL(stmt) {
   const action = type && type.toUpperCase()
   const tableName = tablesToSQL(table)
   const exprList = expr.map(exprToSQL)
-  return `${action} TABLE ${tableName} ${exprList.join(', ')}`
+  const result = [action, 'TABLE', tableName, exprList.join(', ')]
+  return result.filter(hasVal).join(' ')
 }
 
 function alterExprToSQL(expr) {

@@ -135,6 +135,37 @@ describe('Command SQL', () => {
       })
     });
 
+    it('should support alter without expr', () => {
+      const expr = [
+        {
+          "action": "add",
+          "column": "xxx",
+          "definition": {
+              "dataType": "INT"
+          },
+          "keyword": "COLUMN",
+          "resource": "column",
+          "type": "alter"
+        }
+      ]
+      const resource = 'unknow'
+      const ast = {
+        "type": "alter",
+        "table": [
+          {
+            "db": null,
+            "table": "a",
+            "as": null
+          }
+        ],
+      }
+      expect(parser.sqlify(ast)).to.be.equal('ALTER TABLE `a`')
+      ast.expr = expr
+      expect(parser.sqlify(ast)).to.be.equal('ALTER TABLE `a` ADD COLUMN xxx INT')
+      expr[0].resource = resource
+      expect(parser.sqlify(ast)).to.be.equal('ALTER TABLE `a` ADD COLUMN')
+    })
+
     it(`should support MySQL alter drop column`, () => {
       KEYWORDS.forEach(keyword => {
         expect(getParsedSql(`alter table a drop ${keyword}xxx`))
