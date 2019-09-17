@@ -139,9 +139,10 @@ function replaceParams(ast, params) {
 }
 
 function columnRefToSQL(expr) {
-  let str = expr.column === '*' ? '*' : identifierToSql(expr.column, expr.isDual)
-  if (has(expr, 'table') && expr.table !== null) str = `${identifierToSql(expr.table)}.${str}`
-  return expr.parentheses ? `(${str})` : str
+  const { column, isDual, table, parentheses } = expr
+  let str = column === '*' ? '*' : identifierToSql(column, isDual)
+  if (table) str = `${identifierToSql(table)}.${str}`
+  return parentheses ? `(${str})` : str
 }
 
 function toUpper(val) {

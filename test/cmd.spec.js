@@ -132,11 +132,11 @@ describe('Command SQL', () => {
     it(`should support MySQL alter add column`, () => {
       KEYWORDS.forEach(keyword => {
         expect(getParsedSql(`alter table a add ${keyword}xxx int`))
-        .to.equal(`ALTER TABLE \`a\` ADD ${keyword}xxx INT`);
+        .to.equal(`ALTER TABLE \`a\` ADD ${keyword}\`xxx\` INT`);
         expect(getParsedSql(`alter table a add ${keyword}yyy varchar(128)`))
-          .to.equal(`ALTER TABLE \`a\` ADD ${keyword}yyy VARCHAR(128)`);
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword}\`yyy\` VARCHAR(128)`);
         expect(getParsedSql(`alter table a add ${keyword}zzz varchar(128), add aaa date`))
-          .to.equal(`ALTER TABLE \`a\` ADD ${keyword}zzz VARCHAR(128), ADD aaa DATE`);
+          .to.equal(`ALTER TABLE \`a\` ADD ${keyword}\`zzz\` VARCHAR(128), ADD \`aaa\` DATE`);
       })
     });
 
@@ -144,7 +144,11 @@ describe('Command SQL', () => {
       const expr = [
         {
           "action": "add",
-          "column": "xxx",
+          "column": {
+            type: 'column_ref',
+            table: null,
+            column: 'xxx'
+          },
           "definition": {
               "dataType": "INT"
           },
@@ -166,7 +170,7 @@ describe('Command SQL', () => {
       }
       expect(parser.sqlify(ast)).to.be.equal('ALTER TABLE `a`')
       ast.expr = expr
-      expect(parser.sqlify(ast)).to.be.equal('ALTER TABLE `a` ADD COLUMN xxx INT')
+      expect(parser.sqlify(ast)).to.be.equal('ALTER TABLE `a` ADD COLUMN \`xxx\` INT')
       expr[0].resource = resource
       expect(parser.sqlify(ast)).to.be.equal('ALTER TABLE `a` ADD COLUMN')
     })
@@ -174,16 +178,16 @@ describe('Command SQL', () => {
     it(`should support MySQL alter drop column`, () => {
       KEYWORDS.forEach(keyword => {
         expect(getParsedSql(`alter table a drop ${keyword}xxx`))
-        .to.equal(`ALTER TABLE \`a\` DROP ${keyword}xxx`);
+        .to.equal(`ALTER TABLE \`a\` DROP ${keyword}\`xxx\``);
         expect(getParsedSql(`alter table a drop ${keyword}xxx, drop ${keyword}yyy`))
-        .to.equal(`ALTER TABLE \`a\` DROP ${keyword}xxx, DROP ${keyword}yyy`);
+        .to.equal(`ALTER TABLE \`a\` DROP ${keyword}\`xxx\`, DROP ${keyword}\`yyy\``);
       })
     });
 
     it('should support MySQL alter mix action', () => {
       KEYWORDS.forEach(keyword => {
         expect(getParsedSql(`alter table a drop ${keyword}xxx, add ${keyword}yyy varchar(256), add ${keyword}zzz date, drop ${keyword} aaa`))
-        .to.equal(`ALTER TABLE \`a\` DROP ${keyword}xxx, ADD ${keyword}yyy VARCHAR(256), ADD ${keyword}zzz DATE, DROP ${keyword}aaa`);
+        .to.equal(`ALTER TABLE \`a\` DROP ${keyword}\`xxx\`, ADD ${keyword}\`yyy\` VARCHAR(256), ADD ${keyword}\`zzz\` DATE, DROP ${keyword}\`aaa\``);
       })
     })
 

@@ -451,12 +451,10 @@ alter_action
 ALTER_ADD_COLUMN
   = KW_ADD __
     kc:KW_COLUMN? __
-    c:column __
-    d:data_type {
+    cd:create_column_definition {
       return {
         action: 'add',
-        column: c,
-        definition: d,
+        ...cd,
         keyword: kc,
         resource: 'column',
         type: 'alter',
@@ -466,7 +464,7 @@ ALTER_ADD_COLUMN
 ALTER_DROP_COLUMN
   = KW_DROP __
     kc:KW_COLUMN? __
-    c:column __ {
+    c:column_ref __ {
       return {
         action: 'drop',
         column: c,

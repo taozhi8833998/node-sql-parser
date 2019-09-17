@@ -1,4 +1,4 @@
-import { columnDataType } from './column'
+import { columnDefinitionToSQL } from './column'
 import { indexTypeAndOptionToSQL } from './index-definition'
 import { tablesToSQL } from './tables'
 import { exprToSQL } from './expr'
@@ -17,15 +17,16 @@ function alterExprToSQL(expr) {
   const { action, keyword, resource } = expr
   const actionUpper = action && action.toUpperCase()
   const keyWordUpper = keyword && keyword.toUpperCase()
-  const name = expr[resource]
+  let name = ''
   let dataType = ''
   switch (resource) {
     case 'column':
-      dataType = columnDataType(expr.definition)
+      dataType = columnDefinitionToSQL(expr)
       break
     case 'index':
       dataType = indexTypeAndOptionToSQL(expr)
       dataType = dataType.filter(hasVal).join(' ')
+      name = expr[resource]
       break
     default:
       break
