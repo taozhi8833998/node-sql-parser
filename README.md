@@ -36,7 +36,7 @@ or
 yarn add node-sql-parser
 ```
 
-**Install the following type module for typescript usage**
+**(Deprecated)Install the following type module for typescript usage**
 
 ```bash
 npm install @types/node-sql-parser --save-dev
@@ -85,10 +85,14 @@ console.log(ast);
 ### Convert AST back to SQL
 
 ```javascript
+const opt = {
+  database: 'MySQL' // MySQL is the default database
+}
 const { Parser } = require('node-sql-parser');
 const parser = new Parser()
-const ast = parser.astify('SELECT * FROM t');
-const sql = parse.sqlify(ast);
+// opt is optional
+const ast = parser.astify('SELECT * FROM t', opt);
+const sql = parse.sqlify(ast, opt);
 
 console.log(sql); // SELECT * FROM `t`
 ```
@@ -96,9 +100,13 @@ console.log(sql); // SELECT * FROM `t`
 ### Get TableList, ColumnList, Ast by `parse` function
 
 ```javascript
+const opt = {
+  database: 'MariaDB' // MySQL is the default database
+}
 const { Parser } = require('node-sql-parser');
 const parser = new Parser()
-const { tableList, columnList, ast } = parser.parse('SELECT * FROM t');
+// opt is optional
+const { tableList, columnList, ast } = parser.parse('SELECT * FROM t', opt);
 ```
 
 ### Get the SQL visited tables
@@ -107,9 +115,13 @@ const { tableList, columnList, ast } = parser.parse('SELECT * FROM t');
 -  the format is **{type}::{dbName}::{tableName}** // type could be select, update, delete or insert
 
 ```javascript
+const opt = {
+  database: 'MySQL'
+}
 const { Parser } = require('node-sql-parser');
 const parser = new Parser();
-const tableList = parser.tableList('SELECT * FROM t');
+// opt is optional
+const tableList = parser.tableList('SELECT * FROM t', opt);
 
 console.log(tableList); // ["select::null::t"]
 ```
@@ -121,9 +133,13 @@ console.log(tableList); // ["select::null::t"]
 - for `select *`, `delete` and `insert into tableName values()` without specified columns, the `.*` column authority regex is required
 
 ```javascript
+const opt = {
+  database: 'MySQL'
+}
 const { Parser } = require('node-sql-parser');
 const parser = new Parser();
-const columnList = parser.columnList('SELECT t.id FROM t');
+// opt is optional
+const columnList = parser.columnList('SELECT t.id FROM t', opt);
 
 console.log(columnList); // ["select::t::id"]
 ```
@@ -131,14 +147,19 @@ console.log(columnList); // ["select::t::id"]
 ### Check the SQL with Authority List
 
 - check table authority
-- `whiteListCheck` function check on `table` mode by default
+- `whiteListCheck` function check on `table` mode and `MySQL` database by default
 
 ```javascript
 const { Parser } = require('node-sql-parser');
 const parser = new Parser();
 const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
 const whiteTableList = ['(select|update)::(.*)::(a|b)'] // array that contain multiple authorities
-parser.whiteListCheck(sql, whiteTableList, 'table') // if check failed, an error would be thrown with relevant error message, if passed it would return undefined
+const opt = {
+  database: 'MySQL',
+  type: 'table',
+}
+// opt is optional
+parser.whiteListCheck(sql, whiteTableList, opt) // if check failed, an error would be thrown with relevant error message, if passed it would return undefined
 ```
 
 - check column authority
@@ -148,7 +169,12 @@ const { Parser } = require('node-sql-parser');
 const parser = new Parser();
 const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
 const whiteColumnList = ['select::null::name', 'update::a::id'] // array that contain multiple authorities
-parser.whiteListCheck(sql, whiteColumnList, 'column') // if check failed, an error would be thrown with relevant error message, if passed it would return undefined
+const opt = {
+  database: 'MySQL',
+  type: 'column',
+}
+// opt is optional
+parser.whiteListCheck(sql, whiteColumnList, opt) // if check failed, an error would be thrown with relevant error message, if passed it would return undefined
 ```
 
 ## :kissing_heart: Acknowledgement

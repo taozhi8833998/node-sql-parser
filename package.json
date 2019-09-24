@@ -1,15 +1,16 @@
 {
   "name": "node-sql-parser",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "description": "simple node sql parser",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "build": "mkdir -p build && pegjs -o build/pegjs-parser.js sql.pegjs && npm run compile",
-    "test": "NODE_ENV=test npm run lint && mocha --require @babel/register",
+    "build": "mkdir -p build && node build.js && npm run compile",
+    "test": "NODE_ENV=test npm run lint && mocha --recursive --require @babel/register",
     "compile": "babel src -d lib",
     "lint": "npm run build && eslint src/",
     "prepublishOnly": "npm run build",
+    "coverLocal": "nyc npm run test",
     "cover": "nyc npm run test && nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
@@ -27,7 +28,8 @@
   "files": [
     "index.js",
     "lib/",
-    "build/pegjs-parser.js",
+    "index.d.ts",
+    "build/*.js",
     "README.md",
     "LICENSE"
   ],

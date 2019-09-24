@@ -905,7 +905,7 @@ describe('select', () => {
       })
     })
     describe('column mode', () => {
-      const mode = 'column'
+      const mode = { type: 'column' }
       it('should pass the same check', () => {
         const sql = 'SELECT * FROM a'
         const whiteList = ['select::null::(.*)']
@@ -940,20 +940,20 @@ describe('select', () => {
         const sql = 'SELECT b.id, b.name FROM b'
         const whiteList = ['select::b::id']
         const fun = parser.whiteListCheck.bind(parser, sql, whiteList, mode)
-        expect(fun).to.throw(`authority = 'select::b::name' is required in ${mode} whiteList to execute SQL = '${sql}'`)
+        expect(fun).to.throw(`authority = 'select::b::name' is required in ${mode.type} whiteList to execute SQL = '${sql}'`)
       })
       it('should fail the complex sql and regex check', () => {
         const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
         const whiteList = ['select::(.*)::(id|name)']
         const fun = parser.whiteListCheck.bind(parser, sql, whiteList, mode)
-        expect(fun).to.throw(`authority = 'update::null::id' is required in ${mode} whiteList to execute SQL = '${sql}'`)
+        expect(fun).to.throw(`authority = 'update::null::id' is required in ${mode.type} whiteList to execute SQL = '${sql}'`)
       })
     })
     describe('unknow type check', () => {
       it('should throw error', () => {
         const sql = 'SELECT * FROM a'
         const whiteList = ['select::null::(.*)']
-        expect(parser.whiteListCheck.bind(parser, sql, whiteList, 'unknow')).to.throw('unknow is not valid check mode')
+        expect(parser.whiteListCheck.bind(parser, sql, whiteList, { type: 'unknow' })).to.throw('unknow is not valid check mode')
       })
     })
   })
