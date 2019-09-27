@@ -62,6 +62,7 @@
     "pre-commit": "^1.2.2"
   },
   "dependencies": {
+    "big-integer": "^1.6.45",
     "has": "^1.0.3"
   }
 }
