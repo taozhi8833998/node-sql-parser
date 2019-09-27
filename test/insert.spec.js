@@ -68,6 +68,16 @@ describe('insert', () => {
       expect(parser.sqlify(ast)).to.be.eql('INSERT INTO `t` (`col1`, `col2`) VALUES (1,2)')
     })
 
+    it('should support big number', () => {
+      const bigNumberList = ['3511161156327326047123', '23.3e+12323243434']
+      for (const bigNumber of bigNumberList) {
+        const sql = `INSERT INTO t1(id) VALUES(${bigNumber})`
+        const ast = parser.astify(sql)
+        expect(ast.values[0].value).to.be.eql([{ type: 'bigint', value: bigNumber }])
+        expect(parser.sqlify(ast)).to.equal('INSERT INTO `t1` (`id`) VALUES (' + bigNumber + ')')
+      }
+    })
+
     it('failed with INSERT SELECT INFO', () => {
       const sql = 'INSERT INTO t1 SELECT * FROM t'
       const fun = parser.parse.bind(parser, sql)

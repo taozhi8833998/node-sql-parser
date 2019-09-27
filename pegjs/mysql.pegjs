@@ -114,6 +114,13 @@
     };
   }
 
+  function isBigInt(numberStr) {
+    const previousMaxSafe = BigInt(Number.MAX_SAFE_INTEGER)
+    const num = BigInt(numberStr)
+    if (num < previousMaxSafe) return false
+    return true
+  }
+
   function createList(head, tail) {
     const result = [head];
     for (let i = 0; i < tail.length; i++) {
@@ -1600,14 +1607,40 @@ line_terminator
 
 literal_numeric
   = n:number {
+      if (n && n.type === 'bigint') return n
       return { type: 'number', value: n };
     }
 
 number
-  = int_:int frac:frac exp:exp __ { return parseFloat(int_ + frac + exp); }
-  / int_:int frac:frac __         { return parseFloat(int_ + frac); }
-  / int_:int exp:exp __           { return parseFloat(int_ + exp); }
-  / int_:int __                   { return parseFloat(int_); }
+  = int_:int frac:frac exp:exp __ {
+    const numStr = int_ + frac + exp
+    return {
+      type: 'bigint',
+      value: numStr
+    }
+  }
+  / int_:int frac:frac __         {
+    const numStr = int_ + frac
+    if (isBigInt(int_)) return {
+      type: 'bigint',
+      value: numStr
+    }
+    return parseFloat(numStr);
+  }
+  / int_:int exp:exp __           {
+    const numStr = int_ + exp
+    return {
+      type: 'bigint',
+      value: numStr
+    }
+  }
+  / int_:int __                   {
+    if (isBigInt(int_)) return {
+      type: 'bigint',
+      value: int_
+    }
+    return parseFloat(int_);
+  }
 
 int
   = digits
