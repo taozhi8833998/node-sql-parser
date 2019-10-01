@@ -48,6 +48,12 @@ yarn add @types/node-sql-parser --dev
 
 ## :rocket: Usage
 
+### Supported Database SQL Syntax
+
+- Mysql
+- MariaDB
+- PostgresQL
+
 ### Create AST for SQL statement
 
 ```javascript
