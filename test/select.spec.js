@@ -868,6 +868,7 @@ describe('select', () => {
         const whiteList = ['select::(.*)::a']
         const result = parser.whiteListCheck(sql, whiteList)
         expect(result).to.be.eql(undefined)
+        expect(parser.whiteListCheck(sql, whiteList, {})).to.be.eql(undefined)
       })
       it('should pass the complex sql check', () => {
         const sql = 'SELECT * FROM a;SELECT * FROM x.b'

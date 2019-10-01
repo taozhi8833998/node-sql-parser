@@ -12,6 +12,11 @@ const escapeMap = {
   '\\'   : '\\\\',
 }
 
+const DEFAULT_OPT = {
+  database : 'mysql',
+  type     : 'table',
+}
+
 function commonOptionConnector(keyword, action, opt) {
   if (!opt) return
   return `${keyword.toUpperCase()} ${action(opt)}`
@@ -97,10 +102,29 @@ function escape(str) {
   return res.join('')
 }
 
+function getParserOpt() {
+  let opt = DEFAULT_OPT
+  try {
+    opt = JSON.parse(process.env.NODE_SQL_PARSER_OPT)
+  } catch(parseError) {
+    // ignore error
+  }
+  return opt
+}
+
 function identifierToSql(ident, isDual) {
+  const { database } = getParserOpt()
   if (isDual === true) return `'${ident}'`
   if (!ident) return
-  return `\`${ident}\``
+  switch (database && database.toLowerCase()) {
+    case 'mysql':
+    case 'mariadb':
+      return `\`${ident}\``
+    case 'postgresql':
+      return `"${ident}"`
+    default:
+      return `\`${ident}\``
+  }
 }
 
 function literalToSQL(literal) {
@@ -181,6 +205,7 @@ export {
   commentToSQL,
   createBinaryExpr,
   createValueExpr,
+  DEFAULT_OPT,
   escape,
   literalToSQL,
   identifierToSql,

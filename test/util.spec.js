@@ -1,5 +1,11 @@
 const { expect } = require('chai')
-const { createValueExpr, createBinaryExpr, literalToSQL, commentToSQL } = require('../src/util')
+const {
+  createValueExpr,
+  createBinaryExpr,
+  literalToSQL,
+  commentToSQL,
+  identifierToSql,
+} = require('../src/util')
 
 describe('util function test', () => {
   it('should throw error when type is unkonw', () => {
@@ -25,5 +31,12 @@ describe('util function test', () => {
   it('should comment with symbol', () => {
     const comment = commentToSQL({ keyword: 'comment', value: { type: 'string', value: '123'}, symbol: '='})
     expect(comment).to.equal("COMMENT = '123'")
+  })
+
+  it('should support default back quote', () => {
+    process.env.NODE_SQL_PARSER_OPT = '{"database": "default"}'
+    expect(identifierToSql('db')).to.be.equal('`db`')
+    process.env.NODE_SQL_PARSER_OPT = '{}'
+    expect(identifierToSql('db')).to.be.equal('`db`')
   })
 })

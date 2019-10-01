@@ -1,28 +1,34 @@
 import { parse as mysql } from '../build/mysql'
 import { parse as mariadb } from '../build/mariadb'
+import { parse as postgresql } from '../build/postgresql'
 import astToSQL from './sql'
+import { DEFAULT_OPT } from './util'
 
 const parser = {
   mysql,
   mariadb,
+  postgresql,
 }
 class Parser {
-  astify(sql, opt) {
+  astify(sql, opt = DEFAULT_OPT) {
     const astInfo = this.parse(sql, opt)
     return astInfo && astInfo.ast
   }
 
-  sqlify(ast, opt) {
+  sqlify(ast, opt = DEFAULT_OPT) {
+    process.env.NODE_SQL_PARSER_OPT = JSON.stringify(opt)
     return astToSQL(ast, opt)
   }
 
-  parse(sql, { database = 'mysql' } = {}) {
+  parse(sql, opt = DEFAULT_OPT) {
+    const { database = 'mysql' } = opt
+    process.env.NODE_SQL_PARSER_OPT = JSON.stringify(opt)
     const typeCase = database.toLowerCase()
     if (parser[typeCase]) return parser[typeCase](sql)
     throw new Error(`${database} is not supported currently`)
   }
 
-  whiteListCheck(sql, whiteList, opt = {}) {
+  whiteListCheck(sql, whiteList, opt = DEFAULT_OPT) {
     if (!whiteList || whiteList.length === 0) return
     const { type = 'table' } = opt
     if (!this[`${type}List`] || typeof this[`${type}List`] !== 'function') throw new Error(`${type} is not valid check mode`)
