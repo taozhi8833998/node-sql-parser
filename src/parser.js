@@ -2,7 +2,7 @@ import { parse as mysql } from '../build/mysql'
 import { parse as mariadb } from '../build/mariadb'
 import { parse as postgresql } from '../build/postgresql'
 import astToSQL from './sql'
-import { DEFAULT_OPT } from './util'
+import { DEFAULT_OPT, setParserOpt } from './util'
 
 const parser = {
   mysql,
@@ -16,13 +16,13 @@ class Parser {
   }
 
   sqlify(ast, opt = DEFAULT_OPT) {
-    process.env.NODE_SQL_PARSER_OPT = JSON.stringify(opt)
+    setParserOpt(opt)
     return astToSQL(ast, opt)
   }
 
   parse(sql, opt = DEFAULT_OPT) {
     const { database = 'mysql' } = opt
-    process.env.NODE_SQL_PARSER_OPT = JSON.stringify(opt)
+    setParserOpt(opt)
     const typeCase = database.toLowerCase()
     if (parser[typeCase]) return parser[typeCase](sql)
     throw new Error(`${database} is not supported currently`)

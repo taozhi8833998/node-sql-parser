@@ -5,6 +5,7 @@ const {
   literalToSQL,
   commentToSQL,
   identifierToSql,
+  setParserOpt,
 } = require('../src/util')
 
 describe('util function test', () => {
@@ -34,9 +35,9 @@ describe('util function test', () => {
   })
 
   it('should support default back quote', () => {
-    process.env.NODE_SQL_PARSER_OPT = '{"database": "default"}'
+    setParserOpt({"database": "default"})
     expect(identifierToSql('db')).to.be.equal('`db`')
-    process.env.NODE_SQL_PARSER_OPT = '{}'
+    setParserOpt({})
     expect(identifierToSql('db')).to.be.equal('`db`')
   })
 })

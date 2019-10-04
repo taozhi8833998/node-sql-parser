@@ -17,6 +17,8 @@ const DEFAULT_OPT = {
   type     : 'table',
 }
 
+let parserOpt = DEFAULT_OPT
+
 function commonOptionConnector(keyword, action, opt) {
   if (!opt) return
   return `${keyword.toUpperCase()} ${action(opt)}`
@@ -103,13 +105,11 @@ function escape(str) {
 }
 
 function getParserOpt() {
-  let opt = DEFAULT_OPT
-  try {
-    opt = JSON.parse(process.env.NODE_SQL_PARSER_OPT)
-  } catch(parseError) {
-    // ignore error
-  }
-  return opt
+  return parserOpt
+}
+
+function setParserOpt(opt) {
+  parserOpt = opt
 }
 
 function identifierToSql(ident, isDual) {
@@ -211,5 +211,6 @@ export {
   identifierToSql,
   replaceParams,
   hasVal,
+  setParserOpt,
   toUpper,
 }
