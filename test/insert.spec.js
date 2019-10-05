@@ -24,6 +24,13 @@ describe('insert', () => {
       }]);
     });
 
+    it('should support parse insert with multiple rows', () => {
+      const sql = 'INSERT INTO t1 values("1223", "name"), ("1224", "name2")'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.be.equal("INSERT INTO `t1` VALUES ('1223','name'),('1224','name2')")
+    })
+
     it('should parse insert and select', () => {
       const sql = 'INSERT INTO t1 values("1223", "name") ; SELECT * FROM t'
       const [sqla, sqlb] = sql.split(';')
