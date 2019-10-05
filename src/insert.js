@@ -8,7 +8,7 @@ import { identifierToSql, commonOptionConnector, hasVal } from './util'
  */
 function valuesToSQL(values) {
   const clauses = values.map(exprToSQL)
-  return `(${clauses.join('')})`
+  return `(${clauses.join('),(')})`
 }
 
 function insertToSQL(stmt) {
