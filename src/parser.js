@@ -24,7 +24,7 @@ class Parser {
     const { database = 'mysql' } = opt
     setParserOpt(opt)
     const typeCase = database.toLowerCase()
-    if (parser[typeCase]) return parser[typeCase](sql)
+    if (parser[typeCase]) return parser[typeCase](sql.trim())
     throw new Error(`${database} is not supported currently`)
   }
 
