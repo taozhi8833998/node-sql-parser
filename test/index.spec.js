@@ -15,7 +15,7 @@ describe('MariaDB Command SQL', () => {
     expect(parser.parse.bind(parser, sql, opt)).to.throw(`${opt.database} is not supported currently`)
   })
 
-  describe.only('blank line or whitespace auto remove', () => {
+  describe('blank line or whitespace auto remove', () => {
     const sql = `
 
     CALL utility.create_backup_script(schemaName, 'table_name', 'ticket_name');
