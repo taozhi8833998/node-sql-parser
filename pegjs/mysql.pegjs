@@ -1081,13 +1081,16 @@ set_item
   = tbl:(ident __ DOT)? __ c:column __ '=' __ v:additive_expr {
       return { column: c, value: v, table: tbl && tbl[0] };
     }
+insert_value_clause
+  = value_clause
+  / select_stmt_nake
 
 replace_insert_stmt
   = ri:replace_insert       __
-    KW_INTO                 __
+    KW_INTO?                 __
     t:table_ref_list  __ LPAREN __
     c:column_list  __ RPAREN __
-    v:value_clause {
+    v:insert_value_clause {
       if (t) t.forEach(tt => tableList.add(`insert::${tt.db}::${tt.table}`));
       if (c) {
         let table = null

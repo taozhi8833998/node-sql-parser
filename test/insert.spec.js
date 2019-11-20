@@ -31,6 +31,13 @@ describe('insert', () => {
       expect(backSQL).to.be.equal("INSERT INTO `t1` VALUES ('1223','name'),('1224','name2')")
     })
 
+    it('should support parse insert from select', () => {
+      const sql = 'INSERT INTO t1(col_a, col_b) select col_a, col_b from t2'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.be.equal("INSERT INTO `t1` (`col_a`, `col_b`) SELECT `col_a`, `col_b` FROM `t2`")
+    })
+
     it('should parse insert and select', () => {
       const sql = 'INSERT INTO t1 values("1223", "name") ; SELECT * FROM t'
       const [sqla, sqlb] = sql.split(';')

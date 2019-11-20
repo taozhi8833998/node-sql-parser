@@ -21,6 +21,7 @@ let parserOpt = DEFAULT_OPT
 
 function commonOptionConnector(keyword, action, opt) {
   if (!opt) return
+  if (!keyword) return action(opt)
   return `${keyword.toUpperCase()} ${action(opt)}`
 }
 
