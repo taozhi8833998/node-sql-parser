@@ -810,7 +810,15 @@ column_clause
     }
 
 column_list_item
-  = tbl:ident __ DOT __ STAR {
+  = e:expr s:KW_DOUBLE_COLON t:data_type __ {
+    return {
+      type: 'cast',
+      expr: e,
+      symbol: '::',
+      target: t
+    }
+  }
+  / tbl:ident __ DOT __ STAR {
       columnList.add(`select::${tbl}::(.*)`);
       return {
         expr: {
@@ -1423,7 +1431,7 @@ ident_start = [A-Za-z_]
 ident_part  = [A-Za-z0-9_]
 
 // to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_:]
+column_part  = [A-Za-z0-9_]
 
 param
   = l:(':' ident_name) {
@@ -1490,10 +1498,19 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
+  = e:(literal / aggr_func / func_call / case_expr / interval_expr / column_ref / param) s:KW_DOUBLE_COLON t:data_type __ {
     return {
       type: 'cast',
       expr: e,
+      symbol: '::',
+      target: t
+    }
+  }
+  / KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
+    return {
+      type: 'cast',
+      expr: e,
+      symbol: 'as',
       target: t
     };
   }
@@ -1501,6 +1518,7 @@ cast_expr
     return {
       type: 'cast',
       expr: e,
+      symbol: 'as',
       target: {
         dataType: 'DECIMAL(' + precision + ')'
       }
@@ -1510,6 +1528,7 @@ cast_expr
       return {
         type: 'cast',
         expr: e,
+        symbol: 'as',
         target: {
           dataType: 'DECIMAL(' + precision + ', ' + scale + ')'
         }
@@ -1519,6 +1538,7 @@ cast_expr
     return {
       type: 'cast',
       expr: e,
+      symbol: 'as',
       target: {
         dataType: s + (t ? ' ' + t: '')
       }
@@ -1764,6 +1784,7 @@ KW_UNSIGNED = "UNSIGNED"i !ident_start { return 'UNSIGNED'; }
 KW_INT      = "INT"i      !ident_start { return 'INT'; }
 KW_INTEGER  = "INTEGER"i  !ident_start { return 'INTEGER'; }
 KW_JSON     = "JSON"i     !ident_start { return 'JSON'; }
+KW_GEOMETRY = "GEOMETRY"i !ident_start { return 'GEOMETRY'; }
 KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
@@ -1799,6 +1820,7 @@ KW_VAR_PRE
   = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR
 KW_RETURN = 'return'i
 KW_ASSIGN = ':='
+KW_DOUBLE_COLON = '::'
 KW_ASSIGIN_EQUAL = '='
 
 KW_DUAL = "DUAL"i
@@ -2028,6 +2050,7 @@ data_type
   / numeric_type
   / datetime_type
   / json_type
+  / geometry_type
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN __ {
@@ -2046,3 +2069,6 @@ datetime_type
 
 json_type
   = t:KW_JSON { return { dataType: t }; }
+
+geometry_type
+  = t:KW_GEOMETRY { return { dataType: t }; }

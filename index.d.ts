@@ -70,15 +70,15 @@ export interface Insert_Replace {
   values: InsertReplaceValue[];
 }
 export interface Update {
-  type: 'udpate';
+  type: 'update';
   db: string | null;
-  table: string;
+  table: Array<From | Dual> | null;
   set: SetList[];
   where: any;
 }
 export interface Delete {
   type: 'delete';
-  tables: any;
+  table: any;
   from: Array<From | Dual>;
   where: any;
 }

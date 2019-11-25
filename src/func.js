@@ -2,7 +2,10 @@ import { exprToSQL } from './expr'
 
 function castToSQL(expr) {
   const str = expr.target.length ? `(${expr.target.length})` : ''
-  return `CAST(${exprToSQL(expr.expr)} AS ${expr.target.dataType}${str})`
+  if (expr.symbol === 'as') {
+    return `CAST(${exprToSQL(expr.expr)} ${expr.symbol.toUpperCase()} ${expr.target.dataType}${str})`
+  }
+  return `${exprToSQL(expr.expr)}${expr.symbol.toUpperCase()}${expr.target.dataType}${str}`
 }
 
 function funcToSQL(expr) {
