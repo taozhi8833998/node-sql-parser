@@ -2,10 +2,15 @@ import { exprToSQL } from './expr'
 
 function castToSQL(expr) {
   const str = expr.target.length ? `(${expr.target.length})` : ''
+  let prefix = exprToSQL(expr.expr)
+  let symbol = '::'
+  let suffix = ''
   if (expr.symbol === 'as') {
-    return `CAST(${exprToSQL(expr.expr)} ${expr.symbol.toUpperCase()} ${expr.target.dataType}${str})`
+    prefix = `CAST(${prefix}`
+    suffix = ')'
+    symbol = ` ${expr.symbol.toUpperCase()} `
   }
-  return `${exprToSQL(expr.expr)}${expr.symbol.toUpperCase()}${expr.target.dataType}${str}`
+  return `${prefix}${symbol}${expr.target.dataType}${str}${suffix}`
 }
 
 function funcToSQL(expr) {
