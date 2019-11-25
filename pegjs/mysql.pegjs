@@ -1493,6 +1493,7 @@ cast_expr
     return {
       type: 'cast',
       expr: e,
+      symbol: 'as',
       target: t
     };
   }
@@ -1500,6 +1501,7 @@ cast_expr
     return {
       type: 'cast',
       expr: e,
+      symbol: 'as',
       target: {
         dataType: 'DECIMAL(' + precision + ')'
       }
@@ -1509,6 +1511,7 @@ cast_expr
       return {
         type: 'cast',
         expr: e,
+        symbol: 'as',
         target: {
           dataType: 'DECIMAL(' + precision + ', ' + scale + ')'
         }
@@ -1518,6 +1521,7 @@ cast_expr
     return {
       type: 'cast',
       expr: e,
+      symbol: 'as',
       target: {
         dataType: s + (t ? ' ' + t: '')
       }

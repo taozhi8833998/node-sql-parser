@@ -191,7 +191,7 @@ describe('AST', () => {
                 'json casts':  [
                     `SELECT CAST('{"foo":"bar"}' AS JSON) FROM dual`,
                     `SELECT CAST('{\\"foo\\":\\"bar\\"}' AS JSON) FROM DUAL`
-                ]
+                ],
             };
             Object.keys(castQueries).forEach(cast => {
                 const [inputQuery, expectedQuery] = castQueries[cast];
@@ -200,6 +200,26 @@ describe('AST', () => {
                     expect(getParsedSql(inputQuery)).to.equal(expectedQuery);
                 });
             });
+
+            it('should support pg double colon cast', () => {
+                const castQueries = {
+                    'colon cast': [
+                        'SELECT col::CHAR FROM t',
+                        'SELECT `col`::CHAR FROM `t`'
+                    ],
+                    'multiple colon cast': [
+                        'SELECT col::CHAR, colb::geometry FROM t',
+                        'SELECT `col`::CHAR, `colb`::GEOMETRY FROM `t`'
+                    ]
+                }
+                const opt = {
+                    database: 'postgresql'
+                }
+                Object.keys(castQueries).forEach(cast => {
+                    const [inputQuery, expectedQuery] = castQueries[cast];
+                    expect(parser.sqlify(parser.astify(inputQuery, opt))).to.equal(expectedQuery);
+                });
+            })
 
 
             it('should support subselects', () => {
