@@ -533,7 +533,7 @@ create_constraint_definition
   / create_constraint_foreign
 
 constraint_name
-  = kc:KW_CONSTRAINT? __
+  = kc:KW_CONSTRAINT __
   c:ident_name? __ {
     return {
       keyword: kc.toLowerCase(),
