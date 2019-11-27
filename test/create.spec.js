@@ -17,9 +17,10 @@ describe('create', () => {
 
       expect(getParsedSql(`create temporary table dbname.tableName (id int not null default 1, name varchar(128) null default "xx")`))
         .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT NOT NULL DEFAULT 1, `name` VARCHAR(128) NULL DEFAULT \'xx\')');
-
       expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key) ENGINE = MEMORY default character SET = utf8 comment = 'comment test'`))
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY DEFAULT CHARACTER SET = utf8 COMMENT = \'comment test\'');
+      expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key) ENGINE = MEMORY default charset = utf8 comment = 'comment test'`))
+        .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY DEFAULT CHARSET = utf8 COMMENT = \'comment test\'');
       expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key, name varchar(128) unique key) ENGINE = MEMORY compression = 'zlib'`))
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY, `name` VARCHAR(128) UNIQUE KEY) ENGINE = MEMORY COMPRESSION = \'ZLIB\'');
       expect(getParsedSql(`create table dbname.tableName (id INT(11), name varchar(128), primary key(id)) ENGINE = MEMORY compression = 'zlib'`))
