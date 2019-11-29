@@ -89,7 +89,12 @@ export interface Alter {
   expr: any
 }
 
-export type AST = Select | Insert_Replace | Update | Delete | Alter;
+export interface Use {
+  type: 'use';
+  db: string;
+}
+
+export type AST = Use | Select | Insert_Replace | Update | Delete | Alter;
 
 export class Parser {
   constructor();
