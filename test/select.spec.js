@@ -88,7 +88,7 @@ describe('select', () => {
     expect(ast.where).to.be.an('object');
     expect(ast.groupby).to.be.an('array');
     expect(ast.orderby).to.be.an('array');
-    expect(ast.limit).to.be.an('array');
+    expect(ast.limit).to.be.an('object');
   });
 
   describe('column clause', () => {
@@ -538,22 +538,67 @@ describe('select', () => {
   })
 
   describe('limit clause', () => {
-    it('should be parsed w/o offset', () => {
-      const ast = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 3');
+    it('should be parsed w/o', () => {
+      const ast = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e ASC limit 10');
 
-      expect(ast.limit).eql([
-        { type: 'number', value: 0 },
-        { type: 'number', value: 3 }
-      ]);
+      expect(ast.limit).eql({
+        seperator: '',
+        value: [
+          { type: 'number', value: 10 }
+        ],
+      });
+
+      expect(parser.sqlify(ast)).to.be.equal('SELECT DISTINCT `a` FROM `b` WHERE `c` = 0 GROUP BY `d` ORDER BY `e` ASC LIMIT 10')
+    });
+
+    it('should be parsed w/o', () => {
+      const ast = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 10,3');
+
+      expect(ast.limit).eql({
+        seperator: ',',
+        value: [
+          { type: 'number', value: 10 },
+          { type: 'number', value: 3 }
+        ],
+      });
+
+      expect(parser.sqlify(ast)).to.be.equal('SELECT DISTINCT `a` FROM `b` WHERE `c` = 0 GROUP BY `d` ORDER BY `e` ASC LIMIT 10, 3')
     });
 
     it('should be parsed w/ offset', () => {
-      const ast = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 0, 3');
+      const ast = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 10 offset 23');
+      expect(ast.limit).eql({
+        seperator: 'offset',
+        value: [
+          { type: 'number', value: 10 },
+          { type: 'number', value: 23 }
+        ],
+      });
+      expect(parser.sqlify(ast)).to.be.equal('SELECT DISTINCT `a` FROM `b` WHERE `c` = 0 GROUP BY `d` ORDER BY `e` ASC LIMIT 10 OFFSET 23')
+    });
 
-      expect(ast.limit).to.eql([
-        {type: 'number', value: 0 },
-        {type: 'number', value: 3 }
-      ]);
+    it('should be parsed pg offset', () => {
+      const opt = {
+        database: 'postgresql'
+      }
+      const ast = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit all', opt);
+      expect(ast.limit).eql({
+        seperator: '',
+        value: [
+          { type: 'origin', value: 'all' },
+        ],
+      });
+      expect(parser.sqlify(ast)).to.be.equal('SELECT DISTINCT `a` FROM `b` WHERE `c` = 0 GROUP BY `d` ORDER BY `e` ASC LIMIT ALL')
+
+      const offsetAst = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit all offset 100', opt);
+      expect(offsetAst.limit).eql({
+        seperator: 'offset',
+        value: [
+          { type: 'origin', value: 'all' },
+          { type: 'number', value: 100 }
+        ],
+      });
+      expect(parser.sqlify(offsetAst)).to.be.equal('SELECT DISTINCT `a` FROM `b` WHERE `c` = 0 GROUP BY `d` ORDER BY `e` ASC LIMIT ALL OFFSET 100')
     });
   });
 

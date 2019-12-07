@@ -30,7 +30,7 @@ describe('AST', () => {
 
         it('should support double quotes MySQL query', () => {
             expect(getParsedSql('select * from (select * from tb_user where user_id = "lmt") as tableA limit 0,2'))
-                .to.equal('SELECT * FROM (SELECT * FROM `tb_user` WHERE `user_id` = \'lmt\') AS `tableA` LIMIT 0,2');
+                .to.equal('SELECT * FROM (SELECT * FROM `tb_user` WHERE `user_id` = \'lmt\') AS `tableA` LIMIT 0, 2');
         });
 
         describe('logic operator', () => {
@@ -549,12 +549,12 @@ describe('AST', () => {
         describe('limit clause', () => {
             it('should work w/o offset', () => {
                 sql = 'SELECT a FROM t limit 10';
-                expect(getParsedSql(sql)).to.equal('SELECT `a` FROM `t` LIMIT 0,10');
+                expect(getParsedSql(sql)).to.equal('SELECT `a` FROM `t` LIMIT 10');
             });
 
             it('should work w/ offset', () => {
                 sql = 'SELECT a FROM t limit 10, 10';
-                expect(getParsedSql(sql)).to.equal('SELECT `a` FROM `t` LIMIT 10,10');
+                expect(getParsedSql(sql)).to.equal('SELECT `a` FROM `t` LIMIT 10, 10');
             });
         });
 
@@ -1058,12 +1058,12 @@ describe('AST', () => {
     describe('sql comment', () => {
         it('should support # symbol', () => {
             expect(getParsedSql('select * from app limit 0,1; # comment here'))
-            .to.equal('SELECT * FROM `app` LIMIT 0,1')
+            .to.equal('SELECT * FROM `app` LIMIT 0, 1')
         })
 
         it('should support -- symbol', () => {
             expect(getParsedSql('select * from app limit 0,1; -- comment here'))
-            .to.equal('SELECT * FROM `app` LIMIT 0,1')
+            .to.equal('SELECT * FROM `app` LIMIT 0, 1')
         })
 
         it('should support /**/ symbol', () => {

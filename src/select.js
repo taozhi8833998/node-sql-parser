@@ -33,7 +33,10 @@ function selectToSQL(stmt) {
     const orderExpressions = orderby.map(expr => `${exprToSQL(expr.expr)} ${expr.type}`)
     clauses.push(connector('ORDER BY', orderExpressions.join(', ')))
   }
-  if (Array.isArray(limit)) clauses.push(connector('LIMIT', limit.map(exprToSQL)))
+  if (limit) {
+    const { seperator, value } = limit
+    clauses.push(connector('LIMIT', value.map(exprToSQL).join(`${seperator === 'offset' ? ' ' : ''}${seperator.toUpperCase()} `)))
+  }
   return clauses.filter(hasVal).join(' ')
 }
 
