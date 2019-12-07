@@ -148,6 +148,9 @@ function literalToSQL(literal) {
     case 'param':
       str = `:${value}`
       break
+    case 'origin':
+      str = value.toUpperCase()
+      break
     case 'time':
     case 'date':
     case 'timestamp':
