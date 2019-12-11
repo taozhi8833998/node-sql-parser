@@ -125,7 +125,7 @@ describe('AST', () => {
                 expect(getParsedSql(sql)).to.contain('`col` AS `foo bar`');
             });
 
-            ["'", '"', 'n', 't', '\\'].forEach((char) => {
+            ["'", '"', 'n', 't'].forEach((char) => {
                 it(`should escape char ${char} "`, () => {
                     sql = `SELECT ' escape \\${char}'`;
                     expect(getParsedSql(sql)).to.equal(sql);
@@ -623,6 +623,11 @@ describe('AST', () => {
         it('should support string values', () => {
             sql = `SELECT 'foo'`;
             expect(getParsedSql(sql)).to.equal(`SELECT 'foo'`);
+        });
+
+        it('should support string with escape values', () => {
+            sql = `INSERT INTO mytablehere (ID, post_author) VALUES (2564,'I haven\\'t <a href=\\"http://www.someurl.com/somepartofurl\\0\\">figured</a>');`;
+            expect(getParsedSql(sql)).to.equal('INSERT INTO `mytablehere` (`ID`, `post_author`) VALUES (2564,\'I haven\\\'t <a href=\\"http://www.someurl.com/somepartofurl\\0\\">figured</a>\')');
         });
 
         it('should support null values', () => {
