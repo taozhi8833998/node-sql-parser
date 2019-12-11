@@ -9,7 +9,7 @@ const escapeMap = {
   '\r'   : '\\r',
   '\t'   : '\\t',
   '\x1a' : '\\Z',
-  '\\'   : '\\\\',
+  // '\\'   : '\\\\',
 }
 
 const DEFAULT_OPT = {
