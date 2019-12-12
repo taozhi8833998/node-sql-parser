@@ -45,6 +45,42 @@ function setVarToSQL(stmt) {
   return `${action} ${val}`
 }
 
+function lockUnlockToSQL(stmt) {
+  const {
+    type,
+    keyword,
+    tables,
+    lock_mode: lockMode,
+    nowait,
+  } = stmt
+  const result = [type.toUpperCase()]
+  if (keyword) result.push(keyword.toUpperCase())
+  if (type.toUpperCase() === 'UNLOCK') {
+    return result.join(' ')
+  }
+  const tableStmt = []
+  for (const tableInfo of tables) {
+    const { table, lock_type: lockType } = tableInfo
+    const tableInfoTemp = [tableToSQL(table)]
+    if (lockType) {
+      const { prefix, type: typeInner, suffix } = lockType
+      const lockTypeInfo = []
+      if (prefix) lockTypeInfo.push(prefix.toUpperCase())
+      lockTypeInfo.push(typeInner.toUpperCase())
+      if (suffix) lockTypeInfo.push(suffix.toUpperCase())
+      tableInfoTemp.push(lockTypeInfo.join(' '))
+    }
+    tableStmt.push(tableInfoTemp.join(' '))
+  }
+  result.push(tableStmt.join(', '))
+  if (lockMode) {
+    const { mode } = lockMode
+    result.push(mode.toUpperCase())
+  }
+  if (nowait) result.push(nowait.toUpperCase())
+  return result.join(' ')
+}
+
 export {
   dropToSQL,
   truncateToSQL,
@@ -52,4 +88,5 @@ export {
   useToSQL,
   callToSQL,
   setVarToSQL,
+  lockUnlockToSQL,
 }

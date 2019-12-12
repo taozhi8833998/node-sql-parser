@@ -7,8 +7,8 @@ describe('Command SQL', () => {
   const parser = new Parser();
   let sql;
 
-  function getParsedSql(sql) {
-    const ast = parser.astify(sql);
+  function getParsedSql(sql, opt) {
+    const ast = parser.astify(sql, opt);
     return parser.sqlify(ast);
   }
 
@@ -266,6 +266,40 @@ describe('Command SQL', () => {
         expect(getParsedSql(`set @@${keyword}.id = 123; set @@${keyword}.yy.xx = "abcd"`))
         .to.equal(`SET @@${keyword}.id = 123 ; SET @@${keyword}.yy.xx = 'abcd'`);
       })
+    })
+  })
+
+  describe('unlock', () => {
+    it('should support unlock tables', () => {
+      expect(getParsedSql(`unlock tables`))
+        .to.equal(`UNLOCK TABLES`);
+    })
+  })
+
+  describe('lock', () => {
+    const lockType = ['read', 'read local', 'low_priority write', 'write']
+    lockType.forEach(lock_type => {
+      it(`should support lock tables with ${lock_type}`, () => {
+        expect(getParsedSql(`lock tables d1.t1 as ta1 ${lock_type}`))
+          .to.equal(`LOCK TABLES \`d1\`.\`t1\` AS \`ta1\` ${lock_type.toUpperCase()}`);
+      })
+    })
+
+    it('should support lock multiple tables', () => {
+      expect(getParsedSql(`lock tables d1.t1 as ta1 read, d2.t2 t3 write`))
+        .to.equal('LOCK TABLES `d1`.`t1` AS `ta1` READ, `d2`.`t2` AS `t3` WRITE');
+    })
+
+    it('should support pg lock', () => {
+      const opt = {
+        database: 'postgresql'
+      }
+      expect(getParsedSql('lock table t1, t2', opt))
+        .to.equal('LOCK TABLE `t1`, `t2`');
+      expect(getParsedSql('lock table t1, t2 in row share mode', opt))
+        .to.equal('LOCK TABLE `t1`, `t2` IN ROW SHARE MODE');
+      expect(getParsedSql('lock table t1, t2 in row share mode nowait', opt))
+        .to.equal('LOCK TABLE `t1`, `t2` IN ROW SHARE MODE NOWAIT');
     })
   })
 

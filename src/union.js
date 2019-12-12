@@ -11,6 +11,7 @@ import {
   renameToSQL,
   callToSQL,
   setVarToSQL,
+  lockUnlockToSQL,
 } from './command'
 
 const typeToSQLFn = {
@@ -26,6 +27,8 @@ const typeToSQLFn = {
   rename   : renameToSQL,
   call     : callToSQL,
   set      : setVarToSQL,
+  lock     : lockUnlockToSQL,
+  unlock   : lockUnlockToSQL,
 }
 
 function unionToSQL(stmt) {
