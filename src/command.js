@@ -1,4 +1,4 @@
-import { identifierToSql, hasVal } from './util'
+import { identifierToSql, hasVal, toUpper } from './util'
 import { exprToSQL } from './expr'
 import { tablesToSQL, tableToSQL } from './tables'
 
@@ -45,40 +45,33 @@ function setVarToSQL(stmt) {
   return `${action} ${val}`
 }
 
-function lockUnlockToSQL(stmt) {
-  const {
-    type,
-    keyword,
-    tables,
-    lock_mode: lockMode,
-    nowait,
-  } = stmt
-  const result = [type.toUpperCase()]
-  if (keyword) result.push(keyword.toUpperCase())
-  if (type.toUpperCase() === 'UNLOCK') {
-    return result.join(' ')
+function pgLock(stmt) {
+  const { lock_mode: lockMode, nowait } = stmt
+  const lockInfo = []
+  if (lockMode) {
+    const { mode } = lockMode
+    lockInfo.push(mode.toUpperCase())
   }
+  if (nowait) lockInfo.push(nowait.toUpperCase())
+  return lockInfo
+}
+
+function lockUnlockToSQL(stmt) {
+  const { type, keyword, tables } = stmt
+  const result = [type.toUpperCase(), toUpper(keyword)]
+  if (type.toUpperCase() === 'UNLOCK') return result.join(' ')
   const tableStmt = []
   for (const tableInfo of tables) {
     const { table, lock_type: lockType } = tableInfo
     const tableInfoTemp = [tableToSQL(table)]
     if (lockType) {
-      const { prefix, type: typeInner, suffix } = lockType
-      const lockTypeInfo = []
-      if (prefix) lockTypeInfo.push(prefix.toUpperCase())
-      lockTypeInfo.push(typeInner.toUpperCase())
-      if (suffix) lockTypeInfo.push(suffix.toUpperCase())
-      tableInfoTemp.push(lockTypeInfo.join(' '))
+      const lockKeyList = ['prefix', 'type', 'suffix']
+      tableInfoTemp.push(lockKeyList.map(key => toUpper(lockType[key])).filter(hasVal).join(' '))
     }
     tableStmt.push(tableInfoTemp.join(' '))
   }
-  result.push(tableStmt.join(', '))
-  if (lockMode) {
-    const { mode } = lockMode
-    result.push(mode.toUpperCase())
-  }
-  if (nowait) result.push(nowait.toUpperCase())
-  return result.join(' ')
+  result.push(tableStmt.join(', '), ...pgLock(stmt))
+  return result.filter(hasVal).join(' ')
 }
 
 export {
