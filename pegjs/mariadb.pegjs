@@ -52,6 +52,7 @@
     'LEFT': true,
     'LIKE': true,
     'LIMIT': true,
+    'LOW_PRIORITY': true, // for lock table
 
     'NOT': true,
     'NULL': true,
@@ -65,6 +66,7 @@
     'RENAME': true,
     'REPLACE': true,
     'RIGHT': true,
+    'READ': true, // for lock table
 
     'SELECT': true,
     'SESSION_USER': true,
@@ -89,6 +91,7 @@
     'WITH': true,
     'WHEN': true,
     'WHERE': true,
+    'WRITE': true, // for lock table
 
     'GLOBAL': true,
     'SESSION': true,
@@ -205,6 +208,8 @@ cmd_stmt
   / use_stmt
   / alter_stmt
   / set_stmt
+  / lock_stmt
+  / unlock_stmt
 
 create_stmt
   = create_table_stmt
@@ -703,6 +708,59 @@ set_stmt
       ast: {
         type: 'set',
         expr: a
+      }
+    }
+  }
+
+unlock_stmt
+  = KW_UNLOCK __ KW_TABLES __ {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'unlock',
+        keyword: 'tables'
+      }
+    }
+  }
+
+lock_type
+  = "READ"i __ s:("LOCAL"i)? {
+    return {
+      type: 'read',
+      suffix: s && 'local'
+    }
+  }
+  / p:("LOW_PRIORITY"i)? __ "WRITE"i {
+    return {
+      type: 'write',
+      prefix: p && 'low_priority'
+    }
+  }
+
+lock_table
+  = t:table_base __ lt:lock_type {
+    tableList.add(`lock::${t.db}::${t.table}`)
+    return {
+      table: t,
+      lock_type: lt
+    }
+  }
+
+lock_table_list
+  = head:lock_table tail:(__ COMMA __ lock_table)* {
+    return createList(head, tail);
+  }
+
+lock_stmt
+  = KW_LOCK __ KW_TABLES __ ltl:lock_table_list {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'lock',
+        keyword: 'tables',
+        tables: ltl
       }
     }
   }
@@ -1702,9 +1760,12 @@ KW_EXPLAIN  = "EXPLAIN"i    !ident_start
 KW_INTO     = "INTO"i       !ident_start
 KW_FROM     = "FROM"i       !ident_start
 KW_SET      = "SET"i        !ident_start
+KW_UNLOCK   = "UNLOCK"i     !ident_start
+KW_LOCK     = "LOCK"i       !ident_start
 
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
+KW_TABLES   = "TABLES"i     !ident_start { return 'TABLES'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
 
 KW_ON       = "ON"i       !ident_start

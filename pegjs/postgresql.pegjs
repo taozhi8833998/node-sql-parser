@@ -205,6 +205,7 @@ cmd_stmt
   / use_stmt
   / alter_stmt
   / set_stmt
+  / lock_stmt
 
 create_stmt
   = create_table_stmt
@@ -701,6 +702,35 @@ set_stmt
       ast: {
         type: 'set',
         expr: a
+      }
+    }
+  }
+
+lock_mode
+  = "IN"i __
+  m:("ACCESS SHARE"i / "ROW SHARE"i / "ROW EXCLUSIVE"i / "SHARE UPDATE EXCLUSIVE"i / "SHARE ROW EXCLUSIVE"i / "EXCLUSIVE"i / "ACCESS EXCLUSIVE"i / "SHARE"i) __
+  "MODE"i __ {
+    return {
+      mode: `in ${m.toLowerCase()} mode`
+    }
+  }
+
+lock_stmt
+  = KW_LOCK __
+  k:KW_TABLE? __
+  t:table_ref_list __
+  lm:lock_mode? __
+  nw:("NOWAIT"i)? __ {
+    if (t) t.forEach(tt => tableList.add(`lock::${tt.db}::${tt.table}`))
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'lock',
+        keyword: k && k.toLowerCase(),
+        tables: t.map((table) => ({ table })),
+        lock_mode: lm,
+        nowait: nw
       }
     }
   }
@@ -1722,6 +1752,7 @@ KW_EXPLAIN  = "EXPLAIN"i    !ident_start
 KW_INTO     = "INTO"i       !ident_start
 KW_FROM     = "FROM"i       !ident_start
 KW_SET      = "SET"i        !ident_start
+KW_LOCK     = "LOCK"i       !ident_start
 
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
