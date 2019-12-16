@@ -1,3 +1,4 @@
+import { parse as hive } from '../build/hive'
 import { parse as mysql } from '../build/mysql'
 import { parse as mariadb } from '../build/mariadb'
 import { parse as postgresql } from '../build/postgresql'
@@ -5,6 +6,7 @@ import astToSQL from './sql'
 import { DEFAULT_OPT, setParserOpt } from './util'
 
 const parser = {
+  hive,
   mysql,
   mariadb,
   postgresql,

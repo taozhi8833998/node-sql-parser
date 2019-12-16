@@ -92,9 +92,10 @@ describe('insert', () => {
       }
     })
 
-    it('failed with INSERT SELECT INFO', () => {
-      const sql = 'INSERT INTO t1 SELECT * FROM t'
-      const fun = parser.parse.bind(parser, sql)
-      expect(fun).to.throw('Expected [A-Za-z0-9_] but " " found')
+    it('should support parse hive sql insert from select', () => {
+      const sql = 'INSERT overwrite table account select col_a, col_b from t2'
+      const ast = parser.astify(sql, { database: 'hive' })
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.be.equal("INSERT OVERWRITE TABLE `account` SELECT `col_a`, `col_b` FROM `t2`")
     })
 });

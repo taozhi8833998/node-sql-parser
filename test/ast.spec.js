@@ -941,51 +941,50 @@ describe('AST', () => {
             const operatorMap = { '=': 'IN', '!=': 'NOT IN' };
             Object.keys(operatorMap).forEach((operator) => {
                 const sqlOperator = operatorMap[operator];
-
                 it(`should convert "${operator}" to ${sqlOperator} operator for array values`, () => {
                     const ast = {
-                        "type": "update",
-                        "table": [
-                          {
-                            "db": null,
-                            "table": "a",
-                            "as": null
-                          }
-                        ],
-                        "set": [
-                           {
-                              "column": "col1",
-                              "value": {
-                                 "type": "number",
-                                 "value": 5
-                              }
-                           }
-                        ],
-                        "where": {
-                           "type": "binary_expr",
-                           "operator": operator,
-                           "left": {
-                              "type": "column_ref",
-                              "table": null,
-                              "column": "id"
-                           },
-                           "right": {
-                              "type": "expr_list",
-                              "value": [
-                                 {
-                                    "type": "number",
-                                    "value": 1
-                                 },
-                                 {
-                                    "type": "number",
-                                    "value": 2
-                                 }
-                              ]
-                           }
+                    "type": "update",
+                    "table": [
+                        {
+                        "db": null,
+                        "table": "a",
+                        "as": null
                         }
-                     }
+                    ],
+                    "set": [
+                        {
+                            "column": "col1",
+                            "value": {
+                                "type": "number",
+                                "value": 5
+                            }
+                        }
+                    ],
+                    "where": {
+                        "type": "binary_expr",
+                        "operator": operator,
+                        "left": {
+                            "type": "column_ref",
+                            "table": null,
+                            "column": "id"
+                        },
+                        "right": {
+                            "type": "expr_list",
+                            "value": [
+                                {
+                                "type": "number",
+                                "value": 1
+                                },
+                                {
+                                "type": "number",
+                                "value": 2
+                                }
+                            ]
+                        }
+                    }
+                }
 
-                    expect(parser.sqlify(ast)).to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE \`id\` ${sqlOperator} (1, 2)`);
+                expect(parser.sqlify(ast)).to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE \`id\` ${sqlOperator} (1, 2)`);
                 });
             });
 
@@ -1105,18 +1104,12 @@ describe('AST', () => {
 
 
     describe('unsupported situation', () => {
-
-        it(`should throw exception for INSERT SELECT INFO`, () => {
-          const sql = 'INSERT INTO t1 select * from t'
-          expect(getParsedSql.bind(null, sql)).to.throw(Error, 'Expected [A-Za-z0-9_] but " " found');
-        });
-
         it(`should throw exception for drop statements`, () => {
-          expect(parser.sqlify.bind(null, {type: 'Alter'})).to.throw(Error, `Alter statements not supported at the moment`);
+            expect(parser.sqlify.bind(null, {type: 'Alter'})).to.throw(Error, `Alter statements not supported at the moment`);
         });
 
         it(`should throw exception for drop statements`, () => {
             expect(parser.sqlify.bind(null, {ast: {type: 'Alter'}})).to.throw(Error, `Alter statements not supported at the moment`);
-          });
-    });
+            });
+        });
 });
