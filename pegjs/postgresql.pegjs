@@ -1156,7 +1156,7 @@ insert_no_columns_stmt
   = ri:replace_insert       __
     KW_INTO                 __
     t:table_ref_list  __
-    v:value_clause {
+    v:insert_value_clause {
       if (t) t.forEach(tt => {
         tableList.add(`insert::${tt.db}::${tt.table}`)
         columnList.add(`insert::${tt.table}::(.*)`);

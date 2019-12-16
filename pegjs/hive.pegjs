@@ -1147,7 +1147,8 @@ insert_value_clause
 
 replace_insert_stmt
   = ri:replace_insert       __
-    KW_INTO?                 __
+    kw:KW_INTO                 __
+    ta:KW_TABLE __
     t:table_ref_list  __ LPAREN __
     c:column_list  __ RPAREN __
     v:insert_value_clause {
@@ -1162,6 +1163,7 @@ replace_insert_stmt
         columnList: columnListTableAlias(columnList),
         ast: {
           type: ri,
+          prefix: `${kw.toLowerCase()} ${ta.toLowerCase()}`,
           table: t,
           columns: c,
           values: v
@@ -1171,7 +1173,8 @@ replace_insert_stmt
 
 insert_no_columns_stmt
   = ri:replace_insert       __
-    KW_INTO                 __
+    kw:(KW_INTO / KW_OVERWRITE) __
+    ta:KW_TABLE __
     t:table_ref_list  __
     v:insert_value_clause {
       if (t) t.forEach(tt => {
@@ -1183,6 +1186,7 @@ insert_no_columns_stmt
         columnList: columnListTableAlias(columnList),
         ast: {
           type: ri,
+          prefix: `${kw.toLowerCase()} ${ta.toLowerCase()}`,
           table: t,
           columns: null,
           values: v
@@ -1758,7 +1762,8 @@ KW_RENAME   = "RENAME"i     !ident_start
 KW_IGNORE   = "IGNORE"i     !ident_start
 KW_EXPLAIN  = "EXPLAIN"i    !ident_start
 
-KW_INTO     = "INTO"i       !ident_start
+KW_INTO     = "INTO"i       !ident_start { return 'INTO'; }
+KW_OVERWRITE = "OVERWRITE"i !ident_start { return 'OVERWRITE'; }
 KW_FROM     = "FROM"i       !ident_start
 KW_SET      = "SET"i        !ident_start
 KW_UNLOCK   = "UNLOCK"i     !ident_start
@@ -1766,7 +1771,7 @@ KW_LOCK     = "LOCK"i       !ident_start
 
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
-KW_TABLES   = "TABLES"i      !ident_start { return 'TABLES'; }
+KW_TABLES   = "TABLES"i     !ident_start { return 'TABLES'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
 
 KW_ON       = "ON"i       !ident_start

@@ -50,6 +50,7 @@ yarn add @types/node-sql-parser --dev
 
 ### Supported Database SQL Syntax
 
+- Hive
 - Mysql
 - MariaDB
 - PostgresQL
