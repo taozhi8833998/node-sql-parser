@@ -1148,7 +1148,7 @@ insert_value_clause
 replace_insert_stmt
   = ri:replace_insert       __
     kw:KW_INTO                 __
-    ta:KW_TABLE __
+    ta:KW_TABLE? __
     t:table_ref_list  __ LPAREN __
     c:column_list  __ RPAREN __
     v:insert_value_clause {
@@ -1158,12 +1158,13 @@ replace_insert_stmt
         if (t && t.length === 1) table = t[0].table
         c.forEach(c => columnList.add(`insert::${table}::${c}`));
       }
+      const tableKey = ta ? ` ${ta.toLowerCase()}` : ''
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: ri,
-          prefix: `${kw.toLowerCase()} ${ta.toLowerCase()}`,
+          prefix: `${kw.toLowerCase()}${tableKey}`,
           table: t,
           columns: c,
           values: v
@@ -1174,19 +1175,20 @@ replace_insert_stmt
 insert_no_columns_stmt
   = ri:replace_insert       __
     kw:(KW_INTO / KW_OVERWRITE) __
-    ta:KW_TABLE __
+    ta:KW_TABLE? __
     t:table_ref_list  __
     v:insert_value_clause {
       if (t) t.forEach(tt => {
         tableList.add(`insert::${tt.db}::${tt.table}`)
         columnList.add(`insert::${tt.table}::(.*)`);
       });
+      const tableKey = ta ? ` ${ta.toLowerCase()}` : ''
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: ri,
-          prefix: `${kw.toLowerCase()} ${ta.toLowerCase()}`,
+          prefix: `${kw.toLowerCase()}${tableKey}`,
           table: t,
           columns: null,
           values: v
