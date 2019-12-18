@@ -1009,7 +1009,7 @@ describe('select', () => {
         `
         const ast = parser.astify(sql, { database: 'postgresql' })
         const backSQL = parser.sqlify(ast)
-        expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active`, `domain`, `config` ->> email FROM `instances` WHERE `config` ->> email = 'email@provider.com'")
+        expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active`, `domain`, `config` ->> 'email' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
       })
     })
     describe('unknow type check', () => {

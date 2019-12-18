@@ -177,7 +177,7 @@ function columnRefToSQL(expr) {
   } = expr
   let str = column === '*' ? '*' : identifierToSql(column, isDual)
   if (table) str = `${identifierToSql(table)}.${str}`
-  if (arrow) str = `${str} ${arrow} ${property}`
+  if (arrow) str = `${str} ${arrow} '${property}'`
   return parentheses ? `(${str})` : str
 }
 
