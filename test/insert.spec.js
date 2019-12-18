@@ -98,4 +98,32 @@ describe('insert', () => {
       const backSQL = parser.sqlify(ast)
       expect(backSQL).to.be.equal("INSERT OVERWRITE TABLE `account` SELECT `col_a`, `col_b` FROM `t2`")
     })
+
+    it('should support parse insert partition', () => {
+      const sql = 'INSERT into account partition(date, id) select col_a, col_b from t2'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date`, `id`) SELECT `col_a`, `col_b` FROM `t2`")
+    })
+
+    it('should support parse insert partition', () => {
+      const sql = 'INSERT into account partition(date, id) (id, name) values(123, "test"), (124, "test2")'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date`, `id`) (`id`, `name`) VALUES (123,'test'),(124,'test2')")
+    })
+
+    it('should support parse insert partition expr', () => {
+      const sql = 'INSERT into account partition(date = 20191218, id = 2) (id, name) values(123, "test"), (124, "test2")'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date` = 20191218, `id` = 2) (`id`, `name`) VALUES (123,'test'),(124,'test2')")
+    })
+
+    it('should support parse insert partition for hive', () => {
+      const sql = 'INSERT overwrite table account partition(date, id) select * from tmp'
+      const ast = parser.astify(sql, { database: 'hive' })
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.be.equal("INSERT OVERWRITE TABLE `account` PARTITION(`date`, `id`) SELECT * FROM `tmp`")
+    })
 });

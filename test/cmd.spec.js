@@ -245,6 +245,13 @@ describe('Command SQL', () => {
             .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx (\`name\`, \`alias\`)`);
         })
       });
+    });
+
+    ['to', 'as'].forEach(kw => {
+      it(`should support alter rename ${kw} table`, () => {
+        const sql = `alter table oldTable rename ${kw} newTable`
+        expect(getParsedSql(sql)).to.equal(`ALTER TABLE \`oldTable\` RENAME ${kw.toUpperCase()} \`newTable\``)
+      })
     })
   })
 

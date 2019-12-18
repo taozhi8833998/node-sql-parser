@@ -459,6 +459,7 @@ alter_action
   / ALTER_DROP_COLUMN
   / ALTER_ADD_INDEX_OR_KEY
   / ALTER_ADD_FULLETXT_SPARITAL_INDEX
+  / ALTER_RENAME_TABLE
 
 ALTER_ADD_COLUMN
   = KW_ADD __
@@ -498,6 +499,19 @@ ALTER_ADD_INDEX_OR_KEY
         ...id,
       }
     }
+
+ALTER_RENAME_TABLE
+  = KW_RENAME __
+  kw:(KW_TO / KW_AS)? __
+  tn:ident __ {
+    return {
+      action: 'rename',
+      type: 'alter',
+      resource: 'table',
+      keyword: kw && kw[0].toLowerCase(),
+      table: tn
+    }
+  }
 
 create_index_definition
   = kc:(KW_INDEX / KW_KEY) __
@@ -1148,16 +1162,26 @@ insert_value_clause
   = value_clause
   / select_stmt_nake
 
+insert_partition
+  = KW_PARTITION __ LPAREN __ head:ident_name tail:(__ COMMA __ ident_name)* __ RPAREN __ {
+      return createList(head, tail)
+    }
+  / KW_PARTITION __ v: value_item __ {
+    return v
+  }
+
 replace_insert_stmt
   = ri:replace_insert       __
     KW_INTO?                 __
-    t:table_ref_list  __ LPAREN __
-    c:column_list  __ RPAREN __
+    t:table_name  __
+    p:insert_partition? __ LPAREN __ c:column_list  __ RPAREN __
     v:insert_value_clause {
-      if (t) t.forEach(tt => tableList.add(`insert::${tt.db}::${tt.table}`));
+      if (t) {
+        tableList.add(`insert::${t.db}::${t.table}`)
+        t.as = null
+      }
       if (c) {
-        let table = null
-        if (t && t.length === 1) table = t[0].table
+        let table = t && t.table || null
         c.forEach(c => columnList.add(`insert::${table}::${c}`));
       }
       return {
@@ -1165,9 +1189,10 @@ replace_insert_stmt
         columnList: columnListTableAlias(columnList),
         ast: {
           type: ri,
-          table: t,
+          table: [t],
           columns: c,
-          values: v
+          values: v,
+          partition: p,
         }
       };
     }
@@ -1175,20 +1200,23 @@ replace_insert_stmt
 insert_no_columns_stmt
   = ri:replace_insert       __
     KW_INTO                 __
-    t:table_ref_list  __
+    t:table_name  __
+    p:insert_partition? __
     v:insert_value_clause {
-      if (t) t.forEach(tt => {
-        tableList.add(`insert::${tt.db}::${tt.table}`)
-        columnList.add(`insert::${tt.table}::(.*)`);
-      });
+      if (t) {
+        tableList.add(`insert::${t.db}::${t.table}`)
+        columnList.add(`insert::${t.table}::(.*)`);
+        t.as = null
+      }
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: ri,
-          table: t,
+          table: [t],
           columns: null,
-          values: v
+          values: v,
+          partition: p,
         }
       };
     }
@@ -1756,6 +1784,7 @@ KW_REPLACE  = "REPLACE"i    !ident_start
 KW_RENAME   = "RENAME"i     !ident_start
 KW_IGNORE   = "IGNORE"i     !ident_start
 KW_EXPLAIN  = "EXPLAIN"i    !ident_start
+KW_PARTITION = "PARTITION"i !ident_start { return 'PARTITION' }
 
 KW_INTO     = "INTO"i       !ident_start
 KW_FROM     = "FROM"i       !ident_start

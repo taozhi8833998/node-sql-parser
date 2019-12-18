@@ -2,11 +2,11 @@ import { columnDefinitionToSQL } from './column'
 import { indexTypeAndOptionToSQL } from './index-definition'
 import { tablesToSQL } from './tables'
 import { exprToSQL } from './expr'
-import { hasVal, toUpper } from './util'
+import { hasVal, toUpper, identifierToSql } from './util'
 
 function alterToSQL(stmt) {
   const { type, table, expr = [] } = stmt
-  const action = type && type.toUpperCase()
+  const action = toUpper(type)
   const tableName = tablesToSQL(table)
   const exprList = expr.map(exprToSQL)
   const result = [action, 'TABLE', tableName, exprList.join(', ')]
@@ -33,6 +33,9 @@ function alterExprToSQL(expr) {
       dataType = indexTypeAndOptionToSQL(expr)
       dataType = dataType.filter(hasVal).join(' ')
       name = expr[resource]
+      break
+    case 'table':
+      name = identifierToSql(expr[resource])
       break
     default:
       break
