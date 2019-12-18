@@ -459,6 +459,7 @@ alter_action
   / ALTER_DROP_COLUMN
   / ALTER_ADD_INDEX_OR_KEY
   / ALTER_ADD_FULLETXT_SPARITAL_INDEX
+  / ALTER_RENAME_TABLE
 
 ALTER_ADD_COLUMN
   = KW_ADD __
@@ -496,6 +497,19 @@ ALTER_ADD_INDEX_OR_KEY
         ...id,
       }
     }
+
+ALTER_RENAME_TABLE
+  = KW_RENAME __
+  kw:(KW_TO / KW_AS)? __
+  tn:ident __ {
+    return {
+      action: 'rename',
+      type: 'alter',
+      resource: 'table',
+      keyword: kw && kw[0].toLowerCase(),
+      table: tn
+    }
+  }
 
 create_index_definition
   = kc:(KW_INDEX / KW_KEY) __
