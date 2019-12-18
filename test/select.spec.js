@@ -995,6 +995,23 @@ describe('select', () => {
         expect(fun).to.throw(`authority = 'update::null::id' is required in ${mode.type} whiteList to execute SQL = '${sql}'`)
       })
     })
+
+    describe('pg json column', () => {
+      it('should support pg json column query', () => {
+        const sql = `SELECT id,
+        config,
+        busy,
+        'templateId',
+        active,
+        domain,
+        config ->> 'email'
+        FROM instances WHERE config ->> 'email' = 'email@provider.com'
+        `
+        const ast = parser.astify(sql, { database: 'postgresql' })
+        const backSQL = parser.sqlify(ast)
+        expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active`, `domain`, `config` ->> email FROM `instances` WHERE `config` ->> email = 'email@provider.com'")
+      })
+    })
     describe('unknow type check', () => {
       it('should throw error', () => {
         const sql = 'SELECT * FROM a'
