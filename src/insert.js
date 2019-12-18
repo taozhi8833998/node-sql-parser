@@ -13,9 +13,29 @@ function valuesToSQL(values) {
   return `(${clauses.join('),(')})`
 }
 
+function partitionToSQL(partition) {
+  if (!partition) return ''
+  const partitionArr = ['PARTITION', '(']
+  if (Array.isArray(partition)) {
+    partitionArr.push(partition.map(identifierToSql).join(', '))
+  } else {
+    const { value } = partition
+    partitionArr.push(value.map(exprToSQL).join(', '))
+  }
+  partitionArr.push(')')
+  return partitionArr.filter(hasVal).join('')
+}
+
 function insertToSQL(stmt) {
-  const { table, prefix = 'into', columns, values, where } = stmt
-  const clauses = ['INSERT', toUpper(prefix), tablesToSQL(table)]
+  const {
+    table,
+    prefix = 'into',
+    columns,
+    values,
+    where,
+    partition,
+  } = stmt
+  const clauses = ['INSERT', toUpper(prefix), tablesToSQL(table), partitionToSQL(partition)]
   if (Array.isArray(columns)) clauses.push(`(${columns.map(identifierToSql).join(', ')})`)
   clauses.push(commonOptionConnector(Array.isArray(values) ? 'VALUES' : '', valuesToSQL, values))
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
