@@ -1431,6 +1431,16 @@ column_ref
         column: col
       };
     }
+  / col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:quoted_ident {
+      columnList.add(`select::null::${col}`);
+      return {
+        type: 'column_ref',
+        table: null,
+        column: col,
+        arrow: a,
+        property: j
+      };
+  }
   / col:column {
       columnList.add(`select::null::${col}`);
       return {
@@ -1925,6 +1935,8 @@ LBRAKE    = '['
 RBRAKE    = ']'
 
 SEMICOLON = ';'
+SINGLE_ARROW = '->'
+DOUBLE_ARROW = '->>'
 
 OPERATOR_CONCATENATION = '||'
 OPERATOR_AND = '&&'

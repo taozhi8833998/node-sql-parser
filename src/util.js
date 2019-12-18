@@ -167,9 +167,17 @@ function replaceParams(ast, params) {
 }
 
 function columnRefToSQL(expr) {
-  const { column, isDual, table, parentheses } = expr
+  const {
+    arrow,
+    column,
+    isDual,
+    table,
+    parentheses,
+    property,
+  } = expr
   let str = column === '*' ? '*' : identifierToSql(column, isDual)
   if (table) str = `${identifierToSql(table)}.${str}`
+  if (arrow) str = `${str} ${arrow} '${property}'`
   return parentheses ? `(${str})` : str
 }
 
