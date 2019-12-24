@@ -1,6 +1,6 @@
 import { tablesToSQL } from './tables'
 import { exprToSQL } from './expr'
-import { hasVal, identifierToSql, commonOptionConnector } from './util'
+import { hasVal, identifierToSql, commonOptionConnector, returningToSQL } from './util'
 
 /**
  * @param {Array} sets
@@ -20,12 +20,13 @@ function setToSQL(sets) {
 }
 
 function updateToSQL(stmt) {
-  const { table, set, where } = stmt
+  const { table, set, where, returning } = stmt
   const clauses = [
     'UPDATE',
     tablesToSQL(table),
     commonOptionConnector('SET', setToSQL, set),
     commonOptionConnector('WHERE', exprToSQL, where),
+    returningToSQL(returning),
   ]
   return clauses.filter(hasVal).join(' ')
 }

@@ -193,4 +193,11 @@ describe('update', () => {
       }
     });
   })
+
+  it('should support parse pg update returning', () => {
+    const sql = 'update account set id = 1 where name = "abc" returning id'
+    const ast = parser.astify(sql, { database: 'postgresql' })
+    const backSQL = parser.sqlify(ast)
+    expect(backSQL).to.be.equal("UPDATE `account` SET `id` = 1 WHERE `name` = 'abc' RETURNING `id`")
+  })
 });
