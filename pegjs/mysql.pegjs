@@ -64,7 +64,7 @@
 
     'RECURSIVE': true,
     'RENAME': true,
-    'REPLACE': true,
+    // 'REPLACE': true,
     'READ': true, // for lock table
     'RIGHT': true,
 
