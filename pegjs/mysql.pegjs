@@ -2102,7 +2102,6 @@ var_decl
 without_prefix_var_decl
   = name:ident_name m:mem_chain {
     //push for analysis
-    console.log('name===', name)
     varList.push(name);
     return {
       type: 'var',
