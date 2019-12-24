@@ -63,7 +63,7 @@
 
     'RECURSIVE': true,
     'RENAME': true,
-    'REPLACE': true,
+    // 'REPLACE': true,
     'RIGHT': true,
 
     'SELECT': true,
