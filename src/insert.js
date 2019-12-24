@@ -1,6 +1,6 @@
 import { tablesToSQL } from './tables'
 import { exprToSQL } from './expr'
-import { identifierToSql, commonOptionConnector, hasVal, toUpper } from './util'
+import { identifierToSql, commonOptionConnector, hasVal, toUpper, returningToSQL } from './util'
 import { selectToSQL } from './select'
 
 /**
@@ -34,11 +34,13 @@ function insertToSQL(stmt) {
     values,
     where,
     partition,
+    returning,
   } = stmt
   const clauses = ['INSERT', toUpper(prefix), tablesToSQL(table), partitionToSQL(partition)]
   if (Array.isArray(columns)) clauses.push(`(${columns.map(identifierToSql).join(', ')})`)
   clauses.push(commonOptionConnector(Array.isArray(values) ? 'VALUES' : '', valuesToSQL, values))
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
+  clauses.push(returningToSQL(returning))
   return clauses.filter(hasVal).join(' ')
 }
 

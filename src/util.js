@@ -209,6 +209,12 @@ function commentToSQL(comment) {
   return result.join(' ')
 }
 
+function returningToSQL(returning) {
+  if (!returning) return ''
+  const { columns } = returning
+  return ['RETURNING', columns.map(columnRefToSQL).filter(hasVal).join(', ')].join(' ')
+}
+
 export {
   commonOptionConnector,
   connector,
@@ -222,6 +228,7 @@ export {
   literalToSQL,
   identifierToSql,
   replaceParams,
+  returningToSQL,
   hasVal,
   setParserOpt,
   toUpper,

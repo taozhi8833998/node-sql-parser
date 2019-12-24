@@ -1074,7 +1074,8 @@ update_stmt
     t:table_ref_list __
     KW_SET       __
     l:set_list   __
-    w:where_clause? {
+    w:where_clause? __
+    r:returning_stmt? {
       if (t) t.forEach(tableInfo => {
         const { db, as, table } = tableInfo
         tableList.add(`update::${db}::${table}`)
@@ -1089,7 +1090,8 @@ update_stmt
           type: 'update',
           table: t,
           set: l,
-          where: w
+          where: w,
+          returning: r,
         }
       };
     }
@@ -1137,7 +1139,13 @@ set_item
   = tbl:(ident __ DOT)? __ c:column __ '=' __ v:additive_expr {
       return { column: c, value: v, table: tbl && tbl[0] };
     }
-
+returning_stmt
+  = k:KW_RETURNING __ c:column_ref_list {
+    return {
+      type: k && k.toLowerCase() || 'returning',
+      columns: c
+    }
+  }
 insert_value_clause
   = value_clause
   / select_stmt_nake
@@ -1155,7 +1163,8 @@ replace_insert_stmt
     KW_INTO?                 __
     t:table_name  __
     p:insert_partition? __ LPAREN __ c:column_list  __ RPAREN __
-    v:insert_value_clause {
+    v:insert_value_clause __
+    r:returning_stmt? {
       if (t) {
         tableList.add(`insert::${t.db}::${t.table}`)
         t.as = null
@@ -1173,6 +1182,7 @@ replace_insert_stmt
           columns: c,
           values: v,
           partition: p,
+          returning: r,
         }
       };
     }
@@ -1182,7 +1192,8 @@ insert_no_columns_stmt
     KW_INTO                 __
     t:table_name  __
     p:insert_partition? __
-    v:insert_value_clause {
+    v:insert_value_clause __
+    r:returning_stmt? {
       if (t) {
         tableList.add(`insert::${t.db}::${t.table}`)
         columnList.add(`insert::${t.table}::(.*)`);
@@ -1197,6 +1208,7 @@ insert_no_columns_stmt
           columns: null,
           values: v,
           partition: p,
+          returning: r,
         }
       };
     }
@@ -1783,6 +1795,7 @@ KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
 KW_RECURSIVE= "RECURSIVE"   !ident_start
 KW_REPLACE  = "REPLACE"i    !ident_start
+KW_RETURNING  = "RETURNING"i    !ident_start { return 'RETURNING' }
 KW_RENAME   = "RENAME"i     !ident_start
 KW_IGNORE   = "IGNORE"i     !ident_start
 KW_EXPLAIN  = "EXPLAIN"i    !ident_start
