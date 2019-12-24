@@ -818,7 +818,7 @@ cte_column_definition
     }
 
 select_stmt_nake
-  = cte:with_clause? __ KW_SELECT __
+  = __ cte:with_clause? __ KW_SELECT __
     opts:option_clause? __
     d:KW_DISTINCT?      __
     c:column_clause     __

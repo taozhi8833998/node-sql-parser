@@ -816,7 +816,7 @@ cte_column_definition
     }
 
 select_stmt_nake
-  = cte:with_clause? __ KW_SELECT __
+  = __ cte:with_clause? __ KW_SELECT __
     opts:option_clause? __
     d:KW_DISTINCT?      __
     c:column_clause     __
@@ -2102,6 +2102,7 @@ var_decl
 without_prefix_var_decl
   = name:ident_name m:mem_chain {
     //push for analysis
+    console.log('name===', name)
     varList.push(name);
     return {
       type: 'var',
