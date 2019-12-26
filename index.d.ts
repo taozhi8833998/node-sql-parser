@@ -65,7 +65,7 @@ export interface Select {
 export interface Insert_Replace {
   type: 'replace' | 'insert';
   db: string | null;
-  table: string;
+  table: any;
   columns: string[] | null;
   values: InsertReplaceValue[];
 }
