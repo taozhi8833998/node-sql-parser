@@ -38,7 +38,6 @@
     'HAVING': true,
 
     'IN': true,
-    'INDEX': true,
     'INNER': true,
     'INSERT': true,
     'INTO': true,
