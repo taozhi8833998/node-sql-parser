@@ -7,11 +7,10 @@ function aggrToSQL(expr) {
   const { args, over } = expr
   let str = exprToSQL(args.expr)
   const fnName = expr.name
-  let overStr = ''
+  const overStr = over && `OVER (PARTITION BY ${over.map(col => identifierToSql(col)).join(', ')})`
 
   if (fnName === 'COUNT') {
     if (has(args, 'distinct') && args.distinct !== null) str = `DISTINCT ${str}`
-    if (over) overStr = `OVER (PARTITION BY ${over.map(col => identifierToSql(col)).join(', ')})`
   }
   return [`${fnName}(${str})`, overStr].filter(hasVal).join(' ')
 }
