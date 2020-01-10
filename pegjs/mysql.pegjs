@@ -1535,13 +1535,24 @@ KW_SUM_MAX_MIN_AVG
   = KW_SUM / KW_MAX / KW_MIN / KW_AVG
 
 aggr_fun_count
-  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN {
+  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ KW_OVER __ LPAREN __ KW_PARTITION __ KW_BY __ bc: column_list __ RPAREN __ {
+    console.log(bc)
+    if (bc) bc.forEach(c => columnList.add(`select::null::${c}`))
+      return {
+        type: 'aggr_func',
+        name: name,
+        args: arg,
+        over: bc
+      };
+    }
+  / name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN {
       return {
         type: 'aggr_func',
         name: name,
         args: arg
       };
     }
+
 
 count_arg
   = e:star_expr { return { expr: e }; }
@@ -1804,6 +1815,7 @@ KW_FULL     = "FULL"i     !ident_start
 KW_INNER    = "INNER"i    !ident_start
 KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
+KW_OVER     = "OVER"i     !ident_start
 KW_UNION    = "UNION"i    !ident_start
 KW_VALUES   = "VALUES"i   !ident_start
 KW_USING    = "USING"i    !ident_start

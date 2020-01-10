@@ -996,6 +996,15 @@ describe('select', () => {
       })
     })
 
+    describe('select over', () => {
+      it('should support select over', () => {
+        const sql = 'SELECT id, name,gender, COUNT(gender) OVER (PARTITION BY gender) AS Total_students FROM student'
+        const ast = parser.astify(sql)
+        const backSQL = parser.sqlify(ast)
+        expect(backSQL).to.equal("SELECT `id`, `name`, `gender`, COUNT(`gender`) OVER (PARTITION BY `gender`) AS `Total_students` FROM `student`")
+      })
+    })
+
     describe('pg json column', () => {
       it('should support pg json column query', () => {
         const sql = `SELECT id,
