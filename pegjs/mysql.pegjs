@@ -1536,7 +1536,6 @@ KW_SUM_MAX_MIN_AVG
 
 aggr_fun_count
   = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ KW_OVER __ LPAREN __ KW_PARTITION __ KW_BY __ bc: column_list __ RPAREN __ {
-    console.log(bc)
     if (bc) bc.forEach(c => columnList.add(`select::null::${c}`))
       return {
         type: 'aggr_func',
@@ -1562,13 +1561,23 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 func_call
-  = name:ident __ LPAREN __ l:expr_list? __ RPAREN {
+  = name:ident __ LPAREN __ l:expr_list? __ RPAREN __ KW_OVER __ LPAREN __ KW_PARTITION __ KW_BY __ bc: column_list __ RPAREN __ {
+    if (bc) bc.forEach(c => columnList.add(`select::null::${c}`))
+      return {
+        type: 'function',
+        name: name,
+        args: l ? l: { type: 'expr_list', value: [] },
+        over: bc
+      };
+    }
+  / name:ident __ LPAREN __ l:expr_list? __ RPAREN {
       return {
         type: 'function',
         name: name,
         args: l ? l: { type: 'expr_list', value: [] }
       };
     }
+
   / name:scalar_func (__ LPAREN RPAREN __)? {
       return {
         type: 'function',
