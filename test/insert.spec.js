@@ -135,7 +135,7 @@ describe('insert', () => {
     })
 
     describe('support ascii pnCtrl single-char', () => {
-      it.only('should support ascii pnCtrl', () => {
+      it('should support ascii pnCtrl', () => {
         // 0～31及127(共33个)是控制字符或通信专用字符 \0-\x1F和\x7f in ascii, ETX ascii code is 0x03
         const sql = `INSERT INTO posts (content) VALUES('\\'s ')`
         const ast = parser.astify(sql)
