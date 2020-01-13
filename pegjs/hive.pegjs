@@ -1685,7 +1685,7 @@ single_quote_char
   / escape_char
 
 single_char
-  = [^'\\\0-\x1F\x7f]
+  = [^'\\]
   / escape_char
 
 escape_char
