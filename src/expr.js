@@ -67,7 +67,7 @@ exprToSQLConvertFn.select = expr => {
 exprToSQLConvertFn.unary_expr = unaryToSQL
 
 function orderOrPartitionByToSQL(expr, prefix) {
-  if (!Array.isArray(expr)) return
+  if (!Array.isArray(expr)) return ''
   let expressions = []
   const upperPrefix = toUpper(prefix)
   switch (upperPrefix) {
