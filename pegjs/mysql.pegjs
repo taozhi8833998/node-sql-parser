@@ -1887,6 +1887,7 @@ KW_INT      = "INT"i      !ident_start { return 'INT'; }
 KW_INTEGER  = "INTEGER"i  !ident_start { return 'INTEGER'; }
 KW_JSON     = "JSON"i     !ident_start { return 'JSON'; }
 KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
+KW_TINYINT  = "TINYINT"i  !ident_start { return 'TINYINT'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
@@ -2159,8 +2160,8 @@ character_string_type
   / t:KW_VARCHAR { return { dataType: t }; }
 
 numeric_type
-  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT) __ LPAREN __ l:[0-9]+ __ RPAREN __  { return { dataType: t, length: parseInt(l.join(''), 10) }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT) { return { dataType: t }; }
+  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT) __ LPAREN __ l:[0-9]+ __ RPAREN __  { return { dataType: t, length: parseInt(l.join(''), 10) }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT) { return { dataType: t }; }
 
 
 datetime_type
