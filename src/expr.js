@@ -1,4 +1,4 @@
-import { literalToSQL, columnRefToSQL } from './util'
+import { literalToSQL, columnRefToSQL, toUpper, connector } from './util'
 import { alterExprToSQL } from './alter'
 import { aggrToSQL } from './aggregation'
 import { assignToSQL } from './assign'
@@ -20,6 +20,7 @@ const exprToSQLConvertFn = {
   function    : funcToSQL,
   interval    : intervalToSQL,
 }
+
 function varToSQL(expr) {
   const { prefix = '@', name, members, keyword } = expr
   const val = []
@@ -65,9 +66,28 @@ exprToSQLConvertFn.select = expr => {
 
 exprToSQLConvertFn.unary_expr = unaryToSQL
 
+function orderOrPartitionByToSQL(expr, prefix) {
+  if (!Array.isArray(expr)) return
+  let expressions = []
+  const upperPrefix = toUpper(prefix)
+  switch (upperPrefix) {
+    case 'ORDER BY':
+      expressions = expr.map(info => `${exprToSQL(info.expr)} ${info.type}`)
+      break
+    case 'PARTITION BY':
+      expressions = expr.map(info => `${columnRefToSQL(info.expr)}`)
+      break
+    default:
+      expressions = expr.map(info => `${exprToSQL(info.expr)}`)
+      break
+  }
+  return connector(upperPrefix, expressions.join(', '))
+}
+
 export {
   exprToSQLConvertFn,
   exprToSQL,
   getExprListSQL,
   varToSQL,
+  orderOrPartitionByToSQL,
 }

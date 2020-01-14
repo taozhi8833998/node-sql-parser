@@ -1,5 +1,6 @@
 import { exprToSQL } from './expr'
-import { hasVal, identifierToSql } from './util'
+import { hasVal } from './util'
+import { overToSQL } from './over'
 
 function castToSQL(expr) {
   const str = expr.target.length ? `(${expr.target.length})` : ''
@@ -19,7 +20,7 @@ function funcToSQL(expr) {
   if (!args) return name
   const { parentheses, over } = expr
   const str = `${name}(${exprToSQL(args).join(', ')})`
-  const overStr = over && `OVER (PARTITION BY ${over.map(col => identifierToSql(col)).join(', ')})`
+  const overStr = overToSQL(over)
   return [parentheses ? `(${str})` : str, overStr].filter(hasVal).join(' ')
 }
 

@@ -1,4 +1,4 @@
-import { exprToSQL, getExprListSQL } from './expr'
+import { exprToSQL, getExprListSQL, orderOrPartitionByToSQL } from './expr'
 import { columnsToSQL } from './column'
 import { withToSql } from './with'
 import { tablesToSQL } from './tables'
@@ -29,10 +29,7 @@ function selectToSQL(stmt) {
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
   clauses.push(connector('GROUP BY', getExprListSQL(groupby).join(', ')))
   clauses.push(commonOptionConnector('HAVING', exprToSQL, having))
-  if (Array.isArray(orderby)) {
-    const orderExpressions = orderby.map(expr => `${exprToSQL(expr.expr)} ${expr.type}`)
-    clauses.push(connector('ORDER BY', orderExpressions.join(', ')))
-  }
+  clauses.push(orderOrPartitionByToSQL(orderby, 'order by'))
   if (limit) {
     const { seperator, value } = limit
     clauses.push(connector('LIMIT', value.map(exprToSQL).join(`${seperator === 'offset' ? ' ' : ''}${seperator.toUpperCase()} `)))
