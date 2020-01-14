@@ -24,9 +24,11 @@
 - support select, delete, update and insert type
 - support drop, truncate and rename command
 - output the table and column list that the sql visited with the corresponding authority
-- support typescript
+- support multiple kinds of database
 
 ## :tada: Install
+
+### From [npmjs](https://www.npmjs.org/)
 
 ```bash
 npm install node-sql-parser --save
@@ -36,14 +38,10 @@ or
 yarn add node-sql-parser
 ```
 
-**(Deprecated)Install the following type module for typescript usage**
+### From [GitHub Package Registry](https://npm.pkg.github.com/)
 
 ```bash
-npm install @types/node-sql-parser --save-dev
-
-or
-
-yarn add @types/node-sql-parser --dev
+npm install @taozhi8833998/node-sql-parser --registry=https://npm.pkg.github.com/
 ```
 
 ## :rocket: Usage
