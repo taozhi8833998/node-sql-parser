@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const Parser = require('../src/parser').default
 const util = require('../src/util')
-const { varToSQL } = require('../src/expr')
+const { varToSQL, orderOrPartitionByToSQL } = require('../src/expr')
 const { multipleToSQL } = require('../src/union')
 
 describe('AST', () => {
@@ -1100,6 +1100,22 @@ describe('AST', () => {
             .to.equal('SELECT `contact_id`, `last_name`, `first_name` FROM `contacts`')
         })
 
+    })
+
+    describe('orderOrPartitionByToSQL', () => {
+        it('should support default order partition', () => {
+            const expr = [
+                {
+                "expr": {
+                  "type": "column_ref",
+                  "table": null,
+                  "column": "gender"
+                },
+                "as": null
+                }
+            ]
+            expect(orderOrPartitionByToSQL(expr, 'default')).to.equal('DEFAULT `gender`')
+          })
     })
 
 

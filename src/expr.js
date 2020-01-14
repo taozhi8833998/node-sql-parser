@@ -78,7 +78,7 @@ function orderOrPartitionByToSQL(expr, prefix) {
       expressions = expr.map(info => `${columnRefToSQL(info.expr)}`)
       break
     default:
-      expressions = expr.map(info => `${exprToSQL(info.expr)}`)
+      expressions = expr.map(info => `${columnRefToSQL(info.expr)}`)
       break
   }
   return connector(upperPrefix, expressions.join(', '))
