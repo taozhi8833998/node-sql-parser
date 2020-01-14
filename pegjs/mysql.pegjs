@@ -1534,9 +1534,15 @@ aggr_fun_smma
 KW_SUM_MAX_MIN_AVG
   = KW_SUM / KW_MAX / KW_MIN / KW_AVG
 
+over_partition
+  = KW_OVER __ LPAREN __ KW_PARTITION __ KW_BY __ bc:column_clause __ l:order_by_clause? __ RPAREN __  {
+    return {
+      partitionby: bc,
+      orderby: l
+    }
+  }
 aggr_fun_count
-  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ KW_OVER __ LPAREN __ KW_PARTITION __ KW_BY __ bc: column_list __ RPAREN __ {
-    if (bc) bc.forEach(c => columnList.add(`select::null::${c}`))
+  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition {
       return {
         type: 'aggr_func',
         name: name,
@@ -1561,8 +1567,7 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 func_call
-  = name:ident __ LPAREN __ l:expr_list? __ RPAREN __ KW_OVER __ LPAREN __ KW_PARTITION __ KW_BY __ bc: column_list __ RPAREN __ {
-    if (bc) bc.forEach(c => columnList.add(`select::null::${c}`))
+  = name:ident __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition {
       return {
         type: 'function',
         name: name,

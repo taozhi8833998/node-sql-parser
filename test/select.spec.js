@@ -995,45 +995,58 @@ describe('select', () => {
         expect(fun).to.throw(`authority = 'update::null::id' is required in ${mode.type} whiteList to execute SQL = '${sql}'`)
       })
     })
-
-    describe('select over', () => {
-      it('should support select over', () => {
-        const sql = 'SELECT id, name,gender, COUNT(gender) OVER (PARTITION BY gender) AS Total_students FROM student'
-        const ast = parser.astify(sql)
-        const backSQL = parser.sqlify(ast)
-        expect(backSQL).to.equal("SELECT `id`, `name`, `gender`, COUNT(`gender`) OVER (PARTITION BY `gender`) AS `Total_students` FROM `student`")
-      })
-
-      it('should support select over function', () => {
-        const sql = 'SELECT ROW_NUMBER() OVER (PARTITION BY gender) AS Total_students FROM student'
-        const ast = parser.astify(sql)
-        const backSQL = parser.sqlify(ast)
-        expect(backSQL).to.equal("SELECT ROW_NUMBER() OVER (PARTITION BY `gender`) AS `Total_students` FROM `student`")
-      })
+  })
+  describe('select over', () => {
+    it('should support select over', () => {
+      const sql = 'SELECT id, name,gender, COUNT(gender) OVER (PARTITION BY gender) AS Total_students FROM student'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal("SELECT `id`, `name`, `gender`, COUNT(`gender`) OVER (PARTITION BY `gender`) AS `Total_students` FROM `student`")
     })
 
-    describe('pg json column', () => {
-      it('should support pg json column query', () => {
-        const sql = `SELECT id,
-        config,
-        busy,
-        'templateId',
-        active,
-        domain,
-        config ->> 'email'
-        FROM instances WHERE config ->> 'email' = 'email@provider.com'
-        `
-        const ast = parser.astify(sql, { database: 'postgresql' })
-        const backSQL = parser.sqlify(ast)
-        expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active`, `domain`, `config` ->> 'email' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
-      })
+    it('should support select over function', () => {
+      const sql = 'SELECT ROW_NUMBER() OVER (PARTITION BY gender) AS Total_students FROM student'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal("SELECT ROW_NUMBER() OVER (PARTITION BY `gender`) AS `Total_students` FROM `student`")
     })
-    describe('unknow type check', () => {
-      it('should throw error', () => {
-        const sql = 'SELECT * FROM a'
-        const whiteList = ['select::null::(.*)']
-        expect(parser.whiteListCheck.bind(parser, sql, whiteList, { type: 'unknow' })).to.throw('unknow is not valid check mode')
-      })
+
+    it('should support select over function with order by', () => {
+      const sql = 'SELECT ROW_NUMBER() OVER (PARTITION BY gender order by gender asc) AS Total_students FROM student'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal("SELECT ROW_NUMBER() OVER (PARTITION BY `gender` ORDER BY `gender` ASC) AS `Total_students` FROM `student`")
+    })
+
+    it('should support select over function with order by multiple columns', () => {
+      const sql = 'SELECT ROW_NUMBER() OVER (PARTITION BY gender, id order by gender asc, id desc) AS Total_students FROM student'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal("SELECT ROW_NUMBER() OVER (PARTITION BY `gender`, `id` ORDER BY `gender` ASC, `id` DESC) AS `Total_students` FROM `student`")
+    })
+  })
+
+  describe('pg json column', () => {
+    it('should support pg json column query', () => {
+      const sql = `SELECT id,
+      config,
+      busy,
+      'templateId',
+      active,
+      domain,
+      config ->> 'email'
+      FROM instances WHERE config ->> 'email' = 'email@provider.com'
+      `
+      const ast = parser.astify(sql, { database: 'postgresql' })
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active`, `domain`, `config` ->> 'email' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
+    })
+  })
+  describe('unknow type check', () => {
+    it('should throw error', () => {
+      const sql = 'SELECT * FROM a'
+      const whiteList = ['select::null::(.*)']
+      expect(parser.whiteListCheck.bind(parser, sql, whiteList, { type: 'unknow' })).to.throw('unknow is not valid check mode')
     })
   })
 });
