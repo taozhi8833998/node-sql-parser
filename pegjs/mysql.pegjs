@@ -2166,7 +2166,8 @@ character_string_type
   / t:KW_VARCHAR { return { dataType: t }; }
 
 numeric_type
-  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT) __ LPAREN __ l:[0-9]+ __ RPAREN __  { return { dataType: t, length: parseInt(l.join(''), 10) }; }
+  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT) __ LPAREN __ l:[0-9]+ __ RPAREN __  { return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT)l:[0-9]+{ return { dataType: t, length: parseInt(l.join(''), 10) }; }
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT) { return { dataType: t }; }
 
 

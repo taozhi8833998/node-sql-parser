@@ -3,16 +3,19 @@ import { hasVal } from './util'
 import { overToSQL } from './over'
 
 function castToSQL(expr) {
-  const str = expr.target.length ? `(${expr.target.length})` : ''
-  let prefix = exprToSQL(expr.expr)
-  let symbol = '::'
+  const { target, expr: expression, symbol } = expr
+  const { length, dataType, parentheses } = target
+  let str = ''
+  if (length) str = parentheses ? `(${length})` : length
+  let prefix = exprToSQL(expression)
+  let symbolChar = '::'
   let suffix = ''
-  if (expr.symbol === 'as') {
+  if (symbol === 'as') {
     prefix = `CAST(${prefix}`
     suffix = ')'
-    symbol = ` ${expr.symbol.toUpperCase()} `
+    symbolChar = ` ${symbol.toUpperCase()} `
   }
-  return `${prefix}${symbol}${expr.target.dataType}${str}${suffix}`
+  return `${prefix}${symbolChar}${dataType}${str}${suffix}`
 }
 
 function funcToSQL(expr) {
