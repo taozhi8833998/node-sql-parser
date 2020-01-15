@@ -1047,7 +1047,13 @@ where_clause
   = KW_WHERE __ e:expr { return e; }
 
 group_by_clause
-  = KW_GROUP __ KW_BY __ l:column_ref_list { return l; }
+  = KW_GROUP __ KW_BY __ l:column_ref_index { return l; }
+
+column_ref_index
+  = l:column_ref_list
+  / l: literal_list {
+    return l
+  }
 
 column_ref_list
   = head:column_ref tail:(__ COMMA __ column_ref)* {
