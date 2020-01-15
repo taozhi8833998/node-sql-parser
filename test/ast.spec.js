@@ -325,6 +325,17 @@ describe('AST', () => {
                 expect(getParsedSql('SELECT ADDDATE(c, INTERVAL 10 DAY) as b FROM tableA'))
                     .to.equal('SELECT ADDDATE(`c`, INTERVAL 10 DAY) AS `b` FROM `tableA`');
             })
+
+            it('should support adddate function interval expr', () => {
+                expect(getParsedSql('SELECT ADDDATE(c, INTERVAL 1+3 DAY) as b FROM tableA'))
+                    .to.equal('SELECT ADDDATE(`c`, INTERVAL 1 + 3 DAY) AS `b` FROM `tableA`');
+            })
+
+            it('should support adddate function interval column ref', () => {
+                expect(getParsedSql('SELECT ADDDATE(c, INTERVAL tableB.col + 3 DAY) as b FROM tableA'))
+                    .to.equal('SELECT ADDDATE(`c`, INTERVAL `tableB`.`col` + 3 DAY) AS `b` FROM `tableA`');
+            })
+
             it('should support adddate function', () => {
                 expect(getParsedSql('SELECT ADDDATE(c, 10) as b FROM tableA'))
                     .to.equal('SELECT ADDDATE(`c`, 10) AS `b` FROM `tableA`');
