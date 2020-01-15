@@ -618,6 +618,13 @@ describe('select', () => {
         { type: 'column_ref', table: 't', column: 'c' }
       ]);
     });
+
+    it('should parse column index', () => {
+      const sql = 'SELECT name, gender FROM Test.student GROUP BY 1, 2'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal('SELECT `name`, `gender` FROM `Test`.`student` GROUP BY 1, 2')
+    })
   });
 
   describe('having clause', () => {
