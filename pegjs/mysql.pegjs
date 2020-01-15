@@ -1249,11 +1249,12 @@ expr_list
 
 interval_expr
   = KW_INTERVAL                    __
-    n:number                       __
+    e:expr                       __
     u: interval_unit {
       return {
         type: 'interval',
-        value: [n, u]
+        expr: e,
+        unit: u.toLowerCase(),
       }
     }
 
