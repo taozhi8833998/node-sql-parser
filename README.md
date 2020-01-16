@@ -52,6 +52,7 @@ npm install @taozhi8833998/node-sql-parser --registry=https://npm.pkg.github.com
 - Mysql
 - MariaDB
 - PostgresQL
+- TransactSQL
 
 ### Create AST for SQL statement
 

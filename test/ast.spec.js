@@ -1137,6 +1137,16 @@ describe('AST', () => {
           })
     })
 
+    describe('transactsql', () => {
+        it('should support basic parser select', () => {
+            const sql = `SELECT col, col2 FROM dba.schemab.tbl_c`
+            const opt = { database: 'transactsql' }
+            const ast = parser.astify(sql, opt)
+            const backSQL = parser.sqlify(ast, opt)
+            expect(backSQL).to.equals(sql)
+        })
+    })
+
 
     describe('unsupported situation', () => {
         it(`should throw exception for drop statements`, () => {
