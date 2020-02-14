@@ -79,6 +79,13 @@ describe('select', () => {
     expect(ast.limit).to.be.null;
   });
 
+  it('should support parse any column name', () => {
+    const sql = 'select book_view.code from book_view where book_view.type= "A"'
+    const ast = parser.astify(sql)
+    const backSQL = parser.sqlify(ast)
+    expect(backSQL).to.be.equal('SELECT `book_view`.`code` FROM `book_view` WHERE `book_view`.`type` = \'A\'')
+  })
+
   it('should have appropriate types', () => {
     const ast = parser.astify('SELECT SQL_NO_CACHE DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 3');
 

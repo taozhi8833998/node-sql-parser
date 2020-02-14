@@ -1446,7 +1446,7 @@ primary
   / var_decl
 
 column_ref
-  = tbl:ident __ DOT __ col:column {
+  = tbl:ident __ DOT __ col:column_without_kw {
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
@@ -1500,6 +1500,12 @@ single_quoted_ident
 
 backticks_quoted_ident
   = "`" chars:[^`]+ "`" { return chars.join(''); }
+
+column_without_kw
+  = name:column_name {
+    return name;
+  }
+  / quoted_ident
 
 column
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { return name; }
