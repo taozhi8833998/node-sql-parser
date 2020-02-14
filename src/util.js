@@ -123,6 +123,8 @@ function identifierToSql(ident, isDual) {
       return `\`${ident}\``
     case 'postgresql':
       return `"${ident}"`
+    case 'transactsql':
+      return `[${ident}]`
     default:
       return `\`${ident}\``
   }

@@ -2,6 +2,7 @@ import { parse as hive } from '../build/hive'
 import { parse as mysql } from '../build/mysql'
 import { parse as mariadb } from '../build/mariadb'
 import { parse as postgresql } from '../build/postgresql'
+import { parse as transactsql } from '../build/transactsql'
 import astToSQL from './sql'
 import { DEFAULT_OPT, setParserOpt } from './util'
 
@@ -10,6 +11,7 @@ const parser = {
   mysql,
   mariadb,
   postgresql,
+  transactsql,
 }
 class Parser {
   astify(sql, opt = DEFAULT_OPT) {
