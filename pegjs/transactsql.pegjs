@@ -817,6 +817,7 @@ cte_column_definition
 select_stmt_nake
   = __ cte:with_clause? __ KW_SELECT __
     opts:option_clause? __
+    top: top_clause? __
     d:KW_DISTINCT?      __
     c:column_clause     __
     f:from_clause?      __
@@ -836,9 +837,18 @@ select_stmt_nake
           where: w,
           groupby: g,
           having: h,
+          top,
           orderby: o,
           limit: l
       };
+  }
+
+top_clause
+  = KW_TOP __ n:number __ p:('PERCENT'i)? __ {
+    return {
+      value: n,
+      percent: p && p.toLowerCase()
+    }
   }
 
 // MySQL extensions to standard SQL
@@ -1806,6 +1816,7 @@ KW_DEFAULT  = "DEFAULT"i    !ident_start
 KW_NOT_NULL = "NOT NULL"i   !ident_start
 KW_TRUE     = "TRUE"i       !ident_start
 KW_TO       = "TO"i         !ident_start
+KW_TOP      = "TOP"i        !ident_start
 KW_FALSE    = "FALSE"i      !ident_start
 
 KW_SHOW     = "SHOW"i       !ident_start
