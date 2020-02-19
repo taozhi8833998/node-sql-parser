@@ -1056,6 +1056,25 @@ describe('select', () => {
       expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active`, `domain`, `config` ->> 'email' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
     })
   })
+
+  describe('transactsql', () => {
+    const opt = {
+      database: 'transactsql'
+    }
+    it('should support select top n', () => {
+      const sql = 'select top 3 * from tableA'
+      const ast = parser.astify(sql, opt)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal('SELECT TOP 3 * FROM `tableA`')
+    })
+
+    it('should support select top n percent', () => {
+      const sql = 'select top 3 percent * from tableA'
+      const ast = parser.astify(sql, opt)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal('SELECT TOP 3 PERCENT * FROM `tableA`')
+    })
+  })
   describe('unknow type check', () => {
     it('should throw error', () => {
       const sql = 'SELECT * FROM a'

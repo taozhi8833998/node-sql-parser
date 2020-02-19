@@ -113,6 +113,14 @@ function setParserOpt(opt) {
   parserOpt = opt
 }
 
+function topToSQL(opt) {
+  if (!opt) return
+  const { value, percent } = opt
+  const prefix = `TOP ${value}`
+  if (!percent) return prefix
+  return `${prefix} ${percent.toUpperCase()}`
+}
+
 function identifierToSql(ident, isDual) {
   const { database } = getParserOpt()
   if (isDual === true) return `'${ident}'`
@@ -234,4 +242,5 @@ export {
   hasVal,
   setParserOpt,
   toUpper,
+  topToSQL,
 }
