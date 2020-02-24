@@ -229,11 +229,7 @@ describe('select', () => {
             as: null
           }
         ]
-        it(`should parse scalar function ${func}`, () => {
-          const ast = parser.astify(`SELECT ${func} FROM t`);
 
-          expect(ast.columns).to.eql(columnAst);
-        });
         it(`should parse scalar function ${func}() with parentheses`, () => {
           const ast = parser.astify(`SELECT ${func}() FROM t`);
 
@@ -275,6 +271,13 @@ describe('select', () => {
       const ast = parser.astify('SELECT * FROM "u"."t"');
       expect(ast.from).to.eql([{ db: 'u', table: 't', as: null }]);
     });
+
+    it('should support keyword as tablename', () => {
+      const sql = 'select user0__.user_id as userId from user user0__'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal('SELECT `user0__`.`user_id` AS `userId` FROM `user` AS `user0__`')
+    })
 
 
     it('should parse subselect', () => {

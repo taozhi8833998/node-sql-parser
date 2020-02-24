@@ -80,7 +80,6 @@
 
     'UNION': true,
     'UPDATE': true,
-    'USER': true,
     'USING': true,
 
     'VALUES': true,
@@ -1564,7 +1563,7 @@ func_call
         args: l ? l: { type: 'expr_list', value: [] }
       };
     }
-  / name:scalar_func (__ LPAREN RPAREN __)? {
+  / name:scalar_func __ LPAREN __ RPAREN __ {
       return {
         type: 'function',
         name: name,
