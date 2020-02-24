@@ -63,7 +63,6 @@
 
     'RECURSIVE': true,
     'RENAME': true,
-    // 'REPLACE': true,
     'READ': true, // for lock table
     'RIGHT': true,
 
@@ -82,7 +81,6 @@
 
     'UNION': true,
     'UPDATE': true,
-    'USER': true,
     'USING': true,
 
     'VALUES': true,
@@ -235,7 +233,7 @@ multiple_stmt
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
-      	ast: cur
+        ast: cur
       }
     }
 
@@ -249,7 +247,7 @@ union_stmt
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
-      	ast: head
+        ast: head
       }
     }
 
@@ -1596,7 +1594,7 @@ func_call
       };
     }
 
-  / name:scalar_func (__ LPAREN RPAREN __)? {
+  / name:scalar_func __ LPAREN __ RPAREN __ {
       return {
         type: 'function',
         name: name,
