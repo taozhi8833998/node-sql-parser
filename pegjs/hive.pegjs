@@ -1869,6 +1869,7 @@ KW_INTEGER  = "INTEGER"i  !ident_start { return 'INTEGER'; }
 KW_JSON     = "JSON"i     !ident_start { return 'JSON'; }
 KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
 KW_TINYINT  = "TINYINT"i  !ident_start { return 'TINYINT'; }
+KW_BIGINT   = "BIGINT"i   !ident_start { return 'BIGINT'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
@@ -2141,10 +2142,9 @@ character_string_type
   / t:KW_VARCHAR { return { dataType: t }; }
 
 numeric_type
-  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT) __ LPAREN __ l:[0-9]+ __ RPAREN __  { return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT)l:[0-9]+{ return { dataType: t, length: parseInt(l.join(''), 10) }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT) { return { dataType: t }; }
-
+  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT) __ LPAREN __ l:[0-9]+ __ RPAREN __  { return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT)l:[0-9]+{ return { dataType: t, length: parseInt(l.join(''), 10) }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT) { return { dataType: t }; }
 
 datetime_type
   = t:(KW_DATE / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
