@@ -1672,6 +1672,12 @@ literal_datetime
         value: ca[1].join('')
       };
     }
+  / type: KW_CURRENT_TIMESTAMP __ lf:LPAREN? __ rt:RPAREN? !{ if (lf && rt) return true }  __ up:('ON UPDATE CURRENT_TIMESTAMP'i)? {
+      return {
+        type: 'origin',
+        value: (up ? `${type} ${up}` : type).toLowerCase()
+      };
+    }
 
 single_quote_char
   = [^"\\\0-\x1F\x7f]
