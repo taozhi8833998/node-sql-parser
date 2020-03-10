@@ -454,6 +454,8 @@ alter_action
   / ALTER_ADD_INDEX_OR_KEY
   / ALTER_ADD_FULLETXT_SPARITAL_INDEX
   / ALTER_RENAME_TABLE
+  / ALTER_ALGORITHM
+  / ALTER_LOCK
 
 ALTER_ADD_COLUMN
   = KW_ADD __
@@ -502,6 +504,26 @@ ALTER_RENAME_TABLE
       resource: 'table',
       keyword: kw && kw[0].toLowerCase(),
       table: tn
+    }
+  }
+
+ALTER_ALGORITHM
+  = "ALGORITHM"i __ KW_ASSIGIN_EQUAL __ val:("DEFAULT"i / "INSTANT"i / "INPLACE"i / "COPY"i) {
+    return {
+      type: 'alter',
+      keyword: 'algorithm',
+      resource: 'algorithm',
+      algorithm: val
+    }
+  }
+
+ALTER_LOCK
+  = "LOCK"i __ KW_ASSIGIN_EQUAL __ val:("DEFAULT"i / "NONE"i / "SHARED"i / "EXCLUSIVE"i) {
+    return {
+      type: 'alter',
+      keyword: 'lock',
+      resource: 'lock',
+      lock: val
     }
   }
 
