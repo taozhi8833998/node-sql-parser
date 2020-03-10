@@ -140,6 +140,11 @@ describe('Command SQL', () => {
       })
     });
 
+    it('should support alter column with algorithm and lock option', () => {
+      expect(getParsedSql("ALTER TABLE `test`.`test` ADD COLUMN test VARCHAR(20) NOT NULL DEFAULT 'xx', ALGORITHM=INPLACE, LOCK=NONE;"))
+        .to.equal("ALTER TABLE `test`.`test` ADD COLUMN `test` VARCHAR(20) NOT NULL DEFAULT 'xx', ALGORITHM = INPLACE, LOCK = NONE");
+    })
+
     it('should support alter without expr', () => {
       const expr = [
         {

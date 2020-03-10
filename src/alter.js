@@ -37,6 +37,10 @@ function alterExprToSQL(expr) {
     case 'table':
       name = identifierToSql(expr[resource])
       break
+    case 'algorithm':
+    case 'lock':
+      name = `= ${expr[resource]}`
+      break
     default:
       break
   }
