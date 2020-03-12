@@ -1,4 +1,5 @@
 import {
+  identifierToSql,
   toUpper,
   hasVal,
 } from './util'
@@ -17,7 +18,7 @@ function constraintDefinitionToSQL(constraintDefinition) {
   constraintSQL.push(toUpper(keyword))
   constraintSQL.push(constraint)
   constraintSQL.push(toUpper(constraintType))
-  constraintSQL.push(index)
+  constraintSQL.push(identifierToSql(index))
   constraintSQL.push(...indexTypeAndOptionToSQL(constraintDefinition))
   constraintSQL.push(...columnReferenceDefinitionToSQL(referenceDefinition))
   return constraintSQL.filter(hasVal).join(' ')

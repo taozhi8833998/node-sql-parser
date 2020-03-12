@@ -1937,6 +1937,7 @@ KW_DECIMAL  = "DECIMAL"i  !ident_start { return 'DECIMAL'; }
 KW_SIGNED   = "SIGNED"i   !ident_start { return 'SIGNED'; }
 KW_UNSIGNED = "UNSIGNED"i !ident_start { return 'UNSIGNED'; }
 KW_INT      = "INT"i      !ident_start { return 'INT'; }
+KW_ZEROFILL = "ZEROFILL"i !ident_start { return 'ZEROFILL'; }
 KW_INTEGER  = "INTEGER"i  !ident_start { return 'INTEGER'; }
 KW_JSON     = "JSON"i     !ident_start { return 'JSON'; }
 KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
@@ -2213,10 +2214,18 @@ character_string_type
   / t:KW_CHAR { return { dataType: t }; }
   / t:KW_VARCHAR { return { dataType: t }; }
 
+numeric_type_suffix
+  = un: KW_UNSIGNED? __ ze: KW_ZEROFILL? {
+    const result = []
+    if (un) result.push(un)
+    if (ze) result.push(ze)
+    return result
+  }
+
 numeric_type
-  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT) __ LPAREN __ l:[0-9]+ __ RPAREN __  { return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT)l:[0-9]+{ return { dataType: t, length: parseInt(l.join(''), 10) }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT) { return { dataType: t }; }
+  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT) __ LPAREN __ l:[0-9]+ __ RPAREN __ s:numeric_type_suffix? __ { return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true, suffix: s }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT)l:[0-9]+ __ s:numeric_type_suffix? __ { return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT) __ s:numeric_type_suffix? __{ return { dataType: t, suffix: s }; }
 
 datetime_type
   = t:(KW_DATE / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }

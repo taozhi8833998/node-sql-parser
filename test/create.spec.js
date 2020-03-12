@@ -21,6 +21,8 @@ describe('create', () => {
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY DEFAULT CHARACTER SET = utf8 COMMENT = \'comment test\'');
       expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key) ENGINE = MEMORY default charset = utf8 comment = 'comment test'`))
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY DEFAULT CHARSET = utf8 COMMENT = \'comment test\'');
+      expect(getParsedSql('CREATE TABLE `Person` ( `id_Person` int(10) unsigned NOT NULL AUTO_INCREMENT, `id_person_gender` int(11) unsigned zerofill NOT NULL, `id_person_origin` int(11) zerofill NOT NULL, `age` int(11) NOT NULL, `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, `is_alive` tinyint(1) DEFAULT NULL, `updated_by` varchar(48) DEFAULT NULL, PRIMARY KEY (`id_Person`), UNIQUE KEY `pft_ge_or` (`id_person_gender`, `id_person_origin`) );'))
+        .to.equal('CREATE TABLE `Person` (`id_Person` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT, `id_person_gender` INT(11) UNSIGNED ZEROFILL NOT NULL, `id_person_origin` INT(11) ZEROFILL NOT NULL, `age` INT(11) NOT NULL, `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, `is_alive` TINYINT(1) DEFAULT NULL, `updated_by` VARCHAR(48) DEFAULT NULL, PRIMARY KEY (`id_Person`), UNIQUE KEY `pft_ge_or` (`id_person_gender`, `id_person_origin`))');
       expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key, name varchar(128) unique key) ENGINE = MEMORY compression = 'zlib'`))
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY, `name` VARCHAR(128) UNIQUE KEY) ENGINE = MEMORY COMPRESSION = \'ZLIB\'');
       expect(getParsedSql(`create table dbname.tableName (id INT(11), name varchar(128), primary key(id)) ENGINE = MEMORY compression = 'zlib'`))
@@ -150,13 +152,13 @@ describe('create', () => {
       it(`should support unique key`, () => {
         ['index', 'key'].forEach(kind => {
           expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} idx_name unique ${kind} index_name using btree (name) key_block_size 128)`))
-          .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} idx_name UNIQUE ${kind.toUpperCase()} index_name USING BTREE (\`name\`) KEY_BLOCK_SIZE 128)`);
+          .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} idx_name UNIQUE ${kind.toUpperCase()} \`index_name\` USING BTREE (\`name\`) KEY_BLOCK_SIZE 128)`);
         })
       })
 
       it(`should support foreign key`, () => {
         expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} idx_name foreign key index_name (name) references rdb.rta (name_alias) match simple on delete cascade on update set default)`))
-          .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} idx_name FOREIGN KEY index_name (\`name\`) REFERENCES \`rdb\`.\`rta\` (\`name_alias\`) MATCH SIMPLE ON DELETE CASCADE ON UPDATE SET DEFAULT)`);
+          .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} idx_name FOREIGN KEY \`index_name\` (\`name\`) REFERENCES \`rdb\`.\`rta\` (\`name_alias\`) MATCH SIMPLE ON DELETE CASCADE ON UPDATE SET DEFAULT)`);
       })
     })
 

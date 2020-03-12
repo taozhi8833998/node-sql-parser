@@ -3,9 +3,11 @@ import { tablesToSQL } from './tables'
 import { identifierToSql, commonTypeValue, columnRefToSQL, toUpper, hasVal, commentToSQL } from './util'
 
 function columnDataType(definition) {
-  const dataType = definition && definition.dataType
-  if (definition && definition.length) return `${dataType}(${definition.length})`
-  return dataType
+  const { dataType, length, suffix } = definition || {}
+  let result = dataType
+  if (length) result += `(${length})`
+  if (suffix && suffix.length) result += ` ${suffix.join(' ')}`
+  return result
 }
 
 function columnReferenceDefinitionToSQL(referenceDefinition) {
