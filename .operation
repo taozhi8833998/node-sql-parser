@@ -1,0 +1,40 @@
+```
+npm login --registry=https://npm.pkg.github.com/
+
+taozhi8833998
+
+364c07d02e78b3bffbbbf44fa27f8271fc3f497d
+
+taozhi8833998@163.com
+
+
+add
+
+"publishConfig": {
+  "registry": "https://npm.pkg.github.com/"
+},
+
+to package.json
+
+update package.json name to @taozhi8833998/node-sql-parser
+
+
+npm publish
+```
+
+变回去
+
+npm config set registry https://registry.npmjs.com/
+
+npm login
+
+taozhi8833998
+tz520hxy
+taozhi8833998@163.com
+
+https://tarosky.co.jp/tarog/5198
+
+https://help.github.com/en/github/managing-packages-with-github-packages/configuring-npm-for-use-with-github-packages#publishing-a-package
+
+https://medium.com/swlh/how-to-use-the-github-package-registry-b9d853c8ff3e
+
