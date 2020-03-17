@@ -302,7 +302,7 @@ create_table_stmt
       }
     }
 
-crate_like_table_simple
+create_like_table_simple
   = KW_LIKE __ t: table_ref_list __ {
     return {
       type: 'like',
@@ -310,7 +310,7 @@ crate_like_table_simple
     }
   }
 create_like_table
-  = crate_like_table_simple
+  = create_like_table_simple
   / LPAREN __ e:create_like_table  __ RPAREN {
       e.parentheses = true;
       return e;
