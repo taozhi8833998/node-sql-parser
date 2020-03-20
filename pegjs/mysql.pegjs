@@ -1473,6 +1473,16 @@ column_ref
         column: col
       };
     }
+  / col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:quoted_ident {
+      columnList.add(`select::null::${col}`);
+      return {
+        type: 'column_ref',
+        table: null,
+        column: col,
+        arrow: a,
+        property: j
+      };
+  }
   / col:column {
       columnList.add(`select::null::${col}`);
       return {
@@ -2000,6 +2010,8 @@ LBRAKE    = '['
 RBRAKE    = ']'
 
 SEMICOLON = ';'
+SINGLE_ARROW = '->'
+DOUBLE_ARROW = '->>'
 
 OPERATOR_CONCATENATION = '||'
 OPERATOR_AND = '&&'
@@ -2207,7 +2219,7 @@ numeric_type_suffix
     return result
   }
 numeric_type
-  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT) __ LPAREN __ l:[0-9]+ __ RPAREN __ s:numeric_type_suffix? __ { return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true, suffix: s }; }
+  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? __ { return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s }; }
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT)l:[0-9]+ __ s:numeric_type_suffix? __ { return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT) __ s:numeric_type_suffix? __{ return { dataType: t, suffix: s }; }
 

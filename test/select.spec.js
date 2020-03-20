@@ -110,6 +110,11 @@ describe('select', () => {
         { expr: { type: 'column_ref', 'table': 't', column: '*' }, as: null }
       ]);
     });
+    it('should parse json column query expressions', () => {
+      const ast = parser.astify("SELECT jsonCol->>'$.test.path' from 'items'");
+      expect(parser.sqlify(ast)).to.be.equal("SELECT `jsonCol` ->> '$.test.path' FROM `items`")
+    });
+
 
     it('should parse aliases w/o "AS" keyword', () => {
       const ast = parser.astify('SELECT a aa FROM  t');
