@@ -3,9 +3,13 @@ import { tablesToSQL } from './tables'
 import { identifierToSql, commonTypeValue, columnRefToSQL, toUpper, hasVal, commentToSQL } from './util'
 
 function columnDataType(definition) {
-  const { dataType, length, suffix } = definition || {}
+  const { dataType, length, suffix, scale } = definition || {}
   let result = dataType
-  if (length) result += `(${length})`
+  if (length) {
+    result += `(${length}`
+    if (scale) result += `, ${scale}`
+    result += ')'
+  }
   if (suffix && suffix.length) result += ` ${suffix.join(' ')}`
   return result
 }
