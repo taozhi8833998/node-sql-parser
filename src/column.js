@@ -6,9 +6,7 @@ function columnDataType(definition) {
   const { dataType, length, suffix, scale } = definition || {}
   let result = dataType
   if (length) {
-    result += `(${length}`
-    result += scale ? `, ${scale}` : ''
-    result += ')'
+    result += `(${[length, scale].filter(hasVal).join(', ')})`
   }
   if (suffix && suffix.length) result += ` ${suffix.join(' ')}`
   return result
