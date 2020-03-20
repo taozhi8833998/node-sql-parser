@@ -7,9 +7,9 @@ function castToSQL(expr) {
   const { length, dataType, parentheses, scale } = target
   let str = ''
   if (length) {
-    const precision = scale ? `${length}, ${scale}` : length
-    str = parentheses ? `(${precision})` : precision
+    str = scale ? `${length}, ${scale}` : length
   }
+  if (parentheses) str = `(${str})`
   let prefix = exprToSQL(expression)
   let symbolChar = '::'
   let suffix = ''
