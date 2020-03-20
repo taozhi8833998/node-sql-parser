@@ -4,9 +4,12 @@ import { overToSQL } from './over'
 
 function castToSQL(expr) {
   const { target, expr: expression, symbol } = expr
-  const { length, dataType, parentheses } = target
+  const { length, dataType, parentheses, scale } = target
   let str = ''
-  if (length) str = parentheses ? `(${length})` : length
+  if (length) {
+    const precision = scale ? `${length}, ${scale}` : length
+    str = parentheses ? `(${precision})` : precision
+  }
   let prefix = exprToSQL(expression)
   let symbolChar = '::'
   let suffix = ''
