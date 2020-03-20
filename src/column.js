@@ -7,7 +7,7 @@ function columnDataType(definition) {
   let result = dataType
   if (length) {
     result += `(${length}`
-    if (scale) result += `, ${scale}`
+    result += scale ? `, ${scale}` : ''
     result += ')'
   }
   if (suffix && suffix.length) result += ` ${suffix.join(' ')}`
