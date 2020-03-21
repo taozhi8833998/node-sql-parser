@@ -644,6 +644,13 @@ describe('select', () => {
       const backSQL = parser.sqlify(ast)
       expect(backSQL).to.equal('SELECT `name`, `gender` FROM `Test`.`student` GROUP BY 1, 2')
     })
+
+    it('should parser column expression', () => {
+      const sql = 'SELECT name, gender, date_format(gmt_created,"yyyyMM"), count(*) FROM Test.student GROUP BY date_format(gmt_created,"yyyyMM")'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal('SELECT `name`, `gender`, date_format(`gmt_created`, \'yyyyMM\'), COUNT(*) FROM `Test`.`student` GROUP BY date_format(`gmt_created`, \'yyyyMM\')')
+    })
   });
 
   describe('having clause', () => {
