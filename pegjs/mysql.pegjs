@@ -1465,7 +1465,19 @@ primary
   / var_decl
 
 column_ref
-  = tbl:ident __ DOT __ col:column_without_kw {
+  = tbl:(ident __ DOT __)? col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:quoted_ident __ ca:collate_expr? __ {
+      const tableName = tbl && tbl[0] || null
+      columnList.add(`select::${tableName}::${col}`);
+      return {
+        type: 'column_ref',
+        table: tableName,
+        column: col,
+        collate: ca,
+        arrow: a,
+        property: j
+      };
+  }
+  / tbl:ident __ DOT __ col:column_without_kw {
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
@@ -1473,16 +1485,6 @@ column_ref
         column: col
       };
     }
-  / col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:quoted_ident {
-      columnList.add(`select::null::${col}`);
-      return {
-        type: 'column_ref',
-        table: null,
-        column: col,
-        arrow: a,
-        property: j
-      };
-  }
   / col:column {
       columnList.add(`select::null::${col}`);
       return {

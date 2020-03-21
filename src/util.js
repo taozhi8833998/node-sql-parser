@@ -176,9 +176,19 @@ function replaceParams(ast, params) {
   return replaceParamsInner(JSON.parse(JSON.stringify(ast)), params)
 }
 
+function commonTypeValue(opt) {
+  const result = []
+  if (!opt) return result
+  const { type, value } = opt
+  result.push(type.toUpperCase())
+  result.push(value.toUpperCase())
+  return result
+}
+
 function columnRefToSQL(expr) {
   const {
     arrow,
+    collate,
     column,
     isDual,
     table,
@@ -187,7 +197,8 @@ function columnRefToSQL(expr) {
   } = expr
   let str = column === '*' ? '*' : identifierToSql(column, isDual)
   if (table) str = `${identifierToSql(table)}.${str}`
-  if (arrow) str = `${str} ${arrow} '${property}'`
+  if (arrow) str += ` ${arrow} '${property}'`
+  if (collate) str += ` ${commonTypeValue(collate).join(' ')}`
   return parentheses ? `(${str})` : str
 }
 
@@ -198,15 +209,6 @@ function toUpper(val) {
 
 function hasVal(val) {
   return val
-}
-
-function commonTypeValue(opt) {
-  const result = []
-  if (!opt) return result
-  const { type, value } = opt
-  result.push(type.toUpperCase())
-  result.push(value.toUpperCase())
-  return result
 }
 
 function commentToSQL(comment) {

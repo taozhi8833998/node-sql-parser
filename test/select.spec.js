@@ -111,8 +111,12 @@ describe('select', () => {
       ]);
     });
     it('should parse json column query expressions', () => {
-      const ast = parser.astify("SELECT jsonCol->>'$.test.path' from 'items'");
-      expect(parser.sqlify(ast)).to.be.equal("SELECT `jsonCol` ->> '$.test.path' FROM `items`")
+      const ast = parser.astify("SELECT item.jsonCol->>'$.test.path' from 'items'");
+      expect(parser.sqlify(ast)).to.be.equal("SELECT `item`.`jsonCol` ->> '$.test.path' FROM `items`")
+    });
+    it('should parse json column query expressions with collate', () => {
+      const ast = parser.astify("SELECT item.jsonCol->>'$.test.path' collate utf8mb4_unicode_ci from 'items'");
+      expect(parser.sqlify(ast)).to.be.equal("SELECT `item`.`jsonCol` ->> '$.test.path' COLLATE UTF8MB4_UNICODE_CI FROM `items`")
     });
 
 
