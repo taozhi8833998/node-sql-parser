@@ -54,6 +54,8 @@ npm install @taozhi8833998/node-sql-parser --registry=https://npm.pkg.github.com
 - PostgresQL
 - TransactSQL
 
+- New issue could be made for other new database.
+
 ### Create AST for SQL statement
 
 ```javascript
