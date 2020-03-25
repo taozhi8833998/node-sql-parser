@@ -32,6 +32,8 @@ describe('create', () => {
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` BIGINT(11), `name` VARCHAR(128), PRIMARY KEY (`id`)) ENGINE = MEMORY COMPRESSION = \'ZLIB\'');
       expect(getParsedSql(`create table dbname.tableName (id INT(11), name varchar(128), update_time timestamp not null default current_timestamp ON update current_timestamp, primary key(id)) ENGINE = MEMORY compression = 'zlib'`))
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11), `name` VARCHAR(128), `update_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`)) ENGINE = MEMORY COMPRESSION = \'ZLIB\'');
+      expect(getParsedSql(`create table dbname.tableName (id INT(11), name text not null, mt mediumtext not null, lt longtext, tt tinytext, primary key(id)) ENGINE = MEMORY compression = 'zlib'`))
+        .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11), `name` TEXT NOT NULL, `mt` MEDIUMTEXT NOT NULL, `lt` LONGTEXT, `tt` TINYTEXT, PRIMARY KEY (`id`)) ENGINE = MEMORY COMPRESSION = \'ZLIB\'');
     })
 
     it('should support create temporary table', () => {
