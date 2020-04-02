@@ -215,6 +215,16 @@ describe('AST', () => {
                         'SELECT col::CHAR FROM t',
                         'SELECT `col`::CHAR FROM `t`'
                     ],
+                    'string cast': [
+                        `SELECT CASE
+                                WHEN op110.nkw = 1 THEN 'CV'::text
+                                WHEN op110.pkw = 1 AND op110.transporter = 0 THEN 'PC'::text
+                                WHEN op110.pkw = 1 AND op110.transporter = 1 THEN 'LCV'::text
+                                ELSE NULL::text
+                            END AS category
+                        FROM t1 op110`,
+                        "SELECT CASE WHEN `op110`.`nkw` = 1 THEN 'CV'::TEXT WHEN `op110`.`pkw` = 1 AND `op110`.`transporter` = 0 THEN 'PC'::TEXT WHEN `op110`.`pkw` = 1 AND `op110`.`transporter` = 1 THEN 'LCV'::TEXT ELSE NULL::TEXT END AS `category` FROM `t1` AS `op110`"
+                    ],
                     'multiple colon cast': [
                         'SELECT col::CHAR, colb::geometry FROM t',
                         'SELECT `col`::CHAR, `colb`::GEOMETRY FROM `t`'

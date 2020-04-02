@@ -1466,8 +1466,8 @@ multiplicative_operator
   = "*" / "/" / "%"
 
 primary
-  = literal
-  / cast_expr
+  = cast_expr
+  / literal
   / aggr_func
   / func_call
   / case_expr
