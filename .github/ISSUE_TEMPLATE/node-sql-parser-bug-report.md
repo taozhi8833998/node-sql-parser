@@ -14,9 +14,9 @@ A clear and concise description of what the bug is.
 which database engine does your SQL running on? such as MySQL, PostgreSQL.
 
 **To Reproduce**
-- the SQL that be parsed
-- the node-sql-parser version
-- the node version
+  - the SQL that be parsed
+  - the node-sql-parser version
+  - the node version
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
