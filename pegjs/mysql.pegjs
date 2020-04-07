@@ -237,10 +237,11 @@ multiple_stmt
     }
 
 union_stmt
-  = head:select_stmt tail:(__ KW_UNION __ select_stmt)* {
-      let cur = head;
+  = head:select_stmt tail:(__ KW_UNION __ KW_ALL? __ select_stmt)* {
+      let cur = head
       for (let i = 0; i < tail.length; i++) {
-        cur._next = tail[i][3];
+        cur._next = tail[i][5]
+        cur.union = tail[i][3] ? 'union all' : 'union'
         cur = cur._next
       }
       return {

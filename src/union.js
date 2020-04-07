@@ -35,7 +35,8 @@ function unionToSQL(stmt) {
   const fun = typeToSQLFn[stmt.type]
   const res = [fun(stmt)]
   while (stmt._next) {
-    res.push('UNION', fun(stmt._next))
+    const unionKeyword = (stmt.union || 'union').toUpperCase()
+    res.push(unionKeyword, fun(stmt._next))
     stmt = stmt._next
   }
   return res.join(' ')
