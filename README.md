@@ -44,7 +44,7 @@ yarn add node-sql-parser
 npm install @taozhi8833998/node-sql-parser --registry=https://npm.pkg.github.com/
 ```
 
-### From browser
+### From Browser
 
 Import the JS file in your page:
 
@@ -66,7 +66,7 @@ Import the JS file in your page:
     <script src="https://unpkg.com/node-sql-parser@latest/parser.min.js"></script>
     <script>
       window.onload = function () {
-      // Example queries
+      // Example parser
       const parser = new NodeSQLParser.Parser()
       const ast = parser.astify("select id, name from students where age < 18")
       console.log(ast)
