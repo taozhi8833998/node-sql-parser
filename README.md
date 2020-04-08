@@ -61,7 +61,7 @@ Import the JS file in your page:
 	</head>
 	<body>
 		<p><em>Check console to see the output</em></p>
-		<script src="parser-min.js"></script>
+		<script src="https://unpkg.com/node-sql-parser@1.7.13/parser.min.js"></script>
 		<script>
 			window.onload = function () {
 				// Example queries
