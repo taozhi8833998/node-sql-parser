@@ -48,9 +48,10 @@ npm install @taozhi8833998/node-sql-parser --registry=https://npm.pkg.github.com
 Import the JS file in your page:
 
 ```javascript
-<script src="https://unpkg.com/node-sql-parser@1.7.13/parser.min.js"></script>
+<script src="https://unpkg.com/node-sql-parser@latest/parser.min.js"></script>
 ```
-`NodeSQLParser` object is on `window`
+- `latest` is the version that could be replaced by a specified version, such as `1.7.13`
+- `NodeSQLParser` object is on `window`
 
 ```html
 <!DOCTYPE html>
@@ -61,7 +62,7 @@ Import the JS file in your page:
 	</head>
 	<body>
 		<p><em>Check console to see the output</em></p>
-		<script src="https://unpkg.com/node-sql-parser@1.7.13/parser.min.js"></script>
+		<script src="https://unpkg.com/node-sql-parser@latest/parser.min.js"></script>
 		<script>
 			window.onload = function () {
 				// Example queries
