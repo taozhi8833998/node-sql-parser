@@ -5,3 +5,4 @@ lib/
 .nyc_output/
 .coveralls.yml
 bower_components/
+umd/

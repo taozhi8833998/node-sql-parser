@@ -1,6 +1,6 @@
 {
   "name": "node-sql-parser",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "simple node sql parser",
   "main": "index.js",
   "types": "index.d.ts",
@@ -8,7 +8,7 @@
     "build": "rm -rf build/* && mkdir -p build && node build.js && npm run compile",
     "test": "NODE_ENV=test npm run lint && mocha --recursive --require @babel/register",
     "compile": "babel src -d lib",
-    "browser": "browserify -p tinyify index.js -o parser.min.js",
+    "browser": "browserify -p tinyify index.js -o umd/parser.min.js",
     "lint": "npm run build && eslint src/",
     "prepublishOnly": "npm run build && npm run browser",
     "coverLocal": "nyc npm run test",
@@ -33,10 +33,10 @@
   "author": "taozhi8833998 <taozhi8833998@163.com>",
   "files": [
     "index.js",
-    "parser.min.js",
     "lib/",
     "index.d.ts",
     "build/",
+    "umd/",
     "README.md",
     "LICENSE"
   ],
