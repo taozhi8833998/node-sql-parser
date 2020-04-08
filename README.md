@@ -57,22 +57,22 @@ Import the JS file in your page:
 ```html
 <!DOCTYPE html>
 <html lang="en" >
-	<head>
-		<title>node-sql-parser</title>
-		<meta charset="utf-8" />
-	</head>
-	<body>
-		<p><em>Check console to see the output</em></p>
-		<script src="https://unpkg.com/node-sql-parser@latest/parser.min.js"></script>
-		<script>
-			window.onload = function () {
-				// Example queries
-        const parser = new NodeSQLParser.Parser()
-        const ast = parser.astify("select id, name from students where age < 18")
-        console.log(ast)
+  <head>
+    <title>node-sql-parser</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <p><em>Check console to see the output</em></p>
+    <script src="https://unpkg.com/node-sql-parser@latest/parser.min.js"></script>
+    <script>
+      window.onload = function () {
+      // Example queries
+      const parser = new NodeSQLParser.Parser()
+      const ast = parser.astify("select id, name from students where age < 18")
+      console.log(ast)
       }
-		</script>
-	</body>
+    </script>
+  </body>
 </html>
 ```
 
