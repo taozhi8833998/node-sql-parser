@@ -7,7 +7,7 @@
         "targets": {
           "node": "8.16.1"
         },
-        "modules": "commonjs",
+        "modules": "umd",
         "useBuiltIns": "entry",
         "corejs": 3,
         "debug": false

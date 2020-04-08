@@ -11,7 +11,7 @@ fs.readdirSync(parserFolder)
     const [, name] = file.match(PARSER_FILE)
     const source = fs.readFileSync(path.join(parserFolder, file), 'utf8')
     const parser = peg.generate(source, {
-      format: 'commonjs',
+      format: 'umd',
       output: 'source',
       dependencies: {
         "BigInt": "big-integer",

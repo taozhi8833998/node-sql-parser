@@ -5,3 +5,8 @@ module.exports = {
   Parser,
   util,
 }
+
+global.window.NodeSQLParser = {
+  Parser,
+  util,
+}
