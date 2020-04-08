@@ -1,5 +1,3 @@
-import has from 'has'
-
 const escapeMap = {
   '\0'   : '\\0',
   '\''   : '\\\'',
@@ -58,7 +56,7 @@ function createValueExpr(value) {
  */
 function createBinaryExpr(operator, left, right) {
   const expr = { operator, type: 'binary_expr' }
-  expr.left = has(left, 'type') ? left : createValueExpr(left)
+  expr.left = left.type ? left : createValueExpr(left)
   if (operator === 'BETWEEN' || operator === 'NOT BETWEEN') {
     expr.right = {
       type  : 'expr_list',
@@ -66,7 +64,7 @@ function createBinaryExpr(operator, left, right) {
     }
     return expr
   }
-  expr.right = has(right, 'type') ? right : createValueExpr(right)
+  expr.right = right.type ? right : createValueExpr(right)
   return expr
 }
 

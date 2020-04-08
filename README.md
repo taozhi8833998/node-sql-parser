@@ -44,6 +44,38 @@ yarn add node-sql-parser
 npm install @taozhi8833998/node-sql-parser --registry=https://npm.pkg.github.com/
 ```
 
+### From Browser
+
+Import the JS file in your page:
+
+```javascript
+<script src="https://unpkg.com/node-sql-parser@latest/parser.min.js"></script>
+```
+- `latest` is the version that could be replaced by a specified version, such as `1.7.13`
+- `NodeSQLParser` object is on `window`
+
+```html
+<!DOCTYPE html>
+<html lang="en" >
+  <head>
+    <title>node-sql-parser</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <p><em>Check console to see the output</em></p>
+    <script src="https://unpkg.com/node-sql-parser@latest/parser.min.js"></script>
+    <script>
+      window.onload = function () {
+      // Example parser
+      const parser = new NodeSQLParser.Parser()
+      const ast = parser.astify("select id, name from students where age < 18")
+      console.log(ast)
+      }
+    </script>
+  </body>
+</html>
+```
+
 ## :rocket: Usage
 
 ### Supported Database SQL Syntax
