@@ -66,10 +66,12 @@ Import the JS file in your page:
     <script src="https://unpkg.com/node-sql-parser@latest/parser.min.js"></script>
     <script>
       window.onload = function () {
-      // Example parser
-      const parser = new NodeSQLParser.Parser()
-      const ast = parser.astify("select id, name from students where age < 18")
-      console.log(ast)
+        // Example parser
+        const parser = new NodeSQLParser.Parser()
+        const ast = parser.astify("select id, name from students where age < 18")
+        console.log(ast)
+        const sql = parser.sqlify(ast)
+        console.log(sql)
       }
     </script>
   </body>
