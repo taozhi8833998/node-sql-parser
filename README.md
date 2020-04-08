@@ -45,6 +45,7 @@ npm install @taozhi8833998/node-sql-parser --registry=https://npm.pkg.github.com
 ```
 
 ### From browser
+
 Import the JS file in your page:
 
 ```javascript
