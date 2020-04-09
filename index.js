@@ -6,7 +6,9 @@ module.exports = {
   util,
 }
 
-global.window.NodeSQLParser = {
-  Parser,
-  util,
+if (global && global.window) {
+  global.window.NodeSQLParser = {
+    Parser,
+    util,
+  }
 }
