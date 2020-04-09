@@ -51,7 +51,6 @@ Import the JS file in your page:
 ```javascript
 <script src="https://unpkg.com/node-sql-parser/umd/parser.min.js"></script>
 ```
-- `latest` is the version that could be replaced by a specified version, such as `1.7.13`
 - `NodeSQLParser` object is on `window`
 
 ```html
