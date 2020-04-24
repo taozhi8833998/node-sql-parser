@@ -4,10 +4,13 @@ const { indexOptionToSQL, indexTypeAndOptionToSQL } = require('../src/index-defi
 
 describe('create', () => {
   const parser = new Parser();
+  const DEFAULT_OPT = {
+    database: 'mysql'
+  }
 
-  function getParsedSql(sql) {
-    const ast = parser.astify(sql);
-    return parser.sqlify(ast);
+  function getParsedSql(sql, opt = DEFAULT_OPT) {
+    const ast = parser.astify(sql, opt);
+    return parser.sqlify(ast, opt);
   }
 
   describe('create table with basic', () => {
@@ -233,6 +236,10 @@ describe('create', () => {
         ast.create_definitions = columnDefinition
         expect(parser.sqlify.bind(parser, ast)).to.throw('unknow resource = xx type')
       })
+    })
+
+    describe('create table using pg', () => {
+      expect(getParsedSql(`CREATE TABLE foo (id uuid)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" ("id" UUID)')
     })
   })
 })
