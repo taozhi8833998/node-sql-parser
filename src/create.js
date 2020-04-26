@@ -6,7 +6,7 @@ import { constraintDefinitionToSQL } from './constrain'
 import { funcToSQL } from './func'
 import { tablesToSQL, tableOptionToSQL, tableToSQL } from './tables'
 import { unionToSQL } from './union'
-import { toUpper, hasVal, identifierToSql, columnRefToSQL } from './util'
+import { commonKeywordArgsToSQL, toUpper, hasVal, identifierToSql, triggerEventToSQL } from './util'
 
 function createDefinitionToSQL(definition) {
   if (!definition) return []
@@ -52,33 +52,20 @@ function createTableToSQL(stmt) {
 
 function createTriggerToSQL(stmt) {
   const {
-    constraint,
-    constraint_kw: constraintKw,
+    constraint, constraint_kw: constraintKw,
     deferrable,
-    events,
-    execute,
-    for_each: forEach,
-    from,
-    keyword,
-    type,
+    events, execute,
+    for_each: forEach, from,
     location,
-    table,
+    keyword,
+    type, table,
     when,
   } = stmt
   const sql = [toUpper(type), toUpper(constraintKw), toUpper(keyword), identifierToSql(constraint), toUpper(location)]
-  const eventList = events.map(event => {
-    const { keyword: kw, args } = event
-    const result = [toUpper(kw)]
-    if (args) {
-      const { keyword: kwArgs, columns } = args
-      result.push(toUpper(kwArgs), columns.map(columnRefToSQL).join(', '))
-    }
-    return result.join(' ')
-  }).join(' OR ')
-  sql.push(eventList, 'ON', tableToSQL(table))
+  const event = triggerEventToSQL(events)
+  sql.push(event, 'ON', tableToSQL(table))
   if (from) sql.push('FROM', tableToSQL(from))
-  if (deferrable) sql.push(toUpper(deferrable.keyword), toUpper(deferrable.args))
-  if (forEach) sql.push(toUpper(forEach.keyword), toUpper(forEach.args))
+  sql.push(...commonKeywordArgsToSQL(deferrable), ...commonKeywordArgsToSQL(forEach))
   if (when) sql.push(toUpper(when.type), exprToSQL(when.cond))
   sql.push(toUpper(execute.keyword), funcToSQL(execute.expr))
   return sql.filter(hasVal).join(' ')

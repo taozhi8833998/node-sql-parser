@@ -219,13 +219,31 @@ function commentToSQL(comment) {
   return result.join(' ')
 }
 
+function triggerEventToSQL(events) {
+  return events.map(event => {
+    const { keyword: kw, args } = event
+    const result = [toUpper(kw)]
+    if (args) {
+      const { keyword: kwArgs, columns } = args
+      result.push(toUpper(kwArgs), columns.map(columnRefToSQL).join(', '))
+    }
+    return result.join(' ')
+  }).join(' OR ')
+}
+
 function returningToSQL(returning) {
   if (!returning) return ''
   const { columns } = returning
   return ['RETURNING', columns.map(columnRefToSQL).filter(hasVal).join(', ')].join(' ')
 }
 
+function commonKeywordArgsToSQL(kwArgs) {
+  if (!kwArgs) return []
+  return [toUpper(kwArgs.keyword), toUpper(kwArgs.args)]
+}
+
 export {
+  commonKeywordArgsToSQL,
   commonOptionConnector,
   connector,
   commonTypeValue,
@@ -243,4 +261,5 @@ export {
   setParserOpt,
   toUpper,
   topToSQL,
+  triggerEventToSQL,
 }
