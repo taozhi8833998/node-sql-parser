@@ -207,6 +207,7 @@ cmd_stmt
 
 create_stmt
   = create_table_stmt
+  / create_constraint_trigger
 
 alter_stmt
   = alter_table_stmt
@@ -327,8 +328,7 @@ create_definition
 create_column_definition
   = c:column_ref __
     d:data_type __
-    n:(literal_not_null / literal_null)? __
-    df:default_expr? __
+    clc:column_constraint? __
     a:('AUTO_INCREMENT'i)? __
     u:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i)? __
     co:keyword_comment? __
@@ -337,12 +337,11 @@ create_column_definition
     s:storage? __
     re:reference_definition? __ {
       columnList.add(`create::${c.table}::${c.column}`)
-      if (n && !n.value) n.value = 'null'
       return {
         column: c,
         definition: d,
-        nullable: n,
-        default_val: df,
+        nullable: clc && clc.nullable,
+        default_val: clc && clc.default_val,
         auto_increment: a && a.toLowerCase(),
         unique_or_primary: u && `${u[0].toLowerCase()} ${u[2].toLowerCase()}`,
         comment: co,
@@ -353,6 +352,22 @@ create_column_definition
         resource: 'column'
       }
     }
+
+column_constraint
+  = n:(literal_not_null / literal_null) __ df:default_expr? __ {
+    if (n && !n.value) n.value = 'null'
+    return {
+      default_val: df,
+      nullable: n
+    }
+  }
+  / df:default_expr __ n:(literal_not_null / literal_null)? __ {
+    if (n && !n.value) n.value = 'null'
+    return {
+      default_val: df,
+      nullable: n
+    }
+  }
 
 collate_expr
   = KW_COLLATE __ ca:ident_name __ {
@@ -655,6 +670,86 @@ on_reference
 reference_option
   = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i) __ {
     return kc.toLowerCase()
+  }
+
+create_constraint_trigger
+  = kw: KW_CREATE __
+  kc:KW_CONSTRAINT? __
+  t:('TRIGGER'i) __
+  c:ident_name __
+  p:('BEFORE'i / 'AFTER'i / 'INSTEAD OF'i) __
+  te:trigger_event_list __
+  on:'ON'i __
+  tn:table_name __
+  fr:(KW_FROM __ table_name)? __
+  de:trigger_deferrable? __
+  fe:trigger_for_row? __
+  tw:trigger_when? __
+  fc:'EXECUTE'i __ 'PROCEDURE'i __
+  fct:proc_func_call __ {
+    return {
+        type: 'create',
+        constraint: c,
+        location: p && p.toLowerCase(),
+        events: te,
+        table: tn,
+        from: fr && fr[2],
+        deferrable: de,
+        for_each: fe,
+        when: tw,
+        execute: {
+          keyword: 'execute procedure',
+          expr: fct
+        },
+        constraint_type: t && t.toLowerCase(),
+        keyword: t && t.toLowerCase(),
+        constraint_kw: kc && kc.toLowerCase(),
+        resource: 'constraint',
+      }
+  }
+
+trigger_event
+  = kw:(KW_INSERT / KW_DELETE / KW_TRUNCATE) {
+    const keyword = Array.isArray(kw) ? kw[0].toLowerCase() : kw.toLowerCase()
+    return {
+      keyword,
+    }
+  }
+  / kw:KW_UPDATE __ a:('OF'i __ column_ref_list)? __ {
+    return {
+      keyword: kw && kw[0] && kw[0].toLowerCase(),
+      args: a && { keyword: a[0], columns: a[2] } || null
+    }
+  }
+
+trigger_event_list
+  = head:trigger_event tail:(__ KW_OR __ trigger_event)* {
+    return createList(head, tail)
+  }
+
+trigger_deferrable
+  = kw:(('NOT'i)?  __ 'DEFERRABLE'i) __ args:('INITIALLY IMMEDIATE'i / 'INITIALLY DEFERRED'i) __ {
+    return {
+      keyword: kw && kw[0] ? `${kw[0].toLowerCase()} deferrable` : 'deferrable',
+      args: args && args.toLowerCase(),
+    }
+  }
+
+trigger_for_row
+  = kw:'FOR'i __ e:('EACH'i)? __ ob:('ROW'i / 'STATEMENT'i) {
+    return {
+      keyword: e ? `${kw.toLowerCase()} ${e.toLowerCase()}` : kw.toLowerCase(),
+      args: ob.toLowerCase()
+    }
+  }
+
+trigger_when
+  = KW_WHEN __ LPAREN __ condition:expr __ RPAREN __ {
+    return {
+      type: 'when',
+      cond: condition,
+      parentheses: true,
+    }
   }
 
 table_options
@@ -1028,7 +1123,14 @@ join_op
   / (KW_INNER __)? KW_JOIN { return 'INNER JOIN'; }
 
 table_name
-  = dt:ident tail:(__ DOT __ ident)? {
+  = dt:ident __ DOT __ STAR {
+      tableList.add(`select::${dt}::(.*)`);
+      return {
+        db: dt,
+        table: '*'
+      }
+    }
+  / dt:ident tail:(__ DOT __ ident)? {
       const obj = { db: null, table: dt };
       if (tail !== null) {
         obj.db = dt;
@@ -1379,6 +1481,15 @@ is_op_right
   = KW_IS __ right:additive_expr {
       return { op: 'IS', right: right };
     }
+  / KW_IS __ right:(KW_DISTINCT __ KW_FROM __ table_name) {
+    const { db, table } = right.pop()
+    const tableName = table === '*' ? '*' : `"${table}"`
+    let tableStr = db ? `"${db}".${tableName}` : tableName
+    return { op: 'IS', right: {
+      type: 'origin',
+      value: `DISTINCT FROM ${tableStr}`
+    }}
+  }
   / (KW_IS __ KW_NOT) __ right:additive_expr {
       return { op: 'IS NOT', right: right };
   }
@@ -1464,6 +1575,14 @@ column_ref
         table: tbl,
         column: col
       };
+    }
+  / tbl:ident __ DOT __ STAR {
+      columnList.add(`select::${tbl}::(.*)`);
+      return {
+          type: 'column_ref',
+          table: tbl,
+          column: '*'
+      }
     }
   / col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:quoted_ident {
       columnList.add(`select::null::${col}`);

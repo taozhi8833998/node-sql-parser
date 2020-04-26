@@ -240,7 +240,56 @@ describe('create', () => {
 
     describe('create table using pg', () => {
       expect(getParsedSql(`CREATE TABLE foo (id uuid)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" ("id" UUID)')
+      expect(getParsedSql(`CREATE TABLE accounts (
+        id UUID DEFAULT uuid_generate_v4() NOT NULL,
+        email TEXT NOT NULL,
+        password TEXT NOT NULL,
+
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NULL,
+
+        PRIMARY KEY (id)
+      );`, { database: 'postgresql' })).to.equal('CREATE TABLE "accounts" ("id" UUID NOT NULL DEFAULT uuid_generate_v4(), "email" TEXT NOT NULL, "password" TEXT NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT NOW(), "updated_at" TIMESTAMP NULL, PRIMARY KEY ("id"))')
     })
+    describe('create trigger pg', () => {
+      it('should support basic trigger', () => {
+        expect(getParsedSql(`CREATE TRIGGER check_update
+        BEFORE INSERT ON accounts
+        FOR EACH ROW
+        EXECUTE PROCEDURE check_account_update();`, { database: 'postgresql' })).to.equal('CREATE TRIGGER "check_update" BEFORE INSERT ON "accounts" FOR EACH ROW EXECUTE PROCEDURE check_account_update()')
+      })
+      it('should support trigger with when expression', () => {
+        expect(getParsedSql(`CREATE TRIGGER check_update
+        BEFORE DELETE ON accounts
+        NOT DEFERRABLE INITIALLY DEFERRED
+        FOR EACH ROW
+        WHEN (OLD.balance IS DISTINCT FROM NEW.balance)
+        EXECUTE PROCEDURE check_account_update();`, { database: 'postgresql' })).to.equal('CREATE TRIGGER "check_update" BEFORE DELETE ON "accounts" NOT DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN "OLD"."balance" IS DISTINCT FROM "NEW"."BALANCE" EXECUTE PROCEDURE check_account_update()')
+      })
+      it('should support trigger with when expression with * and deferrable', () => {
+        expect(getParsedSql(`CREATE TRIGGER log_update
+        AFTER TRUNCATE ON accounts
+        FROM bank.accounts
+        DEFERRABLE INITIALLY IMMEDIATE
+        FOR EACH ROW
+        WHEN (OLD.* IS DISTINCT FROM NEW.*)
+        EXECUTE PROCEDURE log_account_update();`, { database: 'postgresql' })).to.equal('CREATE TRIGGER "log_update" AFTER TRUNCATE ON "accounts" FROM "bank"."accounts" DEFERRABLE INITIALLY IMMEDIATE FOR EACH ROW WHEN "OLD".* IS DISTINCT FROM "NEW".* EXECUTE PROCEDURE log_account_update()')
+      })
+      it('should support trigger with update of', () => {
+        expect(getParsedSql(`CREATE TRIGGER log_update
+        AFTER UPDATE OF user, name, salary OR INSERT ON accounts
+        DEFERRABLE INITIALLY IMMEDIATE
+        WHEN (OLD.* IS DISTINCT FROM NEW.*)
+        EXECUTE PROCEDURE log_account_update();`, { database: 'postgresql' })).to.equal('CREATE TRIGGER "log_update" AFTER UPDATE OF "user", "name", "salary" OR INSERT ON "accounts" DEFERRABLE INITIALLY IMMEDIATE WHEN "OLD".* IS DISTINCT FROM "NEW".* EXECUTE PROCEDURE log_account_update()')
+      })
+    })
+  })
+  describe('throw error when create type is unknow', () => {
+    const ast = {
+      type: 'create',
+      keyword: 'unknow_create_type'
+    }
+    expect(parser.sqlify.bind(parser, ast)).to.throw(`unknow create resource ${ast.keyword}`)
   })
 })
 
