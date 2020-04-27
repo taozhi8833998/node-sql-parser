@@ -6,7 +6,7 @@ import { constraintDefinitionToSQL } from './constrain'
 import { funcToSQL } from './func'
 import { tablesToSQL, tableOptionToSQL, tableToSQL } from './tables'
 import { unionToSQL } from './union'
-import { commonKeywordArgsToSQL, toUpper, hasVal, identifierToSql, triggerEventToSQL } from './util'
+import { commonKeywordArgsToSQL, toUpper, hasVal, identifierToSql, triggerEventToSQL, literalToSQL } from './util'
 
 function createDefinitionToSQL(definition) {
   if (!definition) return []
@@ -71,16 +71,41 @@ function createTriggerToSQL(stmt) {
   return sql.filter(hasVal).join(' ')
 }
 
+function createExtensionToSQL(stmt) {
+  const {
+    extension,
+    from,
+    if_not_exists: ifNotExists,
+    keyword,
+    schema,
+    type,
+    with: withName,
+    version,
+  } = stmt
+  const sql = [toUpper(type), toUpper(keyword), toUpper(ifNotExists), literalToSQL(extension), toUpper(withName)]
+  if (schema) sql.push('SCHEMA', literalToSQL(schema))
+  if (version) sql.push('VERSION', literalToSQL(version))
+  if (from) sql.push('FROM', literalToSQL(from))
+  return sql.filter(hasVal).join(' ')
+}
+
 function createToSQL(stmt) {
   const { keyword } = stmt
+  let sql = ''
   switch (keyword.toLowerCase()) {
     case 'table':
-      return createTableToSQL(stmt)
+      sql = createTableToSQL(stmt)
+      break
     case 'trigger':
-      return createTriggerToSQL(stmt)
+      sql = createTriggerToSQL(stmt)
+      break
+    case 'extension':
+      sql = createExtensionToSQL(stmt)
+      break
     default:
       throw new Error(`unknow create resource ${keyword}`)
   }
+  return sql
 }
 
 export {

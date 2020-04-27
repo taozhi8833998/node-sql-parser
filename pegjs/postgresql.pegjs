@@ -157,6 +157,10 @@
     return columns
   }
 
+  function commonStrToLiteral(strOrLiteral) {
+    return typeof strOrLiteral === 'string' ? { type: 'same', value: strOrLiteral } : strOrLiteral
+  }
+
   const cmpPrefixMap = {
     '+': true,
     '-': true,
@@ -208,6 +212,7 @@ cmd_stmt
 create_stmt
   = create_table_stmt
   / create_constraint_trigger
+  / create_extension_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -247,6 +252,27 @@ union_stmt
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: head
+      }
+    }
+
+create_extension_stmt
+  = a:KW_CREATE __
+    e:'EXTENSION'i __
+    ife: KW_IF_NOT_EXISTS? __
+    n:(ident_name / literal_string) __
+    w:KW_WITH? __
+    s:('SCHEMA'i __ ident_name / literal_string)? __
+    v:('VERSION'i __ (ident_name / literal_string))? __
+    f:(KW_FROM __ (ident_name / literal_string))? __ {
+      return {
+        type: 'create',
+        keyword: e.toLowerCase(),
+        if_not_exists: ife && ife[0].toLowerCase(),
+        extension: commonStrToLiteral(n),
+        with: w && w[0].toLowerCase(),
+        schema: commonStrToLiteral(s && s[2].toLowerCase()),
+        version: commonStrToLiteral(v && v[2]),
+        from: commonStrToLiteral(f && f[2]),
       }
     }
 
