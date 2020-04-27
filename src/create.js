@@ -91,16 +91,21 @@ function createExtensionToSQL(stmt) {
 
 function createToSQL(stmt) {
   const { keyword } = stmt
+  let sql = ''
   switch (keyword.toLowerCase()) {
     case 'table':
-      return createTableToSQL(stmt)
+      sql = createTableToSQL(stmt)
+      break
     case 'trigger':
-      return createTriggerToSQL(stmt)
+      sql = createTriggerToSQL(stmt)
+      break
     case 'extension':
-      return createExtensionToSQL(stmt)
+      sql = createExtensionToSQL(stmt)
+      break
     default:
       throw new Error(`unknow create resource ${keyword}`)
   }
+  return sql
 }
 
 export {
