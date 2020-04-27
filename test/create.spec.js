@@ -284,6 +284,21 @@ describe('create', () => {
       })
     })
   })
+
+  describe('create extension pg', () => {
+    it('should support basic extension', () => {
+      expect(getParsedSql(`CREATE EXTENSION hstore;`, { database: 'postgresql' })).to.equal('CREATE EXTENSION hstore')
+    })
+    it('should support create extension if not exists', () => {
+      expect(getParsedSql(`CREATE EXTENSION if not exists hstore SCHEMA public FROM unpackaged;`, { database: 'postgresql' })).to.equal('CREATE EXTENSION IF NOT EXISTS hstore SCHEMA public FROM unpackaged')
+    })
+    it('should support create extension with version', () => {
+      expect(getParsedSql(`CREATE EXTENSION if not exists hstore with SCHEMA public version latested FROM unpackaged;`, { database: 'postgresql' })).to.equal('CREATE EXTENSION IF NOT EXISTS hstore WITH SCHEMA public VERSION latested FROM unpackaged')
+    })
+    it('should support create extension literal string version ', () => {
+      expect(getParsedSql(`CREATE EXTENSION if not exists hstore SCHEMA public version "latest" FROM unpackaged;`, { database: 'postgresql' })).to.equal('CREATE EXTENSION IF NOT EXISTS hstore SCHEMA public VERSION \'latest\' FROM unpackaged')
+    })
+  })
   describe('throw error when create type is unknow', () => {
     const ast = {
       type: 'create',
