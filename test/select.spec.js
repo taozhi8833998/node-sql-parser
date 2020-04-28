@@ -214,6 +214,32 @@ describe('select', () => {
             as: null
           }
         ]);
+      })
+
+      it('should parse position function',() => {
+        const ast = parser.astify("SELECT position(', ' in 'a, b')")
+
+        expect(ast.columns).to.eql([
+          {
+            expr: {
+              type: 'function',
+              name: 'position',
+              args: {
+                type: 'expr_list',
+                value: [
+                  {
+                    type: 'binary_expr',
+                    operator: 'IN',
+                    left: { type: 'string', value: ', ' },
+                    right: { type: 'string', value: 'a, b' }
+                  }
+                ]
+              }
+            },
+            as: null
+          }
+        ]);
+        expect(parser.sqlify(ast)).to.be.equal("SELECT position(', ' IN 'a, b')")
       });
 
       [
@@ -1073,6 +1099,51 @@ describe('select', () => {
       const ast = parser.astify(sql, { database: 'postgresql' })
       const backSQL = parser.sqlify(ast)
       expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active`, `domain`, `config` ->> 'email' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
+    })
+
+    it('should support pg json column query #>', () => {
+      const sql = `SELECT id,
+      config,
+      busy,
+      'templateId',
+      active #> '{a,b}',
+      domain ->> 2,
+      config ->> 'email'
+      FROM instances WHERE config ->> 'email' = 'email@provider.com'
+      `
+      const ast = parser.astify(sql, { database: 'postgresql' })
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active` #> '{a,b}', `domain` ->> 2, `config` ->> 'email' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
+    })
+
+    it('should support pg json column query #>>', () => {
+      const sql = `SELECT id,
+      config,
+      busy,
+      'templateId',
+      active #>> '{a,b}',
+      domain ->> 2,
+      config ->> 'email'
+      FROM instances WHERE config ->> 'email' = 'email@provider.com'
+      `
+      const ast = parser.astify(sql, { database: 'postgresql' })
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active` #>> '{a,b}', `domain` ->> 2, `config` ->> 'email' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
+    })
+
+    it('should support pg jsonb column query', () => {
+      const sql = `SELECT id,
+      config,
+      busy,
+      'templateId',
+      active::jsonb @> '{"b":2}'::jsonb,
+      domain::jsonb <@ '{"a":1, "b":2}'::jsonb,
+      config::jsonb - 'a'
+      FROM instances WHERE config ->> 'email' = 'email@provider.com'
+      `
+      const ast = parser.astify(sql, { database: 'postgresql' })
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active`::JSONB @> '{\"b\":2}'::JSONB, `domain`::JSONB <@ '{\"a\":1, \"b\":2}'::JSONB, `config`::JSONB - 'a' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
     })
   })
 

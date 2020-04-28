@@ -1424,7 +1424,7 @@ in_op_right
   = op:in_op __ LPAREN  __ l:expr_list __ RPAREN {
       return { op: op, right: l };
     }
-  / op:in_op __ e:var_decl {
+  / op:in_op __ e:(var_decl / literal_string) {
       return { op: op, right: e };
     }
 
@@ -1466,7 +1466,7 @@ primary
   / var_decl
 
 column_ref
-  = tbl:(ident __ DOT __)? col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:quoted_ident __ ca:collate_expr? __ {
+  = tbl:(ident __ DOT __)? col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) __ ca:collate_expr? __ {
       const tableName = tbl && tbl[0] || null
       columnList.add(`select::${tableName}::${col}`);
       return {

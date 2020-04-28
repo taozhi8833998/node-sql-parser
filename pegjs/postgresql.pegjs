@@ -1494,6 +1494,7 @@ comparison_op_right
   / between_op_right
   / is_op_right
   / like_op_right
+  / jsonb_op_right
 
 arithmetic_op_right
   = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
@@ -1552,9 +1553,18 @@ in_op_right
   = op:in_op __ LPAREN  __ l:expr_list __ RPAREN {
       return { op: op, right: l };
     }
-  / op:in_op __ e:var_decl {
+  / op:in_op __ e:(var_decl / literal_string) {
       return { op: op, right: e };
     }
+
+jsonb_op_right
+  = s: ('@>' / '<@' / OPERATOR_CONCATENATION / DOUBLE_WELL_ARROW / WELL_ARROW / '?' / '?|' / '?&' / '#-') __
+  c:column_list_item __ {
+    return {
+      op: s,
+      right: c && c.expr || c
+    }
+  }
 
 additive_expr
   = head:multiplicative_expr
@@ -1610,7 +1620,7 @@ column_ref
           column: '*'
       }
     }
-  / col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:quoted_ident {
+  / col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) {
       columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
@@ -1836,7 +1846,7 @@ literal_bool
 literal_string
   = ca:("'" single_char* "'") {
       return {
-        type: 'string',
+        type: 'single_quote_string',
         value: ca[1].join('')
       };
     }
@@ -2047,6 +2057,7 @@ KW_INT      = "INT"i      !ident_start { return 'INT'; }
 KW_ZEROFILL = "ZEROFILL"i !ident_start { return 'ZEROFILL'; }
 KW_INTEGER  = "INTEGER"i  !ident_start { return 'INTEGER'; }
 KW_JSON     = "JSON"i     !ident_start { return 'JSON'; }
+KW_JSONB    = "JSONB"i    !ident_start { return 'JSONB'; }
 KW_GEOMETRY = "GEOMETRY"i !ident_start { return 'GEOMETRY'; }
 KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
 KW_TINYINT  = "TINYINT"i  !ident_start { return 'TINYINT'; }
@@ -2133,6 +2144,8 @@ RBRAKE    = ']'
 SEMICOLON = ';'
 SINGLE_ARROW = '->'
 DOUBLE_ARROW = '->>'
+WELL_ARROW = '#>'
+DOUBLE_WELL_ARROW = '#>>'
 
 OPERATOR_CONCATENATION = '||'
 OPERATOR_AND = '&&'
@@ -2145,7 +2158,6 @@ __
 comment
   = block_comment
   / line_comment
-  / pound_sign_comment
 
 block_comment
   = "/*" (!"*/" char)* "*/"
@@ -2351,7 +2363,7 @@ datetime_type
   = t:(KW_DATE / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
 
 json_type
-  = t:KW_JSON { return { dataType: t }; }
+  = t:(KW_JSON / KW_JSONB) { return { dataType: t }; }
 
 geometry_type
   = t:KW_GEOMETRY { return { dataType: t }; }
