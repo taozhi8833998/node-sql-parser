@@ -143,6 +143,9 @@ function literalToSQL(literal) {
     case 'string':
       str = `'${escape(value)}'`
       break
+    case 'single_quote_string':
+      str = `'${value}'`
+      break
     case 'boolean':
     case 'bool':
       str = value ? 'TRUE' : 'FALSE'
@@ -195,7 +198,7 @@ function columnRefToSQL(expr) {
   } = expr
   let str = column === '*' ? '*' : identifierToSql(column, isDual)
   if (table) str = `${identifierToSql(table)}.${str}`
-  if (arrow) str += ` ${arrow} '${property}'`
+  if (arrow) str += ` ${arrow} ${literalToSQL(property)}`
   if (collate) str += ` ${commonTypeValue(collate).join(' ')}`
   return parentheses ? `(${str})` : str
 }
