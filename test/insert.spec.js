@@ -113,6 +113,20 @@ describe('insert', () => {
       expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date`, `id`) (`id`, `name`) VALUES (123,'test'),(124,'test2')")
     })
 
+    it('should support parse insert on duplicate key update', () => {
+      const sql = 'INSERT into account partition(date, id) (id, name) values(123, "test"), (124, "test2") on duplicate key update id = 123, name = "test"'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date`, `id`) (`id`, `name`) VALUES (123,'test'),(124,'test2') ON DUPLICATE KEY UPDATE `id` = 123, `name` = 'test'")
+    })
+
+    it('should support parse insert set', () => {
+      const sql = 'INSERT into account partition(date, id) set id = 234, name="my-name" on duplicate key update id = 123, name = "test"'
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date`, `id`) SET `id` = 234, `name` = 'my-name' ON DUPLICATE KEY UPDATE `id` = 123, `name` = 'test'")
+    })
+
     it('should support parse insert partition expr', () => {
       const sql = 'INSERT into account partition(date = 20191218, id = 2) (id, name) values(123, "test"), (124, "test2")'
       const ast = parser.astify(sql)
