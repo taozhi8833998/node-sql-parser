@@ -1196,7 +1196,8 @@ replace_insert_stmt
     KW_INTO?                 __
     t:table_name  __
     p:insert_partition? __ LPAREN __ c:column_list  __ RPAREN __
-    v:insert_value_clause {
+    v:insert_value_clause __
+    odp:on_duplicate_update_stmt? __ {
       if (t) {
         tableList.add(`insert::${t.db}::${t.table}`)
         t.as = null
@@ -1214,6 +1215,7 @@ replace_insert_stmt
           columns: c,
           values: v,
           partition: p,
+          on_duplicate_update: odp,
         }
       };
     }
@@ -1223,7 +1225,8 @@ insert_no_columns_stmt
     KW_INTO                 __
     t:table_name  __
     p:insert_partition? __
-    v:insert_value_clause {
+    v:insert_value_clause __
+    odp:on_duplicate_update_stmt? __ {
       if (t) {
         tableList.add(`insert::${t.db}::${t.table}`)
         columnList.add(`insert::${t.table}::(.*)`);
@@ -1238,9 +1241,18 @@ insert_no_columns_stmt
           columns: null,
           values: v,
           partition: p,
+          on_duplicate_update: odp,
         }
       };
     }
+
+on_duplicate_update_stmt
+  = KW_ON __ 'DUPLICATE'i __ KW_KEY __ KW_UPDATE __ s:set_list {
+    return {
+      keyword: 'on duplicate key update',
+      set: s
+    }
+  }
 
 replace_insert
   = KW_INSERT   { return 'insert'; }

@@ -33,4 +33,5 @@ function updateToSQL(stmt) {
 
 export {
   updateToSQL,
+  setToSQL,
 }

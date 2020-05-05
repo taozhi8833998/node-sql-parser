@@ -2,6 +2,7 @@ import { tablesToSQL } from './tables'
 import { exprToSQL } from './expr'
 import { identifierToSql, commonOptionConnector, hasVal, toUpper, returningToSQL } from './util'
 import { selectToSQL } from './select'
+import { setToSQL } from './update'
 
 /**
  * @param {Array} values
@@ -33,14 +34,18 @@ function insertToSQL(stmt) {
     columns,
     values,
     where,
+    on_duplicate_update: onDuplicateUpdate,
     partition,
     returning,
+    set,
   } = stmt
   const clauses = ['INSERT', toUpper(prefix), tablesToSQL(table), partitionToSQL(partition)]
   if (Array.isArray(columns)) clauses.push(`(${columns.map(identifierToSql).join(', ')})`)
   clauses.push(commonOptionConnector(Array.isArray(values) ? 'VALUES' : '', valuesToSQL, values))
+  clauses.push(commonOptionConnector('SET', setToSQL, set))
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
   clauses.push(returningToSQL(returning))
+  clauses.push(commonOptionConnector(onDuplicateUpdate && onDuplicateUpdate.keyword, setToSQL, onDuplicateUpdate && onDuplicateUpdate.set))
   return clauses.filter(hasVal).join(' ')
 }
 
