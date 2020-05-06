@@ -230,7 +230,7 @@ This project is based on the SQL parser extracted from [flora-sql-parser](https:
 
 If you like my project, **Star** in the corresponding project right corner. Your support is my biggest encouragement! ^_^
 
-You can also scan the qr code below or open paypal link to donation to Author.
+You can also scan the qr code below or open paypal link to donate to Author.
 
 ### Paypal
 
