@@ -1,6 +1,14 @@
 import { exprToSQL } from './expr'
 import { tablesToSQL } from './tables'
-import { identifierToSql, commonTypeValue, columnRefToSQL, toUpper, hasVal, commentToSQL } from './util'
+import {
+  autoIncreatementToSQL,
+  columnRefToSQL,
+  commonTypeValue,
+  commentToSQL,
+  hasVal,
+  identifierToSql,
+  toUpper,
+} from './util'
 
 function columnDataType(definition) {
   const { dataType, length, suffix, scale } = definition || {}
@@ -48,7 +56,7 @@ function columnOption(definition) {
     const { type, value } = defaultOpt
     columnOpt.push(type.toUpperCase(), exprToSQL(value))
   }
-  columnOpt.push(toUpper(autoIncrement), toUpper(uniquePrimary), commentToSQL(comment))
+  columnOpt.push(autoIncreatementToSQL(autoIncrement), toUpper(uniquePrimary), commentToSQL(comment))
   columnOpt.push(...commonTypeValue(collate))
   columnOpt.push(...commonTypeValue(columnFormat))
   columnOpt.push(...commonTypeValue(storage))
