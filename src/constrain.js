@@ -16,7 +16,7 @@ function constraintDefinitionToSQL(constraintDefinition) {
   } = constraintDefinition
   const constraintSQL = []
   constraintSQL.push(toUpper(keyword))
-  constraintSQL.push(constraint)
+  constraintSQL.push(identifierToSql(constraint))
   constraintSQL.push(toUpper(constraintType))
   constraintSQL.push(identifierToSql(index))
   constraintSQL.push(...indexTypeAndOptionToSQL(constraintDefinition))

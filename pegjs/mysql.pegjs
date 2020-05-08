@@ -571,12 +571,13 @@ create_constraint_definition
 
 constraint_name
   = kc:KW_CONSTRAINT __
-  c:ident_name? __ {
+  c:ident? __ {
     return {
       keyword: kc.toLowerCase(),
       constraint: c
     }
   }
+
 create_constraint_primary
   = kc:constraint_name? __
   p:('PRIMARY KEY'i) __
