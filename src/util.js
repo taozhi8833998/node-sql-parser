@@ -130,7 +130,7 @@ function identifierToSql(ident, isDual) {
     case 'postgresql':
       return `"${ident}"`
     case 'transactsql':
-      return `[${ident}]`
+      return ident
     default:
       return `\`${ident}\``
   }
@@ -245,7 +245,16 @@ function commonKeywordArgsToSQL(kwArgs) {
   return [toUpper(kwArgs.keyword), toUpper(kwArgs.args)]
 }
 
+function autoIncreatementToSQL(autoIncreatement) {
+  if (!autoIncreatement || typeof autoIncreatement === 'string') return toUpper(autoIncreatement)
+  const { keyword, seed, increment, parentheses } = autoIncreatement
+  let result = toUpper(keyword)
+  if (parentheses) result += `(${literalToSQL(seed)}, ${literalToSQL(increment)})`
+  return result
+}
+
 export {
+  autoIncreatementToSQL,
   commonKeywordArgsToSQL,
   commonOptionConnector,
   connector,

@@ -333,8 +333,7 @@ create_column_definition
     d:data_type __
     n:(literal_not_null / literal_null)? __
     df:default_expr? __
-    a:('AUTO_INCREMENT'i)? __
-    u:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i)? __
+    o:identity_unique_primary? __
     co:keyword_comment? __
     ca:collate_expr? __
     cf:column_format? __
@@ -347,8 +346,8 @@ create_column_definition
         definition: d,
         nullable: n,
         default_val: df,
-        auto_increment: a && a.toLowerCase(),
-        unique_or_primary: u && `${u[0].toLowerCase()} ${u[2].toLowerCase()}`,
+        auto_increment: o && o.identity,
+        unique_or_primary: o && o.unique_or_primary,
         comment: co,
         collate: ca,
         column_format: cf,
@@ -357,6 +356,25 @@ create_column_definition
         resource: 'column'
       }
     }
+
+identity_stmt
+  = ('IDENTITY'i) __ c:(LPAREN __  literal_numeric __ COMMA __ literal_numeric __ RPAREN)? {
+    return {
+      keyword: 'identity',
+      seed:c && c[2],
+      increment:c && c[6],
+      parentheses:c && true || false,
+    }
+  }
+
+identity_unique_primary
+  = bu:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i)? __ i:identity_stmt? __ au:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i)? {
+    const u = bu || au
+    return {
+      identity: i,
+      unique_or_primary: u && `${u[0].toLowerCase()} ${u[2].toLowerCase()}`,
+    }
+  }
 
 collate_expr
   = KW_COLLATE __ ca:ident_name __ {

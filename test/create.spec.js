@@ -299,6 +299,27 @@ describe('create', () => {
       expect(getParsedSql(`CREATE EXTENSION if not exists hstore SCHEMA public version "latest" FROM unpackaged;`, { database: 'postgresql' })).to.equal('CREATE EXTENSION IF NOT EXISTS hstore SCHEMA public VERSION \'latest\' FROM unpackaged')
     })
   })
+
+  describe('create table with tsql', () => {
+    it('should support identity without number', () => {
+      expect(getParsedSql(`CREATE TABLE test (
+        id BIGINT NOT NULL IDENTITY PRIMARY KEY,
+        title VARCHAR(100) NOT NULL
+      )`, { database: 'transactsql' })).to.equal('CREATE TABLE test (id BIGINT NOT NULL IDENTITY PRIMARY KEY, title VARCHAR(100) NOT NULL)')
+    })
+    it('should support identity with seed and increment', () => {
+      expect(getParsedSql(`CREATE TABLE test (
+        id BIGINT NOT NULL IDENTITY(1,2) PRIMARY KEY,
+        title VARCHAR(100) NOT NULL
+      )`, { database: 'transactsql' })).to.equal('CREATE TABLE test (id BIGINT NOT NULL IDENTITY(1, 2) PRIMARY KEY, title VARCHAR(100) NOT NULL)')
+    })
+    it('should support identity with seed and increment', () => {
+      expect(getParsedSql(`CREATE TABLE test (
+        id BIGINT NOT NULL PRIMARY KEY IDENTITY(1,2),
+        title VARCHAR(100) NOT NULL
+      )`, { database: 'transactsql' })).to.equal('CREATE TABLE test (id BIGINT NOT NULL IDENTITY(1, 2) PRIMARY KEY, title VARCHAR(100) NOT NULL)')
+    })
+  })
   describe('throw error when create type is unknow', () => {
     const ast = {
       type: 'create',
