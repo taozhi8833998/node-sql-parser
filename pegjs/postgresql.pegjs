@@ -194,9 +194,9 @@
 }
 
 start
-  = multiple_stmt
-  / cmd_stmt
-  / crud_stmt
+  = __ n:(multiple_stmt / cmd_stmt / crud_stmt) __ {
+    return n
+  }
 
 cmd_stmt
   = drop_stmt

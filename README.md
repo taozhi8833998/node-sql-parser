@@ -24,7 +24,7 @@
 - support select, delete, update and insert type
 - support drop, truncate and rename command
 - output the table and column list that the sql visited with the corresponding authority
-- support multiple kinds of database
+- support various databases engine
 
 ## :tada: Install
 

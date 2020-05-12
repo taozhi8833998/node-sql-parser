@@ -304,8 +304,9 @@ describe('create', () => {
     it('should support identity without number', () => {
       expect(getParsedSql(`CREATE TABLE test (
         id BIGINT NOT NULL IDENTITY PRIMARY KEY,
-        title VARCHAR(100) NOT NULL
-      )`, { database: 'transactsql' })).to.equal('CREATE TABLE test (id BIGINT NOT NULL IDENTITY PRIMARY KEY, title VARCHAR(100) NOT NULL)')
+        title VARCHAR(100) NOT NULL,
+        uuid UNIQUEIDENTIFIER NOT NULL DEFAULT(NEWID()) unique
+      )`, { database: 'transactsql' })).to.equal('CREATE TABLE test (id BIGINT NOT NULL IDENTITY PRIMARY KEY, title VARCHAR(100) NOT NULL, uuid UNIQUEIDENTIFIER NOT NULL DEFAULT (NEWID()) UNIQUE)')
     })
     it('should support identity with seed and increment', () => {
       expect(getParsedSql(`CREATE TABLE test (
