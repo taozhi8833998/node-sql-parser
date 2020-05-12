@@ -1,7 +1,7 @@
 # Nodejs SQL Parser
 
 [![Build Status](https://travis-ci.org/taozhi8833998/node-sql-parser.svg?branch=master)](https://travis-ci.org/taozhi8833998/node-sql-parser)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/dff0b2ee1b964d2d88fe6947c4f5c649)](https://app.codacy.com/app/taozhi8833998/node-sql-parser?utm_source=github.com&utm_medium=referral&utm_content=taozhi8833998/node-sql-parser&utm_campaign=Badge_Grade_Dashboard)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d923c9f2853f44f295c383d9943b56cc)](https://www.codacy.com/manual/taozhi8833998/node-sql-parser?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=taozhi8833998/node-sql-parser&amp;utm_campaign=Badge_Grade)
 [![Coverage Status](https://img.shields.io/coveralls/github/taozhi8833998/node-sql-parser/master.svg)](https://coveralls.io/github/taozhi8833998/node-sql-parser?branch=master)
 [![Dependencies](https://img.shields.io/david/taozhi8833998/node-sql-parser.svg)](https://img.shields.io/david/taozhi8833998/node-sql-parser)
 [![Known Vulnerabilities](https://snyk.io/test/github/taozhi8833998/node-sql-parser/badge.svg?targetFile=package.json)](https://snyk.io/test/github/taozhi8833998/node-sql-parser?targetFile=package.json)
