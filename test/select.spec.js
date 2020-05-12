@@ -1164,6 +1164,16 @@ describe('select', () => {
       const backSQL = parser.sqlify(ast)
       expect(backSQL).to.equal('SELECT TOP 3 PERCENT * FROM `tableA`')
     })
+
+    it('should support comment before', () => {
+      const sql = `-- +migrate Up
+      CREATE TABLE test (
+        id BIGINT NOT NULL PRIMARY KEY IDENTITY(1, 1)
+      );`
+      const ast = parser.astify(sql, opt)
+      const backSQL = parser.sqlify(ast, opt)
+      expect(backSQL).to.equal('CREATE TABLE test (id BIGINT NOT NULL IDENTITY(1, 1) PRIMARY KEY)')
+    })
   })
   describe('unknow type check', () => {
     it('should throw error', () => {

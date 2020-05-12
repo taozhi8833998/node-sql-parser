@@ -193,9 +193,9 @@
 }
 
 start
-  = multiple_stmt
-  / cmd_stmt
-  / crud_stmt
+  = __ n:(multiple_stmt / cmd_stmt / crud_stmt) __ {
+    return n
+  }
 
 cmd_stmt
   = drop_stmt
@@ -368,11 +368,12 @@ identity_stmt
   }
 
 identity_unique_primary
-  = bu:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i)? __ i:identity_stmt? __ au:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i)? {
-    const u = bu || au
+  = bu:(('UNIQUE'i / ('PRIMARY'i __ 'KEY'i)))? __ i:identity_stmt? __ au:(('UNIQUE'i / ('PRIMARY'i __ 'KEY'i)))? {
+    let u = bu || au
+    if (u && Array.isArray(u)) u = `${u[0].toLowerCase()} ${u[2].toLowerCase()}`
     return {
       identity: i,
-      unique_or_primary: u && `${u[0].toLowerCase()} ${u[2].toLowerCase()}`,
+      unique_or_primary: u,
     }
   }
 
@@ -1949,6 +1950,9 @@ KW_END      = "END"i        !ident_start
 
 KW_CAST     = "CAST"i       !ident_start
 
+KW_BIT  = "BIT"i  !ident_start { return 'BIT'; }
+KW_MONEY  = "MONEY"i  !ident_start { return 'MONEY'; }
+KW_SMALLMONEY  = "SMALLMONEY"i  !ident_start { return 'SMALLMONEY'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
 KW_NUMERIC  = "NUMERIC"i  !ident_start { return 'NUMERIC'; }
@@ -1972,6 +1976,7 @@ KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
+KW_UNIQUEIDENTIFIER = "UNIQUEIDENTIFIER"i !ident_start { return 'UNIQUEIDENTIFIER'; }
 KW_USER     = "USER"i     !ident_start { return 'USER'; }
 
 KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
@@ -2232,6 +2237,7 @@ data_type
   / datetime_type
   / json_type
   / text_type
+  / uniqueidentifier_type
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN __ {
@@ -2251,7 +2257,7 @@ numeric_type_suffix
 numeric_type
   = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? __ { return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s }; }
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE)l:[0-9]+ __ s:numeric_type_suffix? __ { return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ s:numeric_type_suffix? __{ return { dataType: t, suffix: s }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_BIT / KW_MONEY / KW_SMALLMONEY) __ s:numeric_type_suffix? __{ return { dataType: t, suffix: s }; }
 datetime_type
   = t:(KW_DATE / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
 
@@ -2260,3 +2266,6 @@ json_type
 
 text_type
   = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) { return { dataType: t }}
+
+uniqueidentifier_type
+  = t:(KW_UNIQUEIDENTIFIER) { return { dataType: t }}
