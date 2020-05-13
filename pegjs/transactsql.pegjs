@@ -1955,6 +1955,8 @@ KW_MONEY  = "MONEY"i  !ident_start { return 'MONEY'; }
 KW_SMALLMONEY  = "SMALLMONEY"i  !ident_start { return 'SMALLMONEY'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
+KW_NCHAR  = "NCHAR"i  !ident_start { return 'NCHAR';}
+KW_NVARCHAR  = "NVARCHAR"i  !ident_start { return 'NVARCHAR';}
 KW_NUMERIC  = "NUMERIC"i  !ident_start { return 'NUMERIC'; }
 KW_DECIMAL  = "DECIMAL"i  !ident_start { return 'DECIMAL'; }
 KW_SIGNED   = "SIGNED"i   !ident_start { return 'SIGNED'; }
@@ -2240,11 +2242,16 @@ data_type
   / uniqueidentifier_type
 
 character_string_type
-  = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN __ {
+  = t:(KW_CHAR / KW_VARCHAR / KW_NCHAR / KW_NVARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN __ {
     return { dataType: t, length: parseInt(l.join(''), 10) };
   }
-  / t:KW_CHAR { return { dataType: t }; }
-  / t:KW_VARCHAR { return { dataType: t }; }
+  / t:(KW_CHAR / KW_VARCHAR) { return { dataType: t }; }
+  / t:KW_NVARCHAR __ LPAREN __ m:'MAX'i __ RPAREN __ {
+    return {
+      dataType: t,
+      length: 'max'
+    }
+  }
 
 numeric_type_suffix
   = un: KW_UNSIGNED? __ ze: KW_ZEROFILL? {

@@ -305,8 +305,11 @@ describe('create', () => {
       expect(getParsedSql(`CREATE TABLE test (
         id BIGINT NOT NULL IDENTITY PRIMARY KEY,
         title VARCHAR(100) NOT NULL,
-        uuid UNIQUEIDENTIFIER NOT NULL DEFAULT(NEWID()) unique
-      )`, { database: 'transactsql' })).to.equal('CREATE TABLE test (id BIGINT NOT NULL IDENTITY PRIMARY KEY, title VARCHAR(100) NOT NULL, uuid UNIQUEIDENTIFIER NOT NULL DEFAULT (NEWID()) UNIQUE)')
+        uuid UNIQUEIDENTIFIER NOT NULL DEFAULT(NEWID()) unique,
+        nc nchar(123) not null,
+        nvc nvarchar(200) not null,
+        nvcm nvarchar(max) not null
+      )`, { database: 'transactsql' })).to.equal('CREATE TABLE test (id BIGINT NOT NULL IDENTITY PRIMARY KEY, title VARCHAR(100) NOT NULL, uuid UNIQUEIDENTIFIER NOT NULL DEFAULT (NEWID()) UNIQUE, nc NCHAR(123) NOT NULL, nvc NVARCHAR(200) NOT NULL, nvcm NVARCHAR(max) NOT NULL)')
     })
     it('should support identity with seed and increment', () => {
       expect(getParsedSql(`CREATE TABLE test (
