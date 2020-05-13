@@ -1154,15 +1154,15 @@ describe('select', () => {
     it('should support select top n', () => {
       const sql = 'select top 3 * from tableA'
       const ast = parser.astify(sql, opt)
-      const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.equal('SELECT TOP 3 * FROM `tableA`')
+      const backSQL = parser.sqlify(ast, opt)
+      expect(backSQL).to.equal('SELECT TOP 3 * FROM [tableA]')
     })
 
     it('should support select top n percent', () => {
       const sql = 'select top 3 percent * from tableA'
       const ast = parser.astify(sql, opt)
-      const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.equal('SELECT TOP 3 PERCENT * FROM `tableA`')
+      const backSQL = parser.sqlify(ast, opt)
+      expect(backSQL).to.equal('SELECT TOP 3 PERCENT * FROM [tableA]')
     })
 
     it('should support comment before', () => {
@@ -1172,7 +1172,7 @@ describe('select', () => {
       );`
       const ast = parser.astify(sql, opt)
       const backSQL = parser.sqlify(ast, opt)
-      expect(backSQL).to.equal('CREATE TABLE test (id BIGINT NOT NULL IDENTITY(1, 1) PRIMARY KEY)')
+      expect(backSQL).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1) PRIMARY KEY)')
     })
   })
   describe('unknow type check', () => {

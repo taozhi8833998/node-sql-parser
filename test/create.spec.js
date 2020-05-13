@@ -309,19 +309,29 @@ describe('create', () => {
         nc nchar(123) not null,
         nvc nvarchar(200) not null,
         nvcm nvarchar(max) not null
-      )`, { database: 'transactsql' })).to.equal('CREATE TABLE test (id BIGINT NOT NULL IDENTITY PRIMARY KEY, title VARCHAR(100) NOT NULL, uuid UNIQUEIDENTIFIER NOT NULL DEFAULT (NEWID()) UNIQUE, nc NCHAR(123) NOT NULL, nvc NVARCHAR(200) NOT NULL, nvcm NVARCHAR(max) NOT NULL)')
+      )`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY PRIMARY KEY, [title] VARCHAR(100) NOT NULL, [uuid] UNIQUEIDENTIFIER NOT NULL DEFAULT (NEWID()) UNIQUE, [nc] NCHAR(123) NOT NULL, [nvc] NVARCHAR(200) NOT NULL, [nvcm] NVARCHAR(max) NOT NULL)')
+    })
+    it('should support identity without number', () => {
+      expect(getParsedSql(`CREATE TABLE test (
+        id BIGINT NOT NULL IDENTITY PRIMARY KEY,
+        [title] VARCHAR(100) NOT NULL,
+        [uuid] UNIQUEIDENTIFIER NOT NULL DEFAULT(NEWID()) unique,
+        [nc] nchar(123) not null,
+        [nvc] nvarchar(200) not null,
+        [nvcm] nvarchar(max) not null
+      )`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY PRIMARY KEY, [title] VARCHAR(100) NOT NULL, [uuid] UNIQUEIDENTIFIER NOT NULL DEFAULT (NEWID()) UNIQUE, [nc] NCHAR(123) NOT NULL, [nvc] NVARCHAR(200) NOT NULL, [nvcm] NVARCHAR(max) NOT NULL)')
     })
     it('should support identity with seed and increment', () => {
       expect(getParsedSql(`CREATE TABLE test (
         id BIGINT NOT NULL IDENTITY(1,2) PRIMARY KEY,
         title VARCHAR(100) NOT NULL
-      )`, { database: 'transactsql' })).to.equal('CREATE TABLE test (id BIGINT NOT NULL IDENTITY(1, 2) PRIMARY KEY, title VARCHAR(100) NOT NULL)')
+      )`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 2) PRIMARY KEY, [title] VARCHAR(100) NOT NULL)')
     })
     it('should support identity with seed and increment', () => {
       expect(getParsedSql(`CREATE TABLE test (
         id BIGINT NOT NULL PRIMARY KEY IDENTITY(1,2),
         title VARCHAR(100) NOT NULL
-      )`, { database: 'transactsql' })).to.equal('CREATE TABLE test (id BIGINT NOT NULL IDENTITY(1, 2) PRIMARY KEY, title VARCHAR(100) NOT NULL)')
+      )`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 2) PRIMARY KEY, [title] VARCHAR(100) NOT NULL)')
     })
   })
   describe('throw error when create type is unknow', () => {

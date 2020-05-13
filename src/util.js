@@ -130,7 +130,7 @@ function identifierToSql(ident, isDual) {
     case 'postgresql':
       return `"${ident}"`
     case 'transactsql':
-      return ident
+      return `[${ident}]`
     default:
       return `\`${ident}\``
   }
