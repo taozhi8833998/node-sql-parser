@@ -55,6 +55,7 @@
 
     'NOT': true,
     'NULL': true,
+    'NOCHECK': true,
 
     'ON': true,
     'OR': true,
@@ -323,16 +324,17 @@ create_table_definition
     }
 
 create_definition
-  = create_column_definition
+  = create_constraint_definition
+  / create_column_definition
   / create_index_definition
   / create_fulltext_spatial_index_definition
-  / create_constraint_definition
 
 create_column_definition
   = c:column_ref __
     d:data_type __
     n:(literal_not_null / literal_null)? __
     df:default_expr? __
+    ch:create_constraint_check?
     o:identity_unique_primary? __
     co:keyword_comment? __
     ca:collate_expr? __
@@ -348,6 +350,7 @@ create_column_definition
         default_val: df,
         auto_increment: o && o.identity,
         unique_or_primary: o && o.unique_or_primary,
+        check: ch,
         comment: co,
         collate: ca,
         column_format: cf,
@@ -473,7 +476,11 @@ alter_action_list
     }
 
 alter_action
-  = ALTER_ADD_COLUMN
+  = ALTER_ADD_CONSTRAINT
+  / ALTER_DROP_CONSTRAINT
+  / ALTER_ENABLE_CONSTRAINT
+  / ALTER_DISABLE_CONSTRAINT
+  / ALTER_ADD_COLUMN
   / ALTER_DROP_COLUMN
   / ALTER_ADD_INDEX_OR_KEY
   / ALTER_ADD_FULLETXT_SPARITAL_INDEX
@@ -551,6 +558,48 @@ ALTER_LOCK
     }
   }
 
+ALTER_ADD_CONSTRAINT
+  = KW_ADD __ c:create_constraint_check __ {
+      return {
+        action: 'add',
+        ...c,
+        type: 'alter',
+      }
+    }
+
+ALTER_DROP_CONSTRAINT
+  = KW_DROP __ kc:KW_CONSTRAINT __ c:ident_name {
+      return {
+        action: 'drop',
+        constraint: c,
+        keyword: kc.toLowerCase(),
+        resource: 'constraint',
+        type: 'alter',
+      }
+    }
+
+ALTER_ENABLE_CONSTRAINT
+  = KW_WITH __ 'CHECK'i __ 'CHECK'i __ KW_CONSTRAINT __ c:ident_name {
+      return {
+        action: 'with',
+        constraint: c,
+        keyword: 'check check constraint',
+        resource: 'constraint',
+        type: 'alter',
+      }
+    }
+
+ALTER_DISABLE_CONSTRAINT
+  = 'NOCHECK'i __ KW_CONSTRAINT __ c:ident_name {
+      return {
+        action: 'nocheck',
+        keyword: 'constraint',
+        constraint: c,
+        resource: 'constraint',
+        type: 'alter',
+      }
+    }
+
 create_index_definition
   = kc:(KW_INDEX / KW_KEY) __
     c:column? __
@@ -588,6 +637,7 @@ create_constraint_definition
   = create_constraint_primary
   / create_constraint_unique
   / create_constraint_foreign
+  / create_constraint_check
 
 constraint_name
   = kc:KW_CONSTRAINT __
@@ -631,6 +681,18 @@ create_constraint_unique
         index: i,
         resource: 'constraint',
         index_options: id
+      }
+  }
+
+create_constraint_check
+  = kc:constraint_name? __ u:'CHECK'i __ nfr:('NOT'i __ 'FOR'i __ 'REPLICATION'i __)? LPAREN __ c:expr __ RPAREN {
+    return {
+        constraint_type: u.toLowerCase(),
+        keyword: kc && kc.keyword,
+        constraint: kc && kc.constraint,
+        index_type: nfr && { keyword: 'not for replication' },
+        definition: [c],
+        resource: 'constraint',
       }
   }
 
@@ -1762,7 +1824,7 @@ literal_string
     }
 
 literal_datetime
-  = type:(KW_TIME / KW_DATE / KW_TIMESTAMP) __ ca:("'" single_char* "'") {
+  = type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("'" single_char* "'") {
       return {
         type: type.toLowerCase(),
         value: ca[1].join('')
@@ -1979,6 +2041,7 @@ KW_BIGINT   = "BIGINT"i   !ident_start { return 'BIGINT'; }
 KW_FLOAT   = "FLOAT"i   !ident_start { return 'FLOAT'; }
 KW_DOUBLE   = "DOUBLE"i   !ident_start { return 'DOUBLE'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
+KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
@@ -2270,7 +2333,7 @@ numeric_type
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE)l:[0-9]+ __ s:numeric_type_suffix? __ { return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_BIT / KW_MONEY / KW_SMALLMONEY) __ s:numeric_type_suffix? __{ return { dataType: t, suffix: s }; }
 datetime_type
-  = t:(KW_DATE / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
+  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
 
 json_type
   = t:KW_JSON { return { dataType: t }; }
