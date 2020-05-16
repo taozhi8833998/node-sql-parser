@@ -5,11 +5,12 @@ import {
   hasVal,
   commentToSQL,
 } from './util'
+import { exprToSQL } from './expr'
 
 function indexTypeToSQL(indexType) {
-  if (!indexType) return
+  if (!indexType) return []
   const { keyword, type } = indexType
-  return `${keyword.toUpperCase()} ${type.toUpperCase()}`
+  return [keyword.toUpperCase(), type.toUpperCase()]
 }
 
 function indexOptionToSQL(indexOpt) {
@@ -26,7 +27,7 @@ function indexOptionToSQL(indexOpt) {
     case 'BTREE':
     case 'HASH':
       indexOptArray.length = 0
-      indexOptArray.push(indexTypeToSQL(indexOpt))
+      indexOptArray.push(...indexTypeToSQL(indexOpt))
       break
     case 'WITH PARSER':
       indexOptArray.push(expr)
@@ -46,13 +47,17 @@ function indexOptionToSQL(indexOpt) {
 
 function indexTypeAndOptionToSQL(indexDefinition) {
   const {
+    constraint_type: constraintType,
     index_type: indexType,
     index_options: indexOptions = [],
     definition,
   } = indexDefinition
   const dataType = []
-  dataType.push(indexTypeToSQL(indexType))
-  if (definition && definition.length) dataType.push(`(${definition.map(col => identifierToSql(col)).join(', ')})`)
+  dataType.push(...indexTypeToSQL(indexType))
+  if (definition && definition.length) {
+    const definitionSQL = toUpper(constraintType) === 'CHECK' ? `(${exprToSQL(definition[0])})` : `(${definition.map(col => identifierToSql(col)).join(', ')})`
+    dataType.push(definitionSQL)
+  }
   dataType.push(indexOptions && indexOptions.map(indexOptionToSQL).join(' '))
   return dataType
 }

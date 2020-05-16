@@ -1,3 +1,4 @@
+import { constraintDefinitionToSQL } from './constrain'
 import { exprToSQL } from './expr'
 import { tablesToSQL } from './tables'
 import {
@@ -43,7 +44,7 @@ function columnReferenceDefinitionToSQL(referenceDefinition) {
 function columnOption(definition) {
   const columnOpt = []
   const {
-    nullable, comment, collate, storage,
+    nullable, check, comment, collate, storage,
     default_val: defaultOpt,
     auto_increment: autoIncrement,
     unique_or_primary: uniquePrimary,
@@ -56,6 +57,7 @@ function columnOption(definition) {
     const { type, value } = defaultOpt
     columnOpt.push(type.toUpperCase(), exprToSQL(value))
   }
+  columnOpt.push(constraintDefinitionToSQL(check))
   columnOpt.push(autoIncreatementToSQL(autoIncrement), toUpper(uniquePrimary), commentToSQL(comment))
   columnOpt.push(...commonTypeValue(collate))
   columnOpt.push(...commonTypeValue(columnFormat))
