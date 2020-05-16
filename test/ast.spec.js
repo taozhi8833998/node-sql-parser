@@ -44,7 +44,7 @@ describe('AST', () => {
             it('should support single CTE', () => {
                 const sql = `WITH cte AS (SELECT 1)
                             SELECT * FROM cte`;
-                expect(getParsedSql(sql)).to.equal('WITH "cte" AS (SELECT 1) SELECT * FROM `cte`');
+                expect(getParsedSql(sql)).to.equal('WITH cte AS (SELECT 1) SELECT * FROM `cte`');
             });
 
             it('should support multiple CTE', () => {
@@ -52,7 +52,7 @@ describe('AST', () => {
                               SELECT * FROM cte1 UNION SELECT * FROM cte2`;
 
 
-                let expected = 'WITH "cte1" AS (SELECT 1), "cte2" AS (SELECT 2) ' +
+                let expected = 'WITH cte1 AS (SELECT 1), cte2 AS (SELECT 2) ' +
                                'SELECT * FROM `cte1` UNION SELECT * FROM `cte2`';
                 expect(getParsedSql(sql)).to.equal(expected)
             });

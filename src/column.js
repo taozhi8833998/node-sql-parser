@@ -1,6 +1,7 @@
 import { exprToSQL } from './expr'
 import { tablesToSQL } from './tables'
 import {
+  arrayStructTypeToSQL,
   autoIncreatementToSQL,
   columnRefToSQL,
   commonTypeValue,
@@ -13,6 +14,7 @@ import {
 function columnDataType(definition) {
   const { dataType, length, suffix, scale } = definition || {}
   let result = dataType
+  if (toUpper(dataType) === 'ARRAY' || toUpper(dataType) === 'STRUCT') result = arrayStructTypeToSQL(dataType)
   if (length) {
     result += `(${[length, scale].filter(hasVal).join(', ')})`
   }

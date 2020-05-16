@@ -7,11 +7,13 @@ import { caseToSQL } from './case'
 import { castToSQL, funcToSQL } from './func'
 import { intervalToSQL } from './interval'
 import { selectToSQL } from './select'
+import { arrayStructExprToSQL } from './array-struct'
 import { unionToSQL } from './union'
 
 const exprToSQLConvertFn = {
   alter       : alterExprToSQL,
   aggr_func   : aggrToSQL,
+  'array'     : arrayStructExprToSQL,
   assign      : assignToSQL,
   binary_expr : binaryToSQL,
   case        : caseToSQL,
@@ -19,6 +21,7 @@ const exprToSQLConvertFn = {
   column_ref  : columnRefToSQL,
   function    : funcToSQL,
   interval    : intervalToSQL,
+  struct      : arrayStructExprToSQL,
 }
 
 function varToSQL(expr) {

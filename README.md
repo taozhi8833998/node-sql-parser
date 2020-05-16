@@ -86,6 +86,7 @@ Import the JS file in your page:
 - MariaDB
 - PostgresQL
 - TransactSQL
+- BigQuery
 
 - New issue could be made for other new database.
 
