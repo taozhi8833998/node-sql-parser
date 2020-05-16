@@ -9,7 +9,7 @@ import { exprToSQL } from './expr'
 
 function indexTypeToSQL(indexType) {
   if (!indexType) return []
-  const { keyword = '', type = '' } = indexType
+  const { keyword, type } = indexType
   return [keyword.toUpperCase(), type.toUpperCase()]
 }
 

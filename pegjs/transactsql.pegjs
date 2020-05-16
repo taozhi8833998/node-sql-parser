@@ -690,7 +690,7 @@ create_constraint_check
         constraint_type: u.toLowerCase(),
         keyword: kc && kc.keyword,
         constraint: kc && kc.constraint,
-        index_type: nfr && { keyword: 'not for replication' },
+        index_type: nfr && { keyword: 'not for replication', type: '' },
         definition: [c],
         resource: 'constraint',
       }
