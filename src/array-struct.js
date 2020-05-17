@@ -26,4 +26,5 @@ function arrayStructExprToSQL(expr) {
 
 export {
   arrayStructExprToSQL,
+  arrayStructValueToSQL,
 }

@@ -1,5 +1,7 @@
 const { expect } = require('chai')
 const Parser = require('../src/parser').default
+const { arrayStructValueToSQL } = require('../src/array-struct')
+const { arrayStructTypeToSQL } = require('../src/util')
 
 describe('BigQuery', () => {
   const parser = new Parser();
@@ -62,5 +64,14 @@ describe('BigQuery', () => {
     it(`should support ${title}`, () => {
       expect(getParsedSql(sql[0], opt)).to.equal(sql[1])
     })
+  })
+
+  it('should return empty str for non-array-struct', () => {
+    expect(arrayStructValueToSQL({ type: 'non-array-struct' })).to.equal('')
+  })
+
+  it('should return undefined and dataType', () => {
+    expect(arrayStructTypeToSQL()).to.equal(undefined)
+    expect(arrayStructTypeToSQL({ dataType: 'array' })).to.equal('ARRAY undefined')
   })
 })
