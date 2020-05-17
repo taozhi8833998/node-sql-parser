@@ -296,6 +296,7 @@ select_stmt_nake
       if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
           type: 'select',
+          as_struct_val: sv,
           distinct: d,
           columns: c,
           from: f,
@@ -308,10 +309,7 @@ select_stmt_nake
 
 struct_value
   = a:KW_AS __ k:(KW_STRUCT / KW_VALUE) __ {
-    return {
-      as: a,
-      keyword: k
-    }
+    return `${a[0].toLowerCase()} ${k.toLowerCase()}`
   }
 
 expr_alias_list
@@ -325,7 +323,16 @@ expr_alias
     }
 
 column_clause
-  = head: (KW_ALL / (STAR !ident_start) / STAR) tail:(__ COMMA __ column_list_item)* {
+  = STAR __ k:('EXCEPT'i / 'REPLACE'i) __ LPAREN __ c:columns_list __ RPAREN {
+    columnList.add('select::null::(.*)')
+    return {
+      columns: c,
+      parentheses: true,
+      star: '*',
+      type: k.toLowerCase(),
+    }
+  }
+  / head: (KW_ALL / (STAR !ident_start) / STAR) tail:(__ COMMA __ column_list_item)* {
       columnList.add('select::null::(.*)');
       if (tail && tail.length > 0) {
         head[0] = {
@@ -340,7 +347,10 @@ column_clause
       }
       return head[0];
     }
-  / head:column_list_item tail:(__ COMMA __ column_list_item)* {
+  / columns_list
+
+columns_list
+  = head:column_list_item tail:(__ COMMA __ column_list_item)* {
       return createList(head, tail);
     }
 
@@ -356,12 +366,6 @@ column_list_item
         as: null
       };
     }
-  // / k:('EXPECT'i __ LPAREN __ column_list __ RPAREN)? {
-  //   return k
-  // }
-  // / k:(KW_REPLACE __ expr_alias_list __)? {
-  //   return k
-  // }
   / expr_alias
 
 alias_clause
@@ -448,7 +452,15 @@ join_op
   / k:(KW_INNER / KW_CROSS) __ KW_JOIN { return `${k} JOIN`; }
 
 table_name
-  = dt:ident tail:(__ DOT __ ident)? {
+  = project:ident dt:(__ DOT __ ident) tail:(__ DOT __ ident) {
+      const obj = { db: null, table: project };
+      if (tail !== null) {
+        obj.db = `${project}.${dt[3]}`;
+        obj.table = tail[3];
+      }
+      return obj;
+    }
+  / dt:ident tail:(__ DOT __ ident)? {
       const obj = { db: null, table: dt };
       if (tail !== null) {
         obj.db = dt;
@@ -1102,7 +1114,7 @@ KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
 KW_OVER     = "OVER"i     !ident_start
 KW_UNION    = "UNION"i    !ident_start
-KW_VALUE    = "VALUE"i   !ident_start
+KW_VALUE    = "VALUE"i    !ident_start { return 'VALUE' }
 KW_VALUES   = "VALUES"i   !ident_start
 KW_USING    = "USING"i    !ident_start
 

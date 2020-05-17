@@ -56,7 +56,71 @@ describe('BigQuery', () => {
       FROM locations l;`,
         "WITH locations AS (SELECT ARRAY<STRUCT<city STRING, state STRING>>[('Seattle', 'Washington'), ('Phoenix', 'Arizona')] AS location) SELECT l.* FROM locations AS l"
       ]
-    }
+    },
+    {
+      title: 'select * expect',
+      sql: [
+        `WITH orders AS
+        (SELECT 5 as order_id,
+        "sprocket" as item_name,
+        200 as quantity)
+      SELECT * EXCEPT (order_id)
+      FROM orders;`,
+        "WITH orders AS (SELECT 5 AS order_id, 'sprocket' AS item_name, 200 AS quantity) SELECT * EXCEPT (order_id) FROM orders"
+      ]
+    },
+    {
+      title: 'select * replace',
+      sql: [
+        `WITH orders AS
+        (SELECT 5 as order_id,
+        "sprocket" as item_name,
+        200 as quantity)
+      SELECT * REPLACE ("widget" AS item_name)
+      FROM orders;`,
+        "WITH orders AS (SELECT 5 AS order_id, 'sprocket' AS item_name, 200 AS quantity) SELECT * REPLACE ('widget' AS item_name) FROM orders"
+      ]
+    },
+    {
+      title: 'select * replace calculate',
+      sql: [
+        `WITH orders AS
+        (SELECT 5 as order_id,
+        "sprocket" as item_name,
+        200 as quantity)
+      SELECT * REPLACE (quantity/2 AS quantity)
+      FROM orders;`,
+        "WITH orders AS (SELECT 5 AS order_id, 'sprocket' AS item_name, 200 AS quantity) SELECT * REPLACE (quantity / 2 AS quantity) FROM orders"
+      ]
+    },
+    {
+      title: 'select as struct',
+      sql: [
+        'SELECT AS STRUCT 1 x, 2, 3 xx',
+        'SELECT AS STRUCT 1 AS x, 2, 3 AS xx'
+      ]
+    },
+    {
+      title: 'select as value',
+      sql: [
+        'SELECT AS VALUE STRUCT(1 AS x, 2, 3 AS x)',
+        'SELECT AS VALUE STRUCT(1 AS x, 2, 3 AS x)'
+      ]
+    },
+    {
+      title: 'select as value from',
+      sql: [
+        'SELECT AS VALUE STRUCT(1 a, 2 b) xyz FROM ttt',
+        'SELECT AS VALUE STRUCT(1 AS a, 2 AS b) AS xyz FROM ttt'
+      ]
+    },
+    {
+      title: 'select from project.dataset.table',
+      sql: [
+        'SELECT * FROM project.dataset.Roster;',
+        'SELECT * FROM project.dataset.Roster'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
