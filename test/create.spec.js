@@ -182,7 +182,7 @@ describe('create', () => {
             ID int NOT NULL,
             LastName varchar(255) NOT NULL,
             FirstName varchar(255),
-            Age int CHECK (Age >= 18)
+            Age int CHECK (Age >= 18),
           )`, { database: 'transactsql' }))
           .to.equal(`CREATE TABLE [Persons] ([ID] INT NOT NULL, [LastName] VARCHAR(255) NOT NULL, [FirstName] VARCHAR(255), [Age] INT CHECK ([Age] >= 18))`);
           expect(getParsedSql(`CREATE TABLE Persons (

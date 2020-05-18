@@ -319,7 +319,7 @@ create_like_table
   }
 
 create_table_definition
-  = LPAREN __ head:create_definition tail:(__ COMMA __ create_definition)* __ RPAREN {
+  = LPAREN __ head:create_definition tail:(__ COMMA __ create_definition)* __ COMMA? __ RPAREN {
       return createList(head, tail);
     }
 
