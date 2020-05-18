@@ -3,6 +3,7 @@ import { exprToSQL } from './expr'
 import { tablesToSQL } from './tables'
 import {
   autoIncreatementToSQL,
+  commonOptionConnector,
   commonTypeValue,
   commentToSQL,
   hasVal,
@@ -17,10 +18,14 @@ function columnRefToSQL(expr) {
   } = expr
   let str = column === '*' ? '*' : identifierToSql(column, isDual)
   if (table) str = `${identifierToSql(table)}.${str}`
-  if (as) str += ` AS ${exprToSQL(as)}`
-  if (arrow) str += ` ${arrow} ${literalToSQL(property)}`
-  if (collate) str += ` ${commonTypeValue(collate).join(' ')}`
-  return parentheses ? `(${str})` : str
+  const result = [
+    str,
+    commonOptionConnector('AS', exprToSQL, as),
+    commonOptionConnector(arrow, literalToSQL, property),
+  ]
+  if (collate) result.push(commonTypeValue(collate).join(' '))
+  const sql = result.filter(hasVal).join(' ')
+  return parentheses ? `(${sql})` : sql
 }
 
 function columnDataType(definition) {
