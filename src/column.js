@@ -106,7 +106,6 @@ function columnsToSQL(columns, tables) {
 
         else str = `${str}\`${column.as}\``
       }
-
       return str
     })
     .join(', ')

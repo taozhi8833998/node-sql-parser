@@ -5,7 +5,6 @@ function arrayStructValueToSQL(expr) {
   const {
     array_path: arrayPath,
     expr_list: exprList,
-    parentheses,
     type,
   } = expr
   switch (toUpper(type)) {
@@ -13,8 +12,7 @@ function arrayStructValueToSQL(expr) {
       return `(${columnsToSQL(exprList)})`
     case 'ARRAY':
       if (exprList) return `[${exprList.map(col => `(${columnsToSQL(col)})`).filter(hasVal).join(', ')}]`
-      if (arrayPath) return parentheses && `[${columnsToSQL(arrayPath)}]` || columnsToSQL(arrayPath)
-      break
+      return `[${columnsToSQL(arrayPath)}]`
     default:
       return ''
   }

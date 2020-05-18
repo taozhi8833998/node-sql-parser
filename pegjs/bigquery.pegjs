@@ -331,11 +331,6 @@ struct_value
     return `${a[0].toLowerCase()} ${k.toLowerCase()}`
   }
 
-expr_alias_list
-  = head:expr_alias tail:(__ COMMA __ expr_alias)* {
-      return createList(head, tail);
-    }
-
 expr_alias
   = e:expr __ alias:alias_clause? {
       return { expr: e, as:alias };
@@ -513,17 +508,6 @@ where_clause
 group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list { return e.value; }
 
-column_ref_index
-  = l:column_ref_list
-  / l: literal_list {
-    return l
-  }
-
-column_ref_list
-  = head:column_ref tail:(__ COMMA __ column_ref)* {
-      return createList(head, tail);
-    }
-
 having_clause
   = KW_HAVING __ e:expr { return e; }
 
@@ -626,12 +610,12 @@ expr_list
 
 expr
   = parentheses_list_expr
-  / array_expr
   / struct_expr
   / logic_operator_expr // support concatenation operator || and &&
   / unary_expr
   / or_expr
   / select_stmt
+  / array_expr
 
 parentheses_list_expr
   = head:parentheses_expr tail:(__ COMMA __ parentheses_expr)* {
@@ -643,13 +627,21 @@ parentheses_expr
     return c
   }
 
-
 array_expr
   = LBRAKE __ c:column_clause __ RBRAKE __ {
     return {
       array_path: c,
       type: 'array',
       keyword: '',
+      parentheses: true
+    }
+  }
+  / s:(array_type / KW_ARRAY)? LBRAKE __ c:literal_list __ RBRAKE __ {
+    return {
+      definition: s,
+      array_path: c.map(l => ({ expr: l, as: null })),
+      type: 'array',
+      keyword: s && 'array',
       parentheses: true
     }
   }

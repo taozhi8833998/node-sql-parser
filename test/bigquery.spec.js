@@ -244,14 +244,14 @@ describe('BigQuery', () => {
       title: 'select window clause list',
       sql: [
         `SELECT item, purchases, category, LAST_VALUE(item)
-        OVER (d) AS most_popular
+        OVER d AS most_popular
       FROM Produce
       WINDOW
         a AS (PARTITION BY category),
         b AS (a ORDER BY purchases),
         c AS (b ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING),
         d AS (c)`,
-        'SELECT item, purchases, category, LAST_VALUE(item) OVER (d) AS most_popular FROM Produce WINDOW a AS (PARTITION BY category), b AS (a ORDER BY purchases ASC), c AS (b ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING), d AS (c)'
+        'SELECT item, purchases, category, LAST_VALUE(item) OVER d AS most_popular FROM Produce WINDOW a AS (PARTITION BY category), b AS (a ORDER BY purchases ASC), c AS (b ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING), d AS (c)'
       ]
     },
     {
@@ -265,6 +265,24 @@ describe('BigQuery', () => {
         b AS (a ORDER BY purchases),
         c AS b`,
         'SELECT item, purchases, category, LAST_VALUE(item) OVER (c ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING) AS most_popular FROM Produce WINDOW a AS (PARTITION BY category), b AS (a ORDER BY purchases ASC), c AS b'
+      ]
+    },
+    {
+      title: 'select unnest array limit',
+      sql: [
+        `SELECT *
+        FROM UNNEST(ARRAY<STRING>['a', 'b', 'c', 'd', 'e']) AS letter
+        ORDER BY letter ASC LIMIT 2`,
+        "SELECT * FROM UNNEST (ARRAY<STRING>['a', 'b', 'c', 'd', 'e']) AS letter ORDER BY letter ASC LIMIT 2"
+      ]
+    },
+    {
+      title: 'select unnest array limit and offset',
+      sql: [
+        `SELECT *
+        FROM UNNEST(ARRAY<STRING>['a', 'b', 'c', 'd', 'e']) AS letter
+        ORDER BY letter ASC LIMIT 2 OFFSET 1`,
+        "SELECT * FROM UNNEST (ARRAY<STRING>['a', 'b', 'c', 'd', 'e']) AS letter ORDER BY letter ASC LIMIT 2 OFFSET 1"
       ]
     },
   ]

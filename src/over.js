@@ -7,13 +7,12 @@ function overToSQL(over) {
   const {
     as_window_specification: asWindowSpec,
     orderby,
-    parentheses,
     partitionby,
     type,
   } = over
   if (toUpper(type) === 'WINDOW') {
     const windowSQL = asWindowSpecToSQL(asWindowSpec)
-    return parentheses && `OVER (${windowSQL})` || `OVER ${windowSQL}`
+    return `OVER ${windowSQL}`
   }
   const partition = orderOrPartitionByToSQL(partitionby, 'partition by')
   const order = orderOrPartitionByToSQL(orderby, 'order by')
