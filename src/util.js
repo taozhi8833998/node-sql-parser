@@ -222,8 +222,7 @@ function arrayStructTypeToSQL(expr) {
   if (isNotArrayOrStruct) return dataTypeUpper
   const result = definition && definition.map(field => {
     const {
-      field_name: fieldName,
-      field_type: fieldType,
+      field_name: fieldName, field_type: fieldType,
     } = field
     const fieldResult = [fieldName, arrayStructTypeToSQL(fieldType)]
     return fieldResult.filter(hasVal).join(' ')
@@ -273,25 +272,11 @@ function autoIncreatementToSQL(autoIncreatement) {
 }
 
 export {
-  arrayStructTypeToSQL,
-  autoIncreatementToSQL,
-  commonKeywordArgsToSQL,
-  commonOptionConnector,
-  connector,
-  commonTypeValue,
-  columnRefToSQL,
-  commentToSQL,
-  createBinaryExpr,
-  createValueExpr,
-  DEFAULT_OPT,
-  escape,
-  literalToSQL,
-  identifierToSql,
-  replaceParams,
-  returningToSQL,
-  hasVal,
-  setParserOpt,
-  toUpper,
-  topToSQL,
-  triggerEventToSQL,
+  arrayStructTypeToSQL, autoIncreatementToSQL,
+  commonKeywordArgsToSQL, commonOptionConnector,
+  connector, commonTypeValue, columnRefToSQL,
+  commentToSQL, createBinaryExpr, createValueExpr,
+  DEFAULT_OPT, escape, literalToSQL, identifierToSql,
+  replaceParams, returningToSQL, hasVal, setParserOpt,
+  toUpper, topToSQL, triggerEventToSQL,
 }

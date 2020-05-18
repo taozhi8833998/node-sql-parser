@@ -13,9 +13,9 @@ import {
   setVarToSQL,
   lockUnlockToSQL,
 } from './command'
-import { exprToSQL, orderOrPartitionByToSQL } from './expr'
+import { orderOrPartitionByToSQL } from './expr'
+import { limitToSQL } from './limit'
 import { withToSql } from './with'
-import { connector } from './util'
 
 const typeToSQLFn = {
   alter    : alterToSQL,
@@ -50,10 +50,7 @@ function bigQueryToSQL(stmt) {
   const result = [withToSql(withExpr), lp, unionToSQL(select), rp]
   // process with, orderby and limit
   result.push(orderOrPartitionByToSQL(orderby, 'order by'))
-  if (limit) {
-    const { seperator, value } = limit
-    result.push(connector('LIMIT', value.map(exprToSQL).join(`${seperator === 'offset' ? ' ' : ''}${seperator.toUpperCase()} `)))
-  }
+  result.push(limitToSQL(limit))
   return result.filter(val => val).join(' ')
 }
 

@@ -1,5 +1,6 @@
 import { exprToSQL, getExprListSQL, orderOrPartitionByToSQL } from './expr'
 import { columnsToSQL } from './column'
+import { limitToSQL } from './limit'
 import { withToSql } from './with'
 import { tablesToSQL } from './tables'
 import { hasVal, commonOptionConnector, connector, topToSQL, toUpper } from './util'
@@ -21,20 +22,7 @@ import { hasVal, commonOptionConnector, connector, topToSQL, toUpper } from './u
 
 function selectToSQL(stmt) {
   const {
-    as_struct_val: asStructVal,
-    columns,
-    distinct,
-    from,
-    for_sys_time_as_of: forSystem = {},
-    groupby,
-    having,
-    limit,
-    options,
-    orderby,
-    top,
-    window: windowInfo,
-    with: withInfo,
-    where,
+    as_struct_val: asStructVal, columns, distinct, from, for_sys_time_as_of: forSystem = {}, groupby, having, limit, options, orderby, top, window: windowInfo, with: withInfo, where,
   } = stmt
   const clauses = [withToSql(withInfo), 'SELECT', toUpper(asStructVal)]
   clauses.push(topToSQL(top))
@@ -49,10 +37,7 @@ function selectToSQL(stmt) {
   clauses.push(commonOptionConnector('HAVING', exprToSQL, having))
   clauses.push(commonOptionConnector('WINDOW', exprToSQL, windowInfo))
   clauses.push(orderOrPartitionByToSQL(orderby, 'order by'))
-  if (limit) {
-    const { seperator, value } = limit
-    clauses.push(connector('LIMIT', value.map(exprToSQL).join(`${seperator === 'offset' ? ' ' : ''}${seperator.toUpperCase()} `)))
-  }
+  clauses.push(limitToSQL(limit))
   return clauses.filter(hasVal).join(' ')
 }
 
