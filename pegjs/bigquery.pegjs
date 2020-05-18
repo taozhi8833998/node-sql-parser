@@ -346,7 +346,7 @@ column_clause
       type: k.toLowerCase(),
     }
   }
-  / head: (KW_ALL / (STAR !ident_start) / STAR) tail:(__ COMMA __ column_list_item)* {
+  / head: (KW_ALL / (STAR !ident_start) / STAR) tail:(__ COMMA __ column_list_item)* __ COMMA? {
       columnList.add('select::null::(.*)');
       if (tail && tail.length > 0) {
         head[0] = {
@@ -361,7 +361,9 @@ column_clause
       }
       return head[0];
     }
-  / columns_list
+  / c:columns_list __ COMMA? {
+    return c
+  }
 
 columns_list
   = head:column_list_item tail:(__ COMMA __ column_list_item)* {

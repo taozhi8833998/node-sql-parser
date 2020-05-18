@@ -285,6 +285,15 @@ describe('BigQuery', () => {
         "SELECT * FROM UNNEST (ARRAY<STRING>['a', 'b', 'c', 'd', 'e']) AS letter ORDER BY letter ASC LIMIT 2 OFFSET 1"
       ]
     },
+    {
+      title: 'tail comma',
+      sql: [
+        `SELECT season as season,
+        academic_year as academic_year,
+        FROM source`,
+        'SELECT season AS season, academic_year AS academic_year FROM source'
+      ]
+    }
   ]
 
   SQL_LIST.forEach(sqlInfo => {
