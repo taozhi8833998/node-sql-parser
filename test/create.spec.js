@@ -182,7 +182,7 @@ describe('create', () => {
             ID int NOT NULL,
             LastName varchar(255) NOT NULL,
             FirstName varchar(255),
-            Age int CHECK (Age >= 18)
+            Age int CHECK (Age >= 18),
           )`, { database: 'transactsql' }))
           .to.equal(`CREATE TABLE [Persons] ([ID] INT NOT NULL, [LastName] VARCHAR(255) NOT NULL, [FirstName] VARCHAR(255), [Age] INT CHECK ([Age] >= 18))`);
           expect(getParsedSql(`CREATE TABLE Persons (
@@ -360,6 +360,20 @@ describe('create', () => {
         id BIGINT NOT NULL PRIMARY KEY IDENTITY(1,2),
         title VARCHAR(100) NOT NULL
       )`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 2) PRIMARY KEY, [title] VARCHAR(100) NOT NULL)')
+    })
+    it('should support create column as ', () => {
+      expect(getParsedSql(`CREATE TABLE test (
+        id BIGINT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+        questions_correct BIGINT NOT NULL DEFAULT(0),
+        questions_total BIGINT NOT NULL,
+        score AS (questions_correct * 100 / questions_total)
+      );`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1) PRIMARY KEY, [questions_correct] BIGINT NOT NULL DEFAULT (0), [questions_total] BIGINT NOT NULL, [score] AS ([questions_correct] * 100 / [questions_total]))')
+      expect(getParsedSql(`CREATE TABLE test (
+        id BIGINT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+        questions_correct BIGINT NOT NULL DEFAULT(0),
+        questions_total BIGINT NOT NULL,
+        score AS questions_correct * 100 / questions_total
+      );`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1) PRIMARY KEY, [questions_correct] BIGINT NOT NULL DEFAULT (0), [questions_total] BIGINT NOT NULL, [score] AS [questions_correct] * 100 / [questions_total])')
     })
   })
   describe('throw error when create type is unknow', () => {

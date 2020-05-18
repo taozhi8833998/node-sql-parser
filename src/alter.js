@@ -15,15 +15,8 @@ function alterToSQL(stmt) {
 
 function alterExprToSQL(expr) {
   const {
-    action,
-    constraint_type: constraintType,
-    if_not_exists: ifNotExists,
-    keyword,
-    resource,
+    action, constraint_type: constraintType, if_not_exists: ifNotExists,keyword, resource,
   } = expr
-  const actionUpper = toUpper(action)
-  const keyWordUpper = toUpper(keyword)
-  const ifNotExistsUpper = toUpper(ifNotExists)
   let name = ''
   let dataType = []
   switch (resource) {
@@ -48,11 +41,7 @@ function alterExprToSQL(expr) {
     default:
       break
   }
-  const alterArray = [actionUpper]
-  alterArray.push(keyWordUpper)
-  alterArray.push(ifNotExistsUpper)
-  alterArray.push(name)
-  alterArray.push(dataType.filter(hasVal).join(' '))
+  const alterArray = [toUpper(action), toUpper(keyword), toUpper(ifNotExists), name, dataType.filter(hasVal).join(' ')]
   return alterArray.filter(hasVal).join(' ')
 }
 

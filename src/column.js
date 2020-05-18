@@ -3,13 +3,30 @@ import { exprToSQL } from './expr'
 import { tablesToSQL } from './tables'
 import {
   autoIncreatementToSQL,
-  columnRefToSQL,
+  commonOptionConnector,
   commonTypeValue,
   commentToSQL,
   hasVal,
   identifierToSql,
+  literalToSQL,
   toUpper,
 } from './util'
+
+function columnRefToSQL(expr) {
+  const {
+    arrow, as, collate, column, isDual, table, parentheses, property,
+  } = expr
+  let str = column === '*' ? '*' : identifierToSql(column, isDual)
+  if (table) str = `${identifierToSql(table)}.${str}`
+  const result = [
+    str,
+    commonOptionConnector('AS', exprToSQL, as),
+    commonOptionConnector(arrow, literalToSQL, property),
+  ]
+  if (collate) result.push(commonTypeValue(collate).join(' '))
+  const sql = result.filter(hasVal).join(' ')
+  return parentheses ? `(${sql})` : sql
+}
 
 function columnDataType(definition) {
   const { dataType, length, suffix, scale } = definition || {}
@@ -114,6 +131,7 @@ function columnsToSQL(columns, tables) {
 
 export {
   columnDefinitionToSQL,
+  columnRefToSQL,
   columnsToSQL,
   columnDataType,
   columnReferenceDefinitionToSQL,
