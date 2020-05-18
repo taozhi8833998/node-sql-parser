@@ -1,3 +1,5 @@
+import { columnRefToSQL } from './column'
+
 const escapeMap = {
   '\0'   : '\\0',
   '\''   : '\\\'',
@@ -188,23 +190,6 @@ function commonTypeValue(opt) {
   return result
 }
 
-function columnRefToSQL(expr) {
-  const {
-    arrow,
-    collate,
-    column,
-    isDual,
-    table,
-    parentheses,
-    property,
-  } = expr
-  let str = column === '*' ? '*' : identifierToSql(column, isDual)
-  if (table) str = `${identifierToSql(table)}.${str}`
-  if (arrow) str += ` ${arrow} ${literalToSQL(property)}`
-  if (collate) str += ` ${commonTypeValue(collate).join(' ')}`
-  return parentheses ? `(${str})` : str
-}
-
 function toUpper(val) {
   if (!val) return
   return val.toUpperCase()
@@ -274,9 +259,8 @@ function autoIncreatementToSQL(autoIncreatement) {
 export {
   arrayStructTypeToSQL, autoIncreatementToSQL,
   commonKeywordArgsToSQL, commonOptionConnector,
-  connector, commonTypeValue, columnRefToSQL,
-  commentToSQL, createBinaryExpr, createValueExpr,
-  DEFAULT_OPT, escape, literalToSQL, identifierToSql,
-  replaceParams, returningToSQL, hasVal, setParserOpt,
-  toUpper, topToSQL, triggerEventToSQL,
+  connector, commonTypeValue,commentToSQL, createBinaryExpr,
+  createValueExpr, DEFAULT_OPT, escape, literalToSQL,
+  identifierToSql,replaceParams, returningToSQL, hasVal,
+  setParserOpt, toUpper, topToSQL, triggerEventToSQL,
 }

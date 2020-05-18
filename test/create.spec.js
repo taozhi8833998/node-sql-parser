@@ -361,6 +361,20 @@ describe('create', () => {
         title VARCHAR(100) NOT NULL
       )`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 2) PRIMARY KEY, [title] VARCHAR(100) NOT NULL)')
     })
+    it('should support create column as ', () => {
+      expect(getParsedSql(`CREATE TABLE test (
+        id BIGINT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+        questions_correct BIGINT NOT NULL DEFAULT(0),
+        questions_total BIGINT NOT NULL,
+        score AS (questions_correct * 100 / questions_total)
+      );`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1) PRIMARY KEY, [questions_correct] BIGINT NOT NULL DEFAULT (0), [questions_total] BIGINT NOT NULL, [score] AS ([questions_correct] * 100 / [questions_total]))')
+      expect(getParsedSql(`CREATE TABLE test (
+        id BIGINT NOT NULL PRIMARY KEY IDENTITY(1, 1),
+        questions_correct BIGINT NOT NULL DEFAULT(0),
+        questions_total BIGINT NOT NULL,
+        score AS questions_correct * 100 / questions_total
+      );`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1) PRIMARY KEY, [questions_correct] BIGINT NOT NULL DEFAULT (0), [questions_total] BIGINT NOT NULL, [score] AS [questions_correct] * 100 / [questions_total])')
+    })
   })
   describe('throw error when create type is unknow', () => {
     const ast = {

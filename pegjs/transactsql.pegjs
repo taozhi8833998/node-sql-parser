@@ -359,6 +359,13 @@ create_column_definition
         resource: 'column'
       }
     }
+  / c:column_ref __ as:(KW_AS __ expr)? {
+    if (as) c.as = as[2]
+    return {
+      column: c,
+      resource: 'column'
+    }
+  }
 
 identity_stmt
   = ('IDENTITY'i) __ c:(LPAREN __  literal_numeric __ COMMA __ literal_numeric __ RPAREN)? {
@@ -1032,6 +1039,11 @@ index_type
     return {
       keyword: 'using',
       type: t.toLowerCase(),
+    }
+  }
+  / k:'NONCLUSTERED'i {
+    return {
+      keyword: k.toLowerCase()
     }
   }
 
