@@ -1,4 +1,4 @@
-import { identifierToSql, hasVal, commonOptionConnector } from './util'
+import { identifierToSql, hasVal, commonOptionConnector, toUpper } from './util'
 import { exprToSQL } from './expr'
 
 
@@ -11,11 +11,19 @@ function tableToSQL(tableInfo) {
   return str
 }
 
+function unnestToSQL(unnestExpr) {
+  const { type, as, expr, with_offset: withOffset } = unnestExpr
+  const result = [toUpper(type), `(${expr && exprToSQL(expr) || ' '})`, commonOptionConnector('AS', identifierToSql, as), commonOptionConnector(toUpper(withOffset && withOffset.keyword), identifierToSql, withOffset && withOffset.as)]
+  return result.filter(hasVal).join(' ')
+}
+
 /**
  * @param {Array} tables
  * @return {string}
  */
 function tablesToSQL(tables) {
+  const { type } = tables
+  if (toUpper(type) === 'UNNEST') return unnestToSQL(tables)
   const baseTable = tables[0]
   const clauses = []
   if (baseTable.type === 'dual') return 'DUAL'
@@ -45,4 +53,5 @@ export {
   tablesToSQL,
   tableOptionToSQL,
   tableToSQL,
+  unnestToSQL,
 }

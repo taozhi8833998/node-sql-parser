@@ -142,6 +142,90 @@ describe('BigQuery', () => {
         'SELECT * FROM t1 WHERE t1.a IN (SELECT t2.a FROM t2 FOR SYSTEM_TIME AS OF t1.timestamp_column)'
       ]
     },
+    {
+      title: 'select from unnest array expr',
+      sql: [
+        "SELECT * FROM UNNEST(ARRAY<STRUCT<x INT64, y STRING>>[(1, 'foo'), (3, 'bar')]);",
+        "SELECT * FROM UNNEST (ARRAY<STRUCT<x INT64, y STRING>>[(1, 'foo'), (3, 'bar')])"
+      ]
+    },
+    {
+      title: 'select from unnest array path',
+      sql: [
+        'SELECT * FROM UNNEST ([1, 2, 3]);',
+        'SELECT * FROM UNNEST ([1, 2, 3])'
+      ]
+    },
+    {
+      title: 'select from unnest with offset',
+      sql: [
+        'SELECT * FROM UNNEST ( ) AS abc WITH OFFSET AS num',
+        'SELECT * FROM UNNEST ( ) AS abc WITH OFFSET AS num'
+      ]
+    },
+    {
+      title: 'select with_query_name',
+      sql: [
+        `WITH
+        subQ1 AS (SELECT * FROM Roster WHERE SchoolID = 52),
+        subQ2 AS (SELECT SchoolID FROM subQ1)
+      SELECT DISTINCT * FROM subQ2;`,
+        'WITH subQ1 AS (SELECT * FROM Roster WHERE SchoolID = 52), subQ2 AS (SELECT SchoolID FROM subQ1) SELECT DISTINCT * FROM subQ2'
+      ]
+    },
+    {
+      title: 'select subquery',
+      sql: [
+        `SELECT AVG ( PointsScored )
+        FROM
+        ( SELECT PointsScored
+          FROM Stats
+          WHERE SchoolID = 77 )`,
+        'SELECT AVG(PointsScored) FROM (SELECT PointsScored FROM Stats WHERE SchoolID = 77)'
+      ]
+    },
+    {
+      title: 'select subquery have alias',
+      sql: [
+        `SELECT r.LastName
+        FROM
+        ( SELECT * FROM Roster) AS r`,
+        'SELECT r.LastName FROM (SELECT * FROM Roster) AS r'
+      ]
+    },
+    {
+      title: 'select implicit "comma cross join"',
+      sql: [
+        'SELECT * FROM Roster, TeamMascot',
+        'SELECT * FROM Roster, TeamMascot'
+      ]
+    },
+    {
+      title: 'select cross join',
+      sql: [
+        'SELECT * FROM Roster cross join TeamMascot',
+        'SELECT * FROM Roster CROSS JOIN TeamMascot'
+      ]
+    },
+    {
+      title: 'select inner join using',
+      sql: [
+        `SELECT FirstName
+        FROM Roster INNER JOIN PlayerStats
+        USING (LastName);`,
+        'SELECT FirstName FROM Roster INNER JOIN PlayerStats USING (LastName)'
+      ]
+    },
+    {
+      title: 'select order by using parentheses',
+      sql: [
+        `( SELECT * FROM Roster
+          UNION ALL
+          SELECT * FROM TeamMascot )
+        ORDER BY SchoolID;`,
+        '( SELECT * FROM Roster UNION ALL SELECT * FROM TeamMascot ) ORDER BY SchoolID ASC'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {

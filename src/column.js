@@ -89,12 +89,13 @@ function columnsToSQL(columns, tables) {
   if (baseTable && baseTable.type === 'dual') isDual = true
   const result = []
   const {
-    columns: columnList = columns,
+    expr_list: exprList,
     star,
     type,
   } = columns
   result.push(star, toUpper(type))
-  const columnsStr = columnList
+  const exprListArr = exprList || columns
+  const columnsStr = exprListArr
     .map(column => {
       const { expr } = column
       if (isDual) expr.isDual = isDual

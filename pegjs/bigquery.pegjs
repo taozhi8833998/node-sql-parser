@@ -14,6 +14,7 @@
     'CALL': true,
     'CASE': true,
     'CREATE': true,
+    'CROSS': true,
     'CONTAINS': true,
     'CURRENT_DATE': true,
     'CURRENT_TIME': true,
@@ -231,7 +232,9 @@ query_statement
 
 query_expr
   = cte:with_clause? __
+  lp:LPAREN? __
   s:union_stmt __
+  rp:RPAREN? __
   o:order_by_clause?  __
   l:limit_clause? __
   se:SEMICOLON? {
@@ -244,6 +247,9 @@ query_expr
         select: s && s.ast,
         orderby: o,
         limit: l,
+        lp,
+        rp,
+        parentheses: lp && rp && true || false
       }
     }
   }
@@ -295,7 +301,7 @@ select_stmt_nake
     g:group_by_clause?  __
     h:having_clause?    __
     win:window_clause? __ {
-      if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
+      if(Array.isArray(f)) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
           type: 'select',
           as_struct_val: sv,
@@ -336,7 +342,7 @@ column_clause
   = STAR __ k:('EXCEPT'i / 'REPLACE'i) __ LPAREN __ c:columns_list __ RPAREN {
     columnList.add('select::null::(.*)')
     return {
-      columns: c,
+      expr_list: c,
       parentheses: true,
       star: '*',
       type: k.toLowerCase(),
@@ -383,8 +389,24 @@ alias_clause
   / KW_AS? __ i:ident { return i; }
 
 from_clause
-  = KW_FROM __ l:table_ref_list { return l; }
+  = KW_FROM __ 'UNNEST'i __ LPAREN __ a:array_expr? __ RPAREN __ alias:alias_clause? __ wf:with_offset? {
+    return {
+      type: 'unnest',
+      expr: a,
+      parentheses: true,
+      as:alias,
+      with_offset: wf,
+    }
+  }
+  / KW_FROM __ l:table_ref_list { return l; }
 
+with_offset
+  = KW_WITH __ KW_OFFSET __ alias:alias_clause? {
+    return {
+      keyword: 'with offset as',
+      as: alias
+    }
+  }
 table_to_list
   = head:table_to_item tail:(__ COMMA __ table_to_item)* {
       return createList(head, tail);
@@ -459,7 +481,7 @@ join_op
   = KW_LEFT __ KW_OUTER? __ KW_JOIN { return 'LEFT JOIN'; }
   / KW_RIGHT __ KW_OUTER? __ KW_JOIN { return 'RIGHT JOIN'; }
   / KW_FULL __ KW_OUTER? __ KW_JOIN { return 'FULL JOIN'; }
-  / k:(KW_INNER / KW_CROSS) __ KW_JOIN { return `${k} JOIN`; }
+  / k:(KW_INNER / KW_CROSS) __ KW_JOIN { return `${k[0].toUpperCase()} JOIN`; }
 
 table_name
   = project:ident dt:(__ DOT __ ident) tail:(__ DOT __ ident) {
@@ -616,13 +638,23 @@ parentheses_expr
     return c
   }
 
+
 array_expr
-  = s:(array_type / KW_ARRAY) __ LBRAKE __ c:expr __ RBRAKE __ {
+  = s:(array_type / KW_ARRAY)? __ LBRAKE __ c:expr __ RBRAKE __ {
     return {
       definition: s,
-      columns: c,
+      expr_list: c,
       type: 'array',
+      keyword: s && 'array',
       parentheses: true
+    }
+  }
+  / LBRAKE __ c:column_clause __ RBRAKE __ {
+    return {
+      array_path: c,
+      type: 'array',
+      keyword: '',
+      parentheses: false
     }
   }
 
@@ -630,8 +662,9 @@ struct_expr
   = s:(struct_type / KW_STRUCT) __ LPAREN __ c:column_clause __ RPAREN __ {
     return {
       definition: s,
-      columns: c,
+      expr_list: c,
       type: 'struct',
+      keyword: s && 'struct',
       parentheses: true
     }
   }
