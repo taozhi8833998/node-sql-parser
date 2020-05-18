@@ -1,6 +1,6 @@
-import { unionToSQL, multipleToSQL } from './union'
+import { bigQueryToSQL, unionToSQL, multipleToSQL } from './union'
 
-const surportedTypes = ['select', 'delete', 'update', 'insert', 'drop', 'rename', 'truncate', 'call', 'use', 'alter', 'set', 'create', 'lock', 'unlock']
+const surportedTypes = ['select', 'delete', 'update', 'insert', 'drop', 'rename', 'truncate', 'call', 'use', 'alter', 'set', 'create', 'lock', 'unlock', 'bigquery']
 
 function checkSupported(expr) {
   const ast = expr && expr.ast ? expr.ast : expr
@@ -13,5 +13,7 @@ export default function toSQL(ast) {
     return multipleToSQL(ast)
   }
   checkSupported(ast)
+  const { type } = ast
+  if (type === 'bigquery') return bigQueryToSQL(ast)
   return unionToSQL(ast)
 }

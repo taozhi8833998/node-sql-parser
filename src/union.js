@@ -13,6 +13,9 @@ import {
   setVarToSQL,
   lockUnlockToSQL,
 } from './command'
+import { orderOrPartitionByToSQL } from './expr'
+import { limitToSQL } from './limit'
+import { withToSql } from './with'
 
 const typeToSQLFn = {
   alter    : alterToSQL,
@@ -42,6 +45,15 @@ function unionToSQL(stmt) {
   return res.join(' ')
 }
 
+function bigQueryToSQL(stmt) {
+  const { with: withExpr, select, left_parenthesis: lp, right_parenthesis: rp, orderby, limit } = stmt
+  const result = [withToSql(withExpr), lp, unionToSQL(select), rp]
+  // process with, orderby and limit
+  result.push(orderOrPartitionByToSQL(orderby, 'order by'))
+  result.push(limitToSQL(limit))
+  return result.filter(val => val).join(' ')
+}
+
 function multipleToSQL(stmt) {
   const res = []
   for (let i = 0, len = stmt.length; i < len; ++i) {
@@ -53,6 +65,7 @@ function multipleToSQL(stmt) {
 }
 
 export {
+  bigQueryToSQL,
   unionToSQL,
   multipleToSQL,
 }

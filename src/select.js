@@ -1,8 +1,9 @@
 import { exprToSQL, getExprListSQL, orderOrPartitionByToSQL } from './expr'
 import { columnsToSQL } from './column'
+import { limitToSQL } from './limit'
 import { withToSql } from './with'
 import { tablesToSQL } from './tables'
-import { hasVal, commonOptionConnector, connector, topToSQL } from './util'
+import { hasVal, commonOptionConnector, connector, topToSQL, toUpper } from './util'
 
 /**
  * @param {Object}      stmt
@@ -20,21 +21,23 @@ import { hasVal, commonOptionConnector, connector, topToSQL } from './util'
  */
 
 function selectToSQL(stmt) {
-  const { with: withInfo, options, distinct, columns, from, where, groupby, having, orderby, limit, top } = stmt
-  const clauses = [withToSql(withInfo), 'SELECT']
+  const {
+    as_struct_val: asStructVal, columns, distinct, from, for_sys_time_as_of: forSystem = {}, groupby, having, limit, options, orderby, top, window: windowInfo, with: withInfo, where,
+  } = stmt
+  const clauses = [withToSql(withInfo), 'SELECT', toUpper(asStructVal)]
   clauses.push(topToSQL(top))
   if (Array.isArray(options)) clauses.push(options.join(' '))
   clauses.push(distinct, columnsToSQL(columns, from))
   // FROM + joins
   clauses.push(commonOptionConnector('FROM', tablesToSQL, from))
+  const { keyword, expr } = forSystem || {}
+  clauses.push(commonOptionConnector(keyword, exprToSQL, expr))
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
   clauses.push(connector('GROUP BY', getExprListSQL(groupby).join(', ')))
   clauses.push(commonOptionConnector('HAVING', exprToSQL, having))
+  clauses.push(commonOptionConnector('WINDOW', exprToSQL, windowInfo))
   clauses.push(orderOrPartitionByToSQL(orderby, 'order by'))
-  if (limit) {
-    const { seperator, value } = limit
-    clauses.push(connector('LIMIT', value.map(exprToSQL).join(`${seperator === 'offset' ? ' ' : ''}${seperator.toUpperCase()} `)))
-  }
+  clauses.push(limitToSQL(limit))
   return clauses.filter(hasVal).join(' ')
 }
 

@@ -105,6 +105,7 @@
     "newline-per-chained-call": 0,
     "no-underscore-dangle": 0,
     "no-plusplus": 0,
+    "no-mixed-operators": 0,
     "no-console": [
       2,
       {

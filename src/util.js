@@ -131,6 +131,8 @@ function identifierToSql(ident, isDual) {
       return `"${ident}"`
     case 'transactsql':
       return `[${ident}]`
+    case 'bigquery':
+      return ident
     default:
       return `\`${ident}\``
   }
@@ -212,6 +214,22 @@ function hasVal(val) {
   return val
 }
 
+function arrayStructTypeToSQL(expr) {
+  if (!expr) return
+  const { dataType, definition, anglebracket } = expr
+  const dataTypeUpper = toUpper(dataType)
+  const isNotArrayOrStruct = dataTypeUpper !== 'ARRAY' && dataTypeUpper !== 'STRUCT'
+  if (isNotArrayOrStruct) return dataTypeUpper
+  const result = definition && definition.map(field => {
+    const {
+      field_name: fieldName, field_type: fieldType,
+    } = field
+    const fieldResult = [fieldName, arrayStructTypeToSQL(fieldType)]
+    return fieldResult.filter(hasVal).join(' ')
+  }).join(', ')
+  return anglebracket ? `${dataTypeUpper}<${result}>` : `${dataTypeUpper} ${result}`
+}
+
 function commentToSQL(comment) {
   if (!comment) return
   const result = []
@@ -254,24 +272,11 @@ function autoIncreatementToSQL(autoIncreatement) {
 }
 
 export {
-  autoIncreatementToSQL,
-  commonKeywordArgsToSQL,
-  commonOptionConnector,
-  connector,
-  commonTypeValue,
-  columnRefToSQL,
-  commentToSQL,
-  createBinaryExpr,
-  createValueExpr,
-  DEFAULT_OPT,
-  escape,
-  literalToSQL,
-  identifierToSql,
-  replaceParams,
-  returningToSQL,
-  hasVal,
-  setParserOpt,
-  toUpper,
-  topToSQL,
-  triggerEventToSQL,
+  arrayStructTypeToSQL, autoIncreatementToSQL,
+  commonKeywordArgsToSQL, commonOptionConnector,
+  connector, commonTypeValue, columnRefToSQL,
+  commentToSQL, createBinaryExpr, createValueExpr,
+  DEFAULT_OPT, escape, literalToSQL, identifierToSql,
+  replaceParams, returningToSQL, hasVal, setParserOpt,
+  toUpper, topToSQL, triggerEventToSQL,
 }

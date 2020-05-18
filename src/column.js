@@ -77,6 +77,23 @@ function columnDefinitionToSQL(columnDefinition) {
   return column.filter(hasVal).join(' ')
 }
 
+function columnToSQL(column, isDual) {
+  const { expr } = column
+  if (isDual) expr.isDual = isDual
+  let str = exprToSQL(expr)
+  if (column.as !== null) {
+    str = `${str} AS `
+    if (column.as.match(/^[a-z_][0-9a-z_]*$/i)) str = `${str}${identifierToSql(column.as)}`
+    else str = `${str}\`${column.as}\``
+  }
+  return str
+}
+
+function getDual(tables) {
+  const baseTable = Array.isArray(tables) && tables[0]
+  if (baseTable && baseTable.type === 'dual') return true
+  return false
+}
 /**
  * Stringify column expressions
  *
@@ -84,28 +101,16 @@ function columnDefinitionToSQL(columnDefinition) {
  * @return {string}
  */
 function columnsToSQL(columns, tables) {
-  if (!columns) return
-  if (columns === '*') return columns
-  const baseTable = Array.isArray(tables) && tables[0]
-  let isDual = false
-  if (baseTable && baseTable.type === 'dual') isDual = true
-  return columns
-    .map(column => {
-      const { expr } = column
-      if (isDual) expr.isDual = isDual
-      let str = exprToSQL(expr)
-      if (column.as !== null) {
-        str = `${str} AS `
-        if (column.as.match(/^[a-z_][0-9a-z_]*$/i)) str = `${str}${identifierToSql(column.as)}`
-
-        else str = `${str}\`${column.as}\``
-      }
-
-      return str
-    })
-    .join(', ')
+  if (!columns || columns === '*') return columns
+  const isDual = getDual(tables)
+  const result = []
+  const { expr_list: exprList, star, type } = columns
+  result.push(star, toUpper(type))
+  const exprListArr = exprList || columns
+  const columnsStr = exprListArr.map(col => columnToSQL(col, isDual)).join(', ')
+  result.push([type && '(', columnsStr, type && ')'].filter(hasVal).join(''))
+  return result.filter(hasVal).join(' ')
 }
-
 
 export {
   columnDefinitionToSQL,
