@@ -88,6 +88,12 @@ function columnToSQL(column, isDual) {
   }
   return str
 }
+
+function getDual(tables) {
+  const baseTable = Array.isArray(tables) && tables[0]
+  if (baseTable && baseTable.type === 'dual') return true
+  return false
+}
 /**
  * Stringify column expressions
  *
@@ -95,24 +101,16 @@ function columnToSQL(column, isDual) {
  * @return {string}
  */
 function columnsToSQL(columns, tables) {
-  if (!columns) return
-  if (columns === '*') return columns
-  const baseTable = Array.isArray(tables) && tables[0]
-  let isDual = false
-  if (baseTable && baseTable.type === 'dual') isDual = true
+  if (!columns || columns === '*') return columns
+  const isDual = getDual(tables)
   const result = []
-  const {
-    expr_list: exprList,
-    star,
-    type,
-  } = columns
+  const { expr_list: exprList, star, type } = columns
   result.push(star, toUpper(type))
   const exprListArr = exprList || columns
   const columnsStr = exprListArr.map(col => columnToSQL(col, isDual)).join(', ')
-  result.push(`${type && '(' || ''}${columnsStr}${type && ')' || ''}`)
+  result.push([type && '(', columnsStr, type && ')'].filter(hasVal).join(''))
   return result.filter(hasVal).join(' ')
 }
-
 
 export {
   columnDefinitionToSQL,
