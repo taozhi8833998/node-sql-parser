@@ -1858,7 +1858,7 @@ literal_string
     }
 
 literal_datetime
-  = type:(KW_TIME / KW_DATE / KW_TIMESTAMP) __ ca:("'" single_char* "'") {
+  = type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("'" single_char* "'") {
       return {
         type: type.toLowerCase(),
         value: ca[1].join('')
@@ -2069,6 +2069,7 @@ KW_BIGINT   = "BIGINT"i   !ident_start { return 'BIGINT'; }
 KW_FLOAT   = "FLOAT"i   !ident_start { return 'FLOAT'; }
 KW_DOUBLE   = "DOUBLE"i   !ident_start { return 'DOUBLE'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
+KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
@@ -2360,7 +2361,7 @@ numeric_type
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ s:numeric_type_suffix? __{ return { dataType: t, suffix: s }; }
 
 datetime_type
-  = t:(KW_DATE / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
+  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
 
 json_type
   = t:(KW_JSON / KW_JSONB) { return { dataType: t }; }

@@ -9,7 +9,7 @@ describe('Command SQL', () => {
 
   function getParsedSql(sql, opt) {
     const ast = parser.astify(sql, opt);
-    return parser.sqlify(ast);
+    return parser.sqlify(ast, opt);
   }
 
   describe('drop and truncate', () => {
@@ -180,14 +180,40 @@ describe('Command SQL', () => {
       expect(parser.sqlify(ast)).to.be.equal('ALTER TABLE `a` ADD COLUMN')
     })
 
-    it(`should support MySQL alter drop column`, () => {
-      KEYWORDS.forEach(keyword => {
+    it(`should support MySQL alter drop check and column`, () => {
+      KEYWORDS.concat(['CHECK ']).forEach(keyword => {
         expect(getParsedSql(`alter table a drop ${keyword}xxx`))
         .to.equal(`ALTER TABLE \`a\` DROP ${keyword}\`xxx\``);
         expect(getParsedSql(`alter table a drop ${keyword}xxx, drop ${keyword}yyy`))
         .to.equal(`ALTER TABLE \`a\` DROP ${keyword}\`xxx\`, DROP ${keyword}\`yyy\``);
       })
+      expect(getParsedSql(`alter table a drop constraint xxx`, { database: 'transactsql' }))
+        .to.equal('ALTER TABLE [a] DROP CONSTRAINT [xxx]');
     });
+
+    it('should support alter add constraint check', () => {
+      const opt = {
+        database: 'transactsql'
+      }
+      expect(getParsedSql(`ALTER TABLE Persons ADD CHECK (Age>=18)`))
+        .to.equal('ALTER TABLE `Persons` ADD CHECK (`Age` >= 18)');
+      expect(getParsedSql(`ALTER TABLE Persons ADD CONSTRAINT CHK_PersonAge CHECK (Age>=18 AND City='Sandnes');`))
+        .to.equal('ALTER TABLE `Persons` ADD CONSTRAINT \`CHK_PersonAge\` CHECK (`Age` >= 18 AND `City` = \'Sandnes\')');
+      expect(getParsedSql(`ALTER TABLE Persons ADD CHECK (Age>=18)`, opt))
+        .to.equal('ALTER TABLE [Persons] ADD CHECK ([Age] >= 18)');
+      expect(getParsedSql(`ALTER TABLE Persons ADD CONSTRAINT CHK_PersonAge CHECK (Age>=18 AND City='Sandnes')`, opt))
+        .to.equal('ALTER TABLE [Persons] ADD CONSTRAINT [CHK_PersonAge] CHECK ([Age] >= 18 AND [City] = \'Sandnes\')');
+    })
+
+    it('should support enable and disable check constraint', () => {
+      const opt = {
+        database: 'transactsql'
+      }
+      expect(getParsedSql(`ALTER TABLE Persons with check check constraint check_salary`, opt))
+        .to.equal('ALTER TABLE [Persons] WITH CHECK CHECK CONSTRAINT [check_salary]');
+      expect(getParsedSql(`ALTER TABLE Persons nocheck constraint check_salary`, opt))
+        .to.equal('ALTER TABLE [Persons] NOCHECK CONSTRAINT [check_salary]');
+    })
 
     it('should support MySQL alter mix action', () => {
       KEYWORDS.forEach(keyword => {
@@ -307,11 +333,11 @@ describe('Command SQL', () => {
         database: 'postgresql'
       }
       expect(getParsedSql('lock table t1, t2', opt))
-        .to.equal('LOCK TABLE `t1`, `t2`');
+        .to.equal('LOCK TABLE "t1", "t2"');
       expect(getParsedSql('lock table t1, t2 in row share mode', opt))
-        .to.equal('LOCK TABLE `t1`, `t2` IN ROW SHARE MODE');
+        .to.equal('LOCK TABLE "t1", "t2" IN ROW SHARE MODE');
       expect(getParsedSql('lock table t1, t2 in row share mode nowait', opt))
-        .to.equal('LOCK TABLE `t1`, `t2` IN ROW SHARE MODE NOWAIT');
+        .to.equal('LOCK TABLE "t1", "t2" IN ROW SHARE MODE NOWAIT');
     })
   })
 
