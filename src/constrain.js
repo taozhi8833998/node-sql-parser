@@ -7,6 +7,7 @@ import { indexTypeAndOptionToSQL } from './index-definition'
 import { columnReferenceDefinitionToSQL } from './column'
 
 function constraintDefinitionToSQL(constraintDefinition) {
+  if (!constraintDefinition) return
   const {
     constraint,
     constraint_type: constraintType,

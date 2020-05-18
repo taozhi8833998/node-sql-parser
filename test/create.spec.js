@@ -146,7 +146,7 @@ describe('create', () => {
           type: 'unknow',
         }
         expect(indexOptionToSQL(indexOpt)).to.equal(indexOpt.type.toUpperCase())
-        expect(indexTypeAndOptionToSQL({})).to.be.eql([ undefined, '' ])
+        expect(indexTypeAndOptionToSQL({})).to.be.eql([ '' ])
       })
     })
 
@@ -167,6 +167,33 @@ describe('create', () => {
       it(`should support foreign key`, () => {
         expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} \`idx_name\` foreign key index_name (name) references rdb.rta (name_alias) match simple on delete cascade on update set default)`))
           .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} \`idx_name\` FOREIGN KEY \`index_name\` (\`name\`) REFERENCES \`rdb\`.\`rta\` (\`name_alias\`) MATCH SIMPLE ON DELETE CASCADE ON UPDATE SET DEFAULT)`);
+      })
+
+      it(`should support constraint check`, () => {
+        expect(getParsedSql(`CREATE TABLE Persons (
+              ID int NOT NULL,
+              LastName varchar(255) NOT NULL,
+              FirstName varchar(255),
+              Age int,
+              CHECK (Age >= 18)
+          )`))
+          .to.equal(`CREATE TABLE \`Persons\` (\`ID\` INT NOT NULL, \`LastName\` VARCHAR(255) NOT NULL, \`FirstName\` VARCHAR(255), \`Age\` INT, CHECK (\`Age\` >= 18))`);
+          expect(getParsedSql(`CREATE TABLE Persons (
+            ID int NOT NULL,
+            LastName varchar(255) NOT NULL,
+            FirstName varchar(255),
+            Age int CHECK (Age >= 18)
+          )`, { database: 'transactsql' }))
+          .to.equal(`CREATE TABLE [Persons] ([ID] INT NOT NULL, [LastName] VARCHAR(255) NOT NULL, [FirstName] VARCHAR(255), [Age] INT CHECK ([Age] >= 18))`);
+          expect(getParsedSql(`CREATE TABLE Persons (
+            ID int NOT NULL,
+            LastName varchar(255) NOT NULL,
+            FirstName varchar(255),
+            Age int,
+            City varchar(255),
+            CONSTRAINT CHK_Person CHECK (Age >= 18 AND City = 'Sandnes')
+        )`))
+          .to.equal(`CREATE TABLE \`Persons\` (\`ID\` INT NOT NULL, \`LastName\` VARCHAR(255) NOT NULL, \`FirstName\` VARCHAR(255), \`Age\` INT, \`City\` VARCHAR(255), CONSTRAINT \`CHK_Person\` CHECK (\`Age\` >= 18 AND \`City\` = 'Sandnes'))`);
       })
     })
 
@@ -308,8 +335,9 @@ describe('create', () => {
         uuid UNIQUEIDENTIFIER NOT NULL DEFAULT(NEWID()) unique,
         nc nchar(123) not null,
         nvc nvarchar(200) not null,
-        nvcm nvarchar(max) not null
-      )`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY PRIMARY KEY, [title] VARCHAR(100) NOT NULL, [uuid] UNIQUEIDENTIFIER NOT NULL DEFAULT (NEWID()) UNIQUE, [nc] NCHAR(123) NOT NULL, [nvc] NVARCHAR(200) NOT NULL, [nvcm] NVARCHAR(max) NOT NULL)')
+        nvcm nvarchar(max) not null,
+        created_at datetime NOT NULL DEFAULT GETDATE()
+      )`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY PRIMARY KEY, [title] VARCHAR(100) NOT NULL, [uuid] UNIQUEIDENTIFIER NOT NULL DEFAULT (NEWID()) UNIQUE, [nc] NCHAR(123) NOT NULL, [nvc] NVARCHAR(200) NOT NULL, [nvcm] NVARCHAR(max) NOT NULL, [created_at] DATETIME NOT NULL DEFAULT GETDATE())')
     })
     it('should support identity without number', () => {
       expect(getParsedSql(`CREATE TABLE test (
