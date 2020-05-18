@@ -46,7 +46,7 @@ function unionToSQL(stmt) {
 }
 
 function bigQueryToSQL(stmt) {
-  const { with: withExpr, select, lp, rp, orderby, limit } = stmt
+  const { with: withExpr, select, left_parenthesis: lp, right_parenthesis: rp, orderby, limit } = stmt
   const result = [withToSql(withExpr), lp, unionToSQL(select), rp]
   // process with, orderby and limit
   result.push(orderOrPartitionByToSQL(orderby, 'order by'))

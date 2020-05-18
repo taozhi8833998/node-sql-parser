@@ -226,6 +226,47 @@ describe('BigQuery', () => {
         '( SELECT * FROM Roster UNION ALL SELECT * FROM TeamMascot ) ORDER BY SchoolID ASC'
       ]
     },
+    {
+      title: 'select window clause',
+      sql: [
+        `SELECT item, purchases, category,
+        LAST_VALUE(item)
+        OVER (item_window) AS most_popular
+        FROM Produce
+        WINDOW item_window AS (
+          PARTITION BY category
+          ORDER BY purchases
+          ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING)`,
+        'SELECT item, purchases, category, LAST_VALUE(item) OVER (item_window) AS most_popular FROM Produce WINDOW item_window AS (PARTITION BY category ORDER BY purchases ASC ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING)'
+      ]
+    },
+    {
+      title: 'select window clause list',
+      sql: [
+        `SELECT item, purchases, category, LAST_VALUE(item)
+        OVER (d) AS most_popular
+      FROM Produce
+      WINDOW
+        a AS (PARTITION BY category),
+        b AS (a ORDER BY purchases),
+        c AS (b ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING),
+        d AS (c)`,
+        'SELECT item, purchases, category, LAST_VALUE(item) OVER (d) AS most_popular FROM Produce WINDOW a AS (PARTITION BY category), b AS (a ORDER BY purchases ASC), c AS (b ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING), d AS (c)'
+      ]
+    },
+    {
+      title: 'select window clause list over window',
+      sql: [
+        `SELECT item, purchases, category, LAST_VALUE(item)
+        OVER (c ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING) AS most_popular
+      FROM Produce
+      WINDOW
+        a AS (PARTITION BY category),
+        b AS (a ORDER BY purchases),
+        c AS b`,
+        'SELECT item, purchases, category, LAST_VALUE(item) OVER (c ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING) AS most_popular FROM Produce WINDOW a AS (PARTITION BY category), b AS (a ORDER BY purchases ASC), c AS b'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {

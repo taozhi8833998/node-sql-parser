@@ -64,6 +64,8 @@
     'ORDER': true,
     'OUTER': true,
 
+    'PARTITION': true,
+
     'RECURSIVE': true,
     'RENAME': true,
     'READ': true, // for lock table
@@ -87,6 +89,7 @@
 
     'VALUES': true,
 
+    'WINDOW': true,
     'WITH': true,
     'WHEN': true,
     'WHERE': true,
@@ -247,8 +250,8 @@ query_expr
         select: s && s.ast,
         orderby: o,
         limit: l,
-        lp,
-        rp,
+        left_parenthesis: lp,
+        right_parenthesis: rp,
         parentheses: lp && rp && true || false
       }
     }
@@ -528,6 +531,7 @@ window_clause
   = KW_WINDOW __ l:named_window_expr_list {
     return {
       keyword: 'window',
+      type: 'window',
       expr: l,
     }
   }
@@ -540,28 +544,29 @@ named_window_expr_list
 named_window_expr
   = nw:ident_name __ KW_AS __ anw:as_window_specification __ {
     return {
-      nw,
-      anw
+      name: nw,
+      as_window_specification: anw,
     }
   }
 
 as_window_specification
-  = ident_name
-  / LPAREN __ s:window_specification __ RPAREN {
+  = n:ident_name { return n }
+  / LPAREN __ ws:window_specification? __ RPAREN {
     return {
-      s
+      window_specification: ws,
+      parentheses: true
     }
   }
 
 window_specification
-  = n:ident_name? __
-  p:KW_PARTITION __ KW_BY __ bc:column_clause __
+  = n:ident? __
+  bc:partition_by_clause? __
   l:order_by_clause? __
   w:window_frame_clause? __ {
     return {
-      named_window: n,
+      name: n,
       partitionby: bc,
-      order_by_clause: l,
+      orderby: l,
       window_frame_clause: w
     }
   }
@@ -570,12 +575,12 @@ window_frame_clause
   = 'RANGE'i __ KW_BETWEEN 'UNBOUNDED'i __ 'PRECEDING'i __ KW_AND __ 'CURRENT'i __ 'ROW' {
     return 'range between unbounded preceding and current row'
   }
-  / 'ROWS'i __ KW_BETWEEN __ s:literal_numeric __ 'PRECEDING'i __ KW_AND e:literal_numeric __ 'FOLLOWING'i {
-    return {
-      s,
-      e
-    }
+  / 'ROWS'i __ KW_BETWEEN __ s:literal_numeric __ 'PRECEDING'i __ KW_AND __ e:literal_numeric __ 'FOLLOWING'i {
+    return `rows between ${s.value} preceding and ${e.value} following`
   }
+
+partition_by_clause
+  = KW_PARTITION __ KW_BY __ bc:column_clause { return bc; }
 
 order_by_clause
   = KW_ORDER __ KW_BY __ l:order_by_list { return l; }
@@ -640,21 +645,21 @@ parentheses_expr
 
 
 array_expr
-  = s:(array_type / KW_ARRAY)? __ LBRAKE __ c:expr __ RBRAKE __ {
+  = LBRAKE __ c:column_clause __ RBRAKE __ {
+    return {
+      array_path: c,
+      type: 'array',
+      keyword: '',
+      parentheses: true
+    }
+  }
+  / s:(array_type / KW_ARRAY)? __ LBRAKE __ c:expr __ RBRAKE __ {
     return {
       definition: s,
       expr_list: c,
       type: 'array',
       keyword: s && 'array',
       parentheses: true
-    }
-  }
-  / LBRAKE __ c:column_clause __ RBRAKE __ {
-    return {
-      array_path: c,
-      type: 'array',
-      keyword: '',
-      parentheses: false
     }
   }
 
@@ -921,13 +926,18 @@ KW_SUM_MAX_MIN_AVG
   = KW_SUM / KW_MAX / KW_MIN / KW_AVG
 
 over_partition
-  = KW_OVER __ LPAREN __ KW_PARTITION __ KW_BY __ bc:column_clause __ l:order_by_clause? __ RPAREN __  {
+  = KW_OVER __ aws:as_window_specification {
+    return {
+      type: 'window',
+      as_window_specification: aws,
+    }
+  }
+  / KW_OVER __ LPAREN __ bc:partition_by_clause __ l:order_by_clause? __ RPAREN {
     return {
       partitionby: bc,
       orderby: l
     }
   }
-  / window_frame_clause
 
 aggr_fun_count
   = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition {

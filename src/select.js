@@ -32,6 +32,7 @@ function selectToSQL(stmt) {
     options,
     orderby,
     top,
+    window: windowInfo,
     with: withInfo,
     where,
   } = stmt
@@ -46,6 +47,7 @@ function selectToSQL(stmt) {
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
   clauses.push(connector('GROUP BY', getExprListSQL(groupby).join(', ')))
   clauses.push(commonOptionConnector('HAVING', exprToSQL, having))
+  clauses.push(commonOptionConnector('WINDOW', exprToSQL, windowInfo))
   clauses.push(orderOrPartitionByToSQL(orderby, 'order by'))
   if (limit) {
     const { seperator, value } = limit
