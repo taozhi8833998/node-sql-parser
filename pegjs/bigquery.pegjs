@@ -33,6 +33,7 @@
     'FALSE': true,
     'FROM': true,
     'FULL': true,
+    'FOR': true,
 
     'GROUP': true,
 
@@ -289,6 +290,7 @@ select_stmt_nake
     d:(KW_ALL / KW_DISTINCT)? __
     c:column_clause     __
     f:from_clause?      __
+    fs:for_sys_time_as_of? __
     w:where_clause?     __
     g:group_by_clause?  __
     h:having_clause?    __
@@ -300,6 +302,7 @@ select_stmt_nake
           distinct: d,
           columns: c,
           from: f,
+          for_sys_time_as_of: fs,
           where: w,
           groupby: g,
           having: h,
@@ -307,6 +310,13 @@ select_stmt_nake
       };
   }
 
+for_sys_time_as_of
+  = 'FOR'i __ 'SYSTEM_TIME'i __ 'AS'i __ 'OF'i __ e:expr {
+    return {
+      keyword: 'for system_time as of',
+      expr: e
+    }
+  }
 struct_value
   = a:KW_AS __ k:(KW_STRUCT / KW_VALUE) __ {
     return `${a[0].toLowerCase()} ${k.toLowerCase()}`
@@ -752,6 +762,7 @@ primary
   = literal
   / aggr_func
   / func_call
+  / interval_expr
   / column_ref
   / param
   / LPAREN __ e:expr __ RPAREN {
@@ -761,6 +772,17 @@ primary
   / LPAREN __ list:expr_list __ RPAREN {
         list.parentheses = true;
         return list;
+    }
+
+interval_expr
+  = KW_INTERVAL                    __
+    e:expr                       __
+    u: interval_unit {
+      return {
+        type: 'interval',
+        expr: e,
+        unit: u.toLowerCase(),
+      }
     }
 
 column_ref

@@ -121,6 +121,27 @@ describe('BigQuery', () => {
         'SELECT * FROM project.dataset.Roster'
       ]
     },
+    {
+      title: 'select from table for system_time as of',
+      sql: [
+        'SELECT * FROM t FOR SYSTEM_TIME AS OF TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR);',
+        'SELECT * FROM t FOR SYSTEM_TIME AS OF TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)'
+      ]
+    },
+    {
+      title: 'select from table for system_time as of string',
+      sql: [
+        "SELECT * FROM t FOR SYSTEM_TIME AS OF '2017-01-01 10:00:00-07:00';",
+        "SELECT * FROM t FOR SYSTEM_TIME AS OF '2017-01-01 10:00:00-07:00'"
+      ]
+    },
+    {
+      title: 'select from table for system_time as of in',
+      sql: [
+        'SELECT * FROM t1 WHERE t1.a IN (SELECT t2.a FROM t2 FOR SYSTEM_TIME AS OF t1.timestamp_column);',
+        'SELECT * FROM t1 WHERE t1.a IN (SELECT t2.a FROM t2 FOR SYSTEM_TIME AS OF t1.timestamp_column)'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {

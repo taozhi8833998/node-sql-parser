@@ -20,13 +20,29 @@ import { hasVal, commonOptionConnector, connector, topToSQL, toUpper } from './u
  */
 
 function selectToSQL(stmt) {
-  const { as_struct_val: asStructVal, with: withInfo, options, distinct, columns, from, where, groupby, having, orderby, limit, top } = stmt
+  const {
+    as_struct_val: asStructVal,
+    columns,
+    distinct,
+    from,
+    for_sys_time_as_of: forSystem = {},
+    groupby,
+    having,
+    limit,
+    options,
+    orderby,
+    top,
+    with: withInfo,
+    where,
+  } = stmt
   const clauses = [withToSql(withInfo), 'SELECT', toUpper(asStructVal)]
   clauses.push(topToSQL(top))
   if (Array.isArray(options)) clauses.push(options.join(' '))
   clauses.push(distinct, columnsToSQL(columns, from))
   // FROM + joins
   clauses.push(commonOptionConnector('FROM', tablesToSQL, from))
+  const { keyword, expr } = forSystem || {}
+  clauses.push(commonOptionConnector(keyword, exprToSQL, expr))
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
   clauses.push(connector('GROUP BY', getExprListSQL(groupby).join(', ')))
   clauses.push(commonOptionConnector('HAVING', exprToSQL, having))
