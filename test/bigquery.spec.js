@@ -41,9 +41,9 @@ describe('BigQuery', () => {
         (SELECT STRUCT("Seattle" AS city, "Washington" AS state) AS location
         UNION ALL
         SELECT STRUCT("Phoenix" AS city, "Arizona" AS state) AS location)
-      SELECT l.*
+      SELECT l.locations.*
       FROM locations l;`,
-        "WITH locations AS (SELECT STRUCT('Seattle' AS city, 'Washington' AS state) AS location UNION ALL SELECT STRUCT('Phoenix' AS city, 'Arizona' AS state) AS location) SELECT l.* FROM locations AS l"
+        "WITH locations AS (SELECT STRUCT('Seattle' AS city, 'Washington' AS state) AS location UNION ALL SELECT STRUCT('Phoenix' AS city, 'Arizona' AS state) AS location) SELECT l.locations.* FROM locations AS l"
       ]
     },
     {
@@ -293,7 +293,25 @@ describe('BigQuery', () => {
         FROM source`,
         'SELECT season AS season, academic_year AS academic_year FROM source'
       ]
-    }
+    },
+    {
+      title: 'select union distinct',
+      sql: [
+        `SELECT win_team_id AS winTeamID, win_market as market, winName as name from winners UNION DISTINCT (SELECT * from losers)`,
+        'SELECT win_team_id AS winTeamID, win_market AS market, winName AS name FROM winners UNION DISTINCT (SELECT * FROM losers)'
+      ]
+    },
+    {
+      title: 'select offset',
+      sql: [
+        `WITH locations AS
+        (SELECT ARRAY<STRUCT<city STRING, state STRING>>[("Seattle", "Washington"),
+          ("Phoenix", "Arizona")] AS location)
+      SELECT l.LOCATION[offset(0)].*
+      FROM locations l;`,
+        "WITH locations AS (SELECT ARRAY<STRUCT<city STRING, state STRING>>[('Seattle', 'Washington'), ('Phoenix', 'Arizona')] AS location) SELECT l.LOCATION[offset(0)].* FROM locations AS l"
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
