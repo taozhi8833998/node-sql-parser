@@ -232,12 +232,13 @@ multiple_stmt
 
 query_statement
   = query_expr
+  / s:('(' __ select_stmt __ ')') {
+      return s[2];
+    }
 
 query_expr
   = cte:with_clause? __
-  lp:LPAREN? __
   s:union_stmt __
-  rp:RPAREN? __
   o:order_by_clause?  __
   l:limit_clause? __
   se:SEMICOLON? {
@@ -250,9 +251,7 @@ query_expr
         select: s && s.ast,
         orderby: o,
         limit: l,
-        left_parenthesis: lp,
-        right_parenthesis: rp,
-        parentheses: lp && rp && true || false
+        parentheses: s && s.parentheses,
       }
     }
   }
@@ -266,6 +265,15 @@ set_op
   }
 
 union_stmt
+  = union_stmt_nake
+  / s:('(' __ union_stmt_nake __ ')') {
+      return {
+        ...s[2],
+        parentheses: true
+      }
+    }
+
+union_stmt_nake
   = head:select_stmt tail:(__ set_op? __ select_stmt)* {
       let cur = head
       for (let i = 0; i < tail.length; i++) {
@@ -279,9 +287,14 @@ union_stmt
         ast: head
       }
     }
-
 select_stmt
   = select_stmt_nake
+  / s:('(' __ select_stmt __ ')') {
+      return {
+        ...s[2],
+        parentheses_symbol: true
+      }
+    }
 
 with_clause
   = KW_WITH __ head:cte_definition tail:(__ COMMA __ cte_definition)* {
@@ -370,9 +383,16 @@ columns_list
       return createList(head, tail);
     }
 
+column_offset_expr
+  = n:ident __ LBRAKE __ KW_OFFSET __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
+    return `${n}[offset(${l.value})]`
+  }
+  / ident
+
 column_list_item
-  = tbl:ident __ DOT __ STAR {
+  = tbl:ident __ DOT pro:(column_offset_expr __ DOT)? __ STAR {
       columnList.add(`select::${tbl}::(.*)`);
+      if (pro) tbl = `${tbl}.${pro[0]}`
       return {
         expr: {
           type: 'column_ref',
