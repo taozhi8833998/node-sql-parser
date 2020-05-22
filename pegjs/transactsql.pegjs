@@ -212,6 +212,7 @@ cmd_stmt
 
 create_stmt
   = create_table_stmt
+  / create_index_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -235,7 +236,7 @@ multiple_stmt
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
-      	ast: cur
+        ast: cur
       }
     }
 
@@ -253,6 +254,66 @@ union_stmt
         ast: head
       }
     }
+
+column_order_list
+  = LBRAKE __ c:column_order_list_item __ RBRAKE { return c }
+  / column_order_list_item
+
+column_order_list_item
+  = head:column_order tail:(__ COMMA __ column_order)* {
+    return createList(head, tail)
+  }
+
+column_order
+  = c:column_ref __
+  o:(KW_ASC / KW_DESC)? {
+    return {
+      column: c,
+      order: o && o.toLowerCase() || 'asc',
+    }
+  }
+
+include_column
+  = k:'INCLUDE'i __ LPAREN __ c:column_list __ RPAREN {
+    return {
+      type: k.toLowerCase(),
+      keyword: k.toLowerCase(),
+      columns:c,
+    }
+  }
+
+create_index_stmt
+  = a:KW_CREATE __
+  kw:(KW_UNIQUE / KW_CLUSTERED / KW_NONCLUSTERED)? __
+  t:KW_INDEX __
+  n:ident __
+  on:KW_ON __
+  ta:table_name __
+  LPAREN __ cols:column_order_list __ RPAREN __
+  i:include_column? __
+  w:where_clause? __
+  wr:(KW_WITH __ LPAREN __ index_options_list __ RPAREN)? __
+  op:on_clause? __
+  fo:('FILESTREAM_ON'i __ ident)? {
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          index_type: kw && kw.toLowerCase(),
+          keyword: t.toLowerCase(),
+          index: n,
+          on_kw: on[0].toLowerCase(),
+          table: ta,
+          index_columns: cols,
+          include: i,
+          where: w,
+          with: wr && wr[4],
+          on: op,
+          filestream_on: fo && { value: fo[2] },
+        }
+    }
+  }
 
 create_table_stmt
   = a:KW_CREATE __
@@ -1047,6 +1108,11 @@ index_type
     }
   }
 
+index_options_list
+  = head:index_option tail:(__ COMMA __ index_option)* {
+    return createList(head, tail)
+  }
+
 index_options
   = head:index_option tail:(__ index_option)* {
     const result = [head];
@@ -1056,8 +1122,39 @@ index_options
     return result;
   }
 
+partition_number_expression_list
+  = head:partition_number_expression tail:(__ COMMA __ partition_number_expression)* {
+    return createList(head, tail)
+  }
+
+partition_number_expression
+  = s:literal_numeric __ t:KW_TO __ e:literal_numeric {
+    return {
+      type: 'range',
+      symbol: t[0],
+      start: s,
+      end: s
+    }
+  }
+  / literal_numeric
+
+on_partition
+  = KW_ON __ 'PARTITIONS'i __ LPAREN __ p:partition_number_expression_list __ RPAREN {
+    return {
+      type: 'on partitions',
+      partitions: p
+    }
+  }
+
 index_option
-  = k:KW_KEY_BLOCK_SIZE __ e:(KW_ASSIGIN_EQUAL)? __ kbs:literal_numeric __ {
+  = k:(KW_KEY_BLOCK_SIZE) __ e:(KW_ASSIGIN_EQUAL)? __ kbs:literal_numeric __ {
+    return {
+      type: k.toLowerCase(),
+      symbol: e,
+      expr: kbs
+    };
+  }
+  / k:('FILLFACTOR'i / 'MAX_DURATION'i / 'MAXDOP'i) __ e:KW_ASSIGIN_EQUAL __ kbs:literal_numeric __ {
     return {
       type: k.toLowerCase(),
       symbol: e,
@@ -1075,6 +1172,28 @@ index_option
     return {
       type: k.toLowerCase(),
       expr: k.toLowerCase()
+    }
+  }
+  / k:('PAD_INDEX'i / 'SORT_IN_TEMPDB'i / 'IGNORE_DUP_KEY'i / 'STATISTICS_NORECOMPUTE'i / 'STATISTICS_INCREMENTAL'i / 'DROP_EXISTING'i / 'ONLINE'i / 'RESUMABLE'i / 'ALLOW_ROW_LOCKS'i / 'ALLOW_PAGE_LOCKS'i / 'OPTIMIZE_FOR_SEQUENTIAL_KEY'i ) __
+  e:KW_ASSIGIN_EQUAL __
+  r:(KW_ON / KW_OFF) {
+    return {
+      type: k.toLowerCase(),
+      symbol: e,
+      expr: {
+        type: 'origin',
+        value: r[0]
+      }
+    }
+  }
+  / k:'DATA_COMPRESSION'i __ e:KW_ASSIGIN_EQUAL __ r:('NONE'i / 'ROW'i / 'PAGE') __ on:on_partition? {
+    return {
+      type: k.toLowerCase(),
+      symbol: e,
+      expr: {
+        value: r,
+        on,
+      },
     }
   }
   / keyword_comment
@@ -1974,6 +2093,7 @@ KW_TABLES   = "TABLES"i      !ident_start { return 'TABLES'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
 
 KW_ON       = "ON"i       !ident_start
+KW_OFF      = "OFF"i       !ident_start
 KW_LEFT     = "LEFT"i     !ident_start
 KW_RIGHT    = "RIGHT"i    !ident_start
 KW_FULL     = "FULL"i     !ident_start
@@ -2100,6 +2220,8 @@ KW_KEY     = "KEY"i  !ident_start { return 'KEY'; }
 KW_FULLTEXT = "FULLTEXT"i  !ident_start { return 'FULLTEXT'; }
 KW_SPATIAL  = "SPATIAL"i  !ident_start { return 'SPATIAL'; }
 KW_UNIQUE     = "UNIQUE"i  !ident_start { return 'UNIQUE'; }
+KW_CLUSTERED     = "CLUSTERED"i  !ident_start { return 'CLUSTERED'; }
+KW_NONCLUSTERED  = "NONCLUSTERED"i  !ident_start { return 'NONCLUSTERED'; }
 KW_KEY_BLOCK_SIZE = "KEY_BLOCK_SIZE"i !ident_start { return 'KEY_BLOCK_SIZE'; }
 KW_COMMENT     = "COMMENT"i  !ident_start { return 'COMMENT'; }
 KW_CONSTRAINT  = "CONSTRAINT"i  !ident_start { return 'CONSTRAINT'; }

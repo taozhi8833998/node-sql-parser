@@ -1,6 +1,7 @@
 const { expect } = require('chai');
 const Parser = require('../src/parser').default
 const { indexOptionToSQL, indexTypeAndOptionToSQL } = require('../src/index-definition')
+const { columnOrderListToSQL } = require('../src/util')
 
 describe('create', () => {
   const parser = new Parser();
@@ -374,6 +375,38 @@ describe('create', () => {
         questions_total BIGINT NOT NULL,
         score AS questions_correct * 100 / questions_total
       );`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1) PRIMARY KEY, [questions_correct] BIGINT NOT NULL DEFAULT (0), [questions_total] BIGINT NOT NULL, [score] AS [questions_correct] * 100 / [questions_total])')
+    })
+  })
+
+  describe('create index with tsql', () => {
+    it('should support a nonclustered index on a table or view', () => {
+      expect(getParsedSql('CREATE INDEX i1 ON t1 (col1, col2 DESC);', { database: 'transactsql' })).to.equal('CREATE INDEX [i1] ON [t1] ([col1] ASC, [col2] DESC)')
+    })
+
+    it('should suport create a clustered, unique, nonclustered', () => {
+      expect(getParsedSql('CREATE CLUSTERED INDEX i1 ON d1.s1.t1 (col1);', { database: 'transactsql' })).to.equal('CREATE CLUSTERED INDEX [i1] ON [d1.s1].[t1] ([col1] ASC)')
+      expect(getParsedSql('CREATE UNIQUE INDEX i1 ON t1 (col1 DESC, col2 ASC, col3 DESC);', { database: 'transactsql' })).to.equal('CREATE UNIQUE INDEX [i1] ON [t1] ([col1] DESC, [col2] ASC, [col3] DESC)')
+      expect(getParsedSql('CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]);', { database: 'transactsql' })).to.equal('CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col] ASC)')
+    })
+
+    it('should support include', () => {
+      expect(getParsedSql('CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]) include (test_col, test_col2);', { database: 'transactsql' })).to.equal('CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col] ASC) INCLUDE ([test_col], [test_col2])')
+    })
+
+    it('should support include and where', () => {
+      expect(getParsedSql("CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]) include (test_col, test_col2) where StartDate > '20000101' AND EndDate <= '20000630' and ComponentID IN (533, 324, 753) and EndDate IS NOT NULL;", { database: 'transactsql' })).to.equal("CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col] ASC) INCLUDE ([test_col], [test_col2]) WHERE [StartDate] > '20000101' AND [EndDate] <= '20000630' AND [ComponentID] IN (533, 324, 753) AND [EndDate] IS NOT NULL")
+    })
+
+    it('should support include and where', () => {
+      expect(getParsedSql("CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]) include (test_col, test_col2) where StartDate > '20000101' AND EndDate <= '20000630' and ComponentID IN (533, 324, 753) and EndDate IS NOT NULL with (DATA_COMPRESSION = ROW ON PARTITIONS (2, 4, 6 TO 8));", { database: 'transactsql' })).to.equal("CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col] ASC) INCLUDE ([test_col], [test_col2]) WHERE [StartDate] > '20000101' AND [EndDate] <= '20000630' AND [ComponentID] IN (533, 324, 753) AND [EndDate] IS NOT NULL WITH (DATA_COMPRESSION = ROW ON PARTITIONS (2, 4, 6 TO 6))")
+    })
+
+    it('should support include and where', () => {
+      expect(getParsedSql("CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]) include (test_col, test_col2) where StartDate > '20000101' AND EndDate <= '20000630' and ComponentID IN (533, 324, 753) and EndDate IS NOT NULL with (DATA_COMPRESSION = ROW ON PARTITIONS (2, 4, 6 TO 8)) on pn(abc) FILESTREAM_ON filename;", { database: 'transactsql' })).to.equal("CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col] ASC) INCLUDE ([test_col], [test_col2]) WHERE [StartDate] > '20000101' AND [EndDate] <= '20000630' AND [ComponentID] IN (533, 324, 753) AND [EndDate] IS NOT NULL WITH (DATA_COMPRESSION = ROW ON PARTITIONS (2, 4, 6 TO 6)) ON pn([abc]) FILESTREAM_ON filename")
+    })
+
+    it('should return undefined for empty index columns', () => {
+      expect(columnOrderListToSQL()).to.be.equal(undefined)
     })
   })
   describe('throw error when create type is unknow', () => {

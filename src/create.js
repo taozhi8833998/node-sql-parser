@@ -1,12 +1,12 @@
 
 import { exprToSQL } from './expr'
-import { indexDefinitionToSQL } from './index-definition'
+import { indexDefinitionToSQL, indexOptionListToSQL } from './index-definition'
 import { columnDefinitionToSQL } from './column'
 import { constraintDefinitionToSQL } from './constrain'
 import { funcToSQL } from './func'
 import { tablesToSQL, tableOptionToSQL, tableToSQL } from './tables'
 import { unionToSQL } from './union'
-import { commonKeywordArgsToSQL, toUpper, hasVal, identifierToSql, triggerEventToSQL, literalToSQL } from './util'
+import { columnOrderListToSQL, commonOptionConnector, commonKeywordArgsToSQL, toUpper, hasVal, identifierToSql, triggerEventToSQL, literalToSQL } from './util'
 
 function createDefinitionToSQL(definition) {
   if (!definition) return []
@@ -73,19 +73,38 @@ function createTriggerToSQL(stmt) {
 
 function createExtensionToSQL(stmt) {
   const {
-    extension,
-    from,
-    if_not_exists: ifNotExists,
-    keyword,
-    schema,
-    type,
-    with: withName,
-    version,
+    extension, from, if_not_exists: ifNotExists,
+    keyword, schema, type, with: withName, version,
   } = stmt
-  const sql = [toUpper(type), toUpper(keyword), toUpper(ifNotExists), literalToSQL(extension), toUpper(withName)]
-  if (schema) sql.push('SCHEMA', literalToSQL(schema))
-  if (version) sql.push('VERSION', literalToSQL(version))
-  if (from) sql.push('FROM', literalToSQL(from))
+  const sql = [
+    toUpper(type),
+    toUpper(keyword),
+    toUpper(ifNotExists),
+    literalToSQL(extension),
+    toUpper(withName),
+    commonOptionConnector('SCHEMA', literalToSQL, schema),
+    commonOptionConnector('VERSION', literalToSQL, version),
+    commonOptionConnector('FROM', literalToSQL, from),
+  ]
+  return sql.filter(hasVal).join(' ')
+}
+
+function createIndexToSQL(stmt) {
+  const {
+    filestream_on: fileStream, keyword, include, index_columns: indexColumns,
+    index_type: indexType, index, on, on_kw: onKw, table, type, where,
+    with: withExpr,
+  } = stmt
+  const withIndexOpt = withExpr && `WITH (${indexOptionListToSQL(withExpr).join(', ')})`
+  const includeColumns = include && `${toUpper(include.keyword)} (${include.columns.map(col => identifierToSql(col)).join(', ')})`
+  const sql = [
+    toUpper(type), toUpper(indexType), toUpper(keyword),
+    identifierToSql(index), toUpper(onKw), tableToSQL(table),
+    `(${columnOrderListToSQL(indexColumns)})`, includeColumns,
+    commonOptionConnector('WHERE', exprToSQL, where), withIndexOpt,
+    commonOptionConnector('ON', exprToSQL, on),
+    commonOptionConnector('FILESTREAM_ON', literalToSQL, fileStream),
+  ]
   return sql.filter(hasVal).join(' ')
 }
 
@@ -101,6 +120,9 @@ function createToSQL(stmt) {
       break
     case 'extension':
       sql = createExtensionToSQL(stmt)
+      break
+    case 'index':
+      sql = createIndexToSQL(stmt)
       break
     default:
       throw new Error(`unknow create resource ${keyword}`)
