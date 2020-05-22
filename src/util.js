@@ -141,6 +141,7 @@ function identifierToSql(ident, isDual) {
 }
 
 function literalToSQL(literal) {
+  if (!literal) return
   const { type, parentheses, value } = literal
   let str = value
   switch (type) {
@@ -197,6 +198,20 @@ function toUpper(val) {
 
 function hasVal(val) {
   return val
+}
+
+function onPartitionsToSQL(expr) {
+  const { type, partitions } = expr
+  const result = [
+    toUpper(type),
+    `(${partitions.map(partition => {
+      const { type: partitionType } = partition
+      if (!(partitionType === 'range')) return literalToSQL(partition)
+      const { start, end, symbol } = partition
+      return `${literalToSQL(start)} ${toUpper(symbol)} ${literalToSQL(end)}`
+    }).join(', ')})`,
+  ]
+  return result.join(' ')
 }
 
 function arrayStructTypeToSQL(expr) {
@@ -256,11 +271,16 @@ function autoIncreatementToSQL(autoIncreatement) {
   return result
 }
 
+function columnOrderListToSQL(columnOrderList) {
+  if (!columnOrderList) return
+  return columnOrderList.map(({ column, order }) => `${columnRefToSQL(column)} ${toUpper(order)}`).filter(hasVal).join(', ')
+}
+
 export {
   arrayStructTypeToSQL, autoIncreatementToSQL,
-  commonKeywordArgsToSQL, commonOptionConnector,
+  columnOrderListToSQL, commonKeywordArgsToSQL, commonOptionConnector,
   connector, commonTypeValue,commentToSQL, createBinaryExpr,
   createValueExpr, DEFAULT_OPT, escape, literalToSQL,
-  identifierToSql,replaceParams, returningToSQL, hasVal,
-  setParserOpt, toUpper, topToSQL, triggerEventToSQL,
+  identifierToSql, onPartitionsToSQL, replaceParams, returningToSQL,
+  hasVal, setParserOpt, toUpper, topToSQL, triggerEventToSQL,
 }

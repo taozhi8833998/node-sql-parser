@@ -4,6 +4,7 @@ import {
   toUpper,
   hasVal,
   commentToSQL,
+  onPartitionsToSQL,
 } from './util'
 import { exprToSQL } from './expr'
 
@@ -39,10 +40,19 @@ function indexOptionToSQL(indexOpt) {
       indexOptArray.shift()
       indexOptArray.push(commentToSQL(indexOpt))
       break
+    case 'DATA_COMPRESSION':
+      indexOptArray.push(symbol, toUpper(expr.value), onPartitionsToSQL(expr.on))
+      break
     default:
+      indexOptArray.push(symbol, literalToSQL(expr))
       break
   }
-  return indexOptArray.join(' ')
+  return indexOptArray.filter(hasVal).join(' ')
+}
+
+function indexOptionListToSQL(indexOptList) {
+  if (!indexOptList) return []
+  return indexOptList.map(indexOptionToSQL)
 }
 
 function indexTypeAndOptionToSQL(indexDefinition) {
@@ -58,7 +68,7 @@ function indexTypeAndOptionToSQL(indexDefinition) {
     const definitionSQL = toUpper(constraintType) === 'CHECK' ? `(${exprToSQL(definition[0])})` : `(${definition.map(col => identifierToSql(col)).join(', ')})`
     dataType.push(definitionSQL)
   }
-  dataType.push(indexOptions && indexOptions.map(indexOptionToSQL).join(' '))
+  dataType.push(indexOptionListToSQL(indexOptions).join(' '))
   return dataType
 }
 
@@ -78,5 +88,6 @@ export {
   indexDefinitionToSQL,
   indexTypeToSQL,
   indexOptionToSQL,
+  indexOptionListToSQL,
   indexTypeAndOptionToSQL,
 }
