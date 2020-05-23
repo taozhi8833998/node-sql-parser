@@ -572,11 +572,11 @@ alter_action
   / ALTER_LOCK
 
 ALTER_ADD_COLUMN
-  = KW_ADD __
+  = a: (KW_ADD / KW_ALTER) __
     kc:KW_COLUMN? __
     cd:create_column_definition {
       return {
-        action: 'add',
+        action: a.toLowerCase(),
         ...cd,
         keyword: kc,
         resource: 'column',
@@ -2081,7 +2081,7 @@ KW_FALSE    = "FALSE"i      !ident_start
 KW_SHOW     = "SHOW"i       !ident_start
 KW_DROP     = "DROP"i       !ident_start { return 'DROP'; }
 KW_USE      = "USE"i        !ident_start
-KW_ALTER    = "ALTER"i      !ident_start
+KW_ALTER    = "ALTER"i      !ident_start { return 'ALTER' }
 KW_SELECT   = "SELECT"i     !ident_start
 KW_UPDATE   = "UPDATE"i     !ident_start
 KW_CREATE   = "CREATE"i     !ident_start

@@ -226,7 +226,8 @@ describe('Command SQL', () => {
       expect(getParsedSql(`ALTER TABLE Persons ADD CHECK (Age>=18)`, opt))
         .to.equal('ALTER TABLE [Persons] ADD CHECK ([Age] >= 18)');
       expect(getParsedSql(`ALTER TABLE Persons ADD CONSTRAINT CHK_PersonAge CHECK (Age>=18 AND City='Sandnes')`, opt))
-        .to.equal('ALTER TABLE [Persons] ADD CONSTRAINT [CHK_PersonAge] CHECK ([Age] >= 18 AND [City] = \'Sandnes\')');
+      expect(getParsedSql('ALTER TABLE [test] alter COLUMN [a] NVARCHAR(MAX) NOT NULL;', opt))
+        .to.equal('ALTER TABLE [test] ALTER COLUMN [a] NVARCHAR(max) NOT NULL');
     })
 
     it('should support enable and disable check constraint', () => {
