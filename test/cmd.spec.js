@@ -33,10 +33,10 @@ describe('Command SQL', () => {
 
     it(`should truncate TABLE optional`, () => {
       expect(getParsedSql('truncate  dbA.tableA'))
-          .to.equal('TRUNCATE `dbA`.`tableA`');
+          .to.equal('TRUNCATE TABLE `dbA`.`tableA`');
       expect(getParsedSql('truncate tableA'))
-          .to.equal('TRUNCATE `tableA`');
-      expect(getParsedSql('truncate  TABLE tableA'))
+          .to.equal('TRUNCATE TABLE `tableA`');
+      expect(getParsedSql('truncate TABLE tableA'))
           .to.equal('TRUNCATE TABLE `tableA`');
     })
 

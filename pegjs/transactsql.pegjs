@@ -478,7 +478,7 @@ default_expr
   }
 drop_stmt
   = a:KW_DROP __
-    KW_TABLE __
+    r:KW_TABLE __
     t:table_ref_list __ {
       if(t) t.forEach(tt => tableList.add(`${a}::${tt.db}::${tt.table}`));
       return {
@@ -486,10 +486,25 @@ drop_stmt
         columnList: columnListTableAlias(columnList),
         ast: {
           type: a.toLowerCase(),
-          table: t
+          keyword: r.toLowerCase(),
+          name: t
         }
       };
     }
+  / a:KW_DROP __
+  r:'PROCEDURE'i __
+  p:ident __ {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: a.toLowerCase(),
+        keyword: r.toLowerCase(),
+        name: p
+      }
+    }
+  }
+
 
 truncate_stmt
   = a:KW_TRUNCATE  __
@@ -501,8 +516,8 @@ truncate_stmt
         columnList: columnListTableAlias(columnList),
         ast: {
           type: a.toLowerCase(),
-          keyword: kw,
-          table: t
+          keyword: kw && kw.toLowerCase() || 'table',
+          name: t
         }
       };
     }
