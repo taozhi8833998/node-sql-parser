@@ -2,13 +2,19 @@ import { identifierToSql, hasVal, toUpper } from './util'
 import { exprToSQL } from './expr'
 import { tablesToSQL, tableToSQL } from './tables'
 
-function dropToSQL(stmt) {
-  const clauses = ['DROP TABLE', tablesToSQL(stmt.table)]
-  return clauses.join(' ')
-}
-
-function truncateToSQL(stmt) {
-  const clauses = ['TRUNCATE', stmt.keyword, tablesToSQL(stmt.table)]
+function commonCmdToSQL(stmt) {
+  const { type, keyword, name } = stmt
+  const clauses = [toUpper(type), toUpper(keyword)]
+  switch (keyword) {
+    case 'table':
+      clauses.push(tablesToSQL(name))
+      break
+    case 'procedure':
+      clauses.push(identifierToSql(name))
+      break
+    default:
+      break
+  }
   return clauses.filter(hasVal).join(' ')
 }
 
@@ -27,7 +33,7 @@ function renameToSQL(stmt) {
 
 function useToSQL(stmt) {
   const { type, db } = stmt
-  const action = type && type.toUpperCase()
+  const action = toUpper(type)
   const database = identifierToSql(db)
   return `${action} ${database}`
 }
@@ -75,8 +81,7 @@ function lockUnlockToSQL(stmt) {
 }
 
 export {
-  dropToSQL,
-  truncateToSQL,
+  commonCmdToSQL,
   renameToSQL,
   useToSQL,
   callToSQL,

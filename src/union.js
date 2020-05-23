@@ -5,8 +5,7 @@ import { deleteToSQL } from './delete'
 import { updateToSQL } from './update'
 import { insertToSQL } from './insert'
 import {
-  dropToSQL,
-  truncateToSQL,
+  commonCmdToSQL,
   useToSQL,
   renameToSQL,
   callToSQL,
@@ -24,8 +23,8 @@ const typeToSQLFn = {
   delete   : deleteToSQL,
   update   : updateToSQL,
   insert   : insertToSQL,
-  drop     : dropToSQL,
-  truncate : truncateToSQL,
+  drop     : commonCmdToSQL,
+  truncate : commonCmdToSQL,
   use      : useToSQL,
   rename   : renameToSQL,
   call     : callToSQL,
