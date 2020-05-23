@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const Parser = require('../src/parser').default
-const { renameToSQL } = require('../src/command')
+const { renameToSQL, commonCmdToSQL } = require('../src/command')
 
 
 describe('Command SQL', () => {
@@ -38,6 +38,30 @@ describe('Command SQL', () => {
           .to.equal('TRUNCATE TABLE `tableA`');
       expect(getParsedSql('truncate TABLE tableA'))
           .to.equal('TRUNCATE TABLE `tableA`');
+    })
+
+    it('should support unsupported keyword', () => {
+      const ast = {
+        "type": "truncate",
+        "table": [
+           {
+              "db": null,
+              "table": "abc",
+              "as": null
+           }
+        ]
+     }
+      expect(commonCmdToSQL(ast)).to.be.equal(ast.type.toUpperCase())
+    })
+
+    it('should support drop procedure in tsql', () => {
+      const opt = {
+        database: 'transactsql'
+      }
+      expect(getParsedSql('drop procedure [test]', opt))
+          .to.equal('DROP PROCEDURE [test]')
+      expect(getParsedSql('drop procedure test', opt))
+          .to.equal('DROP PROCEDURE [test]')
     })
 
   })

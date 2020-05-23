@@ -1,4 +1,4 @@
-import { identifierToSql, hasVal, toUpper, literalToSQL } from './util'
+import { identifierToSql, hasVal, toUpper } from './util'
 import { exprToSQL } from './expr'
 import { tablesToSQL, tableToSQL } from './tables'
 
@@ -10,7 +10,7 @@ function commonCmdToSQL(stmt) {
       clauses.push(tablesToSQL(name))
       break
     case 'procedure':
-      clauses.push(literalToSQL(name))
+      clauses.push(identifierToSql(name))
       break
     default:
       break
