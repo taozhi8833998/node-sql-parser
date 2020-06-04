@@ -1,3 +1,5 @@
+import { columnDataType } from './column'
+import { createDefinitionToSQL } from './create'
 import { identifierToSql, hasVal, toUpper } from './util'
 import { exprToSQL } from './expr'
 import { tablesToSQL, tableToSQL } from './tables'
@@ -80,8 +82,35 @@ function lockUnlockToSQL(stmt) {
   return result.filter(hasVal).join(' ')
 }
 
+function declareToSQL(stmt) {
+  const { type, declare } = stmt
+  const result = [toUpper(type)]
+  const info = declare.map(dec => {
+    const { at, name, as, prefix, definition, keyword } = dec
+    const declareInfo = [`${at}${name}`, toUpper(as)]
+    switch (keyword) {
+      case 'variable':
+        declareInfo.push(columnDataType(prefix))
+        if (definition) declareInfo.push('=', exprToSQL(definition))
+        break
+      case 'cursor':
+        declareInfo.push(toUpper(prefix))
+        break
+      case 'table':
+        declareInfo.push(toUpper(prefix), `(${definition.map(createDefinitionToSQL).join(', ')})`)
+        break
+      default:
+        break
+    }
+    return declareInfo.filter(hasVal).join(' ')
+  }).join(', ')
+  result.push(info)
+  return result.join(' ')
+}
+
 export {
   commonCmdToSQL,
+  declareToSQL,
   renameToSQL,
   useToSQL,
   callToSQL,

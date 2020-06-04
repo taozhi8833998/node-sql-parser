@@ -366,4 +366,46 @@ describe('Command SQL', () => {
     })
   })
 
+  describe('declare', () => {
+    const opt = {
+      database: 'transactsql'
+    }
+    it('should support declare variables', () => {
+      expect(getParsedSql('DECLARE @find varchar(30)', opt))
+          .to.equal('DECLARE @find VARCHAR(30)');
+      expect(getParsedSql("DECLARE @find varchar(30) = 'Man%'", opt))
+          .to.equal("DECLARE @find VARCHAR(30) = 'Man%'");
+      expect(getParsedSql('DECLARE @Group nvarchar(50), @Sales money', opt))
+          .to.equal('DECLARE @Group NVARCHAR(50), @Sales MONEY');
+    })
+
+    it('should support declare variables', () => {
+      const ast = parser.astify('DECLARE @find varchar(30)', opt);
+      ast.declare[0].keyword = null
+      expect(parser.sqlify(ast, opt)).to.equal('DECLARE @find')
+    })
+
+    it('should support declare cursor', () => {
+      expect(getParsedSql('DECLARE @find CURSOR', opt))
+          .to.equal('DECLARE @find CURSOR');
+    })
+
+    it('should support declare table', () => {
+      expect(getParsedSql(`DECLARE @MyTableVar table(
+        EmpID int NOT NULL,
+        OldVacationHours int,
+        NewVacationHours int,
+        ModifiedDate datetime);`, opt))
+          .to.equal('DECLARE @MyTableVar TABLE ([EmpID] INT NOT NULL, [OldVacationHours] INT, [NewVacationHours] INT, [ModifiedDate] DATETIME)');
+    })
+
+    it('should support declare with other sql', () => {
+      expect(getParsedSql(`DECLARE @QuizID BIGINT;
+      INSERT INTO quiz
+      (name, max_attempts, num_questions, passing_score)
+      VALUES ('Class Quiz', 3, 10, 70);
+      SELECT @QuizID = (SELECT SCOPE_IDENTITY());`, opt))
+          .to.equal("DECLARE @QuizID BIGINT ; INSERT INTO [quiz] ([name], [max_attempts], [num_questions], [passing_score]) VALUES ('Class Quiz',3,10,70) ; SELECT @QuizID = (SELECT SCOPE_IDENTITY())");
+    })
+  })
 })

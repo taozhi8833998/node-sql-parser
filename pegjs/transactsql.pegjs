@@ -209,6 +209,7 @@ cmd_stmt
   / set_stmt
   / lock_stmt
   / unlock_stmt
+  / declare_stmt
 
 create_stmt
   = create_table_stmt
@@ -476,6 +477,62 @@ default_expr
       value: ce
     }
   }
+declare_var
+  = at:KW_VAR__PRE_AT __ name:ident_name __
+  as:KW_AS? __
+  dt:data_type __
+  v:(KW_ASSIGIN_EQUAL __ expr)? {
+    return {
+      at: '@',
+      name,
+      as: as && as[0].toLowerCase(),
+      prefix: dt,
+      keyword: 'variable',
+      definition: v && v[2]
+    }
+  }
+  / at:KW_VAR__PRE_AT __ name:ident_name __ 'CURSOR'i {
+    return {
+      at: '@',
+      name,
+      keyword: 'cursor',
+      prefix: 'cursor',
+    }
+  }
+declare_var_list
+  = head:declare_var tail:(__ COMMA __ declare_var)* {
+      return createList(head, tail);
+    }
+
+declare_stmt
+  = a:KW_DECLARE __ dl:declare_var_list {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'declare',
+        declare: dl,
+      }
+    }
+  }
+  / a:KW_DECLARE __ at:KW_VAR__PRE_AT __ name:ident_name __ as:KW_AS? __ KW_TABLE __ t:create_table_definition {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'declare',
+        declare: [{
+          at: '@',
+          name,
+          as: as && as[0].toLowerCase(),
+          keyword: 'table',
+          prefix: 'table',
+          definition: t,
+        }]
+      }
+    }
+  }
+
 drop_stmt
   = a:KW_DROP __
     r:KW_TABLE __
@@ -2080,6 +2137,7 @@ KW_FALSE    = "FALSE"i      !ident_start
 
 KW_SHOW     = "SHOW"i       !ident_start
 KW_DROP     = "DROP"i       !ident_start { return 'DROP'; }
+KW_DECLARE  = "DECLARE"i    !ident_start { return 'DECLARE'; }
 KW_USE      = "USE"i        !ident_start
 KW_ALTER    = "ALTER"i      !ident_start { return 'ALTER' }
 KW_SELECT   = "SELECT"i     !ident_start
