@@ -6,6 +6,7 @@ import { updateToSQL } from './update'
 import { insertToSQL } from './insert'
 import {
   commonCmdToSQL,
+  declareToSQL,
   useToSQL,
   renameToSQL,
   callToSQL,
@@ -25,6 +26,7 @@ const typeToSQLFn = {
   insert   : insertToSQL,
   drop     : commonCmdToSQL,
   truncate : commonCmdToSQL,
+  declare  : declareToSQL,
   use      : useToSQL,
   rename   : renameToSQL,
   call     : callToSQL,

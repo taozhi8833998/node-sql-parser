@@ -132,4 +132,5 @@ function createToSQL(stmt) {
 
 export {
   createToSQL,
+  createDefinitionToSQL,
 }
