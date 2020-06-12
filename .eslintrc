@@ -19,6 +19,7 @@
       2,
       "allow-null"
     ],
+    "id-match": 0,
     "no-var": 2,
     "new-cap": 0,
     "no-param-reassign": 0,

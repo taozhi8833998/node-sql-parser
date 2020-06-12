@@ -8,9 +8,9 @@ describe('AST', () => {
     const parser = new Parser();
     let sql;
 
-    function getParsedSql(sql) {
-        const ast = parser.astify(sql);
-        return parser.sqlify(ast);
+    function getParsedSql(sql, opt) {
+        const ast = parser.astify(sql, opt);
+        return parser.sqlify(ast, opt);
     }
 
     describe('select statement', () => {
@@ -584,6 +584,16 @@ describe('AST', () => {
             it('should work w/ offset', () => {
                 sql = 'SELECT a FROM t limit 10, 10';
                 expect(getParsedSql(sql)).to.equal('SELECT `a` FROM `t` LIMIT 10, 10');
+            });
+
+            it('should work db2 fetch', () => {
+                sql = "select col1, col2 from library.tablename where col1 = 'foo' fetch first 5 rows only";
+                expect(getParsedSql(sql, {database: 'db2'})).to.equal("SELECT col1, col2 FROM library.tablename WHERE col1 = 'foo' FETCH FIRST 5 ROWS ONLY");
+            });
+
+            it('should work db2 fetch offset', () => {
+                sql = "select col1, col2 from library.tablename where col1 = 'foo' offset 10 rows fetch next 5 rows only";
+                expect(getParsedSql(sql, {database: 'db2'})).to.equal("SELECT col1, col2 FROM library.tablename WHERE col1 = 'foo' OFFSET 10 ROWS FETCH NEXT 5 ROWS ONLY");
             });
         });
 

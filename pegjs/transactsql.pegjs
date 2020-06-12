@@ -1902,7 +1902,7 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 func_call
-  = name:ident __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition {
+  = name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition {
       return {
         type: 'function',
         name: name,
@@ -1910,7 +1910,7 @@ func_call
         over: bc
       };
     }
-  / name:ident __ LPAREN __ l:expr_list? __ RPAREN {
+  / name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN {
       return {
         type: 'function',
         name: name,

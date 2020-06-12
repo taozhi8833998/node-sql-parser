@@ -1165,14 +1165,29 @@ number_or_param
   / param
 
 limit_clause
-  = KW_LIMIT __ i1:(number_or_param) __ tail:((COMMA / KW_OFFSET) __ number_or_param)? {
-      const res = [i1];
-      if (tail) res.push(tail[2]);
-      return {
-        seperator: tail && tail[0] && tail[0].toLowerCase() || '',
-        value: res
-      };
+  = k:KW_FETCH __ 'FIRST'i __ i1:(number_or_param) __ 'ROWS'i __ 'ONLY'i {
+    return {
+      fetch: {
+        prefix: 'fetch first',
+        value: i1,
+        suffix: 'rows only'
+      }
     }
+  }
+  / KW_OFFSET __ i1:(number_or_param) __ 'ROWS'i __ KW_FETCH __ 'NEXT'i __  i2:(number_or_param) __ 'ROWS'i __ 'ONLY'i {
+    return {
+      offset: {
+        prefix: 'offset',
+        value: i1,
+        suffix: 'rows',
+      },
+      fetch: {
+        prefix: 'fetch next',
+        value: i2,
+        suffix: 'rows only'
+      }
+    }
+  }
 
 update_stmt
   = KW_UPDATE    __
@@ -1994,7 +2009,7 @@ KW_BY       = "BY"i         !ident_start
 KW_ORDER    = "ORDER"i      !ident_start
 KW_HAVING   = "HAVING"i     !ident_start
 
-KW_LIMIT    = "LIMIT"i      !ident_start
+KW_FETCH    = "FETCH"i      !ident_start { return 'FETCH'; }
 KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET'; }
 
 KW_ASC      = "ASC"i        !ident_start { return 'ASC'; }

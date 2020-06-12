@@ -1,4 +1,5 @@
 import { parse as bigquery } from '../build/bigquery'
+import { parse as db2 } from '../build/db2'
 import { parse as hive } from '../build/hive'
 import { parse as mysql } from '../build/mysql'
 import { parse as mariadb } from '../build/mariadb'
@@ -9,6 +10,7 @@ import { DEFAULT_OPT, setParserOpt } from './util'
 
 const parser = {
   bigquery,
+  db2,
   hive,
   mysql,
   mariadb,

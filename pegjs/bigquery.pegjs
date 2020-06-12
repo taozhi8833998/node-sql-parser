@@ -979,7 +979,7 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 func_call
-  = name:ident __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition {
+  = name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition {
       return {
         type: 'function',
         name: name,
@@ -987,7 +987,7 @@ func_call
         over: bc
       };
     }
-  / name:ident __ LPAREN __ l:expr_list? __ RPAREN {
+  / name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN {
       return {
         type: 'function',
         name: name,
@@ -1001,6 +1001,15 @@ func_call
         name: name,
         args: { type: 'expr_list', value: [] }
       };
+    }
+
+proc_func_name
+  = dt:ident tail:(__ DOT __ ident)? {
+      let name = dt
+      if (tail !== null) {
+        name = `${dt}.${tail[3]}`
+      }
+      return name;
     }
 
 scalar_func

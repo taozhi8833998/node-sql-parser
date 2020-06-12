@@ -134,6 +134,7 @@ function identifierToSql(ident, isDual) {
     case 'transactsql':
       return `[${ident}]`
     case 'bigquery':
+    case 'db2':
       return ident
     default:
       return `\`${ident}\``
