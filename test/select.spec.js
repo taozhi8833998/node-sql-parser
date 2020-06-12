@@ -198,6 +198,12 @@ describe('select', () => {
     })
 
     describe('functions', () => {
+      it(`should parse function dot name `, () => {
+        const ast = parser.astify(`SELECT a.func() FROM t`);
+
+        expect(parser.sqlify(ast)).to.eql('SELECT a.func() FROM `t`');
+      });
+
       it('should parse function expression', () => {
         const ast = parser.astify('SELECT fun(d) FROM t');
 
