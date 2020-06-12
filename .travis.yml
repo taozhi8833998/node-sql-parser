@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "8"
+  # - "8" remove for mocha@8.0.0
   - "10"
   - "11"
   - "12"

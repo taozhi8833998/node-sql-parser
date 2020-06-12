@@ -1,4 +1,3 @@
-
 import { exprToSQL } from './expr'
 import { indexDefinitionToSQL, indexOptionListToSQL } from './index-definition'
 import { columnDefinitionToSQL } from './column'
