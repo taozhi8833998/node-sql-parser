@@ -1,7 +1,6 @@
 import { identifierToSql, hasVal, commonOptionConnector, toUpper } from './util'
 import { exprToSQL } from './expr'
 
-
 function tableToSQL(tableInfo) {
   const { table, db, as, expr } = tableInfo
   const database = identifierToSql(db)
