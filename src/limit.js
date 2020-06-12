@@ -18,7 +18,7 @@ function limitOffsetToSQL(limit) {
 }
 
 function limitToSQL(limit) {
-  if (!limit) return
+  if (!limit) return ''
   if (limit.fetch) return fetchOffsetToSQL(limit)
   return limitOffsetToSQL(limit)
 }
