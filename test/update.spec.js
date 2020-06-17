@@ -65,6 +65,7 @@ describe('update', () => {
           value: {
             type: "function",
             name: "concat",
+            over: null,
             args: {
               type: "expr_list",
               value: [

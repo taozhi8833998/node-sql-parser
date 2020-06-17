@@ -1885,14 +1885,6 @@ aggr_fun_count
         over: bc
       };
     }
-  / name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN {
-      return {
-        type: 'aggr_func',
-        name: name,
-        args: arg
-      };
-    }
-
 
 count_arg
   = e:star_expr { return { expr: e }; }
@@ -1902,7 +1894,7 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 func_call
-  = name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition {
+  = name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
@@ -1910,19 +1902,12 @@ func_call
         over: bc
       };
     }
-  / name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN {
+  / name:scalar_func __ LPAREN __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
-        args: l ? l: { type: 'expr_list', value: [] }
-      };
-    }
-
-  / name:scalar_func __ LPAREN __ RPAREN __ {
-      return {
-        type: 'function',
-        name: name,
-        args: { type: 'expr_list', value: [] }
+        args: { type: 'expr_list', value: [] },
+        over: bc,
       };
     }
 

@@ -1703,19 +1703,12 @@ over_partition
     }
   }
 aggr_fun_count
-  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition {
+  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
       return {
         type: 'aggr_func',
         name: name,
         args: arg,
         over: bc
-      };
-    }
-  / name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN {
-      return {
-        type: 'aggr_func',
-        name: name,
-        args: arg
       };
     }
 
@@ -1728,27 +1721,20 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 func_call
-  = name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition {
+  = name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
         args: l ? l: { type: 'expr_list', value: [] },
-        over: bc
+        over: bc,
       };
     }
-  / name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN {
+  / name:scalar_func __ LPAREN __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
-        args: l ? l: { type: 'expr_list', value: [] }
-      };
-    }
-
-  / name:scalar_func __ LPAREN __ RPAREN __ {
-      return {
-        type: 'function',
-        name: name,
-        args: { type: 'expr_list', value: [] }
+        args: { type: 'expr_list', value: [] },
+        over: bc,
       };
     }
 
