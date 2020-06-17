@@ -212,6 +212,7 @@ describe('select', () => {
             expr: {
               type: 'function',
               name: 'fun',
+              over: null,
               args: {
                 type  : 'expr_list',
                 value : [ { type: 'column_ref', table: null, column: 'd' } ]
@@ -230,6 +231,7 @@ describe('select', () => {
             expr: {
               type: 'function',
               name: 'position',
+              over: null,
               args: {
                 type: 'expr_list',
                 value: [
@@ -262,6 +264,7 @@ describe('select', () => {
             expr: {
               type: 'function',
               name: func,
+              over: null,
               args: {
                 type: 'expr_list',
                 value: []
@@ -695,6 +698,7 @@ describe('select', () => {
         left: {
           type: 'aggr_func',
           name: 'COUNT',
+          over: null,
           args: { expr: { type: 'star', value: '*' } }
         },
         right: { type: 'number', value: 1 }

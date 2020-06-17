@@ -1564,12 +1564,21 @@ aggr_fun_smma
 KW_SUM_MAX_MIN_AVG
   = KW_SUM / KW_MAX / KW_MIN / KW_AVG
 
+over_partition
+  = KW_OVER __ LPAREN __ KW_PARTITION __ KW_BY __ bc:column_clause __ l:order_by_clause? __ RPAREN __  {
+    return {
+      partitionby: bc,
+      orderby: l
+    }
+  }
+
 aggr_fun_count
-  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN {
+  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
       return {
         type: 'aggr_func',
         name: name,
-        args: arg
+        args: arg,
+        over: bc
       };
     }
 
@@ -1581,18 +1590,20 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 func_call
-  = name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN {
+  = name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
-        args: l ? l: { type: 'expr_list', value: [] }
+        args: l ? l: { type: 'expr_list', value: [] },
+        over: bc
       };
     }
-  / name:scalar_func __ LPAREN __ RPAREN __ {
+  / name:scalar_func __ LPAREN __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
-        args: { type: 'expr_list', value: [] }
+        args: { type: 'expr_list', value: [] },
+        over: bc,
       };
     }
 
@@ -1841,6 +1852,7 @@ KW_FULL     = "FULL"i     !ident_start
 KW_INNER    = "INNER"i    !ident_start
 KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
+KW_OVER     = "OVER"i     !ident_start
 KW_UNION    = "UNION"i    !ident_start
 KW_VALUES   = "VALUES"i   !ident_start
 KW_USING    = "USING"i    !ident_start
