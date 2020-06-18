@@ -239,13 +239,15 @@ multiple_stmt
     }
 
 union_stmt
-  = head:select_stmt tail:(__ KW_UNION __ KW_ALL? __ select_stmt)* {
+  = head:select_stmt tail:(__ KW_UNION __ KW_ALL? __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
       let cur = head
       for (let i = 0; i < tail.length; i++) {
         cur._next = tail[i][5]
         cur.union = tail[i][3] ? 'union all' : 'union'
         cur = cur._next
       }
+      if(ob) head._orderby = ob
+      if(l) head._limit = l
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -817,7 +819,10 @@ call_stmt
 select_stmt
   = select_stmt_nake
   / s:('(' __ select_stmt __ ')') {
-      return s[2];
+      return {
+        ...s[2],
+        parentheses_symbol: true,
+      }
     }
 
 with_clause
