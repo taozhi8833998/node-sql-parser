@@ -16,6 +16,7 @@ import {
 import { orderOrPartitionByToSQL } from './expr'
 import { limitToSQL } from './limit'
 import { withToSql } from './with'
+import { hasVal } from './util'
 
 const typeToSQLFn = {
   alter    : alterToSQL,
@@ -38,20 +39,21 @@ const typeToSQLFn = {
 function unionToSQL(stmt) {
   const fun = typeToSQLFn[stmt.type]
   const res = [fun(stmt)]
+  const { _orderby, _limit } = stmt
   while (stmt._next) {
     const unionKeyword = (stmt.union || 'union').toUpperCase()
     res.push(unionKeyword, fun(stmt._next))
     stmt = stmt._next
   }
-  return res.join(' ')
+  res.push(orderOrPartitionByToSQL(_orderby, 'order by'), limitToSQL(_limit))
+  return res.filter(hasVal).join(' ')
 }
 
 function bigQueryToSQL(stmt) {
   const { with: withExpr, parentheses, select, orderby, limit } = stmt
   const result = [withToSql(withExpr), parentheses && '(', unionToSQL(select), parentheses && ')']
   // process with, orderby and limit
-  result.push(orderOrPartitionByToSQL(orderby, 'order by'))
-  result.push(limitToSQL(limit))
+  result.push(orderOrPartitionByToSQL(orderby, 'order by'), limitToSQL(limit))
   return result.filter(val => val).join(' ')
 }
 

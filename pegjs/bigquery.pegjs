@@ -233,7 +233,10 @@ multiple_stmt
 query_statement
   = query_expr
   / s:('(' __ select_stmt __ ')') {
-      return s[2];
+      return {
+        ...s[2],
+        parentheses: true,
+      }
     }
 
 query_expr
