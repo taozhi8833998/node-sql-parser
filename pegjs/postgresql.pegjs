@@ -1754,6 +1754,23 @@ func_call
         args: { type: 'expr_list', value: [] }
       };
     }
+  / extract_func
+
+extract_filed
+  = f:'CENTURY'i / 'DAY'i / 'DECADE'i / 'DOW'i / 'DOY'i / 'EPOCH'i / 'HOUR'i / 'ISODOW'i / 'ISOYEAR'i / 'MICROSECONDS'i / 'MILLENNIUM'i / 'MILLISECONDS'i / 'MINUTE'i / 'MONTH'i / 'QUARTER'i / 'SECOND'i / 'TIMEZONE'i / 'TIMEZONE_HOUR'i / 'TIMEZONE_MINUTE'i / 'WEEK'i / 'YEAR'i {
+    return f
+  }
+extract_func
+  = kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ t:(KW_TIMESTAMP / KW_INTERVAL / KW_TIME)? __ s:literal_string __ RPAREN {
+    return {
+        type: kw.toLowerCase(),
+        args: {
+          field: f,
+          cast_type: t,
+          source: s,
+        }
+    }
+  }
 
 scalar_func
   = KW_CURRENT_DATE
@@ -2043,6 +2060,7 @@ KW_MIN      = "MIN"i        !ident_start { return 'MIN'; }
 KW_SUM      = "SUM"i        !ident_start { return 'SUM'; }
 KW_AVG      = "AVG"i        !ident_start { return 'AVG'; }
 
+KW_EXTRACT  = "EXTRACT"i    !ident_start { return 'EXTRACT'; }
 KW_CALL     = "CALL"i       !ident_start { return 'CALL'; }
 
 KW_CASE     = "CASE"i       !ident_start

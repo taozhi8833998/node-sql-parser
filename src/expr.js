@@ -1,4 +1,4 @@
-import { literalToSQL, toUpper, connector } from './util'
+import { literalToSQL, toUpper, connector, extractFunToSQL } from './util'
 import { alterExprToSQL } from './alter'
 import { aggrToSQL } from './aggregation'
 import { assignToSQL } from './assign'
@@ -17,6 +17,7 @@ const exprToSQLConvertFn = {
   aggr_func   : aggrToSQL,
   'array'     : arrayStructExprToSQL,
   assign      : assignToSQL,
+  extract     : extractFunToSQL,
   binary_expr : binaryToSQL,
   case        : caseToSQL,
   cast        : castToSQL,
