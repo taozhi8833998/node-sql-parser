@@ -198,10 +198,19 @@ describe('select', () => {
     })
 
     describe('functions', () => {
-      it(`should parse function dot name `, () => {
+      it(`should parse function dot name`, () => {
         const ast = parser.astify(`SELECT a.func() FROM t`);
 
         expect(parser.sqlify(ast)).to.eql('SELECT a.func() FROM `t`');
+      });
+
+      it('should parse extract function in pg', () => {
+        const opt = { database: 'postgresql' }
+        const ast = parser.astify("SELECT EXTRACT(MICROSECONDS FROM TIME '17:12:28.5')", opt);
+
+        expect(parser.sqlify(ast, opt)).to.eql("SELECT EXTRACT(MICROSECONDS FROM TIME '17:12:28.5')");
+        expect(parser.sqlify(parser.astify("SELECT EXTRACT(MILLISECONDS FROM TIMESTAMP '2016-12-31 13:30:15')", opt), opt)).to.eql("SELECT EXTRACT(MILLISECONDS FROM TIMESTAMP '2016-12-31 13:30:15')");
+        expect(parser.sqlify(parser.astify("SELECT EXTRACT(MILLISECONDS FROM '2016-12-31 13:30:15')", opt), opt)).to.eql("SELECT EXTRACT(MILLISECONDS FROM '2016-12-31 13:30:15')");
       });
 
       it('should parse function expression', () => {
