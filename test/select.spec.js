@@ -338,6 +338,13 @@ describe('select', () => {
       expect(backSQL).to.equal('SELECT `user0__`.`user_id` AS `userId` FROM `user` AS `user0__`')
     })
 
+    it('should support select from db.xxx.table', () => {
+      const sql = 'select id from db-name.public.table-name'
+      const opt = { database: 'postgresql' }
+      const ast = parser.astify(sql, opt)
+      const backSQL = parser.sqlify(ast,opt )
+      expect(backSQL).to.equal('SELECT "id" FROM "db-name.public"."table-name"')
+    })
 
     it('should parse subselect', () => {
       const ast = parser.astify('SELECT * FROM (SELECT id FROM t1) someAlias');
