@@ -211,6 +211,12 @@ describe('select', () => {
         expect(parser.sqlify(ast, opt)).to.eql("SELECT EXTRACT(MICROSECONDS FROM TIME '17:12:28.5')");
         expect(parser.sqlify(parser.astify("SELECT EXTRACT(MILLISECONDS FROM TIMESTAMP '2016-12-31 13:30:15')", opt), opt)).to.eql("SELECT EXTRACT(MILLISECONDS FROM TIMESTAMP '2016-12-31 13:30:15')");
         expect(parser.sqlify(parser.astify("SELECT EXTRACT(MILLISECONDS FROM '2016-12-31 13:30:15')", opt), opt)).to.eql("SELECT EXTRACT(MILLISECONDS FROM '2016-12-31 13:30:15')");
+        expect(parser.sqlify(parser.astify(`WITH tss AS
+        (SELECT CURRENT_TIMESTAMP AS ts)
+      SELECT
+        EXTRACT(EPOCH FROM ts)
+      FROM
+        tss`, opt), opt)).to.eql('WITH tss AS (SELECT CURRENT_TIMESTAMP AS "ts") SELECT EXTRACT(EPOCH FROM "ts") FROM "tss"');
       });
 
       it('should parse function expression', () => {

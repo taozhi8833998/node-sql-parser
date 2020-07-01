@@ -264,13 +264,6 @@ function commonKeywordArgsToSQL(kwArgs) {
   return [toUpper(kwArgs.keyword), toUpper(kwArgs.args)]
 }
 
-function extractFunToSQL(stmt) {
-  const { args, type } = stmt
-  const { field, cast_type: castType, source } = args
-  const result = [`${toUpper(type)}(${toUpper(field)}`, 'FROM', toUpper(castType), literalToSQL(source)]
-  return `${result.filter(hasVal).join(' ')})`
-}
-
 function autoIncreatementToSQL(autoIncreatement) {
   if (!autoIncreatement || typeof autoIncreatement === 'string') return toUpper(autoIncreatement)
   const { keyword, seed, increment, parentheses } = autoIncreatement
@@ -290,5 +283,5 @@ export {
   connector, commonTypeValue,commentToSQL, createBinaryExpr,
   createValueExpr, DEFAULT_OPT, escape, literalToSQL,
   identifierToSql, onPartitionsToSQL, replaceParams, returningToSQL,
-  hasVal, setParserOpt, toUpper, topToSQL, triggerEventToSQL,extractFunToSQL,
+  hasVal, setParserOpt, toUpper, topToSQL, triggerEventToSQL,
 }
