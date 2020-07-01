@@ -1025,9 +1025,9 @@ describe('select', () => {
         expect(fun).to.throw(`authority = 'select::null::b' is required in table whiteList to execute SQL = '${sql}'`)
       })
       it('should fail for as column reserved word check', () => {
-        const sql = 'SELECT id as type FROM b'
+        const sql = 'SELECT id as delete FROM b'
         const fun = parser.astify.bind(parser, sql)
-        expect(fun).to.throw('Error: "type" is a reserved word, can not as alias clause')
+        expect(fun).to.throw('Error: "delete" is a reserved word, can not as alias clause')
       })
       it('should fail for as table reserved word check', () => {
         const sql = 'SELECT id as bc FROM b as table'
