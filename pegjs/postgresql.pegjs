@@ -1155,7 +1155,15 @@ join_op
   / (KW_INNER __)? KW_JOIN { return 'INNER JOIN'; }
 
 table_name
-  = dt:ident __ DOT __ STAR {
+  = dt:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
+      const obj = { db: null, table: dt };
+      if (tail !== null) {
+        obj.db = `${dt}.${schema[3]}`;
+        obj.table = tail[3];
+      }
+      return obj;
+    }
+  / dt:ident __ DOT __ STAR {
       tableList.add(`select::${dt}::(.*)`);
       return {
         db: dt,
@@ -1695,7 +1703,7 @@ ident_name
 
 ident_start = [A-Za-z_]
 
-ident_part  = [A-Za-z0-9_]
+ident_part  = [A-Za-z0-9_\-]
 
 // to support column name like `cf1:name` in hbase
 column_part  = [A-Za-z0-9_]
@@ -1761,7 +1769,7 @@ extract_filed
     return f
   }
 extract_func
-  = kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ t:(KW_TIMESTAMP / KW_INTERVAL / KW_TIME)? __ s:literal_string __ RPAREN {
+  = kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ t:(KW_TIMESTAMP / KW_INTERVAL / KW_TIME)? __ s:expr __ RPAREN {
     return {
         type: kw.toLowerCase(),
         args: {

@@ -211,6 +211,12 @@ describe('select', () => {
         expect(parser.sqlify(ast, opt)).to.eql("SELECT EXTRACT(MICROSECONDS FROM TIME '17:12:28.5')");
         expect(parser.sqlify(parser.astify("SELECT EXTRACT(MILLISECONDS FROM TIMESTAMP '2016-12-31 13:30:15')", opt), opt)).to.eql("SELECT EXTRACT(MILLISECONDS FROM TIMESTAMP '2016-12-31 13:30:15')");
         expect(parser.sqlify(parser.astify("SELECT EXTRACT(MILLISECONDS FROM '2016-12-31 13:30:15')", opt), opt)).to.eql("SELECT EXTRACT(MILLISECONDS FROM '2016-12-31 13:30:15')");
+        expect(parser.sqlify(parser.astify(`WITH tss AS
+        (SELECT CURRENT_TIMESTAMP AS ts)
+      SELECT
+        EXTRACT(EPOCH FROM ts)
+      FROM
+        tss`, opt), opt)).to.eql('WITH tss AS (SELECT CURRENT_TIMESTAMP AS "ts") SELECT EXTRACT(EPOCH FROM "ts") FROM "tss"');
       });
 
       it('should parse function expression', () => {
@@ -332,6 +338,13 @@ describe('select', () => {
       expect(backSQL).to.equal('SELECT `user0__`.`user_id` AS `userId` FROM `user` AS `user0__`')
     })
 
+    it('should support select from db.xxx.table', () => {
+      const sql = 'select id from db-name.public.table-name'
+      const opt = { database: 'postgresql' }
+      const ast = parser.astify(sql, opt)
+      const backSQL = parser.sqlify(ast,opt )
+      expect(backSQL).to.equal('SELECT "id" FROM "db-name.public"."table-name"')
+    })
 
     it('should parse subselect', () => {
       const ast = parser.astify('SELECT * FROM (SELECT id FROM t1) someAlias');
@@ -1012,9 +1025,9 @@ describe('select', () => {
         expect(fun).to.throw(`authority = 'select::null::b' is required in table whiteList to execute SQL = '${sql}'`)
       })
       it('should fail for as column reserved word check', () => {
-        const sql = 'SELECT id as type FROM b'
+        const sql = 'SELECT id as delete FROM b'
         const fun = parser.astify.bind(parser, sql)
-        expect(fun).to.throw('Error: "type" is a reserved word, can not as alias clause')
+        expect(fun).to.throw('Error: "delete" is a reserved word, can not as alias clause')
       })
       it('should fail for as table reserved word check', () => {
         const sql = 'SELECT id as bc FROM b as table'

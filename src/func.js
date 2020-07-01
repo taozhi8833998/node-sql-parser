@@ -1,5 +1,5 @@
 import { exprToSQL } from './expr'
-import { hasVal } from './util'
+import { hasVal, toUpper } from './util'
 import { overToSQL } from './over'
 
 function castToSQL(expr) {
@@ -21,6 +21,13 @@ function castToSQL(expr) {
   return `${prefix}${symbolChar}${dataType}${str}${suffix}`
 }
 
+function extractFunToSQL(stmt) {
+  const { args, type } = stmt
+  const { field, cast_type: castType, source } = args
+  const result = [`${toUpper(type)}(${toUpper(field)}`, 'FROM', toUpper(castType), exprToSQL(source)]
+  return `${result.filter(hasVal).join(' ')})`
+}
+
 function funcToSQL(expr) {
   const { args, name } = expr
   if (!args) return name
@@ -32,5 +39,6 @@ function funcToSQL(expr) {
 
 export {
   castToSQL,
+  extractFunToSQL,
   funcToSQL,
 }

@@ -76,7 +76,7 @@
     'THEN': true,
     'TRUE': true,
     'TRUNCATE': true,
-    'TYPE': true,   // reserved (MySQL)
+    // 'TYPE': true,   // reserved (MySQL)
 
     'UNION': true,
     'UPDATE': true,
