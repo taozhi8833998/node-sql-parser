@@ -61,18 +61,23 @@ describe('select', () => {
     })
   })
 
+  it('should support for update', () => {
+    const ast = parser.astify('select SOME_COLUMN from TABLE_NAME where ID_COLUMN = 0 for update');
+    expect(parser.sqlify(ast)).to.eql('SELECT `SOME_COLUMN` FROM `TABLE_NAME` WHERE `ID_COLUMN` = 0 FOR UPDATE');
+  });
+
   it('should support select *from', () => {
     const ast = parser.astify('SELECT *from abc');
     expect(ast.options).to.be.null;
     expect(ast.distinct).to.be.null;
     expect(ast.columns).to.be.eql('*');
     expect(ast.from).to.be.eql([
-         {
-            "db": null,
-            "table": "abc",
-            "as": null
-         }
-      ]);
+      {
+        "db": null,
+        "table": "abc",
+        "as": null
+      }
+    ]);
     expect(ast.where).to.be.null;
     expect(ast.groupby).to.be.null;
     expect(ast.orderby).to.be.null;
@@ -357,6 +362,7 @@ describe('select', () => {
               type: 'select',
               options: null,
               distinct: null,
+              for_update: null,
               from: [{ db: null, table: 't1', as: null }],
               columns: [{ expr: { type: 'column_ref', table: null, column: 'id' }, as: null }],
               where: null,
@@ -420,6 +426,7 @@ describe('select', () => {
                 type: 'select',
                 options: null,
                 distinct: null,
+                for_update: null,
                 from: [{ db: null, table: 't2', as: null }],
                 columns: [
                   { expr: { type: 'column_ref', table: null, 'column': 'id' }, as: null },
@@ -557,6 +564,7 @@ describe('select', () => {
               type: 'select',
               options: null,
               distinct: null,
+              for_update: null,
               columns: [{ expr: { type: 'number', value: 1 }, as: null }],
               from: null,
               where: null,
@@ -768,6 +776,7 @@ describe('select', () => {
           type: 'select',
           options: null,
           distinct: null,
+          for_update: null,
           columns: [{ expr: { type: 'number', value: 10 }, as: null }],
           from: null,
           where: null,

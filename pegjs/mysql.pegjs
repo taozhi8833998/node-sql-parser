@@ -911,7 +911,8 @@ select_stmt_nake
     g:group_by_clause?  __
     h:having_clause?    __
     o:order_by_clause?  __
-    l:limit_clause? {
+    l:limit_clause?
+    fu: ('FOR'i __ KW_UPDATE)? {
       if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
           with: cte,
@@ -924,7 +925,8 @@ select_stmt_nake
           groupby: g,
           having: h,
           orderby: o,
-          limit: l
+          limit: l,
+          for_update: fu && `${fu[0]} ${fu[2][0]}`,
       };
   }
 

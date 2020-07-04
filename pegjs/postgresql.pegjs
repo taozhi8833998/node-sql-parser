@@ -2079,6 +2079,8 @@ KW_END      = "END"i        !ident_start
 
 KW_CAST     = "CAST"i       !ident_start
 
+KW_BOOL     = "BOOL"i     !ident_start { return 'BOOL'; }
+KW_BOOLEAN  = "BOOLEAN"i  !ident_start { return 'BOOLEAN'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
 KW_NUMERIC  = "NUMERIC"i  !ident_start { return 'NUMERIC'; }
@@ -2372,6 +2374,10 @@ data_type
   / geometry_type
   / text_type
   / uuid_type
+  / boolean_type
+
+boolean_type
+  = t:(KW_BOOL / KW_BOOLEAN) { return { dataType: t }}
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN __ {
@@ -2393,7 +2399,8 @@ numeric_type
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ s:numeric_type_suffix? __{ return { dataType: t, suffix: s }; }
 
 datetime_type
-  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
+  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) __ LPAREN __ l:[0-9]+ __ RPAREN { return { dataType: t, length: parseInt(l.join(''), 10) }; }
+  / t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
 
 json_type
   = t:(KW_JSON / KW_JSONB) { return { dataType: t }; }

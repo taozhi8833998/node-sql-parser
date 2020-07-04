@@ -22,7 +22,7 @@ import { hasVal, commonOptionConnector, connector, topToSQL, toUpper } from './u
 
 function selectToSQL(stmt) {
   const {
-    as_struct_val: asStructVal, columns, distinct, from, for_sys_time_as_of: forSystem = {}, groupby, having, limit, options, orderby, parentheses_symbol: parentheses, top, window: windowInfo, with: withInfo, where,
+    as_struct_val: asStructVal, columns, distinct, from, for_sys_time_as_of: forSystem = {}, for_update: forUpdate, groupby, having, limit, options, orderby, parentheses_symbol: parentheses, top, window: windowInfo, with: withInfo, where,
   } = stmt
   const clauses = [withToSql(withInfo), 'SELECT', toUpper(asStructVal)]
   clauses.push(topToSQL(top))
@@ -38,6 +38,7 @@ function selectToSQL(stmt) {
   clauses.push(commonOptionConnector('WINDOW', exprToSQL, windowInfo))
   clauses.push(orderOrPartitionByToSQL(orderby, 'order by'))
   clauses.push(limitToSQL(limit))
+  clauses.push(toUpper(forUpdate))
   const sql = clauses.filter(hasVal).join(' ')
   return parentheses ? `(${sql})` : sql
 }
