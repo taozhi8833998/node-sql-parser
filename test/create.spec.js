@@ -278,6 +278,16 @@ describe('create', () => {
 
         PRIMARY KEY (id)
       );`, { database: 'postgresql' })).to.equal('CREATE TABLE "accounts" ("id" UUID NOT NULL DEFAULT uuid_generate_v4(), "email" TEXT NOT NULL, "password" TEXT NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT NOW(), "updated_at" TIMESTAMP NULL, PRIMARY KEY ("id"))')
+
+      it('should support pg bool/boolean type', () => {
+        expect(getParsedSql(`CREATE TABLE "foos"
+        (
+            "Id" varchar(25) not null,
+            "status" boolean default 't',
+            "is_deleted" bool null,
+            "is_man" boolean not null default 'f'
+        );`, { database: 'postgresql' })).to.equal(`CREATE TABLE "foos" ("Id" VARCHAR(25) NOT NULL, "status" BOOLEAN DEFAULT 't', "is_deleted" BOOL NULL, "is_man" BOOLEAN NOT NULL DEFAULT 'f')`)
+      })
     })
     describe('create trigger pg', () => {
       it('should support basic trigger', () => {

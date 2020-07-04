@@ -2079,6 +2079,8 @@ KW_END      = "END"i        !ident_start
 
 KW_CAST     = "CAST"i       !ident_start
 
+KW_BOOL     = "BOOL"i     !ident_start { return 'BOOL'; }
+KW_BOOLEAN  = "BOOLEAN"i  !ident_start { return 'BOOLEAN'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
 KW_NUMERIC  = "NUMERIC"i  !ident_start { return 'NUMERIC'; }
@@ -2372,6 +2374,10 @@ data_type
   / geometry_type
   / text_type
   / uuid_type
+  / boolean_type
+
+boolean_type
+  = t:(KW_BOOL / KW_BOOLEAN) { return { dataType: t }}
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN __ {
