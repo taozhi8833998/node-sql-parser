@@ -288,6 +288,13 @@ describe('create', () => {
             "is_man" boolean not null default 'f'
         );`, { database: 'postgresql' })).to.equal(`CREATE TABLE "foos" ("Id" VARCHAR(25) NOT NULL, "status" BOOLEAN DEFAULT 't', "is_deleted" BOOL NULL, "is_man" BOOLEAN NOT NULL DEFAULT 'f')`)
       })
+      it('should support pg time length type', () => {
+        expect(getParsedSql(`CREATE TABLE "foos"
+        (
+            "Id" varchar(25) not null,
+            "TIME" time(7) null
+        );`, { database: 'postgresql' })).to.equal(`CREATE TABLE "foos" ("Id" VARCHAR(25) NOT NULL, "TIME" TIME(7) NULL)`)
+      })
     })
     describe('create trigger pg', () => {
       it('should support basic trigger', () => {
