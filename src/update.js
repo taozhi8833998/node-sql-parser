@@ -1,5 +1,6 @@
 import { tablesToSQL } from './tables'
-import { exprToSQL } from './expr'
+import { exprToSQL, orderOrPartitionByToSQL } from './expr'
+import { limitToSQL } from './limit'
 import { hasVal, identifierToSql, commonOptionConnector, returningToSQL } from './util'
 
 /**
@@ -20,12 +21,14 @@ function setToSQL(sets) {
 }
 
 function updateToSQL(stmt) {
-  const { table, set, where, returning } = stmt
+  const { table, set, where, orderby, limit, returning } = stmt
   const clauses = [
     'UPDATE',
     tablesToSQL(table),
     commonOptionConnector('SET', setToSQL, set),
     commonOptionConnector('WHERE', exprToSQL, where),
+    orderOrPartitionByToSQL(orderby, 'order by'),
+    limitToSQL(limit),
     returningToSQL(returning),
   ]
   return clauses.filter(hasVal).join(' ')
