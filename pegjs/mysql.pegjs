@@ -1186,7 +1186,9 @@ update_stmt
     t:table_ref_list __
     KW_SET       __
     l:set_list   __
-    w:where_clause? {
+    w:where_clause? __
+    or:order_by_clause? __
+    lc:limit_clause? {
       if (t) t.forEach(tableInfo => {
         const { db, as, table } = tableInfo
         tableList.add(`update::${db}::${table}`)
@@ -1201,7 +1203,9 @@ update_stmt
           type: 'update',
           table: t,
           set: l,
-          where: w
+          where: w,
+          orderby: or,
+          limit: lc,
         }
       };
     }
@@ -1210,7 +1214,9 @@ delete_stmt
   = KW_DELETE    __
     t: table_ref_list? __
     f:from_clause __
-    w:where_clause? {
+    w:where_clause? __
+    or:order_by_clause? __
+    l:limit_clause? {
       if(f) f.forEach(info => {
         info.table && tableList.add(`delete::${info.db}::${info.table}`);
         columnList.add(`delete::${info.table}::(.*)`);
@@ -1231,7 +1237,9 @@ delete_stmt
           type: 'delete',
           table: t,
           from: f,
-          where: w
+          where: w,
+          orderby: or,
+          limit: l,
         }
       };
     }

@@ -5,6 +5,11 @@ const { deleteToSQL } = require('../src/delete')
 describe('delete', () => {
     const parser = new Parser();
 
+    function getParsedSql(sql, opt) {
+      const ast = parser.astify(sql, opt);
+      return parser.sqlify(ast, opt);
+  }
+
     it('should parse baisc usage', () => {
       const { tableList, columnList, ast } = parser.parse('delete from a where id = 1');
       expect(tableList).to.eql(['delete::null::a']);
@@ -113,4 +118,11 @@ describe('delete', () => {
          }
       });
     });
+
+   it('should support order by and limit in delete sql', () => {
+      expect(getParsedSql('delete from t1 where id = 1 order by id')).to.be.equal('DELETE FROM `t1` WHERE `id` = 1 ORDER BY `id` ASC')
+      expect(getParsedSql('delete from t1 where id = 1 limit 10')).to.be.equal('DELETE FROM `t1` WHERE `id` = 1 LIMIT 10')
+      expect(getParsedSql('delete from t1 where id = 1 order by id limit 10')).to.be.equal('DELETE FROM `t1` WHERE `id` = 1 ORDER BY `id` ASC LIMIT 10')
+      expect(getParsedSql('delete from t1 order by id limit 10')).to.be.equal('DELETE FROM `t1` ORDER BY `id` ASC LIMIT 10')
+   })
 });

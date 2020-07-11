@@ -4,6 +4,11 @@ const Parser = require('../src/parser').default
 describe('update', () => {
     const parser = new Parser();
 
+    function getParsedSql(sql, opt) {
+      const ast = parser.astify(sql, opt);
+      return parser.sqlify(ast, opt);
+  }
+
     it('should parse baisc usage', () => {
       const { tableList, columnList, ast } = parser.parse('UPDATE a set id = 1');
       expect(tableList).to.eql(["update::null::a"]);
@@ -193,6 +198,13 @@ describe('update', () => {
         "value": 12
       }
     });
+  })
+
+  it('should support order by and limit in update sql', () => {
+    expect(getParsedSql('update a set id = 123 where age > 15 order by name')).to.be.equal('UPDATE `a` SET `id` = 123 WHERE `age` > 15 ORDER BY `name` ASC')
+    expect(getParsedSql('update a set id = 123 order by name')).to.be.equal('UPDATE `a` SET `id` = 123 ORDER BY `name` ASC')
+    expect(getParsedSql('update a set id = 123 limit 10')).to.be.equal('UPDATE `a` SET `id` = 123 LIMIT 10')
+    expect(getParsedSql('update a set id = 123 order by name limit 10')).to.be.equal('UPDATE `a` SET `id` = 123 ORDER BY `name` ASC LIMIT 10')
   })
 
   it('should support parse pg update returning', () => {
