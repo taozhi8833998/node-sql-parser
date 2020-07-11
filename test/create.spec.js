@@ -393,6 +393,16 @@ describe('create', () => {
         score AS questions_correct * 100 / questions_total
       );`, { database: 'transactsql' })).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1) PRIMARY KEY, [questions_correct] BIGINT NOT NULL DEFAULT (0), [questions_total] BIGINT NOT NULL, [score] AS [questions_correct] * 100 / [questions_total])')
     })
+    it('should support bracket around data type', () => {
+      expect(getParsedSql(`CREATE TABLE [dbo].[foo]
+      (
+          [Id] [nvarchar](25) NOT NULL,
+          name [nchar](123) not null,
+          [test] [real] NULL,
+          [gmt_modified] [time](7) NULL,
+          [abc] [UNIQUEIDENTIFIER] null,
+      );`, { database: 'transactsql' })).to.equal('CREATE TABLE [dbo].[foo] ([Id] NVARCHAR(25) NOT NULL, [name] NCHAR(123) NOT NULL, [test] REAL NULL, [gmt_modified] TIME(7) NULL, [abc] UNIQUEIDENTIFIER NULL)')
+    })
   })
 
   describe('create index with tsql', () => {

@@ -2234,9 +2234,13 @@ KW_MEDIUMTEXT = "MEDIUMTEXT"i  !ident_start { return 'MEDIUMTEXT'; }
 KW_LONGTEXT  = "LONGTEXT"i  !ident_start { return 'LONGTEXT'; }
 KW_BIGINT   = "BIGINT"i   !ident_start { return 'BIGINT'; }
 KW_FLOAT   = "FLOAT"i   !ident_start { return 'FLOAT'; }
+KW_REAL   = "REAL"i   !ident_start { return 'REAL'; }
 KW_DOUBLE   = "DOUBLE"i   !ident_start { return 'DOUBLE'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
-KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
+KW_SMALLDATETIME   = "SMALLDATETIME"i     !ident_start { return 'SMALLDATETIME'; }
+KW_DATETIME   = "DATETIME"i     !ident_start { return 'DATETIME'; }
+KW_DATETIME2  = "DATETIME2"i    !ident_start { return 'DATETIME2'; }
+KW_DATETIMEOFFSET  = "DATETIMEOFFSET"i    !ident_start { return 'DATETIMEOFFSET'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
@@ -2506,11 +2510,13 @@ data_type
   / uniqueidentifier_type
 
 character_string_type
-  = t:(KW_CHAR / KW_VARCHAR / KW_NCHAR / KW_NVARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN __ {
+  = lb:LBRAKE? __ t:(KW_CHAR / KW_VARCHAR / KW_NCHAR / KW_NVARCHAR) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } __ LPAREN __ l:[0-9]+ __ RPAREN __ {
     return { dataType: t, length: parseInt(l.join(''), 10) };
   }
-  / t:(KW_CHAR / KW_VARCHAR) { return { dataType: t }; }
-  / t:KW_NVARCHAR __ LPAREN __ m:'MAX'i __ RPAREN __ {
+  / lb:LBRAKE? __ t:(KW_CHAR / KW_VARCHAR) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
+    return { dataType: t };
+  }
+  / lb:LBRAKE? __ t:KW_NVARCHAR __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } __ LPAREN __ m:'MAX'i __ RPAREN __ {
     return {
       dataType: t,
       length: 'max'
@@ -2526,17 +2532,34 @@ numeric_type_suffix
   }
 
 numeric_type
-  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? __ { return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE)l:[0-9]+ __ s:numeric_type_suffix? __ { return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_BIT / KW_MONEY / KW_SMALLMONEY) __ s:numeric_type_suffix? __{ return { dataType: t, suffix: s }; }
+  = lb:LBRAKE? __ t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_REAL / KW_DOUBLE) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? __ {
+    return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s };
+  }
+  / lb:LBRAKE? __ t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_REAL / KW_DOUBLE) rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } __ l:[0-9]+ __ s:numeric_type_suffix? __ {
+    return { dataType: t, length: parseInt(l.join(''), 10), suffix: s };
+  }
+  / lb:LBRAKE? __ t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_REAL / KW_DOUBLE / KW_BIT / KW_MONEY / KW_SMALLMONEY) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } __ s:numeric_type_suffix? __{
+    return { dataType: t, suffix: s };
+  }
 datetime_type
-  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
+  = lb:LBRAKE? __ t:(KW_DATETIME2 / KW_DATETIMEOFFSET / KW_TIME) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ {
+    return  {dataType: t, length: parseInt(l.join(''), 10) }
+  }
+  / lb:LBRAKE? __ t:(KW_DATE / KW_SMALLDATETIME / KW_DATETIME / KW_DATETIME2 / KW_DATETIMEOFFSET / KW_TIME / KW_TIMESTAMP) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
+    return { dataType: t };
+  }
 
 json_type
-  = t:KW_JSON { return { dataType: t }; }
+  = lb:LBRAKE? __ t:KW_JSON __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
+    return { dataType: t };
+  }
 
 text_type
-  = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) { return { dataType: t }}
+  = lb:LBRAKE? __ t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
+    return { dataType: t }
+  }
 
 uniqueidentifier_type
-  = t:(KW_UNIQUEIDENTIFIER) { return { dataType: t }}
+  = lb:LBRAKE? __ t:(KW_UNIQUEIDENTIFIER) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
+    return { dataType: t }
+  }
