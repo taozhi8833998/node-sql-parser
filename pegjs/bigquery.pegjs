@@ -212,7 +212,7 @@
 }
 
 start
-  = __ n:(multiple_stmt / query_statement) __ {
+  = __ n:(multiple_stmt / query_statement) {
     return n
   }
 
@@ -319,7 +319,7 @@ select_stmt_nake
     w:where_clause?     __
     g:group_by_clause?  __
     h:having_clause?    __
-    win:window_clause? __ {
+    win:window_clause? {
       if(Array.isArray(f)) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
           type: 'select',
@@ -343,7 +343,7 @@ for_sys_time_as_of
     }
   }
 struct_value
-  = a:KW_AS __ k:(KW_STRUCT / KW_VALUE) __ {
+  = a:KW_AS __ k:(KW_STRUCT / KW_VALUE) {
     return `${a[0].toLowerCase()} ${k.toLowerCase()}`
   }
 
@@ -551,7 +551,7 @@ named_window_expr_list
     }
 
 named_window_expr
-  = nw:ident_name __ KW_AS __ anw:as_window_specification __ {
+  = nw:ident_name __ KW_AS __ anw:as_window_specification {
     return {
       name: nw,
       as_window_specification: anw,
@@ -571,7 +571,7 @@ window_specification
   = n:ident? __
   bc:partition_by_clause? __
   l:order_by_clause? __
-  w:window_frame_clause? __ {
+  w:window_frame_clause? {
     return {
       name: n,
       partitionby: bc,
@@ -653,7 +653,7 @@ parentheses_expr
   }
 
 array_expr
-  = LBRAKE __ c:column_clause __ RBRAKE __ {
+  = LBRAKE __ c:column_clause __ RBRAKE {
     return {
       array_path: c,
       type: 'array',
@@ -661,7 +661,7 @@ array_expr
       parentheses: true
     }
   }
-  / s:(array_type / KW_ARRAY)? LBRAKE __ c:literal_list __ RBRAKE __ {
+  / s:(array_type / KW_ARRAY)? LBRAKE __ c:literal_list __ RBRAKE {
     return {
       definition: s,
       array_path: c.map(l => ({ expr: l, as: null })),
@@ -670,7 +670,7 @@ array_expr
       parentheses: true
     }
   }
-  / s:(array_type / KW_ARRAY)? __ LBRAKE __ c:expr __ RBRAKE __ {
+  / s:(array_type / KW_ARRAY)? __ LBRAKE __ c:expr __ RBRAKE {
     return {
       definition: s,
       expr_list: c,
@@ -681,7 +681,7 @@ array_expr
   }
 
 struct_expr
-  = s:(struct_type / KW_STRUCT) __ LPAREN __ c:column_clause __ RPAREN __ {
+  = s:(struct_type / KW_STRUCT) __ LPAREN __ c:column_clause __ RPAREN {
     return {
       definition: s,
       expr_list: c,
@@ -702,12 +702,12 @@ unary_expr
   }
 
 or_expr
-  = head:and_expr tail:(__ KW_OR __ and_expr)* {
+  = head:and_expr tail:(___ KW_OR __ and_expr)* {
       return createBinaryExprChain(head, tail);
     }
 
 and_expr
-  = head:not_expr tail:(__ KW_AND __ not_expr)* {
+  = head:not_expr tail:(___ KW_AND __ not_expr)* {
       return createBinaryExprChain(head, tail);
     }
 
@@ -1100,14 +1100,14 @@ literal_numeric
     }
 
 number
-  = int_:int frac:frac exp:exp __ {
+  = int_:int frac:frac exp:exp {
     const numStr = int_ + frac + exp
     return {
       type: 'bigint',
       value: numStr
     }
   }
-  / int_:int frac:frac __         {
+  / int_:int frac:frac {
     const numStr = int_ + frac
     if (isBigInt(int_)) return {
       type: 'bigint',
@@ -1115,14 +1115,14 @@ number
     }
     return parseFloat(numStr);
   }
-  / int_:int exp:exp __           {
+  / int_:int exp:exp {
     const numStr = int_ + exp
     return {
       type: 'bigint',
       value: numStr
     }
   }
-  / int_:int __                   {
+  / int_:int {
     if (isBigInt(int_)) return {
       type: 'bigint',
       value: int_
@@ -1321,6 +1321,9 @@ LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
 __
   = (whitespace / comment)*
 
+___
+  = (whitespace / comment)+
+
 comment
   = block_comment
   / line_comment
@@ -1381,7 +1384,7 @@ character_string_type
   = t:KW_STRING { return { dataType: t }; }
 
 numeric_type
-  = t:(KW_NUMERIC / KW_INT_64 / KW_FLOAT_64) __ { return { dataType: t }; }
+  = t:(KW_NUMERIC / KW_INT_64 / KW_FLOAT_64) { return { dataType: t }; }
 
 datetime_type
   = t:(KW_DATE / KW_TIME / KW_TIMESTAMP / KW_DATETIME) { return { dataType: t }; }

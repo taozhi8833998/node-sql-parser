@@ -4,6 +4,11 @@ const Parser = require('../src/parser').default
 describe('select', () => {
   const parser = new Parser();
 
+  function getParsedSql(sql, opt) {
+    const ast = parser.astify(sql, opt);
+    return parser.sqlify(ast, opt);
+}
+
   it('should be null if empty', () => {
     const ast = parser.astify('SELECT a');
     expect(ast.options).to.be.null;
@@ -1222,5 +1227,10 @@ describe('select', () => {
       const whiteList = ['select::null::(.*)']
       expect(parser.whiteListCheck.bind(parser, sql, whiteList, { type: 'unknow' })).to.throw('unknow is not valid check mode')
     })
+  })
+
+  it('should throw error when no space before keyword', () => {
+    expect(() => getParsedSql('SELECT * FROM a where id = 1and name="test"')).to.throw('Expected "!=", "#", "%", "*", "+", "-", "--", ".", "/", "/*", ";", "<", "<=", "<>", "=", ">", ">=", "FOR", "GROUP", "HAVING", "LIMIT", "ORDER", "UNION", [ \\t\\n\\r], [0-9], [eE], or end of input but "a" found.')
+    expect(() => getParsedSql('SELECT * FROM a where class = "ac"or name="test"')).to.throw('Expected "!=", "#", "%", "*", "+", "-", "--", "/", "/*", ";", "<", "<=", "<>", "=", ">", ">=", "FOR", "GROUP", "HAVING", "LIMIT", "ORDER", "UNION", [ \\t\\n\\r], or end of input but "o" found.')
   })
 });
