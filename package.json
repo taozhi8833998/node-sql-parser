@@ -55,7 +55,7 @@
     "@babel/preset-env": "^7.5.5",
     "@babel/register": "^7.5.5",
     "@types/chai": "^4.1.7",
-    "@types/mocha": "^7.0.1",
+    "@types/mocha": "^8.0.0",
     "browserify": "^16.5.1",
     "chai": "^4.2.0",
     "coveralls": "^3.0.13",
