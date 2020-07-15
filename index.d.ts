@@ -49,10 +49,14 @@ export interface InsertReplaceValue {
   type: 'expr_list';
   value: any[];
 }
+export interface Star {
+  type: 'star';
+  value: '*';
+}
 export interface AggrFunc {
   type: 'aggr_func';
   name: string;
-  args: ColumnRef | AggrFunc | null;
+  args: ColumnRef | AggrFunc | Star | null;
 }
 export interface Column {
   expr: ColumnRef | AggrFunc;
