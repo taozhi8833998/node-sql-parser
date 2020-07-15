@@ -358,7 +358,7 @@ create_column_definition
     d:data_type __
     clc:column_constraint? __
     a:('AUTO_INCREMENT'i)? __
-    u:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i)? __
+    u:('UNIQUE'i / 'PRIMARY KEY'i)? __
     co:keyword_comment? __
     ca:collate_expr? __
     cf:column_format? __
@@ -371,7 +371,7 @@ create_column_definition
         nullable: clc && clc.nullable,
         default_val: clc && clc.default_val,
         auto_increment: a && a.toLowerCase(),
-        unique_or_primary: u && `${u[0].toLowerCase()} ${u[2].toLowerCase()}`,
+        unique_or_primary: u && u.toLowerCase(),
         comment: co,
         collate: ca,
         column_format: cf,
