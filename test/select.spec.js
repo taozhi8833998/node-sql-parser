@@ -542,6 +542,12 @@ describe('select', () => {
       });
     });
 
+    it('should parse multiple condition with boolean', () => {
+      expect(getParsedSql('SELECT id FROM t where deleted and not suspended')).to.be.equal('SELECT `id` FROM `t` WHERE `deleted` AND NOT `suspended`')
+      expect(getParsedSql('SELECT id FROM t where not deleted and not suspended')).to.be.equal('SELECT `id` FROM `t` WHERE NOT `deleted` AND NOT `suspended`')
+      expect(getParsedSql('SELECT id FROM t where deleted and suspended')).to.be.equal('SELECT `id` FROM `t` WHERE `deleted` AND `suspended`')
+    });
+
     ['is', 'is not'].forEach((operator) => {
       it(`should parse ${operator} condition`, () => {
         const ast = parser.astify(`SELECT * FROM t WHERE col ${operator} NULL`);
