@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "name": "Attach unit tests",
+            "request": "attach",
+            "port": 9240,
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ],
+            "skipFiles": [
+                "<node_internals>/*.js",
+                "**/loader.js", // webpack hmr reloader
+                "node_modules/core-js/**",
+                "output/**"
+            ]
+        }
+    ]
+}

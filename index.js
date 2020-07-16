@@ -1,14 +1,14 @@
-const Parser = require('./lib/parser').default
-const util = require('./lib/util')
+import Parser from './src/parser';
+import * as util from './src/util';
 
-module.exports = {
+export {
   Parser,
   util,
-}
+};
 
 if (global && global.window) {
   global.window.NodeSQLParser = {
     Parser,
     util,
-  }
+  };
 }
