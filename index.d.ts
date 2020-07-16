@@ -49,12 +49,25 @@ export interface InsertReplaceValue {
   type: 'expr_list';
   value: any[];
 }
+export interface Star {
+  type: 'star';
+  value: '*';
+}
+export interface AggrFunc {
+  type: 'aggr_func';
+  name: string;
+  args: ColumnRef | AggrFunc | Star | null;
+}
+export interface Column {
+  expr: ColumnRef | AggrFunc;
+  as: string;
+}
 export interface Select {
   with: With | null;
   type: 'select';
   options: any[] | null;
   distinct: 'DISTINCT' | null;
-  columns: any[] | '*';
+  columns: any[] | Column[] | '*';
   from: Array<From | Dual> | null;
   where: any;
   groupby: ColumnRef[] | null;
