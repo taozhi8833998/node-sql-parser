@@ -15,7 +15,7 @@ import {
 } from './command'
 import { orderOrPartitionByToSQL } from './expr'
 import { limitToSQL } from './limit'
-import { withToSql } from './with'
+import { withToSQL } from './with'
 import { hasVal } from './util'
 
 const typeToSQLFn = {
@@ -51,7 +51,7 @@ function unionToSQL(stmt) {
 
 function bigQueryToSQL(stmt) {
   const { with: withExpr, parentheses, select, orderby, limit } = stmt
-  const result = [withToSql(withExpr), parentheses && '(', unionToSQL(select), parentheses && ')']
+  const result = [withToSQL(withExpr), parentheses && '(', unionToSQL(select), parentheses && ')']
   // process with, orderby and limit
   result.push(orderOrPartitionByToSQL(orderby, 'order by'), limitToSQL(limit))
   return result.filter(val => val).join(' ')

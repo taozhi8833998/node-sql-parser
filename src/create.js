@@ -1,5 +1,5 @@
 import { exprToSQL } from './expr'
-import { indexDefinitionToSQL, indexOptionListToSQL } from './index-definition'
+import { indexDefinitionToSQL, indexOptionListToSQL, indexTypeToSQL } from './index-definition'
 import { columnDefinitionToSQL } from './column'
 import { constraintDefinitionToSQL } from './constrain'
 import { funcToSQL } from './func'
@@ -90,16 +90,17 @@ function createExtensionToSQL(stmt) {
 
 function createIndexToSQL(stmt) {
   const {
-    filestream_on: fileStream, keyword, include, index_columns: indexColumns,
-    index_type: indexType, index, on, on_kw: onKw, table, type, where,
+    concurrently, filestream_on: fileStream, keyword, include, index_columns: indexColumns,
+    index_type: indexType, index_using: indexUsing, index, on, on_kw: onKw, table, tablespace, type, where,
     with: withExpr,
   } = stmt
   const withIndexOpt = withExpr && `WITH (${indexOptionListToSQL(withExpr).join(', ')})`
   const includeColumns = include && `${toUpper(include.keyword)} (${include.columns.map(col => identifierToSql(col)).join(', ')})`
   const sql = [
-    toUpper(type), toUpper(indexType), toUpper(keyword),
-    identifierToSql(index), toUpper(onKw), tableToSQL(table),
+    toUpper(type), toUpper(indexType), toUpper(keyword), toUpper(concurrently),
+    identifierToSql(index), toUpper(onKw), tableToSQL(table), ...indexTypeToSQL(indexUsing),
     `(${columnOrderListToSQL(indexColumns)})`, includeColumns,
+    commonOptionConnector('TABLESPACE', literalToSQL, tablespace),
     commonOptionConnector('WHERE', exprToSQL, where), withIndexOpt,
     commonOptionConnector('ON', exprToSQL, on),
     commonOptionConnector('FILESTREAM_ON', literalToSQL, fileStream),

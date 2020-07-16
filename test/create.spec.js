@@ -9,6 +9,10 @@ describe('create', () => {
     database: 'mysql'
   }
 
+  const PG_OPT = {
+    database: 'postgresql'
+  }
+
   function getParsedSql(sql, opt = DEFAULT_OPT) {
     const ast = parser.astify(sql, opt);
     return parser.sqlify(ast, opt);
@@ -267,7 +271,6 @@ describe('create', () => {
     })
 
     describe('create table using pg', () => {
-
       it ('supports basic things', () => {
         expect(getParsedSql(`CREATE TABLE foo (id uuid)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" ("id" UUID)')
         expect(getParsedSql(`CREATE TABLE foo (value text unique)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" ("value" TEXT UNIQUE)')
@@ -290,22 +293,79 @@ describe('create', () => {
             "status" boolean default 't',
             "is_deleted" bool null,
             "is_man" boolean not null default 'f'
-        );`, { database: 'postgresql' })).to.equal(`CREATE TABLE "foos" ("Id" VARCHAR(25) NOT NULL, "status" BOOLEAN DEFAULT 't', "is_deleted" BOOL NULL, "is_man" BOOLEAN NOT NULL DEFAULT 'f')`)
+        );`, PG_OPT)).to.equal(`CREATE TABLE "foos" ("Id" VARCHAR(25) NOT NULL, "status" BOOLEAN DEFAULT 't', "is_deleted" BOOL NULL, "is_man" BOOLEAN NOT NULL DEFAULT 'f')`)
       })
       it('should support pg time length type', () => {
         expect(getParsedSql(`CREATE TABLE "foos"
         (
             "Id" varchar(25) not null,
             "TIME" time(7) null
-        );`, { database: 'postgresql' })).to.equal(`CREATE TABLE "foos" ("Id" VARCHAR(25) NOT NULL, "TIME" TIME(7) NULL)`)
+        );`, PG_OPT)).to.equal(`CREATE TABLE "foos" ("Id" VARCHAR(25) NOT NULL, "TIME" TIME(7) NULL)`)
       })
     })
+
+    describe('create index using pg', () => {
+      const indexSQLList = [
+        {
+          origin: 'CREATE UNIQUE INDEX title_idx ON films (title);',
+          description: 'should create a B-tree index on the column title in the table films',
+          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title" ASC)'
+        },
+        {
+          origin: 'CREATE INDEX ON films ((lower(title)));',
+          description: 'should create an index on the expression lower(title), allowing efficient case-insensitive searches',
+          sqlify: 'CREATE INDEX ON "films" ((lower("title")) ASC)'
+        },
+        {
+          origin: 'CREATE INDEX title_idx_german ON films (title COLLATE "de_DE");',
+          description: 'should create an index with non-default collation',
+          sqlify: 'CREATE INDEX "title_idx_german" ON "films" ("title" COLLATE "de_DE" ASC)'
+        },
+        {
+          origin: 'CREATE INDEX title_idx_nulls_low ON films (title NULLS FIRST);',
+          description: 'should create an index with non-default sort ordering of nulls',
+          sqlify: 'CREATE INDEX "title_idx_nulls_low" ON "films" ("title" ASC NULLS FIRST)'
+        },
+        {
+          origin: 'CREATE UNIQUE INDEX title_idx ON films (title) WITH (fillfactor = 70);',
+          description: 'should create an index with non-default fill factor',
+          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title" ASC) WITH (FILLFACTOR = 70)'
+        },
+        {
+          origin: 'CREATE INDEX gin_idx ON documents_table USING gin (locations) WITH (fastupdate = off);',
+          description: 'should create a GIN index with fast updates disabled',
+          sqlify: 'CREATE INDEX "gin_idx" ON "documents_table" USING GIN ("locations" ASC) WITH (FASTUPDATE = OFF)'
+        },
+        {
+          origin: 'CREATE INDEX code_idx ON films (code) TABLESPACE indexspace;',
+          description: 'should create an index on the column code in the table films and have the index reside in the tablespace indexspace',
+          sqlify: 'CREATE INDEX "code_idx" ON "films" ("code" ASC) TABLESPACE INDEXSPACE'
+        },
+        {
+          origin: 'CREATE INDEX pointloc ON points USING gist (box(location,location))',
+          description: 'should create a GiST index on a point attribute so that we can efficiently use box operators on the result of the conversion function',
+          sqlify: 'CREATE INDEX "pointloc" ON "points" USING GIST (box("location", "location") ASC)'
+        },
+        {
+          origin: 'CREATE INDEX CONCURRENTLY sales_quantity_index ON sales_table (quantity);',
+          description: 'should create an index without locking out writes to the table',
+          sqlify: 'CREATE INDEX CONCURRENTLY "sales_quantity_index" ON "sales_table" ("quantity" ASC)'
+        },
+      ]
+      indexSQLList.forEach(indexSQL => {
+        const { description, origin, sqlify } = indexSQL
+        it(description, () => {
+          expect(getParsedSql(origin, PG_OPT)).to.equal(sqlify)
+        })
+      })
+    })
+
     describe('create trigger pg', () => {
       it('should support basic trigger', () => {
         expect(getParsedSql(`CREATE TRIGGER check_update
         BEFORE INSERT ON accounts
         FOR EACH ROW
-        EXECUTE PROCEDURE check_account_update();`, { database: 'postgresql' })).to.equal('CREATE TRIGGER "check_update" BEFORE INSERT ON "accounts" FOR EACH ROW EXECUTE PROCEDURE check_account_update()')
+        EXECUTE PROCEDURE check_account_update();`, PG_OPT)).to.equal('CREATE TRIGGER "check_update" BEFORE INSERT ON "accounts" FOR EACH ROW EXECUTE PROCEDURE check_account_update()')
       })
       it('should support trigger with when expression', () => {
         expect(getParsedSql(`CREATE TRIGGER check_update
@@ -313,7 +373,7 @@ describe('create', () => {
         NOT DEFERRABLE INITIALLY DEFERRED
         FOR EACH ROW
         WHEN (OLD.balance IS DISTINCT FROM NEW.balance)
-        EXECUTE PROCEDURE check_account_update();`, { database: 'postgresql' })).to.equal('CREATE TRIGGER "check_update" BEFORE DELETE ON "accounts" NOT DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN "OLD"."balance" IS DISTINCT FROM "NEW"."BALANCE" EXECUTE PROCEDURE check_account_update()')
+        EXECUTE PROCEDURE check_account_update();`, PG_OPT)).to.equal('CREATE TRIGGER "check_update" BEFORE DELETE ON "accounts" NOT DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN "OLD"."balance" IS DISTINCT FROM "NEW"."BALANCE" EXECUTE PROCEDURE check_account_update()')
       })
       it('should support trigger with when expression with * and deferrable', () => {
         expect(getParsedSql(`CREATE TRIGGER log_update
@@ -322,30 +382,30 @@ describe('create', () => {
         DEFERRABLE INITIALLY IMMEDIATE
         FOR EACH ROW
         WHEN (OLD.* IS DISTINCT FROM NEW.*)
-        EXECUTE PROCEDURE log_account_update();`, { database: 'postgresql' })).to.equal('CREATE TRIGGER "log_update" AFTER TRUNCATE ON "accounts" FROM "bank"."accounts" DEFERRABLE INITIALLY IMMEDIATE FOR EACH ROW WHEN "OLD".* IS DISTINCT FROM "NEW".* EXECUTE PROCEDURE log_account_update()')
+        EXECUTE PROCEDURE log_account_update();`, PG_OPT)).to.equal('CREATE TRIGGER "log_update" AFTER TRUNCATE ON "accounts" FROM "bank"."accounts" DEFERRABLE INITIALLY IMMEDIATE FOR EACH ROW WHEN "OLD".* IS DISTINCT FROM "NEW".* EXECUTE PROCEDURE log_account_update()')
       })
       it('should support trigger with update of', () => {
         expect(getParsedSql(`CREATE TRIGGER log_update
         AFTER UPDATE OF user, name, salary OR INSERT ON accounts
         DEFERRABLE INITIALLY IMMEDIATE
         WHEN (OLD.* IS DISTINCT FROM NEW.*)
-        EXECUTE PROCEDURE log_account_update();`, { database: 'postgresql' })).to.equal('CREATE TRIGGER "log_update" AFTER UPDATE OF "user", "name", "salary" OR INSERT ON "accounts" DEFERRABLE INITIALLY IMMEDIATE WHEN "OLD".* IS DISTINCT FROM "NEW".* EXECUTE PROCEDURE log_account_update()')
+        EXECUTE PROCEDURE log_account_update();`, PG_OPT)).to.equal('CREATE TRIGGER "log_update" AFTER UPDATE OF "user", "name", "salary" OR INSERT ON "accounts" DEFERRABLE INITIALLY IMMEDIATE WHEN "OLD".* IS DISTINCT FROM "NEW".* EXECUTE PROCEDURE log_account_update()')
       })
     })
   })
 
   describe('create extension pg', () => {
     it('should support basic extension', () => {
-      expect(getParsedSql(`CREATE EXTENSION hstore;`, { database: 'postgresql' })).to.equal('CREATE EXTENSION hstore')
+      expect(getParsedSql(`CREATE EXTENSION hstore;`, PG_OPT)).to.equal('CREATE EXTENSION hstore')
     })
     it('should support create extension if not exists', () => {
-      expect(getParsedSql(`CREATE EXTENSION if not exists hstore SCHEMA public FROM unpackaged;`, { database: 'postgresql' })).to.equal('CREATE EXTENSION IF NOT EXISTS hstore SCHEMA public FROM unpackaged')
+      expect(getParsedSql(`CREATE EXTENSION if not exists hstore SCHEMA public FROM unpackaged;`, PG_OPT)).to.equal('CREATE EXTENSION IF NOT EXISTS hstore SCHEMA public FROM unpackaged')
     })
     it('should support create extension with version', () => {
-      expect(getParsedSql(`CREATE EXTENSION if not exists hstore with SCHEMA public version latested FROM unpackaged;`, { database: 'postgresql' })).to.equal('CREATE EXTENSION IF NOT EXISTS hstore WITH SCHEMA public VERSION latested FROM unpackaged')
+      expect(getParsedSql(`CREATE EXTENSION if not exists hstore with SCHEMA public version latested FROM unpackaged;`, PG_OPT)).to.equal('CREATE EXTENSION IF NOT EXISTS hstore WITH SCHEMA public VERSION latested FROM unpackaged')
     })
     it('should support create extension literal string version ', () => {
-      expect(getParsedSql(`CREATE EXTENSION if not exists hstore SCHEMA public version "latest" FROM unpackaged;`, { database: 'postgresql' })).to.equal('CREATE EXTENSION IF NOT EXISTS hstore SCHEMA public VERSION \'latest\' FROM unpackaged')
+      expect(getParsedSql(`CREATE EXTENSION if not exists hstore SCHEMA public version "latest" FROM unpackaged;`, PG_OPT)).to.equal('CREATE EXTENSION IF NOT EXISTS hstore SCHEMA public VERSION \'latest\' FROM unpackaged')
     })
   })
 
