@@ -92,7 +92,7 @@ function createIndexToSQL(stmt) {
   const {
     concurrently, filestream_on: fileStream, keyword, include, index_columns: indexColumns,
     index_type: indexType, index_using: indexUsing, index, on, on_kw: onKw, table, tablespace, type, where,
-    with: withExpr,
+    with: withExpr, with_before_where: withBeforeWhere,
   } = stmt
   const withIndexOpt = withExpr && `WITH (${indexOptionListToSQL(withExpr).join(', ')})`
   const includeColumns = include && `${toUpper(include.keyword)} (${include.columns.map(col => identifierToSql(col)).join(', ')})`
@@ -101,10 +101,13 @@ function createIndexToSQL(stmt) {
     identifierToSql(index), toUpper(onKw), tableToSQL(table), ...indexTypeToSQL(indexUsing),
     `(${columnOrderListToSQL(indexColumns)})`, includeColumns,
     commonOptionConnector('TABLESPACE', literalToSQL, tablespace),
-    commonOptionConnector('WHERE', exprToSQL, where), withIndexOpt,
-    commonOptionConnector('ON', exprToSQL, on),
-    commonOptionConnector('FILESTREAM_ON', literalToSQL, fileStream),
   ]
+  if (withBeforeWhere) {
+    sql.push(withIndexOpt, commonOptionConnector('WHERE', exprToSQL, where))
+  } else {
+    sql.push(commonOptionConnector('WHERE', exprToSQL, where), withIndexOpt)
+  }
+  sql.push(commonOptionConnector('ON', exprToSQL, on), commonOptionConnector('FILESTREAM_ON', literalToSQL, fileStream))
   return sql.filter(hasVal).join(' ')
 }
 

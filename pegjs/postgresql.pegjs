@@ -357,6 +357,7 @@ create_index_stmt
           index_using: um,
           index_columns: cols,
           with: wr && wr[4],
+          with_before_where: true,
           tablespace: ts && { type: 'origin', value: ts[2] },
           where: w,
         }

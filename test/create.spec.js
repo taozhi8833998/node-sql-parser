@@ -332,6 +332,11 @@ describe('create', () => {
           sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title" ASC) WITH (FILLFACTOR = 70)'
         },
         {
+          origin: 'CREATE UNIQUE INDEX title_idx ON films (title) WITH (fillfactor = 70) where id > 100',
+          description: 'should create an index with non-default fill factor',
+          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title" ASC) WITH (FILLFACTOR = 70) WHERE "id" > 100'
+        },
+        {
           origin: 'CREATE INDEX gin_idx ON documents_table USING gin (locations) WITH (fastupdate = off);',
           description: 'should create a GIN index with fast updates disabled',
           sqlify: 'CREATE INDEX "gin_idx" ON "documents_table" USING GIN ("locations" ASC) WITH (FASTUPDATE = OFF)'
