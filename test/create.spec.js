@@ -267,17 +267,21 @@ describe('create', () => {
     })
 
     describe('create table using pg', () => {
-      expect(getParsedSql(`CREATE TABLE foo (id uuid)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" ("id" UUID)')
-      expect(getParsedSql(`CREATE TABLE accounts (
-        id UUID DEFAULT uuid_generate_v4() NOT NULL,
-        email TEXT NOT NULL,
-        password TEXT NOT NULL,
 
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMP NULL,
+      it ('supports basic things', () => {
+        expect(getParsedSql(`CREATE TABLE foo (id uuid)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" ("id" UUID)')
+        expect(getParsedSql(`CREATE TABLE foo (value text unique)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" ("value" TEXT UNIQUE)')
+        expect(getParsedSql(`CREATE TABLE accounts (
+          id UUID DEFAULT uuid_generate_v4() NOT NULL,
+          email TEXT NOT NULL,
+          password TEXT NOT NULL,
 
-        PRIMARY KEY (id)
-      );`, { database: 'postgresql' })).to.equal('CREATE TABLE "accounts" ("id" UUID NOT NULL DEFAULT uuid_generate_v4(), "email" TEXT NOT NULL, "password" TEXT NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT NOW(), "updated_at" TIMESTAMP NULL, PRIMARY KEY ("id"))')
+          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMP NULL,
+
+          PRIMARY KEY (id)
+        );`, { database: 'postgresql' })).to.equal('CREATE TABLE "accounts" ("id" UUID NOT NULL DEFAULT uuid_generate_v4(), "email" TEXT NOT NULL, "password" TEXT NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT NOW(), "updated_at" TIMESTAMP NULL, PRIMARY KEY ("id"))');
+      })
 
       it('should support pg bool/boolean type', () => {
         expect(getParsedSql(`CREATE TABLE "foos"
@@ -436,7 +440,7 @@ describe('create', () => {
       expect(columnOrderListToSQL()).to.be.equal(undefined)
     })
   })
-  describe('throw error when create type is unknow', () => {
+  it('throw error when create type is unknow', () => {
     const ast = {
       type: 'create',
       keyword: 'unknow_create_type'
@@ -444,4 +448,3 @@ describe('create', () => {
     expect(parser.sqlify.bind(parser, ast)).to.throw(`unknow create resource ${ast.keyword}`)
   })
 })
-
