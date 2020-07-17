@@ -39,6 +39,5 @@ describe('MariaDB Command SQL', () => {
     it('support mariadb quote', () => {
       expect(getParsedSql(sql, { database: 'MariaDB'})).to.equal('SELECT `id` FROM `db`.`abc`')
     })
-
   })
 })

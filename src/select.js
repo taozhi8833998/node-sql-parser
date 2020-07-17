@@ -1,7 +1,7 @@
 import { exprToSQL, getExprListSQL, orderOrPartitionByToSQL } from './expr'
 import { columnsToSQL } from './column'
 import { limitToSQL } from './limit'
-import { withToSql } from './with'
+import { withToSQL } from './with'
 import { tablesToSQL } from './tables'
 import { hasVal, commonOptionConnector, connector, topToSQL, toUpper } from './util'
 
@@ -24,7 +24,7 @@ function selectToSQL(stmt) {
   const {
     as_struct_val: asStructVal, columns, distinct, from, for_sys_time_as_of: forSystem = {}, for_update: forUpdate, groupby, having, limit, options, orderby, parentheses_symbol: parentheses, top, window: windowInfo, with: withInfo, where,
   } = stmt
-  const clauses = [withToSql(withInfo), 'SELECT', toUpper(asStructVal)]
+  const clauses = [withToSQL(withInfo), 'SELECT', toUpper(asStructVal)]
   clauses.push(topToSQL(top))
   if (Array.isArray(options)) clauses.push(options.join(' '))
   clauses.push(distinct, columnsToSQL(columns, from))
