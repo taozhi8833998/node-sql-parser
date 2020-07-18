@@ -124,6 +124,6 @@ if (isProd) {
         })
         // test bundle (HMR)
         : buildConfig(null, 'node', {
-            'tests': ['./tests-index.js'],
+            'tests': ['webpack/hot/poll?100', './tests-index.js'],
         });
 }
