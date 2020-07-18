@@ -3,7 +3,7 @@ import { exprToSQL } from './expr'
 /**
  * @param {Array<Object>} withExpr
  */
-function withToSql(withExpr) {
+function withToSQL(withExpr) {
   if (!withExpr || withExpr.length === 0) return
   const isRecursive = withExpr[0].recursive ? 'RECURSIVE ' : ''
   const withExprStr = withExpr.map(cte => {
@@ -16,5 +16,5 @@ function withToSql(withExpr) {
 }
 
 export {
-  withToSql,
+  withToSQL,
 }

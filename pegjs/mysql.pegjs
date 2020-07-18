@@ -630,14 +630,14 @@ constraint_name
 
 create_constraint_primary
   = kc:constraint_name? __
-  p:('PRIMARY KEY'i) __
+  p:('PRIMARY'i __ 'KEY'i) __
   t:index_type? __
   de:cte_column_definition __
   id:index_options? {
     return {
         constraint: kc && kc.constraint,
         definition: de,
-        constraint_type: p.toLowerCase(),
+        constraint_type: `${p[0].toLowerCase()} ${p[2].toLowerCase()}`,
         keyword: kc && kc.keyword,
         index_type: t,
         resource: 'constraint',

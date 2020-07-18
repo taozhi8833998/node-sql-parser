@@ -54,6 +54,7 @@
 
     'NOT': true,
     'NULL': true,
+    'NULLS': true,
 
     'ON': true,
     'OR': true,
@@ -213,6 +214,7 @@ create_stmt
   = create_table_stmt
   / create_constraint_trigger
   / create_extension_stmt
+  / create_index_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -328,6 +330,60 @@ create_table_stmt
       }
     }
 
+create_index_stmt
+  = a:KW_CREATE __
+  kw:KW_UNIQUE? __
+  t:KW_INDEX __
+  co:KW_CONCURRENTLY? __
+  n:ident? __
+  on:KW_ON __
+  ta:table_name __
+  um:index_type? __
+  LPAREN __ cols:column_order_list __ RPAREN __
+  wr:(KW_WITH __ LPAREN __ index_options_list __ RPAREN)? __
+  ts:(KW_TABLESPACE __ ident_name)? __
+  w:where_clause? __ {
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          index_type: kw && kw.toLowerCase(),
+          keyword: t.toLowerCase(),
+          concurrently: co && co.toLowerCase(),
+          index: n,
+          on_kw: on[0].toLowerCase(),
+          table: ta,
+          index_using: um,
+          index_columns: cols,
+          with: wr && wr[4],
+          with_before_where: true,
+          tablespace: ts && { type: 'origin', value: ts[2] },
+          where: w,
+        }
+    }
+  }
+
+column_order_list
+  = head:column_order tail:(__ COMMA __ column_order)* {
+    return createList(head, tail)
+  }
+
+column_order
+  = c:expr __
+  ca:collate_expr? __
+  op:ident? __
+  o:(KW_ASC / KW_DESC)? __
+  nf:('NULLS'i __ ('FIRST'i / 'LAST'i))? {
+    return {
+      column: c,
+      collate: ca,
+      opclass: op,
+      order: o && o.toLowerCase() || 'asc',
+      nulls: nf && `${nf[0].toLowerCase()} ${nf[2].toLowerCase()}`,
+    }
+  }
+
 create_like_table_simple
   = KW_LIKE __ t: table_ref_list {
     return {
@@ -358,7 +414,7 @@ create_column_definition
     d:data_type __
     clc:column_constraint? __
     a:('AUTO_INCREMENT'i)? __
-    u:('UNIQUE'i / 'PRIMARY KEY'i)? __
+    u:('UNIQUE'i / ('PRIMARY'i __ 'KEY'i))? __
     co:keyword_comment? __
     ca:collate_expr? __
     cf:column_format? __
@@ -371,7 +427,7 @@ create_column_definition
         nullable: clc && clc.nullable,
         default_val: clc && clc.default_val,
         auto_increment: a && a.toLowerCase(),
-        unique_or_primary: u && u.toLowerCase(),
+        unique_or_primary: Array.isArray(u) ? `${u[0].toLowerCase()} ${u[2].toLowerCase()}` : u,
         comment: co,
         collate: ca,
         column_format: cf,
@@ -398,7 +454,7 @@ column_constraint
   }
 
 collate_expr
-  = KW_COLLATE __ ca:ident_name {
+  = KW_COLLATE __ ca:ident {
     return {
       type: 'collate',
       value: ca,
@@ -1044,11 +1100,16 @@ table_to_item
 
 index_type
   = KW_USING __
-  t:("BTREE"i / "HASH"i) {
+  t:("BTREE"i / "HASH"i / "GIST"i / "GIN"i) {
     return {
       keyword: 'using',
       type: t.toLowerCase(),
     }
+  }
+
+index_options_list
+  = head:index_option tail:(__ COMMA __ index_option)* {
+    return createList(head, tail)
   }
 
 index_options
@@ -1066,6 +1127,13 @@ index_option
       type: k.toLowerCase(),
       symbol: e,
       expr: kbs
+    }
+  }
+  / k:ident_name __ e:KW_ASSIGIN_EQUAL __ kbs:(literal_numeric / ident) {
+    return {
+      type: k.toLowerCase(),
+      symbol: e,
+      expr: typeof kbs === 'string' && { type: 'origin', value: kbs } || kbs
     };
   }
   / index_type
@@ -2022,6 +2090,7 @@ KW_LOCK     = "LOCK"i       !ident_start
 
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
+KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
 
 KW_ON       = "ON"i       !ident_start
@@ -2154,6 +2223,7 @@ KW_UNIQUE     = "UNIQUE"i  !ident_start { return 'UNIQUE'; }
 KW_KEY_BLOCK_SIZE = "KEY_BLOCK_SIZE"i !ident_start { return 'KEY_BLOCK_SIZE'; }
 KW_COMMENT     = "COMMENT"i  !ident_start { return 'COMMENT'; }
 KW_CONSTRAINT  = "CONSTRAINT"i  !ident_start { return 'CONSTRAINT'; }
+KW_CONCURRENTLY  = "CONCURRENTLY"i  !ident_start { return 'CONCURRENTLY'; }
 KW_REFERENCES  = "REFERENCES"i  !ident_start { return 'REFERENCES'; }
 
 

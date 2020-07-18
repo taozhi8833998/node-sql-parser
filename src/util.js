@@ -1,4 +1,4 @@
-import { columnRefToSQL } from './column'
+import { columnRefToSQL, columnOrderToSQL } from './column'
 
 const escapeMap = {
   '\0'   : '\\0',
@@ -274,7 +274,7 @@ function autoIncreatementToSQL(autoIncreatement) {
 
 function columnOrderListToSQL(columnOrderList) {
   if (!columnOrderList) return
-  return columnOrderList.map(({ column, order }) => `${columnRefToSQL(column)} ${toUpper(order)}`).filter(hasVal).join(', ')
+  return columnOrderList.map(columnOrderToSQL).filter(hasVal).join(', ')
 }
 
 export {

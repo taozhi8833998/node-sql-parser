@@ -83,6 +83,18 @@ function columnOption(definition) {
   return columnOpt.filter(hasVal).join(' ')
 }
 
+function columnOrderToSQL(columnOrder) {
+  const { column, collate, nulls, opclass, order } = columnOrder
+  const result = [
+    exprToSQL(column),
+    commonOptionConnector(collate && collate.type, identifierToSql, collate && collate.value),
+    opclass,
+    toUpper(order),
+    toUpper(nulls),
+  ]
+  return result.filter(hasVal).join(' ')
+}
+
 function columnDefinitionToSQL(columnDefinition) {
   const column = []
   const name = columnRefToSQL(columnDefinition.column)
@@ -134,5 +146,6 @@ export {
   columnRefToSQL,
   columnsToSQL,
   columnDataType,
+  columnOrderToSQL,
   columnReferenceDefinitionToSQL,
 }
