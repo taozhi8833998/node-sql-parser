@@ -2,15 +2,11 @@ const fs = require('fs');
 const path = require('path');
 const peg = require('pegjs');
 const util = require('util');
-const { ERANGE } = require('constants');
-const { parse } = require('path');
-const { debug } = require('console');
 
 
 
 const syntax = fs.readFileSync(path.resolve(__dirname, './pegjs/postgresql.pegjs'), 'utf-8')
 const ast = peg.parser.parse(syntax);
-const rulesById = {};
 
 
 const built = [];
