@@ -11,6 +11,12 @@ const isTest = isCoverage || process.argv.includes('--test');
 const outputPath = path.join(__dirname, isProd ? 'output/prod' : isTest ? 'output/test' : 'output/dev');
 require('rimraf').sync(outputPath);
 
+if (isProd) {
+    // generate ast types
+
+    require('./typegen');
+}
+
 function buildConfig(parserName, target, entry, plugins) {
     const watch = !isProd && !isTest && !isCoverage;
     return {
@@ -60,7 +66,7 @@ function buildConfig(parserName, target, entry, plugins) {
                 PARSER_NAME: parserName ? JSON.stringify(parserName) : 'null',
             }),
             ...(plugins || []),
-            ...(!watch
+            ...(isProd
                 ? [
                     new CopyPlugin({
                         patterns: [
@@ -68,11 +74,11 @@ function buildConfig(parserName, target, entry, plugins) {
                             'README.md',
                             'package.json',
                             'types.d.ts',
+                            'ast/**',
                             { from: 'index.d.ts', to: (parserName || 'index') + (target === 'web' ? '.umd' : '') + '.d.ts', }
                         ],
                     }),
                 ] : [
-                    new webpack.HotModuleReplacementPlugin(),
                 ])],
         output: {
             path: outputPath,
@@ -124,6 +130,6 @@ if (isProd) {
         })
         // test bundle (HMR)
         : buildConfig(null, 'node', {
-            'tests': ['webpack/hot/poll?100', './tests-index.js'],
-        });
+                'tests': ['webpack/hot/poll?100', './tests-index.js'],
+            }, [new webpack.HotModuleReplacementPlugin()]);
 }
