@@ -1197,6 +1197,11 @@ describe('select', () => {
       const backSQL = parser.sqlify(ast)
       expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active`::JSONB @> '{\"b\":2}'::JSONB, `domain`::JSONB <@ '{\"a\":1, \"b\":2}'::JSONB, `config`::JSONB - 'a' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
     })
+
+    it('should support pg jsonb column query', () => {
+      const sql = 'SELECT "t1"."uid", "t1"."username" FROM "t1"'
+      expect(getParsedSql(sql, { database: 'postgresql' })).to.be.equal(sql)
+    })
   })
 
   describe('transactsql', () => {
