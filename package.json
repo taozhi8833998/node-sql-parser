@@ -1,19 +1,19 @@
 {
   "name": "node-sql-parser",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "simple node sql parser",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
     "start": "webpack --config webpack.config.js",
-    "build": "webpack --config webpack.config.js --prod",
-    "test": "mochapack \"test/**/*.spec.js\"",
-    "prepublishOnly": "npm run lint && npm run build",
+    "build": "npm run lint && npm run compile && webpack --config webpack.config.js --prod",
+    "test": "npm run lint && mochapack \"test/**/*.spec.js\"",
     "lint": "eslint src",
+    "compile": "babel src -d lib",
     "coverLocal": "cross-env NODE_ENV=coverage nyc --reporter=lcov --reporter=text npm run test",
     "cover:run": "cross-env NODE_ENV=coverage nyc --reporter=text-lcov npm run test",
     "cover": "npm run cover:run && nyc report --reporter=text-lcov | coveralls",
-    "release": "npm publish output/prod"
+    "release": "npm run build && npm publish output/prod"
   },
   "repository": {
     "type": "git",
@@ -34,12 +34,15 @@
   "author": "taozhi8833998 <taozhi8833998@163.com>",
   "files": [
     "ast/",
+    "build",
+    "lib",
     "index.js",
-    "lib/",
     "index.d.ts",
-    "build/",
+    "index.js.map",
     "umd/",
     "README.md",
+    "package.json",
+    "types.d.ts",
     "LICENSE"
   ],
   "license": "GPLv2",
