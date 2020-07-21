@@ -83,7 +83,7 @@
     "vscode-mocha-hmr": "^1.0.0",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.12",
-    "webpack-node-externals": "^1.7.2"
+    "webpack-node-externals": "^2.5.0"
   },
   "nyc": {
     "include": [
