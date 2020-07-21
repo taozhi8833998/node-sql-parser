@@ -3,8 +3,6 @@ const path = require('path');
 const peg = require('pegjs');
 const util = require('util');
 
-
-
 const syntax = fs.readFileSync(path.resolve(__dirname, './pegjs/postgresql.pegjs'), 'utf-8')
 const ast = peg.parser.parse(syntax);
 

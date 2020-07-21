@@ -7,11 +7,11 @@ import { parse as postgresql } from '../pegjs/postgresql.pegjs'
 import { parse as transactsql } from '../pegjs/transactsql.pegjs'
 
 export default {
-    bigquery,
-    db2,
-    hive,
-    mysql,
-    mariadb,
-    postgresql,
-    transactsql,
-  }
+  bigquery,
+  db2,
+  hive,
+  mysql,
+  mariadb,
+  postgresql,
+  transactsql,
+}

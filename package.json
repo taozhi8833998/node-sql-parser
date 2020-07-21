@@ -7,7 +7,7 @@
   "scripts": {
     "start": "webpack --config webpack.config.js",
     "build": "webpack --config webpack.config.js --prod",
-    "test": "mochapack test/**/*.spec.js",
+    "test": "mochapack \"test/**/*.spec.js\"",
     "prepublishOnly": "npm run build",
     "lint": "eslint src",
     "coverLocal": "cross-env NODE_ENV=coverage nyc --reporter=lcov --reporter=text npm run test",
