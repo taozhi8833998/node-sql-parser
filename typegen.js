@@ -8,25 +8,20 @@ const ast = peg.parser.parse(syntax);
 
 
 const built = [];
+function checkCode(r) {
+    const simple = /^[\s$]*\/\/\s*=>\s*([^$\r\n]+)$/m.exec(r.code);
+    if (simple) return simple[1].trim();
+    const complex = /^[\s$]*\/\*([^§]+)\*\//m.exec(r.code);
+    if (!complex) throw new Error('You must provide a type for code block: ' + onName);
+    const typecode = complex[1];
+    const at = typecode.lastIndexOf('=>');
+    if (at < 0) throw new Error('Wrong type code format for code block: ' + onName);
+    const toInsert = typecode.substr(0, at);
+    built.push(toInsert.trim());
+    return typecode.substr(at + 2).trim();
+}
 function buildExpression(r, onName) {
-    if (r.code) {
-        const simple = /^[\s$]*\/\/\s*=>\s*([^$\r\n]+)$/m.exec(r.code);
-        if (simple) {
-            return simple[1].trim();
-        }
-        const complex = /^[\s$]*\/\*([^§]+)\*\//m.exec(r.code);
-        if (!complex) {
-            throw new Error('You must provide a type for code block: ' + onName);
-        }
-        const typecode = complex[1];
-        const at = typecode.lastIndexOf('=>');
-        if (at < 0) {
-            throw new Error('Wrong type code format for code block: ' + onName);
-        }
-        const toInsert = typecode.substr(0, at);
-        built.push(toInsert.trim());
-        return typecode.substr(at + 2).trim();
-    }
+    if (r.code) return checkCode(r)
     switch (r.type) {
         case 'choice':
             const ret = r.alternatives
