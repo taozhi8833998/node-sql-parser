@@ -49,7 +49,7 @@ npm install @taozhi8833998/node-sql-parser --registry=https://npm.pkg.github.com
 Import the JS file in your page:
 
 ```javascript
-<script src="https://unpkg.com/node-sql-parser/mysql.umd.js"></script>
+<script src="https://unpkg.com/node-sql-parser/umd/mysql.umd.js"></script>
 ```
 - `NodeSQLParser` object is on `window`
 
@@ -62,7 +62,7 @@ Import the JS file in your page:
   </head>
   <body>
     <p><em>Check console to see the output</em></p>
-    <script src="https://unpkg.com/node-sql-parser/umd/parser.min.js"></script>
+    <script src="https://unpkg.com/node-sql-parser/umd/mysql.umd.js"></script>
     <script>
       window.onload = function () {
         // Example parser

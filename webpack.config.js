@@ -1,4 +1,5 @@
 const CopyPlugin = require('copy-webpack-plugin')
+const FileManagerPlugin = require('filemanager-webpack-plugin')
 const fs = require('fs')
 const path = require('path')
 const webpack = require('webpack')
@@ -59,6 +60,23 @@ const getPlugins = (parserName, target, plugins) => [
                     }
                 ],
             }),
+            new FileManagerPlugin({
+                onEnd: {
+                    mkdir: [
+                        `${outputPath}/umd`
+                    ],
+                    copy: [
+                        { source: `${outputPath}/*.umd.d.ts`, destination: `${outputPath}/umd` },
+                        { source: `${outputPath}/*.umd.js`, destination: `${outputPath}/umd` },
+                        { source: `${outputPath}/*.umd.js.map`, destination: `${outputPath}/umd` },
+                    ],
+                    delete: [
+                        `${outputPath}/*.umd.d.ts`,
+                        `${outputPath}/*.umd.js`,
+                        `${outputPath}/*.umd.js.map`
+                    ]
+                }
+            })
         ] : [
         ])
     ]
