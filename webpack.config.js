@@ -10,6 +10,7 @@ const isProd = process.argv.includes('--prod')
 const isTest = isCoverage || process.argv.includes('--test')
 const subDir = isProd ? 'output/prod' : isTest ? 'output/test' : 'output/dev'
 const outputPath = path.join(__dirname, subDir)
+const srcPath = path.join(__dirname, 'src')
 require('rimraf').sync(outputPath)
 
 if (isProd) require('./typegen')
@@ -39,6 +40,18 @@ const moduleCfg = {
     ],
 }
 
+const getCopyFile = (database) => {
+    return [
+        { source: `${outputPath}/${database}.js`, destination: `${outputPath}/build/${database}.js` },
+        { source: `${outputPath}/${database}.js.map`, destination: `${outputPath}/build/${database}.js.map` },
+        { source: `${outputPath}/${database}.d.ts`, destination: `${outputPath}/build/${database}.d.ts` },
+    ]
+}
+
+const getDbFile = () => ['bigquery', 'db2', 'hive', 'mariadb', 'mysql', 'postgresql', 'transactsql'].map(getCopyFile).reduce((prev, curr) => [...prev, ...curr], [])
+
+const getSrcFile = () => fs.readdirSync(srcPath).filter(name => name !== 'parser.all.js' || name !== 'parser.single.js').map(name => ({ source: `${outputPath}/${name}`, destination: `${outputPath}/lib/${name}` }))
+
 const getPlugins = (parserName, target, plugins) => [
     new webpack.DefinePlugin({
         PARSER_NAME: parserName ? JSON.stringify(parserName) : 'null',
@@ -63,12 +76,18 @@ const getPlugins = (parserName, target, plugins) => [
             new FileManagerPlugin({
                 onEnd: {
                     mkdir: [
-                        `${outputPath}/umd`
+                        `${outputPath}/umd`,
+                        `${outputPath}/build`,
+                        `${outputPath}/lib`,
                     ],
                     copy: [
                         { source: `${outputPath}/*.umd.d.ts`, destination: `${outputPath}/umd` },
                         { source: `${outputPath}/*.umd.js`, destination: `${outputPath}/umd` },
                         { source: `${outputPath}/*.umd.js.map`, destination: `${outputPath}/umd` },
+                    ],
+                    move: [
+                        ...getDbFile(),
+                        ...getSrcFile(),
                     ],
                     delete: [
                         `${outputPath}/*.umd.d.ts`,

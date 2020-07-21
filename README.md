@@ -130,7 +130,7 @@ console.log(ast);
 const opt = {
   database: 'MySQL' // MySQL is the default database
 }
-const { Parser } = require('node-sql-parser/mysql');
+const { Parser } = require('node-sql-parser/build/mysql');
 const parser = new Parser()
 // opt is optional
 const ast = parser.astify('SELECT * FROM t', opt);
@@ -145,7 +145,7 @@ console.log(sql); // SELECT * FROM `t`
 const opt = {
   database: 'MariaDB' // MySQL is the default database
 }
-const { Parser } = require('node-sql-parser/mariadb');
+const { Parser } = require('node-sql-parser/build/mariadb');
 const parser = new Parser()
 // opt is optional
 const { tableList, columnList, ast } = parser.parse('SELECT * FROM t', opt);
@@ -160,7 +160,7 @@ const { tableList, columnList, ast } = parser.parse('SELECT * FROM t', opt);
 const opt = {
   database: 'MySQL'
 }
-const { Parser } = require('node-sql-parser/mysql');
+const { Parser } = require('node-sql-parser/build/mysql');
 const parser = new Parser();
 // opt is optional
 const tableList = parser.tableList('SELECT * FROM t', opt);
@@ -178,7 +178,7 @@ console.log(tableList); // ["select::null::t"]
 const opt = {
   database: 'MySQL'
 }
-const { Parser } = require('node-sql-parser/mysql');
+const { Parser } = require('node-sql-parser/build/mysql');
 const parser = new Parser();
 // opt is optional
 const columnList = parser.columnList('SELECT t.id FROM t', opt);
