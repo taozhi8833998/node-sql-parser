@@ -1,0 +1,41 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "name": "Attach unit tests",
+            "request": "attach",
+            "port": 9240,
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ],
+            "skipFiles": [
+                "<node_internals>/*.js",
+                "**/loader.js", // webpack hmr reloader
+                "node_modules/core-js/**",
+                "output/**"
+            ]
+        }, {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug generator",
+            "cwd": "${workspaceFolder}",
+            "args": [
+              // "${workspaceFolder}/output/dev/generator.js"
+              "${workspaceFolder}/typegen.js"
+            ],
+            "protocol": "inspector",
+            "sourceMaps": true,
+            "resolveSourceMapLocations": [
+              "${workspaceFolder}/**",
+              "!**/node_modules/**"
+            ],
+            "skipFiles": [
+              "<node_internals>/*.js",
+              "${workspaceFolder}\\output/**",
+              "${workspaceFolder}\\webpack\\bootstrap"
+            ]
+          }
+    ]
+}

@@ -13,7 +13,7 @@ const escapeMap = {
 }
 
 const DEFAULT_OPT = {
-  database : 'mysql',
+  database : PARSER_NAME || 'mysql',
   type     : 'table',
 }
 

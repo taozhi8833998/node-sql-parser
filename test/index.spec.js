@@ -9,7 +9,7 @@ describe('MariaDB Command SQL', () => {
     return parser.sqlify(ast, opt);
   }
 
-  describe('unknow database', () => {
+  it('unknow database', () => {
     const sql = 'select id from db.abc'
     const opt = { database: 'unknowDB' }
     expect(parser.parse.bind(parser, sql, opt)).to.throw(`${opt.database} is not supported currently`)

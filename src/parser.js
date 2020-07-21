@@ -1,22 +1,7 @@
-import { parse as bigquery } from '../build/bigquery'
-import { parse as db2 } from '../build/db2'
-import { parse as hive } from '../build/hive'
-import { parse as mysql } from '../build/mysql'
-import { parse as mariadb } from '../build/mariadb'
-import { parse as postgresql } from '../build/postgresql'
-import { parse as transactsql } from '../build/transactsql'
+import parsers from './parser.all'
 import astToSQL from './sql'
 import { DEFAULT_OPT, setParserOpt } from './util'
 
-const parser = {
-  bigquery,
-  db2,
-  hive,
-  mysql,
-  mariadb,
-  postgresql,
-  transactsql,
-}
 class Parser {
   astify(sql, opt = DEFAULT_OPT) {
     const astInfo = this.parse(sql, opt)
@@ -29,10 +14,10 @@ class Parser {
   }
 
   parse(sql, opt = DEFAULT_OPT) {
-    const { database = 'mysql' } = opt
+    const { database = (PARSER_NAME || 'mysql') } = opt
     setParserOpt(opt)
     const typeCase = database.toLowerCase()
-    if (parser[typeCase]) return parser[typeCase](sql.trim())
+    if (parsers[typeCase]) return parsers[typeCase](sql.trim())
     throw new Error(`${database} is not supported currently`)
   }
 
