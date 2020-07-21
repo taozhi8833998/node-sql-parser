@@ -1,100 +1,98 @@
-const fs = require('fs');
-const webpack = require('webpack');
-const path = require('path');
-const nodeExternals = require('webpack-node-externals');
-const CopyPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin')
+const fs = require('fs')
+const path = require('path')
+const webpack = require('webpack')
+const nodeExternals = require('webpack-node-externals')
 
+const isCoverage = process.env.NODE_ENV === 'coverage'
+const isProd = process.argv.includes('--prod')
+const isTest = isCoverage || process.argv.includes('--test')
+const subDir = isProd ? 'output/prod' : isTest ? 'output/test' : 'output/dev'
+const outputPath = path.join(__dirname, subDir)
+require('rimraf').sync(outputPath)
 
-var isCoverage = process.env.NODE_ENV === 'coverage';
-const isProd = process.argv.includes('--prod');
-const isTest = isCoverage || process.argv.includes('--test');
-const outputPath = path.join(__dirname, isProd ? 'output/prod' : isTest ? 'output/test' : 'output/dev');
-require('rimraf').sync(outputPath);
+if (isProd) require('./typegen')
 
-if (isProd) {
-    // generate ast types
-
-    require('./typegen');
+const moduleCfg = {
+    rules: [
+        {
+            test: /\.m?js$/,
+            exclude: /(node_modules|bower_components)/,
+            use: isCoverage
+                ? {
+                    loader: 'istanbul-instrumenter-loader',
+                    options: { esModules: true },
+                }
+                : {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['@babel/preset-env']
+                    }
+                },
+            enforce: 'post',
+        },
+        {
+            test: /\.pegjs$/,
+            loader: 'pegjs-loader'
+        }
+    ],
 }
 
+const getPlugins = (parserName, target, plugins) => [
+    new webpack.DefinePlugin({
+        PARSER_NAME: parserName ? JSON.stringify(parserName) : 'null',
+    }),
+    ...(plugins || []),
+    ...(isProd
+        ? [
+            new CopyPlugin({
+                patterns: [
+                    'LICENSE',
+                    'lib',
+                    'README.md',
+                    'package.json',
+                    'types.d.ts',
+                    'ast/**',
+                    {
+                        from: 'index.d.ts',
+                        to: (parserName || 'index') + (target === 'web' ? '.umd' : '') + '.d.ts',
+                    }
+                ],
+            }),
+        ] : [
+        ])
+    ]
+const getOutput = (target) => ({
+    path: outputPath,
+    library: '',
+    libraryTarget: target === 'web' ? 'umd' : 'commonjs',
+    // this ensures that source maps are mapped to actual files (not "webpack:" uris)
+    devtoolModuleFilenameTemplate: info => path.resolve(__dirname, info.resourcePath),
+})
 function buildConfig(parserName, target, entry, plugins) {
-    const watch = !isProd && !isTest && !isCoverage;
+    const watch = !(isProd || isTest || isCoverage)
     return {
-        entry,
-        watch,
-        target,
         devtool: 'source-map',
-        mode: isProd ? 'production' : 'development',
-        node: {
-            __dirname: false
-        },
         externals: target == 'web' ? [] : [
             nodeExternals({
                 whitelist: ['webpack/hot/poll?100'],
             }),
         ],
-        module: {
-            rules: [
-                {
-                    test: /\.m?js$/,
-                    exclude: /(node_modules|bower_components)/,
-                    use: isCoverage
-                        ? {
-                            loader: 'istanbul-instrumenter-loader',
-                            options: { esModules: true },
-                        }
-                        : {
-                            loader: 'babel-loader',
-                            options: {
-                                presets: ['@babel/preset-env']
-                            }
-                        },
-                    enforce: 'post',
-                    // exclude: /node_modules|\.spec\.js$/,
-                },
-                {
-                    test: /\.pegjs$/,
-                    loader: 'pegjs-loader'
-                }
-            ],
-        },
-        resolve: {
-            extensions: ['.js', '.pegjs'],
-        },
-        plugins: [
-            new webpack.DefinePlugin({
-                PARSER_NAME: parserName ? JSON.stringify(parserName) : 'null',
-            }),
-            ...(plugins || []),
-            ...(isProd
-                ? [
-                    new CopyPlugin({
-                        patterns: [
-                            'LICENSE',
-                            'README.md',
-                            'package.json',
-                            'types.d.ts',
-                            'ast/**',
-                            { from: 'index.d.ts', to: (parserName || 'index') + (target === 'web' ? '.umd' : '') + '.d.ts', }
-                        ],
-                    }),
-                ] : [
-                ])],
-        output: {
-            path: outputPath,
-            library: '',
-            libraryTarget: target === 'web' ? 'umd' : 'commonjs',
-            // this ensures that source maps are mapped to actual files (not "webpack:" uris)
-            devtoolModuleFilenameTemplate: info => path.resolve(__dirname, info.resourcePath),
-        },
-    };
+        entry,
+        watch,
+        target,
+        mode: isProd ? 'production' : 'development',
+        node: { __dirname: false },
+        module: moduleCfg,
+        resolve: { extensions: ['.js', '.pegjs'] },
+        plugins: getPlugins(parserName, target, plugins),
+        output: getOutput(target),
+    }
 }
-
-
 
 // =========== PROD CONFIG ================
 if (isProd) {
-    const config = module.exports = [];
+    const config = module.exports = []
 
     for (const target of ['web', 'node']) {
         config.push(
@@ -131,5 +129,5 @@ if (isProd) {
         // test bundle (HMR)
         : buildConfig(null, 'node', {
                 'tests': ['webpack/hot/poll?100', './tests-index.js'],
-            }, [new webpack.HotModuleReplacementPlugin()]);
+            }, [new webpack.HotModuleReplacementPlugin()])
 }

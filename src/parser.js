@@ -1,4 +1,4 @@
-import parsers from './parser.all';
+import parsers from './parser.all'
 import astToSQL from './sql'
 import { DEFAULT_OPT, setParserOpt } from './util'
 
@@ -16,7 +16,7 @@ class Parser {
   parse(sql, opt = DEFAULT_OPT) {
     const { database = (PARSER_NAME || 'mysql') } = opt
     setParserOpt(opt)
-    const typeCase = database.toLowerCase();
+    const typeCase = database.toLowerCase()
     if (parsers[typeCase]) return parsers[typeCase](sql.trim())
     throw new Error(`${database} is not supported currently`)
   }

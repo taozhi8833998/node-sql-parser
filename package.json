@@ -8,7 +8,7 @@
     "start": "webpack --config webpack.config.js",
     "build": "webpack --config webpack.config.js --prod",
     "test": "mochapack \"test/**/*.spec.js\"",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run lint && npm run build",
     "lint": "eslint src",
     "coverLocal": "cross-env NODE_ENV=coverage nyc --reporter=lcov --reporter=text npm run test",
     "cover:run": "cross-env NODE_ENV=coverage nyc --reporter=text-lcov npm run test",
@@ -33,6 +33,7 @@
   ],
   "author": "taozhi8833998 <taozhi8833998@163.com>",
   "files": [
+    "ast/",
     "index.js",
     "lib/",
     "index.d.ts",

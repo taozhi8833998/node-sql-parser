@@ -8,6 +8,9 @@
     "airbnb-base",
     "strict"
   ],
+  "globals": {
+    "PARSER_NAME": true
+  },
   "rules": {
     "comma-dangle": [
       2,
