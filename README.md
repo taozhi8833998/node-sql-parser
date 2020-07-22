@@ -49,7 +49,14 @@ npm install @taozhi8833998/node-sql-parser --registry=https://npm.pkg.github.com
 Import the JS file in your page:
 
 ```javascript
+// support all database parser, but file size is about 750K
+<script src="https://unpkg.com/node-sql-parser/umd/index.umd.js"></script>
+
+// or you can import specified database parser only, it's about 150K
+
 <script src="https://unpkg.com/node-sql-parser/umd/mysql.umd.js"></script>
+
+<script src="https://unpkg.com/node-sql-parser/umd/postgresql.umd.js"></script>
 ```
 - `NodeSQLParser` object is on `window`
 
@@ -93,6 +100,7 @@ Import the JS file in your page:
 ### Create AST for SQL statement
 
 ```javascript
+// import Parser for all databases
 const { Parser } = require('node-sql-parser');
 const parser = new Parser();
 const ast = parser.astify('SELECT * FROM t'); // mysql sql grammer parsed by default
@@ -130,6 +138,7 @@ console.log(ast);
 const opt = {
   database: 'MySQL' // MySQL is the default database
 }
+// import mysql parser only
 const { Parser } = require('node-sql-parser/build/mysql');
 const parser = new Parser()
 // opt is optional
