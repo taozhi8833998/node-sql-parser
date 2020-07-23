@@ -645,7 +645,7 @@ export type multiplicative_expr = binary_expr;
 
 export type multiplicative_operator = "*" | "/" | "%";
 
-export type primary = cast_expr | literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param | expr | expr_list | var_decl;
+export type primary = cast_expr | literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param | expr | expr_list | var_decl | { type: 'origin'; value: string; };
 
 
 

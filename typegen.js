@@ -7,7 +7,7 @@ const ast = peg.parser.parse(syntax);
 
 
 const built = [];
-function checkCode(r) {
+function checkCode(r, onName) {
     const simple = /^[\s$]*\/\/\s*=>\s*([^$\r\n]+)$/m.exec(r.code);
     if (simple) return simple[1].trim();
     const complex = /^[\s$]*\/\*([^§]+)\*\//m.exec(r.code);
@@ -20,7 +20,7 @@ function checkCode(r) {
     return typecode.substr(at + 2).trim();
 }
 function buildExpression(r, onName) {
-    if (r.code) return checkCode(r)
+    if (r.code) return checkCode(r, onName)
     switch (r.type) {
         case 'choice':
             const ret = r.alternatives
