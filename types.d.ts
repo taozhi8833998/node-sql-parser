@@ -126,19 +126,3 @@ export class Parser {
 
   columnList(sql: string, opt?: Option): string[];
 }
-
-export class Parser {
-  constructor();
-
-  parse(sql: string, opt?: Option): TableColumnAst;
-
-  astify(sql: string, opt?: Option): AST[] | AST;
-
-  sqlify(ast: AST[] | AST, opt?: Option): string;
-
-  whiteListCheck(sql: string, whiteList: string[], opt?: Option): Error | undefined;
-
-  tableList(sql: string, opt?: Option): string[];
-
-  columnList(sql: string, opt?: Option): string[];
-}
