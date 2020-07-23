@@ -1583,6 +1583,12 @@ primary
         return list;
     }
   / var_decl
+  / __ prepared_symbol:'?' __ {
+    return {
+      type: 'origin',
+      value: prepared_symbol
+    }
+  }
 
 column_ref
   = tbl:(ident __ DOT __)? col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) __ ca:collate_expr? {

@@ -2138,6 +2138,12 @@ primary
         return list;
     }
   / var_decl
+  / __ prepared_symbol:'$'n:literal_numeric {
+    return {
+      type: 'origin',
+      value: `$${n.value}`,
+    }
+  }
 
 column_ref
   = tbl:ident __ DOT __ col:column {
