@@ -1240,6 +1240,19 @@ describe('select', () => {
     })
   })
 
+  describe('prepared statements', () => {
+    it('should parse mysql prepared statements', () => {
+      expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = ?'))
+      .to.be.equal('SELECT `bar`, `baz`, `foo` FROM `tablename` WHERE `bar` = ?')
+    })
+
+    it('should parse pg prepared statements', () => {
+      const opt = { database: 'postgresql' }
+      expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = $1', opt))
+      .to.be.equal('SELECT "bar", "baz", "foo" FROM "tablename" WHERE "bar" = $1', opt)
+    })
+  })
+
   it('should throw error when no space before keyword', () => {
     expect(() => getParsedSql('SELECT * FROM a where id = 1and name="test"')).to.throw('Expected "!=", "#", "%", "*", "+", "-", "--", ".", "/", "/*", ";", "<", "<=", "<>", "=", ">", ">=", "FOR", "GROUP", "HAVING", "LIMIT", "ORDER", "UNION", [ \\t\\n\\r], [0-9], [eE], or end of input but "a" found.')
     expect(() => getParsedSql('SELECT * FROM a where class = "ac"or name="test"')).to.throw('Expected "!=", "#", "%", "*", "+", "-", "--", "/", "/*", ";", "<", "<=", "<>", "=", ">", ">=", "FOR", "GROUP", "HAVING", "LIMIT", "ORDER", "UNION", [ \\t\\n\\r], or end of input but "o" found.')
