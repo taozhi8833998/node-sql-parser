@@ -1244,12 +1244,16 @@ describe('select', () => {
     it('should parse mysql prepared statements', () => {
       expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = ?'))
       .to.be.equal('SELECT `bar`, `baz`, `foo` FROM `tablename` WHERE `bar` = ?')
+      expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = ? and baz = ?'))
+      .to.be.equal('SELECT `bar`, `baz`, `foo` FROM `tablename` WHERE `bar` = ? AND `baz` = ?')
     })
 
     it('should parse pg prepared statements', () => {
       const opt = { database: 'postgresql' }
       expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = $1', opt))
       .to.be.equal('SELECT "bar", "baz", "foo" FROM "tablename" WHERE "bar" = $1', opt)
+      expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = $1 and baz = $2', opt))
+      .to.be.equal('SELECT "bar", "baz", "foo" FROM "tablename" WHERE "bar" = $1 AND "baz" = $2', opt)
     })
   })
 
