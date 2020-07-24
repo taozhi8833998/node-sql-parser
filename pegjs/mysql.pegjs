@@ -1583,7 +1583,7 @@ primary
         return list;
     }
   / var_decl
-  / __ prepared_symbol:'?' __ {
+  / __ prepared_symbol:'?' {
     return {
       type: 'origin',
       value: prepared_symbol
