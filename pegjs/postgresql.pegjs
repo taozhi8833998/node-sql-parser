@@ -41,6 +41,7 @@
     'INNER': true,
     'INSERT': true,
     'INTO': true,
+    'INTERVAL': true,
     'IS': true,
 
     'JOIN': true,
@@ -1872,14 +1873,23 @@ expr_list
     }
 
 interval_expr
-  = KW_INTERVAL                    __
-    e:expr                       __
+  = KW_INTERVAL __
+    e:expr __
     u: interval_unit {
       // => { type: 'interval', expr: expr; unit: interval_unit; }
       return {
         type: 'interval',
         expr: e,
         unit: u.toLowerCase(),
+      }
+    }
+  / KW_INTERVAL __
+    e:literal_string  {
+      // => { type: 'interval', expr: expr; unit: interval_unit; }
+      return {
+        type: 'interval',
+        expr: e,
+        unit: '',
       }
     }
 

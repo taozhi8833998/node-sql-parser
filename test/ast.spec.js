@@ -331,6 +331,16 @@ describe('AST', () => {
         });
 
         describe('date function', () => {
+            it('should interval string', () => {
+                const opt = {
+                    database: 'postgresql'
+                }
+                expect(getParsedSql("SELECT NOW() - INTERVAL '7 DAY'", opt))
+                .to.equal("SELECT NOW() - INTERVAL '7 DAY'");
+                expect(getParsedSql("SELECT NOW() - INTERVAL 7 DAY", opt))
+                    .to.equal("SELECT NOW() - INTERVAL 7 DAY");
+            })
+
             it('should support adddate function', () => {
                 expect(getParsedSql('SELECT ADDDATE(c, INTERVAL 10 DAY) as b FROM tableA'))
                     .to.equal('SELECT ADDDATE(`c`, INTERVAL 10 DAY) AS `b` FROM `tableA`');
