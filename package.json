@@ -1,6 +1,6 @@
 {
   "name": "node-sql-parser",
-  "version": "3.0.1",
+  "version": "3.0.4",
   "description": "simple node sql parser",
   "main": "index.js",
   "types": "index.d.ts",
