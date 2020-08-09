@@ -1231,7 +1231,28 @@ describe('select', () => {
       const backSQL = parser.sqlify(ast, opt)
       expect(backSQL).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1) PRIMARY KEY)')
     })
+
+    it('should properly escape column aliases that contain special characters', () => {
+      const sql = `select column_name as [Column Name] from table_name`
+      const ast = parser.astify(sql, opt)
+      const backSQL = parser.sqlify(ast, opt)
+      expect(backSQL).to.equal('SELECT [column_name] AS [Column Name] FROM [table_name]')
+    })
   })
+
+  describe('postgreql', () => {
+    const opt = {
+      database: 'postgresql'
+    }
+    it('should properly escape column aliases that contain special characters', () => {
+      const sql = `select column_name as "Column Name" from table_name`
+      const ast = parser.astify(sql, opt)
+      const backSQL = parser.sqlify(ast, opt)
+      expect(backSQL).to.equal('SELECT "column_name" AS "Column Name" FROM "table_name"')
+    })
+  })
+
+
   describe('unknow type check', () => {
     it('should throw error', () => {
       const sql = 'SELECT * FROM a'
