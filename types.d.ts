@@ -75,7 +75,7 @@ export interface Select {
   groupby: ColumnRef[] | null;
   having: any[] | null;
   orderby: OrderBy[] | null;
-  limit: Limit[] | null;
+  limit: Limit | null;
 }
 export interface Insert_Replace {
   type: 'replace' | 'insert';
