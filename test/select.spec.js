@@ -1261,4 +1261,20 @@ describe('select', () => {
     expect(() => getParsedSql('SELECT * FROM a where id = 1and name="test"')).to.throw('Expected "!=", "#", "%", "*", "+", "-", "--", ".", "/", "/*", ";", "<", "<=", "<>", "=", ">", ">=", "FOR", "GROUP", "HAVING", "LIMIT", "ORDER", "UNION", [ \\t\\n\\r], [0-9], [eE], or end of input but "a" found.')
     expect(() => getParsedSql('SELECT * FROM a where class = "ac"or name="test"')).to.throw('Expected "!=", "#", "%", "*", "+", "-", "--", "/", "/*", ";", "<", "<=", "<>", "=", ">", ">=", "FOR", "GROUP", "HAVING", "LIMIT", "ORDER", "UNION", [ \\t\\n\\r], or end of input but "o" found.')
   })
+
+  describe('FlinkSQL', () => {
+    const opt = { database: 'flinksql' }
+
+    it('should parse COLLECT aggr_func expression', () => {
+      const sql = 'SELECT bar, COLLECT(DISTINCT foo) FROM tablename GROUP BY bar';
+      expect(getParsedSql(sql, opt))
+      .to.be.equal('SELECT `bar`, COLLECT(`foo`) FROM `tablename` GROUP BY `bar`', opt)
+    })
+
+    it('should parse LISTAGG aggr_func', () => {
+      const sql = `SELECT bar, LISTAGG(foo, ',') AS fooNames FROM tablename GROUP BY bar`;
+      expect(getParsedSql(sql, opt))
+      .to.be.equal('SELECT `bar`, LISTAGG(`foo`) AS `fooNames` FROM `tablename` GROUP BY `bar`', opt)
+    })
+  })
 });

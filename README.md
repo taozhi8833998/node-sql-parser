@@ -95,6 +95,7 @@ Import the JS file in your page:
 - Mysql
 - PostgresQL
 - TransactSQL
+- [FlinkSQL](https://ci.apache.org/projects/flink/flink-docs-stable/dev/table/sql/)
 - New issue could be made for other new database.
 
 ### Create AST for SQL statement

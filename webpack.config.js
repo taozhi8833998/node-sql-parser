@@ -48,7 +48,7 @@ const getCopyFile = (database) => {
     ]
 }
 
-const getDbFile = () => ['bigquery', 'db2', 'hive', 'mariadb', 'mysql', 'postgresql', 'transactsql'].map(getCopyFile).reduce((prev, curr) => [...prev, ...curr], [])
+const getDbFile = () => ['bigquery', 'db2', 'hive', 'mariadb', 'mysql', 'postgresql', 'transactsql', 'flinksql'].map(getCopyFile).reduce((prev, curr) => [...prev, ...curr], [])
 
 const getSrcFile = () => fs.readdirSync(srcPath).filter(name => name !== 'parser.all.js' || name !== 'parser.single.js').map(name => ({ source: `${outputPath}/${name}`, destination: `${outputPath}/lib/${name}` }))
 
