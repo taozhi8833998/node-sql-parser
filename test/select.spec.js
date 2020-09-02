@@ -1250,6 +1250,14 @@ describe('select', () => {
       const backSQL = parser.sqlify(ast, opt)
       expect(backSQL).to.equal('SELECT "column_name" AS "Column Name" FROM "table_name"')
     })
+
+    it('should support array_agg', () => {
+      const sql = `SELECT shipmentId, ARRAY_AGG(distinct abc order by name) AS shipmentStopIDs, ARRAY_AGG (first_name || ' ' || last_name) actors FROM table_name GROUP BY shipmentId
+      `
+      const ast = parser.astify(sql, opt)
+      const backSQL = parser.sqlify(ast, opt)
+      expect(backSQL).to.equal('SELECT "shipmentId", ARRAY_AGG(DISTINCT "abc" ORDER BY "name" ASC) AS "shipmentStopIDs", ARRAY_AGG("first_name" || \' \' || "last_name") AS "actors" FROM "table_name" GROUP BY "shipmentId"')
+    })
   })
 
 
@@ -1289,7 +1297,7 @@ describe('select', () => {
     it('should parse COLLECT aggr_func expression', () => {
       const sql = 'SELECT bar, COLLECT(DISTINCT foo) FROM tablename GROUP BY bar';
       expect(getParsedSql(sql, opt))
-      .to.be.equal('SELECT `bar`, COLLECT(`foo`) FROM `tablename` GROUP BY `bar`', opt)
+      .to.be.equal('SELECT `bar`, COLLECT(DISTINCT `foo`) FROM `tablename` GROUP BY `bar`', opt)
     })
 
     it('should parse LISTAGG aggr_func', () => {
