@@ -3,6 +3,7 @@ import { exprToSQL } from './expr'
 import { tablesToSQL } from './tables'
 import {
   autoIncreatementToSQL,
+  columnIdentifierToSql,
   commonOptionConnector,
   commonTypeValue,
   commentToSQL,
@@ -113,7 +114,7 @@ function columnToSQL(column, isDual) {
   if (column.as !== null) {
     str = `${str} AS `
     if (column.as.match(/^[a-z_][0-9a-z_]*$/i)) str = `${str}${identifierToSql(column.as)}`
-    else str = `${str}\`${column.as}\``
+    else str = `${str}${columnIdentifierToSql(column.as)}`
   }
   return str
 }

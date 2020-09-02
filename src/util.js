@@ -121,6 +121,23 @@ function topToSQL(opt) {
   return `${prefix} ${percent.toUpperCase()}`
 }
 
+function columnIdentifierToSql(ident) {
+  const { database } = getParserOpt()
+  if (!ident) return
+  switch (database && database.toLowerCase()) {
+    case 'postgresql':
+    case 'db2':
+      return `"${ident}"`
+    case 'transactsql':
+      return `[${ident}]`
+    case 'mysql':
+    case 'mariadb':
+    case 'bigquery':
+    default:
+      return `\`${ident}\``
+  }
+}
+
 function identifierToSql(ident, isDual) {
   const { database } = getParserOpt()
   if (isDual === true) return `'${ident}'`
@@ -281,7 +298,7 @@ export {
   arrayStructTypeToSQL, autoIncreatementToSQL,
   columnOrderListToSQL, commonKeywordArgsToSQL, commonOptionConnector,
   connector, commonTypeValue,commentToSQL, createBinaryExpr,
-  createValueExpr, DEFAULT_OPT, escape, literalToSQL,
+  createValueExpr, DEFAULT_OPT, escape, literalToSQL, columnIdentifierToSql,
   identifierToSql, onPartitionsToSQL, replaceParams, returningToSQL,
   hasVal, setParserOpt, toUpper, topToSQL, triggerEventToSQL,
 }
