@@ -5,6 +5,7 @@ import { parse as mysql } from '../pegjs/mysql.pegjs'
 import { parse as mariadb } from '../pegjs/mariadb.pegjs'
 import { parse as postgresql } from '../pegjs/postgresql.pegjs'
 import { parse as transactsql } from '../pegjs/transactsql.pegjs'
+import { parse as flinksql } from '../pegjs/flinksql.pegjs'
 
 export default {
   bigquery,
@@ -14,4 +15,5 @@ export default {
   mariadb,
   postgresql,
   transactsql,
+  flinksql,
 }
