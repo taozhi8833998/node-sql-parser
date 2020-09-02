@@ -1,9 +1,21 @@
 import { columnsToSQL } from './column'
+import { exprToSQL } from './expr'
 import { arrayStructTypeToSQL, hasVal, toUpper } from './util'
+
+function arrayExprListToSQL(expr) {
+  const {
+    array_path: arrayPath,
+    expr_list: exprList,
+    parentheses,
+  } = expr
+  if (!exprList) return `[${columnsToSQL(arrayPath)}]`
+  if (Array.isArray(exprList)) return `[${exprList.map(col => `(${columnsToSQL(col)})`).filter(hasVal).join(', ')}]`
+  const result = exprToSQL(exprList)
+  return parentheses ? `(${result})` : result
+}
 
 function arrayStructValueToSQL(expr) {
   const {
-    array_path: arrayPath,
     expr_list: exprList,
     type,
   } = expr
@@ -11,8 +23,7 @@ function arrayStructValueToSQL(expr) {
     case 'STRUCT':
       return `(${columnsToSQL(exprList)})`
     case 'ARRAY':
-      if (exprList) return `[${exprList.map(col => `(${columnsToSQL(col)})`).filter(hasVal).join(', ')}]`
-      return `[${columnsToSQL(arrayPath)}]`
+      return arrayExprListToSQL(expr)
     default:
       return ''
   }

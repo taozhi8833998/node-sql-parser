@@ -157,6 +157,13 @@ describe('BigQuery', () => {
       ]
     },
     {
+      title: 'select from unnest JSON_EXTRACT_ARRAY',
+      sql: [
+        'SELECT a, b, c, ARRAY(SELECT * FROM UNNEST(JSON_EXTRACT_ARRAY(d))) AS d FROM e WHERE LOWER(f)=\'123\' GROUP BY a, b, c',
+        'SELECT a, b, c, ARRAY(SELECT * FROM UNNEST (JSON_EXTRACT_ARRAY(d))) AS d FROM e WHERE LOWER(f) = \'123\' GROUP BY a, b, c'
+      ]
+    },
+    {
       title: 'select from unnest with offset',
       sql: [
         'SELECT * FROM UNNEST ( ) AS abc WITH OFFSET AS num',

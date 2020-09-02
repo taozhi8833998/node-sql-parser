@@ -412,7 +412,7 @@ alias_clause
   / KW_AS? __ i:ident { return i; }
 
 from_clause
-  = KW_FROM __ 'UNNEST'i __ LPAREN __ a:array_expr? __ RPAREN __ alias:alias_clause? __ wf:with_offset? {
+  = KW_FROM __ 'UNNEST'i __ LPAREN __ a:expr? __ RPAREN __ alias:alias_clause? __ wf:with_offset? {
     return {
       type: 'unnest',
       expr: a,
@@ -670,7 +670,7 @@ array_expr
       parentheses: true
     }
   }
-  / s:(array_type / KW_ARRAY)? __ LBRAKE __ c:expr __ RBRAKE {
+  / s:(array_type / KW_ARRAY)? __ (LBRAKE / LPAREN) __ c:expr __ (RBRAKE / RPAREN) {
     return {
       definition: s,
       expr_list: c,
