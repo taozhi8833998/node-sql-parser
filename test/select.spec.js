@@ -1246,17 +1246,18 @@ describe('select', () => {
     }
     it('should properly escape column aliases that contain special characters', () => {
       const sql = `select column_name as "Column Name" from table_name`
-      const ast = parser.astify(sql, opt)
-      const backSQL = parser.sqlify(ast, opt)
-      expect(backSQL).to.equal('SELECT "column_name" AS "Column Name" FROM "table_name"')
+      expect(getParsedSql(sql, opt)).to.equal('SELECT "column_name" AS "Column Name" FROM "table_name"')
     })
 
     it('should support array_agg', () => {
       const sql = `SELECT shipmentId, ARRAY_AGG(distinct abc order by name) AS shipmentStopIDs, ARRAY_AGG (first_name || ' ' || last_name) actors FROM table_name GROUP BY shipmentId
       `
-      const ast = parser.astify(sql, opt)
-      const backSQL = parser.sqlify(ast, opt)
-      expect(backSQL).to.equal('SELECT "shipmentId", ARRAY_AGG(DISTINCT "abc" ORDER BY "name" ASC) AS "shipmentStopIDs", ARRAY_AGG("first_name" || \' \' || "last_name") AS "actors" FROM "table_name" GROUP BY "shipmentId"')
+      expect(getParsedSql(sql, opt)).to.equal('SELECT "shipmentId", ARRAY_AGG(DISTINCT "abc" ORDER BY "name" ASC) AS "shipmentStopIDs", ARRAY_AGG("first_name" || \' \' || "last_name") AS "actors" FROM "table_name" GROUP BY "shipmentId"')
+    })
+
+    it('should should support ilike', () => {
+      const sql = `select column_name as "Column Name" from table_name where a ilike 'f%' and 'b' not ilike 'B'`
+      expect(getParsedSql(sql, opt)).to.equal('SELECT "column_name" AS "Column Name" FROM "table_name" WHERE "a" ILIKE \'f%\' AND \'b\' NOT ILIKE \'B\'')
     })
   })
 
