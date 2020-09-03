@@ -2676,6 +2676,7 @@ KW_NOT      = "NOT"i        !ident_start { return 'NOT'; }
 KW_AND      = "AND"i        !ident_start { return 'AND'; }
 KW_OR       = "OR"i         !ident_start { return 'OR'; }
 
+// aggregation functions
 KW_COUNT    = "COUNT"i      !ident_start { return 'COUNT'; }
 KW_MAX      = "MAX"i        !ident_start { return 'MAX'; }
 KW_MIN      = "MIN"i        !ident_start { return 'MIN'; }
@@ -2686,6 +2687,22 @@ KW_RANK     = "RANK"i       !ident_start { return 'RANK'; }
 KW_DENSE_RANK = "DENSE_RANK"i       !ident_start { return 'DENSE_RANK'; }
 KW_LISTAGG  = "LISTAGG"i    !ident_start { return 'LISTAGG'; }
 KW_ROW_NUMBER = "ROW_NUMBER"i !ident_start { return 'ROW_NUMBER'; }
+
+// group window start end functions
+KW_TUMBLE_START   = "TUMBLE_START"i  !ident_start { return 'TUMBLE_START'; }
+KW_TUMBLE_END     = "TUMBLE_END"i    !ident_start { return 'TUMEBLE_END'; }
+KW_HOP_START      = "HOP_START"i     !ident_start { return 'HOP_START'; }
+KW_HOP_END        = "HOP_END"i       !ident_start { return 'HOP_END'; }
+KW_SESSION_START  = "SESSION_START"i !ident_start { return 'SESSION_START'; }
+KW_SESSION_END    = "SESSION_END"i   !ident_start { return 'SESSION_END'; }
+
+KW_TUMBLE_ROWTIME = "TUMBLE_ROWTIME"i   !ident_start { return 'TUMBLE_ROWTIME'; }
+KW_HOP_ROWTIME = "HOP_ROWTIME"i         !ident_start { return 'HOP_ROWTIME'; }
+KW_SESSION_ROWTIME = "SESSION_ROWTIME"i !ident_start { return 'SESSION_ROWTIME'; }
+
+KW_TUMBLE_PROCTIME = "TUMBLE_PROCTIME"i   !ident_start { return 'TUMBLE_PROCTIME'; }
+KW_HOP_PROCTIME = "HOP_PROCTIME"i         !ident_start { return 'HOP_PROCTIME'; }
+KW_SESSION_PROCTIME = "SESSION_PROCTIME"i !ident_start { return 'SESSION_PROCTIME'; }
 
 KW_EXTRACT  = "EXTRACT"i    !ident_start { return 'EXTRACT'; }
 KW_CALL     = "CALL"i       !ident_start { return 'CALL'; }
@@ -2702,6 +2719,7 @@ KW_BOOL     = "BOOL"i     !ident_start { return 'BOOL'; }
 KW_BOOLEAN  = "BOOLEAN"i  !ident_start { return 'BOOLEAN'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
+KW_STRING   = "STRING"i   !ident_start { return 'STRING';}
 KW_NUMERIC  = "NUMERIC"i  !ident_start { return 'NUMERIC'; }
 KW_DECIMAL  = "DECIMAL"i  !ident_start { return 'DECIMAL'; }
 KW_SIGNED   = "SIGNED"i   !ident_start { return 'SIGNED'; }
@@ -2728,6 +2746,10 @@ KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
 KW_USER     = "USER"i     !ident_start { return 'USER'; }
 KW_UUID     = "UUID"i     !ident_start { return 'UUID'; }
+KW_ARRAY    = "ARRAY"i    !ident_start { return 'ARRAY'; }
+KW_MAP      = "MAP"i      !ident_start { return 'MAP'; }
+KW_MULTISET = "MULTISET"i !ident_start { return 'MULTISET'; }
+KW_ROW      = "ROW"i      !ident_start { return 'ROW'; }
 
 KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
 KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
@@ -2795,6 +2817,9 @@ RPAREN    = ')'
 
 LBRAKE    = '['
 RBRAKE    = ']'
+
+LANGLEBRAKE = '<'
+RANGLEBRAKE = '>'
 
 SEMICOLON = ';'
 SINGLE_ARROW = '->'
@@ -3014,6 +3039,9 @@ data_type
   / text_type
   / uuid_type
   / boolean_type
+  / collection_type
+  / key_value_type
+  / row_type
 
 boolean_type
   = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
@@ -3025,6 +3053,7 @@ character_string_type
   }
   / t:KW_CHAR { /* =>  data_type */ return { dataType: t }; }
   / t:KW_VARCHAR { /* =>  data_type */  return { dataType: t }; }
+  / t:KW_STRING { return {dataType: t }; }
 
 numeric_type_suffix
   = un: KW_UNSIGNED? __ ze: KW_ZEROFILL? {
@@ -3054,3 +3083,13 @@ text_type
 
 uuid_type
   = t:KW_UUID {/* =>  data_type */  return { dataType: t }}
+
+collection_type
+  = t:KW_ARRAY LANGLEBRAKE subt:data_type RANGLEBRAKE { return { dataType: t, subType: subt}; }
+
+key_value_type
+  = t:KW_MAP LANGLEBRAKE subk:data_type COMMA subv:data_type RANGLEBRAKE { return {dataType: t, subType: subv}; }
+
+row_type
+  = t:KW_ROW { return {dataType: t} }
+  

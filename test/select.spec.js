@@ -1276,5 +1276,23 @@ describe('select', () => {
       expect(getParsedSql(sql, opt))
       .to.be.equal('SELECT `bar`, LISTAGG(`foo`) AS `fooNames` FROM `tablename` GROUP BY `bar`', opt)
     })
+
+    it('should parse CAST function', () => {
+      const sql = 'SELECT userID, COLLECT(DISTINCT CAST(pickupLat AS STRING)) from tablename GROUP BY userID';
+      expect(getParsedSql(sql, opt))
+      .to.be.equal('SELECT `userID`, COLLECT(CAST(`pickupLat` AS STRING)) FROM `tablename` GROUP BY `userID`');
+    });
+
+    it('should parse || string concatenation', () => {
+      const sql = 'SELECT userID, COLLECT(DISTINCT CAST(pickupLat AS STRING)) from tablename GROUP BY userID';
+      expect(getParsedSql(sql, opt))
+      .to.be.equal('SELECT `userID`, COLLECT(CAST(`pickupLat` AS STRING)) FROM `tablename` GROUP BY `userID`');
+    });
+
+    it('should parse || string concatenation in functions', () => {
+      const sql = `SELECT userID, COLLECT(DISTINCT CONCAT(CAST(pickupLat AS STRING), ',', CAST(pickupLon AS STRING))) AS pickupLocations FROM tablename GROUP BY userID`;
+      expect(getParsedSql(sql, opt))
+      .to.be.equal('SELECT `userID`, COLLECT(CONCAT(CAST(`pickupLat` AS STRING), \',\', CAST(`pickupLon` AS STRING))) AS `pickupLocations` FROM `tablename` GROUP BY `userID`');
+    });
   })
 });
