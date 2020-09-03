@@ -27,9 +27,13 @@ export interface From {
 export interface Dual {
   type: 'dual';
 }
-export interface Limit {
+export interface LimitValue {
   type: string;
   value: number;
+}
+export interface Limit {
+  seperator: string;
+  value: LimitValue[];
 }
 export interface OrderBy {
   type: 'ASC' | 'DESC';
@@ -75,7 +79,7 @@ export interface Select {
   groupby: ColumnRef[] | null;
   having: any[] | null;
   orderby: OrderBy[] | null;
-  limit: Limit[] | null;
+  limit: Limit | null;
 }
 export interface Insert_Replace {
   type: 'replace' | 'insert';

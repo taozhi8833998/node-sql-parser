@@ -412,7 +412,7 @@ alias_clause
   / KW_AS? __ i:ident { return i; }
 
 from_clause
-  = KW_FROM __ 'UNNEST'i __ LPAREN __ a:array_expr? __ RPAREN __ alias:alias_clause? __ wf:with_offset? {
+  = KW_FROM __ 'UNNEST'i __ LPAREN __ a:expr? __ RPAREN __ alias:alias_clause? __ wf:with_offset? {
     return {
       type: 'unnest',
       expr: a,
@@ -670,7 +670,7 @@ array_expr
       parentheses: true
     }
   }
-  / s:(array_type / KW_ARRAY)? __ LBRAKE __ c:expr __ RBRAKE {
+  / s:(array_type / KW_ARRAY)? __ (LBRAKE / LPAREN) __ c:expr __ (RBRAKE / RPAREN) {
     return {
       definition: s,
       expr_list: c,
@@ -720,11 +720,13 @@ not_expr
     }
 
 comparison_expr
-  = left:additive_expr __ rh:comparison_op_right? {
+  = left:additive_expr __ !KW_AND __ rh:comparison_op_right? {
       if (rh === null) return left;
       else if (rh.type === 'arithmetic') return createBinaryExprChain(left, rh.tail);
       else return createBinaryExpr(rh.op, left, rh.right);
     }
+  / literal_string
+  / column_ref
 
 exists_expr
   = op:exists_op __ LPAREN __ stmt:union_stmt __ RPAREN {

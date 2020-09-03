@@ -2003,12 +2003,14 @@ not_expr
     }
 
 comparison_expr
-  = left:additive_expr __ rh:comparison_op_right? {
+  = left:additive_expr __ !KW_AND __ rh:comparison_op_right? {
     // => binary_expr
       if (rh === null) return left;
       else if (rh.type === 'arithmetic') return createBinaryExprChain(left, rh.tail);
       else return createBinaryExpr(rh.op, left, rh.right);
     }
+  / literal_string
+  / column_ref
 
 exists_expr
   = op:exists_op __ LPAREN __ stmt:union_stmt __ RPAREN {
@@ -2075,8 +2077,10 @@ between_or_not_between_op
   / KW_BETWEEN
 
 like_op
-  = nk:(KW_NOT __ KW_LIKE) { /* => 'LIKE' */ return nk[0] + ' ' + nk[2]; }
+  = nk:(KW_NOT __ (KW_LIKE / KW_ILIKE)) { /* => 'LIKE' */ return nk[0] + ' ' + nk[2]; }
   / KW_LIKE
+  / KW_ILIKE
+
 
 in_op
   = nk:(KW_NOT __ KW_IN) { /* => 'NOT IN' */ return nk[0] + ' ' + nk[2]; }
@@ -2274,6 +2278,7 @@ param
 aggr_func
   = aggr_fun_count
   / aggr_fun_smma
+  / aggr_array_agg
 
 aggr_fun_smma
   = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN {
@@ -2300,9 +2305,23 @@ aggr_fun_count
       };
     }
 
+distinct_args
+   = d:KW_DISTINCT? __ c:column_ref { /* => { distinct: 'DISTINCT'; expr: column_ref; } */  return { distinct: d, expr: c }; }
+
 count_arg
   = e:star_expr { /* => { expr: star_expr } */ return { expr: e }; }
-  / d:KW_DISTINCT? __ c:column_ref { /* => { distinct: 'DISTINCT'; expr: column_ref; } */  return { distinct: d, expr: c }; }
+  / distinct_args
+
+aggr_array_agg
+  = name:KW_ARRAY_AGG __ LPAREN __ arg:distinct_args __ o:order_by_clause? __ RPAREN {
+    // => { type: 'aggr_func'; name: 'ARRAY_AGG'; args:count_arg; orderby?: order_by_clause  }
+      return {
+        type: 'aggr_func',
+        name: name,
+        args: arg,
+        orderby: o,
+      };
+    }
 
 star_expr
   = "*" { /* => { type: 'star'; value: '*' } */ return { type: 'star', value: '*' }; }
@@ -2646,12 +2665,14 @@ KW_BETWEEN  = "BETWEEN"i    !ident_start { return 'BETWEEN'; }
 KW_IN       = "IN"i         !ident_start { return 'IN'; }
 KW_IS       = "IS"i         !ident_start { return 'IS'; }
 KW_LIKE     = "LIKE"i       !ident_start { return 'LIKE'; }
+KW_ILIKE    = "ILIKE"i      !ident_start { return 'ILIKE'; }
 KW_EXISTS   = "EXISTS"i     !ident_start { /* => 'EXISTS' */ return 'EXISTS'; }
 
 KW_NOT      = "NOT"i        !ident_start { return 'NOT'; }
 KW_AND      = "AND"i        !ident_start { return 'AND'; }
 KW_OR       = "OR"i         !ident_start { return 'OR'; }
 
+KW_ARRAY_AGG = "ARRAY_AGG"i !ident_start { return 'ARRAY_AGG'; }
 KW_COUNT    = "COUNT"i      !ident_start { return 'COUNT'; }
 KW_MAX      = "MAX"i        !ident_start { return 'MAX'; }
 KW_MIN      = "MIN"i        !ident_start { return 'MIN'; }

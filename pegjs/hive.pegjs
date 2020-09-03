@@ -1362,11 +1362,13 @@ not_expr
     }
 
 comparison_expr
-  = left:additive_expr __ rh:comparison_op_right? {
+  = left:additive_expr __ !KW_AND __ rh:comparison_op_right? {
       if (rh === null) return left;
       else if (rh.type === 'arithmetic') return createBinaryExprChain(left, rh.tail);
       else return createBinaryExpr(rh.op, left, rh.right);
     }
+  / literal_string
+  / column_ref
 
 exists_expr
   = op:exists_op __ LPAREN __ stmt:union_stmt __ RPAREN {

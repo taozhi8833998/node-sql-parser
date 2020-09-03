@@ -1474,9 +1474,8 @@ comparison_expr
       else if (rh.type === 'arithmetic') return createBinaryExprChain(left, rh.tail);
       else return createBinaryExpr(rh.op, left, rh.right);
     }
-  / left:column_ref {
-    return left
-  }
+  / literal_string
+  / column_ref
 
 exists_expr
   = op:exists_op __ LPAREN __ stmt:union_stmt __ RPAREN {
