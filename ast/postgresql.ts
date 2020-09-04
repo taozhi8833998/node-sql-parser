@@ -601,7 +601,7 @@ export type and_expr = binary_expr;
 
 export type not_expr = comparison_expr | exists_expr | unary_expr;
 
-export type comparison_expr = binary_expr;
+export type comparison_expr = binary_expr | literal_string | column_ref;
 
 export type exists_expr = unary_expr;
 
@@ -625,7 +625,7 @@ export type between_or_not_between_op = 'NOT BETWEEN' | KW_BETWEEN;
 
 
 
-export type like_op = 'LIKE' | KW_LIKE;
+export type like_op = 'LIKE' | KW_LIKE | KW_ILIKE;
 
 
 
@@ -695,7 +695,7 @@ type column_part = never;
 
 export type param = { type: 'param'; value: ident_name };
 
-export type aggr_func = aggr_fun_count | aggr_fun_smma;
+export type aggr_func = aggr_fun_count | aggr_fun_smma | aggr_array_agg;
 
 export type aggr_fun_smma = { type: 'aggr_func'; name: 'SUM' | 'MAX' | 'MIN' | 'AVG'; args: { expr: additive_expr } };
 
@@ -705,9 +705,13 @@ export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT'; args:count_arg;
 
 
 
+export type distinct_args = { distinct: 'DISTINCT'; expr: column_ref; };
 
 
-export type count_arg = { expr: star_expr } | { distinct: 'DISTINCT'; expr: column_ref; };
+
+export type count_arg = { expr: star_expr } | distinct_args;
+
+export type aggr_array_agg = { type: 'aggr_func'; name: 'ARRAY_AGG'; args:count_arg; orderby?: order_by_clause  };
 
 
 
@@ -887,6 +891,8 @@ type KW_IS = never;
 
 type KW_LIKE = never;
 
+type KW_ILIKE = never;
+
 type KW_EXISTS = never;
 
 type KW_NOT = never;
@@ -894,6 +900,8 @@ type KW_NOT = never;
 type KW_AND = never;
 
 type KW_OR = never;
+
+type KW_ARRAY_AGG = never;
 
 type KW_COUNT = never;
 
