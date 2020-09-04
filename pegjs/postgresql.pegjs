@@ -49,7 +49,6 @@
 
     'KEY': true,
 
-    'LEFT': true,
     'LIKE': true,
     'LIMIT': true,
 
@@ -2485,7 +2484,7 @@ literal_string
   / ca:("\"" single_quote_char* "\"") !DOT {
       // => { type: 'string'; value: string; }
       return {
-        type: 'string',
+        type: 'double_quote_string',
         value: ca[1].join('')
       };
     }
