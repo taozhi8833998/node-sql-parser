@@ -1264,6 +1264,11 @@ describe('select', () => {
       const sql = `SELECT "contact"."_id" FROM "contact" WHERE LOWER("contact"."name.givenName") LIKE 'yan%' AND LOWER("contact"."name.familyName") LIKE 'ei%';`
       expect(getParsedSql(sql, opt)).to.equal(`SELECT "contact"."_id" FROM "contact" WHERE LOWER("contact"."name.givenName") LIKE 'yan%' AND LOWER("contact"."name.familyName") LIKE 'ei%'`)
     })
+
+    it('should support left', () => {
+      const sql = 'SELECT * FROM partitions WHERE "location"  IS null AND "code" <> left("name", length("code"))'
+      expect(getParsedSql(sql, opt)).to.equal('SELECT * FROM "partitions" WHERE "location" IS NULL AND "code" <> left("name", length("code"))')
+    })
   })
 
 

@@ -145,7 +145,7 @@ describe('insert', () => {
       const sql = 'INSERT into account (date, id) values("2019-12-23", 123) returning id'
       const ast = parser.astify(sql, { database: 'postgresql' })
       const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.be.equal("INSERT INTO `account` (`date`, `id`) VALUES ('2019-12-23',123) RETURNING `id`")
+      expect(backSQL).to.be.equal("INSERT INTO `account` (`date`, `id`) VALUES (\"2019-12-23\",123) RETURNING `id`")
     })
 
     describe('support ascii pnCtrl single-char', () => {

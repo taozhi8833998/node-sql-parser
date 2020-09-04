@@ -410,7 +410,7 @@ describe('create', () => {
       expect(getParsedSql(`CREATE EXTENSION if not exists hstore with SCHEMA public version latested FROM unpackaged;`, PG_OPT)).to.equal('CREATE EXTENSION IF NOT EXISTS hstore WITH SCHEMA public VERSION latested FROM unpackaged')
     })
     it('should support create extension literal string version ', () => {
-      expect(getParsedSql(`CREATE EXTENSION if not exists hstore SCHEMA public version "latest" FROM unpackaged;`, PG_OPT)).to.equal('CREATE EXTENSION IF NOT EXISTS hstore SCHEMA public VERSION \'latest\' FROM unpackaged')
+      expect(getParsedSql(`CREATE EXTENSION if not exists hstore SCHEMA public version "latest" FROM unpackaged;`, PG_OPT)).to.equal('CREATE EXTENSION IF NOT EXISTS hstore SCHEMA public VERSION "latest" FROM unpackaged')
     })
   })
 
