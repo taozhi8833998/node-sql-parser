@@ -1948,7 +1948,7 @@ expr
   / select_stmt
 
 logic_operator_expr
-  = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ {
+  = head:primary tail:(__ BINARY_OPERATORS __ primary)+ {
     /*
     export type BINARY_OPERATORS = LOGIC_OPERATOR | 'OR' | 'AND' | multiplicative_operator | additive_operator
       | arithmetic_comparison_operator
@@ -2287,6 +2287,15 @@ aggr_fun_expr
         args: {
           expr: e,
           distinct: d
+        }
+      };
+    }
+  / name:KW_AGGR_FUNC __ LPAREN __ d:KW_DISTINCT? __ e:primary __ RPAREN {
+      return {
+        type: 'aggr_func',
+        name: name,
+        args: {
+          expr: e
         }
       };
     }
@@ -2832,6 +2841,7 @@ DOUBLE_WELL_ARROW = '#>>'
 OPERATOR_CONCATENATION = '||'
 OPERATOR_AND = '&&'
 LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
+BINARY_OPERATORS = LOGIC_OPERATOR / 'OR' / 'AND' / multiplicative_operator / additive_operator / arithmetic_comparison_operator / 'IN' / 'NOT IN' / 'BETWEEN' / '=' 
 
 // separator
 __

@@ -1334,5 +1334,10 @@ describe('select', () => {
       expect(getParsedSql(sql, opt))
       .to.be.equal('SELECT `userID`, HOP_START(`eventtime`, INTERVAL \'1\' HOUR, INTERVAL \'1\' DAY) AS `hopStart` FROM `tablename` GROUP BY HOP(`eventtime`, INTERVAL \'1\' HOUR, INTERVAL \'1\' DAY)');
     });
+    it('should parse case when conditional function', () => {
+      const sql = `SELECT userID as ID, SUM(CASE col WHEN 'ACTIVE' THEN 1 ELSE 0 END) FROM tablename`;
+      expect(getParsedSql(sql, opt))
+      .to.be.equal('SELECT `userID` AS `ID`, SUM(CASE `col` WHEN \'ACTIVE\' THEN 1 ELSE 0 END) FROM `tablename`');
+    })
   })
 });
