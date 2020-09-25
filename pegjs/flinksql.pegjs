@@ -71,7 +71,6 @@
     'SESSION_USER': true,
     'SET': true,
     'SHOW': true,
-    'STATUS': true, // reserved (MySQL)
     'SYSTEM_USER': true,
 
     'TABLE': true,
@@ -2287,15 +2286,6 @@ aggr_fun_expr
         args: {
           expr: e,
           distinct: d
-        }
-      };
-    }
-  / name:KW_AGGR_FUNC __ LPAREN __ d:KW_DISTINCT? __ e:primary __ RPAREN {
-      return {
-        type: 'aggr_func',
-        name: name,
-        args: {
-          expr: e
         }
       };
     }
