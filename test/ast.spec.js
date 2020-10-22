@@ -40,6 +40,20 @@ describe('AST', () => {
             })
         })
 
+        describe('where clauses', () => {
+            xit("should support where clause with many conditions and backticks", () => {
+                const sql = 'SELECT * FROM `table_name` WHERE (`to_name` = "name" OR `from_name` = "name") AND (`from_rating` <> `to_rating`) OR (`from_rating` IS NULL AND `to_rating` IS NOT NULL)';
+                const ast = parser.astify(sql)
+                expect(ast.from.table).to.equal("table")
+            })
+
+            xit("should support where clause with many conditions", () => {
+                const sql = 'SELECT * FROM table_name WHERE (to_name = "name" OR from_name = "name") OR (from_rating <> to_rating)';
+                const ast = parser.astify(sql)
+                expect(ast.from.table).to.equal("table_name")
+            })
+        })
+
         describe('common table expressions', () => {
             it('should support single CTE', () => {
                 const sql = `WITH cte AS (SELECT 1)
