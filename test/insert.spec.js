@@ -127,6 +127,13 @@ describe('insert', () => {
       expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date`, `id`) SET `id` = 234, `name` = 'my-name' ON DUPLICATE KEY UPDATE `id` = 123, `name` = 'test'")
     })
 
+    it('should support values(COLUMN)', () => {
+      const sql = "INSERT into user (id, name) values (12345, 'user1') on duplicate key update id = VALUES(id), name = VALUES(name)"
+      const ast = parser.astify(sql)
+      const backSQL = parser.sqlify(ast)
+      expect(backSQL).to.be.equal("INSERT INTO `user` (`id`, `name`) VALUES (12345,'user1') ON DUPLICATE KEY UPDATE `id` = VALUES(`id`), `name` = VALUES(`name`)")
+    })
+
     it('should support parse insert partition expr', () => {
       const sql = 'INSERT into account partition(date = 20191218, id = 2) (id, name) values(123, "test"), (124, "test2")'
       const ast = parser.astify(sql)
