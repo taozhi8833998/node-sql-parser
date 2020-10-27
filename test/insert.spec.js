@@ -31,6 +31,12 @@ describe('insert', () => {
       expect(backSQL).to.be.equal("INSERT INTO `t1` VALUES ('1223','name'),('1224','name2')")
     })
 
+    it("should throw error if column count doesn't match value count", () => {
+      const sql = 'INSERT INTO t1 (col1, col2, col3) values("1223", "name"), ("1224", "name2")'
+      const fun = parser.astify.bind(parser, sql)
+      expect(fun).to.throw("column count doesn't match value count at row 1")
+    })
+
     it('should support parse insert from select', () => {
       const sql = 'INSERT INTO t1(col_a, col_b) select col_a, col_b from t2'
       const ast = parser.astify(sql)
