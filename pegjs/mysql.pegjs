@@ -206,6 +206,7 @@ cmd_stmt
   / set_stmt
   / lock_stmt
   / unlock_stmt
+  / desc_stmt
 
 create_stmt
   = create_table_stmt
@@ -429,6 +430,17 @@ use_stmt
         ast: {
           type: 'use',
           db: d
+        }
+      };
+    }
+
+desc_stmt
+  = (KW_DESC / KW_DESCRIBE) __
+    t:ident {
+      return {
+        ast: {
+          type: 'desc',
+          table: t
         }
       };
     }
@@ -2007,6 +2019,8 @@ KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET'; }
 
 KW_ASC      = "ASC"i        !ident_start { return 'ASC'; }
 KW_DESC     = "DESC"i       !ident_start { return 'DESC'; }
+
+KW_DESCRIBE = "DESCRIBE"i   !ident_start
 
 KW_ALL      = "ALL"i        !ident_start { return 'ALL'; }
 KW_DISTINCT = "DISTINCT"i   !ident_start { return 'DISTINCT';}

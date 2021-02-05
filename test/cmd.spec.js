@@ -137,6 +137,28 @@ describe('Command SQL', () => {
 
   })
 
+  describe('desc', () => {
+    it(`should support MySQL desc`, () => {
+      expect(getParsedSql('desc databaseA'))
+        .to.equal('DESC `databaseA`');
+    });
+
+    it(`should support MySQL desc with semicolon`, () => {
+      expect(getParsedSql('desc databaseA;'))
+        .to.equal('DESC `databaseA`');
+    });
+
+    it(`should support MySQL describe`, () => {
+      expect(getParsedSql('describe databaseA'))
+        .to.equal('DESC `databaseA`');
+    });
+
+    it(`should support MySQL describe with semicolon`, () => {
+      expect(getParsedSql('describe databaseA;'))
+        .to.equal('DESC `databaseA`');
+    });
+  })
+
   describe('multiple statement with cmd', () => {
     it(`should support cmd multiple use`, () => {
       expect(getParsedSql('use databaseA;drop table tableA;truncate table tableB; call sp'))

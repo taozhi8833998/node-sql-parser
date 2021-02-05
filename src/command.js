@@ -40,6 +40,12 @@ function useToSQL(stmt) {
   return `${action} ${database}`
 }
 
+function descToSQL(stmt) {
+  const { type, table } = stmt
+  const action = toUpper(type)
+  return `${action} ${identifierToSql(table)}`
+}
+
 function callToSQL(stmt) {
   const type = 'CALL'
   const storeProcessCall = exprToSQL(stmt.expr)
@@ -113,6 +119,7 @@ export {
   declareToSQL,
   renameToSQL,
   useToSQL,
+  descToSQL,
   callToSQL,
   setVarToSQL,
   lockUnlockToSQL,

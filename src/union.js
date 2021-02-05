@@ -8,6 +8,7 @@ import {
   commonCmdToSQL,
   declareToSQL,
   useToSQL,
+  descToSQL,
   renameToSQL,
   callToSQL,
   setVarToSQL,
@@ -34,6 +35,7 @@ const typeToSQLFn = {
   set      : setVarToSQL,
   lock     : lockUnlockToSQL,
   unlock   : lockUnlockToSQL,
+  desc     : descToSQL,
 }
 
 function unionToSQL(stmt) {
