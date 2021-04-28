@@ -2003,7 +2003,7 @@ not_expr
     }
 
 comparison_expr
-  = left:additive_expr __ !KW_AND __ rh:comparison_op_right? {
+  = left:additive_expr __ !(KW_AND / KW_OR) __ rh:comparison_op_right? {
     // => binary_expr
       if (rh === null) return left;
       else if (rh.type === 'arithmetic') return createBinaryExprChain(left, rh.tail);

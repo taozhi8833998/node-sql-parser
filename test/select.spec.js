@@ -494,6 +494,10 @@ describe('select', () => {
       });
     });
 
+    it('should parse like and or statement', () => {
+      expect(getParsedSql(`SELECT a, b, c FROM tb WHERE a like 'test1' OR b = 'test2';`)).to.equal("SELECT `a`, `b`, `c` FROM `tb` WHERE `a` LIKE 'test1' OR `b` = 'test2'")
+    })
+
     it('should parse parameters', () => {
       const ast = parser.astify('SELECT * FROM t where t.a > :my_param');
 
