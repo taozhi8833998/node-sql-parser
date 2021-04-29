@@ -92,7 +92,8 @@ const getPlugins = (parserName, target, plugins) => [
                     delete: [
                         `${outputPath}/*.umd.d.ts`,
                         `${outputPath}/*.umd.js`,
-                        `${outputPath}/*.umd.js.map`
+                        `${outputPath}/*.umd.js.map`,
+                        `${outputPath}/index.d.ts`
                     ]
                 }
             })
