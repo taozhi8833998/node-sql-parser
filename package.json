@@ -3,7 +3,7 @@
   "version": "3.1.0",
   "description": "simple node sql parser",
   "main": "index.js",
-  "types": "index.d.ts",
+  "types": "types.d.ts",
   "scripts": {
     "start": "webpack --config webpack.config.js",
     "build": "npm run lint && npm run compile && webpack --config webpack.config.js --prod",
