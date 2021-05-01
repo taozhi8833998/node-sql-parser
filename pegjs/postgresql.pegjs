@@ -1982,11 +1982,13 @@ unary_expr
 
 or_and_where_expr
 	= head:parentheses_or_expr tail:(__ (KW_AND / KW_OR) __ parentheses_or_expr)* {
+    // => binary_expr
     return createBinaryExprChain(head, tail);
 }
 
 parentheses_or_expr
   = lf:LPAREN? __ head:or_expr __ rt:RPAREN? !{ if ((lf && !rt) || (!lf && rt)) return true } {
+    // => binary_expr
   if (lf && rt) head.parentheses = true
   return head
 }
