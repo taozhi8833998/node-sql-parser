@@ -504,6 +504,8 @@ describe('select', () => {
       expect(getParsedSql(`select * from tableName where (a = 1 and b = 2) or c=3;`)).to.equal("SELECT * FROM `tableName` WHERE (`a` = 1 AND `b` = 2) OR `c` = 3")
       expect(getParsedSql(`select * from tableName where a = 1 or (b = 2) and c=3;`)).to.equal("SELECT * FROM `tableName` WHERE `a` = 1 OR (`b` = 2) AND `c` = 3")
       expect(getParsedSql(`select * from tableName where a = 1 or (b = 2 and d=4) and c=3;`)).to.equal("SELECT * FROM `tableName` WHERE `a` = 1 OR (`b` = 2 AND `d` = 4) AND `c` = 3")
+      expect(getParsedSql(`SELECT * FROM messages WHERE (year = 2012 AND month >= 9) OR (year = 2021 AND month <= 4) OR (year > 2012 AND year < 2021);`)).to.equal("SELECT * FROM `messages` WHERE (`year` = 2012 AND `month` >= 9) OR (`year` = 2021 AND `month` <= 4) OR (`year` > 2012 AND `year` < 2021)")
+
     })
 
     it('should parse parameters', () => {

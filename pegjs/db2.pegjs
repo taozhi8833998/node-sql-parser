@@ -1131,7 +1131,7 @@ on_clause
   = KW_ON __ e:expr { return e; }
 
 where_clause
-  = KW_WHERE __ e:expr { return e; }
+  = KW_WHERE __ e:(or_and_where_expr / expr) { return e; }
 
 group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list { return e.value; }
@@ -1454,6 +1454,17 @@ unary_expr
   = op: additive_operator tail: (__ primary)+ {
     return createUnaryExpr(op, tail[0][1]);
   }
+
+or_and_where_expr
+	= head:parentheses_or_expr tail:(__ (KW_AND / KW_OR) __ parentheses_or_expr)* {
+    return createBinaryExprChain(head, tail);
+}
+
+parentheses_or_expr
+  = lf:LPAREN? __ head:or_expr __ rt:RPAREN? !{ if ((lf && !rt) || (!lf && rt)) return true } {
+  if (lf && rt) head.parentheses = true
+  return head
+}
 
 or_expr
   = head:and_expr tail:(___ KW_OR __ and_expr)* {
