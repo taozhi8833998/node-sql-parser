@@ -1,4 +1,5 @@
 import { columnDefinitionToSQL } from './column'
+import { createDefinitionToSQL } from './create'
 import { indexTypeAndOptionToSQL } from './index-definition'
 import { tablesToSQL } from './tables'
 import { exprToSQL } from './expr'
@@ -15,7 +16,7 @@ function alterToSQL(stmt) {
 
 function alterExprToSQL(expr) {
   const {
-    action, constraint_type: constraintType, if_not_exists: ifNotExists,keyword, resource,
+    action, create_definitions: createDefinition, if_not_exists: ifNotExists,keyword, resource,
   } = expr
   let name = ''
   let dataType = []
@@ -36,7 +37,7 @@ function alterExprToSQL(expr) {
       break
     case 'constraint':
       name = identifierToSql(expr[resource])
-      dataType = [toUpper(constraintType), ...indexTypeAndOptionToSQL(expr)]
+      dataType = [createDefinitionToSQL(createDefinition)]
       break
     default:
       break
