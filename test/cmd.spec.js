@@ -215,6 +215,13 @@ describe('Command SQL', () => {
         .to.equal('ALTER TABLE [a] DROP CONSTRAINT [xxx]');
     });
 
+    it('should support alter add constraint definition', () => {
+      expect(getParsedSql(`ALTER TABLE \`CSEHistory\` ADD CONSTRAINT \`CSEHistoryDel\` FOREIGN KEY ( \`SystemUUID\` ) REFERENCES \`Systems\` (UUID)
+      ON UPDATE RESTRICT ON
+      DELETE CASCADE`))
+        .to.equal('ALTER TABLE `CSEHistory` ADD CONSTRAINT `CSEHistoryDel` FOREIGN KEY (`SystemUUID`) REFERENCES `Systems` (`UUID`) ON UPDATE RESTRICT ON DELETE CASCADE');
+    })
+
     it('should support alter add constraint check', () => {
       const opt = {
         database: 'transactsql'

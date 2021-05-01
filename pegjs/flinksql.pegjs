@@ -947,8 +947,8 @@ reference_definition
   t:table_ref_list __
   de:cte_column_definition __
   m:('MATCH FULL'i / 'MATCH PARTIAL'i / 'MATCH SIMPLE'i)? __
-  od: on_reference? __
-  ou: on_reference? {
+  od:on_reference? __
+  ou:on_reference? {
     /* => {
         definition: cte_column_definition;
         table: table_ref_list;
@@ -968,13 +968,13 @@ reference_definition
   }
 
 on_reference
-  = kw: ('ON DELETE'i / 'ON UPDATE'i) __ ro:reference_option {
-    // => { type: 'on delete' | 'on update'; value: reference_option; }
+  = on_kw:'ON'i __ kw: ('DELETE'i / 'UPDATE'i) __ ro:reference_option {
     return {
-      type: kw.toLowerCase(),
+      type: `${on_kw.toLowerCase()} ${kw.toLowerCase()}`,
       value: ro
     }
   }
+
 reference_option
   = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i) {
     // => 'restrict' | 'cascade' | 'set null' | 'no action' | 'set default'

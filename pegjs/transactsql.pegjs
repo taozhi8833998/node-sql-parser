@@ -701,10 +701,11 @@ ALTER_LOCK
   }
 
 ALTER_ADD_CONSTRAINT
-  = KW_ADD __ c:create_constraint_check {
+  = KW_ADD __ c:create_constraint_definition {
       return {
         action: 'add',
-        ...c,
+        create_definitions: c,
+        resource: 'constraint',
         type: 'alter',
       }
     }
@@ -860,8 +861,8 @@ reference_definition
   t:table_ref_list __
   de:cte_column_definition __
   m:('MATCH FULL'i / 'MATCH PARTIAL'i / 'MATCH SIMPLE'i)? __
-  od: on_reference? __
-  ou: on_reference? {
+  od:on_reference? __
+  ou:on_reference? {
     return {
         definition: de,
         table: t,
@@ -873,9 +874,9 @@ reference_definition
   }
 
 on_reference
-  = kw: ('ON DELETE'i / 'ON UPDATE'i) __ ro:reference_option {
+  = on_kw:'ON'i __ kw: ('DELETE'i / 'UPDATE'i) __ ro:reference_option {
     return {
-      type: kw.toLowerCase(),
+      type: `${on_kw.toLowerCase()} ${kw.toLowerCase()}`,
       value: ro
     }
   }
