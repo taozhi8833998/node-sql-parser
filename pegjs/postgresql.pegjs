@@ -1628,6 +1628,77 @@ column_ref_list
 having_clause
   = KW_HAVING __ e:expr { /* => expr */ return e; }
 
+as_window_specification
+  = LPAREN __ ws:window_specification? __ RPAREN {
+    return {
+      window_specification: ws,
+      parentheses: true
+    }
+  }
+
+window_specification
+  = bc:partition_by_clause? __
+  l:order_by_clause? __
+  w:window_frame_clause? {
+    return {
+      name: null,
+      partitionby: bc,
+      orderby: l,
+      window_frame_clause: w
+    }
+  }
+
+window_specification_frameless
+  = bc:partition_by_clause? __
+  l:order_by_clause? {
+    return {
+      name: null,
+      partitionby: bc,
+      orderby: l,
+      window_frame_clause: ''
+    }
+  }
+
+window_frame_clause
+  = 'ROWS'i __ f:window_frame_following {
+    return `rows ${f}`
+  }
+  / 'ROWS'i __ p:window_frame_preceding {
+    return `rows ${p}`
+  }
+  / 'ROWS'i __ KW_BETWEEN __ p:window_frame_preceding __ KW_AND __ f:window_frame_following {
+    return `rows between ${p} AND ${f}`
+  }
+
+window_frame_following
+  = s:window_frame_value __ 'FOLLOWING'i  {
+    return `${s} following`
+  }
+  / window_frame_current_row
+
+window_frame_preceding
+  = s:window_frame_value __ 'PRECEDING'i  {
+    return `${s} preceding`
+  }
+  / window_frame_current_row
+
+window_frame_current_row 
+  = 'CURRENT'i __ 'ROW'i {
+    return 'current row'
+  }
+
+window_frame_value
+ = s:'UNBOUNDED'i {
+   return 'unbounded'
+ }
+ / s:literal_numeric {
+   return s.value
+ }
+
+
+partition_by_clause
+  = KW_PARTITION __ KW_BY __ bc:column_clause { return bc; }
+
 order_by_clause
   = KW_ORDER __ KW_BY __ l:order_by_list { /* => order_by_list */ return l; }
 
@@ -2148,6 +2219,7 @@ primary
   = cast_expr
   / literal
   / aggr_func
+  / window_func
   / func_call
   / case_expr
   / interval_expr
@@ -2287,20 +2359,95 @@ param
       return { type: 'param', value: l[1] };
     }
 
+
+over_partition
+  = 'OVER'i __ aws:as_window_specification {
+    return {
+      type: 'window',
+      as_window_specification: aws,
+    }
+  }
+  / 'OVER'i __ LPAREN __ bc:partition_by_clause __ l:order_by_clause? __ RPAREN {
+    return {
+      partitionby: bc,
+      orderby: l
+    }
+  }
+
 aggr_func
   = aggr_fun_count
   / aggr_fun_smma
   / aggr_array_agg
 
+
+window_func
+  = window_fun_rank
+  / window_fun_laglead
+  / window_fun_firstlast
+
+window_fun_rank
+  = name:KW_WIN_FNS_RANK __ LPAREN __ RPAREN __ 
+  'OVER'i __ LPAREN __ ws:window_specification_frameless? __ RPAREN __ {
+    return {
+      type: 'window_func',
+      name: name,
+      over: ws
+    }
+  }
+
+window_fun_laglead
+  = name:KW_LAG_LEAD __ LPAREN __ l:expr_list __ RPAREN __
+  cn:consider_nulls_clause? __
+  'OVER'i __ LPAREN __ ws:window_specification_frameless? __ RPAREN __ {
+    return {
+      type: 'window_func',
+      name: name,
+      args: l,
+      over: ws,
+      consider_nulls: cn || 'RESPECT NULLS'
+    };
+  }
+
+window_fun_firstlast
+  = name:KW_FIRST_LAST_VALUE __ LPAREN __ l:expr __ cn:consider_nulls_clause? __ RPAREN __
+  'OVER'i __ LPAREN __ ws:window_specification_frameless? __ RPAREN __  {
+    return {
+      type: 'window_func',
+      name: name,
+      args: {
+        type: 'expr_list', value: [l]
+      },
+      over: ws,
+      consider_nulls: cn || 'RESPECT NULLS'
+    };
+  }
+
+KW_FIRST_LAST_VALUE
+ = 'FIRST_VALUE'i / 'LAST_VALUE'i
+
+KW_WIN_FNS_RANK
+  = 'ROW_NUMBER'i / 'DENSE_RANK'i / 'RANK'i 
+  // / 'CUME_DIST'i / 'MEDIAN'i /  'PERCENT_RANK'i 
+  // / 'PERCENTILE_CONT'i / 'PERCENTILE_DISC'i / 'RATIO_TO_REPORT'i
+
+KW_LAG_LEAD
+  = 'LAG'i / 'LEAD'i / 'NTH_VALUE'i
+
+consider_nulls_clause
+  = v:('IGNORE'i / 'RESPECT'i) __ 'NULLS'i {
+    return v.toUpperCase() + ' NULLS'
+  }
+
 aggr_fun_smma
-  = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN {
+  = name:KW_SUM_MAX_MIN_AVG __ LPAREN __ e:additive_expr __ RPAREN __ bc:over_partition? {
     // => { type: 'aggr_func'; name: 'SUM' | 'MAX' | 'MIN' | 'AVG'; args: { expr: additive_expr } }
       return {
-        type: 'aggr_func',
+        type: bc ? 'window_func' : 'aggr_func',
         name: name,
         args: {
           expr: e
-        }
+        },
+        over: bc
       };
     }
 
@@ -2308,12 +2455,13 @@ KW_SUM_MAX_MIN_AVG
   = KW_SUM / KW_MAX / KW_MIN / KW_AVG
 
 aggr_fun_count
-  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN {
+  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
     // => { type: 'aggr_func'; name: 'COUNT'; args:count_arg; }
       return {
-        type: 'aggr_func',
+        type: bc ? 'window_func' : 'aggr_func',
         name: name,
-        args: arg
+        args: arg,
+        over: bc
       };
     }
 
@@ -2385,7 +2533,7 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = e:(literal / aggr_func / func_call / case_expr / interval_expr / column_ref / param) s:KW_DOUBLE_COLON t:data_type {
+  = e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) s:KW_DOUBLE_COLON t:data_type {
     /* => {
         type: 'cast';
         expr: expr | literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
