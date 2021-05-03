@@ -53,12 +53,9 @@ function constructArgsList(expr) {
 }
 
 function funcToSQL(expr) {
-  const { over, orderby } = expr
-  let str = constructArgsList(expr)
+  const { over } = expr
+  const str = constructArgsList(expr)
   const overStr = overToSQL(over)
-  if (orderby) {
-    str = `${str} ${orderOrPartitionByToSQL(orderby, 'order by')}`
-  }
   return [str, overStr].filter(hasVal).join(' ')
 }
 
