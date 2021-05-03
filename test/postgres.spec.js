@@ -207,10 +207,10 @@ describe('Postgres', () => {
           `SELECT
             FIRST_VALUE(user_name ignore NULLS) OVER (
                 PARTITION BY user_city
-                ORDER BY created_at
+                ORDER BY created_at, ranking
             ) AS age_window
           FROM roster`,
-          'SELECT FIRST_VALUE("user_name" IGNORE NULLS) OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
+          'SELECT FIRST_VALUE("user_name" IGNORE NULLS) OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC, "ranking" ASC) AS "age_window" FROM "roster"'
         ]
     },
   ]

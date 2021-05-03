@@ -53,7 +53,7 @@ function constructArgsList(expr) {
 }
 
 function funcToSQL(expr) {
-  const { orderby, over } = expr
+  const { over, orderby } = expr
   let str = constructArgsList(expr)
   const overStr = overToSQL(over)
   if (orderby) {
