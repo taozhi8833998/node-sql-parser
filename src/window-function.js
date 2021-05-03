@@ -8,37 +8,60 @@ function windowSumCountToSQL(expr) {
   let str = args.expr ? exprToSQL(args.expr) : ''
   const fnName = expr.name
   const overStr = overToSQL(over)
-  if (args.distinct) str = `DISTINCT ${str}`
+  // if (args.distinct) str = `DISTINCT ${str}` // cant occur in window fn context
   if (orderby) str = `${str} ${orderOrPartitionByToSQL(orderby, 'order by')}`
   return [`${fnName}(${str})`, overStr].filter(hasVal).join(' ')
 }
 
-function considerNullPosition(fnName) {
+function isConsiderNullsInArgs(fnName) {
+  // position of IGNORE/RESPECT NULLS varies by function
   switch (fnName) {
     case 'NTH_VALUE':
     case 'LEAD':
     case 'LAG':
-      return 'AFTER'
+      return false
     default:
-      return 'BEFORE'
+      return true
   }
 }
 
+function constructArgsList(expr) {
+  const { args, name, consider_nulls = '' } = expr
+  const argsList = args ? exprToSQL(args).join(', ') : ''
+  // cover Syntax from FN_NAME(...args [RESPECT NULLS]) [RESPECT NULLS]
+  if (isConsiderNullsInArgs(name)) {
+    return [
+      name,
+      '(',
+      argsList,
+      // if consider nulls we need a space
+      consider_nulls && ' ',
+      consider_nulls,
+      ')',
+    ].filter(hasVal).join('')
+  }
+
+  return [
+    name,
+    '(',
+    argsList,
+    ')',
+    // if consider nulls we need a space
+    consider_nulls && ' ',
+    consider_nulls,
+  ].filter(hasVal).join('')
+}
+
 function funcToSQL(expr) {
-  const { args, name, orderby, over, consider_nulls } = expr
-  let argsList = args ? exprToSQL(args).join(', ') : ''
-  if (consider_nulls && considerNullPosition(name) === 'BEFORE') {
-    argsList = `${argsList} ${consider_nulls}`
-  }
-  let str = `${name}(${argsList})`
-  if (consider_nulls && considerNullPosition(name) === 'AFTER') {
-    str = `${str} ${consider_nulls}`
-  }
+  const { orderby, over } = expr
+  let str = constructArgsList(expr)
   const overStr = overToSQL(over)
-  if (args && args.distinct) str = `DISTINCT ${str}`
-  if (orderby) str = `${str} ${orderOrPartitionByToSQL(orderby, 'order by')}`
+  if (orderby) {
+    str = `${str} ${orderOrPartitionByToSQL(orderby, 'order by')}`
+  }
   return [str, overStr].filter(hasVal).join(' ')
 }
+
 function windowFuncToSQL(expr) {
   switch (expr.name) {
     case 'SUM':
