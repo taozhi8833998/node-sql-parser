@@ -169,6 +169,11 @@ describe('Command SQL', () => {
         .to.equal("ALTER TABLE `test`.`test` ADD COLUMN `test` VARCHAR(20) NOT NULL DEFAULT 'xx', ALGORITHM = INPLACE, LOCK = NONE");
     })
 
+    it('should support alter with BIT type', () => {
+      expect(getParsedSql('ALTER TABLE newtable ADD newcol BIT(1)'))
+        .to.equal('ALTER TABLE `newtable` ADD `newcol` BIT(1)');
+    })
+
     it('should support alter without expr', () => {
       const expr = [
         {
