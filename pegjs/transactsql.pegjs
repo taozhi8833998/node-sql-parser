@@ -1778,9 +1778,10 @@ primary
   / interval_expr
   / column_ref
   / param
-  / LPAREN __ e:expr __ RPAREN {
+  / LPAREN __ e:expr __ RPAREN  __ tail: (__ (KW_AND / KW_OR) __ or_expr)* {
       e.parentheses = true;
-      return e;
+      if (!tail || tail.length === 0) return e
+      return createBinaryExprChain(e, tail);
     }
   / LPAREN __ list:expr_list __ RPAREN {
         list.parentheses = true;

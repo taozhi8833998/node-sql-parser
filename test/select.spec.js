@@ -505,6 +505,13 @@ describe('select', () => {
       expect(getParsedSql(`select * from tableName where a = 1 or (b = 2) and c=3;`)).to.equal("SELECT * FROM `tableName` WHERE `a` = 1 OR (`b` = 2) AND `c` = 3")
       expect(getParsedSql(`select * from tableName where a = 1 or (b = 2 and d=4) and c=3;`)).to.equal("SELECT * FROM `tableName` WHERE `a` = 1 OR (`b` = 2 AND `d` = 4) AND `c` = 3")
       expect(getParsedSql(`SELECT * FROM messages WHERE (year = 2012 AND month >= 9) OR (year = 2021 AND month <= 4) OR (year > 2012 AND year < 2021);`)).to.equal("SELECT * FROM `messages` WHERE (`year` = 2012 AND `month` >= 9) OR (`year` = 2021 AND `month` <= 4) OR (`year` > 2012 AND `year` < 2021)")
+      expect(getParsedSql(`SELECT max('Y')
+      FROM "TABLE_1" as ST INNER JOIN
+      (SELECT * FROM "TABLE_2" AS JT_1
+        WHERE JT_1.dcc_user_y_n='N' and JT_1.wax_user_y_n='N'
+      )
+      ON ST.senderId=JT_1.customerId
+      WHERE (ST.is_pmt_official_y_n='Y' and ST.rcvr_id IN ('1903441177248177755','1253078913466070789','2028875792797419044','1363196721610324064') and ST.pmt_usd_amt>0 and (ST.pmt_txn_status_code='S' or (ST.pmt_txn_status_code='V' and ST.cum_pmt_cnt=1)) and ST.sndr_type_key=1) AND (ST.pmt_cre_dt>=JT_2.cust_signup_dt) GROUP BY JT_1.cust_id`)).to.equal("SELECT MAX('Y') FROM `TABLE_1` AS `ST` INNER JOIN (SELECT * FROM `TABLE_2` AS `JT_1` WHERE `JT_1`.`dcc_user_y_n` = 'N' AND `JT_1`.`wax_user_y_n` = 'N') ON `ST`.`senderId` = `JT_1`.`customerId` WHERE (`ST`.`is_pmt_official_y_n` = 'Y' AND `ST`.`rcvr_id` IN ('1903441177248177755', '1253078913466070789', '2028875792797419044', '1363196721610324064') AND `ST`.`pmt_usd_amt` > 0 AND (`ST`.`pmt_txn_status_code` = 'S' OR (`ST`.`pmt_txn_status_code` = 'V' AND `ST`.`cum_pmt_cnt` = 1)) AND `ST`.`sndr_type_key` = 1) AND (`ST`.`pmt_cre_dt` >= `JT_2`.`cust_signup_dt`) GROUP BY `JT_1`.`cust_id`")
 
     })
 
