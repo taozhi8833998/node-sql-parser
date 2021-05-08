@@ -1583,7 +1583,7 @@ primary
   / interval_expr
   / column_ref
   / param
-  / LPAREN __ e:expr __ RPAREN  __ tail: (__ (KW_AND / KW_OR) __ or_expr)* {
+  / LPAREN __ e:expr __ RPAREN  tail: (___ (KW_AND / KW_OR) __ or_expr)* {
       e.parentheses = true;
       if (!tail || tail.length === 0) return e
       return createBinaryExprChain(e, tail);
