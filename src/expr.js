@@ -11,10 +11,12 @@ import { selectToSQL } from './select'
 import { arrayStructExprToSQL } from './array-struct'
 import { unionToSQL } from './union'
 import { namedWindowExprListToSQL } from './window'
+import { windowFuncToSQL } from './window-function'
 
 const exprToSQLConvertFn = {
   alter       : alterExprToSQL,
   aggr_func   : aggrToSQL,
+  window_func : windowFuncToSQL,
   'array'     : arrayStructExprToSQL,
   assign      : assignToSQL,
   extract     : extractFunToSQL,
