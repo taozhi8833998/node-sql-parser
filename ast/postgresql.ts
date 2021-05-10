@@ -480,7 +480,9 @@ export type column_ref_list = column_ref[];
 
 export type having_clause = expr;
 
+export type partition_by_clause = column_clause;
 
+export type window_specification = { name: null, partitionby: partition_by_clause, orderby: order_by_clause, window_frame_clause: string | null }
 
 export type order_by_clause = order_by_list;
 

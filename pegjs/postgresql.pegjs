@@ -1630,6 +1630,7 @@ having_clause
 
 as_window_specification
   = LPAREN __ ws:window_specification? __ RPAREN {
+    // => { window_specification: window_specification, parentheses: boolean }
     return {
       window_specification: ws || {},
       parentheses: true
@@ -1640,6 +1641,7 @@ window_specification
   = bc:partition_by_clause? __
   l:order_by_clause? __
   w:window_frame_clause {
+    // => { name: null, partitionby: partition_by_clause, orderby: order_by_clause, window_frame_clause: string }
     return {
       name: null,
       partitionby: bc,
@@ -1651,6 +1653,7 @@ window_specification
 window_specification_frameless
   = bc:partition_by_clause? __
   l:order_by_clause? {
+    // => { name: null, partitionby: partition_by_clause, orderby: order_by_clause, window_frame_clause: string | null }
     return {
       name: null,
       partitionby: bc,
@@ -1661,14 +1664,17 @@ window_specification_frameless
 
 window_frame_clause
   = kw:KW_ROWS __ s:(window_frame_following / window_frame_preceding) {
+    // => string
     return `rows ${s.value}`
   }
   / KW_ROWS __ KW_BETWEEN __ p:window_frame_preceding __ KW_AND __ f:window_frame_following {
+    // => string
     return `rows between ${p.value} and ${f.value}`
   }
 
 window_frame_following
   = s:window_frame_value __ 'FOLLOWING'i  {
+    // => string
     s.value += ' FOLLOWING'
     return s
   }
@@ -1676,6 +1682,7 @@ window_frame_following
 
 window_frame_preceding
   = s:window_frame_value __ 'PRECEDING'i  {
+    // => string
     s.value += ' PRECEDING'
     return s
   }
@@ -1683,18 +1690,20 @@ window_frame_preceding
 
 window_frame_current_row
   = 'CURRENT'i __ 'ROW'i {
+    // { type: 'single_quote_string', value: string }
     return { type: 'single_quote_string', value: 'current row' }
   }
 
 window_frame_value
   = s:'UNBOUNDED'i {
+    // => literal_string
     return { type: 'single_quote_string', value: s.toUpperCase() }
   }
   / literal_numeric
 
 
 partition_by_clause
-  = KW_PARTITION __ KW_BY __ bc:column_clause { return bc; }
+  = KW_PARTITION __ KW_BY __ bc:column_clause { /* => column_clause */ return bc; }
 
 order_by_clause
   = KW_ORDER __ KW_BY __ l:order_by_list { /* => order_by_list */ return l; }
@@ -2360,12 +2369,14 @@ param
 
 over_partition
   = 'OVER'i __ aws:as_window_specification {
+    // { type: 'windows'; as_window_specification: }
     return {
       type: 'window',
       as_window_specification: aws,
     }
   }
   / 'OVER'i __ LPAREN __ bc:partition_by_clause? __ l:order_by_clause? __ RPAREN {
+    // { partitionby: partition_by_clause; orderby: order_by_clause }
     return {
       partitionby: bc,
       orderby: l
