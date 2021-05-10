@@ -1,7 +1,5 @@
 const { expect } = require('chai')
 const Parser = require('../src/parser').default
-const { arrayStructValueToSQL } = require('../src/array-struct')
-const { arrayStructTypeToSQL } = require('../src/util')
 
 describe('Postgres', () => {
   const parser = new Parser();
@@ -64,8 +62,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns with qualified frame clause',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (PARTITION BY user_city ORDER BY created_at DESC) AS age_window
           FROM roster`,
           'SELECT "first_name", SUM("user_age") OVER (PARTITION BY "user_city" ORDER BY "created_at" DESC) AS "age_window" FROM "roster"'
@@ -74,8 +72,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (PARTITION BY user_city ORDER BY created_at) AS age_window
           FROM roster`,
           'SELECT "first_name", SUM("user_age") OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
@@ -84,8 +82,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns + ROWS following',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (
                 PARTITION BY user_city
                 ORDER BY created_at ASC
@@ -98,8 +96,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns + ROWS unbounded following',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (
                 PARTITION BY user_city
                 ORDER BY created_at ASC
@@ -112,8 +110,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns + ROWS unbounded preceding',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (
                 PARTITION BY user_city
                 ORDER BY created_at ASC
@@ -126,8 +124,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns + ROWS between',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (
                 PARTITION BY user_city
                 ORDER BY created_at DESC
@@ -145,8 +143,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns + ROWS unbounded preceding + current row',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (
                 PARTITION BY user_city
                 ORDER BY created_at, user_id ASC
@@ -188,6 +186,30 @@ describe('Postgres', () => {
           FROM roster`,
           'SELECT LAG("user_name", 10) RESPECT NULLS OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
         ]
+    },
+    {
+      title: 'Window Fns + LEAD',
+      sql: [
+        `SELECT
+          LEAD(user_name, 10) OVER (
+              PARTITION BY user_city
+              ORDER BY created_at
+          ) AS age_window
+        FROM roster`,
+        'SELECT LEAD("user_name", 10) RESPECT NULLS OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
+      ]
+    },
+    {
+      title: 'Window Fns + NTH_VALUE',
+      sql: [
+        `SELECT
+        NTH_VALUE(user_name, 10) OVER (
+              PARTITION BY user_city
+              ORDER BY created_at
+          ) AS age_window
+        FROM roster`,
+        'SELECT NTH_VALUE("user_name", 10) RESPECT NULLS OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
+      ]
     },
     {
         title: 'Window Fns + LAG + explicit NULLS',

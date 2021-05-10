@@ -1,5 +1,6 @@
 import { hasVal, toUpper } from './util'
-import { orderOrPartitionByToSQL } from './expr'
+import { exprToSQL, orderOrPartitionByToSQL } from './expr'
+import { overToSQL } from './over'
 
 function windowSpecificationToSQL(windowSpec) {
   const {
@@ -33,9 +34,38 @@ function namedWindowExprListToSQL(namedWindowExprInfo) {
   return expr.map(namedWindowExprToSQL).join(', ')
 }
 
+function isConsiderNullsInArgs(fnName) {
+  // position of IGNORE/RESPECT NULLS varies by function
+  switch (fnName) {
+    case 'NTH_VALUE':
+    case 'LEAD':
+    case 'LAG':
+      return false
+    default:
+      return true
+  }
+}
+
+function constructArgsList(expr) {
+  const { args, name, consider_nulls = '' } = expr
+  const argsList = args ? exprToSQL(args).join(', ') : ''
+  // cover Syntax from FN_NAME(...args [RESPECT NULLS]) [RESPECT NULLS]
+  const isConsidernulls = isConsiderNullsInArgs(name)
+  const result = [name, '(', argsList, !isConsidernulls && ')', consider_nulls && ' ', consider_nulls, isConsidernulls && ')']
+  return result.filter(hasVal).join('')
+}
+
+function windowFuncToSQL(expr) {
+  const { over } = expr
+  const str = constructArgsList(expr)
+  const overStr = overToSQL(over)
+  return [str, overStr].filter(hasVal).join(' ')
+}
+
 export {
   asWindowSpecToSQL,
   namedWindowExprToSQL,
   namedWindowExprListToSQL,
+  windowFuncToSQL,
   windowSpecificationToSQL,
 }
