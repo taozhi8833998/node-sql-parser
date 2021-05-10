@@ -64,8 +64,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns with qualified frame clause',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (PARTITION BY user_city ORDER BY created_at DESC) AS age_window
           FROM roster`,
           'SELECT "first_name", SUM("user_age") OVER (PARTITION BY "user_city" ORDER BY "created_at" DESC) AS "age_window" FROM "roster"'
@@ -74,8 +74,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (PARTITION BY user_city ORDER BY created_at) AS age_window
           FROM roster`,
           'SELECT "first_name", SUM("user_age") OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
@@ -84,8 +84,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns + ROWS following',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (
                 PARTITION BY user_city
                 ORDER BY created_at ASC
@@ -98,8 +98,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns + ROWS unbounded following',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (
                 PARTITION BY user_city
                 ORDER BY created_at ASC
@@ -112,8 +112,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns + ROWS unbounded preceding',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (
                 PARTITION BY user_city
                 ORDER BY created_at ASC
@@ -126,8 +126,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns + ROWS between',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (
                 PARTITION BY user_city
                 ORDER BY created_at DESC
@@ -145,8 +145,8 @@ describe('Postgres', () => {
     {
         title: 'Window Fns + ROWS unbounded preceding + current row',
         sql: [
-          `SELECT 
-            first_name, 
+          `SELECT
+            first_name,
             SUM(user_age) OVER (
                 PARTITION BY user_city
                 ORDER BY created_at, user_id ASC

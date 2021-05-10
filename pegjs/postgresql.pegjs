@@ -1631,7 +1631,7 @@ having_clause
 as_window_specification
   = LPAREN __ ws:window_specification? __ RPAREN {
     return {
-      window_specification: ws,
+      window_specification: ws || {},
       parentheses: true
     }
   }
@@ -1639,7 +1639,7 @@ as_window_specification
 window_specification
   = bc:partition_by_clause? __
   l:order_by_clause? __
-  w:window_frame_clause? {
+  w:window_frame_clause {
     return {
       name: null,
       partitionby: bc,
@@ -1655,45 +1655,42 @@ window_specification_frameless
       name: null,
       partitionby: bc,
       orderby: l,
-      window_frame_clause: ''
+      window_frame_clause: null
     }
   }
 
 window_frame_clause
-  = 'ROWS'i __ f:window_frame_following {
-    return `rows ${f}`
+  = kw:KW_ROWS __ s:(window_frame_following / window_frame_preceding) {
+    return `rows ${s.value}`
   }
-  / 'ROWS'i __ p:window_frame_preceding {
-    return `rows ${p}`
-  }
-  / 'ROWS'i __ KW_BETWEEN __ p:window_frame_preceding __ KW_AND __ f:window_frame_following {
-    return `rows between ${p} AND ${f}`
+  / KW_ROWS __ KW_BETWEEN __ p:window_frame_preceding __ KW_AND __ f:window_frame_following {
+    return `rows between ${p.value} and ${f.value}`
   }
 
 window_frame_following
   = s:window_frame_value __ 'FOLLOWING'i  {
-    return `${s} following`
+    s.value += ' FOLLOWING'
+    return s
   }
   / window_frame_current_row
 
 window_frame_preceding
   = s:window_frame_value __ 'PRECEDING'i  {
-    return `${s} preceding`
+    s.value += ' PRECEDING'
+    return s
   }
   / window_frame_current_row
 
-window_frame_current_row 
+window_frame_current_row
   = 'CURRENT'i __ 'ROW'i {
-    return 'current row'
+    return { type: 'single_quote_string', value: 'current row' }
   }
 
 window_frame_value
- = s:'UNBOUNDED'i {
-   return 'unbounded'
- }
- / s:literal_numeric {
-   return s.value
- }
+  = s:'UNBOUNDED'i {
+    return { type: 'single_quote_string', value: s.toUpperCase() }
+  }
+  / literal_numeric
 
 
 partition_by_clause
@@ -2368,7 +2365,7 @@ over_partition
       as_window_specification: aws,
     }
   }
-  / 'OVER'i __ LPAREN __ bc:partition_by_clause __ l:order_by_clause? __ RPAREN {
+  / 'OVER'i __ LPAREN __ bc:partition_by_clause? __ l:order_by_clause? __ RPAREN {
     return {
       partitionby: bc,
       orderby: l
@@ -2387,48 +2384,45 @@ window_func
   / window_fun_firstlast
 
 window_fun_rank
-  = name:KW_WIN_FNS_RANK __ LPAREN __ RPAREN __ 
-  'OVER'i __ LPAREN __ ws:window_specification_frameless? __ RPAREN __ {
+  = name:KW_WIN_FNS_RANK __ LPAREN __ RPAREN __ over:over_partition {
     return {
       type: 'window_func',
       name: name,
-      over: ws
+      over: over
     }
   }
 
 window_fun_laglead
   = name:KW_LAG_LEAD __ LPAREN __ l:expr_list __ RPAREN __
-  cn:consider_nulls_clause? __
-  'OVER'i __ LPAREN __ ws:window_specification_frameless? __ RPAREN __ {
+  cn:consider_nulls_clause? __ over:over_partition {
     return {
       type: 'window_func',
       name: name,
       args: l,
-      over: ws,
+      over: over,
       consider_nulls: cn || 'RESPECT NULLS'
     };
   }
 
 window_fun_firstlast
-  = name:KW_FIRST_LAST_VALUE __ LPAREN __ l:expr __ cn:consider_nulls_clause? __ RPAREN __
-  'OVER'i __ LPAREN __ ws:window_specification_frameless? __ RPAREN __  {
+  = name:KW_FIRST_LAST_VALUE __ LPAREN __ l:expr __ cn:consider_nulls_clause? __ RPAREN __ over:over_partition {
     return {
       type: 'window_func',
       name: name,
       args: {
         type: 'expr_list', value: [l]
       },
-      over: ws,
+      over: over,
       consider_nulls: cn || 'RESPECT NULLS'
     };
   }
 
 KW_FIRST_LAST_VALUE
- = 'FIRST_VALUE'i / 'LAST_VALUE'i
+  = 'FIRST_VALUE'i / 'LAST_VALUE'i
 
 KW_WIN_FNS_RANK
-  = 'ROW_NUMBER'i / 'DENSE_RANK'i / 'RANK'i 
-  // / 'CUME_DIST'i / 'MEDIAN'i /  'PERCENT_RANK'i 
+  = 'ROW_NUMBER'i / 'DENSE_RANK'i / 'RANK'i
+  // / 'CUME_DIST'i / 'MEDIAN'i /  'PERCENT_RANK'i
   // / 'PERCENTILE_CONT'i / 'PERCENTILE_DISC'i / 'RATIO_TO_REPORT'i
 
 KW_LAG_LEAD
@@ -2443,7 +2437,7 @@ aggr_fun_smma
   = name:KW_SUM_MAX_MIN_AVG __ LPAREN __ e:additive_expr __ RPAREN __ bc:over_partition? {
     // => { type: 'aggr_func'; name: 'SUM' | 'MAX' | 'MIN' | 'AVG'; args: { expr: additive_expr } }
       return {
-        type: bc ? 'window_func' : 'aggr_func',
+        type: 'aggr_func',
         name: name,
         args: {
           expr: e
@@ -2459,7 +2453,7 @@ aggr_fun_count
   = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
     // => { type: 'aggr_func'; name: 'COUNT'; args:count_arg; }
       return {
-        type: bc ? 'window_func' : 'aggr_func',
+        type: 'aggr_func',
         name: name,
         args: arg,
         over: bc
@@ -2876,6 +2870,7 @@ KW_FLOAT   = "FLOAT"i   !ident_start { return 'FLOAT'; }
 KW_DOUBLE   = "DOUBLE"i   !ident_start { return 'DOUBLE'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
+KW_ROWS     = "ROWS"i     !ident_start { return 'ROWS'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
