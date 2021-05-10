@@ -480,9 +480,27 @@ export type column_ref_list = column_ref[];
 
 export type having_clause = expr;
 
+export type as_window_specification = { window_specification: window_specification; parentheses: boolean };
+
+export type window_specification = { name: null; partitionby: partition_by_clause; orderby: order_by_clause; window_frame_clause: string };
+
+export type window_specification_frameless = { name: null; partitionby: partition_by_clause; orderby: order_by_clause; window_frame_clause: null };
+
+export type window_frame_clause = string;
+
+export type window_frame_following = string | window_frame_current_row;
+
+export type window_frame_preceding = string | window_frame_current_row;
+
+export type window_frame_current_row = { type: 'single_quote_string'; value: string };
+
+export type window_frame_value = literal_string | literal_numeric;
+
+
+
 export type partition_by_clause = column_clause;
 
-export type window_specification = { name: null, partitionby: partition_by_clause, orderby: order_by_clause, window_frame_clause: string | null }
+
 
 export type order_by_clause = order_by_list;
 
@@ -651,7 +669,7 @@ export type multiplicative_expr = binary_expr;
 
 export type multiplicative_operator = "*" | "/" | "%";
 
-export type primary = cast_expr | literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param | expr | expr_list | var_decl | { type: 'origin'; value: string; };
+export type primary = cast_expr | literal | aggr_func | window_func | func_call | case_expr | interval_expr | column_ref | param | expr | binary_expr | expr_list | var_decl | { type: 'origin'; value: string; };
 
 
 
@@ -701,13 +719,31 @@ type column_part = never;
 
 export type param = { type: 'param'; value: ident_name };
 
+export type over_partition = { type: 'windows'; as_window_specification: as_window_specification } | { partitionby: partition_by_clause; orderby: order_by_clause };
+
 export type aggr_func = aggr_fun_count | aggr_fun_smma | aggr_array_agg;
 
-export type aggr_fun_smma = { type: 'aggr_func'; name: 'SUM' | 'MAX' | 'MIN' | 'AVG'; args: { expr: additive_expr } };
+export type window_func = window_fun_rank | window_fun_laglead | window_fun_firstlast;
+
+export type window_fun_rank = { type: 'window_func'; name: string; over: over_partition };
+
+export type window_fun_laglead = { type: 'window_func'; name: string; args: expr_list; consider_nulls: string; over: over_partition };
+
+export type window_fun_firstlast = { type: 'window_func'; name: string; args: expr_list; consider_nulls: string; over: over_partition };
+
+type KW_FIRST_LAST_VALUE = never;
+
+type KW_WIN_FNS_RANK = never;
+
+type KW_LAG_LEAD = never;
+
+export type consider_nulls_clause = string;
+
+export type aggr_fun_smma = { type: 'aggr_func'; name: 'SUM' | 'MAX' | 'MIN' | 'AVG'; args: { expr: additive_expr }; over: over_partition };
 
 type KW_SUM_MAX_MIN_AVG = never;
 
-export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT'; args:count_arg; };
+export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT'; args:count_arg; over: over_partition };
 
 
 
@@ -984,6 +1020,8 @@ type KW_DOUBLE = never;
 type KW_DATE = never;
 
 type KW_DATETIME = never;
+
+type KW_ROWS = never;
 
 type KW_TIME = never;
 
