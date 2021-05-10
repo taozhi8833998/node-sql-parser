@@ -2419,7 +2419,7 @@ window_fun_laglead
 
 window_fun_firstlast
   = name:KW_FIRST_LAST_VALUE __ LPAREN __ l:expr __ cn:consider_nulls_clause? __ RPAREN __ over:over_partition {
-    // => { type: 'window_func'; name: string; args: expr_list; consider_nulls: string; over: over_partition }
+    // => window_fun_laglead
     return {
       type: 'window_func',
       name: name,
@@ -2484,7 +2484,7 @@ count_arg
 
 aggr_array_agg
   = name:KW_ARRAY_AGG __ LPAREN __ arg:distinct_args __ o:order_by_clause? __ RPAREN {
-    // => { type: 'aggr_func'; name: 'ARRAY_AGG'; args:count_arg; orderby?: order_by_clause  }
+    // => { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG'; orderby?: order_by_clause  }
       return {
         type: 'aggr_func',
         name: name,

@@ -729,7 +729,7 @@ export type window_fun_rank = { type: 'window_func'; name: string; over: over_pa
 
 export type window_fun_laglead = { type: 'window_func'; name: string; args: expr_list; consider_nulls: string; over: over_partition };
 
-export type window_fun_firstlast = { type: 'window_func'; name: string; args: expr_list; consider_nulls: string; over: over_partition };
+export type window_fun_firstlast = window_fun_laglead;
 
 type KW_FIRST_LAST_VALUE = never;
 
@@ -753,7 +753,7 @@ export type distinct_args = { distinct: 'DISTINCT'; expr: column_ref; };
 
 export type count_arg = { expr: star_expr } | distinct_args;
 
-export type aggr_array_agg = { type: 'aggr_func'; name: 'ARRAY_AGG'; args:count_arg; orderby?: order_by_clause  };
+export type aggr_array_agg = { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG'; orderby?: order_by_clause  };
 
 
 
