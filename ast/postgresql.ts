@@ -476,8 +476,6 @@ export type group_by_clause = expr_list['value'];
 
 export type column_ref_list = column_ref[];
 
-
-
 export type having_clause = expr;
 
 export type as_window_specification = { window_specification: window_specification; parentheses: boolean };
@@ -727,9 +725,11 @@ export type window_func = window_fun_rank | window_fun_laglead | window_fun_firs
 
 export type window_fun_rank = { type: 'window_func'; name: string; over: over_partition };
 
-export type window_fun_laglead = { type: 'window_func'; name: string; args: expr_list; consider_nulls: string; over: over_partition };
+type window_fun_type = { type: 'window_func'; name: string; args: expr_list; consider_nulls: string; over: over_partition };
 
-export type window_fun_firstlast = { type: 'window_func'; name: string; args: expr_list; consider_nulls: string; over: over_partition };
+export type window_fun_laglead = window_fun_type;
+
+export type window_fun_firstlast = window_fun_type;
 
 type KW_FIRST_LAST_VALUE = never;
 
@@ -745,17 +745,11 @@ type KW_SUM_MAX_MIN_AVG = never;
 
 export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT'; args:count_arg; over: over_partition };
 
-
-
 export type distinct_args = { distinct: 'DISTINCT'; expr: column_ref; };
-
-
 
 export type count_arg = { expr: star_expr } | distinct_args;
 
 export type aggr_array_agg = { type: 'aggr_func'; name: 'ARRAY_AGG'; args:count_arg; orderby?: order_by_clause  };
-
-
 
 export type star_expr = { type: 'star'; value: '*' };
 
