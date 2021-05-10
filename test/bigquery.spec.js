@@ -332,6 +332,17 @@ describe('BigQuery', () => {
     expect(arrayStructValueToSQL({ type: 'non-array-struct' })).to.equal('')
   })
 
+  it('should without parentheses', () => {
+    const ast = parser.astify(SQL_LIST[14].sql[0], opt)
+    const expr = ast.select.from.expr
+    expr.parentheses = false
+    expr.expr_list = {
+      type: 'string',
+      value: 'abc'
+    }
+    expect(arrayStructValueToSQL(expr)).to.equal(`'${expr.expr_list.value}'`)
+  })
+
   it('should return undefined and dataType', () => {
     expect(arrayStructTypeToSQL()).to.equal(undefined)
     expect(arrayStructTypeToSQL({ dataType: 'array' })).to.equal('ARRAY undefined')

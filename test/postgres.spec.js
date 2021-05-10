@@ -1,7 +1,5 @@
 const { expect } = require('chai')
 const Parser = require('../src/parser').default
-const { arrayStructValueToSQL } = require('../src/array-struct')
-const { arrayStructTypeToSQL } = require('../src/util')
 
 describe('Postgres', () => {
   const parser = new Parser();
@@ -188,6 +186,30 @@ describe('Postgres', () => {
           FROM roster`,
           'SELECT LAG("user_name", 10) RESPECT NULLS OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
         ]
+    },
+    {
+      title: 'Window Fns + LEAD',
+      sql: [
+        `SELECT
+          LEAD(user_name, 10) OVER (
+              PARTITION BY user_city
+              ORDER BY created_at
+          ) AS age_window
+        FROM roster`,
+        'SELECT LEAD("user_name", 10) RESPECT NULLS OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
+      ]
+    },
+    {
+      title: 'Window Fns + NTH_VALUE',
+      sql: [
+        `SELECT
+        NTH_VALUE(user_name, 10) OVER (
+              PARTITION BY user_city
+              ORDER BY created_at
+          ) AS age_window
+        FROM roster`,
+        'SELECT NTH_VALUE("user_name", 10) RESPECT NULLS OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
+      ]
     },
     {
         title: 'Window Fns + LAG + explicit NULLS',

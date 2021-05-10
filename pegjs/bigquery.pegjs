@@ -254,7 +254,7 @@ query_expr
         select: s && s.ast,
         orderby: o,
         limit: l,
-        parentheses: s && s.parentheses,
+        parentheses: s && s.parentheses || false,
       }
     }
   }

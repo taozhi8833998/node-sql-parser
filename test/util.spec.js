@@ -1,5 +1,6 @@
 const { expect } = require('chai')
 const {
+  columnIdentifierToSql,
   createValueExpr,
   createBinaryExpr,
   literalToSQL,
@@ -39,5 +40,9 @@ describe('util function test', () => {
     expect(identifierToSql('db')).to.be.equal('`db`')
     setParserOpt({})
     expect(identifierToSql('db')).to.be.equal('`db`')
+  })
+
+  it('should support columnIdentifierToSql without ident', () => {
+    expect(columnIdentifierToSql()).to.be.undefined
   })
 })
