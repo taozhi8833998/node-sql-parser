@@ -239,6 +239,11 @@ describe('AST', () => {
                 });
             })
 
+            it('should support hive cast as string', () => {
+                expect(getParsedSql(`select abc from t1 where cast(abc as string) = "123"`, { database: 'hive' }))
+                    .to.equal('SELECT `abc` FROM `t1` WHERE CAST(`abc` AS STRING) = \'123\'')
+            })
+
 
             it('should support subselects', () => {
                 expect(getParsedSql(`SELECT 'string', (SELECT col FROM t2) subSelect FROM t1`))
