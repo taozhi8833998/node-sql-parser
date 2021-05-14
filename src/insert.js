@@ -11,7 +11,7 @@ import { setToSQL } from './update'
 function valuesToSQL(values) {
   if (values.type === 'select') return selectToSQL(values)
   const clauses = values.map(exprToSQL)
-  return `(${clauses.join('),(')})`
+  return `(${clauses.join('), (')})`
 }
 
 function partitionToSQL(partition) {

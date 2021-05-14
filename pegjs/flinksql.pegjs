@@ -1757,13 +1757,14 @@ set_item
       return { column: c, value: v, table: tbl && tbl[0] };
     }
 returning_stmt
-  = k:KW_RETURNING __ c:column_ref_list {
-    // => { type: 'returning'; columns: column_ref_list; }
+  = k:KW_RETURNING __ c:(STAR / column_ref_list) {
+    // => { type: 'returning'; columns: column_ref_list | column_ref; }
     return {
       type: k && k.toLowerCase() || 'returning',
-      columns: c
+      columns: c === '*' && [{ type: 'columne_ref', table: null, column: '*' }] || c
     }
   }
+
 insert_value_clause
   = value_clause
   / select_stmt_nake
@@ -3106,4 +3107,3 @@ key_value_type
 
 row_type
   = t:KW_ROW { return {dataType: t} }
-  
