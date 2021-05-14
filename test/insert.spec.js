@@ -28,7 +28,7 @@ describe('insert', () => {
       const sql = 'INSERT INTO t1 values("1223", "name"), ("1224", "name2")'
       const ast = parser.astify(sql)
       const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.be.equal("INSERT INTO `t1` VALUES ('1223','name'),('1224','name2')")
+      expect(backSQL).to.be.equal("INSERT INTO `t1` VALUES ('1223','name'), ('1224','name2')")
     })
 
     it('should support parse insert from select', () => {
@@ -110,14 +110,14 @@ describe('insert', () => {
       const sql = 'INSERT into account partition(date, id) (id, name) values(123, "test"), (124, "test2")'
       const ast = parser.astify(sql)
       const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date`, `id`) (`id`, `name`) VALUES (123,'test'),(124,'test2')")
+      expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date`, `id`) (`id`, `name`) VALUES (123,'test'), (124,'test2')")
     })
 
     it('should support parse insert on duplicate key update', () => {
       const sql = 'INSERT into account partition(date, id) (id, name) values(123, "test"), (124, "test2") on duplicate key update id = 123, name = "test"'
       const ast = parser.astify(sql)
       const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date`, `id`) (`id`, `name`) VALUES (123,'test'),(124,'test2') ON DUPLICATE KEY UPDATE `id` = 123, `name` = 'test'")
+      expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date`, `id`) (`id`, `name`) VALUES (123,'test'), (124,'test2') ON DUPLICATE KEY UPDATE `id` = 123, `name` = 'test'")
     })
 
     it('should support parse insert set', () => {
@@ -131,7 +131,7 @@ describe('insert', () => {
       const sql = 'INSERT into account partition(date = 20191218, id = 2) (id, name) values(123, "test"), (124, "test2")'
       const ast = parser.astify(sql)
       const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date` = 20191218, `id` = 2) (`id`, `name`) VALUES (123,'test'),(124,'test2')")
+      expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date` = 20191218, `id` = 2) (`id`, `name`) VALUES (123,'test'), (124,'test2')")
     })
 
     it('should support parse insert partition for hive', () => {
@@ -143,9 +143,11 @@ describe('insert', () => {
 
     it('should support parse pg insert returning', () => {
       const sql = 'INSERT into account (date, id) values("2019-12-23", 123) returning id'
-      const ast = parser.astify(sql, { database: 'postgresql' })
-      const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.be.equal("INSERT INTO `account` (`date`, `id`) VALUES (\"2019-12-23\",123) RETURNING `id`")
+      const opt = { database: 'postgresql' }
+      const ast = parser.astify(sql, opt)
+      const backSQL = parser.sqlify(ast, opt)
+      expect(backSQL).to.be.equal('INSERT INTO "account" ("date", "id") VALUES ("2019-12-23",123) RETURNING "id"')
+      expect(parser.sqlify(parser.astify(`INSERT INTO account (date, id) VALUES ("2019-12-23",123) RETURNING *`, opt), opt)).to.be.equal('INSERT INTO "account" ("date", "id") VALUES ("2019-12-23",123) RETURNING *')
     })
 
     describe('support ascii pnCtrl single-char', () => {
