@@ -12,15 +12,15 @@ function setToSQL(sets) {
   const clauses = []
   for (const set of sets) {
     const { table, column, value, keyword } = set
-    let str = [table, column].filter(hasVal).map(info => identifierToSql(info)).join('.')
-    let prefix = ''
-    let suffix = ''
-    if (keyword) {
-      prefix = `${toUpper(keyword)}(`
-      suffix = ')'
+    const str = [table, column].filter(hasVal).map(info => identifierToSql(info)).join('.')
+    const setItem = [str]
+    let val = ''
+    if (value) {
+      val = exprToSQL(value)
+      setItem.push('=', val)
     }
-    if (value) str = `${str} = ${prefix}${exprToSQL(value)}${suffix}`
-    clauses.push(str)
+    if (keyword) setItem[2] = `${toUpper(keyword)}(${val})`
+    clauses.push(setItem.filter(hasVal).join(' '))
   }
   return clauses.join(', ')
 }
