@@ -845,7 +845,7 @@ cte_column_definition
     }
 
 select_stmt_nake
-  = __ cte:with_clause? __ KW_SELECT __
+  = __ cte:with_clause? __ KW_SELECT ___
     opts:option_clause? __
     d:KW_DISTINCT?      __
     c:column_clause     __
@@ -1374,7 +1374,7 @@ not_expr
     }
 
 comparison_expr
-  = left:additive_expr __ !(KW_AND / KW_OR) __ rh:comparison_op_right? {
+  = left:additive_expr __ rh:comparison_op_right? {
       if (rh === null) return left;
       else if (rh.type === 'arithmetic') return createBinaryExprChain(left, rh.tail);
       else return createBinaryExpr(rh.op, left, rh.right);

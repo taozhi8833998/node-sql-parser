@@ -1301,7 +1301,7 @@ cte_column_definition
     }
 
 select_stmt_nake
-  = __ cte:with_clause? __ KW_SELECT __
+  = __ cte:with_clause? __ KW_SELECT ___
     opts:option_clause? __
     d:KW_DISTINCT?      __
     c:column_clause     __
@@ -1386,9 +1386,10 @@ column_clause
     }
 
 column_list_item
-  = e:expr s:KW_DOUBLE_COLON t:data_type {
+  = e:expr s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; }
     return {
+      as: alias,
       type: 'cast',
       expr: e,
       symbol: '::',
@@ -2093,7 +2094,7 @@ not_expr
     }
 
 comparison_expr
-  = left:additive_expr __ !(KW_AND / KW_OR) __ rh:comparison_op_right? {
+  = left:additive_expr __ rh:comparison_op_right? {
     // => binary_expr
       if (rh === null) return left;
       else if (rh.type === 'arithmetic') return createBinaryExprChain(left, rh.tail);
@@ -2544,8 +2545,9 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) s:KW_DOUBLE_COLON t:data_type {
+  = e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
     /* => {
+        as?: alias_clause,
         type: 'cast';
         expr: expr | literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
           | expr;
@@ -2554,6 +2556,7 @@ cast_expr
       }
       */
     return {
+      as: alias,
       type: 'cast',
       expr: e,
       symbol: '::',
