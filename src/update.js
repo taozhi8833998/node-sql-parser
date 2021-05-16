@@ -11,9 +11,8 @@ function setToSQL(sets) {
   if (!sets || sets.length === 0) return ''
   const clauses = []
   for (const set of sets) {
-    let str = ''
     const { table, column, value, keyword } = set
-    str = [table, column].filter(hasVal).map(info => identifierToSql(info)).join('.')
+    let str = [table, column].filter(hasVal).map(info => identifierToSql(info)).join('.')
     let prefix = ''
     let suffix = ''
     if (keyword) {
