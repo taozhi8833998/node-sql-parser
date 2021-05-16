@@ -147,18 +147,24 @@
   }
 
   function columnListTableAlias(columnList) {
-    const columns = []
+    const newColumnsList = new Set()
     const symbolChar = '::'
     for(let column of columnList.keys()) {
       const columnInfo = column.split(symbolChar)
       if (!columnInfo) {
-        columns.push(column)
+        newColumnsList.add(column)
         break
       }
       if (columnInfo && columnInfo[1]) columnInfo[1] = queryTableAlias(columnInfo[1])
-      columns.push(columnInfo.join(symbolChar))
+      newColumnsList.add(columnInfo.join(symbolChar))
     }
-    return columns
+    return Array.from(newColumnsList)
+  }
+
+  function refreshColumnList(columnList) {
+    const columns = columnListTableAlias(columnList)
+    columnList.clear()
+    columns.forEach(col => columnList.add(col))
   }
 
   const cmpPrefixMap = {
@@ -1284,6 +1290,7 @@ table_ref_list
         const { table, as } = tableInfo
         tableAlias[table] = table
         if (as) tableAlias[as] = table
+        refreshColumnList(columnList)
       })
       return tail;
     }
