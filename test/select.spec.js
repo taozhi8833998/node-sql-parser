@@ -567,6 +567,7 @@ describe('select', () => {
       expect(getParsedSql('SELECT id FROM t where deleted and not suspended')).to.be.equal('SELECT `id` FROM `t` WHERE `deleted` AND NOT `suspended`')
       expect(getParsedSql('SELECT id FROM t where not deleted and not suspended')).to.be.equal('SELECT `id` FROM `t` WHERE NOT `deleted` AND NOT `suspended`')
       expect(getParsedSql('SELECT id FROM t where deleted and suspended')).to.be.equal('SELECT `id` FROM `t` WHERE `deleted` AND `suspended`')
+      expect(getParsedSql('SELECT id FROM t where true and id > 10')).to.be.equal('SELECT `id` FROM `t` WHERE TRUE AND `id` > 10')
     });
 
     ['is', 'is not'].forEach((operator) => {

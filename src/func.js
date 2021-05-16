@@ -6,9 +6,7 @@ function castToSQL(expr) {
   const { target, expr: expression, symbol, as: alias } = expr
   const { length, dataType, parentheses, scale } = target
   let str = ''
-  if (length) {
-    str = scale ? `${length}, ${scale}` : length
-  }
+  if (length) str = scale ? `${length}, ${scale}` : length
   if (parentheses) str = `(${str})`
   let prefix = exprToSQL(expression)
   let symbolChar = '::'
