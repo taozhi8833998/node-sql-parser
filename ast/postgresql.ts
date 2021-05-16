@@ -536,9 +536,9 @@ export type delete_stmt = AstStatement<delete_stmt_node>;
 
 export type set_list = set_item[];
 
-export type set_item = { column: ident; value: additive_expr; table?: ident;};
+export type set_item = { column: ident; value: additive_expr; table?: ident;} | { column: ident; value: column_ref; table?: ident; keyword: 'values' };
 
-export type returning_stmt = { type: 'returning'; columns: column_ref_list; };
+export type returning_stmt = { type: 'returning'; columns: column_ref_list | column_ref; };
 
 export type insert_value_clause = value_clause | select_stmt_nake;
 
@@ -770,6 +770,7 @@ export type scalar_func = KW_CURRENT_DATE | KW_CURRENT_TIME | KW_CURRENT_TIMESTA
 
 
 export type cast_expr = {
+        as?: alias_clause,
         type: 'cast';
         expr: expr | literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
           | expr;
