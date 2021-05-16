@@ -14,11 +14,13 @@ function setToSQL(sets) {
     let str = ''
     const { table, column, value, keyword } = set
     str = [table, column].filter(hasVal).map(info => identifierToSql(info)).join('.')
-    if (value) {
-      const prefix = keyword && `${toUpper(keyword)}(` || ''
-      const suffix = keyword && ')' || ''
-      str = `${str} = ${prefix}${exprToSQL(value)}${suffix}`
+    let prefix = ''
+    let suffix = ''
+    if (keyword) {
+      prefix = `${toUpper(keyword)}(`
+      suffix = ')'
     }
+    if (value) str = `${str} = ${prefix}${exprToSQL(value)}${suffix}`
     clauses.push(str)
   }
   return clauses.join(', ')
