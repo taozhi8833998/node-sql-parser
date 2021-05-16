@@ -1386,9 +1386,10 @@ column_clause
     }
 
 column_list_item
-  = e:expr s:KW_DOUBLE_COLON t:data_type {
+  = e:expr s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; }
     return {
+      as: alias,
       type: 'cast',
       expr: e,
       symbol: '::',
@@ -2544,7 +2545,7 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) s:KW_DOUBLE_COLON t:data_type {
+  = e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
     /* => {
         type: 'cast';
         expr: expr | literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
@@ -2554,6 +2555,7 @@ cast_expr
       }
       */
     return {
+      as: alias,
       type: 'cast',
       expr: e,
       symbol: '::',

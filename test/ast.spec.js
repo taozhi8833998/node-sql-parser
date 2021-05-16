@@ -228,6 +228,10 @@ describe('AST', () => {
                     'multiple colon cast': [
                         'SELECT col::CHAR, colb::geometry FROM t',
                         'SELECT `col`::CHAR, `colb`::GEOMETRY FROM `t`'
+                    ],
+                    'colon cast with as': [
+                        'select (salary + bonus)::bigint as comp from employee',
+                        'SELECT (`salary` + `bonus`)::BIGINT AS `comp` FROM `employee`'
                     ]
                 }
                 const opt = {

@@ -1,5 +1,6 @@
 import { constraintDefinitionToSQL } from './constrain'
 import { exprToSQL } from './expr'
+import { castToSQL } from './func'
 import { tablesToSQL } from './tables'
 import {
   autoIncreatementToSQL,
@@ -108,7 +109,8 @@ function columnDefinitionToSQL(columnDefinition) {
 }
 
 function columnToSQL(column, isDual) {
-  const { expr } = column
+  const { expr, type } = column
+  if (type === 'cast') return castToSQL(column)
   if (isDual) expr.isDual = isDual
   let str = exprToSQL(expr)
   if (column.as !== null) {

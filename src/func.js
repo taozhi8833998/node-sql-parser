@@ -1,9 +1,9 @@
 import { exprToSQL } from './expr'
-import { hasVal, toUpper } from './util'
+import { hasVal, identifierToSql, toUpper } from './util'
 import { overToSQL } from './over'
 
 function castToSQL(expr) {
-  const { target, expr: expression, symbol } = expr
+  const { target, expr: expression, symbol, as: alias } = expr
   const { length, dataType, parentheses, scale } = target
   let str = ''
   if (length) {
@@ -18,6 +18,7 @@ function castToSQL(expr) {
     suffix = ')'
     symbolChar = ` ${symbol.toUpperCase()} `
   }
+  if (alias) suffix += ` AS ${identifierToSql(alias)}`
   return `${prefix}${symbolChar}${dataType}${str}${suffix}`
 }
 
