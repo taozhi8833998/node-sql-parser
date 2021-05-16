@@ -1756,6 +1756,10 @@ set_item
       // => { column: ident; value: additive_expr; table?: ident;}
       return { column: c, value: v, table: tbl && tbl[0] };
     }
+    / tbl:(ident __ DOT)? __ c:column __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
+      return { column: c, value: v, table: tbl && tbl[0], keyword: 'values' };
+  }
+
 returning_stmt
   = k:KW_RETURNING __ c:(STAR / column_ref_list) {
     // => { type: 'returning'; columns: column_ref_list | column_ref; }

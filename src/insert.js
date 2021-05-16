@@ -39,13 +39,14 @@ function insertToSQL(stmt) {
     returning,
     set,
   } = stmt
+  const { keyword, set: duplicateSet } = onDuplicateUpdate || {}
   const clauses = ['INSERT', toUpper(prefix), tablesToSQL(table), partitionToSQL(partition)]
   if (Array.isArray(columns)) clauses.push(`(${columns.map(identifierToSql).join(', ')})`)
   clauses.push(commonOptionConnector(Array.isArray(values) ? 'VALUES' : '', valuesToSQL, values))
   clauses.push(commonOptionConnector('SET', setToSQL, set))
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
   clauses.push(returningToSQL(returning))
-  clauses.push(commonOptionConnector(onDuplicateUpdate && onDuplicateUpdate.keyword, setToSQL, onDuplicateUpdate && onDuplicateUpdate.set))
+  clauses.push(commonOptionConnector(keyword, setToSQL, duplicateSet))
   return clauses.filter(hasVal).join(' ')
 }
 
