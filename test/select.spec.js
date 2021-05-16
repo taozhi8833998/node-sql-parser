@@ -1127,6 +1127,42 @@ describe('select', () => {
         const fun = parser.whiteListCheck.bind(parser, sql, whiteList, mode)
         expect(fun).to.throw(`authority = 'update::null::id' is required in ${mode.type} whiteList to execute SQL = '${sql}'`)
       })
+      it('should support multiple table alias', () => {
+        const sql = `SELECT
+        A.A_NAME,
+        B.B_NAME,
+        C.C_NAME
+        FROM
+        (SELECT M.A_ID,M.A_NAME,M.A_DESC FROM TABLE_A M) A
+        LEFT JOIN
+        (SELECT M.B_ID,M.B_NAME,M.B_DESC FROM TABLE_B M) B ON(A.A_ID=B.B_ID)
+        LEFT JOIN
+        (SELECT M.C_ID,M.C_NAME,M.C_DESC FROM TABLE_C M) C ON(A.A_ID=C.C_ID)`
+        const { tableList, columnList, ast } = parser.parse(sql)
+        expect(tableList).to.eql([
+          "select::null::TABLE_A",
+          "select::null::TABLE_B",
+          "select::null::TABLE_C"
+        ])
+        expect(columnList).to.eql([
+          "select::A::A_NAME",
+          "select::B::B_NAME",
+          "select::C::C_NAME",
+          "select::TABLE_A::A_ID",
+          "select::TABLE_A::A_NAME",
+          "select::TABLE_A::A_DESC",
+          "select::TABLE_B::B_ID",
+          "select::TABLE_B::B_NAME",
+          "select::TABLE_B::B_DESC",
+          "select::A::A_ID",
+          "select::B::B_ID",
+          "select::TABLE_C::C_ID",
+          "select::TABLE_C::C_NAME",
+          "select::TABLE_C::C_DESC",
+          "select::C::C_ID"
+        ])
+        expect(parser.sqlify(ast)).to.be.equal('SELECT `A`.`A_NAME`, `B`.`B_NAME`, `C`.`C_NAME` FROM (SELECT `M`.`A_ID`, `M`.`A_NAME`, `M`.`A_DESC` FROM `TABLE_A` AS `M`) AS `A` LEFT JOIN (SELECT `M`.`B_ID`, `M`.`B_NAME`, `M`.`B_DESC` FROM `TABLE_B` AS `M`) AS `B` ON (`A`.`A_ID` = `B`.`B_ID`) LEFT JOIN (SELECT `M`.`C_ID`, `M`.`C_NAME`, `M`.`C_DESC` FROM `TABLE_C` AS `M`) AS `C` ON (`A`.`A_ID` = `C`.`C_ID`)')
+      })
     })
   })
   describe('select over', () => {
