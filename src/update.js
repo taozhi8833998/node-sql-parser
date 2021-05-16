@@ -1,7 +1,7 @@
 import { tablesToSQL } from './tables'
 import { exprToSQL, orderOrPartitionByToSQL } from './expr'
 import { limitToSQL } from './limit'
-import { hasVal, identifierToSql, commonOptionConnector, returningToSQL } from './util'
+import { hasVal, identifierToSql, commonOptionConnector, returningToSQL, toUpper } from './util'
 
 /**
  * @param {Array} sets
@@ -12,9 +12,13 @@ function setToSQL(sets) {
   const clauses = []
   for (const set of sets) {
     let str = ''
-    const { table, column, value } = set
+    const { table, column, value, keyword } = set
     str = [table, column].filter(hasVal).map(info => identifierToSql(info)).join('.')
-    if (value) str = `${str} = ${exprToSQL(value)}`
+    if (value) {
+      const prefix = keyword && `${toUpper(keyword)}(` || ''
+      const suffix = keyword && ')' || ''
+      str = `${str} = ${prefix}${exprToSQL(value)}${suffix}`
+    }
     clauses.push(str)
   }
   return clauses.join(', ')

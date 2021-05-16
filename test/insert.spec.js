@@ -118,6 +118,7 @@ describe('insert', () => {
       const ast = parser.astify(sql)
       const backSQL = parser.sqlify(ast)
       expect(backSQL).to.be.equal("INSERT INTO `account` PARTITION(`date`, `id`) (`id`, `name`) VALUES (123,'test'), (124,'test2') ON DUPLICATE KEY UPDATE `id` = 123, `name` = 'test'")
+      expect(parser.sqlify(parser.astify(`INSERT INTO user (id, name, age) VALUES (1, 'user1', 50) ON DUPLICATE KEY UPDATE name = VALUES(name), age = VALUES(age)`))).to.be.equal("INSERT INTO `user` (`id`, `name`, `age`) VALUES (1,'user1',50) ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `age` = VALUES(`age`)")
     })
 
     it('should support parse insert set', () => {
