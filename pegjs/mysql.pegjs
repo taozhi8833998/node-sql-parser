@@ -888,8 +888,8 @@ show_stmt
       columnList: columnListTableAlias(columnList),
       ast: {
         type: 'show',
-        suffix: t,
-        keyword: 'logs'
+        suffix: 'logs',
+        keyword: t.toLowerCase()
       }
     }
   }
@@ -899,13 +899,59 @@ show_stmt
       columnList: columnListTableAlias(columnList),
       ast: {
         type: 'show',
-        suffix: 'binlog',
-        keyword: 'events',
+        suffix: 'events',
+        keyword: 'binlog',
         in: ins,
         from,
         limit,
       }
     }
+  }
+  / KW_SHOW __ k:(('CHARACTER'i __ 'SET'i) / 'COLLATION'i) __ e:(like_op_right / where_clause)? {
+    let keyword = Array.isArray(k) && k || [k]
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'show',
+        suffix: keyword[2] && keyword[2].toLowerCase(),
+        keyword: keyword[0].toLowerCase(),
+        expr: e
+      }
+    }
+  }
+  / show_grant_stmt
+
+show_grant_stmt
+  = KW_SHOW __ 'GRANTS'i __ f:show_grant_for? {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'show',
+        keyword: 'grants',
+        for: f,
+      }
+    }
+  }
+
+show_grant_for
+  = 'FOR'i __ n:ident __ h:(KW_VAR__PRE_AT __ ident)? __ u:show_grant_for_using? {
+    return {
+      user: n,
+      host: h && h[2],
+      role_list: u
+    }
+  }
+
+show_grant_for_using
+  = KW_USING __ l:show_grant_for_using_list {
+    return l
+  }
+
+show_grant_for_using_list
+  = head:ident tail:(__ COMMA __ ident)* {
+    return createList(head, tail);
   }
 
 select_stmt
