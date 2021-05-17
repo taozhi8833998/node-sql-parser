@@ -15,6 +15,7 @@ import {
 } from './command'
 import { orderOrPartitionByToSQL } from './expr'
 import { limitToSQL } from './limit'
+import { showToSQL } from './show'
 import { withToSQL } from './with'
 import { hasVal } from './util'
 
@@ -34,6 +35,7 @@ const typeToSQLFn = {
   set      : setVarToSQL,
   lock     : lockUnlockToSQL,
   unlock   : lockUnlockToSQL,
+  show     : showToSQL,
 }
 
 function unionToSQL(stmt) {

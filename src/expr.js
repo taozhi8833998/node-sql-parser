@@ -8,6 +8,7 @@ import { columnRefToSQL } from './column'
 import { castToSQL, extractFunToSQL, funcToSQL } from './func'
 import { intervalToSQL } from './interval'
 import { selectToSQL } from './select'
+import { showToSQL } from './show'
 import { arrayStructExprToSQL } from './array-struct'
 import { unionToSQL } from './union'
 import { namedWindowExprListToSQL, windowFuncToSQL } from './window'
@@ -25,6 +26,7 @@ const exprToSQLConvertFn = {
   column_ref  : columnRefToSQL,
   function    : funcToSQL,
   interval    : intervalToSQL,
+  show        : showToSQL,
   struct      : arrayStructExprToSQL,
   'window'    : namedWindowExprListToSQL,
 }

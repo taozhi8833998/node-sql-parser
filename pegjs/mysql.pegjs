@@ -212,6 +212,7 @@ cmd_stmt
   / set_stmt
   / lock_stmt
   / unlock_stmt
+  / show_stmt
 
 create_stmt
   = create_table_stmt
@@ -876,6 +877,33 @@ call_stmt
       ast: {
         type: 'call',
         expr: e
+      }
+    }
+  }
+
+show_stmt
+  = KW_SHOW __ t:('BINARY'i / 'MASTER'i) __ 'LOGS'i {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'show',
+        suffix: t,
+        keyword: 'logs'
+      }
+    }
+  }
+  / KW_SHOW __ 'BINLOG'i __ 'EVENTS'i __ ins:in_op_right? __ from: from_clause? __ limit: limit_clause? {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'show',
+        suffix: 'binlog',
+        keyword: 'events',
+        in: ins,
+        from,
+        limit,
       }
     }
   }
