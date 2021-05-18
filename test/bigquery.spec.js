@@ -326,6 +326,34 @@ describe('BigQuery', () => {
         "WITH locations AS (SELECT ARRAY<STRUCT<city STRING, state STRING>>[('Seattle', 'Washington'), ('Phoenix', 'Arizona')] AS location) SELECT l.LOCATION[offset(0)].* FROM locations AS l"
       ]
     },
+    {
+      title: 'select scalar function with args',
+      sql: [
+        'SELECT CURRENT_DATE(\'America/New_York\') FROM table1;',
+        "SELECT CURRENT_DATE('America/New_York') FROM table1"
+      ]
+    },
+    {
+      title: 'select extract function with args',
+      sql: [
+        "SELECT EXTRACT(DAY FROM DATE '2013-12-25') as the_day FROM table1;",
+        "SELECT EXTRACT(DAY FROM DATE '2013-12-25') AS the_day FROM table1"
+      ]
+    },
+    {
+      title: 'select regex extract function with args',
+      sql: [
+        'SELECT REGEXP_EXTRACT(CAST(date AS String), r"^[0-9]+") AS regexp FROM table1',
+        'SELECT REGEXP_EXTRACT(CAST(date AS STRING), r"^[0-9]+") AS regexp FROM table1'
+      ]
+    },
+    {
+      title: 'select regex substr function with args',
+      sql: [
+        'SELECT REGEXP_SUBSTR(CAST(date AS String), r"^[0-9]+", 2, 10) AS regexp FROM table1',
+        'SELECT REGEXP_SUBSTR(CAST(date AS STRING), r"^[0-9]+", 2, 10) AS regexp FROM table1'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {

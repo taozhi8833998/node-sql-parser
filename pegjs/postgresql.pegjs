@@ -2518,12 +2518,12 @@ func_call
         args: l ? l: { type: 'expr_list', value: [] }
       };
     }
-  / name:scalar_func __ LPAREN __ RPAREN {
-    // => IGNORE
+  / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
-        args: { type: 'expr_list', value: [] }
+        args: l ? l: { type: 'expr_list', value: [] },
+        over: bc
       };
     }
   / extract_func
@@ -2534,7 +2534,7 @@ extract_filed
     return f
   }
 extract_func
-  = kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ t:(KW_TIMESTAMP / KW_INTERVAL / KW_TIME)? __ s:expr __ RPAREN {
+  = kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ t:(KW_TIMESTAMP / KW_INTERVAL / KW_TIME / KW_DATE)? __ s:expr __ RPAREN {
     // => { type: 'extract'; args: { field: extract_filed; cast_type: 'TIMESTAMP' | 'INTERVAL' | 'TIME'; source: expr; }}
     return {
         type: kw.toLowerCase(),

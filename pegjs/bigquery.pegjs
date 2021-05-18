@@ -833,7 +833,8 @@ multiplicative_operator
   = "*" / "/" / "%"
 
 primary
-  = literal
+  = cast_expr
+  / literal
   / aggr_func
   / func_call
   / interval_expr
@@ -1003,14 +1004,15 @@ func_call
         over: bc
       };
     }
-  / name:scalar_func __ LPAREN __ RPAREN __ bc:over_partition? {
+  / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
-        args: { type: 'expr_list', value: [] },
+        args: l ? l: { type: 'expr_list', value: [] },
         over: bc
       };
     }
+    / extract_func
 
 proc_func_name
   = dt:ident tail:(__ DOT __ ident)? {
@@ -1025,6 +1027,66 @@ scalar_func
   = KW_CURRENT_DATE
   / KW_CURRENT_TIME
   / KW_CURRENT_TIMESTAMP
+
+extract_filed
+  = f:'CENTURY'i / 'DAY'i / 'DECADE'i / 'DOW'i / 'DOY'i / 'EPOCH'i / 'HOUR'i / 'ISODOW'i / 'ISOYEAR'i / 'MICROSECONDS'i / 'MILLENNIUM'i / 'MILLISECONDS'i / 'MINUTE'i / 'MONTH'i / 'QUARTER'i / 'SECOND'i / 'TIMEZONE'i / 'TIMEZONE_HOUR'i / 'TIMEZONE_MINUTE'i / 'WEEK'i / 'YEAR'i {
+    return f
+  }
+extract_func
+  = kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ t:(KW_TIMESTAMP / KW_INTERVAL / KW_TIME / KW_DATE)? __ s:expr __ RPAREN {
+    return {
+        type: kw.toLowerCase(),
+        args: {
+          field: f,
+          cast_type: t,
+          source: s,
+        }
+    }
+  }
+
+cast_expr
+  = KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
+    return {
+      type: 'cast',
+      expr: e,
+      symbol: 'as',
+      target: t
+    };
+  }
+  / KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
+    return {
+      type: 'cast',
+      expr: e,
+      symbol: 'as',
+      target: {
+        dataType: 'DECIMAL(' + precision + ')'
+      }
+    };
+  }
+  / KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
+      return {
+        type: 'cast',
+        expr: e,
+        symbol: 'as',
+        target: {
+          dataType: 'DECIMAL(' + precision + ', ' + scale + ')'
+        }
+      };
+    }
+  / KW_CAST __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
+    return {
+      type: 'cast',
+      expr: e,
+      symbol: 'as',
+      target: {
+        dataType: s + (t ? ' ' + t: '')
+      }
+    };
+  }
+
+signedness
+  = KW_SIGNED
+  / KW_UNSIGNED
 
 literal
   = literal_string
@@ -1060,15 +1122,15 @@ literal_bool
     }
 
 literal_string
-  = ca:("'" single_char* "'") {
+  = r:'R'i? __ ca:("'" single_char* "'") {
       return {
-        type: 'string',
+        type: r ? 'regex_string' : 'string',
         value: ca[1].join('')
       };
     }
-  / ca:("\"" single_quote_char* "\"") {
+  / r:'R'i? __ ca:("\"" single_quote_char* "\"") {
       return {
-        type: 'string',
+        type: r ? 'regex_string' : 'string',
         value: ca[1].join('')
       };
     }
@@ -1249,6 +1311,7 @@ KW_MIN      = "MIN"i        !ident_start { return 'MIN'; }
 KW_SUM      = "SUM"i        !ident_start { return 'SUM'; }
 KW_AVG      = "AVG"i        !ident_start { return 'AVG'; }
 
+KW_EXTRACT  = "EXTRACT"i    !ident_start { return 'EXTRACT'; }
 KW_CALL     = "CALL"i       !ident_start { return 'CALL'; }
 
 KW_CASE     = "CASE"i       !ident_start

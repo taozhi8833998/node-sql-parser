@@ -166,6 +166,9 @@ function literalToSQL(literal) {
     case 'string':
       str = `'${escape(value)}'`
       break
+    case 'regex_string':
+      str = `r"${escape(value)}"`
+      break
     case 'double_quote_string':
       str = `"${escape(value)}"`
       break

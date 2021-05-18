@@ -1832,11 +1832,11 @@ func_call
         over: bc
       };
     }
-  / name:scalar_func __ LPAREN __ RPAREN __ bc:over_partition? {
+  / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
-        args: { type: 'expr_list', value: [] },
+        args: l ? l: { type: 'expr_list', value: [] },
         over: bc
       };
     }
