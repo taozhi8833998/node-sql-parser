@@ -265,17 +265,20 @@ union_stmt
     }
 
 column_order_list
-  = LBRAKE __ c:column_order_list_item __ RBRAKE { return c }
-  / column_order_list_item
-
-column_order_list_item
-  = head:column_order tail:(__ COMMA __ column_order)* {
+  = head:column_order_item tail:(__ COMMA __ column_order_item)* {
     return createList(head, tail)
   }
 
+column_order_item
+  = LBRAKE __ c:column_ref __ RBRAKE __ o:(KW_ASC / KW_DESC)? { return {
+      column: c,
+      order: o && o.toLowerCase() || 'asc',
+    }
+  }
+  / column_order
+
 column_order
-  = c:column_ref __
-  o:(KW_ASC / KW_DESC)? {
+  = c:column_ref __ o:(KW_ASC / KW_DESC)? {
     return {
       column: c,
       order: o && o.toLowerCase() || 'asc',
