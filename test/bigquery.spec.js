@@ -23,6 +23,13 @@ describe('BigQuery', () => {
       ]
     },
     {
+      title: 'select simple column with parentheses',
+      sql: [
+        'SELECT ((aaa + bbb) / ccc) FROM xxx',
+        "SELECT ((aaa + bbb) / ccc) FROM xxx"
+      ]
+    },
+    {
       title: 'select expression.*',
       sql: [
         `WITH groceries AS
@@ -333,7 +340,7 @@ describe('BigQuery', () => {
   })
 
   it('should without parentheses', () => {
-    const ast = parser.astify(SQL_LIST[14].sql[0], opt)
+    const ast = parser.astify(SQL_LIST[15].sql[0], opt)
     const expr = ast.select.from.expr
     expr.parentheses = false
     expr.expr_list = {

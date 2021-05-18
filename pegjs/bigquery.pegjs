@@ -641,8 +641,7 @@ expr_list
     }
 
 expr
-  = parentheses_list_expr
-  / struct_expr
+  = struct_expr
   / logic_operator_expr // support concatenation operator || and &&
   / unary_expr
   / or_expr
@@ -677,7 +676,7 @@ array_expr
       parentheses: true
     }
   }
-  / s:(array_type / KW_ARRAY)? __ (LBRAKE / LPAREN) __ c:expr __ (RBRAKE / RPAREN) {
+  / s:(array_type / KW_ARRAY)? __ (LBRAKE / LPAREN) __ c:(parentheses_list_expr / expr) __ (RBRAKE / RPAREN) {
     return {
       definition: s,
       expr_list: c,
