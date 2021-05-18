@@ -122,6 +122,18 @@ describe('create', () => {
           expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} using btree (name) key_block_size = 128 invisible with parser newparser comment "index comment")`))
             .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} USING BTREE (\`name\`) KEY_BLOCK_SIZE = 128 INVISIBLE WITH PARSER newparser COMMENT 'index comment')`);
         })
+      })
+
+      it('should support create index multiple columns in tsql', () => {
+        const sql = `CREATE INDEX ix_class_segment_progress_segment_id_user_id_archived ON [class_segment_progress]
+        (
+          [segment_id], [user_id] desc, [archived]
+        );`
+        const opt = {
+          database: 'transactsql'
+        }
+        expect(getParsedSql(sql, opt))
+            .to.equal('CREATE INDEX [ix_class_segment_progress_segment_id_user_id_archived] ON [class_segment_progress] ([segment_id] ASC, [user_id] DESC, [archived] ASC)');
       });
 
       ['fulltext', 'spatial'].forEach(prefix => {

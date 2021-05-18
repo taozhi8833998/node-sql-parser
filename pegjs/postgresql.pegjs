@@ -2490,6 +2490,7 @@ aggr_fun_count
 
 distinct_args
    = d:KW_DISTINCT? __ c:column_ref { /* => { distinct: 'DISTINCT'; expr: column_ref; } */  return { distinct: d, expr: c }; }
+   /  d:KW_DISTINCT? __ LPAREN __ c:column_ref __ RPAREN { /* => { distinct: 'DISTINCT'; expr: column_ref; } */  c.parentheses = true; return { distinct: d, expr: c }; }
 
 count_arg
   = e:star_expr { /* => { expr: star_expr } */ return { expr: e }; }
@@ -2518,12 +2519,12 @@ func_call
         args: l ? l: { type: 'expr_list', value: [] }
       };
     }
-  / name:scalar_func __ LPAREN __ RPAREN {
-    // => IGNORE
+  / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
-        args: { type: 'expr_list', value: [] }
+        args: l ? l: { type: 'expr_list', value: [] },
+        over: bc
       };
     }
   / extract_func
@@ -2534,7 +2535,7 @@ extract_filed
     return f
   }
 extract_func
-  = kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ t:(KW_TIMESTAMP / KW_INTERVAL / KW_TIME)? __ s:expr __ RPAREN {
+  = kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ t:(KW_TIMESTAMP / KW_INTERVAL / KW_TIME / KW_DATE)? __ s:expr __ RPAREN {
     // => { type: 'extract'; args: { field: extract_filed; cast_type: 'TIMESTAMP' | 'INTERVAL' | 'TIME'; source: expr; }}
     return {
         type: kw.toLowerCase(),
@@ -2627,6 +2628,12 @@ literal
   / literal_bool
   / literal_null
   / literal_datetime
+  / literal_array
+
+literal_array
+  = 'ARRAY'i LBRAKE __ RBRAKE {
+    return { type: 'origin', value: 'ARRAY[]' };
+  }
 
 literal_list
   = head:literal tail:(__ COMMA __ literal)* {
@@ -3228,7 +3235,8 @@ geometry_type
   = t:KW_GEOMETRY {/* =>  data_type */  return { dataType: t }; }
 
 text_type
-  = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) { /* =>  data_type */ return { dataType: t }}
+  = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) LBRAKE __ RBRAKE { /* =>  data_type */ return { dataType: `${t}[]` }}
+  / t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) { /* =>  data_type */ return { dataType: t }}
 
 uuid_type
   = t:KW_UUID {/* =>  data_type */  return { dataType: t }}
