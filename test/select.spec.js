@@ -1313,6 +1313,11 @@ describe('select', () => {
       expect(getParsedSql(sql, opt)).to.equal('SELECT "shipmentId", ARRAY_AGG(DISTINCT "abc" ORDER BY "name" ASC) AS "shipmentStopIDs", ARRAY_AGG("first_name" || \' \' || "last_name") AS "actors" FROM "table_name" GROUP BY "shipmentId"')
     })
 
+    it('should support array_agg in coalesce', () => {
+      const sql = `SELECT COALESCE(array_agg(DISTINCT(a.xx)), Array[]::text[]) AS "distinctName" FROM public."Users" a1`
+      expect(getParsedSql(sql, opt)).to.equal('SELECT COALESCE(ARRAY_AGG(DISTINCT ("a"."xx")), ARRAY[]::TEXT[]) AS "distinctName" FROM "public"."Users" AS "a1"')
+    })
+
     it('should support ilike', () => {
       const sql = `select column_name as "Column Name" from table_name where a ilike 'f%' and 'b' not ilike 'B'`
       expect(getParsedSql(sql, opt)).to.equal('SELECT "column_name" AS "Column Name" FROM "table_name" WHERE "a" ILIKE \'f%\' AND \'b\' NOT ILIKE \'B\'')
