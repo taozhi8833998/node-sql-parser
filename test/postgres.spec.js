@@ -245,4 +245,52 @@ describe('Postgres', () => {
     })
   }
   neatlyNestTestedSQL(SQL_LIST)
+
+  describe('create sequence', () => {
+    const SQL_LIST = [
+      {
+        title: 'create sequence',
+        sql: [
+          `CREATE SEQUENCE public.table_id_seq`,
+          'CREATE SEQUENCE "public"."table_id_seq"'
+        ]
+      },
+      {
+        title: 'create sequence increment by',
+        sql: [
+          `CREATE TEMPORARY SEQUENCE if not exists public.table_id_seq increment by 10`,
+          'CREATE TEMPORARY SEQUENCE IF NOT EXISTS "public"."table_id_seq" INCREMENT BY 10'
+        ]
+      },
+      {
+        title: 'create sequence increment by minvalue and maxvalue',
+        sql: [
+          `CREATE TEMPORARY SEQUENCE if not exists public.table_id_seq increment by 10 minvalue 20 maxvalue 30`,
+          'CREATE TEMPORARY SEQUENCE IF NOT EXISTS "public"."table_id_seq" INCREMENT BY 10 MINVALUE 20 MAXVALUE 30'
+        ]
+      },
+      {
+        title: 'create sequence increment by start with cache',
+        sql: [
+          `CREATE TEMPORARY SEQUENCE if not exists public.table_id_seq increment by 10 no minvalue no maxvalue start with 1 cache 3`,
+          'CREATE TEMPORARY SEQUENCE IF NOT EXISTS "public"."table_id_seq" INCREMENT BY 10 NO MINVALUE NO MAXVALUE START WITH 1 CACHE 3'
+        ]
+      },
+      {
+        title: 'create sequence increment by start with cache, cycle and owned',
+        sql: [
+          `CREATE TEMPORARY SEQUENCE if not exists public.table_id_seq increment by 10 no minvalue no maxvalue start with 1 cache 3 no cycle owned by tn.cn`,
+          'CREATE TEMPORARY SEQUENCE IF NOT EXISTS "public"."table_id_seq" INCREMENT BY 10 NO MINVALUE NO MAXVALUE START WITH 1 CACHE 3 NO CYCLE OWNED BY "tn"."cn"'
+        ]
+      },
+      {
+        title: 'create sequence increment by start with cache, cycle and owned',
+        sql: [
+          `CREATE TEMPORARY SEQUENCE if not exists public.table_id_seq increment 10 no minvalue no maxvalue start with 1 cache 3 cycle owned by none`,
+          'CREATE TEMPORARY SEQUENCE IF NOT EXISTS "public"."table_id_seq" INCREMENT 10 NO MINVALUE NO MAXVALUE START WITH 1 CACHE 3 CYCLE OWNED BY NONE'
+        ]
+      },
+    ]
+    neatlyNestTestedSQL(SQL_LIST)
+  })
 })

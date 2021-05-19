@@ -234,7 +234,7 @@ describe('create', () => {
     })
 
     describe('create table unknow resource', () => {
-      it('should throw error, when reosurce unkonw', () => {
+      it('should throw error, when reosurce unkonwn', () => {
         const columnDefinition = [{
           "column": {
             "type": "column_ref",
@@ -278,7 +278,7 @@ describe('create', () => {
         ast.create_definitions = ['', null]
         expect(parser.sqlify(ast)).to.be.eql('CREATE TEMPORARY TABLE `dbname`.`tableName` (, )')
         ast.create_definitions = columnDefinition
-        expect(parser.sqlify.bind(parser, ast)).to.throw('unknow resource = xx type')
+        expect(parser.sqlify.bind(parser, ast)).to.throw('unknown resource = xx type')
       })
     })
 
