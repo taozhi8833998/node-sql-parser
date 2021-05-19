@@ -326,8 +326,8 @@ create_table_stmt
       export type create_table_stmt_node = create_table_stmt_node_simple | create_table_stmt_node_like;
       export interface create_table_stmt_node_base {
         type: 'create';
-        keyword: 'table' | 'sequence';
-        temporary?: 'temporary' | 'temp';
+        keyword: 'table';
+        temporary?: 'temporary';
         if_not_exists?: 'if not exists';
         table: table_ref_list;
       }
@@ -393,7 +393,17 @@ create_sequence
     ife:KW_IF_NOT_EXISTS? __
     t:table_name __ as:(KW_AS __ alias_ident)?__
     c:create_sequence_definition_list? {
-      // => AstStatement<create_table_stmt_node_simple>
+      /*
+      export type create_sequence_stmt = {
+        type: 'create',
+        keyword: 'sequence',
+        temporary?: 'temporary' | 'temp',
+        if_not_exists?: 'if not exists',
+        table: table_ref_list,
+        create_definition?: create_sequence_definition_list
+      }
+      => AstStatement<create_sequence_stmt>
+      */
       t.as = as && as[2]
       return {
         tableList: Array.from(tableList),
@@ -525,7 +535,7 @@ create_sequence_definition
 
 create_sequence_definition_list
   = head: create_sequence_definition tail:(__ create_sequence_definition)* {
-    // => sequence_definition[]
+    // => create_sequence_definition[]
     return createList(head, tail, 1)
 }
 
@@ -2664,6 +2674,7 @@ func_call
       };
     }
   / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
+    // => { type: 'function'; name: string; args: expr_list; over?: over_partition; }
       return {
         type: 'function',
         name: name,
@@ -2776,6 +2787,7 @@ literal
 
 literal_array
   = 'ARRAY'i LBRAKE __ RBRAKE {
+    // => { type: 'origin'; value: string; }
     return { type: 'origin', value: 'ARRAY[]' };
   }
 

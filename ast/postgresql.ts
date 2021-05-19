@@ -9,7 +9,7 @@ export type start = multiple_stmt | cmd_stmt | crud_stmt;
 
 export type cmd_stmt = drop_stmt | create_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt;
 
-export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt;
+export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence;
 
 export type alter_stmt = alter_table_stmt;
 
@@ -61,6 +61,37 @@ export interface create_table_stmt_node_like extends create_table_stmt_node_base
       }
 
 export type create_table_stmt = AstStatement<create_table_stmt_node> | AstStatement<create_table_stmt_node>;;
+
+export type create_sequence_stmt = {
+        type: 'create',
+        keyword: 'sequence',
+        temporary?: 'temporary' | 'temp',
+        if_not_exists?: 'if not exists',
+        table: table_ref_list,
+        create_definition?: create_sequence_definition_list
+      }
+
+export type create_sequence = AstStatement<create_sequence_stmt>;
+
+export type sequence_definition = { "resource": "sequence", prefix?: string,value: literal | column_ref }
+
+export type sequence_definition_increment = sequence_definition;
+
+export type sequence_definition_minval = sequence_definition;
+
+export type sequence_definition_maxval = sequence_definition;
+
+export type sequence_definition_start = sequence_definition;
+
+export type sequence_definition_cache = sequence_definition;
+
+export type sequence_definition_cycle = sequence_definition;
+
+export type sequence_definition_owned = sequence_definition;
+
+export type create_sequence_definition = sequence_definition_increment | sequence_definition_minval | sequence_definition_maxval | sequence_definition_start | sequence_definition_cache | sequence_definition_cycle | sequence_definition_owned;
+
+export type create_sequence_definition_list = create_sequence_definition[];
 
 export interface create_index_stmt_node {
       type: 'create';
@@ -747,6 +778,8 @@ export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT'; args:count_arg;
 
 
 
+
+
 export type distinct_args = { distinct: 'DISTINCT'; expr: column_ref; };
 
 
@@ -759,7 +792,7 @@ export type aggr_array_agg = { type: 'aggr_func'; args:count_arg; name: 'ARRAY_A
 
 export type star_expr = { type: 'star'; value: '*' };
 
-export type func_call = { type: 'function'; name: string; args: expr_list; } | extract_func;
+export type func_call = { type: 'function'; name: string; args: expr_list; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func;
 
 export type extract_filed = "CENTURY" | "DAY" | "DECADE" | "DOW" | "DOY" | "EPOCH" | "HOUR" | "ISODOW" | "ISOYEAR" | "MICROSECONDS" | "MILLENNIUM" | "MILLISECONDS" | "MINUTE" | "MONTH" | "QUARTER" | "SECOND" | "TIMEZONE" | "TIMEZONE_HOUR" | "TIMEZONE_MINUTE" | "WEEK" | 'string';
 
@@ -780,7 +813,9 @@ export type cast_expr = {
 
 export type signedness = KW_SIGNED | KW_UNSIGNED;
 
-export type literal = literal_string | literal_numeric | literal_bool | literal_null | literal_datetime;
+export type literal = literal_string | literal_numeric | literal_bool | literal_null | literal_datetime | literal_array;
+
+export type literal_array = { type: 'origin'; value: string; };
 
 export type literal_list = literal[];
 
@@ -846,6 +881,8 @@ type KW_CREATE = never;
 
 type KW_TEMPORARY = never;
 
+type KW_TEMP = never;
+
 type KW_IF_NOT_EXISTS = never;
 
 type KW_DELETE = never;
@@ -877,6 +914,8 @@ type KW_LOCK = never;
 type KW_AS = never;
 
 type KW_TABLE = never;
+
+type KW_SEQUENCE = never;
 
 type KW_TABLESPACE = never;
 
@@ -1253,6 +1292,8 @@ export type json_type = data_type;
 
 
 export type geometry_type = data_type;
+
+
 
 
 
