@@ -17,8 +17,10 @@ function createDefinitionToSQL(definition) {
       return indexDefinitionToSQL(definition)
     case 'constraint':
       return constraintDefinitionToSQL(definition)
+    case 'sequence':
+      return [toUpper(definition.prefix), exprToSQL(definition.value)].filter(hasVal).join(' ')
     default:
-      throw new Error(`unknow resource = ${resource} type`)
+      throw new Error(`unknown resource = ${resource} type`)
   }
 }
 
@@ -111,6 +113,23 @@ function createIndexToSQL(stmt) {
   return sql.filter(hasVal).join(' ')
 }
 
+function createSequenceToSQL(stmt) {
+  const {
+    type, keyword, sequence, temporary,
+    if_not_exists: ifNotExists,
+    create_definitions: createDefinition,
+  } = stmt
+  const sql = [
+    toUpper(type),
+    toUpper(temporary),
+    toUpper(keyword),
+    toUpper(ifNotExists),
+    tablesToSQL(sequence),
+  ]
+  if (createDefinition) sql.push(createDefinition.map(createDefinitionToSQL).join(' '))
+  return sql.filter(hasVal).join(' ')
+}
+
 function createToSQL(stmt) {
   const { keyword } = stmt
   let sql = ''
@@ -126,6 +145,9 @@ function createToSQL(stmt) {
       break
     case 'index':
       sql = createIndexToSQL(stmt)
+      break
+    case 'sequence':
+      sql = createSequenceToSQL(stmt)
       break
     default:
       throw new Error(`unknow create resource ${keyword}`)

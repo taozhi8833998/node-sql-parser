@@ -120,10 +120,10 @@
     return true
   }
 
-  function createList(head, tail) {
+  function createList(head, tail, po = 3) {
     const result = [head];
     for (let i = 0; i < tail.length; i++) {
-      result.push(tail[i][3]);
+      result.push(tail[i][po]);
     }
     return result;
   }
@@ -222,6 +222,7 @@ create_stmt
   / create_constraint_trigger
   / create_extension_stmt
   / create_index_stmt
+  / create_sequence
 
 alter_stmt
   = alter_table_stmt
@@ -346,7 +347,7 @@ create_table_stmt
         ast: {
           type: a[0].toLowerCase(),
           keyword: 'table',
-          temporary: tp && tp[0].toLowerCase(),
+          temporary: tp && tp.toLowerCase(),
           if_not_exists: ife && ife[0].toLowerCase(),
           table: t,
           ignore_replace: ir && ir[0].toLowerCase(),
@@ -377,13 +378,166 @@ create_table_stmt
         ast: {
           type: a[0].toLowerCase(),
           keyword: 'table',
-          temporary: tp && tp[0].toLowerCase(),
+          temporary: tp && tp.toLowerCase(),
           if_not_exists: ife && ife[0].toLowerCase(),
           table: t,
           like: lt
         }
       }
     }
+
+create_sequence
+  = a:KW_CREATE __
+    tp:(KW_TEMPORARY / KW_TEMP)? __
+    KW_SEQUENCE __
+    ife:KW_IF_NOT_EXISTS? __
+    t:table_name __ as:(KW_AS __ alias_ident)?__
+    c:create_sequence_definition_list? {
+      /*
+      export type create_sequence_stmt = {
+        type: 'create',
+        keyword: 'sequence',
+        temporary?: 'temporary' | 'temp',
+        if_not_exists?: 'if not exists',
+        table: table_ref_list,
+        create_definition?: create_sequence_definition_list
+      }
+      => AstStatement<create_sequence_stmt>
+      */
+      t.as = as && as[2]
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'sequence',
+          temporary: tp && tp.toLowerCase(),
+          if_not_exists: ife && ife[0].toLowerCase(),
+          sequence: [t],
+          create_definitions: c,
+        }
+      }
+    }
+
+sequence_definition_increment
+  = k:'INCREMENT'i __ b:KW_BY? __ n:literal_numeric {
+    /*
+    export type sequence_definition = { "resource": "sequence", prefix?: string,value: literal | column_ref }
+    => sequence_definition
+    */
+    return {
+      resource: 'sequence',
+      prefix: b ? `${k.toLowerCase()} by` : k.toLowerCase(),
+      value: n
+    }
+  }
+sequence_definition_minval
+  = k:'MINVALUE'i __ n:literal_numeric {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: k.toLowerCase(),
+      value: n
+    }
+  }
+  / 'NO'i __ 'MINVALUE'i {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      value: {
+        type: 'origin',
+        value: 'no minvalue'
+      }
+    }
+  }
+
+sequence_definition_maxval
+  = k:'MAXVALUE'i __ n:literal_numeric {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: k.toLowerCase(),
+      value: n
+    }
+  }
+  / 'NO'i __ 'MAXVALUE'i {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      value: {
+        type: 'origin',
+        value: 'no maxvalue'
+      }
+    }
+  }
+
+sequence_definition_start
+  = k:'START'i __ w:KW_WITH? __ n:literal_numeric {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: w ? `${k.toLowerCase()} with` : k.toLowerCase(),
+      value: n
+    }
+  }
+
+sequence_definition_cache
+  = k:'CACHE'i __ n:literal_numeric {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: k.toLowerCase(),
+      value: n
+    }
+  }
+
+sequence_definition_cycle
+  = n:'NO'i? __ 'CYCLE'i {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      value: {
+        type: 'origin',
+        value: n ? 'no cycle' : 'cycle'
+      }
+    }
+  }
+
+sequence_definition_owned
+  = 'OWNED'i __ KW_BY __ 'NONE'i {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: 'owned by',
+      value: {
+        type: 'origin',
+        value: 'none'
+      }
+    }
+  }
+  / n:'OWNED'i __ KW_BY __ col:column_ref {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: 'owned by',
+      value: col
+    }
+  }
+
+create_sequence_definition
+  = sequence_definition_increment
+  / sequence_definition_minval
+  / sequence_definition_maxval
+  / sequence_definition_start
+  / sequence_definition_cache
+  / sequence_definition_cycle
+  / sequence_definition_owned
+
+create_sequence_definition_list
+  = head: create_sequence_definition tail:(__ create_sequence_definition)* {
+    // => create_sequence_definition[]
+    return createList(head, tail, 1)
+}
 
 create_index_stmt
   = a:KW_CREATE __
@@ -2520,6 +2674,7 @@ func_call
       };
     }
   / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
+    // => { type: 'function'; name: string; args: expr_list; over?: over_partition; }
       return {
         type: 'function',
         name: name,
@@ -2632,6 +2787,7 @@ literal
 
 literal_array
   = 'ARRAY'i LBRAKE __ RBRAKE {
+    // => { type: 'origin'; value: string; }
     return { type: 'origin', value: 'ARRAY[]' };
   }
 
@@ -2803,7 +2959,8 @@ KW_ALTER    = "ALTER"i      !ident_start
 KW_SELECT   = "SELECT"i     !ident_start
 KW_UPDATE   = "UPDATE"i     !ident_start
 KW_CREATE   = "CREATE"i     !ident_start
-KW_TEMPORARY = "TEMPORARY"i !ident_start
+KW_TEMPORARY = "TEMPORARY"i !ident_start { return 'TEMPORARY'; }
+KW_TEMP     = "TEMP"i !ident_start { return 'TEMP'; }
 KW_IF_NOT_EXISTS = "IF NOT EXISTS"i !ident_start
 KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
@@ -2822,6 +2979,7 @@ KW_LOCK     = "LOCK"i       !ident_start
 
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
+KW_SEQUENCE   = "SEQUENCE"i      !ident_start { return 'SEQUENCE'; }
 KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
 

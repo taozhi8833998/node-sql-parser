@@ -1280,6 +1280,15 @@ describe('select', () => {
       expect(backSQL).to.equal('SELECT TOP 3 PERCENT * FROM [tableA]')
     })
 
+    it('should support select count', () => {
+      let sql = 'select count(*);'
+      expect(getParsedSql(sql, opt)).to.equal('SELECT COUNT(*)')
+      sql = 'SELECT COUNT(DISTINCT foo);'
+      expect(getParsedSql(sql, opt)).to.equal('SELECT COUNT(DISTINCT [foo])')
+      sql = 'SELECT COUNT(*) as foo;'
+      expect(getParsedSql(sql, opt)).to.equal('SELECT COUNT(*) AS [foo]')
+    })
+
     it('should support comment before', () => {
       const sql = `-- +migrate Up
       CREATE TABLE test (
