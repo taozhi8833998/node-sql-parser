@@ -1358,6 +1358,8 @@ describe('select', () => {
       .to.be.equal('SELECT `bar`, `baz`, `foo` FROM `tablename` WHERE `bar` = ?')
       expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = ? and baz = ?'))
       .to.be.equal('SELECT `bar`, `baz`, `foo` FROM `tablename` WHERE `bar` = ? AND `baz` = ?')
+      expect(getParsedSql("SELECT * FROM tabla WHERE id = ? AND name LIKE '%jos%' AND city_id = ?"))
+      .to.be.equal("SELECT * FROM `tabla` WHERE `id` = ? AND `name` LIKE '%jos%' AND `city_id` = ?")
     })
 
     it('should parse pg prepared statements', () => {
