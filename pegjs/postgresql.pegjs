@@ -2419,7 +2419,28 @@ primary
   }
 
 column_ref
-  = tbl:ident __ DOT __ col:column {
+  = tbl:ident __ DOT __ STAR {
+    // => IGNORE
+      columnList.add(`select::${tbl}::(.*)`);
+      return {
+          type: 'column_ref',
+          table: tbl,
+          column: '*'
+      }
+    }
+  / tbl:(ident __ DOT)? __ col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) {
+    // => IGNORE
+      const tableName = tbl && tbl[0] || null
+      columnList.add(`select::${tableName}::${col}`);
+      return {
+        type: 'column_ref',
+        table: tableName,
+        column: col,
+        arrow: a,
+        property: j
+      };
+  }
+  / tbl:ident __ DOT __ col:column {
       /* => {
         type: 'column_ref';
         table: ident;
@@ -2434,26 +2455,6 @@ column_ref
         column: col
       };
     }
-  / tbl:ident __ DOT __ STAR {
-    // => IGNORE
-      columnList.add(`select::${tbl}::(.*)`);
-      return {
-          type: 'column_ref',
-          table: tbl,
-          column: '*'
-      }
-    }
-  / col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) {
-    // => IGNORE
-      columnList.add(`select::null::${col}`);
-      return {
-        type: 'column_ref',
-        table: null,
-        column: col,
-        arrow: a,
-        property: j
-      };
-  }
   / col:column {
     // => IGNORE
       columnList.add(`select::null::${col}`);
@@ -2786,9 +2787,13 @@ literal
   / literal_array
 
 literal_array
-  = 'ARRAY'i LBRAKE __ RBRAKE {
-    // => { type: 'origin'; value: string; }
-    return { type: 'origin', value: 'ARRAY[]' };
+  = s:KW_ARRAY __ LBRAKE __ c:expr_list? __ RBRAKE {
+    return {
+      expr_list: c || { type: 'origin', value: '' },
+      type: 'array',
+      keyword: 'array',
+      brackets: true
+    }
   }
 
 literal_list
@@ -3022,6 +3027,7 @@ KW_NOT      = "NOT"i        !ident_start { return 'NOT'; }
 KW_AND      = "AND"i        !ident_start { return 'AND'; }
 KW_OR       = "OR"i         !ident_start { return 'OR'; }
 
+KW_ARRAY    = "ARRAY"i !ident_start { return 'ARRAY'; }
 KW_ARRAY_AGG = "ARRAY_AGG"i !ident_start { return 'ARRAY_AGG'; }
 KW_COUNT    = "COUNT"i      !ident_start { return 'COUNT'; }
 KW_MAX      = "MAX"i        !ident_start { return 'MAX'; }

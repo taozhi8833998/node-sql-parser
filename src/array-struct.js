@@ -5,12 +5,14 @@ import { arrayStructTypeToSQL, hasVal, toUpper } from './util'
 function arrayExprListToSQL(expr) {
   const {
     array_path: arrayPath,
+    brackets,
     expr_list: exprList,
     parentheses,
   } = expr
   if (!exprList) return `[${columnsToSQL(arrayPath)}]`
   if (Array.isArray(exprList)) return `[${exprList.map(col => `(${columnsToSQL(col)})`).filter(hasVal).join(', ')}]`
   const result = exprToSQL(exprList)
+  if (brackets) return `[${result}]`
   return parentheses ? `(${result})` : result
 }
 

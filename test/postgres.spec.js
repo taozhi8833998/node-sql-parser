@@ -235,6 +235,32 @@ describe('Postgres', () => {
           'SELECT FIRST_VALUE("user_name" IGNORE NULLS) OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC, "ranking" ASC) AS "age_window" FROM "roster"'
         ]
     },
+    {
+      title: 'array column',
+      sql: [
+        "SELECT ARRAY[col1, col2, 1, 'str_literal'] from tableb",
+        `SELECT ARRAY["col1","col2",1,'str_literal'] FROM "tableb"`
+      ]
+    },
+    {
+      title: 'row function column',
+      sql: [
+        "SELECT ROW(col1, col2, 'literal', 1) from tableb",
+        `SELECT ROW("col1", "col2", 'literal', 1) FROM "tableb"`
+      ]
+    },
+    {
+      title: 'json column',
+      sql: [
+        `SELECT
+        d.metadata->>'communication_status' as communication_status
+      FROM
+        device d
+      WHERE d.metadata->>'communication_status' IS NOT NULL
+      LIMIT 10;`,
+        `SELECT "d"."metadata" ->> 'communication_status' AS "communication_status" FROM "device" AS "d" WHERE "d"."metadata" ->> 'communication_status' IS NOT NULL LIMIT 10`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
