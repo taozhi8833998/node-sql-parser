@@ -517,11 +517,20 @@ describe('create', () => {
       expect(columnOrderListToSQL()).to.be.equal(undefined)
     })
   })
-  it('throw error when create type is unknow', () => {
+
+  describe('create database', () => {
+    it('should support create database', () => {
+      expect(getParsedSql('CREATE DATABASE abc')).to.equal('CREATE DATABASE `abc`')
+      expect(getParsedSql('CREATE DATABASE IF NOT EXISTS abc')).to.equal('CREATE DATABASE IF NOT EXISTS `abc`')
+      expect(getParsedSql('CREATE DATABASE IF NOT EXISTS abc default CHARACTER SET utf8mb4')).to.equal('CREATE DATABASE IF NOT EXISTS `abc` DEFAULT CHARACTER SET utf8mb4')
+      expect(getParsedSql('CREATE DATABASE IF NOT EXISTS abc CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci')).to.equal('CREATE DATABASE IF NOT EXISTS `abc` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci')
+    })
+  })
+  it('throw error when create type is unknown', () => {
     const ast = {
       type: 'create',
-      keyword: 'unknow_create_type'
+      keyword: 'unknown_create_type'
     }
-    expect(parser.sqlify.bind(parser, ast)).to.throw(`unknow create resource ${ast.keyword}`)
+    expect(parser.sqlify.bind(parser, ast)).to.throw(`unknown create resource ${ast.keyword}`)
   })
 })

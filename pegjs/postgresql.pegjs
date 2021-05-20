@@ -223,6 +223,7 @@ create_stmt
   / create_extension_stmt
   / create_index_stmt
   / create_sequence
+  / create_db_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -308,6 +309,30 @@ create_extension_stmt
         schema: commonStrToLiteral(s && s[2].toLowerCase()), // <== wont that be a bug ?
         version: commonStrToLiteral(v && v[2]),
         from: commonStrToLiteral(f && f[2]),
+      }
+    }
+
+create_db_definition
+  = head:create_option_character_set tail:(__ create_option_character_set)* {
+    return createList(head, tail, 1)
+  }
+
+create_db_stmt
+  = a:KW_CREATE __
+    k:(KW_DATABASE / KW_SCHEME) __
+    ife:KW_IF_NOT_EXISTS? __
+    t:ident_name __
+    c:create_db_definition? {
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'database',
+          if_not_exists: ife && ife[0].toLowerCase(),
+          database: t,
+          create_definitions: c,
+        }
       }
     }
 
@@ -1253,6 +1278,26 @@ table_options
     return createList(head, tail)
   }
 
+create_option_character_set_kw
+  // => string
+  = 'CHARACTER'i __ 'SET'i {
+    return 'CHARACTER SET'
+  }
+
+create_option_character_set
+  = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
+    /* => {
+      keyword: 'character set' | 'charset' | 'collate' | 'default character set' | 'default charset' | 'default collate';
+      symbol: '=';
+      value: ident_name;
+      } */
+    return {
+      keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
+      symbol: s,
+      value: v
+    }
+  }
+
 table_option
   = kw:('AUTO_INCREMENT'i / 'AVG_ROW_LENGTH'i / 'KEY_BLOCK_SIZE'i / 'MAX_ROWS'i / 'MIN_ROWS'i / 'STATS_SAMPLE_PAGES'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:literal_numeric {
     /* => {
@@ -1266,18 +1311,7 @@ table_option
       value: v.value
     }
   }
-  / kw:KW_DEFAULT? __ t:('CHARACTER SET'i / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
-    /* => {
-      keyword: 'character set' | 'charset' | 'collate' | 'default character set' | 'default charset' | 'default collate';
-      symbol: '=';
-      value: ident_name;
-      } */
-    return {
-      keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
-      symbol: s,
-      value: v
-    }
-  }
+  / create_option_character_set
   / kw:(KW_COMMENT / 'CONNECTION'i) __ s:(KW_ASSIGIN_EQUAL)? __ c:literal_string {
     // => { keyword: 'connection' | 'comment'; symbol: '='; value: string; }
     return {
@@ -2984,6 +3018,8 @@ KW_LOCK     = "LOCK"i       !ident_start
 
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
+KW_DATABASE = "DATABASE"i      !ident_start { return 'DATABASE'; }
+KW_SCHEME   = "SCHEME"i      !ident_start { return 'SCHEME'; }
 KW_SEQUENCE   = "SEQUENCE"i      !ident_start { return 'SEQUENCE'; }
 KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
