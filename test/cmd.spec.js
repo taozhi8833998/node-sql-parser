@@ -420,4 +420,19 @@ describe('Command SQL', () => {
           .to.equal("DECLARE @QuizID BIGINT ; INSERT INTO [quiz] ([name], [max_attempts], [num_questions], [passing_score]) VALUES ('Class Quiz',3,10,70) ; SELECT @QuizID = (SELECT SCOPE_IDENTITY())");
     })
   })
+
+  describe('drop', () => {
+    it('should support drop index', () => {
+      expect(getParsedSql('DROP INDEX IX_NAME ON TABLE_NAME;')).to.equal('DROP INDEX `IX_NAME` ON `TABLE_NAME`')
+      expect(getParsedSql('DROP INDEX abc.IX_NAME ON TABLE_NAME algorithm inplace;')).to.equal('DROP INDEX `abc`.`IX_NAME` ON `TABLE_NAME` ALGORITHM INPLACE')
+      expect(getParsedSql('DROP INDEX abc.IX_NAME ON TABLE_NAME algorithm = copy lock SHARED;')).to.equal('DROP INDEX `abc`.`IX_NAME` ON `TABLE_NAME` ALGORITHM = COPY LOCK SHARED')
+    })
+
+    it('should support drop index for tsql', () => {
+      const opt = { database: 'transactsql' }
+      expect(getParsedSql('DROP INDEX IX_NAME ON TABLE_NAME;', opt)).to.equal('DROP INDEX [IX_NAME] ON [TABLE_NAME]')
+      expect(getParsedSql('DROP INDEX abc.IX_NAME ON TABLE_NAME algorithm inplace;', opt)).to.equal('DROP INDEX [abc].[IX_NAME] ON [TABLE_NAME] ALGORITHM INPLACE')
+      expect(getParsedSql('DROP INDEX abc.IX_NAME ON TABLE_NAME algorithm = copy lock SHARED;', opt)).to.equal('DROP INDEX [abc].[IX_NAME] ON [TABLE_NAME] ALGORITHM = COPY LOCK SHARED')
+    })
+  })
 })

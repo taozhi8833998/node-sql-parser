@@ -170,13 +170,23 @@ export type storage = { type: 'storage'; value: 'disk' | 'memory' };
 
 export type default_expr = { type: 'default'; value: literal | expr; };
 
+export type drop_index_opt = (ALTER_ALGORITHM | ALTER_LOCK)[];
+
 export interface drop_stmt_node {
         type: 'drop';
         keyword: 'table';
         name: table_ref_list;
       }
 
-export type drop_stmt = AstStatement<drop_stmt_node>;
+export interface drop_index_stmt_node {
+        type: 'drop';
+        keyword: string;
+        name: column_ref;
+        table: table_name;
+        options?: drop_index_opt;
+      }
+
+export type drop_stmt = AstStatement<drop_stmt_node> | AstStatement<drop_index_stmt_node>;
 
 export interface truncate_stmt_node {
         type: 'trucate';
@@ -247,6 +257,7 @@ export type ALTER_ALGORITHM = {
         type: 'alter';
         keyword: 'algorithm';
         resource: 'algorithm';
+        symbol?: '=';
         algorithm: 'DEFAULT' | 'INSTANT' | 'INPLACE' | 'COPY';
       };
 
@@ -256,6 +267,7 @@ export type ALTER_LOCK = {
       type: 'alter';
       keyword: 'lock';
       resource: 'lock';
+      symbol?: '=';
       lock: 'DEFAULT' | 'NONE' | 'SHARED' | 'EXCLUSIVE';
     };
 

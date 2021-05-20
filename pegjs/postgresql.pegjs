@@ -779,6 +779,11 @@ default_expr
       value: ce
     }
   }
+drop_index_opt
+  = head:(ALTER_ALGORITHM / ALTER_LOCK) tail:(__ (ALTER_ALGORITHM / ALTER_LOCK))* {
+    // => (ALTER_ALGORITHM | ALTER_LOCK)[]
+    return createList(head, tail, 1)
+  }
 drop_stmt
   = a:KW_DROP __
     r:KW_TABLE __
@@ -799,6 +804,34 @@ drop_stmt
           type: a.toLowerCase(),
           keyword: r.toLowerCase(),
           name: t
+        }
+      };
+    }
+  / a:KW_DROP __
+    r:KW_INDEX __
+    i:column_ref __
+    KW_ON __
+    t:table_name __
+    op:drop_index_opt? __ {
+      /*
+      export interface drop_index_stmt_node {
+        type: 'drop';
+        keyword: string;
+        name: column_ref;
+        table: table_name;
+        options?: drop_index_opt;
+      }
+      => AstStatement<drop_index_stmt_node>
+      */
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: r.toLowerCase(),
+          name: i,
+          table: t,
+          options: op
         }
       };
     }
@@ -965,33 +998,37 @@ ALTER_RENAME_TABLE
   }
 
 ALTER_ALGORITHM
-  = "ALGORITHM"i __ KW_ASSIGIN_EQUAL __ val:("DEFAULT"i / "INSTANT"i / "INPLACE"i / "COPY"i) {
+  = "ALGORITHM"i __ s:KW_ASSIGIN_EQUAL? __ val:("DEFAULT"i / "INSTANT"i / "INPLACE"i / "COPY"i) {
     /* => {
         type: 'alter';
         keyword: 'algorithm';
         resource: 'algorithm';
+        symbol?: '=';
         algorithm: 'DEFAULT' | 'INSTANT' | 'INPLACE' | 'COPY';
       }*/
     return {
       type: 'alter',
       keyword: 'algorithm',
       resource: 'algorithm',
+      symbol: s,
       algorithm: val
     }
   }
 
 ALTER_LOCK
-  = "LOCK"i __ KW_ASSIGIN_EQUAL __ val:("DEFAULT"i / "NONE"i / "SHARED"i / "EXCLUSIVE"i) {
+  = "LOCK"i __ s:KW_ASSIGIN_EQUAL? __ val:("DEFAULT"i / "NONE"i / "SHARED"i / "EXCLUSIVE"i) {
     /* => {
       type: 'alter';
       keyword: 'lock';
       resource: 'lock';
+      symbol?: '=';
       lock: 'DEFAULT' | 'NONE' | 'SHARED' | 'EXCLUSIVE';
     }*/
     return {
       type: 'alter',
       keyword: 'lock',
       resource: 'lock',
+      symbol: s,
       lock: val
     }
   }

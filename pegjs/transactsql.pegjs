@@ -123,10 +123,10 @@
     return true
   }
 
-  function createList(head, tail) {
+  function createList(head, tail, po = 3) {
     const result = [head];
     for (let i = 0; i < tail.length; i++) {
-      result.push(tail[i][3]);
+      result.push(tail[i][po]);
     }
     return result;
   }
@@ -568,7 +568,10 @@ declare_stmt
       }
     }
   }
-
+drop_index_opt
+  = head:(ALTER_ALGORITHM / ALTER_LOCK) tail:(__ (ALTER_ALGORITHM / ALTER_LOCK))* {
+    return createList(head, tail, 1)
+  }
 drop_stmt
   = a:KW_DROP __
     r:KW_TABLE __
@@ -597,6 +600,24 @@ drop_stmt
       }
     }
   }
+  / a:KW_DROP __
+    r:KW_INDEX __
+    i:column_ref __
+    KW_ON __
+    t:table_name __
+    op:drop_index_opt? __ {
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: r.toLowerCase(),
+          name: i,
+          table: t,
+          options: op
+        }
+      };
+    }
 
 
 truncate_stmt
@@ -715,21 +736,23 @@ ALTER_RENAME_TABLE
   }
 
 ALTER_ALGORITHM
-  = "ALGORITHM"i __ KW_ASSIGIN_EQUAL __ val:("DEFAULT"i / "INSTANT"i / "INPLACE"i / "COPY"i) {
+  = "ALGORITHM"i __ s:KW_ASSIGIN_EQUAL? __ val:("DEFAULT"i / "INSTANT"i / "INPLACE"i / "COPY"i) {
     return {
       type: 'alter',
       keyword: 'algorithm',
       resource: 'algorithm',
+      symbol: s,
       algorithm: val
     }
   }
 
 ALTER_LOCK
-  = "LOCK"i __ KW_ASSIGIN_EQUAL __ val:("DEFAULT"i / "NONE"i / "SHARED"i / "EXCLUSIVE"i) {
+  = "LOCK"i __ s:KW_ASSIGIN_EQUAL? __ val:("DEFAULT"i / "NONE"i / "SHARED"i / "EXCLUSIVE"i) {
     return {
       type: 'alter',
       keyword: 'lock',
       resource: 'lock',
+      symbol: s,
       lock: val
     }
   }
