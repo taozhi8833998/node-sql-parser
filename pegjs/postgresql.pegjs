@@ -223,6 +223,7 @@ create_stmt
   / create_extension_stmt
   / create_index_stmt
   / create_sequence
+  / create_db_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -308,6 +309,41 @@ create_extension_stmt
         schema: commonStrToLiteral(s && s[2].toLowerCase()), // <== wont that be a bug ?
         version: commonStrToLiteral(v && v[2]),
         from: commonStrToLiteral(f && f[2]),
+      }
+    }
+
+create_db_definition
+  = head:create_option_character_set tail:(__ create_option_character_set)* {
+    // => create_option_character_set[]
+    return createList(head, tail, 1)
+  }
+
+create_db_stmt
+  = a:KW_CREATE __
+    k:(KW_DATABASE / KW_SCHEME) __
+    ife:KW_IF_NOT_EXISTS? __
+    t:ident_name __
+    c:create_db_definition? {
+      /*
+      export type create_db_stmt = {
+        type: 'create',
+        keyword: 'database',
+        if_not_exists?: 'if not exists',
+        database: string,
+        create_definition?: create_db_definition
+      }
+      => AstStatement<create_db_stmt>
+      */
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'database',
+          if_not_exists: ife && ife[0].toLowerCase(),
+          database: t,
+          create_definitions: c,
+        }
       }
     }
 
@@ -743,6 +779,11 @@ default_expr
       value: ce
     }
   }
+drop_index_opt
+  = head:(ALTER_ALGORITHM / ALTER_LOCK) tail:(__ (ALTER_ALGORITHM / ALTER_LOCK))* {
+    // => (ALTER_ALGORITHM | ALTER_LOCK)[]
+    return createList(head, tail, 1)
+  }
 drop_stmt
   = a:KW_DROP __
     r:KW_TABLE __
@@ -763,6 +804,34 @@ drop_stmt
           type: a.toLowerCase(),
           keyword: r.toLowerCase(),
           name: t
+        }
+      };
+    }
+  / a:KW_DROP __
+    r:KW_INDEX __
+    i:column_ref __
+    KW_ON __
+    t:table_name __
+    op:drop_index_opt? __ {
+      /*
+      export interface drop_index_stmt_node {
+        type: 'drop';
+        keyword: string;
+        name: column_ref;
+        table: table_name;
+        options?: drop_index_opt;
+      }
+      => AstStatement<drop_index_stmt_node>
+      */
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: r.toLowerCase(),
+          name: i,
+          table: t,
+          options: op
         }
       };
     }
@@ -929,33 +998,37 @@ ALTER_RENAME_TABLE
   }
 
 ALTER_ALGORITHM
-  = "ALGORITHM"i __ KW_ASSIGIN_EQUAL __ val:("DEFAULT"i / "INSTANT"i / "INPLACE"i / "COPY"i) {
+  = "ALGORITHM"i __ s:KW_ASSIGIN_EQUAL? __ val:("DEFAULT"i / "INSTANT"i / "INPLACE"i / "COPY"i) {
     /* => {
         type: 'alter';
         keyword: 'algorithm';
         resource: 'algorithm';
+        symbol?: '=';
         algorithm: 'DEFAULT' | 'INSTANT' | 'INPLACE' | 'COPY';
       }*/
     return {
       type: 'alter',
       keyword: 'algorithm',
       resource: 'algorithm',
+      symbol: s,
       algorithm: val
     }
   }
 
 ALTER_LOCK
-  = "LOCK"i __ KW_ASSIGIN_EQUAL __ val:("DEFAULT"i / "NONE"i / "SHARED"i / "EXCLUSIVE"i) {
+  = "LOCK"i __ s:KW_ASSIGIN_EQUAL? __ val:("DEFAULT"i / "NONE"i / "SHARED"i / "EXCLUSIVE"i) {
     /* => {
       type: 'alter';
       keyword: 'lock';
       resource: 'lock';
+      symbol?: '=';
       lock: 'DEFAULT' | 'NONE' | 'SHARED' | 'EXCLUSIVE';
     }*/
     return {
       type: 'alter',
       keyword: 'lock',
       resource: 'lock',
+      symbol: s,
       lock: val
     }
   }
@@ -1253,6 +1326,26 @@ table_options
     return createList(head, tail)
   }
 
+create_option_character_set_kw
+  = 'CHARACTER'i __ 'SET'i {
+    // => string
+    return 'CHARACTER SET'
+  }
+
+create_option_character_set
+  = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
+    /* => {
+      keyword: 'character set' | 'charset' | 'collate' | 'default character set' | 'default charset' | 'default collate';
+      symbol: '=';
+      value: ident_name;
+      } */
+    return {
+      keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
+      symbol: s,
+      value: v
+    }
+  }
+
 table_option
   = kw:('AUTO_INCREMENT'i / 'AVG_ROW_LENGTH'i / 'KEY_BLOCK_SIZE'i / 'MAX_ROWS'i / 'MIN_ROWS'i / 'STATS_SAMPLE_PAGES'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:literal_numeric {
     /* => {
@@ -1266,18 +1359,7 @@ table_option
       value: v.value
     }
   }
-  / kw:KW_DEFAULT? __ t:('CHARACTER SET'i / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
-    /* => {
-      keyword: 'character set' | 'charset' | 'collate' | 'default character set' | 'default charset' | 'default collate';
-      symbol: '=';
-      value: ident_name;
-      } */
-    return {
-      keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
-      symbol: s,
-      value: v
-    }
-  }
+  / create_option_character_set
   / kw:(KW_COMMENT / 'CONNECTION'i) __ s:(KW_ASSIGIN_EQUAL)? __ c:literal_string {
     // => { keyword: 'connection' | 'comment'; symbol: '='; value: string; }
     return {
@@ -2419,7 +2501,28 @@ primary
   }
 
 column_ref
-  = tbl:ident __ DOT __ col:column {
+  = tbl:ident __ DOT __ STAR {
+    // => IGNORE
+      columnList.add(`select::${tbl}::(.*)`);
+      return {
+          type: 'column_ref',
+          table: tbl,
+          column: '*'
+      }
+    }
+  / tbl:(ident __ DOT)? __ col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) {
+    // => IGNORE
+      const tableName = tbl && tbl[0] || null
+      columnList.add(`select::${tableName}::${col}`);
+      return {
+        type: 'column_ref',
+        table: tableName,
+        column: col,
+        arrow: a,
+        property: j
+      };
+  }
+  / tbl:ident __ DOT __ col:column {
       /* => {
         type: 'column_ref';
         table: ident;
@@ -2434,26 +2537,6 @@ column_ref
         column: col
       };
     }
-  / tbl:ident __ DOT __ STAR {
-    // => IGNORE
-      columnList.add(`select::${tbl}::(.*)`);
-      return {
-          type: 'column_ref',
-          table: tbl,
-          column: '*'
-      }
-    }
-  / col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) {
-    // => IGNORE
-      columnList.add(`select::null::${col}`);
-      return {
-        type: 'column_ref',
-        table: null,
-        column: col,
-        arrow: a,
-        property: j
-      };
-  }
   / col:column {
     // => IGNORE
       columnList.add(`select::null::${col}`);
@@ -2786,9 +2869,21 @@ literal
   / literal_array
 
 literal_array
-  = 'ARRAY'i LBRAKE __ RBRAKE {
-    // => { type: 'origin'; value: string; }
-    return { type: 'origin', value: 'ARRAY[]' };
+  = s:KW_ARRAY __ LBRAKE __ c:expr_list? __ RBRAKE {
+    /*
+      => {
+        expr_list: expr_list | {type: 'origin', value: ident },
+        type: string,
+        keyword: string,
+        brackets: boolean
+      }
+    */
+    return {
+      expr_list: c || { type: 'origin', value: '' },
+      type: 'array',
+      keyword: 'array',
+      brackets: true
+    }
   }
 
 literal_list
@@ -2979,6 +3074,8 @@ KW_LOCK     = "LOCK"i       !ident_start
 
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
+KW_DATABASE = "DATABASE"i      !ident_start { return 'DATABASE'; }
+KW_SCHEME   = "SCHEME"i      !ident_start { return 'SCHEME'; }
 KW_SEQUENCE   = "SEQUENCE"i      !ident_start { return 'SEQUENCE'; }
 KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
@@ -3022,6 +3119,7 @@ KW_NOT      = "NOT"i        !ident_start { return 'NOT'; }
 KW_AND      = "AND"i        !ident_start { return 'AND'; }
 KW_OR       = "OR"i         !ident_start { return 'OR'; }
 
+KW_ARRAY    = "ARRAY"i !ident_start { return 'ARRAY'; }
 KW_ARRAY_AGG = "ARRAY_AGG"i !ident_start { return 'ARRAY_AGG'; }
 KW_COUNT    = "COUNT"i      !ident_start { return 'COUNT'; }
 KW_MAX      = "MAX"i        !ident_start { return 'MAX'; }

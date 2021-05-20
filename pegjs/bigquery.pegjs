@@ -141,10 +141,10 @@
     return true
   }
 
-  function createList(head, tail) {
+  function createList(head, tail, po = 3) {
     const result = [head];
     for (let i = 0; i < tail.length; i++) {
-      result.push(tail[i][3]);
+      result.push(tail[i][po]);
     }
     return result;
   }

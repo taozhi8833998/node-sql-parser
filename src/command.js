@@ -1,4 +1,5 @@
-import { columnDataType } from './column'
+import { alterExprToSQL } from './alter'
+import { columnDataType, columnRefToSQL } from './column'
 import { createDefinitionToSQL } from './create'
 import { identifierToSql, hasVal, toUpper } from './util'
 import { exprToSQL } from './expr'
@@ -13,6 +14,14 @@ function commonCmdToSQL(stmt) {
       break
     case 'procedure':
       clauses.push(identifierToSql(name))
+      break
+    case 'index':
+      clauses.push(
+        columnRefToSQL(name),
+        'ON',
+        tableToSQL(stmt.table),
+        stmt.options && stmt.options.map(alterExprToSQL).filter(hasVal).join(' ')
+      )
       break
     default:
       break

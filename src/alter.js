@@ -16,7 +16,7 @@ function alterToSQL(stmt) {
 
 function alterExprToSQL(expr) {
   const {
-    action, create_definitions: createDefinition, if_not_exists: ifNotExists,keyword, resource,
+    action, create_definitions: createDefinition, if_not_exists: ifNotExists,keyword, resource, symbol,
   } = expr
   let name = ''
   let dataType = []
@@ -33,7 +33,7 @@ function alterExprToSQL(expr) {
       break
     case 'algorithm':
     case 'lock':
-      name = `= ${expr[resource]}`
+      name = [symbol, toUpper(expr[resource])].filter(hasVal).join(' ')
       break
     case 'constraint':
       name = identifierToSql(expr[resource])

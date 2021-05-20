@@ -5,7 +5,7 @@ import { constraintDefinitionToSQL } from './constrain'
 import { funcToSQL } from './func'
 import { tablesToSQL, tableOptionToSQL, tableToSQL } from './tables'
 import { unionToSQL } from './union'
-import { columnOrderListToSQL, commonOptionConnector, commonKeywordArgsToSQL, toUpper, hasVal, identifierToSql, triggerEventToSQL, literalToSQL } from './util'
+import { columnIdentifierToSql, columnOrderListToSQL, commonOptionConnector, commonKeywordArgsToSQL, toUpper, hasVal, identifierToSql, triggerEventToSQL, literalToSQL } from './util'
 
 function createDefinitionToSQL(definition) {
   if (!definition) return []
@@ -130,6 +130,22 @@ function createSequenceToSQL(stmt) {
   return sql.filter(hasVal).join(' ')
 }
 
+function createDatabaseToSQL(stmt) {
+  const {
+    type, keyword, database,
+    if_not_exists: ifNotExists,
+    create_definitions: createDefinition,
+  } = stmt
+  const sql = [
+    toUpper(type),
+    toUpper(keyword),
+    toUpper(ifNotExists),
+    columnIdentifierToSql(database),
+  ]
+  if (createDefinition) sql.push(createDefinition.map(tableOptionToSQL).join(' '))
+  return sql.filter(hasVal).join(' ')
+}
+
 function createToSQL(stmt) {
   const { keyword } = stmt
   let sql = ''
@@ -149,8 +165,11 @@ function createToSQL(stmt) {
     case 'sequence':
       sql = createSequenceToSQL(stmt)
       break
+    case 'database':
+      sql = createDatabaseToSQL(stmt)
+      break
     default:
-      throw new Error(`unknow create resource ${keyword}`)
+      throw new Error(`unknown create resource ${keyword}`)
   }
   return sql
 }

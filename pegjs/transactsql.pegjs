@@ -123,10 +123,10 @@
     return true
   }
 
-  function createList(head, tail) {
+  function createList(head, tail, po = 3) {
     const result = [head];
     for (let i = 0; i < tail.length; i++) {
-      result.push(tail[i][3]);
+      result.push(tail[i][po]);
     }
     return result;
   }
@@ -220,6 +220,7 @@ cmd_stmt
 create_stmt
   = create_table_stmt
   / create_index_stmt
+  / create_db_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -326,6 +327,30 @@ create_index_stmt
         }
     }
   }
+
+create_db_definition
+  = head:create_option_character_set tail:(__ create_option_character_set)* {
+    return createList(head, tail, 1)
+  }
+
+create_db_stmt
+  = a:KW_CREATE __
+    k:(KW_DATABASE / KW_SCHEME) __
+    ife:KW_IF_NOT_EXISTS? __
+    t:ident_name __
+    c:create_db_definition? {
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'database',
+          if_not_exists: ife && ife[0].toLowerCase(),
+          database: t,
+          create_definitions: c,
+        }
+      }
+    }
 
 create_table_stmt
   = a:KW_CREATE __
@@ -543,7 +568,10 @@ declare_stmt
       }
     }
   }
-
+drop_index_opt
+  = head:(ALTER_ALGORITHM / ALTER_LOCK) tail:(__ (ALTER_ALGORITHM / ALTER_LOCK))* {
+    return createList(head, tail, 1)
+  }
 drop_stmt
   = a:KW_DROP __
     r:KW_TABLE __
@@ -572,6 +600,24 @@ drop_stmt
       }
     }
   }
+  / a:KW_DROP __
+    r:KW_INDEX __
+    i:column_ref __
+    KW_ON __
+    t:table_name __
+    op:drop_index_opt? __ {
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: r.toLowerCase(),
+          name: i,
+          table: t,
+          options: op
+        }
+      };
+    }
 
 
 truncate_stmt
@@ -690,21 +736,23 @@ ALTER_RENAME_TABLE
   }
 
 ALTER_ALGORITHM
-  = "ALGORITHM"i __ KW_ASSIGIN_EQUAL __ val:("DEFAULT"i / "INSTANT"i / "INPLACE"i / "COPY"i) {
+  = "ALGORITHM"i __ s:KW_ASSIGIN_EQUAL? __ val:("DEFAULT"i / "INSTANT"i / "INPLACE"i / "COPY"i) {
     return {
       type: 'alter',
       keyword: 'algorithm',
       resource: 'algorithm',
+      symbol: s,
       algorithm: val
     }
   }
 
 ALTER_LOCK
-  = "LOCK"i __ KW_ASSIGIN_EQUAL __ val:("DEFAULT"i / "NONE"i / "SHARED"i / "EXCLUSIVE"i) {
+  = "LOCK"i __ s:KW_ASSIGIN_EQUAL? __ val:("DEFAULT"i / "NONE"i / "SHARED"i / "EXCLUSIVE"i) {
     return {
       type: 'alter',
       keyword: 'lock',
       resource: 'lock',
+      symbol: s,
       lock: val
     }
   }
@@ -899,6 +947,19 @@ table_options
     return createList(head, tail)
   }
 
+create_option_character_set_kw
+  = 'CHARACTER'i __ 'SET'i {
+    return 'CHARACTER SET'
+  }
+create_option_character_set
+  = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
+    return {
+      keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
+      symbol: s,
+      value: v
+    }
+  }
+
 table_option
   = kw:('AUTO_INCREMENT'i / 'AVG_ROW_LENGTH'i / 'KEY_BLOCK_SIZE'i / 'MAX_ROWS'i / 'MIN_ROWS'i / 'STATS_SAMPLE_PAGES'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:literal_numeric {
     return {
@@ -907,13 +968,7 @@ table_option
       value: v.value
     }
   }
-  / kw:KW_DEFAULT? __ t:('CHARACTER SET'i / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
-    return {
-      keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
-      symbol: s,
-      value: v
-    }
-  }
+  / create_option_character_set
   / kw:(KW_COMMENT / 'CONNECTION'i) __ s:(KW_ASSIGIN_EQUAL)? __ c:literal_string {
     return {
       keyword: kw.toLowerCase(),
@@ -2180,6 +2235,8 @@ KW_LOCK     = "LOCK"i       !ident_start
 
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
+KW_DATABASE = "DATABASE"i      !ident_start { return 'DATABASE'; }
+KW_SCHEME   = "SCHEME"i      !ident_start { return 'SCHEME'; }
 KW_TABLES   = "TABLES"i      !ident_start { return 'TABLES'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
 

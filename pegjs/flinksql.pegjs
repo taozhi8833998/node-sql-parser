@@ -121,10 +121,10 @@
     return true
   }
 
-  function createList(head, tail) {
+  function createList(head, tail, po = 3) {
     const result = [head];
     for (let i = 0; i < tail.length; i++) {
-      result.push(tail[i][3]);
+      result.push(tail[i][po]);
     }
     return result;
   }
@@ -223,6 +223,7 @@ create_stmt
   / create_constraint_trigger
   / create_extension_stmt
   / create_index_stmt
+  / create_db_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -310,6 +311,31 @@ create_extension_stmt
         from: commonStrToLiteral(f && f[2]),
       }
     }
+
+create_db_definition
+  = head:create_option_character_set tail:(__ create_option_character_set)* {
+    return createList(head, tail, 1)
+  }
+
+create_db_stmt
+  = a:KW_CREATE __
+    k:(KW_DATABASE / KW_SCHEME) __
+    ife:KW_IF_NOT_EXISTS? __
+    t:ident_name __
+    c:create_db_definition? {
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'database',
+          if_not_exists: ife && ife[0].toLowerCase(),
+          database: t,
+          create_definitions: c,
+        }
+      }
+    }
+
 
 create_table_stmt
   = a:KW_CREATE __
@@ -590,18 +616,14 @@ default_expr
       value: ce
     }
   }
+drop_index_opt
+  = head:(ALTER_ALGORITHM / ALTER_LOCK) tail:(__ (ALTER_ALGORITHM / ALTER_LOCK))* {
+    return createList(head, tail, 1)
+  }
 drop_stmt
   = a:KW_DROP __
     r:KW_TABLE __
     t:table_ref_list {
-      /*
-      export interface drop_stmt_node {
-        type: 'drop';
-        keyword: 'table';
-        name: table_ref_list;
-      }
-      => AstStatement<drop_stmt_node>
-      */
       if(t) t.forEach(tt => tableList.add(`${a}::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
@@ -613,7 +635,24 @@ drop_stmt
         }
       };
     }
-
+  / a:KW_DROP __
+    r:KW_INDEX __
+    i:column_ref __
+    KW_ON __
+    t:table_name __
+    op:drop_index_opt? __ {
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: r.toLowerCase(),
+          name: i,
+          table: t,
+          options: op
+        }
+      };
+    }
 truncate_stmt
   = a:KW_TRUNCATE  __
     kw:KW_TABLE? __
@@ -776,33 +815,37 @@ ALTER_RENAME_TABLE
   }
 
 ALTER_ALGORITHM
-  = "ALGORITHM"i __ KW_ASSIGIN_EQUAL __ val:("DEFAULT"i / "INSTANT"i / "INPLACE"i / "COPY"i) {
+  = "ALGORITHM"i __ s:KW_ASSIGIN_EQUAL? __ val:("DEFAULT"i / "INSTANT"i / "INPLACE"i / "COPY"i) {
     /* => {
         type: 'alter';
         keyword: 'algorithm';
         resource: 'algorithm';
+        symbol?: '=';
         algorithm: 'DEFAULT' | 'INSTANT' | 'INPLACE' | 'COPY';
       }*/
     return {
       type: 'alter',
       keyword: 'algorithm',
       resource: 'algorithm',
+      symbol: s,
       algorithm: val
     }
   }
 
 ALTER_LOCK
-  = "LOCK"i __ KW_ASSIGIN_EQUAL __ val:("DEFAULT"i / "NONE"i / "SHARED"i / "EXCLUSIVE"i) {
+  = "LOCK"i __ s:KW_ASSIGIN_EQUAL? __ val:("DEFAULT"i / "NONE"i / "SHARED"i / "EXCLUSIVE"i) {
     /* => {
       type: 'alter';
       keyword: 'lock';
       resource: 'lock';
+      symbol?: '=';
       lock: 'DEFAULT' | 'NONE' | 'SHARED' | 'EXCLUSIVE';
     }*/
     return {
       type: 'alter',
       keyword: 'lock',
       resource: 'lock',
+      symbol: s,
       lock: val
     }
   }
@@ -1100,6 +1143,19 @@ table_options
     return createList(head, tail)
   }
 
+create_option_character_set_kw
+  = 'CHARACTER'i __ 'SET'i {
+    return 'CHARACTER SET'
+  }
+create_option_character_set
+  = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
+    return {
+      keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
+      symbol: s,
+      value: v
+    }
+  }
+
 table_option
   = kw:('AUTO_INCREMENT'i / 'AVG_ROW_LENGTH'i / 'KEY_BLOCK_SIZE'i / 'MAX_ROWS'i / 'MIN_ROWS'i / 'STATS_SAMPLE_PAGES'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:literal_numeric {
     /* => {
@@ -1113,18 +1169,7 @@ table_option
       value: v.value
     }
   }
-  / kw:KW_DEFAULT? __ t:('CHARACTER SET'i / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
-    /* => {
-      keyword: 'character set' | 'charset' | 'collate' | 'default character set' | 'default charset' | 'default collate';
-      symbol: '=';
-      value: ident_name;
-      } */
-    return {
-      keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
-      symbol: s,
-      value: v
-    }
-  }
+  / create_option_character_set
   / kw:(KW_COMMENT / 'CONNECTION'i) __ s:(KW_ASSIGIN_EQUAL)? __ c:literal_string {
     // => { keyword: 'connection' | 'comment'; symbol: '='; value: string; }
     return {
@@ -2183,7 +2228,28 @@ primary
   }
 
 column_ref
-  = tbl:ident __ DOT __ col:column {
+  = tbl:ident __ DOT __ STAR {
+    // => IGNORE
+      columnList.add(`select::${tbl}::(.*)`);
+      return {
+          type: 'column_ref',
+          table: tbl,
+          column: '*'
+      }
+    }
+  / tbl:(ident __ DOT)? __ col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) {
+    // => IGNORE
+      const tableName = tbl && tbl[0] || null
+      columnList.add(`select::${tableName}::${col}`);
+      return {
+        type: 'column_ref',
+        table: tableName,
+        column: col,
+        arrow: a,
+        property: j
+      };
+  }
+  / tbl:ident __ DOT __ col:column {
       /* => {
         type: 'column_ref';
         table: ident;
@@ -2198,26 +2264,6 @@ column_ref
         column: col
       };
     }
-  / tbl:ident __ DOT __ STAR {
-    // => IGNORE
-      columnList.add(`select::${tbl}::(.*)`);
-      return {
-          type: 'column_ref',
-          table: tbl,
-          column: '*'
-      }
-    }
-  / col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) {
-    // => IGNORE
-      columnList.add(`select::null::${col}`);
-      return {
-        type: 'column_ref',
-        table: null,
-        column: col,
-        arrow: a,
-        property: j
-      };
-  }
   / col:column {
     // => IGNORE
       columnList.add(`select::null::${col}`);
@@ -2662,6 +2708,8 @@ KW_LOCK     = "LOCK"i       !ident_start
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
 KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
+KW_DATABASE = "DATABASE"i      !ident_start { return 'DATABASE'; }
+KW_SCHEME   = "SCHEME"i      !ident_start { return 'SCHEME'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
 
 KW_ON       = "ON"i       !ident_start
