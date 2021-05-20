@@ -314,6 +314,7 @@ create_extension_stmt
 
 create_db_definition
   = head:create_option_character_set tail:(__ create_option_character_set)* {
+    // => create_option_character_set[]
     return createList(head, tail, 1)
   }
 
@@ -323,6 +324,16 @@ create_db_stmt
     ife:KW_IF_NOT_EXISTS? __
     t:ident_name __
     c:create_db_definition? {
+      /*
+      export type create_db_stmt = {
+        type: 'create',
+        keyword: 'database',
+        if_not_exists?: 'if not exists',
+        database: string,
+        create_definition?: create_db_definition
+      }
+      => AstStatement<create_db_stmt>
+      */
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -1279,8 +1290,8 @@ table_options
   }
 
 create_option_character_set_kw
-  // => string
   = 'CHARACTER'i __ 'SET'i {
+    // => string
     return 'CHARACTER SET'
   }
 
@@ -2822,6 +2833,14 @@ literal
 
 literal_array
   = s:KW_ARRAY __ LBRAKE __ c:expr_list? __ RBRAKE {
+    /*
+      => {
+        expr_list: expr_list | {type: 'origin', value: ident },
+        type: string,
+        keyword: string,
+        brackets: boolean
+      }
+    */
     return {
       expr_list: c || { type: 'origin', value: '' },
       type: 'array',

@@ -9,7 +9,7 @@ export type start = multiple_stmt | cmd_stmt | crud_stmt;
 
 export type cmd_stmt = drop_stmt | create_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt;
 
-export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence;
+export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence | create_db_stmt;
 
 export type alter_stmt = alter_table_stmt;
 
@@ -39,6 +39,18 @@ export type create_extension_stmt = {
           version: nameOrLiteral;
           from: nameOrLiteral;
         };
+
+export type create_db_definition = create_option_character_set[];
+
+export type create_db_stmt = {
+        type: 'create',
+        keyword: 'database',
+        if_not_exists?: 'if not exists',
+        database: string,
+        create_definition?: create_db_definition
+      }
+
+export type create_db_stmt = AstStatement<create_db_stmt>;
 
 export type create_table_stmt_node = create_table_stmt_node_simple | create_table_stmt_node_like;
       export interface create_table_stmt_node_base {
@@ -355,7 +367,15 @@ export type trigger_when = { type: 'when'; cond: expr; parentheses: true; };
 
 export type table_options = table_option[];
 
+export type create_option_character_set_kw = string;
 
+
+
+export type create_option_character_set = {
+      keyword: 'character set' | 'charset' | 'collate' | 'default character set' | 'default charset' | 'default collate';
+      symbol: '=';
+      value: ident_name;
+      };
 
 
 
@@ -363,11 +383,7 @@ export type table_option = {
       keyword: 'auto_increment' | 'avg_row_length' | 'key_block_size' | 'max_rows' | 'min_rows' | 'stats_sample_pages';
       symbol: '=';
       value: number; // <== literal_numeric['value']
-      } | {
-      keyword: 'character set' | 'charset' | 'collate' | 'default character set' | 'default charset' | 'default collate';
-      symbol: '=';
-      value: ident_name;
-      } | { keyword: 'connection' | 'comment'; symbol: '='; value: string; } | { keyword: 'compression'; symbol: '='; value: "'ZLIB'" | "'LZ4'" | "'NONE'" } | { keyword: 'engine'; symbol: '='; value: string; };
+      } | create_option_character_set | { keyword: 'connection' | 'comment'; symbol: '='; value: string; } | { keyword: 'compression'; symbol: '='; value: "'ZLIB'" | "'LZ4'" | "'NONE'" } | { keyword: 'engine'; symbol: '='; value: string; };
 
 export type ALTER_ADD_FULLETXT_SPARITAL_INDEX = create_fulltext_spatial_index_definition & { action: 'add'; type: 'alter' };
 
@@ -815,7 +831,14 @@ export type signedness = KW_SIGNED | KW_UNSIGNED;
 
 export type literal = literal_string | literal_numeric | literal_bool | literal_null | literal_datetime | literal_array;
 
-export type literal_array = { type: 'origin'; value: string; };
+
+
+export type literal_array = {
+        expr_list: expr_list | {type: 'origin', value: ident },
+        type: string,
+        keyword: string,
+        brackets: boolean
+      };
 
 export type literal_list = literal[];
 
@@ -915,6 +938,10 @@ type KW_AS = never;
 
 type KW_TABLE = never;
 
+type KW_DATABASE = never;
+
+type KW_SCHEME = never;
+
 type KW_SEQUENCE = never;
 
 type KW_TABLESPACE = never;
@@ -982,6 +1009,8 @@ type KW_NOT = never;
 type KW_AND = never;
 
 type KW_OR = never;
+
+type KW_ARRAY = never;
 
 type KW_ARRAY_AGG = never;
 
