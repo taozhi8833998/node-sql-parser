@@ -1,4 +1,5 @@
 import { exprToSQL } from './expr'
+import { toUpper } from './util'
 
 function binaryToSQL(expr) {
   let { operator } = expr
@@ -22,8 +23,10 @@ function binaryToSQL(expr) {
     }
     if (!isBetween) rstr = `(${rstr.join(', ')})`
   }
-  const str = `${exprToSQL(expr.left)} ${operator} ${rstr}`
-  return expr.parentheses ? `(${str})` : str
+  const str = [exprToSQL(expr.left), operator]
+  if (expr.prefix) str.push(toUpper(expr.prefix))
+  str.push(rstr)
+  return expr.parentheses ? `(${str.join(' ')})` : str.join(' ')
 }
 
 export {
