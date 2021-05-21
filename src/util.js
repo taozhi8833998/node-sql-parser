@@ -1,16 +1,16 @@
 import { columnRefToSQL, columnOrderToSQL } from './column'
 
-const escapeMap = {
-  '\0'   : '\\0',
-  '\''   : '\\\'',
-  '"'    : '\\"',
-  '\b'   : '\\b',
-  '\n'   : '\\n',
-  '\r'   : '\\r',
-  '\t'   : '\\t',
-  '\x1a' : '\\Z',
-  // '\\'   : '\\\\',
-}
+// const escapeMap = {
+//   '\0'   : '\\0',
+//   '\''   : '\\\'',
+//   '"'    : '\\"',
+//   '\b'   : '\\b',
+//   '\n'   : '\\n',
+//   '\r'   : '\\r',
+//   '\t'   : '\\t',
+//   '\x1a' : '\\Z',
+//   // '\\'   : '\\\\',
+// }
 
 const DEFAULT_OPT = {
   database : PARSER_NAME || 'mysql',
@@ -95,14 +95,15 @@ function replaceParamsInner(ast, keys) {
 }
 
 function escape(str) {
-  const res = []
-  for (let i = 0, len = str.length; i < len; ++i) {
-    let char = str[i]
-    const escaped = escapeMap[char]
-    if (escaped) char = escaped
-    res.push(char)
-  }
-  return res.join('')
+  return str
+  // const res = []
+  // for (let i = 0, len = str.length; i < len; ++i) {
+  //   let char = str[i]
+  //   const escaped = escapeMap[char]
+  //   if (escaped) char = escaped
+  //   res.push(char)
+  // }
+  // return res.join('')
 }
 
 function getParserOpt() {
