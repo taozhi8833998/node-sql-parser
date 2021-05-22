@@ -501,6 +501,7 @@ describe('select', () => {
     it('should parse or statement with parentheses', () => {
       expect(getParsedSql(`select * from tableName where (a = 1 or b = 2) and c=3;`)).to.equal("SELECT * FROM `tableName` WHERE (`a` = 1 OR `b` = 2) AND `c` = 3")
       expect(getParsedSql(`select * from tableName where (a = 1) or b = 2 and c=3;`)).to.equal("SELECT * FROM `tableName` WHERE (`a` = 1) OR `b` = 2 AND `c` = 3")
+      expect(getParsedSql(`select * from tableName where (name LIKE "dummy" and sku = "dummy") or b = 2 and c=3;`)).to.equal('SELECT * FROM `tableName` WHERE (`name` LIKE \'dummy\' AND `sku` = \'dummy\') OR `b` = 2 AND `c` = 3')
       expect(getParsedSql(`select * from tableName where (a = 1 and b = 2) or c=3;`)).to.equal("SELECT * FROM `tableName` WHERE (`a` = 1 AND `b` = 2) OR `c` = 3")
       expect(getParsedSql(`select * from tableName where a = 1 or (b = 2) and c=3;`)).to.equal("SELECT * FROM `tableName` WHERE `a` = 1 OR (`b` = 2) AND `c` = 3")
       expect(getParsedSql(`select * from tableName where a = 1 or (b = 2 and d=4) and c=3;`)).to.equal("SELECT * FROM `tableName` WHERE `a` = 1 OR (`b` = 2 AND `d` = 4) AND `c` = 3")
