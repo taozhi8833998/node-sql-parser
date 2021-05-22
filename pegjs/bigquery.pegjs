@@ -802,7 +802,7 @@ in_op
   / KW_IN
 
 like_op_right
-  = op:like_op __ right:comparison_expr {
+  = op:like_op __ right:(literal / comparison_expr) {
       return { op: op, right: right };
     }
 
