@@ -714,7 +714,7 @@ export type like_op = 'LIKE' | KW_LIKE | KW_ILIKE;
 
 export type in_op = 'NOT IN' | KW_IN;
 
-export type like_op_right = { op: like_op; right: comparison_expr};
+export type like_op_right = { op: like_op; right: literal | comparison_expr};
 
 export type in_op_right = {op: in_op; right: expr_list | var_decl | literal_string; };
 
