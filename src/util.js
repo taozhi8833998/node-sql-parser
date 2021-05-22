@@ -1,16 +1,16 @@
 import { columnRefToSQL, columnOrderToSQL } from './column'
 
-const escapeMap = {
-  '\0'   : '\\0',
-  '\''   : '\\\'',
-  '"'    : '\\"',
-  '\b'   : '\\b',
-  '\n'   : '\\n',
-  '\r'   : '\\r',
-  '\t'   : '\\t',
-  '\x1a' : '\\Z',
-  // '\\'   : '\\\\',
-}
+// const escapeMap = {
+//   '\0'   : '\\0',
+//   '\''   : '\\\'',
+//   '"'    : '\\"',
+//   '\b'   : '\\b',
+//   '\n'   : '\\n',
+//   '\r'   : '\\r',
+//   '\t'   : '\\t',
+//   '\x1a' : '\\Z',
+//   // '\\'   : '\\\\',
+// }
 
 const DEFAULT_OPT = {
   database : PARSER_NAME || 'mysql',
@@ -95,14 +95,15 @@ function replaceParamsInner(ast, keys) {
 }
 
 function escape(str) {
-  const res = []
-  for (let i = 0, len = str.length; i < len; ++i) {
-    let char = str[i]
-    const escaped = escapeMap[char]
-    if (escaped) char = escaped
-    res.push(char)
-  }
-  return res.join('')
+  return str
+  // const res = []
+  // for (let i = 0, len = str.length; i < len; ++i) {
+  //   let char = str[i]
+  //   const escaped = escapeMap[char]
+  //   if (escaped) char = escaped
+  //   res.push(char)
+  // }
+  // return res.join('')
 }
 
 function getParserOpt() {
@@ -158,6 +159,24 @@ function identifierToSql(ident, isDual) {
   }
 }
 
+function commonTypeValue(opt) {
+  const result = []
+  if (!opt) return result
+  const { type, value } = opt
+  result.push(type.toUpperCase())
+  result.push(value.toUpperCase())
+  return result
+}
+
+function toUpper(val) {
+  if (!val) return
+  return val.toUpperCase()
+}
+
+function hasVal(val) {
+  return val
+}
+
 function literalToSQL(literal) {
   if (!literal) return
   const { type, parentheses, value } = literal
@@ -199,29 +218,17 @@ function literalToSQL(literal) {
     default:
       break
   }
+  const { prefix, suffix } = literal
+  const result = []
+  if (prefix) result.push(toUpper(prefix))
+  result.push(str)
+  if (suffix && suffix.collate) result.push(commonTypeValue(suffix.collate).join(' '))
+  str = result.join(' ')
   return parentheses ? `(${str})` : str
 }
 
 function replaceParams(ast, params) {
   return replaceParamsInner(JSON.parse(JSON.stringify(ast)), params)
-}
-
-function commonTypeValue(opt) {
-  const result = []
-  if (!opt) return result
-  const { type, value } = opt
-  result.push(type.toUpperCase())
-  result.push(value.toUpperCase())
-  return result
-}
-
-function toUpper(val) {
-  if (!val) return
-  return val.toUpperCase()
-}
-
-function hasVal(val) {
-  return val
 }
 
 function onPartitionsToSQL(expr) {

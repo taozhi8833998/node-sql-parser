@@ -45,7 +45,7 @@ describe('select', () => {
         },
         {
           "expr": {
-              "type": "string",
+              "type": "single_quote_string",
               "value": "a"
           },
           "as": "col2"
@@ -263,8 +263,8 @@ describe('select', () => {
                   {
                     type: 'binary_expr',
                     operator: 'IN',
-                    left: { type: 'string', value: ', ' },
-                    right: { type: 'string', value: 'a, b' }
+                    left: { type: 'single_quote_string', value: ', ' },
+                    right: { type: 'single_quote_string', value: 'a, b' }
                   }
                 ]
               }
@@ -540,7 +540,7 @@ describe('select', () => {
             type : 'expr_list',
             value : [
               { type: 'number', value: 1 },
-              { type: 'string', value: 't' }
+              { type: 'single_quote_string', value: 't' }
             ]
           }
         },
@@ -896,12 +896,12 @@ describe('select', () => {
     describe('strings', () => {
       it('should parse single quoted strings', () => {
         const ast = parser.astify(`SELECT 'string'`);
-        expect(ast.columns).to.eql([{ expr: { type: 'string', value: 'string' }, as: null }]);
+        expect(ast.columns).to.eql([{ expr: { type: 'single_quote_string', value: 'string' }, as: null }]);
       });
 
       it('should parse keywords in single quotes as string', () => {
         const ast = parser.astify(`SELECT 'select'`);
-        expect(ast.columns).to.eql([{ expr: { type: 'string', value: 'select' }, as: null }]);
+        expect(ast.columns).to.eql([{ expr: { type: 'single_quote_string', value: 'select' }, as: null }]);
       });
     });
 
@@ -943,8 +943,8 @@ describe('select', () => {
         right: {
           type: 'expr_list',
           value: [
-            { type: 'string', value: 'John' },
-            { type: 'string', value: 'Doe' }
+            { type: 'single_quote_string', value: 'John' },
+            { type: 'single_quote_string', value: 'Doe' }
           ],
           parentheses: true
         }

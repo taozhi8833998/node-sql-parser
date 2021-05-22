@@ -1643,6 +1643,7 @@ comparison_op_right
   / between_op_right
   / is_op_right
   / like_op_right
+  / regexp_op_right
 
 arithmetic_op_right
   = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
@@ -1679,9 +1680,18 @@ like_op
   = nk:(KW_NOT __ KW_LIKE) { return nk[0] + ' ' + nk[2]; }
   / KW_LIKE
 
+regexp_op
+  = n: KW_NOT? __ k:(KW_REGEXP / KW_RLIKE) {
+    return n ? `${n} ${k}` : k
+  }
 in_op
   = nk:(KW_NOT __ KW_IN) { return nk[0] + ' ' + nk[2]; }
   / KW_IN
+
+regexp_op_right
+  = op:regexp_op __ b:'BINARY'i? __ e:literal_string {
+    return  { op: b ? `${op} ${b}` :  op, right: e };
+  }
 
 like_op_right
   = op:like_op __ right:comparison_expr {
@@ -1950,7 +1960,11 @@ signedness
   / KW_UNSIGNED
 
 literal
-  = literal_string
+  = b:'BINARY'i? __ s:literal_string ca:(__ collate_expr)? {
+    if (b) s.prefix = b.toLowerCase()
+    if (ca) s.suffix = { collate: ca[1] }
+    return s
+  }
   / literal_numeric
   / literal_bool
   / literal_null
@@ -1985,7 +1999,7 @@ literal_bool
 literal_string
   = ca:("'" single_char* "'") {
       return {
-        type: 'string',
+        type: 'single_quote_string',
         value: ca[1].join('')
       };
     }
@@ -2168,6 +2182,8 @@ KW_BETWEEN  = "BETWEEN"i    !ident_start { return 'BETWEEN'; }
 KW_IN       = "IN"i         !ident_start { return 'IN'; }
 KW_IS       = "IS"i         !ident_start { return 'IS'; }
 KW_LIKE     = "LIKE"i       !ident_start { return 'LIKE'; }
+KW_RLIKE    = "RLIKE"i      !ident_start { return 'RLIKE'; }
+KW_REGEXP   = "REGEXP"i     !ident_start { return 'REGEXP'; }
 KW_EXISTS   = "EXISTS"i     !ident_start { return 'EXISTS'; }
 
 KW_NOT      = "NOT"i        !ident_start { return 'NOT'; }

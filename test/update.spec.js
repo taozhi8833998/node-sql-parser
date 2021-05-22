@@ -80,7 +80,7 @@ describe('update', () => {
                   column: "name"
                 },
                 {
-                  type: "string",
+                  type: "single_quote_string",
                   value: "名字"
                 }
               ]

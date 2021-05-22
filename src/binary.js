@@ -22,7 +22,7 @@ function binaryToSQL(expr) {
     }
     if (!isBetween) rstr = `(${rstr.join(', ')})`
   }
-  const str = `${exprToSQL(expr.left)} ${operator} ${rstr}`
+  const str = [exprToSQL(expr.left), operator, rstr].join(' ')
   return expr.parentheses ? `(${str})` : str
 }
 

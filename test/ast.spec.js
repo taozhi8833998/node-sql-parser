@@ -127,7 +127,7 @@ describe('AST', () => {
 
             ["'", '"', 'n', 't'].forEach((char) => {
                 it(`should escape char ${char} "`, () => {
-                    sql = `SELECT ' escape \\${char}'`;
+                    sql = `SELECT ' escape \${char}'`;
                     expect(getParsedSql(sql)).to.equal(sql);
                 });
             });
@@ -198,7 +198,7 @@ describe('AST', () => {
                 ],
                 'json casts':  [
                     `SELECT CAST('{"foo":"bar"}' AS JSON) FROM dual`,
-                    `SELECT CAST('{\\"foo\\":\\"bar\\"}' AS JSON) FROM DUAL`
+                    `SELECT CAST('{"foo":"bar"}' AS JSON) FROM DUAL`
                 ],
             };
             Object.keys(castQueries).forEach(cast => {
@@ -706,7 +706,7 @@ describe('AST', () => {
 
         it('should support string with escape values', () => {
             sql = `INSERT INTO mytablehere (ID, post_author) VALUES (2564,'I haven\\'t <a href=\\"http://www.someurl.com/somepartofurl\\0\\">figured</a>');`;
-            expect(getParsedSql(sql)).to.equal('INSERT INTO `mytablehere` (`ID`, `post_author`) VALUES (2564,\'I haven\\\'t <a href=\\"http://www.someurl.com/somepartofurl\\0\\">figured</a>\')');
+            expect(getParsedSql(sql)).to.equal('INSERT INTO `mytablehere` (`ID`, `post_author`) VALUES (2564,\'I haven\'t <a href="http://www.someurl.com/somepartofurl\\0">figured</a>\')');
         });
 
         it('should support null values', () => {
