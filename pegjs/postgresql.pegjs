@@ -70,7 +70,6 @@
     'SESSION_USER': true,
     'SET': true,
     'SHOW': true,
-    'STATUS': true, // reserved (MySQL)
     'SYSTEM_USER': true,
 
     'TABLE': true,
@@ -2637,7 +2636,6 @@ aggr_func
   = aggr_fun_count
   / aggr_fun_smma
   / aggr_array_agg
-
 
 window_func
   = window_fun_rank
