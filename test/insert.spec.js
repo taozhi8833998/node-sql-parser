@@ -151,6 +151,12 @@ describe('insert', () => {
       expect(parser.sqlify(parser.astify(`INSERT INTO account (date, id) VALUES ("2019-12-23",123) RETURNING *`, opt), opt)).to.be.equal('INSERT INTO "account" ("date", "id") VALUES ("2019-12-23",123) RETURNING *')
     })
 
+    it('should support insert hex value', () => {
+      expect(parser.sqlify(parser.astify(`INSERT INTO \`t\`
+      (\`a\`) VALUES
+      (X'ax')`))).to.be.equal("INSERT INTO `t` (`a`) VALUES (X'ax')")
+    })
+
     describe('support ascii pnCtrl single-char', () => {
       it('should support ascii pnCtrl', () => {
         // 0～31及127(共33个)是控制字符或通信专用字符 \0-\x1F和\x7f in ascii, ETX ascii code is 0x03
