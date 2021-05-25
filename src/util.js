@@ -188,6 +188,9 @@ function literalToSQL(literal) {
     case 'regex_string':
       str = `r"${escape(value)}"`
       break
+    case 'hex_string':
+      str = `X'${escape(value)}'`
+      break
     case 'double_quote_string':
       str = `"${escape(value)}"`
       break

@@ -1124,7 +1124,7 @@ literal_bool
 literal_string
   = r:'R'i? __ ca:("'" single_char* "'") {
       return {
-        type: r ? 'regex_string' : 'string',
+        type: r ? 'regex_string' : 'single_quote_string',
         value: ca[1].join('')
       };
     }

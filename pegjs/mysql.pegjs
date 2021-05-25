@@ -1997,15 +1997,15 @@ literal_bool
     }
 
 literal_string
-  = ca:("'" single_char* "'") {
+  = r:'X'i? ca:("'" single_char* "'") {
       return {
-        type: 'single_quote_string',
+        type: r ? 'hex_string' : 'single_quote_string',
         value: ca[1].join('')
       };
     }
-  / ca:("\"" single_quote_char* "\"") {
+  / r:'X'i? ca:("\"" single_quote_char* "\"") {
       return {
-        type: 'string',
+        type: r ? 'hex_string' : 'string',
         value: ca[1].join('')
       };
     }
