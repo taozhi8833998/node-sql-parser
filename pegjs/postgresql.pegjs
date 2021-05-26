@@ -2916,7 +2916,14 @@ literal_bool
     }
 
 literal_string
-  = ca:("'" single_char* "'") {
+  = ca:("'" single_char* "'") [\n]+ __ fs:("'" single_char* "'") {
+      // => { type: 'single_quote_string'; value: string; }
+      return {
+        type: 'single_quote_string',
+        value: `${ca[1].join('')}${fs[1].join('')}`
+      };
+    }
+  / ca:("'" single_char* "'") {
       // => { type: 'single_quote_string'; value: string; }
       return {
         type: 'single_quote_string',
