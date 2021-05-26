@@ -275,6 +275,14 @@ describe('Postgres', () => {
         `SELECT * FROM "partitions" WHERE "location" IS NULL AND "code" LIKE 'XX-%' AND "key" <> 1`
       ]
     },
+    {
+      title: 'a multi-line single-quoted string',
+      sql: [
+        `SELECT 'Hello '
+            'world!' AS x;`,
+        `SELECT 'Hello world!' AS "x"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
