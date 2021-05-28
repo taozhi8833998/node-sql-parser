@@ -49,6 +49,7 @@
 
     // 'KEY': true,
 
+    'LEFT': true,
     'LIKE': true,
     'LIMIT': true,
 
@@ -3374,7 +3375,7 @@ proc_primary
     }
 
 proc_func_name
-  = dt:ident tail:(__ DOT __ ident)? {
+  = dt:ident_name tail:(__ DOT __ ident_name)? {
     // => string
       let name = dt
       if (tail !== null) {
