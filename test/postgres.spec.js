@@ -283,6 +283,18 @@ describe('Postgres', () => {
         `SELECT 'Hello world!' AS "x"`
       ]
     },
+    {
+      title: 'a multi-line single-quoted string',
+      sql: [
+        `select
+        person.first_name,
+        department.dept_name
+      from
+        person
+      left join department on person.dept_id = department.dept_id`,
+        'SELECT "person"."first_name", "department"."dept_name" FROM "person" LEFT JOIN "department" ON "person"."dept_id" = "department"."dept_id"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
