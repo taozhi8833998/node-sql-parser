@@ -5,6 +5,12 @@ import { identifierToSql, hasVal, toUpper } from './util'
 import { exprToSQL } from './expr'
 import { tablesToSQL, tableToSQL } from './tables'
 
+function callToSQL(stmt) {
+  const type = 'CALL'
+  const storeProcessCall = exprToSQL(stmt.expr)
+  return `${type} ${storeProcessCall}`
+}
+
 function commonCmdToSQL(stmt) {
   const { type, keyword, name } = stmt
   const clauses = [toUpper(type), toUpper(keyword)]
@@ -29,6 +35,12 @@ function commonCmdToSQL(stmt) {
   return clauses.filter(hasVal).join(' ')
 }
 
+function descToSQL(stmt) {
+  const { type, table } = stmt
+  const action = toUpper(type)
+  return `${action} ${identifierToSql(table)}`
+}
+
 function renameToSQL(stmt) {
   const { type, table } = stmt
   const clauses = []
@@ -47,12 +59,6 @@ function useToSQL(stmt) {
   const action = toUpper(type)
   const database = identifierToSql(db)
   return `${action} ${database}`
-}
-
-function callToSQL(stmt) {
-  const type = 'CALL'
-  const storeProcessCall = exprToSQL(stmt.expr)
-  return `${type} ${storeProcessCall}`
 }
 
 function setVarToSQL(stmt) {
@@ -118,11 +124,12 @@ function declareToSQL(stmt) {
 }
 
 export {
+  callToSQL,
   commonCmdToSQL,
   declareToSQL,
+  descToSQL,
   renameToSQL,
   useToSQL,
-  callToSQL,
   setVarToSQL,
   lockUnlockToSQL,
 }
