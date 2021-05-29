@@ -124,6 +124,15 @@ describe('Command SQL', () => {
 
   })
 
+  describe('desc', () => {
+    ['desc', 'describe'].forEach(keyword => {
+      it(`should support MySQL ${keyword}`, () => {
+        expect(getParsedSql(`${keyword} tableA`))
+          .to.equal('DESC `tableA`');
+      });
+    })
+  })
+
   describe('use', () => {
     it(`should support MySQL use`, () => {
       expect(getParsedSql('use databaseA'))

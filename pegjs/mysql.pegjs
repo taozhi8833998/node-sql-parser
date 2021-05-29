@@ -213,6 +213,7 @@ cmd_stmt
   / lock_stmt
   / unlock_stmt
   / show_stmt
+  / desc_stmt
 
 create_stmt
   = create_table_stmt
@@ -1007,6 +1008,18 @@ show_grant_for_using
 show_grant_for_using_list
   = head:ident tail:(__ COMMA __ ident)* {
     return createList(head, tail);
+  }
+
+desc_stmt
+  = (KW_DESC / KW_DESCRIBE) __ t:ident {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'desc',
+        table: t
+      }
+    };
   }
 
 select_stmt
@@ -2181,6 +2194,7 @@ KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET'; }
 
 KW_ASC      = "ASC"i        !ident_start { return 'ASC'; }
 KW_DESC     = "DESC"i       !ident_start { return 'DESC'; }
+KW_DESCRIBE = "DESCRIBE"i       !ident_start { return 'DESCRIBE'; }
 
 KW_ALL      = "ALL"i        !ident_start { return 'ALL'; }
 KW_DISTINCT = "DISTINCT"i   !ident_start { return 'DISTINCT';}

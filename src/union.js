@@ -5,11 +5,12 @@ import { deleteToSQL } from './delete'
 import { updateToSQL } from './update'
 import { insertToSQL } from './insert'
 import {
+  callToSQL,
   commonCmdToSQL,
   declareToSQL,
+  descToSQL,
   useToSQL,
   renameToSQL,
-  callToSQL,
   setVarToSQL,
   lockUnlockToSQL,
 } from './command'
@@ -32,6 +33,7 @@ const typeToSQLFn = {
   use      : useToSQL,
   rename   : renameToSQL,
   call     : callToSQL,
+  desc     : descToSQL,
   set      : setVarToSQL,
   lock     : lockUnlockToSQL,
   unlock   : lockUnlockToSQL,
