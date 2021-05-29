@@ -1276,6 +1276,13 @@ replace_insert_stmt
       }
       if (c) {
         let table = t && t.table || null
+        if(Array.isArray(v)) {
+          v.forEach((row, idx) => {
+            if(row.value.length != c.length) {
+              throw new Error(`Error: column count doesn't match value count at row ${idx+1}`)
+            }
+          })
+        }
         c.forEach(c => columnList.add(`insert::${table}::${c}`));
       }
       const tableKey = ta ? ` ${ta.toLowerCase()}` : ''
