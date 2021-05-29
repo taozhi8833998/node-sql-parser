@@ -354,6 +354,42 @@ describe('BigQuery', () => {
         'SELECT REGEXP_SUBSTR(CAST(date AS STRING), r"^[0-9]+", 2, 10) AS regexp FROM table1'
       ]
     },
+    {
+      title: 'select with timestamp prefix',
+      sql: [
+        `SELECT
+        DATETIME(2008, 12, 25, 05, 30, 00) as datetime_ymdhms,
+        DATETIME(TIMESTAMP "2008-12-25 05:30:00+00", "America/Los_Angeles") as datetime_tstz;`,
+        "SELECT DATETIME(2008, 12, 25, 5, 30, 0) AS datetime_ymdhms, DATETIME(TIMESTAMP '2008-12-25 05:30:00+00', 'America/Los_Angeles') AS datetime_tstz"
+      ]
+    },
+    {
+      title: 'select with datetime prefix',
+      sql: [
+        `SELECT
+        DATETIME "2008-12-25 15:30:00" as original_date,
+        DATETIME_ADD(DATETIME "2008-12-25 15:30:00", INTERVAL 10 MINUTE) as later;`,
+        "SELECT DATETIME '2008-12-25 15:30:00' AS original_date, DATETIME_ADD(DATETIME '2008-12-25 15:30:00', INTERVAL 10 MINUTE) AS later"
+      ]
+    },
+    {
+      title: 'select with datetime_diff',
+      sql: [
+        `SELECT
+        DATETIME "2010-07-07 10:20:00" as first_datetime,
+        DATETIME "2008-12-25 15:30:00" as second_datetime,
+        DATETIME_DIFF(DATETIME "2010-07-07 10:20:00",
+          DATETIME "2008-12-25 15:30:00", DAY) as difference;`,
+        "SELECT DATETIME '2010-07-07 10:20:00' AS first_datetime, DATETIME '2008-12-25 15:30:00' AS second_datetime, DATETIME_DIFF(DATETIME '2010-07-07 10:20:00', DATETIME '2008-12-25 15:30:00', DAY) AS difference"
+      ]
+    },
+    {
+      title: 'select with row_number',
+      sql: [
+        `select ROW_NUMBER() OVER(PARTITION BY column1 ORDER BY column2)`,
+        "SELECT ROW_NUMBER() OVER (PARTITION BY column1 ORDER BY column2 ASC)"
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {

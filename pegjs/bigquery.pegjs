@@ -837,6 +837,7 @@ primary
   / literal
   / aggr_func
   / func_call
+  / case_expr
   / interval_expr
   / column_ref
   / param
@@ -860,6 +861,33 @@ interval_expr
         unit: u.toLowerCase(),
       }
     }
+
+case_expr
+  = KW_CASE                         __
+    expr:expr?                      __
+    condition_list:case_when_then+  __
+    otherwise:case_else?            __
+    KW_END __ KW_CASE? {
+      if (otherwise) condition_list.push(otherwise);
+      return {
+        type: 'case',
+        expr: expr || null,
+        args: condition_list
+      };
+    }
+
+case_when_then
+  = KW_WHEN __ condition:expr __ KW_THEN __ result:expr {
+    return {
+      type: 'when',
+      cond: condition,
+      result: result
+    };
+  }
+
+case_else = KW_ELSE __ result:expr {
+    return { type: 'else', result: result };
+  }
 
 column_ref
   = tbl:ident __ DOT __ col:column_without_kw {
@@ -1136,13 +1164,19 @@ literal_string
     }
 
 literal_datetime
-  = type:(KW_TIME / KW_DATE / KW_TIMESTAMP) __ ca:("'" single_char* "'") {
+  = type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("'" single_char* "'") {
       return {
         type: type.toLowerCase(),
         value: ca[1].join('')
       };
     }
-  / type: KW_CURRENT_TIMESTAMP __ lf:LPAREN? __ rt:RPAREN? !{ if (lf && rt) return true }  __ up:('ON UPDATE CURRENT_TIMESTAMP'i)? {
+  / type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("\"" single_quote_char* "\"") {
+      return {
+        type: type.toLowerCase(),
+        value: ca[1].join('')
+      };
+    }
+  / type:KW_CURRENT_TIMESTAMP __ lf:LPAREN? __ rt:RPAREN? !{ if (lf && rt) return true }  __ up:('ON UPDATE CURRENT_TIMESTAMP'i)? {
       return {
         type: 'origin',
         value: (up ? `${type} ${up}` : type).toLowerCase()
@@ -1348,7 +1382,7 @@ KW_BIGINT   = "BIGINT"i   !ident_start { return 'BIGINT'; }
 KW_FLOAT_64   = "FLOAT64"i   !ident_start { return 'FLOAT64'; }
 KW_DOUBLE   = "DOUBLE"i   !ident_start { return 'DOUBLE'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
-KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
+KW_DATETIME = "DATETIME"i     !ident_start { return 'DATETIME'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
