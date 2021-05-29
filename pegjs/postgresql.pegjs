@@ -2948,7 +2948,14 @@ literal_string
 
 literal_datetime
   = type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("'" single_char* "'") {
-      //=> { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string }
+      // => { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string }
+      return {
+        type: type.toLowerCase(),
+        value: ca[1].join('')
+      };
+    }
+  / type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("\"" single_quote_char* "\"") {
+    // => { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string }
       return {
         type: type.toLowerCase(),
         value: ca[1].join('')

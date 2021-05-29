@@ -213,8 +213,9 @@ function literalToSQL(literal) {
     case 'origin':
       str = value.toUpperCase()
       break
-    case 'time':
     case 'date':
+    case 'datetime':
+    case 'time':
     case 'timestamp':
       str = `${type.toUpperCase()} '${value}'`
       break
