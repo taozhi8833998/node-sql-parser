@@ -1024,7 +1024,8 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 func_call
-  = name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
+  = extract_func
+  / name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
@@ -1040,7 +1041,6 @@ func_call
         over: bc
       };
     }
-    / extract_func
 
 proc_func_name
   = dt:ident tail:(__ DOT __ ident)? {

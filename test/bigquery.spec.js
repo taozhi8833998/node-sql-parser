@@ -403,6 +403,12 @@ describe('BigQuery', () => {
     expect(arrayStructValueToSQL({ type: 'non-array-struct' })).to.equal('')
   })
 
+  it('should return empty column list for extract column only', () => {
+    const sql = "SELECT EXTRACT(DAY FROM DATE '2013-12-25') as the_day FROM table1;"
+    const { columnList } = parser.parse(sql, opt)
+    expect(columnList).to.be.eql([])
+  })
+
   it('should without parentheses', () => {
     const ast = parser.astify(SQL_LIST[15].sql[0], opt)
     const expr = ast.select.from.expr
