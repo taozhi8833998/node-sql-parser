@@ -1094,6 +1094,8 @@ type KW_LONGTEXT = never;
 
 type KW_BIGINT = never;
 
+type KW_ENUM = never;
+
 type KW_FLOAT = never;
 
 type KW_DOUBLE = never;
@@ -1298,6 +1300,7 @@ export type data_type = {
                     suffix?: string;
                     scale?: number;
                     parentheses?: boolean;
+                    expr?: expr_list;
                 };
 
 
@@ -1325,6 +1328,10 @@ export type numeric_type = data_type;
 
 
 export type datetime_type = data_type;
+
+
+
+export type enum_type = data_type;
 
 
 
