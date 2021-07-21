@@ -2443,7 +2443,8 @@ numeric_type
 
 
 datetime_type
-  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
+  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) __ LPAREN __ l:[0-9]+ __ RPAREN { return { dataType: t, length: parseInt(l.join(''), 10) }; }
+  / t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
 
 json_type
   = t:KW_JSON { return { dataType: t }; }
