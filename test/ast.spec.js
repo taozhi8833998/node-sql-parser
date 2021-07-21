@@ -530,7 +530,7 @@ describe('AST', () => {
 
             it('should support row value constructors', () => {
                 expect(getParsedSql(`SELECT * FROM "user" WHERE (firstname, lastname) = ('John', 'Doe')`))
-                    .to.equal(`SELECT * FROM \`user\` WHERE (\`firstname\`,\`lastname\`) = ('John','Doe')`);
+                    .to.equal(`SELECT * FROM \`user\` WHERE (\`firstname\`, \`lastname\`) = ('John', 'Doe')`);
             });
         });
 

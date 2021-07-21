@@ -78,6 +78,7 @@ for (const r of ast.rules) {
                     suffix?: string;
                     scale?: number;
                     parentheses?: boolean;
+                    expr?: expr_list;
                 }`;
             break;
         default:

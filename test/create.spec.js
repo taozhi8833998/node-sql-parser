@@ -46,6 +46,8 @@ describe('create', () => {
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11), `float_a` FLOAT NOT NULL, `double_b` DOUBLE, `decimal_c` DECIMAL(6, 5), `float_m` FLOAT(7), `float_md` FLOAT(7, 4), `double_m` DOUBLE(6), `double_md` DOUBLE(6, 3), PRIMARY KEY (`id`)) ENGINE = MEMORY COMPRESSION = \'ZLIB\'');
       expect(getParsedSql('CREATE TABLE `test` (`date` date NULL DEFAULT NULL, `datetime` datetime(6) NULL DEFAULT NULL);CREATE TABLE `test`.`Untitled` (`date` date NULL DEFAULT NULL, `datetime` datetime NULL DEFAULT NULL, `time` time NULL DEFAULT NULL, `timestamp` timestamp(6) NULL DEFAULT NULL);'))
         .to.equal('CREATE TABLE `test` (`date` DATE NULL DEFAULT NULL, `datetime` DATETIME(6) NULL DEFAULT NULL) ; CREATE TABLE `test`.`Untitled` (`date` DATE NULL DEFAULT NULL, `datetime` DATETIME NULL DEFAULT NULL, `time` TIME NULL DEFAULT NULL, `timestamp` TIMESTAMP(6) NULL DEFAULT NULL)');
+      expect(getParsedSql("CREATE TABLE `action`(`id` int NOT NULL AUTO_INCREMENT, `platform` enum('IOS','ANDROID','PC_WEB','MOBILE_WEB','ETC') NOT NULL DEFAULT 'PC_WEB', `size` ENUM('small', CONCAT('med','ium'), 'large'), `date` datetime NOT NULL,PRIMARY KEY (`id`));"))
+        .to.equal("CREATE TABLE `action` (`id` INT NOT NULL AUTO_INCREMENT, `platform` ENUM('IOS', 'ANDROID', 'PC_WEB', 'MOBILE_WEB', 'ETC') NOT NULL DEFAULT 'PC_WEB', `size` ENUM('small', CONCAT('med', 'ium'), 'large'), `date` DATETIME NOT NULL, PRIMARY KEY (`id`))");
     })
 
     it('should support create temporary table', () => {
