@@ -44,6 +44,8 @@ describe('create', () => {
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11), `name` TEXT NOT NULL, `mt` MEDIUMTEXT NOT NULL, `lt` LONGTEXT, `tt` TINYTEXT, PRIMARY KEY (`id`)) ENGINE = MEMORY COMPRESSION = \'ZLIB\'');
       expect(getParsedSql(`create table dbname.tableName (id INT(11), float_a FLOAT not null, double_b DOUBLE, decimal_c DECIMAL (6,5), float_m float(7), float_md float(7,4), double_m double(6), double_md double(6, 3),primary key(id)) ENGINE = MEMORY compression = 'zlib'`))
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11), `float_a` FLOAT NOT NULL, `double_b` DOUBLE, `decimal_c` DECIMAL(6, 5), `float_m` FLOAT(7), `float_md` FLOAT(7, 4), `double_m` DOUBLE(6), `double_md` DOUBLE(6, 3), PRIMARY KEY (`id`)) ENGINE = MEMORY COMPRESSION = \'ZLIB\'');
+      expect(getParsedSql('CREATE TABLE `test` (`date` date NULL DEFAULT NULL, `datetime` datetime(6) NULL DEFAULT NULL);CREATE TABLE `test`.`Untitled` (`date` date NULL DEFAULT NULL, `datetime` datetime NULL DEFAULT NULL, `time` time NULL DEFAULT NULL, `timestamp` timestamp(6) NULL DEFAULT NULL);'))
+        .to.equal('CREATE TABLE `test` (`date` DATE NULL DEFAULT NULL, `datetime` DATETIME(6) NULL DEFAULT NULL) ; CREATE TABLE `test`.`Untitled` (`date` DATE NULL DEFAULT NULL, `datetime` DATETIME NULL DEFAULT NULL, `time` TIME NULL DEFAULT NULL, `timestamp` TIMESTAMP(6) NULL DEFAULT NULL)');
     })
 
     it('should support create temporary table', () => {
