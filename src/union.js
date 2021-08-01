@@ -1,5 +1,6 @@
-import { createToSQL } from './create'
 import { alterToSQL } from './alter'
+import { analyzeToSQL } from './analyze'
+import { createToSQL } from './create'
 import { selectToSQL } from './select'
 import { deleteToSQL } from './delete'
 import { updateToSQL } from './update'
@@ -22,6 +23,7 @@ import { hasVal } from './util'
 
 const typeToSQLFn = {
   alter    : alterToSQL,
+  analyze  : analyzeToSQL,
   create   : createToSQL,
   select   : selectToSQL,
   delete   : deleteToSQL,
