@@ -203,6 +203,7 @@ start
 
 cmd_stmt
   = analyze_stmt
+  / attach_stmt
   / drop_stmt
   / create_stmt
   / truncate_stmt
@@ -429,6 +430,21 @@ analyze_stmt
         ast: {
           type: a.toLowerCase(),
           table: t
+        }
+      };
+    }
+attach_stmt
+  = a:KW_ATTACH __ db: KW_DATABASE __ e:expr __ as:KW_AS __ schema:ident __ {
+      // tableList.add(`${a}::${t.db}::${t.table}`);
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          database: db,
+          expr: e,
+          as: as && as[0].toLowerCase(),
+          schema,
         }
       };
     }
@@ -1538,7 +1554,6 @@ expr
   = logic_operator_expr // support concatenation operator || and &&
   / unary_expr
   / or_expr
-  / select_stmt
 
 logic_operator_expr
   = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ {
@@ -2077,6 +2092,7 @@ e
 
 
 KW_ANALYZE  = "ANALYZE"i       !ident_start { return 'ANALYZE'; }
+KW_ATTACH   = "ATTACH"i       !ident_start { return 'ATTACH'; }
 KW_NULL     = "NULL"i       !ident_start
 KW_DEFAULT  = "DEFAULT"i    !ident_start
 KW_NOT_NULL = "NOT NULL"i   !ident_start
