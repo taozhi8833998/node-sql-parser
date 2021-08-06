@@ -2397,6 +2397,10 @@ data_type
   / json_type
   / text_type
   / enum_type
+  / boolean_type
+
+boolean_type
+  = 'boolean'i { return { dataType: 'BOOLEAN' }; }
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {

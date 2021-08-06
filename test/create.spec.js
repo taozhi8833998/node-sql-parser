@@ -20,8 +20,8 @@ describe('create', () => {
 
   describe('create table with basic', () => {
     it('should support create table', () => {
-      expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128))`))
-        .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT, `name` VARCHAR(128))');
+      expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), compeated boolean)`))
+        .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT, `name` VARCHAR(128), `compeated` BOOLEAN)');
       expect(getParsedSql(`create temporary table dbname.tableName (id int not null default 1, name varchar(128) null default "xx")`))
         .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT NOT NULL DEFAULT 1, `name` VARCHAR(128) NULL DEFAULT \'xx\')');
       expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key) ENGINE = MEMORY default character SET = utf8 comment = 'comment test'`))
