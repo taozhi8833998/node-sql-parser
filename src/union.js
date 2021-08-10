@@ -1,5 +1,5 @@
-import { createToSQL } from './create'
 import { alterToSQL } from './alter'
+import { createToSQL } from './create'
 import { selectToSQL } from './select'
 import { deleteToSQL } from './delete'
 import { updateToSQL } from './update'
@@ -17,11 +17,14 @@ import {
 import { orderOrPartitionByToSQL } from './expr'
 import { limitToSQL } from './limit'
 import { showToSQL } from './show'
+import { analyzeToSQL, attachToSQL } from './sqlite'
 import { withToSQL } from './with'
 import { hasVal } from './util'
 
 const typeToSQLFn = {
   alter    : alterToSQL,
+  analyze  : analyzeToSQL,
+  attach   : attachToSQL,
   create   : createToSQL,
   select   : selectToSQL,
   delete   : deleteToSQL,

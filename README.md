@@ -94,6 +94,7 @@ Import the JS file in your page:
 - MariaDB
 - Mysql
 - PostgresQL
+- Sqlite(developing)
 - TransactSQL
 - [FlinkSQL](https://ci.apache.org/projects/flink/flink-docs-stable/dev/table/sql/)
 - New issue could be made for other new database.

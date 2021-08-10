@@ -146,6 +146,7 @@ function identifierToSql(ident, isDual) {
   switch (database && database.toLowerCase()) {
     case 'mysql':
     case 'mariadb':
+    case 'sqlite':
       return `\`${ident}\``
     case 'postgresql':
       return `"${ident}"`
