@@ -367,7 +367,7 @@ create_column_definition
     n:(literal_not_null / literal_null)? __
     df:default_expr? __
     a:('AUTO_INCREMENT'i)? __
-    u:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i)? __
+    u:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i?)? __
     co:keyword_comment? __
     ca:collate_expr? __
     cf:column_format? __
@@ -375,13 +375,15 @@ create_column_definition
     re:reference_definition? {
       columnList.add(`create::${c.table}::${c.column}`)
       if (n && !n.value) n.value = 'null'
+      const unique_or_primary = []
+      if (u) unique_or_primary.push(u[0], u[2])
       return {
         column: c,
         definition: d,
         nullable: n,
         default_val: df,
         auto_increment: a && a.toLowerCase(),
-        unique_or_primary: u && `${u[0].toLowerCase()} ${u[2].toLowerCase()}`,
+        unique_or_primary: unique_or_primary.filter(v => v).join(' ').toLowerCase(''),
         comment: co,
         collate: ca,
         column_format: cf,
