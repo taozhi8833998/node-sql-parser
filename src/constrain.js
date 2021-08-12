@@ -11,6 +11,7 @@ function constraintDefinitionToSQL(constraintDefinition) {
   const {
     constraint,
     constraint_type: constraintType,
+    enforced,
     index,
     keyword,
     reference_definition: referenceDefinition,
@@ -22,6 +23,7 @@ function constraintDefinitionToSQL(constraintDefinition) {
   constraintSQL.push(identifierToSql(index))
   constraintSQL.push(...indexTypeAndOptionToSQL(constraintDefinition))
   constraintSQL.push(...columnReferenceDefinitionToSQL(referenceDefinition))
+  constraintSQL.push(toUpper(enforced))
   return constraintSQL.filter(hasVal).join(' ')
 }
 

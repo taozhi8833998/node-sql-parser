@@ -106,6 +106,12 @@ describe('create', () => {
           .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT \'id column\' COLLATE UTF8_BIN COLUMN_FORMAT FIXED STORAGE DISK REFERENCES `rdb`.`rta` (`id`) MATCH FULL ON DELETE CASCADE ON UPDATE RESTRICT, `name` VARCHAR(128) UNIQUE KEY COMMENT \'user name\' COLLATE UTF8_BIN COLUMN_FORMAT DYNAMIC STORAGE MEMORY REFERENCES `rdb`.`rtb` (`name`) MATCH SIMPLE ON DELETE SET NULL ON UPDATE SET DEFAULT) ENGINE = MEMORY');
       })
 
+      it('should support create table with column check', () => {
+        expect(getParsedSql(`CREATE TABLE parts (part_no VARCHAR(18) PRIMARY KEY,description VARCHAR(40),cost DECIMAL(10,2 ) NOT NULL CHECK (cost >= 0),price DECIMAL(10,2) NOT NULL CHECK (price >= 0));`))
+          .to.equal('CREATE TABLE `parts` (`part_no` VARCHAR(18) PRIMARY KEY, `description` VARCHAR(40), `cost` DECIMAL(10, 2) NOT NULL CHECK (`cost` >= 0), `price` DECIMAL(10, 2) NOT NULL CHECK (`price` >= 0))');
+        expect(getParsedSql(`CREATE TABLE parts (part_no VARCHAR(18) PRIMARY KEY,description VARCHAR(40),cost DECIMAL(10,2 ) NOT NULL CHECK (cost >= 0) enforced,price DECIMAL(10,2) NOT NULL CHECK (price >= 0) not enforced);`))
+          .to.equal('CREATE TABLE `parts` (`part_no` VARCHAR(18) PRIMARY KEY, `description` VARCHAR(40), `cost` DECIMAL(10, 2) NOT NULL CHECK (`cost` >= 0) ENFORCED, `price` DECIMAL(10, 2) NOT NULL CHECK (`price` >= 0) NOT ENFORCED)');
+      })
     })
 
     describe('create index or key', () => {
