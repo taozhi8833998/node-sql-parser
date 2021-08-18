@@ -688,7 +688,7 @@ create_definition
 column_definition_opt
   = column_constraint
   / a:('AUTO_INCREMENT'i) {
-    // => { auto_increment?: 'auto_increment'; }
+    // => { auto_increment: 'auto_increment'; }
     return { auto_increment: a.toLowerCase() }
   }
   / u:(('UNIQUE'i __ ('KEY'i)?) / (('PRIMARY'i)? __ 'KEY'i)) {
