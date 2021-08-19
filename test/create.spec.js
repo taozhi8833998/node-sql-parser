@@ -24,6 +24,8 @@ describe('create', () => {
         .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT, `name` VARCHAR(128), `compeated` BOOLEAN)');
       expect(getParsedSql(`create temporary table dbname.tableName (id int not null default 1, name varchar(128) null default "xx")`))
         .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT NOT NULL DEFAULT 1, `name` VARCHAR(128) NULL DEFAULT \'xx\')');
+      expect(getParsedSql(`create table dbname.tableName (id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, date DATETIME not null unique key);`))
+        .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `date` DATETIME NOT NULL UNIQUE KEY)');
       expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key) ENGINE = MEMORY default character SET = utf8 comment = 'comment test'`))
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY DEFAULT CHARACTER SET = utf8 COMMENT = \'comment test\'');
       expect(getParsedSql(`create table dbname.tableName (id decimal(11, 2) primary key, bc bit(6)) ENGINE = MEMORY default charset = utf8 comment = 'comment test'`))

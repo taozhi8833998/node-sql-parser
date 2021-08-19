@@ -685,17 +685,65 @@ create_definition
   / create_fulltext_spatial_index_definition
   / create_constraint_definition
 
+column_definition_opt
+  = column_constraint
+  / a:('AUTO_INCREMENT'i) {
+    // => { auto_increment: 'auto_increment'; }
+    return { auto_increment: a.toLowerCase() }
+  }
+  / u:(('UNIQUE'i __ ('KEY'i)?) / (('PRIMARY'i)? __ 'KEY'i)) {
+    // => { unique_or_primary: 'unique' | 'primary key'; }
+    const unique_or_primary = []
+    if (u) unique_or_primary.push(u[0], u[2])
+    return { unique_or_primary: unique_or_primary.filter(v => v).join(' ').toLowerCase('') }
+  }
+  / co:keyword_comment {
+    // => { comment: keyword_comment; }
+    return { comment: co }
+  }
+  / ca:collate_expr {
+    // => { collate: collate_expr; }
+    return { collate: ca }
+  }
+  / cf:column_format {
+    // => { column_format: column_format; }
+    return { column_format: cf }
+  }
+  / s:storage {
+    // => { storage: storage }
+    return { storage: s }
+  }
+  / re:reference_definition {
+    // => { reference_definition: reference_definition; }
+    return { reference_definition: re }
+  }
+
+column_definition_opt_list
+  = head:column_definition_opt __ tail:(__ column_definition_opt)* {
+    /*
+      => {
+        nullable?: column_constraint['nullable'];
+        default_val?: column_constraint['default_val'];
+        auto_increment?: 'auto_increment';
+        unique_or_primary?: 'unique' | 'primary key';
+        comment?: keyword_comment;
+        collate?: collate_expr;
+        column_format?: column_format;
+        storage?: storage;
+        reference_definition?: reference_definition;
+      }
+      */
+    let opt = head
+    for (let i = 0; i < tail.length; i++) {
+      opt = { ...opt, ...tail[i][1] }
+    }
+    return opt
+  }
+
 create_column_definition
   = c:column_ref __
     d:data_type __
-    clc:column_constraint? __
-    a:('AUTO_INCREMENT'i)? __
-    u:('UNIQUE'i / ('PRIMARY'i __ 'KEY'i))? __
-    co:keyword_comment? __
-    ca:collate_expr? __
-    cf:column_format? __
-    s:storage? __
-    re:reference_definition? {
+    cdo:column_definition_opt_list? {
       /*
       => {
         column: column_ref;
@@ -716,16 +764,8 @@ create_column_definition
       return {
         column: c,
         definition: d,
-        nullable: clc && clc.nullable,
-        default_val: clc && clc.default_val,
-        auto_increment: a && a.toLowerCase(),
-        unique_or_primary: Array.isArray(u) ? `${u[0].toLowerCase()} ${u[2].toLowerCase()}` : u,
-        comment: co,
-        collate: ca,
-        column_format: cf,
-        storage:s,
-        reference_definition: re,
-        resource: 'column'
+        resource: 'column',
+        ...(cdo || {})
       }
     }
 

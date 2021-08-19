@@ -361,37 +361,60 @@ create_definition
   / create_index_definition
   / create_fulltext_spatial_index_definition
 
+column_definition_opt
+  = n:(literal_not_null / literal_null) {
+    if (n && !n.value) n.value = 'null'
+    return { nullable: n }
+  }
+  / d:default_expr {
+    return { default_val: d }
+  }
+  / a:('AUTO_INCREMENT'i) {
+    return { auto_increment: a.toLowerCase() }
+  }
+  / u:(('UNIQUE'i __ ('KEY'i)?) / (('PRIMARY'i)? __ 'KEY'i)) {
+    const unique_or_primary = []
+    if (u) unique_or_primary.push(u[0], u[2])
+    return { unique_or_primary: unique_or_primary.filter(v => v).join(' ').toLowerCase('') }
+  }
+  / co:keyword_comment {
+    return { comment: co }
+  }
+  / ca:collate_expr {
+    return { collate: ca }
+  }
+  / cf:column_format {
+    return { column_format: cf }
+  }
+  / s:storage {
+    return { storage: s }
+  }
+  / re:reference_definition {
+    return { reference_definition: re }
+  }
+  / ck:check_constraint_definition {
+    return { check: ck }
+  }
+
+column_definition_opt_list
+  = head:column_definition_opt __ tail:(__ column_definition_opt)* {
+    let opt = head
+    for (let i = 0; i < tail.length; i++) {
+      opt = { ...opt, ...tail[i][1] }
+    }
+    return opt
+  }
+
 create_column_definition
   = c:column_ref __
     d:data_type __
-    n:(literal_not_null / literal_null)? __
-    df:default_expr? __
-    a:('AUTO_INCREMENT'i)? __
-    u:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i?)? __
-    co:keyword_comment? __
-    ca:collate_expr? __
-    cf:column_format? __
-    s:storage? __
-    re:reference_definition? __
-    ck:check_constraint_definition? {
+    cdo:column_definition_opt_list? {
       columnList.add(`create::${c.table}::${c.column}`)
-      if (n && !n.value) n.value = 'null'
-      const unique_or_primary = []
-      if (u) unique_or_primary.push(u[0], u[2])
       return {
-        check: ck,
         column: c,
         definition: d,
-        nullable: n,
-        default_val: df,
-        auto_increment: a && a.toLowerCase(),
-        unique_or_primary: unique_or_primary.filter(v => v).join(' ').toLowerCase(''),
-        comment: co,
-        collate: ca,
-        column_format: cf,
-        storage:s,
-        reference_definition: re,
-        resource: 'column'
+        resource: 'column',
+        ...(cdo || {})
       }
     }
 

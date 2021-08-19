@@ -427,34 +427,60 @@ create_definition
   / create_index_definition
   / create_fulltext_spatial_index_definition
 
+column_definition_opt
+  = n:(literal_not_null / literal_null) {
+    if (n && !n.value) n.value = 'null'
+    return { nullable: n }
+  }
+  / d:default_expr {
+    return { default_val: d }
+  }
+  / ch:create_constraint_check {
+    return { check: ch }
+  }
+  / u:(('UNIQUE'i / ('PRIMARY'i __ 'KEY'i))) {
+    let unique_or_primary = [u]
+    if (Array.isArray(u)) unique_or_primary = [u[0], u[2]]
+    return { unique_or_primary: unique_or_primary.filter(v => v).join(' ').toLowerCase('') }
+  }
+  / o:identity_stmt {
+    return { auto_increment: o }
+  }
+  / co:keyword_comment {
+    return { comment: co }
+  }
+  / ca:collate_expr {
+    return { collate: ca }
+  }
+  / cf:column_format {
+    return { column_format: cf }
+  }
+  / s:storage {
+    return { storage: s }
+  }
+  / re:reference_definition {
+    return { reference_definition: re }
+  }
+
+column_definition_opt_list
+  = head:column_definition_opt __ tail:(__ column_definition_opt)* {
+    let opt = head
+    for (let i = 0; i < tail.length; i++) {
+      opt = { ...opt, ...tail[i][1] }
+    }
+    return opt
+  }
+
 create_column_definition
   = c:column_ref __
     d:data_type __
-    n:(literal_not_null / literal_null)? __
-    df:default_expr? __
-    ch:create_constraint_check?
-    o:identity_unique_primary? __
-    co:keyword_comment? __
-    ca:collate_expr? __
-    cf:column_format? __
-    s:storage? __
-    re:reference_definition? {
+    cdo:column_definition_opt_list? {
       columnList.add(`create::${c.table}::${c.column}`)
-      if (n && !n.value) n.value = 'null'
       return {
         column: c,
         definition: d,
-        nullable: n,
-        default_val: df,
-        auto_increment: o && o.identity,
-        unique_or_primary: o && o.unique_or_primary,
-        check: ch,
-        comment: co,
-        collate: ca,
-        column_format: cf,
-        storage:s,
-        reference_definition: re,
-        resource: 'column'
+        resource: 'column',
+        ...(cdo || {})
       }
     }
   / c:column_ref __ as:(KW_AS __ expr)? {
@@ -472,16 +498,6 @@ identity_stmt
       seed:c && c[2],
       increment:c && c[6],
       parentheses:c && true || false,
-    }
-  }
-
-identity_unique_primary
-  = bu:(('UNIQUE'i / ('PRIMARY'i __ 'KEY'i)))? __ i:identity_stmt? __ au:(('UNIQUE'i / ('PRIMARY'i __ 'KEY'i)))? {
-    let u = bu || au
-    if (u && Array.isArray(u)) u = `${u[0].toLowerCase()} ${u[2].toLowerCase()}`
-    return {
-      identity: i,
-      unique_or_primary: u,
     }
   }
 
