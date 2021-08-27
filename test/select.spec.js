@@ -71,7 +71,7 @@ describe('select', () => {
     expect(parser.sqlify(ast)).to.eql('SELECT `SOME_COLUMN` FROM `TABLE_NAME` WHERE `ID_COLUMN` = 0 FOR UPDATE');
   });
 
-  it('should support select *from', () => {
+  it('should support select * from', () => {
     const ast = parser.astify('SELECT *from abc');
     expect(ast.options).to.be.null;
     expect(ast.distinct).to.be.null;
@@ -246,6 +246,13 @@ describe('select', () => {
             as: null
           }
         ]);
+      })
+
+      it('should support select group_concat', () => {
+        let sql = "select group_concat(distinct asd) as 'abc';"
+        expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT `asd`) AS `abc`')
+        sql = "select group_concat(distinct(asd)) as 'abc';"
+        expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT(`asd`)) AS `abc`')
       })
 
       it('should parse position function',() => {
@@ -1325,7 +1332,7 @@ describe('select', () => {
 
     it('should support array_agg in coalesce', () => {
       const sql = `SELECT COALESCE(array_agg(DISTINCT(a.xx)), Array[]::text[]) AS "distinctName" FROM public."Users" a1`
-      expect(getParsedSql(sql, opt)).to.equal('SELECT COALESCE(ARRAY_AGG(DISTINCT ("a"."xx")), ARRAY[]::TEXT[]) AS "distinctName" FROM "public"."Users" AS "a1"')
+      expect(getParsedSql(sql, opt)).to.equal('SELECT COALESCE(ARRAY_AGG(DISTINCT("a"."xx")), ARRAY[]::TEXT[]) AS "distinctName" FROM "public"."Users" AS "a1"')
     })
 
     it('should support ilike', () => {
