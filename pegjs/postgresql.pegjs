@@ -2761,8 +2761,8 @@ KW_SUM_MAX_MIN_AVG
   = KW_SUM / KW_MAX / KW_MIN / KW_AVG
 
 aggr_fun_count
-  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
-    // => { type: 'aggr_func'; name: 'COUNT'; args:count_arg; over: over_partition }
+  = name:(KW_COUNT / KW_GROUP_CONCAT) __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
+    // => { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'; args:count_arg; over: over_partition }
       return {
         type: 'aggr_func',
         name: name,
@@ -3182,6 +3182,7 @@ KW_OR       = "OR"i         !ident_start { return 'OR'; }
 KW_ARRAY    = "ARRAY"i !ident_start { return 'ARRAY'; }
 KW_ARRAY_AGG = "ARRAY_AGG"i !ident_start { return 'ARRAY_AGG'; }
 KW_COUNT    = "COUNT"i      !ident_start { return 'COUNT'; }
+KW_GROUP_CONCAT = "GROUP_CONCAT"i  !ident_start { return 'GROUP_CONCAT'; }
 KW_MAX      = "MAX"i        !ident_start { return 'MAX'; }
 KW_MIN      = "MIN"i        !ident_start { return 'MIN'; }
 KW_SUM      = "SUM"i        !ident_start { return 'SUM'; }

@@ -818,7 +818,7 @@ export type aggr_fun_smma = { type: 'aggr_func'; name: 'SUM' | 'MAX' | 'MIN' | '
 
 type KW_SUM_MAX_MIN_AVG = never;
 
-export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT'; args:count_arg; over: over_partition };
+export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'; args:count_arg; over: over_partition };
 
 
 
@@ -1043,6 +1043,8 @@ type KW_ARRAY = never;
 type KW_ARRAY_AGG = never;
 
 type KW_COUNT = never;
+
+type KW_GROUP_CONCAT = never;
 
 type KW_MAX = never;
 
