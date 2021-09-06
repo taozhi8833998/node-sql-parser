@@ -42,6 +42,23 @@ describe('BigQuery', () => {
       ]
     },
     {
+      title: 'with expr, order',
+      sql: [
+        `with
+
+        cte as (
+            select *
+            from product.organization
+            order by id
+            limit 10
+        )
+
+        select *
+        from cte`,
+        "WITH cte AS (SELECT * FROM product.organization ORDER BY id ASC LIMIT 10) SELECT * FROM cte"
+      ]
+    },
+    {
       title: 'select expression.* with struct',
       sql: [
         `WITH locations AS
@@ -410,7 +427,7 @@ describe('BigQuery', () => {
   })
 
   it('should without parentheses', () => {
-    const ast = parser.astify(SQL_LIST[15].sql[0], opt)
+    const ast = parser.astify(SQL_LIST[16].sql[0], opt)
     const expr = ast.select.from.expr
     expr.parentheses = false
     expr.expr_list = {

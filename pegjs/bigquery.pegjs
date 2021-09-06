@@ -325,6 +325,8 @@ select_stmt_nake
     w:where_clause?     __
     g:group_by_clause?  __
     h:having_clause?    __
+    o:order_by_clause?  __
+    l:limit_clause? __
     win:window_clause? {
       if(Array.isArray(f)) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
@@ -337,6 +339,8 @@ select_stmt_nake
           where: w,
           groupby: g,
           having: h,
+          orderby: o,
+          limit: l,
           window:win,
       };
   }
