@@ -253,6 +253,8 @@ describe('select', () => {
         expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT `asd`) AS `abc`')
         sql = "select group_concat(distinct(asd)) as 'abc';"
         expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT(`asd`)) AS `abc`')
+        sql = "select Quantity, group_concat(distinct(IF(Quantity>10, \"MORE\", \"LESS\"))) as 'abc';"
+        expect(getParsedSql(sql)).to.equal('SELECT `Quantity`, GROUP_CONCAT(DISTINCT(IF(`Quantity` > 10, \'MORE\', \'LESS\'))) AS `abc`')
       })
 
       it('should parse position function',() => {
