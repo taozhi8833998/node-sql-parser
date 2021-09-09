@@ -397,13 +397,23 @@ columns_list
     }
 
 column_offset_expr
-  = n:ident __ LBRAKE __ KW_OFFSET __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
-    return `${n}[offset(${l.value})]`
+  = n:ident __ LBRAKE __ t:(KW_OFFSET / KW_ORDINAL) __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
+    columnList.add(`select::null::${n}`);
+    return `${n}[${t}(${l.value})]`
   }
-  / ident
 
 column_list_item
-  = tbl:ident __ DOT pro:(column_offset_expr __ DOT)? __ STAR {
+  = c:column_offset_expr __ as:alias_clause {
+    return {
+        expr: {
+          type: 'column_ref',
+          table: null,
+          column: c
+        },
+        as: as
+      }
+  }
+  / tbl:ident __ DOT pro:((column_offset_expr / ident) __ DOT)? __ STAR {
       columnList.add(`select::${tbl}::(.*)`);
       if (pro) tbl = `${tbl}.${pro[0]}`
       return {
@@ -1324,6 +1334,7 @@ KW_BY       = "BY"i         !ident_start
 KW_ORDER    = "ORDER"i      !ident_start
 KW_HAVING   = "HAVING"i     !ident_start
 KW_WINDOW   = "WINDOW"i  !ident_start
+KW_ORDINAL  = "ORDINAL"i !ident_start { return 'ORDINAL' }
 
 KW_LIMIT    = "LIMIT"i      !ident_start
 KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET'; }

@@ -340,7 +340,21 @@ describe('BigQuery', () => {
           ("Phoenix", "Arizona")] AS location)
       SELECT l.LOCATION[offset(0)].*
       FROM locations l;`,
-        "WITH locations AS (SELECT ARRAY<STRUCT<city STRING, state STRING>>[('Seattle', 'Washington'), ('Phoenix', 'Arizona')] AS location) SELECT l.LOCATION[offset(0)].* FROM locations AS l"
+        "WITH locations AS (SELECT ARRAY<STRUCT<city STRING, state STRING>>[('Seattle', 'Washington'), ('Phoenix', 'Arizona')] AS location) SELECT l.LOCATION[OFFSET(0)].* FROM locations AS l"
+      ]
+    },
+    {
+      title: 'select offset or ordinal',
+      sql: [
+        `WITH sequences AS
+        (SELECT [0, 1, 1, 2, 3, 5] AS some_numbers
+         UNION ALL SELECT [2, 4, 8, 16, 32] AS some_numbers
+         UNION ALL SELECT [5, 10] AS some_numbers)
+      SELECT some_numbers,
+             some_numbers[OFFSET(1)] AS offset_1,
+             some_numbers[ORDINAL(1)] AS ordinal_1
+      FROM sequences;`,
+        "WITH sequences AS (SELECT [0, 1, 1, 2, 3, 5] AS some_numbers UNION ALL SELECT [2, 4, 8, 16, 32] AS some_numbers UNION ALL SELECT [5, 10] AS some_numbers) SELECT some_numbers, some_numbers[OFFSET(1)] AS offset_1, some_numbers[ORDINAL(1)] AS ordinal_1 FROM sequences"
       ]
     },
     {
