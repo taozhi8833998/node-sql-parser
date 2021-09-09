@@ -1195,6 +1195,16 @@ table_base
         type: 'dual'
       };
   }
+  / name:ident_name __ LPAREN __ l:expr_list __ RPAREN __ alias:alias_clause? {
+      return {
+        expr: {
+          type: 'function',
+          name: name,
+          args: l,
+        },
+        as: alias,
+      }
+    }
   / t:table_name __ alias:alias_clause? {
       if (t.type === 'var') {
         t.as = alias;
@@ -1696,7 +1706,7 @@ multiplicative_expr
     }
 
 multiplicative_operator
-  = "*" / "/" / "%"
+  = "*" / "/" / "%" / "||"
 
 primary
   = cast_expr
