@@ -28,4 +28,16 @@ describe('sqlite', () => {
         author_id;`
     expect(getParsedSql(sql)).to.be.equal("SELECT json_extract(`value`, '$.id') AS `author_id` FROM `post`, json_each(`post`.`author`, '$') GROUP BY `author_id`")
   })
+
+  it('should support || in where clause', () => {
+    const sql = `SELECT *
+    FROM
+        pets
+        LEFT JOIN(
+            SELECT * FROM user
+            WHERE user.name = "pepe" || "rone"
+        ) u ON pets.owner = u.id
+    GROUP BY pets.id;`
+    expect(getParsedSql(sql)).to.be.equal("SELECT * FROM `pets` LEFT JOIN (SELECT * FROM `user` WHERE `user`.`name` = 'pepe' || 'rone') AS `u` ON `pets`.`owner` = `u`.`id` GROUP BY `pets`.`id`")
+  })
 })
