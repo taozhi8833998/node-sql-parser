@@ -824,7 +824,7 @@ export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'
 
 
 
-export type distinct_args = { distinct: 'DISTINCT'; expr: column_ref; };
+export type distinct_args = { distinct: 'DISTINCT'; expr: column_ref; } | { distinct: 'DISTINCT'; expr: expr; };
 
 
 
