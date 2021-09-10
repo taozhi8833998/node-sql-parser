@@ -41,7 +41,6 @@
     'INNER': true,
     'INSERT': true,
     'INTO': true,
-    'INTERVAL': true,
     'IS': true,
 
     'JOIN': true,
