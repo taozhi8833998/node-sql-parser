@@ -692,7 +692,7 @@ export type unary_expr = {
 
 export type or_and_where_expr = binary_expr;
 
-export type parentheses_or_expr = binary_expr;
+export type parentheses_or_expr = binary_expr | or_expr;
 
 export type or_expr = binary_expr;
 
