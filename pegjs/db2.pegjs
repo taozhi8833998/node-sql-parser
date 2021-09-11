@@ -1536,10 +1536,11 @@ or_and_where_expr
 }
 
 parentheses_or_expr
-  = lf:LPAREN? __ head:or_expr __ rt:RPAREN? !{ if ((lf && !rt) || (!lf && rt)) return true } {
-  if (lf && rt) head.parentheses = true
-  return head
-}
+  = lf:LPAREN __ head:or_expr __ rt:RPAREN {
+    head.parentheses = true
+    return head
+  }
+  / or_expr
 
 or_expr
   = head:and_expr tail:(___ KW_OR __ and_expr)* {
