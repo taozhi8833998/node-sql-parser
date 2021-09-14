@@ -39,6 +39,9 @@ function alterExprToSQL(expr) {
       name = identifierToSql(expr[resource])
       dataType = [createDefinitionToSQL(createDefinition)]
       break
+    case 'key':
+      name = identifierToSql(expr[resource])
+      break
     default:
       break
   }

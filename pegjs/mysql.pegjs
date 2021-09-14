@@ -291,13 +291,9 @@ create_table_stmt
     tp:KW_TEMPORARY? __
     KW_TABLE __
     ife:KW_IF_NOT_EXISTS? __
-    t:table_ref_list __
-    c:create_table_definition __
-    to:table_options? __
-    ir: (KW_IGNORE / KW_REPLACE)? __
-    as: KW_AS? __
-    qe: union_stmt? {
-      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
+    t:table_name __
+    lt:create_like_table {
+      if(t) tableList.add(`create::${t.db}::${t.table}`)
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -306,7 +302,31 @@ create_table_stmt
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists: ife && ife[0].toLowerCase(),
-          table: t,
+          table: [t],
+          like: lt
+        }
+      }
+    }
+  / a:KW_CREATE __
+    tp:KW_TEMPORARY? __
+    KW_TABLE __
+    ife:KW_IF_NOT_EXISTS? __
+    t:table_name __
+    c:create_table_definition? __
+    to:table_options? __
+    ir:(KW_IGNORE / KW_REPLACE)? __
+    as:KW_AS? __
+    qe:union_stmt? {
+      if(t) tableList.add(`create::${t.db}::${t.table}`)
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'table',
+          temporary: tp && tp[0].toLowerCase(),
+          if_not_exists: ife && ife[0].toLowerCase(),
+          table: [t],
           ignore_replace: ir && ir[0].toLowerCase(),
           as: as && as[0].toLowerCase(),
           query_expr: qe && qe.ast,
@@ -315,26 +335,7 @@ create_table_stmt
         }
       }
     }
-  / a:KW_CREATE __
-    tp:KW_TEMPORARY? __
-    KW_TABLE __
-    ife:KW_IF_NOT_EXISTS? __
-    t:table_ref_list __
-    lt:create_like_table {
-      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
-      return {
-        tableList: Array.from(tableList),
-        columnList: columnListTableAlias(columnList),
-        ast: {
-          type: a[0].toLowerCase(),
-          keyword: 'table',
-          temporary: tp && tp[0].toLowerCase(),
-          if_not_exists: ife && ife[0].toLowerCase(),
-          table: t,
-          like: lt
-        }
-      }
-    }
+
 
 create_like_table_simple
   = KW_LIKE __ t: table_ref_list {
@@ -343,6 +344,7 @@ create_like_table_simple
       table: t
     }
   }
+
 create_like_table
   = create_like_table_simple
   / LPAREN __ e:create_like_table  __ RPAREN {
@@ -539,6 +541,7 @@ alter_action_list
 alter_action
   = ALTER_ADD_CONSTRAINT
   / ALTER_DROP_CONSTRAINT
+  / ALTER_DROP_KEY
   / ALTER_ENABLE_CONSTRAINT
   / ALTER_DISABLE_CONSTRAINT
   / ALTER_ADD_COLUMN
@@ -577,8 +580,7 @@ ALTER_DROP_COLUMN
 
 ALTER_ADD_INDEX_OR_KEY
   = KW_ADD __
-    id:create_index_definition
-     {
+    id:create_index_definition {
       return {
         action: 'add',
         type: 'alter',
@@ -630,6 +632,26 @@ ALTER_ADD_CONSTRAINT
         type: 'alter',
       }
     }
+
+ALTER_DROP_KEY
+  = KW_DROP __ 'PRIMARY'i __ KW_KEY {
+    return {
+        action: 'drop',
+        key: '',
+        keyword: 'primary key',
+        resource: 'key',
+        type: 'alter',
+    }
+  }
+  / KW_DROP __ 'FOREIGN'i __ KW_KEY __ c:ident_name {
+    return {
+        action: 'drop',
+        key: c,
+        keyword: 'foreign key',
+        resource: 'key',
+        type: 'alter',
+    }
+  }
 
 ALTER_DROP_CONSTRAINT
   = KW_DROP __ kc:'CHECK'i __ c:ident_name {

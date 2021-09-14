@@ -183,6 +183,13 @@ describe('Command SQL', () => {
         .to.equal('ALTER TABLE `newtable` ADD `newcol` BIT(1)');
     })
 
+    it('should support alter drop primary key', () => {
+      expect(getParsedSql('alter table places drop primary key'))
+        .to.equal('ALTER TABLE `places` DROP PRIMARY KEY');
+      expect(getParsedSql('alter table places drop foreign key abc'))
+        .to.equal('ALTER TABLE `places` DROP FOREIGN KEY `abc`');
+    })
+
     it('should support alter without expr', () => {
       const expr = [
         {

@@ -228,7 +228,7 @@ describe('create', () => {
 
     describe('create table from like', () => {
       it('should support create table', () => {
-        expect(getParsedSql(`create temporary table if not exists  dbname.tableName like odb.ota`))
+        expect(getParsedSql(`create temporary table if not exists dbname.tableName like odb.ota`))
           .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` LIKE `odb`.`ota`');
       })
     })
@@ -243,10 +243,15 @@ describe('create', () => {
         expect(getParsedSql(`create temporary table if not exists  dbname.tableName (id int, name varchar(128)) engine = innodb ignore as select id, name from qdb.qta union select ab as id, cd as name from qdb.qtc`))
           .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT, `name` VARCHAR(128)) ENGINE = INNODB IGNORE AS SELECT `id`, `name` FROM `qdb`.`qta` UNION SELECT `ab` AS `id`, `cd` AS `name` FROM `qdb`.`qtc`');
       })
+
+      it('should support create table as select', () => {
+        expect(getParsedSql(`create table places2 as select * from places;`))
+          .to.equal('CREATE TABLE `places2` AS SELECT * FROM `places`');
+      })
     })
 
-    describe('create table unknow resource', () => {
-      it('should throw error, when reosurce unkonwn', () => {
+    describe('create table unknown resource', () => {
+      it('should throw error, when resource unkonwn', () => {
         const columnDefinition = [{
           "column": {
             "type": "column_ref",
