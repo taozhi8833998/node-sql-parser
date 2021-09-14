@@ -247,6 +247,8 @@ describe('create', () => {
       it('should support create table as select', () => {
         expect(getParsedSql(`create table places2 as select * from places;`))
           .to.equal('CREATE TABLE `places2` AS SELECT * FROM `places`');
+        expect(getParsedSql(`create table places2 select * from places;`))
+          .to.equal('CREATE TABLE `places2` SELECT * FROM `places`');
       })
     })
 

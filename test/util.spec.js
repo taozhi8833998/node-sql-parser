@@ -10,7 +10,7 @@ const {
 } = require('../src/util')
 
 describe('util function test', () => {
-  it('should throw error when type is unkonw', () => {
+  it('should throw error when type is unkonwn', () => {
     expect(createValueExpr.bind(null, {})).to.throw('Cannot convert value "object" to SQL')
   })
 
