@@ -3214,6 +3214,7 @@ KW_JSON     = "JSON"i     !ident_start { return 'JSON'; }
 KW_JSONB    = "JSONB"i    !ident_start { return 'JSONB'; }
 KW_GEOMETRY = "GEOMETRY"i !ident_start { return 'GEOMETRY'; }
 KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
+KW_SERIAL = "SERIAL"i !ident_start { return 'SERIAL'; }
 KW_TINYINT  = "TINYINT"i  !ident_start { return 'TINYINT'; }
 KW_TINYTEXT = "TINYTEXT"i !ident_start { return 'TINYTEXT'; }
 KW_TEXT     = "TEXT"i     !ident_start { return 'TEXT'; }
@@ -3518,6 +3519,7 @@ data_type
   / uuid_type
   / boolean_type
   / enum_type
+  / serial_type
 
 boolean_type
   = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
@@ -3562,6 +3564,9 @@ json_type
 
 geometry_type
   = t:KW_GEOMETRY {/* =>  data_type */  return { dataType: t }; }
+
+serial_type
+  = t:(KW_SERIAL) { /* =>  data_type */  return { dataType: t }; }
 
 text_type
   = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) LBRAKE __ RBRAKE { /* =>  data_type */ return { dataType: `${t}[]` }}
