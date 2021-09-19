@@ -15,6 +15,7 @@ function alterToSQL(stmt) {
 }
 
 function alterExprToSQL(expr) {
+  if (!expr) return ''
   const {
     action, create_definitions: createDefinition, if_not_exists: ifNotExists,keyword, resource, symbol,
   } = expr

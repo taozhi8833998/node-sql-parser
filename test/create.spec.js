@@ -117,6 +117,15 @@ describe('create', () => {
     })
 
     describe('create index or key', () => {
+
+      it('should support create index in mysql', () => {
+        expect(getParsedSql('create index city_idx on places(city)')).to.equal('CREATE INDEX `city_idx` ON `places` (`city` ASC)')
+        expect(getParsedSql('create unique index city_idx on places(city, country desc)')).to.equal('CREATE UNIQUE INDEX `city_idx` ON `places` (`city` ASC, `country` DESC)')
+        expect(getParsedSql('create index city_idx on places(city(10), country desc)')).to.equal('CREATE INDEX `city_idx` ON `places` (city(10) ASC, `country` DESC)')
+        expect(getParsedSql('CREATE INDEX idx1 ON t1 ((col1 + col2));')).to.equal('CREATE INDEX `idx1` ON `t1` ((`col1` + `col2`) ASC)')
+        expect(getParsedSql('CREATE fulltext INDEX idx2 ON t1 ((col1 + col2) asc, (col1 - col2) desc, col1 asc);')).to.equal('CREATE FULLTEXT INDEX `idx2` ON `t1` ((`col1` + `col2`) ASC, (`col1` - `col2`) DESC, `col1` ASC)')
+      });
+
       ['index', 'key'].forEach(type => {
         it(`should support create table ${type}`, () => {
           expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} idx_name using hash (name) key_block_size 128) engine = innodb auto_increment = 10`))

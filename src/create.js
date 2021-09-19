@@ -1,3 +1,4 @@
+import { alterExprToSQL } from './alter'
 import { exprToSQL } from './expr'
 import { indexDefinitionToSQL, indexOptionListToSQL, indexTypeToSQL } from './index-definition'
 import { columnDefinitionToSQL } from './column'
@@ -93,7 +94,7 @@ function createExtensionToSQL(stmt) {
 function createIndexToSQL(stmt) {
   const {
     concurrently, filestream_on: fileStream, keyword, include, index_columns: indexColumns,
-    index_type: indexType, index_using: indexUsing, index, on, on_kw: onKw, table, tablespace, type, where,
+    index_type: indexType, index_using: indexUsing, index, on, index_options: indexOpt, algorithm_option: algorithmOpt, lock_option: lockOpt, on_kw: onKw, table, tablespace, type, where,
     with: withExpr, with_before_where: withBeforeWhere,
   } = stmt
   const withIndexOpt = withExpr && `WITH (${indexOptionListToSQL(withExpr).join(', ')})`
@@ -101,7 +102,7 @@ function createIndexToSQL(stmt) {
   const sql = [
     toUpper(type), toUpper(indexType), toUpper(keyword), toUpper(concurrently),
     identifierToSql(index), toUpper(onKw), tableToSQL(table), ...indexTypeToSQL(indexUsing),
-    `(${columnOrderListToSQL(indexColumns)})`, includeColumns,
+    `(${columnOrderListToSQL(indexColumns)})`, includeColumns, indexOptionListToSQL(indexOpt).join(' '), alterExprToSQL(algorithmOpt), alterExprToSQL(lockOpt),
     commonOptionConnector('TABLESPACE', literalToSQL, tablespace),
   ]
   if (withBeforeWhere) {
