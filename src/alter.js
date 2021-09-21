@@ -1,4 +1,4 @@
-import { columnDefinitionToSQL } from './column'
+import { columnDefinitionToSQL, columnRefToSQL } from './column'
 import { createDefinitionToSQL } from './create'
 import { indexTypeAndOptionToSQL } from './index-definition'
 import { tablesToSQL } from './tables'
@@ -17,7 +17,7 @@ function alterToSQL(stmt) {
 function alterExprToSQL(expr) {
   if (!expr) return ''
   const {
-    action, create_definitions: createDefinition, if_not_exists: ifNotExists,keyword, resource, symbol,
+    action, create_definitions: createDefinition, first_after: firstAfter, if_not_exists: ifNotExists,keyword, old_column: oldColumn, resource, symbol,
   } = expr
   let name = ''
   let dataType = []
@@ -46,7 +46,15 @@ function alterExprToSQL(expr) {
     default:
       break
   }
-  const alterArray = [toUpper(action), toUpper(keyword), toUpper(ifNotExists), name, dataType.filter(hasVal).join(' ')]
+  const alterArray = [
+    toUpper(action),
+    toUpper(keyword),
+    toUpper(ifNotExists),
+    oldColumn && columnRefToSQL(oldColumn),
+    name,
+    dataType.filter(hasVal).join(' '),
+    firstAfter && `${toUpper(firstAfter.keyword)} ${columnRefToSQL(firstAfter.column)}`,
+  ]
   return alterArray.filter(hasVal).join(' ')
 }
 

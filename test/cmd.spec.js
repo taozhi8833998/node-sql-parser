@@ -173,6 +173,13 @@ describe('Command SQL', () => {
       })
     });
 
+    it('should change column', () => {
+      expect(getParsedSql('alter table places change city city2 varchar(255)'))
+        .to.equal('ALTER TABLE `places` CHANGE `city` `city2` VARCHAR(255)');
+      expect(getParsedSql('alter table places change city city2 varchar(255) first city'))
+        .to.equal('ALTER TABLE `places` CHANGE `city` `city2` VARCHAR(255) FIRST `city`');
+    })
+
     it('should support alter column with algorithm and lock option', () => {
       expect(getParsedSql("ALTER TABLE `test`.`test` ADD COLUMN test VARCHAR(20) NOT NULL DEFAULT 'xx', ALGORITHM=INPLACE, LOCK=NONE;"))
         .to.equal("ALTER TABLE `test`.`test` ADD COLUMN `test` VARCHAR(20) NOT NULL DEFAULT 'xx', ALGORITHM = INPLACE, LOCK = NONE");

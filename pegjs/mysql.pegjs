@@ -572,15 +572,15 @@ use_stmt
 alter_table_stmt
   = KW_ALTER  __
     KW_TABLE __
-    t:table_ref_list __
+    t:table_name __
     e:alter_action_list {
-      if (t && t.length > 0) t.forEach(table => tableList.add(`alter::${table.db}::${table.table}`));
+      tableList.add(`alter::${t.db}::${t.table}`)
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: 'alter',
-          table: t,
+          table: [t],
           expr: e
         }
       };
@@ -604,6 +604,7 @@ alter_action
   / ALTER_RENAME_TABLE
   / ALTER_ALGORITHM
   / ALTER_LOCK
+  / ALTER_CHANGE_COLUMN
 
 ALTER_ADD_COLUMN
   = KW_ADD __
@@ -674,6 +675,22 @@ ALTER_LOCK
       symbol: s,
       lock: val
     }
+  }
+
+ALTER_CHANGE_COLUMN
+  = 'CHANGE'i __ kc:KW_COLUMN? __ od:column_ref __ cd:create_column_definition __ fa:(('FIRST'i / 'AFTER'i) __ column_ref)? {
+    return {
+        action: 'change',
+        old_column: od,
+        ...cd,
+        keyword: kc,
+        resource: 'column',
+        type: 'alter',
+        first_after: fa && {
+          keyword: fa[0],
+          column: fa[2]
+        },
+      }
   }
 
 ALTER_ADD_CONSTRAINT
