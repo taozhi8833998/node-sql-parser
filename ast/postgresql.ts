@@ -1100,6 +1100,8 @@ type KW_GEOMETRY = never;
 
 type KW_SMALLINT = never;
 
+type KW_SERIAL = never;
+
 type KW_TINYINT = never;
 
 type KW_TINYTEXT = never;
@@ -1358,6 +1360,10 @@ export type json_type = data_type;
 
 
 export type geometry_type = data_type;
+
+
+
+export type serial_type = data_type;
 
 
 
