@@ -219,6 +219,7 @@ cmd_stmt
 
 create_stmt
   = create_table_stmt
+  / create_index_stmt
   / create_db_stmt
 
 alter_stmt
@@ -263,6 +264,26 @@ union_stmt
         ast: head
       }
     }
+column_order_list
+  = head:column_order_item tail:(__ COMMA __ column_order_item)* {
+    return createList(head, tail)
+  }
+
+column_order_item
+  = c:expr o:(KW_ASC / KW_DESC)? { return {
+      column: c,
+      order: o && o.toLowerCase() || 'asc',
+    }
+  }
+  / column_order
+
+column_order
+  = c:column_ref __ o:(KW_ASC / KW_DESC)? {
+    return {
+      column: c,
+      order: o && o.toLowerCase() || 'asc',
+    }
+  }
 create_db_definition
   = head:create_option_character_set tail:(__ create_option_character_set)* {
     return createList(head, tail, 1)
@@ -286,6 +307,37 @@ create_db_stmt
         }
       }
     }
+
+create_index_stmt
+  = a:KW_CREATE __
+  kw:(KW_UNIQUE / KW_FULLTEXT / KW_SPATIAL)? __
+  t:KW_INDEX __
+  n:ident __
+  um:index_type? __
+  on:KW_ON __
+  ta:table_name __
+  LPAREN __ cols:column_order_list __ RPAREN __
+  io:index_options? __
+  al:ALTER_ALGORITHM? __
+  lo:ALTER_LOCK? __ {
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          index_type: kw && kw.toLowerCase(),
+          keyword: t.toLowerCase(),
+          index: n,
+          on_kw: on[0].toLowerCase(),
+          table: ta,
+          index_columns: cols,
+          index_using: um,
+          index_options: io,
+          algorithm_option: al,
+          lock_option: lo,
+        }
+    }
+  }
 
 create_table_stmt
   = a:KW_CREATE __
@@ -545,6 +597,7 @@ alter_action
   / ALTER_RENAME_TABLE
   / ALTER_ALGORITHM
   / ALTER_LOCK
+  / ALTER_CHANGE_COLUMN
 
 ALTER_ADD_COLUMN
   = KW_ADD __
@@ -618,6 +671,22 @@ ALTER_LOCK
       symbol: s,
       lock: val
     }
+  }
+
+ALTER_CHANGE_COLUMN
+  = 'CHANGE'i __ kc:KW_COLUMN? __ od:column_ref __ cd:create_column_definition __ fa:(('FIRST'i / 'AFTER'i) __ column_ref)? {
+    return {
+        action: 'change',
+        old_column: od,
+        ...cd,
+        keyword: kc,
+        resource: 'column',
+        type: 'alter',
+        first_after: fa && {
+          keyword: fa[0],
+          column: fa[2]
+        },
+      }
   }
 
 create_index_definition

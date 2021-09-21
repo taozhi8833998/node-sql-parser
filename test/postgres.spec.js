@@ -21,7 +21,7 @@ describe('Postgres', () => {
         subQ2 AS (SELECT SchoolID FROM subQ1)
       SELECT DISTINCT * FROM subQ2;`,
       `WITH subQ1 AS (SELECT * FROM "Roster" WHERE "SchoolID" = 52), subQ2 AS (SELECT "SchoolID" FROM "subQ1") SELECT DISTINCT * FROM "subQ2"`
-    ]
+     ]
     },
     {
       title: 'select subquery',
@@ -294,6 +294,13 @@ describe('Postgres', () => {
       left join department on person.dept_id = department.dept_id`,
         'SELECT "person"."first_name", "department"."dept_name" FROM "person" LEFT JOIN "department" ON "person"."dept_id" = "department"."dept_id"'
       ]
+    },
+    {
+      title: 'create table with serial',
+      sql: [
+        `create table posts(id serial primary key, name varchar(128))`,
+      `CREATE TABLE "posts" ("id" SERIAL PRIMARY KEY, "name" VARCHAR(128))`
+     ]
     },
   ]
   function neatlyNestTestedSQL(sqlList){

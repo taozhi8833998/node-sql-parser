@@ -217,6 +217,7 @@ cmd_stmt
 
 create_stmt
   = create_table_stmt
+  / create_index_stmt
   / create_db_stmt
 
 alter_stmt
@@ -262,6 +263,27 @@ union_stmt
         ast: head
       }
     }
+
+column_order_list
+  = head:column_order_item tail:(__ COMMA __ column_order_item)* {
+    return createList(head, tail)
+  }
+
+column_order_item
+  = c:expr o:(KW_ASC / KW_DESC)? { return {
+      column: c,
+      order: o && o.toLowerCase() || 'asc',
+    }
+  }
+  / column_order
+
+column_order
+  = c:column_ref __ o:(KW_ASC / KW_DESC)? {
+    return {
+      column: c,
+      order: o && o.toLowerCase() || 'asc',
+    }
+  }
 create_db_definition
   = head:create_option_character_set tail:(__ create_option_character_set)* {
     return createList(head, tail, 1)
@@ -286,18 +308,45 @@ create_db_stmt
       }
     }
 
+create_index_stmt
+  = a:KW_CREATE __
+  kw:(KW_UNIQUE / KW_FULLTEXT / KW_SPATIAL)? __
+  t:KW_INDEX __
+  n:ident __
+  um:index_type? __
+  on:KW_ON __
+  ta:table_name __
+  LPAREN __ cols:column_order_list __ RPAREN __
+  io:index_options? __
+  al:ALTER_ALGORITHM? __
+  lo:ALTER_LOCK? __ {
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          index_type: kw && kw.toLowerCase(),
+          keyword: t.toLowerCase(),
+          index: n,
+          on_kw: on[0].toLowerCase(),
+          table: ta,
+          index_columns: cols,
+          index_using: um,
+          index_options: io,
+          algorithm_option: al,
+          lock_option: lo,
+        }
+    }
+  }
+
 create_table_stmt
   = a:KW_CREATE __
     tp:KW_TEMPORARY? __
     KW_TABLE __
     ife:KW_IF_NOT_EXISTS? __
-    t:table_ref_list __
-    c:create_table_definition __
-    to:table_options? __
-    ir: (KW_IGNORE / KW_REPLACE)? __
-    as: KW_AS? __
-    qe: union_stmt? {
-      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
+    t:table_name __
+    lt:create_like_table {
+      if(t) tableList.add(`create::${t.db}::${t.table}`)
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -306,7 +355,31 @@ create_table_stmt
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists: ife && ife[0].toLowerCase(),
-          table: t,
+          table: [t],
+          like: lt
+        }
+      }
+    }
+  / a:KW_CREATE __
+    tp:KW_TEMPORARY? __
+    KW_TABLE __
+    ife:KW_IF_NOT_EXISTS? __
+    t:table_name __
+    c:create_table_definition? __
+    to:table_options? __
+    ir:(KW_IGNORE / KW_REPLACE)? __
+    as:KW_AS? __
+    qe:union_stmt? {
+      if(t) tableList.add(`create::${t.db}::${t.table}`)
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'table',
+          temporary: tp && tp[0].toLowerCase(),
+          if_not_exists: ife && ife[0].toLowerCase(),
+          table: [t],
           ignore_replace: ir && ir[0].toLowerCase(),
           as: as && as[0].toLowerCase(),
           query_expr: qe && qe.ast,
@@ -315,26 +388,7 @@ create_table_stmt
         }
       }
     }
-  / a:KW_CREATE __
-    tp:KW_TEMPORARY? __
-    KW_TABLE __
-    ife:KW_IF_NOT_EXISTS? __
-    t:table_ref_list __
-    lt:create_like_table {
-      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
-      return {
-        tableList: Array.from(tableList),
-        columnList: columnListTableAlias(columnList),
-        ast: {
-          type: a[0].toLowerCase(),
-          keyword: 'table',
-          temporary: tp && tp[0].toLowerCase(),
-          if_not_exists: ife && ife[0].toLowerCase(),
-          table: t,
-          like: lt
-        }
-      }
-    }
+
 
 create_like_table_simple
   = KW_LIKE __ t: table_ref_list {
@@ -343,6 +397,7 @@ create_like_table_simple
       table: t
     }
   }
+
 create_like_table
   = create_like_table_simple
   / LPAREN __ e:create_like_table  __ RPAREN {
@@ -517,15 +572,15 @@ use_stmt
 alter_table_stmt
   = KW_ALTER  __
     KW_TABLE __
-    t:table_ref_list __
+    t:table_name __
     e:alter_action_list {
-      if (t && t.length > 0) t.forEach(table => tableList.add(`alter::${table.db}::${table.table}`));
+      tableList.add(`alter::${t.db}::${t.table}`)
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: 'alter',
-          table: t,
+          table: [t],
           expr: e
         }
       };
@@ -539,6 +594,7 @@ alter_action_list
 alter_action
   = ALTER_ADD_CONSTRAINT
   / ALTER_DROP_CONSTRAINT
+  / ALTER_DROP_KEY
   / ALTER_ENABLE_CONSTRAINT
   / ALTER_DISABLE_CONSTRAINT
   / ALTER_ADD_COLUMN
@@ -548,6 +604,7 @@ alter_action
   / ALTER_RENAME_TABLE
   / ALTER_ALGORITHM
   / ALTER_LOCK
+  / ALTER_CHANGE_COLUMN
 
 ALTER_ADD_COLUMN
   = KW_ADD __
@@ -577,8 +634,7 @@ ALTER_DROP_COLUMN
 
 ALTER_ADD_INDEX_OR_KEY
   = KW_ADD __
-    id:create_index_definition
-     {
+    id:create_index_definition {
       return {
         action: 'add',
         type: 'alter',
@@ -621,6 +677,22 @@ ALTER_LOCK
     }
   }
 
+ALTER_CHANGE_COLUMN
+  = 'CHANGE'i __ kc:KW_COLUMN? __ od:column_ref __ cd:create_column_definition __ fa:(('FIRST'i / 'AFTER'i) __ column_ref)? {
+    return {
+        action: 'change',
+        old_column: od,
+        ...cd,
+        keyword: kc,
+        resource: 'column',
+        type: 'alter',
+        first_after: fa && {
+          keyword: fa[0],
+          column: fa[2]
+        },
+      }
+  }
+
 ALTER_ADD_CONSTRAINT
   = KW_ADD __ c:create_constraint_definition {
       return {
@@ -630,6 +702,26 @@ ALTER_ADD_CONSTRAINT
         type: 'alter',
       }
     }
+
+ALTER_DROP_KEY
+  = KW_DROP __ 'PRIMARY'i __ KW_KEY {
+    return {
+        action: 'drop',
+        key: '',
+        keyword: 'primary key',
+        resource: 'key',
+        type: 'alter',
+    }
+  }
+  / KW_DROP __ 'FOREIGN'i __ KW_KEY __ c:ident_name {
+    return {
+        action: 'drop',
+        key: c,
+        keyword: 'foreign key',
+        resource: 'key',
+        type: 'alter',
+    }
+  }
 
 ALTER_DROP_CONSTRAINT
   = KW_DROP __ kc:'CHECK'i __ c:ident_name {
@@ -669,8 +761,7 @@ create_index_definition
     c:column? __
     t:index_type? __
     de:cte_column_definition __
-    id:index_options? __
-     {
+    id:index_options? __ {
       return {
         index: c,
         definition: de,
@@ -686,8 +777,7 @@ create_fulltext_spatial_index_definition
     kc:(KW_INDEX / KW_KEY)? __
     c:column? __
     de: cte_column_definition __
-    id: index_options? __
-     {
+    id: index_options? {
       return {
         index: c,
         definition: de,

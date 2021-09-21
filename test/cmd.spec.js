@@ -173,6 +173,13 @@ describe('Command SQL', () => {
       })
     });
 
+    it('should change column', () => {
+      expect(getParsedSql('alter table places change city city2 varchar(255)'))
+        .to.equal('ALTER TABLE `places` CHANGE `city` `city2` VARCHAR(255)');
+      expect(getParsedSql('alter table places change city city2 varchar(255) first city'))
+        .to.equal('ALTER TABLE `places` CHANGE `city` `city2` VARCHAR(255) FIRST `city`');
+    })
+
     it('should support alter column with algorithm and lock option', () => {
       expect(getParsedSql("ALTER TABLE `test`.`test` ADD COLUMN test VARCHAR(20) NOT NULL DEFAULT 'xx', ALGORITHM=INPLACE, LOCK=NONE;"))
         .to.equal("ALTER TABLE `test`.`test` ADD COLUMN `test` VARCHAR(20) NOT NULL DEFAULT 'xx', ALGORITHM = INPLACE, LOCK = NONE");
@@ -181,6 +188,13 @@ describe('Command SQL', () => {
     it('should support alter with BIT type', () => {
       expect(getParsedSql('ALTER TABLE newtable ADD newcol BIT(1)'))
         .to.equal('ALTER TABLE `newtable` ADD `newcol` BIT(1)');
+    })
+
+    it('should support alter drop primary key', () => {
+      expect(getParsedSql('alter table places drop primary key'))
+        .to.equal('ALTER TABLE `places` DROP PRIMARY KEY');
+      expect(getParsedSql('alter table places drop foreign key abc'))
+        .to.equal('ALTER TABLE `places` DROP FOREIGN KEY `abc`');
     })
 
     it('should support alter without expr', () => {
