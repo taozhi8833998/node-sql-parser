@@ -248,6 +248,19 @@ describe('BigQuery', () => {
       ]
     },
     {
+      title: 'inner could be omit when join',
+      sql: [
+        `select
+          organization.name,
+          count(*) as nb_payments
+        from product.organization
+        join product.payment on organization_id = organization.id
+        group by 1
+        order by 2 desc`,
+        'SELECT organization.name, COUNT(*) AS nb_payments FROM product.organization JOIN product.payment ON organization_id = organization.id GROUP BY 1 ORDER BY 2 DESC'
+      ]
+    },
+    {
       title: 'select order by using parentheses',
       sql: [
         `( SELECT * FROM Roster

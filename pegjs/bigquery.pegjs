@@ -525,7 +525,8 @@ join_op
   = KW_LEFT __ KW_OUTER? __ KW_JOIN { return 'LEFT JOIN'; }
   / KW_RIGHT __ KW_OUTER? __ KW_JOIN { return 'RIGHT JOIN'; }
   / KW_FULL __ KW_OUTER? __ KW_JOIN { return 'FULL JOIN'; }
-  / k:(KW_INNER / KW_CROSS) __ KW_JOIN { return `${k[0].toUpperCase()} JOIN`; }
+  / k:KW_CROSS __ KW_JOIN { return `${k[0].toUpperCase()} JOIN`; }
+  / k:KW_INNER? __ KW_JOIN { return k ? `${k[0].toUpperCase()} JOIN` : 'JOIN'; }
 
 table_name
   = project:ident dt:(__ DOT __ ident) tail:(__ DOT __ ident) {
