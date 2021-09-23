@@ -114,7 +114,7 @@ function columnToSQL(column, isDual) {
   let str = exprToSQL(expr)
   if (column.as !== null) {
     str = `${str} AS `
-    if (column.as.match(/^[a-z_][0-9a-z_]*$/i)) str = `${str}${identifierToSql(column.as)}`
+    if (/^(`?)[a-z_][0-9a-z_]*(`?)$/i.test(column.as)) str = `${str}${identifierToSql(column.as)}`
     else str = `${str}${columnIdentifierToSql(column.as)}`
   }
   return str

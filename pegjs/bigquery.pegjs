@@ -959,7 +959,7 @@ single_quoted_ident
   = "'" chars:[^']+ "'" { return chars.join(''); }
 
 backticks_quoted_ident
-  = "`" chars:[^`]+ "`" { return chars.join(''); }
+  = "`" chars:[^`]+ "`" { return `\`${chars.join('')}\``; }
 
 column_without_kw
   = name:column_name {

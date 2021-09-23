@@ -434,6 +434,13 @@ describe('BigQuery', () => {
         "SELECT ROW_NUMBER() OVER (PARTITION BY column1 ORDER BY column2 ASC)"
       ]
     },
+    {
+      title: 'select as backticks_quoted_ident',
+      sql: [
+        'select 1 as `from`',
+        'SELECT 1 AS `from`'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
