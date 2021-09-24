@@ -14,11 +14,16 @@ import {
   toUpper,
 } from './util'
 
+function columnOffsetToSQL(column, isDual) {
+  if (typeof column === 'string') return identifierToSql(column, isDual)
+  const { expr, offset, suffix } = column
+  return [exprToSQL(expr), offset, suffix].filter(hasVal).join('')
+}
 function columnRefToSQL(expr) {
   const {
     arrow, as, collate, column, isDual, table, parentheses, property,
   } = expr
-  let str = column === '*' ? '*' : identifierToSql(column, isDual)
+  let str = column === '*' ? '*' : columnOffsetToSQL(column, isDual)
   if (table) str = `${identifierToSql(table)}.${str}`
   const result = [
     str,

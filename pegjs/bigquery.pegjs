@@ -397,13 +397,30 @@ columns_list
     }
 
 column_offset_expr
-  = n:ident __ LBRAKE __ t:(KW_OFFSET / KW_ORDINAL) __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
-    columnList.add(`select::null::${n}`);
-    return `${n}[${t}(${l.value})]`
+  = n:expr __ LBRAKE __ t:(KW_OFFSET / KW_ORDINAL) __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
+    return {
+      expr: n,
+      offset: `[${t}(${l.value})]`
+    }
   }
 
 column_list_item
-  = c:column_offset_expr __ as:alias_clause {
+  = tbl:ident __ DOT pro:((column_offset_expr / ident) __ DOT)? __ STAR {
+      columnList.add(`select::${tbl}::(.*)`)
+      let column = '*'
+      const mid = pro && pro[0]
+      if (typeof mid === 'string') column = `${mid}.*`
+      if (mid && mid.expr && mid.offset) column = { ...mid, suffix: '.*' }
+      return {
+        expr: {
+          type: 'column_ref',
+          table: tbl,
+          column,
+        },
+        as: null
+      }
+    }
+  / c:column_offset_expr __ as:alias_clause? {
     return {
         expr: {
           type: 'column_ref',
@@ -413,18 +430,6 @@ column_list_item
         as: as
       }
   }
-  / tbl:ident __ DOT pro:((column_offset_expr / ident) __ DOT)? __ STAR {
-      columnList.add(`select::${tbl}::(.*)`);
-      if (pro) tbl = `${tbl}.${pro[0]}`
-      return {
-        expr: {
-          type: 'column_ref',
-          table: tbl,
-          column: '*'
-        },
-        as: null
-      };
-    }
   / expr_alias
 
 alias_clause

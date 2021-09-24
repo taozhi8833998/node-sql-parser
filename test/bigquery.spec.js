@@ -371,6 +371,13 @@ describe('BigQuery', () => {
       ]
     },
     {
+      title: 'select offset after funtion',
+      sql: [
+        "select split('To - be - split', ' - ')[OFFSET(0)] from abc",
+        "SELECT split('To - be - split', ' - ')[OFFSET(0)] FROM abc"
+      ]
+    },
+    {
       title: 'select scalar function with args',
       sql: [
         'SELECT CURRENT_DATE(\'America/New_York\') FROM table1;',
