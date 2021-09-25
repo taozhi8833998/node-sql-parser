@@ -44,7 +44,7 @@
     'IS': true,
 
     'JOIN': true,
-    'JSON': true,
+    // 'JSON': true,
 
     'KEY': true,
 
