@@ -248,6 +248,19 @@ describe('BigQuery', () => {
       ]
     },
     {
+      title: 'inner could be omit when join',
+      sql: [
+        `select
+          organization.name,
+          count(*) as nb_payments
+        from product.organization
+        join product.payment on organization_id = organization.id
+        group by 1
+        order by 2 desc`,
+        'SELECT organization.name, COUNT(*) AS nb_payments FROM product.organization JOIN product.payment ON organization_id = organization.id GROUP BY 1 ORDER BY 2 DESC'
+      ]
+    },
+    {
       title: 'select order by using parentheses',
       sql: [
         `( SELECT * FROM Roster
@@ -358,6 +371,13 @@ describe('BigQuery', () => {
       ]
     },
     {
+      title: 'select offset after funtion',
+      sql: [
+        "select split('To - be - split', ' - ')[OFFSET(0)] from abc",
+        "SELECT split('To - be - split', ' - ')[OFFSET(0)] FROM abc"
+      ]
+    },
+    {
       title: 'select scalar function with args',
       sql: [
         'SELECT CURRENT_DATE(\'America/New_York\') FROM table1;',
@@ -419,6 +439,13 @@ describe('BigQuery', () => {
       sql: [
         `select ROW_NUMBER() OVER(PARTITION BY column1 ORDER BY column2)`,
         "SELECT ROW_NUMBER() OVER (PARTITION BY column1 ORDER BY column2 ASC)"
+      ]
+    },
+    {
+      title: 'select as backticks_quoted_ident',
+      sql: [
+        'select 1 as `from`',
+        'SELECT 1 AS `from`'
       ]
     },
   ]
