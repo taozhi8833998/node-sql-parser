@@ -3533,7 +3533,8 @@ data_type
   / uuid_type
   / boolean_type
   / enum_type
-  / serial_type
+  / serial_interval_type
+
 
 boolean_type
   = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
@@ -3579,8 +3580,8 @@ json_type
 geometry_type
   = t:KW_GEOMETRY {/* =>  data_type */  return { dataType: t }; }
 
-serial_type
-  = t:(KW_SERIAL) { /* =>  data_type */  return { dataType: t }; }
+serial_interval_type
+  = t:(KW_SERIAL / KW_INTERVAL) { /* =>  data_type */  return { dataType: t }; }
 
 text_type
   = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) LBRAKE __ RBRAKE { /* =>  data_type */ return { dataType: `${t}[]` }}

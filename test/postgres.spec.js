@@ -324,8 +324,15 @@ describe('Postgres', () => {
       title: 'create table with serial',
       sql: [
         `create table posts(id serial primary key, name varchar(128))`,
-      `CREATE TABLE "posts" ("id" SERIAL PRIMARY KEY, "name" VARCHAR(128))`
-     ]
+        `CREATE TABLE "posts" ("id" SERIAL PRIMARY KEY, "name" VARCHAR(128))`
+      ]
+    },
+    {
+      title: 'cast to interval',
+      sql: [
+        `select '1 week'::interval`,
+        `SELECT '1 week'::INTERVAL`
+      ]
     },
   ]
   function neatlyNestTestedSQL(sqlList){

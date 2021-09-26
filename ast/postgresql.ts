@@ -482,6 +482,10 @@ export type query_option = 'SQL_CALC_FOUND_ROWS'| 'SQL_CACHE'| 'SQL_NO_CACHE'| '
 
 export type column_clause = 'ALL' | '*' | column_list_item[] | column_list_item[];
 
+export type array_index = { brackets: boolean, number: number };
+
+export type expr_item = expr & { array_index: array_index };
+
 export type column_list_item = { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; } | { type: 'star_ref'; expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
 
 
@@ -1363,7 +1367,7 @@ export type geometry_type = data_type;
 
 
 
-export type serial_type = data_type;
+export type serial_interval_type = data_type;
 
 
 
