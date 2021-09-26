@@ -243,6 +243,31 @@ describe('Postgres', () => {
       ]
     },
     {
+      title: 'array column index',
+      sql: [
+        "select (array['a', 'b', 'c'])[2]",
+        `SELECT (ARRAY['a','b','c'])[2]`
+      ]
+    },
+    {
+      title: 'array cast column index',
+      sql: [
+        "select ('{a, b, c}'::text[])[2]",
+        `SELECT ('{a, b, c}'::TEXT[])[2]`
+      ]
+    },
+    {
+      title: 'column array index',
+      sql: [
+        `with t as (
+          select array['a', 'b', 'c'] as a
+        )
+        select a[2]
+        from t`,
+        `WITH t AS (SELECT ARRAY['a','b','c'] AS "a") SELECT "a"[2] FROM "t"`
+      ]
+    },
+    {
       title: 'row function column',
       sql: [
         "SELECT ROW(col1, col2, 'literal', 1) from tableb",

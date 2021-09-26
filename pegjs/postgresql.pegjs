@@ -1665,8 +1665,23 @@ column_clause
       return createList(head, tail);
     }
 
+array_index
+  = LBRAKE __ n:number __ RBRAKE {
+    // => { brackets: boolean, number: number }
+    return {
+      brackets: true,
+      number: n
+    }
+  }
+
+expr_item
+  = e:expr __ a:array_index? {
+    // => expr & { array_index: array_index }
+    e.array_index = a
+    return e
+  }
 column_list_item
-  = e:expr s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
+  = e:expr_item s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; }
     return {
       as: alias,
@@ -1678,7 +1693,6 @@ column_list_item
   }
   / tbl:ident __ DOT __ STAR {
     // => { type: 'star_ref'; expr: column_ref; as: null; }
-
       columnList.add(`select::${tbl}::(.*)`);
       return {
         type: 'star_ref',
@@ -1690,7 +1704,7 @@ column_list_item
         as: null
       };
     }
-  / e:expr __ alias:alias_clause? {
+  / e:expr_item __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
       return { type: 'expr', expr: e, as: alias };
     }
@@ -3469,8 +3483,8 @@ proc_primary_list
       return createList(head, tail);
     }
 
-proc_array =
-  LBRAKE __ l:proc_primary_list __ RBRAKE {
+proc_array
+  = LBRAKE __ l:proc_primary_list __ RBRAKE {
     // => { type: 'array'; value: proc_primary_list }
     return { type: 'array', value: l };
   }
