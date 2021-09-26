@@ -63,4 +63,21 @@ describe('sqlite', () => {
     GROUP BY pets.id;`
     expect(getParsedSql(sql)).to.be.equal("SELECT * FROM `pets` LEFT JOIN (SELECT * FROM `user` WHERE `user`.`name` = 'pepe' || 'rone' OR `user`.`code` = UPPER('test') OR `user`.`code` = UPPER('more_test')) AS `u` ON `pets`.`owner` = `u`.`id` GROUP BY `pets`.`id`")
   })
+
+  it('should support json as function name', () => {
+    const sql = `SELECT
+      id,
+      json_object(
+          'hasGeometry',
+          CASE
+              WHEN json_extract(floor.rect, '$') IS '{"boundariesList":[]}' THEN json('false')
+              ELSE json('true')
+          END
+      ) as "metadata"
+  FROM
+      floor
+  WHERE
+    floor.id = 1;`
+    expect(getParsedSql(sql)).to.be.equal("SELECT `id`, json_object('hasGeometry', CASE WHEN json_extract(`floor`.`rect`, '$') IS '{\"boundariesList\":[]}' THEN json('false') ELSE json('true') END) AS `metadata` FROM `floor` WHERE `floor`.`id` = 1")
+  })
 })
