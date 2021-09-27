@@ -311,9 +311,10 @@ with_clause
     }
 
 cte_definition
-  = name:ident_name __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
-      return { name, stmt };
-    }
+  = name:(literal_string / ident_name) __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
+    if (typeof name === 'string') name = { type: 'default', value: name }
+    return { name, stmt };
+  }
 
 select_stmt_nake
   = KW_SELECT ___

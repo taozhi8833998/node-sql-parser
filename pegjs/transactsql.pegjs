@@ -1134,9 +1134,10 @@ with_clause
     }
 
 cte_definition
-  = name:ident_name __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
-      return { name, stmt, columns };
-    }
+  = name:(literal_string / ident_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
+    if (typeof name === 'string') name = { type: 'default', value: name }
+    return { name, stmt, columns };
+  }
 
 cte_column_definition
   = LPAREN __ head:column tail:(__ COMMA __ column)* __ RPAREN {

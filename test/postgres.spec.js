@@ -334,6 +334,16 @@ describe('Postgres', () => {
         `SELECT '1 week'::INTERVAL`
       ]
     },
+    {
+      title: 'with clause support double quote ',
+      sql: [
+        `with "cte name" as (
+          select 1
+        )
+        select * from "cte name"`,
+        `WITH "cte name" AS (SELECT 1) SELECT * FROM "cte name"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
