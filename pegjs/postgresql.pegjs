@@ -2793,7 +2793,7 @@ aggr_fun_count
 
 distinct_args
    = d:KW_DISTINCT? __ c:column_ref { /* => { distinct: 'DISTINCT'; expr: column_ref; } */  return { distinct: d, expr: c }; }
-   /  d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN { /* => { distinct: 'DISTINCT'; expr: expr; } */  c.parentheses = true; return { distinct: d, expr: c }; }
+   / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ or:order_by_clause? {  /* => { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; } */  c.parentheses = true; return { distinct: d, expr: c, orderby: or }; }
 
 count_arg
   = e:star_expr { /* => { expr: star_expr } */ return { expr: e }; }

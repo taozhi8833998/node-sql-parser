@@ -12,6 +12,7 @@ function aggrToSQL(expr) {
     const separator = args.expr.parentheses ? '' : ' '
     str = ['DISTINCT', str].join(separator)
   }
+  if (args.orderby) str = `${str} ${orderOrPartitionByToSQL(args.orderby, 'order by')}`
   if (orderby) str = `${str} ${orderOrPartitionByToSQL(orderby, 'order by')}`
   return [`${fnName}(${str})`, overStr].filter(hasVal).join(' ')
 }
