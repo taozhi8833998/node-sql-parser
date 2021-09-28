@@ -1,10 +1,16 @@
-import { identifierToSql, hasVal, commonOptionConnector, toUpper } from './util'
 import { exprToSQL } from './expr'
+import { valuesToSQL } from './insert'
+import { identifierToSql, hasVal, commonOptionConnector, toUpper } from './util'
 
 function tableToSQL(tableInfo) {
   const { table, db, as, expr } = tableInfo
   const database = identifierToSql(db)
-  const tableName = table ? identifierToSql(table) : exprToSQL(expr)
+  let tableName = table && identifierToSql(table)
+  if (expr && expr.type === 'values') {
+    tableName = commonOptionConnector('VALUES', valuesToSQL, expr.values)
+    if (expr.parentheses) tableName = `(${tableName})`
+  }
+  if (expr && expr.type !== 'values') tableName = exprToSQL(expr)
   const str = database ? `${database}.${tableName}` : tableName
   if (as) return `${str} AS ${identifierToSql(as)}`
   return str

@@ -1362,7 +1362,6 @@ table_join
       on: expr
     };
   }
-
 //NOTE that, the table assigned to `var` shouldn't write in `table_join`
 table_base
   = KW_DUAL {

@@ -335,13 +335,22 @@ describe('Postgres', () => {
       ]
     },
     {
-      title: 'with clause support double quote ',
+      title: 'with clause support double quote',
       sql: [
         `with "cte name" as (
           select 1
         )
         select * from "cte name"`,
         `WITH "cte name" AS (SELECT 1) SELECT * FROM "cte name"`
+      ]
+    },
+    {
+      title: 'select from values as',
+      sql: [
+        `select *
+        from (values (0, 0), (1, null), (null, 2), (3, 4)) as t(a,b)
+        where a is distinct from "b"`,
+        `SELECT * FROM (VALUES (0,0), (1,NULL), (NULL,2), (3,4)) AS "t(a, b)" WHERE "a" IS DISTINCT FROM "b"`
       ]
     },
   ]

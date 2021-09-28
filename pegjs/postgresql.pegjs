@@ -1858,14 +1858,15 @@ table_base
         };
       }
     }
-  / LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? {
+  / LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:alias_clause? {
     // => { expr: union_stmt; as?: alias_clause; }
-      stmt.parentheses = true;
-      return {
-        expr: stmt,
-        as: alias
-      };
-    }
+    if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt }
+    stmt.parentheses = true;
+    return {
+      expr: stmt,
+      as: alias
+    };
+  }
 
 join_op
   = KW_LEFT __ KW_OUTER? __ KW_JOIN { /* => 'LEFT JOIN' */ return 'LEFT JOIN'; }
@@ -2451,7 +2452,7 @@ is_op_right
     const tableName = table === '*' ? '*' : `"${table}"`
     let tableStr = db ? `"${db}".${tableName}` : tableName
     return { op: 'IS', right: {
-      type: 'origin',
+      type: 'default',
       value: `DISTINCT FROM ${tableStr}`
     }}
   }
@@ -2626,7 +2627,11 @@ ident
     }
 
 alias_ident
-  = name:ident_name !{
+  = name:ident_name !{ if (reservedMap[name.toUpperCase()] === true) throw new Error("Error: "+ JSON.stringify(name)+" is a reserved word, can not as alias clause"); return false } __ LPAREN __ c:column_list __ RPAREN {
+    // => string
+    return `${name}(${c.join(', ')})`
+  }
+  / name:ident_name !{
       if (reservedMap[name.toUpperCase()] === true) throw new Error("Error: "+ JSON.stringify(name)+" is a reserved word, can not as alias clause");
       return false
     } {
