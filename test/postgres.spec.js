@@ -353,6 +353,30 @@ describe('Postgres', () => {
         `SELECT * FROM (VALUES (0,0), (1,NULL), (NULL,2), (3,4)) AS "t(a, b)" WHERE "a" IS DISTINCT FROM "b"`
       ]
     },
+    {
+      title: 'aggr_fun percentile_cont',
+      sql: [
+        `select percentile_cont(0.25) within group (order by a asc) as p25
+        from (values (0),(0),(1),(2),(3),(4)) as t(a)`,
+        `SELECT PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY "a" ASC) AS "p25" FROM (VALUES (0), (0), (1), (2), (3), (4)) AS "t(a)"`
+      ]
+    },
+    {
+      title: 'aggr_fun percentile_cont with array args',
+      sql: [
+        `select percentile_cont(array[0.5, 1]) within group (order by a asc) as p25
+        from (values (0),(0),(1),(2),(3),(4)) as t(a)`,
+        `SELECT PERCENTILE_CONT(ARRAY[0.5,1]) WITHIN GROUP (ORDER BY "a" ASC) AS "p25" FROM (VALUES (0), (0), (1), (2), (3), (4)) AS "t(a)"`
+      ]
+    },
+    {
+      title: 'aggr_fun mode',
+      sql: [
+        `select mode() within group (order by a asc) as p25
+        from (values (0),(0),(1),(2),(3),(4)) as t(a)`,
+        `SELECT MODE() WITHIN GROUP (ORDER BY "a" ASC) AS "p25" FROM (VALUES (0), (0), (1), (2), (3), (4)) AS "t(a)"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

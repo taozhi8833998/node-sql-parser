@@ -2790,6 +2790,28 @@ aggr_fun_count
         over: bc
       };
     }
+  / name:('percentile_cont'i / 'percentile_disc'i) __ LPAREN __ arg:(literal_numeric / literal_array) __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
+   // => { type: 'aggr_func'; name: 'percentile_cont' | 'percentile_disc'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
+    return {
+        type: 'aggr_func',
+        name: name.toUpperCase(),
+        args: {
+          expr: arg
+        },
+        within_group_orderby: or,
+        over: bc
+      };
+  }
+  / name:('mode'i) __ LPAREN __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
+    // => { type: 'aggr_func'; name: 'mode'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
+    return {
+        type: 'aggr_func',
+        name: name.toUpperCase(),
+        args: { expr: {} },
+        within_group_orderby: or,
+        over: bc
+      };
+  }
 
 distinct_args
    = d:KW_DISTINCT? __ c:column_ref { /* => { distinct: 'DISTINCT'; expr: column_ref; } */  return { distinct: d, expr: c }; }
