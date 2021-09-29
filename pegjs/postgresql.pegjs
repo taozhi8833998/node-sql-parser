@@ -2791,7 +2791,7 @@ aggr_fun_count
       };
     }
   / name:('percentile_cont'i / 'percentile_disc'i) __ LPAREN __ arg:(literal_numeric / literal_array) __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
-   // => { type: 'aggr_func'; name: 'percentile_cont' | 'percentile_disc'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
+   // => { type: 'aggr_func'; name: 'PERCENTILE_CONT' | 'PERCENTILE_DISC'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
     return {
         type: 'aggr_func',
         name: name.toUpperCase(),
@@ -2803,7 +2803,7 @@ aggr_fun_count
       };
   }
   / name:('mode'i) __ LPAREN __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
-    // => { type: 'aggr_func'; name: 'mode'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
+    // => { type: 'aggr_func'; name: 'MODE'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
     return {
         type: 'aggr_func',
         name: name.toUpperCase(),
