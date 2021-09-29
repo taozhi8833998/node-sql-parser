@@ -456,7 +456,7 @@ export type select_stmt = select_stmt_nake | select_stmt_node;
 
 export type with_clause = cte_definition[] | [cte_definition & {recursive: true; }];
 
-export type cte_definition = { name: ident_name; stmt: union_stmt; columns?: cte_column_definition; };
+export type cte_definition = { name: { type: 'default'; value: string; }; stmt: union_stmt; columns?: cte_column_definition; };
 
 export type cte_column_definition = column[];
 
@@ -481,6 +481,10 @@ export type option_clause = query_option[];
 export type query_option = 'SQL_CALC_FOUND_ROWS'| 'SQL_CACHE'| 'SQL_NO_CACHE'| 'SQL_BIG_RESULT'| 'SQL_SMALL_RESULT'| 'SQL_BUFFER_RESULT';
 
 export type column_clause = 'ALL' | '*' | column_list_item[] | column_list_item[];
+
+export type array_index = { brackets: boolean, number: number };
+
+export type expr_item = expr & { array_index: array_index };
 
 export type column_list_item = { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; } | { type: 'star_ref'; expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
 
@@ -818,13 +822,13 @@ export type aggr_fun_smma = { type: 'aggr_func'; name: 'SUM' | 'MAX' | 'MIN' | '
 
 type KW_SUM_MAX_MIN_AVG = never;
 
-export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'; args:count_arg; over: over_partition };
+export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'; args:count_arg; over: over_partition } | { type: 'aggr_func'; name: 'PERCENTILE_CONT' | 'PERCENTILE_DISC'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition } | { type: 'aggr_func'; name: 'MODE'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition };
 
 
 
 
 
-export type distinct_args = { distinct: 'DISTINCT'; expr: column_ref; } | { distinct: 'DISTINCT'; expr: expr; };
+export type distinct_args = { distinct: 'DISTINCT'; expr: column_ref; } | { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; };
 
 
 
@@ -1363,7 +1367,7 @@ export type geometry_type = data_type;
 
 
 
-export type serial_type = data_type;
+export type serial_interval_type = data_type;
 
 
 

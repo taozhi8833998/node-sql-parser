@@ -243,6 +243,31 @@ describe('Postgres', () => {
       ]
     },
     {
+      title: 'array column index',
+      sql: [
+        "select (array['a', 'b', 'c'])[2]",
+        `SELECT (ARRAY['a','b','c'])[2]`
+      ]
+    },
+    {
+      title: 'array cast column index',
+      sql: [
+        "select ('{a, b, c}'::text[])[2]",
+        `SELECT ('{a, b, c}'::TEXT[])[2]`
+      ]
+    },
+    {
+      title: 'column array index',
+      sql: [
+        `with t as (
+          select array['a', 'b', 'c'] as a
+        )
+        select a[2]
+        from t`,
+        `WITH t AS (SELECT ARRAY['a','b','c'] AS "a") SELECT "a"[2] FROM "t"`
+      ]
+    },
+    {
       title: 'row function column',
       sql: [
         "SELECT ROW(col1, col2, 'literal', 1) from tableb",
@@ -299,8 +324,58 @@ describe('Postgres', () => {
       title: 'create table with serial',
       sql: [
         `create table posts(id serial primary key, name varchar(128))`,
-      `CREATE TABLE "posts" ("id" SERIAL PRIMARY KEY, "name" VARCHAR(128))`
-     ]
+        `CREATE TABLE "posts" ("id" SERIAL PRIMARY KEY, "name" VARCHAR(128))`
+      ]
+    },
+    {
+      title: 'cast to interval',
+      sql: [
+        `select '1 week'::interval`,
+        `SELECT '1 week'::INTERVAL`
+      ]
+    },
+    {
+      title: 'with clause support double quote',
+      sql: [
+        `with "cte name" as (
+          select 1
+        )
+        select * from "cte name"`,
+        `WITH "cte name" AS (SELECT 1) SELECT * FROM "cte name"`
+      ]
+    },
+    {
+      title: 'select from values as',
+      sql: [
+        `select *
+        from (values (0, 0), (1, null), (null, 2), (3, 4)) as t(a,b)
+        where a is distinct from "b"`,
+        `SELECT * FROM (VALUES (0,0), (1,NULL), (NULL,2), (3,4)) AS "t(a, b)" WHERE "a" IS DISTINCT FROM "b"`
+      ]
+    },
+    {
+      title: 'aggr_fun percentile_cont',
+      sql: [
+        `select percentile_cont(0.25) within group (order by a asc) as p25
+        from (values (0),(0),(1),(2),(3),(4)) as t(a)`,
+        `SELECT PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY "a" ASC) AS "p25" FROM (VALUES (0), (0), (1), (2), (3), (4)) AS "t(a)"`
+      ]
+    },
+    {
+      title: 'aggr_fun percentile_cont with array args',
+      sql: [
+        `select percentile_cont(array[0.5, 1]) within group (order by a asc) as p25
+        from (values (0),(0),(1),(2),(3),(4)) as t(a)`,
+        `SELECT PERCENTILE_CONT(ARRAY[0.5,1]) WITHIN GROUP (ORDER BY "a" ASC) AS "p25" FROM (VALUES (0), (0), (1), (2), (3), (4)) AS "t(a)"`
+      ]
+    },
+    {
+      title: 'aggr_fun mode',
+      sql: [
+        `select mode() within group (order by a asc) as p25
+        from (values (0),(0),(1),(2),(3),(4)) as t(a)`,
+        `SELECT MODE() WITHIN GROUP (ORDER BY "a" ASC) AS "p25" FROM (VALUES (0), (0), (1), (2), (3), (4)) AS "t(a)"`
+      ]
     },
   ]
   function neatlyNestTestedSQL(sqlList){

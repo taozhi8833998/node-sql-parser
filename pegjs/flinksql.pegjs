@@ -1341,10 +1341,11 @@ with_clause
     }
 
 cte_definition
-  = name:ident_name __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
-    // => { name: ident_name; stmt: union_stmt; columns?: cte_column_definition; }
-      return { name, stmt, columns };
-    }
+  = name:(literal_string / ident_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
+    // => { name: { type: 'default'; value: string; }; stmt: union_stmt; columns?: cte_column_definition; }
+    if (typeof name === 'string') name = { type: 'default', value: name }
+    return { name, stmt, columns };
+  }
 
 cte_column_definition
   = LPAREN __ head:column tail:(__ COMMA __ column)* __ RPAREN {
@@ -2407,7 +2408,7 @@ aggr_fun_count
 count_arg
   = e:star_expr { /* => { expr: star_expr } */ return { expr: e }; }
   / d:KW_DISTINCT? __ c:column_ref { return { distinct: d, expr: c }; }
-  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN {  c.parentheses = true; return { distinct: d, expr: c }; }
+  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ or:order_by_clause? {  c.parentheses = true; return { distinct: d, expr: c, orderby: or }; }
 
 star_expr
   = "*" { /* => { type: 'star'; value: '*' } */ return { type: 'star', value: '*' }; }

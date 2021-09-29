@@ -1,4 +1,5 @@
 import { exprToSQL } from './expr'
+import { literalToSQL } from './util'
 
 /**
  * @param {Array<Object>} withExpr
@@ -9,7 +10,7 @@ function withToSQL(withExpr) {
   const withExprStr = withExpr.map(cte => {
     const { name, stmt, columns } = cte
     const column = Array.isArray(columns) ? `(${columns.join(', ')})` : ''
-    return `${name}${column} AS (${exprToSQL(stmt)})`
+    return `${literalToSQL(name)}${column} AS (${exprToSQL(stmt)})`
   }).join(', ')
 
   return `WITH ${isRecursive}${withExprStr}`

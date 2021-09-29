@@ -1569,8 +1569,9 @@ with_clause
     }
 
 cte_definition
-  = name:ident_name __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
-    // => { name: ident_name; stmt: union_stmt; columns?: cte_column_definition; }
+  = name:(literal_string / ident_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
+    // => { name: { type: 'default'; value: string; }; stmt: union_stmt; columns?: cte_column_definition; }
+    if (typeof name === 'string') name = { type: 'default', value: name }
       return { name, stmt, columns };
     }
 
@@ -1665,8 +1666,23 @@ column_clause
       return createList(head, tail);
     }
 
+array_index
+  = LBRAKE __ n:number __ RBRAKE {
+    // => { brackets: boolean, number: number }
+    return {
+      brackets: true,
+      number: n
+    }
+  }
+
+expr_item
+  = e:expr __ a:array_index? {
+    // => expr & { array_index: array_index }
+    e.array_index = a
+    return e
+  }
 column_list_item
-  = e:expr s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
+  = e:expr_item s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; }
     return {
       as: alias,
@@ -1678,7 +1694,6 @@ column_list_item
   }
   / tbl:ident __ DOT __ STAR {
     // => { type: 'star_ref'; expr: column_ref; as: null; }
-
       columnList.add(`select::${tbl}::(.*)`);
       return {
         type: 'star_ref',
@@ -1690,7 +1705,7 @@ column_list_item
         as: null
       };
     }
-  / e:expr __ alias:alias_clause? {
+  / e:expr_item __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
       return { type: 'expr', expr: e, as: alias };
     }
@@ -1843,14 +1858,15 @@ table_base
         };
       }
     }
-  / LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? {
+  / LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:alias_clause? {
     // => { expr: union_stmt; as?: alias_clause; }
-      stmt.parentheses = true;
-      return {
-        expr: stmt,
-        as: alias
-      };
-    }
+    if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt }
+    stmt.parentheses = true;
+    return {
+      expr: stmt,
+      as: alias
+    };
+  }
 
 join_op
   = KW_LEFT __ KW_OUTER? __ KW_JOIN { /* => 'LEFT JOIN' */ return 'LEFT JOIN'; }
@@ -2436,7 +2452,7 @@ is_op_right
     const tableName = table === '*' ? '*' : `"${table}"`
     let tableStr = db ? `"${db}".${tableName}` : tableName
     return { op: 'IS', right: {
-      type: 'origin',
+      type: 'default',
       value: `DISTINCT FROM ${tableStr}`
     }}
   }
@@ -2611,7 +2627,11 @@ ident
     }
 
 alias_ident
-  = name:ident_name !{
+  = name:ident_name !{ if (reservedMap[name.toUpperCase()] === true) throw new Error("Error: "+ JSON.stringify(name)+" is a reserved word, can not as alias clause"); return false } __ LPAREN __ c:column_list __ RPAREN {
+    // => string
+    return `${name}(${c.join(', ')})`
+  }
+  / name:ident_name !{
       if (reservedMap[name.toUpperCase()] === true) throw new Error("Error: "+ JSON.stringify(name)+" is a reserved word, can not as alias clause");
       return false
     } {
@@ -2770,10 +2790,32 @@ aggr_fun_count
         over: bc
       };
     }
+  / name:('percentile_cont'i / 'percentile_disc'i) __ LPAREN __ arg:(literal_numeric / literal_array) __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
+   // => { type: 'aggr_func'; name: 'PERCENTILE_CONT' | 'PERCENTILE_DISC'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
+    return {
+        type: 'aggr_func',
+        name: name.toUpperCase(),
+        args: {
+          expr: arg
+        },
+        within_group_orderby: or,
+        over: bc
+      };
+  }
+  / name:('mode'i) __ LPAREN __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
+    // => { type: 'aggr_func'; name: 'MODE'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
+    return {
+        type: 'aggr_func',
+        name: name.toUpperCase(),
+        args: { expr: {} },
+        within_group_orderby: or,
+        over: bc
+      };
+  }
 
 distinct_args
    = d:KW_DISTINCT? __ c:column_ref { /* => { distinct: 'DISTINCT'; expr: column_ref; } */  return { distinct: d, expr: c }; }
-   /  d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN { /* => { distinct: 'DISTINCT'; expr: expr; } */  c.parentheses = true; return { distinct: d, expr: c }; }
+   / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ or:order_by_clause? {  /* => { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; } */  c.parentheses = true; return { distinct: d, expr: c, orderby: or }; }
 
 count_arg
   = e:star_expr { /* => { expr: star_expr } */ return { expr: e }; }
@@ -3469,8 +3511,8 @@ proc_primary_list
       return createList(head, tail);
     }
 
-proc_array =
-  LBRAKE __ l:proc_primary_list __ RBRAKE {
+proc_array
+  = LBRAKE __ l:proc_primary_list __ RBRAKE {
     // => { type: 'array'; value: proc_primary_list }
     return { type: 'array', value: l };
   }
@@ -3519,7 +3561,8 @@ data_type
   / uuid_type
   / boolean_type
   / enum_type
-  / serial_type
+  / serial_interval_type
+
 
 boolean_type
   = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
@@ -3565,8 +3608,8 @@ json_type
 geometry_type
   = t:KW_GEOMETRY {/* =>  data_type */  return { dataType: t }; }
 
-serial_type
-  = t:(KW_SERIAL) { /* =>  data_type */  return { dataType: t }; }
+serial_interval_type
+  = t:(KW_SERIAL / KW_INTERVAL) { /* =>  data_type */  return { dataType: t }; }
 
 text_type
   = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) LBRAKE __ RBRAKE { /* =>  data_type */ return { dataType: `${t}[]` }}

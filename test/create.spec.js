@@ -418,7 +418,7 @@ describe('create', () => {
         NOT DEFERRABLE INITIALLY DEFERRED
         FOR EACH ROW
         WHEN (OLD.balance IS DISTINCT FROM NEW.balance)
-        EXECUTE PROCEDURE check_account_update();`, PG_OPT)).to.equal('CREATE TRIGGER "check_update" BEFORE DELETE ON "accounts" NOT DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN "OLD"."balance" IS DISTINCT FROM "NEW"."BALANCE" EXECUTE PROCEDURE check_account_update()')
+        EXECUTE PROCEDURE check_account_update();`, PG_OPT)).to.equal('CREATE TRIGGER "check_update" BEFORE DELETE ON "accounts" NOT DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN "OLD"."balance" IS DISTINCT FROM "NEW"."balance" EXECUTE PROCEDURE check_account_update()')
       })
       it('should support trigger with when expression with * and deferrable', () => {
         expect(getParsedSql(`CREATE TRIGGER log_update

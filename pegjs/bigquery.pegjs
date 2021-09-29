@@ -311,9 +311,10 @@ with_clause
     }
 
 cte_definition
-  = name:ident_name __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
-      return { name, stmt };
-    }
+  = name:(literal_string / ident_name) __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
+    if (typeof name === 'string') name = { type: 'default', value: name }
+    return { name, stmt };
+  }
 
 select_stmt_nake
   = KW_SELECT ___
@@ -1040,7 +1041,7 @@ aggr_fun_count
 count_arg
   = e:star_expr { return { expr: e }; }
   / d:KW_DISTINCT? __ c:column_ref { return { distinct: d, expr: c }; }
-  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN {  c.parentheses = true; return { distinct: d, expr: c }; }
+  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ or:order_by_clause? {  c.parentheses = true; return { distinct: d, expr: c, orderby: or }; }
 
 star_expr
   = "*" { return { type: 'star', value: '*' }; }

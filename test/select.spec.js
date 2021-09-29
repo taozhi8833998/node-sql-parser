@@ -255,6 +255,8 @@ describe('select', () => {
         expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT(`asd`)) AS `abc`')
         sql = "select Quantity, group_concat(distinct(IF(Quantity>10, \"MORE\", \"LESS\"))) as 'abc';"
         expect(getParsedSql(sql)).to.equal('SELECT `Quantity`, GROUP_CONCAT(DISTINCT(IF(`Quantity` > 10, \'MORE\', \'LESS\'))) AS `abc`')
+        sql = "select group_concat(distinct(organization.name) order by organization.name) as colum1"
+        expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT(`organization`.`name`) ORDER BY `organization`.`name` ASC) AS `colum1`')
       })
 
       it('should parse position function',() => {
@@ -972,7 +974,7 @@ describe('select', () => {
         .and.to.have.lengthOf(1);
 
       const cte = ast.with[0];
-      expect(cte).to.have.property('name', 'cte');
+      expect(cte.name).to.be.eql({ type: 'default', value: 'cte' });
       expect(cte)
         .to.have.property('stmt')
         .and.to.be.an('object');
@@ -987,8 +989,8 @@ describe('select', () => {
         .and.to.have.lengthOf(2);
 
       const [cte1, cte2] = ast.with;
-      expect(cte1).to.have.property('name', 'cte1');
-      expect(cte2).to.have.property('name', 'cte2');
+      expect(cte1.name).to.be.eql({ type: 'default', value: 'cte1' });
+      expect(cte2.name).to.be.eql({ type: 'default', value: 'cte2' });
     });
 
     it('should parse CTE with column', () => {

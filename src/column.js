@@ -117,6 +117,8 @@ function columnToSQL(column, isDual) {
   if (type === 'cast') return castToSQL(column)
   if (isDual) expr.isDual = isDual
   let str = exprToSQL(expr)
+  if (expr.parentheses && Reflect.has(expr, 'array_index')) str = `(${str})`
+  if (expr.array_index) str = `${str}[${expr.array_index.number}]`
   if (column.as !== null) {
     str = `${str} AS `
     if (/^(`?)[a-z_][0-9a-z_]*(`?)$/i.test(column.as)) str = `${str}${identifierToSql(column.as)}`

@@ -52,4 +52,5 @@ function insertToSQL(stmt) {
 
 export {
   insertToSQL,
+  valuesToSQL,
 }
