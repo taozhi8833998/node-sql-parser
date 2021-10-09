@@ -1875,6 +1875,9 @@ multiplicative_expr
 
 multiplicative_operator
   = "*" / "/" / "%"
+  / "div"i {
+    return 'DIV'
+  }
 
 primary
   = cast_expr

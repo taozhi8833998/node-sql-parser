@@ -71,6 +71,11 @@ describe('select', () => {
     expect(parser.sqlify(ast)).to.eql('SELECT `SOME_COLUMN` FROM `TABLE_NAME` WHERE `ID_COLUMN` = 0 FOR UPDATE');
   });
 
+  it('should support div as divsion', () => {
+    expect(getParsedSql('SELECT * FROM businesses WHERE  SUBSTRING(street_physical, 1, LENGTH(street_physical) div 2) = SUBSTRING(street_physical, LENGTH(street_physical) DIV 2 + 1, LENGTH(street_physical) / 2);'))
+    .to.be.equal('SELECT * FROM `businesses` WHERE SUBSTRING(`street_physical`, 1, LENGTH(`street_physical`) DIV 2) = SUBSTRING(`street_physical`, LENGTH(`street_physical`) DIV 2 + 1, LENGTH(`street_physical`) / 2)')
+  })
+
   it('should support select * from', () => {
     const ast = parser.astify('SELECT *from abc');
     expect(ast.options).to.be.null;
