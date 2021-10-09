@@ -113,7 +113,49 @@ export interface Use {
   db: string;
 }
 
-export type AST = Use | Select | Insert_Replace | Update | Delete | Alter;
+export interface Create {
+  type: 'create',
+  keyword: 'table' | 'index' | 'database',
+  temporary?: 'temporary' | null,
+  table?: {db: string, table: string}[],
+  if_not_exists?: 'if not exists' | null,
+  like?: {
+    type: 'like',
+    table: string,
+    parentheses?: boolean
+  } | null,
+  ignore_replace?: 'ignore' | 'replace' | null,
+  as?: string | null,
+  query_expr?: any | null,
+  create_definitions?: any[] | null,
+  table_options?: any[] | null,
+  index_using?: {
+    keyword: 'using',
+    type: 'btree' | 'hash'
+  } | null,
+  index?: string | null,
+  on_kw?: 'on' | null;
+  index_columns?: any[] | null,
+  index_type?: 'unique' | 'fulltext' | 'spatial' | null,
+  index_options?: any[] | null,
+  algorithm_option?: {
+    type: 'alter',
+    keyword: 'algorithm',
+    resource: 'algorithm',
+    symbol: '=' | null,
+    algorithm: 'default' | 'instant' | 'inplace' | 'copy'
+  } | null,
+  lock_option?: {
+    type: 'alter',
+    keyword: 'lock',
+    resource: 'lock',
+    symbol: '=' | null,
+    lock: 'default' | 'none' | 'shared' | 'exclusive',
+  } | null,
+  database?: string
+}
+
+export type AST = Use | Select | Insert_Replace | Update | Delete | Alter | Create;
 
 export class Parser {
   constructor();
