@@ -2300,8 +2300,8 @@ case_expr
     }
 
 case_when_then
-  = KW_WHEN __ condition:expr __ KW_THEN __ result:expr {
-    // => { type: 'when'; cond: expr; result: expr; }
+  = KW_WHEN __ condition:or_and_where_expr __ KW_THEN __ result:expr {
+    // => { type: 'when'; cond: binary_expr; result: expr; }
     return {
       type: 'when',
       cond: condition,

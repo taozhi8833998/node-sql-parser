@@ -1402,7 +1402,7 @@ case_expr
     }
 
 case_when_then
-  = KW_WHEN __ condition:expr __ KW_THEN __ result:expr {
+  = KW_WHEN __ condition:or_and_where_expr __ KW_THEN __ result:expr {
     return {
       type: 'when',
       cond: condition,
