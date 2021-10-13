@@ -2431,6 +2431,12 @@ func_call
       };
     }
   / extract_func
+  / f:KW_CURRENT_TIMESTAMP __ up:('ON UPDATE CURRENT_TIMESTAMP'i)? {
+    return {
+      type: 'origin',
+      value: (up ? `${f} ${up}` : f).toLowerCase()
+    }
+  }
 
 extract_filed
   = f:'CENTURY'i / 'DAY'i / 'DECADE'i / 'DOW'i / 'DOY'i / 'EPOCH'i / 'HOUR'i / 'ISODOW'i / 'ISOYEAR'i / 'MICROSECONDS'i / 'MILLENNIUM'i / 'MILLISECONDS'i / 'MINUTE'i / 'MONTH'i / 'QUARTER'i / 'SECOND'i / 'TIMEZONE'i / 'TIMEZONE_HOUR'i / 'TIMEZONE_MINUTE'i / 'WEEK'i / 'YEAR'i {
@@ -2589,13 +2595,6 @@ literal_datetime
       return {
         type: type.toLowerCase(),
         value: ca[1].join('')
-      };
-    }
-  / type: KW_CURRENT_TIMESTAMP __ lf:LPAREN? __ rt:RPAREN? !{ if (lf && rt) return true }  __ up:('ON UPDATE CURRENT_TIMESTAMP'i)? {
-      // => { type: 'origin'; value: string; }
-      return {
-        type: 'origin',
-        value: (up ? `${type} ${up}` : type).toLowerCase()
       };
     }
 
