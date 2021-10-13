@@ -71,14 +71,12 @@
     'SESSION_USER': true,
     'SET': true,
     'SHOW': true,
-    'STATUS': true, // reserved (MySQL)
     'SYSTEM_USER': true,
 
     'TABLE': true,
     'THEN': true,
     'TRUE': true,
     'TRUNCATE': true,
-    'TYPE': true,   // reserved (MySQL)
 
     'UNION': true,
     'UPDATE': true,
