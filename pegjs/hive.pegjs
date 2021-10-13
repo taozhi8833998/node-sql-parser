@@ -1728,6 +1728,12 @@ func_call
         over: bc
       };
     }
+  / f:KW_CURRENT_TIMESTAMP __ up:('ON UPDATE CURRENT_TIMESTAMP'i)? {
+    return {
+      type: 'origin',
+      value: (up ? `${f} ${up}` : f).toLowerCase()
+    }
+  }
 
 scalar_func
   = KW_CURRENT_DATE
@@ -1840,12 +1846,6 @@ literal_datetime
       return {
         type: type.toLowerCase(),
         value: ca[1].join('')
-      };
-    }
-  / type: KW_CURRENT_TIMESTAMP __ lf:LPAREN? __ rt:RPAREN? !{ if (lf && rt) return true }  __ up:('ON UPDATE CURRENT_TIMESTAMP'i)? {
-      return {
-        type: 'origin',
-        value: (up ? `${type} ${up}` : type).toLowerCase()
       };
     }
 
