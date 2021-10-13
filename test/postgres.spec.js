@@ -294,6 +294,23 @@ describe('Postgres', () => {
       ]
     },
     {
+      title: 'case when multiple condition in pg',
+      sql: [
+        `select case
+        when
+          ee.start_time <= current_timestamp
+          and ee.end_time > current_timestamp
+        then
+          true
+        else
+          false
+        end
+          is_live,
+          is_upcoming from abc`,
+        `SELECT CASE WHEN "ee"."start_time" <= CURRENT_TIMESTAMP AND "ee"."end_time" > CURRENT_TIMESTAMP THEN TRUE ELSE FALSE END AS "is_live", "is_upcoming" FROM "abc"`
+      ]
+    },
+    {
       title: 'key keyword in pg',
       sql: [
         `SELECT * FROM partitions WHERE location IS NULL AND code like 'XX-%' AND key <> 1;`,
