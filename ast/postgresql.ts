@@ -663,7 +663,7 @@ export type case_expr = {
           args: (case_when_then | case_else)[];
         };
 
-export type case_when_then = { type: 'when'; cond: expr; result: expr; };
+export type case_when_then = { type: 'when'; cond: binary_expr; result: expr; };
 
 export type case_else = { type: 'else'; condition?: never; result: expr; };
 
@@ -840,7 +840,7 @@ export type aggr_array_agg = { type: 'aggr_func'; args:count_arg; name: 'ARRAY_A
 
 export type star_expr = { type: 'star'; value: '*' };
 
-export type func_call = { type: 'function'; name: string; args: expr_list; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func;
+export type func_call = { type: 'function'; name: string; args: expr_list; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'origin'; value: string; };
 
 export type extract_filed = "CENTURY" | "DAY" | "DECADE" | "DOW" | "DOY" | "EPOCH" | "HOUR" | "ISODOW" | "ISOYEAR" | "MICROSECONDS" | "MILLENNIUM" | "MILLISECONDS" | "MINUTE" | "MONTH" | "QUARTER" | "SECOND" | "TIMEZONE" | "TIMEZONE_HOUR" | "TIMEZONE_MINUTE" | "WEEK" | 'string';
 
@@ -882,7 +882,7 @@ export type literal_bool = { type: 'bool', value: true } | { type: 'bool', value
 
 export type literal_string = { type: 'single_quote_string'; value: string; } | { type: 'string'; value: string; };
 
-export type literal_datetime = { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string } | { type: 'origin'; value: string; };
+export type literal_datetime = { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string };
 
 export type single_quote_char = string;
 
