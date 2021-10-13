@@ -2855,6 +2855,7 @@ func_call
     }
   / extract_func
   / f:KW_CURRENT_TIMESTAMP __ up:('ON UPDATE CURRENT_TIMESTAMP'i)? {
+    // => { type: 'origin'; value: string; }
     return {
       type: 'origin',
       value: (up ? `${f} ${up}` : f).toLowerCase()
