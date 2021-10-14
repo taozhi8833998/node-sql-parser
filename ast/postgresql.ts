@@ -143,7 +143,7 @@ export type create_table_definition = create_definition[];
 
 export type create_definition = create_column_definition | create_index_definition | create_fulltext_spatial_index_definition | create_constraint_definition;
 
-export type column_definition_opt = column_constraint | { auto_increment: 'auto_increment'; } | { unique_or_primary: 'unique' | 'primary key'; } | { comment: keyword_comment; } | { collate: collate_expr; } | { column_format: column_format; } | { storage: storage } | { reference_definition: reference_definition; };
+export type column_definition_opt = column_constraint | { auto_increment: 'auto_increment'; } | { unique_or_primary: 'unique' | 'primary key'; } | { comment: keyword_comment; } | { collate: collate_expr; } | { column_format: column_format; } | { storage: storage } | { reference_definition: reference_definition; } | { character_set: collate_expr };
 
 
 
@@ -178,7 +178,7 @@ export type create_column_definition = {
 
 export type column_constraint = { nullable: literal_null | literal_not_null; default_val: default_expr; };
 
-export type collate_expr = { type: 'collate'; value: ident; };
+export type collate_expr = { type: 'collate'; symbol: '=' | null; value: ident; };
 
 export type column_format = { type: 'column_format'; value: 'fixed' | 'dynamic' | 'default'; };
 

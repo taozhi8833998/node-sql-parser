@@ -163,8 +163,9 @@ function identifierToSql(ident, isDual) {
 function commonTypeValue(opt) {
   const result = []
   if (!opt) return result
-  const { type, value } = opt
+  const { type, symbol, value } = opt
   result.push(type.toUpperCase())
+  if (symbol) result.push(symbol)
   result.push(value.toUpperCase())
   return result
 }

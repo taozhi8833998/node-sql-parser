@@ -715,6 +715,10 @@ column_definition_opt
     // => { reference_definition: reference_definition; }
     return { reference_definition: re }
   }
+  / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_name {
+    // => { character_set: collate_expr }
+    return { character_set: { type: t, value: v, symbol: s }}
+  }
 
 column_definition_opt_list
   = head:column_definition_opt __ tail:(__ column_definition_opt)* {
@@ -786,10 +790,11 @@ column_constraint
   }
 
 collate_expr
-  = KW_COLLATE __ ca:ident {
-    // => { type: 'collate'; value: ident; }
+  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
+    // => { type: 'collate'; symbol: '=' | null; value: ident; }
     return {
       type: 'collate',
+      symbol: s,
       value: ca,
     }
   }

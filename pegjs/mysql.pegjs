@@ -450,6 +450,9 @@ column_definition_opt
   / ck:check_constraint_definition {
     return { check: ck }
   }
+  / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_name {
+    return { character_set: { type: t, value: v, symbol: s }}
+  }
 
 column_definition_opt_list
   = head:column_definition_opt __ tail:(__ column_definition_opt)* {
@@ -474,9 +477,10 @@ create_column_definition
     }
 
 collate_expr
-  = KW_COLLATE __ ca:ident_name {
+  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident_name {
     return {
       type: 'collate',
+      symbol: s,
       value: ca,
     }
   }
@@ -953,6 +957,13 @@ table_option
     }
   }
   / kw:'ENGINE'i __ s:(KW_ASSIGIN_EQUAL)? __ c:ident_name {
+    return {
+      keyword: kw.toLowerCase(),
+      symbol: s,
+      value: c.toUpperCase()
+    }
+  }
+  / kw:'ROW_FORMAT'i __ s:(KW_ASSIGIN_EQUAL)? __ c:(KW_DEFAULT / 'DYNAMIC'i / 'FIXED'i / 'COMPRESSED'i / 'REDUNDANT'i / 'COMPACT'i) {
     return {
       keyword: kw.toLowerCase(),
       symbol: s,
