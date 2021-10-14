@@ -448,6 +448,9 @@ column_definition_opt
   / ck:check_constraint_definition {
     return { check: ck }
   }
+  / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_name {
+    return { character_set: { type: t, value: v, symbol: s }}
+  }
 
 column_definition_opt_list
   = head:column_definition_opt __ tail:(__ column_definition_opt)* {
@@ -472,12 +475,14 @@ create_column_definition
     }
 
 collate_expr
-  = KW_COLLATE __ ca:ident_name {
+  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident_name {
     return {
       type: 'collate',
+      symbol: s,
       value: ca,
     }
   }
+
 column_format
   = k:'COLUMN_FORMAT'i __ f:('FIXED'i / 'DYNAMIC'i / 'DEFAULT'i) {
     return {

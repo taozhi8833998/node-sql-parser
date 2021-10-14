@@ -67,7 +67,7 @@ function columnReferenceDefinitionToSQL(referenceDefinition) {
 function columnOption(definition) {
   const columnOpt = []
   const {
-    nullable, check, comment, collate, storage,
+    nullable, character_set: characterSet, check, comment, collate, storage,
     default_val: defaultOpt,
     auto_increment: autoIncrement,
     unique_or_primary: uniquePrimary,
@@ -82,6 +82,7 @@ function columnOption(definition) {
   }
   columnOpt.push(constraintDefinitionToSQL(check))
   columnOpt.push(autoIncreatementToSQL(autoIncrement), toUpper(uniquePrimary), commentToSQL(comment))
+  columnOpt.push(...commonTypeValue(characterSet))
   columnOpt.push(...commonTypeValue(collate))
   columnOpt.push(...commonTypeValue(columnFormat))
   columnOpt.push(...commonTypeValue(storage))

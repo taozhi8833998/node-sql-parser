@@ -50,6 +50,12 @@ describe('create', () => {
         .to.equal('CREATE TABLE `test` (`date` DATE NULL DEFAULT NULL, `datetime` DATETIME(6) NULL DEFAULT NULL) ; CREATE TABLE `test`.`Untitled` (`date` DATE NULL DEFAULT NULL, `datetime` DATETIME NULL DEFAULT NULL, `time` TIME NULL DEFAULT NULL, `timestamp` TIMESTAMP(6) NULL DEFAULT NULL)');
       expect(getParsedSql("CREATE TABLE `action`(`id` int NOT NULL AUTO_INCREMENT, `platform` enum('IOS','ANDROID','PC_WEB','MOBILE_WEB','ETC') NOT NULL DEFAULT 'PC_WEB', `size` ENUM('small', CONCAT('med','ium'), 'large'), `date` datetime NOT NULL,PRIMARY KEY (`id`));"))
         .to.equal("CREATE TABLE `action` (`id` INT NOT NULL AUTO_INCREMENT, `platform` ENUM('IOS', 'ANDROID', 'PC_WEB', 'MOBILE_WEB', 'ETC') NOT NULL DEFAULT 'PC_WEB', `size` ENUM('small', CONCAT('med', 'ium'), 'large'), `date` DATETIME NOT NULL, PRIMARY KEY (`id`))");
+      expect(getParsedSql(`CREATE TABLE comp  (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        compCode varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '我是comment',
+        compCode2 varchar(255) CHARACTER SET = utf8 COLLATE = utf8_general_ci NOT NULL COMMENT '我是comment'
+      ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '我是comment' ROW_FORMAT = Dynamic`))
+        .to.equal("CREATE TABLE `comp` (`id` INT(11) NOT NULL AUTO_INCREMENT, `compCode` VARCHAR(255) NOT NULL COMMENT '我是comment' CHARACTER SET UTF8 COLLATE UTF8_GENERAL_CI, `compCode2` VARCHAR(255) NOT NULL COMMENT '我是comment' CHARACTER SET = UTF8 COLLATE = UTF8_GENERAL_CI) ENGINE = INNODB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '我是comment' ROW_FORMAT = DYNAMIC");
     })
 
     it('should support create temporary table', () => {
