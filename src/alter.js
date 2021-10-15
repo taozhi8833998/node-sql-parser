@@ -17,7 +17,14 @@ function alterToSQL(stmt) {
 function alterExprToSQL(expr) {
   if (!expr) return ''
   const {
-    action, create_definitions: createDefinition, first_after: firstAfter, if_not_exists: ifNotExists,keyword, old_column: oldColumn, resource, symbol,
+    action,
+    create_definitions: createDefinition,
+    first_after: firstAfter,
+    if_not_exists: ifNotExists,keyword,
+    old_column: oldColumn,
+    prefix,
+    resource,
+    symbol,
   } = expr
   let name = ''
   let dataType = []
@@ -51,6 +58,7 @@ function alterExprToSQL(expr) {
     toUpper(keyword),
     toUpper(ifNotExists),
     oldColumn && columnRefToSQL(oldColumn),
+    toUpper(prefix),
     name,
     dataType.filter(hasVal).join(' '),
     firstAfter && `${toUpper(firstAfter.keyword)} ${columnRefToSQL(firstAfter.column)}`,
