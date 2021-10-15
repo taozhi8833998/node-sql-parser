@@ -344,6 +344,11 @@ describe('Command SQL', () => {
         expect(getParsedSql(sql)).to.equal(`ALTER TABLE \`oldTable\` RENAME ${kw.toUpperCase()} \`newTable\``)
       })
     })
+
+    it(`should support MySQL rename column`, () => {
+      expect(getParsedSql('alter table a rename column id to player_id'))
+        .to.equal('ALTER TABLE `a` RENAME COLUMN `id` TO `player_id`');
+    });
   })
 
   describe('set', () => {
