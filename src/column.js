@@ -38,7 +38,7 @@ function columnRefToSQL(expr) {
 function columnDataType(definition) {
   const { dataType, length, suffix, scale, expr } = definition || {}
   let result = dataType
-  if (length) result += `(${[length, scale].filter(hasVal).join(', ')})`
+  if (length != null) result += `(${[length, scale].filter(val => val != null).join(', ')})`
   if (suffix && suffix.length) result += ` ${suffix.join(' ')}`
   if (expr) result += exprToSQL(expr)
   return result
