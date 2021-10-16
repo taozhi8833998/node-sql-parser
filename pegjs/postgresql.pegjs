@@ -2688,6 +2688,21 @@ param
       return { type: 'param', value: l[1] };
     }
 
+on_update_current_timestamp
+  = KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN{
+    return {
+      type: 'on update',
+      keyword: kw,
+      parentheses: true,
+      expr: l
+    }
+  }
+  / KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP {
+    return {
+      type: 'on update',
+      keyword: kw,
+    }
+  }
 
 over_partition
   = 'OVER'i __ aws:as_window_specification {
@@ -2704,6 +2719,7 @@ over_partition
       orderby: l
     }
   }
+  / on_update_current_timestamp
 
 aggr_func
   = aggr_fun_count
@@ -2859,11 +2875,11 @@ func_call
       };
     }
   / extract_func
-  / f:KW_CURRENT_TIMESTAMP __ up:('ON UPDATE CURRENT_TIMESTAMP'i)? {
-    // => { type: 'origin'; value: string; }
+  / f:KW_CURRENT_TIMESTAMP __ up:on_update_current_timestamp? {
     return {
-      type: 'origin',
-      value: (up ? `${f} ${up}` : f).toLowerCase()
+        type: 'function',
+        name: f,
+        over: up
     }
   }
 
