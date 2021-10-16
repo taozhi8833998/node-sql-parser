@@ -2395,6 +2395,31 @@ KW_AGGR_FUNC_NO_ARG
 KW_AGGR_FUNC_STR_ARG
   = KW_LISTAGG
 
+on_update_current_timestamp
+  = KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN{
+    return {
+      type: 'on update',
+      keyword: kw,
+      parentheses: true,
+      expr: l
+    }
+  }
+  / KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP {
+    return {
+      type: 'on update',
+      keyword: kw,
+    }
+  }
+
+over_partition
+  = 'OVER'i __ LPAREN __ KW_PARTITION __ KW_BY __ bc:column_clause __ l:order_by_clause? __ RPAREN {
+    return {
+      partitionby: bc,
+      orderby: l
+    }
+  }
+  / on_update_current_timestamp
+
 aggr_fun_count
   = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN {
     // => { type: 'aggr_func'; name: 'COUNT'; args:count_arg; }
@@ -2414,12 +2439,13 @@ star_expr
   = "*" { /* => { type: 'star'; value: '*' } */ return { type: 'star', value: '*' }; }
 
 func_call
-  = name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN {
+  = name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       // => { type: 'function'; name: string; args: expr_list; }
       return {
         type: 'function',
         name: name,
-        args: l ? l: { type: 'expr_list', value: [] }
+        args: l ? l: { type: 'expr_list', value: [] },
+        over: bc,
       };
     }
   / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN {
@@ -2431,10 +2457,11 @@ func_call
       };
     }
   / extract_func
-  / f:KW_CURRENT_TIMESTAMP __ up:('ON UPDATE CURRENT_TIMESTAMP'i)? {
+  / f:KW_CURRENT_TIMESTAMP __ up:on_update_current_timestamp? {
     return {
-      type: 'origin',
-      value: (up ? `${f} ${up}` : f).toLowerCase()
+        type: 'function',
+        name: f,
+        over: up
     }
   }
 

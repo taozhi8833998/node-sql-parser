@@ -2046,6 +2046,21 @@ aggr_fun_smma
 KW_SUM_MAX_MIN_AVG
   = KW_SUM / KW_MAX / KW_MIN / KW_AVG
 
+on_update_current_timestamp
+  = KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN{
+    return {
+      type: 'on update',
+      keyword: kw,
+      parentheses: true,
+      expr: l
+    }
+  }
+  / KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP {
+    return {
+      type: 'on update',
+      keyword: kw,
+    }
+  }
 over_partition
   = KW_OVER __ LPAREN __ KW_PARTITION __ KW_BY __ bc:column_clause __ l:order_by_clause? __ RPAREN {
     return {
@@ -2053,6 +2068,7 @@ over_partition
       orderby: l
     }
   }
+  / on_update_current_timestamp
 aggr_fun_count
   = name:(KW_COUNT / KW_GROUP_CONCAT) __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
       return {
@@ -2088,10 +2104,11 @@ func_call
         over: bc
       };
     }
-  / f:KW_CURRENT_TIMESTAMP __ up:('ON UPDATE CURRENT_TIMESTAMP'i)? {
+  / f:KW_CURRENT_TIMESTAMP __ up:on_update_current_timestamp? {
     return {
-      type: 'origin',
-      value: (up ? `${f} ${up}` : f).toLowerCase()
+        type: 'function',
+        name: f,
+        over: up
     }
   }
 
