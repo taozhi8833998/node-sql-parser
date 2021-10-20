@@ -2694,6 +2694,7 @@ param
 
 on_update_current_timestamp
   = KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN{
+    // => { type: 'on update'; keyword: string; parentheses: boolean; expr: expr }
     return {
       type: 'on update',
       keyword: kw,
@@ -2702,6 +2703,7 @@ on_update_current_timestamp
     }
   }
   / KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP {
+    // => { type: 'on update'; keyword: string; }
     return {
       type: 'on update',
       keyword: kw,
@@ -2880,6 +2882,7 @@ func_call
     }
   / extract_func
   / f:KW_CURRENT_TIMESTAMP __ up:on_update_current_timestamp? {
+    // => { type: 'function'; name: string; over?: on_update_current_timestamp; }
     return {
         type: 'function',
         name: f,
