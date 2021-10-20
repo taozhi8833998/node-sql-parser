@@ -728,7 +728,7 @@ export type between_or_not_between_op = 'NOT BETWEEN' | KW_BETWEEN;
 
 
 
-export type like_op = 'LIKE' | KW_LIKE | KW_ILIKE;
+export type like_op = 'LIKE' | KW_LIKE | KW_ILIKE | 'SIMILAR TO';
 
 
 
@@ -798,7 +798,9 @@ type column_part = never;
 
 export type param = { type: 'param'; value: ident_name };
 
-export type over_partition = { type: 'windows'; as_window_specification: as_window_specification } | { partitionby: partition_by_clause; orderby: order_by_clause };
+export type on_update_current_timestamp = { type: 'on update'; keyword: string; parentheses: boolean; expr: expr } | { type: 'on update'; keyword: string; };
+
+export type over_partition = { type: 'windows'; as_window_specification: as_window_specification } | { partitionby: partition_by_clause; orderby: order_by_clause } | on_update_current_timestamp;
 
 export type aggr_func = aggr_fun_count | aggr_fun_smma | aggr_array_agg;
 
@@ -840,7 +842,7 @@ export type aggr_array_agg = { type: 'aggr_func'; args:count_arg; name: 'ARRAY_A
 
 export type star_expr = { type: 'star'; value: '*' };
 
-export type func_call = { type: 'function'; name: string; args: expr_list; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'origin'; value: string; };
+export type func_call = { type: 'function'; name: string; args: expr_list; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; };
 
 export type extract_filed = "CENTURY" | "DAY" | "DECADE" | "DOW" | "DOY" | "EPOCH" | "HOUR" | "ISODOW" | "ISOYEAR" | "MICROSECONDS" | "MILLENNIUM" | "MILLISECONDS" | "MINUTE" | "MONTH" | "QUARTER" | "SECOND" | "TIMEZONE" | "TIMEZONE_HOUR" | "TIMEZONE_MINUTE" | "WEEK" | 'string';
 
