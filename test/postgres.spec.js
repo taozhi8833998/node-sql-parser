@@ -394,6 +394,13 @@ describe('Postgres', () => {
         `SELECT MODE() WITHIN GROUP (ORDER BY "a" ASC) AS "p25" FROM (VALUES (0), (0), (1), (2), (3), (4)) AS "t(a)"`
       ]
     },
+    {
+      title: 'similar to keyword in pg',
+      sql: [
+        `select name similar to 'John%' from (values ('John Doe'),('Jane Doe'),('Bob John')) as t(name)`,
+        `SELECT "name" SIMILAR TO 'John%' FROM (VALUES ('John Doe'), ('Jane Doe'), ('Bob John')) AS "t(name)"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

@@ -2486,6 +2486,10 @@ like_op
   = nk:(KW_NOT __ (KW_LIKE / KW_ILIKE)) { /* => 'LIKE' */ return nk[0] + ' ' + nk[2]; }
   / KW_LIKE
   / KW_ILIKE
+  / 'SIMILAR'i __ KW_TO {
+    // => 'SIMILAR TO'
+    return 'SIMILAR TO'
+  }
 
 
 in_op
