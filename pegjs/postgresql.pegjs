@@ -214,6 +214,7 @@ cmd_stmt
   / alter_stmt
   / set_stmt
   / lock_stmt
+  / show_stmt
 
 create_stmt
   = create_table_stmt
@@ -1535,14 +1536,33 @@ call_stmt
       type: 'call';
       expr: proc_func_call;
     }
-       => AstStatement<call_stmt_node>
-       */
+    => AstStatement<call_stmt_node>
+    */
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
       ast: {
         type: 'call',
         expr: e
+      }
+    }
+  }
+
+show_stmt
+  = KW_SHOW __ 'TABLES'i {
+    return {
+      /*
+        export interface show_stmt_node {
+          type: 'show';
+          keyword: 'tables';
+        }
+        => AstStatement<show_stmt_node>
+       */
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'show',
+        keyword: 'tables'
       }
     }
   }

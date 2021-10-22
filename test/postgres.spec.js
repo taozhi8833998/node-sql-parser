@@ -401,6 +401,13 @@ describe('Postgres', () => {
         `SELECT "name" SIMILAR TO 'John%' FROM (VALUES ('John Doe'), ('Jane Doe'), ('Bob John')) AS "t(name)"`
       ]
     },
+    {
+      title: 'show tables',
+      sql: [
+        `show tables`,
+        `SHOW TABLES`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
