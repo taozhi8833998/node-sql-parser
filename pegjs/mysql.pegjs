@@ -2087,8 +2087,30 @@ count_arg
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
+convert_args
+  = c:column_ref __ COMMA __ d:data_type {
+    return {
+      type: 'expr_list',
+      value: [c, { value: d.dataType.toUpperCase() }]
+    }
+  }
+  / c:column_ref __ KW_USING __ d:ident_name {
+    c.suffix = `USING ${d}`
+    return {
+      type: 'expr_list',
+      value: [c]
+    }
+  }
+
 func_call
-  = name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
+  = 'convert'i __ LPAREN __ l:convert_args __ RPAREN {
+    return {
+        type: 'function',
+        name: 'CONVERT',
+        args: l
+    };
+  }
+  / name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
@@ -2637,6 +2659,7 @@ proc_func_name
       }
       return name;
     }
+    / KW_LEFT { return 'LEFT' }
 
 proc_func_call
   = name:proc_func_name __ LPAREN __ l:proc_primary_list? __ RPAREN {
