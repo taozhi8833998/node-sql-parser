@@ -103,7 +103,6 @@ describe('select', () => {
 
   it('should have appropriate types', () => {
     const ast = parser.astify('SELECT SQL_NO_CACHE DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit 3');
-
     expect(ast.options).to.be.an('array');
     expect(ast.distinct).to.equal('DISTINCT');
     expect(ast.from).to.be.an('array');
@@ -668,6 +667,14 @@ describe('select', () => {
       expect(ast.groupby).to.be.null;
       expect(ast.orderby).to.be.null;
       expect(ast.limit).to.be.null;
+    })
+    it('should support left and covert fun', () => {
+      expect(getParsedSql(`select * from test where LEFT(column,2)="ts";`))
+        .to.equal("SELECT * FROM `test` WHERE LEFT(`column`, 2) = 'ts'")
+      expect(getParsedSql(`select * from test where CONVERT(column, DATE)="test";`))
+        .to.equal("SELECT * FROM `test` WHERE CONVERT(`column`, DATE) = 'test'")
+      expect(getParsedSql(`select * from test where CONVERT(column using utf8)="test";`))
+        .to.equal("SELECT * FROM `test` WHERE CONVERT(`column` USING UTF8) = 'test'")
     })
   })
 
