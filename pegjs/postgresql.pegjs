@@ -1707,7 +1707,10 @@ expr_item
     return e
   }
 column_list_item
-  = e:expr_item s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
+  = c:string_constants_escape {
+    return { expr: c, as: null }
+  }
+  / e:expr_item s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; }
     return {
       as: alias,
@@ -2592,8 +2595,17 @@ primary
     }
   }
 
+string_constants_escape
+  = 'E'i"'" __ n:single_char* __ "'" {
+    return {
+      type: 'origin',
+      value: `E'${n.join('')}'`
+    }
+  }
+
 column_ref
-  = tbl:ident __ DOT __ STAR {
+  = string_constants_escape
+  / tbl:ident __ DOT __ STAR {
     // => IGNORE
       columnList.add(`select::${tbl}::(.*)`);
       return {

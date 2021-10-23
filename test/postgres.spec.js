@@ -430,6 +430,13 @@ describe('Postgres', () => {
         `SELECT 'foobar'`
       ]
     },
+    {
+      title: 'String Constants with C-Style Escapes',
+      sql: [
+        `SELECT E'\\''`,
+        `SELECT E'\''`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
