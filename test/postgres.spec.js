@@ -408,6 +408,28 @@ describe('Postgres', () => {
         `SHOW TABLES`
       ]
     },
+    {
+      title: 'String Constants',
+      sql: [
+        `select ''''`,
+        `SELECT ''''`
+      ]
+    },
+    {
+      title: 'String Constants',
+      sql: [
+        `SELECT '''To be, or not'', it starts.' AS x;`,
+        `SELECT '''To be, or not'', it starts.' AS "x"`
+      ]
+    },
+    {
+      title: 'String Constants',
+      sql: [
+        `SELECT 'foo'
+        'bar';`,
+        `SELECT 'foobar'`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
