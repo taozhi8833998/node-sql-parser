@@ -200,6 +200,10 @@ describe('AST', () => {
                     `SELECT CAST('{"foo":"bar"}' AS JSON) FROM dual`,
                     `SELECT CAST('{"foo":"bar"}' AS JSON) FROM DUAL`
                 ],
+                'binary casts':  [
+                    `SELECT CAST(a AS BINARY) FROM t`,
+                    'SELECT CAST(`a` AS BINARY) FROM `t`'
+                ],
             };
             Object.keys(castQueries).forEach(cast => {
                 const [inputQuery, expectedQuery] = castQueries[cast];

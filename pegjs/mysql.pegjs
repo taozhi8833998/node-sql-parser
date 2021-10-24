@@ -2918,9 +2918,14 @@ data_type
   / text_type
   / enum_type
   / boolean_type
+  / binary_type
 
 boolean_type
   = 'boolean'i { return { dataType: 'BOOLEAN' }; }
+
+binary_type
+  = 'binary'i { return { dataType: 'BINARY' }; }
+  / 'varbinary'i { return { dataType: 'VARBINARY' }; }
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
