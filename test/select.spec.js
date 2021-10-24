@@ -599,7 +599,7 @@ describe('select', () => {
       });
     });
 
-    ['exists', 'not exists'].forEach((operator) => {
+    ['not exists'].forEach((operator) => {
       it('should parse ' + operator.toUpperCase() + ' condition', () => {
         const ast = parser.astify(`SELECT * FROM t WHERE ${operator} (SELECT 1)`);
         expect(ast.where).to.eql({
@@ -625,6 +625,43 @@ describe('select', () => {
             parentheses: true
           }
         });
+      });
+    });
+
+    it('should parse exists condition', () => {
+      const operator = 'EXISTS'
+      const ast = parser.astify(`SELECT * FROM t WHERE ${operator} (SELECT 1)`);
+      expect(ast.where).to.eql({
+        "type": "function",
+        "name": "EXISTS",
+        "args": {
+            "type": "expr_list",
+            "value": [
+              {
+                  "with": null,
+                  "type": "select",
+                  "options": null,
+                  "distinct": null,
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "number",
+                        "value": 1
+                      },
+                        "as": null
+                    }
+                  ],
+                  "from": null,
+                  "where": null,
+                  "groupby": null,
+                  "having": null,
+                  "orderby": null,
+                  "limit": null,
+                  "for_update": null
+              }
+            ]
+        },
+        "over": null
       });
     });
 

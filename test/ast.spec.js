@@ -18,7 +18,7 @@ describe('AST', () => {
             expect(getParsedSql('SELECT SQL_CALC_FOUND_ROWS SQL_BUFFER_RESULT col1 FROM t'))
                 .to.equal('SELECT SQL_CALC_FOUND_ROWS SQL_BUFFER_RESULT `col1` FROM `t`');
         });
-        it('should support MySQL query options', () => {
+        it('should support MySQL query options function', () => {
             expect(getParsedSql(`SELECT xx.dd, Max(IF(stat_key = 'yys', stat_us, 0)) AS 'yys_users' FROM waf.t_cpkg WHERE stat_ty = 'waf_ty' GROUP BY dd;`))
                 .to.equal("SELECT `xx`.`dd`, MAX(IF(`stat_key` = 'yys', `stat_us`, 0)) AS `yys_users` FROM `waf`.`t_cpkg` WHERE `stat_ty` = 'waf_ty' GROUP BY `dd`");
         });
@@ -521,11 +521,17 @@ describe('AST', () => {
                     .to.equal('SELECT `col1` FROM `t` WHERE `col2` IN (1, 3, 5, 7)');
             });
 
-            ['EXISTS', 'NOT EXISTS'].forEach((operator) => {
+            ['NOT EXISTS'].forEach((operator) => {
                 it(`should support ${operator} operator`, () => {
                     expect(getParsedSql(`SELECT a FROM t WHERE ${operator} (SELECT 1)`))
                         .to.equal(`SELECT \`a\` FROM \`t\` WHERE ${operator} (SELECT 1)`);
                 });
+            });
+
+            it(`should support exists operator`, () => {
+                const operator = 'EXISTS'
+                expect(getParsedSql(`SELECT a FROM t WHERE ${operator} (SELECT 1)`))
+                    .to.equal(`SELECT \`a\` FROM \`t\` WHERE ${operator}(SELECT 1)`);
             });
 
             it('should support row value constructors', () => {
@@ -958,12 +964,18 @@ describe('AST', () => {
                     .to.equal('DELETE `col1` FROM `t` WHERE `col2` IN (1, 3, 5, 7)');
             });
 
-            ['EXISTS', 'NOT EXISTS'].forEach((operator) => {
+            ['NOT EXISTS'].forEach((operator) => {
                 it(`should support ${operator} operator`, () => {
                     expect(getParsedSql(`DELETE a FROM t WHERE ${operator} (SELECT 1)`))
                         .to.equal(`DELETE \`a\` FROM \`t\` WHERE ${operator} (SELECT 1)`);
                 });
             })
+
+            it(`should support exists operator`, () => {
+                const operator = 'EXISTS'
+                expect(getParsedSql(`DELETE a FROM t WHERE ${operator} (SELECT 1)`))
+                    .to.equal(`DELETE \`a\` FROM \`t\` WHERE ${operator}(SELECT 1)`);
+            });
         });
 
         it('should support JOINs', () => {
@@ -1108,12 +1120,18 @@ describe('AST', () => {
                     .to.equal('UPDATE `t` SET \`col1\` = 5 WHERE `col2` IN (1, 3, 5, 7)');
             });
 
-            ['EXISTS', 'NOT EXISTS'].forEach((operator) => {
+            ['NOT EXISTS'].forEach((operator) => {
                 it(`should support ${operator} operator`, () => {
                     expect(getParsedSql(`UPDATE a SET col1 = 5 WHERE ${operator} (SELECT 1)`))
                         .to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE ${operator} (SELECT 1)`);
                 });
             })
+
+            it(`should support exists operator`, () => {
+                const operator = 'EXISTS'
+                expect(getParsedSql(`UPDATE a SET col1 = 5 WHERE ${operator} (SELECT 1)`))
+                    .to.equal(`UPDATE \`a\` SET \`col1\` = 5 WHERE ${operator}(SELECT 1)`);
+            });
         });
 
 
