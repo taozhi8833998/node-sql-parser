@@ -408,6 +408,35 @@ describe('Postgres', () => {
         `SHOW TABLES`
       ]
     },
+    {
+      title: 'String Constants',
+      sql: [
+        `select ''''`,
+        `SELECT ''''`
+      ]
+    },
+    {
+      title: 'String Constants',
+      sql: [
+        `SELECT '''To be, or not'', it starts.' AS x;`,
+        `SELECT '''To be, or not'', it starts.' AS "x"`
+      ]
+    },
+    {
+      title: 'String Constants',
+      sql: [
+        `SELECT 'foo'
+        'bar';`,
+        `SELECT 'foobar'`
+      ]
+    },
+    {
+      title: 'String Constants with C-Style Escapes',
+      sql: [
+        `SELECT E'\\''`,
+        `SELECT E'\''`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
