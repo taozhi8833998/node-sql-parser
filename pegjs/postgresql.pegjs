@@ -1708,6 +1708,7 @@ expr_item
   }
 column_list_item
   = c:string_constants_escape {
+    // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
   / e:expr_item s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
@@ -2605,6 +2606,7 @@ primary
 
 string_constants_escape
   = 'E'i"'" __ n:single_char* __ "'" {
+    // => { type: 'origin'; value: string; }
     return {
       type: 'origin',
       value: `E'${n.join('')}'`
