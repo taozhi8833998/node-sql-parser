@@ -1354,7 +1354,7 @@ on_clause
   = KW_ON __ e:expr { return e; }
 
 where_clause
-  = KW_WHERE __ e:(or_and_where_expr / expr) { return e; }
+  = KW_WHERE __ e:(or_and_where_expr) { return e; }
 
 group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list { return e.value; }
@@ -1587,14 +1587,25 @@ interval_expr
 
 case_expr
   = KW_CASE                         __
-    expr:expr?                      __
     condition_list:case_when_then+  __
     otherwise:case_else?            __
     KW_END __ KW_CASE? {
       if (otherwise) condition_list.push(otherwise);
       return {
         type: 'case',
-        expr: expr || null,
+        expr: null,
+        args: condition_list
+      };
+    }
+  / KW_CASE                         __
+    expr:expr                      __
+    condition_list:case_when_then+  __
+    otherwise:case_else?            __
+    KW_END __ KW_CASE? {
+      if (otherwise) condition_list.push(otherwise);
+      return {
+        type: 'case',
+        expr: expr,
         args: condition_list
       };
     }
@@ -1642,16 +1653,9 @@ unary_expr
   }
 
 or_and_where_expr
-	= head:parentheses_or_expr tail:(__ (KW_AND / KW_OR) __ parentheses_or_expr)* {
+	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
     return createBinaryExprChain(head, tail);
 }
-
-parentheses_or_expr
-  = lf:LPAREN __ head:or_expr __ rt:RPAREN {
-    head.parentheses = true
-    return head
-  }
-  / or_expr
 
 or_expr
   = head:and_expr tail:(___ KW_OR __ and_expr)* {
@@ -2553,9 +2557,14 @@ data_type
   / text_type
   / enum_type
   / boolean_type
+  / binary_type
 
 boolean_type
   = 'boolean'i { return { dataType: 'BOOLEAN' }; }
+
+binary_type
+  = 'binary'i { return { dataType: 'BINARY' }; }
+  / 'varbinary'i { return { dataType: 'VARBINARY' }; }
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
