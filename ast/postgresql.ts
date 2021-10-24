@@ -7,7 +7,7 @@
 
 export type start = multiple_stmt | cmd_stmt | crud_stmt;
 
-export type cmd_stmt = drop_stmt | create_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt;
+export type cmd_stmt = drop_stmt | create_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt | show_stmt;
 
 export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence | create_db_stmt;
 
@@ -448,6 +448,13 @@ export interface call_stmt_node {
 
 export type call_stmt = AstStatement<call_stmt_node>;
 
+export interface show_stmt_node {
+          type: 'show';
+          keyword: 'tables';
+        }
+
+export type show_stmt = AstStatement<show_stmt_node>;
+
 export interface select_stmt_node extends select_stmt_nake  {
        parentheses_symbol: true;
       }
@@ -486,7 +493,7 @@ export type array_index = { brackets: boolean, number: number };
 
 export type expr_item = expr & { array_index: array_index };
 
-export type column_list_item = { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; } | { type: 'star_ref'; expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
+export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; } | { type: 'star_ref'; expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
 
 
 
@@ -547,7 +554,7 @@ export type on_clause = expr;
 
 
 
-export type where_clause = expr;
+export type where_clause = binary_expr;
 
 
 
@@ -656,9 +663,16 @@ export type interval_expr = { type: 'interval', expr: expr; unit: interval_unit;
 
 
 
+
+
 export type case_expr = {
           type: 'case';
-          expr?: expr;
+          expr:  null;
+          // nb: Only the last element is a case_else
+          args: (case_when_then | case_else)[];
+        } | {
+          type: 'case';
+          expr: expr;
           // nb: Only the last element is a case_else
           args: (case_when_then | case_else)[];
         };
@@ -695,8 +709,6 @@ export type unary_expr = {
     };
 
 export type or_and_where_expr = binary_expr;
-
-export type parentheses_or_expr = binary_expr | or_expr;
 
 export type or_expr = binary_expr;
 
@@ -750,9 +762,11 @@ export type multiplicative_operator = "*" | "/" | "%";
 
 export type primary = cast_expr | literal | aggr_func | window_func | func_call | case_expr | interval_expr | column_ref | param | expr | binary_expr | expr_list | var_decl | { type: 'origin'; value: string; };
 
+export type string_constants_escape = { type: 'origin'; value: string; };
 
 
-export type column_ref = {
+
+export type column_ref = string_constants_escape | {
         type: 'column_ref';
         table: ident;
         column: column | '*';
