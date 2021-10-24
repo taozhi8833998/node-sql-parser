@@ -1746,9 +1746,6 @@ set_item
   = tbl:(ident __ DOT)? __ c:column __ '=' __ v:additive_expr {
       return { column: c, value: v, table: tbl && tbl[0] };
   }
-  / tbl:(ident __ DOT)? __ c:column __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
-      return { column: c, value: v, table: tbl && tbl[0], keyword: 'values' };
-  }
 
 insert_value_clause
   = value_clause
@@ -2840,7 +2837,11 @@ proc_func_name
       }
       return name;
     }
-    / ident_name
+    / n:ident_name {
+      const upperName = n.toUpperCase()
+      if (reservedMap[upperName] === true) return upperName
+      return n
+    }
     / quoted_ident
 
 proc_func_call
