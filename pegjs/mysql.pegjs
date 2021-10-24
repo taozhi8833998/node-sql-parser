@@ -6,94 +6,275 @@
     'AND': true,
     'AS': true,
     'ASC': true,
+    'ANALYZE': true,
+    'ACCESSIBLE': true,
 
+    'BEFORE': true,
     'BETWEEN': true,
+    'BIGINT': true,
+    'BLOB': true,
+    'BOTH': true,
     'BY': true,
 
     'CALL': true,
+    'CASCADE': true,
     'CASE': true,
     'CREATE': true,
-    'CONTAINS': true,
+    'CHAR': true,
+    'CHECK': true,
+    'COLLATE': true,
+    // 'COLUMN': true,
+    'CONDITION': true,
+    'CONSTRAINT': true,
+    'CONTINUE': true,
+    'CONVERT': true,
+    'CREATE': true,
+    'CROSS': true,
     'CURRENT_DATE': true,
     'CURRENT_TIME': true,
     'CURRENT_TIMESTAMP': true,
     'CURRENT_USER': true,
+    'CURSOR': true,
 
+    'DATABASE': true,
+    'DATABASES': true,
+    'DAY_HOUR': true,
+    'DAY_MICROSECOND': true,
+    'DAY_MINUTE': true,
+    'DAY_SECOND': true,
+    'DEC': true,
+    'DECIMAL': true,
+    'DECLARE': true,
+    'DEFAULT': true,
+    'DELAYED': true,
     'DELETE': true,
     'DESC': true,
+    'DESCRIBE': true,
+    'DETERMINISTIC': true,
     'DISTINCT': true,
+    'DISTINCTROW': true,
+    'DIV': true,
     'DROP': true,
+    'DOUBLE': true,
+    'DUAL': true,
 
     'ELSE': true,
-    'END': true,
+    'EACH': true,
+    'ELSEIF': true,
+    'ENCLOSED': true,
+    'ESCAPED': true,
+    'EXCEPT': true,
     'EXISTS': true,
+    'EXIT': true,
     'EXPLAIN': true,
 
     'FALSE': true,
-    'FROM': true,
     'FULL': true,
+    'FROM': true,
+    'FETCH': true,
+    'FLOAT': true,
+    'FLOAT4': true,
+    'FLOAT8': true,
+    'FOR': true,
+    'FORCE': true,
+    'FOREIGN': true,
+    'FULLTEXT': true,
+    'FUNCTION': true,
 
+    'GENERATED': true,
+    'GET': true,
+    'GRANT': true,
     'GROUP': true,
+    'GROUPING': true,
+    'GROUPS': true,
 
     'HAVING': true,
+    'HIGH_PRIORITY': true,
+    'HOUR_MICROSECOND': true,
+    'HOUR_MINUTE': true,
+    'HOUR_SECOND': true,
 
+    // 'IF': true,
+    'IGNORE': true,
     'IN': true,
     'INNER': true,
+    'INFILE': true,
+    'INOUT': true,
+    'INSENSITIVE': true,
     'INSERT': true,
+    'INT': true,
+    'INT1': true,
+    'INT2': true,
+    'INT3': true,
+    'INT4': true,
+    'INT8': true,
+    'INTEGER': true,
+    'INTERVAL': true,
     'INTO': true,
+    'IO_AFTER_GTIDS': true,
+    'IO_BEFORE_GTIDS': true,
     'IS': true,
+    'ITERATE': true,
 
     'JOIN': true,
-    'JSON': true,
+    'JSON_TABLE': true,
 
     'KEY': true,
+    'KEYS': true,
+    'KILL': true,
 
+    'LAG': true, // added in 8.0.2 (reserved)
+    'LAST_VALUE': true,
+    'LATERAL': true,
+    'LEAD': true,
+    'LEADING': true,
+    'LEAVE': true,
     'LEFT': true,
     'LIKE': true,
     'LIMIT': true,
+    'LINEAR': true,
+    'LINES': true,
+    'LOAD': true,
+    'LOCALTIME': true,
+    'LOCALTIMESTAMP': true,
+    'LOCK': true,
+    'LONG': true,
+    'LONGBLOB': true,
+    'LONGTEXT': true,
+    'LOOP': true,
     'LOW_PRIORITY': true, // for lock table
 
-    'NOT': true,
-    'NULL': true,
+    'MASTER_BIND': true,
+    'MATCH': true,
+    'MAXVALUE': true,
+    'MEDIUMBLOB': true,
+    'MEDIUMINT': true,
+    'MEDIUMTEXT': true,
+    'MIDDLEINT': true,
+    'MINUTE_MICROSECOND': true,
+    'MINUTE_SECOND': true,
+    'MOD': true,
+    'MODIFIES': true,
 
+
+    'NATURAL': true,
+    'NOT': true,
+    'NO_WRITE_TO_BINLOG': true,
+    'NTH_VALUE': true, // added in 8.0.2 (reserved)
+    'NTILE': true, // added in 8.0.2 (reserved)
+    'NULL': true,
+    'NUMERIC': true,
+
+    'OF': true, // added in 8.0.1 (reserved)
     'ON': true,
+    'OPTIMIZE': true,
+    'OPTIMIZER_COSTS': true,
+    'OPTION': true,
+    'OPTIONALLY': true,
     'OR': true,
     'ORDER': true,
+    'OUT': true,
     'OUTER': true,
+    'OUTFILE': true,
+    'OVER': true, // added in 8.0.2 (reserved)
 
-    'RECURSIVE': true,
-    'RENAME': true,
+    'PARTITION': true,
+    'PERCENT_RANK': true, // added in 8.0.2 (reserved)
+    'PRECISION': true,
+    'PRIMARY': true,
+    'PROCEDURE': true,
+    'PURGE': true,
+
+    'RANGE': true,
+    'RANK': true, // added in 8.0.2 (reserved)
     'READ': true, // for lock table
+    'READS': true, // for lock table
+    'READ_WRITE': true, // for lock table
+    'REAL': true, // for lock table
+    'RECURSIVE': true,
+    'REFERENCES': true,
+    'REGEXP': true,
+    'RELEASE': true,
+    'RENAME': true,
+    'REPEAT': true,
+    'REPLACE': true,
+    'REQUIRE': true,
+    'RESIGNAL': true,
+    'RESTRICT': true,
+    'RETURN': true,
+    'REVOKE': true,
     'RIGHT': true,
+    'RLIKE': true,
+    'ROW': true, // // added in 8.0.2 (reserved)
+    'ROWS': true, // // added in 8.0.2 (reserved)
+    'ROW_NUMBER': true, // // added in 8.0.2 (reserved)
 
+    'SCHEMA': true,
+    'SCHEMAS': true,
     'SELECT': true,
-    'SESSION_USER': true,
+    'SENSITIVE': true,
+    'SEPARATOR': true,
     'SET': true,
     'SHOW': true,
-    'SYSTEM_USER': true,
+    'SIGNAL': true,
+    'SMALLINT': true,
+    'SPATIAL': true,
+    'SPECIFIC': true,
+    'SQL': true,
+    'SQLEXCEPTION': true,
+    'SQLSTATE': true,
+    'SQLWARNING': true,
+    'SQL_BIG_RESULT': true,
+    // 'SQL_CALC_FOUND_ROWS': true,
+    // 'SQL_SMALL_RESULT': true,
+    'SSL': true,
+    'STARTING': true,
+    'STORED': true,
+    'STRAIGHT_JOIN': true,
+    'SYSTEM': true,
 
     'TABLE': true,
+    'TERMINATED': true,
     'THEN': true,
+    'TINYBLOB': true,
+    'TINYINT': true,
+    'TINYTEXT': true,
+    'TO': true,
+    'TRAILING': true,
+    'TRIGGER': true,
     'TRUE': true,
-    'TRUNCATE': true,
-    // 'TYPE': true,   // reserved (MySQL)
 
     'UNION': true,
+    'UNIQUE': true,
+    'UNLOCK': true,
+    'UNSIGNED': true,
     'UPDATE': true,
+    'USAGE': true,
+    'USE': true,
     'USING': true,
+    'UTC_DATE': true,
+    'UTC_TIME': true,
+    'UTC_TIMESTAMP': true,
 
     'VALUES': true,
+    'VARBINARY': true,
+    'VARCHAR': true,
+    'VARCHARACTER': true,
+    'VARYING': true,
+    'VIRTUAL': true,
 
-    'WITH': true,
     'WHEN': true,
     'WHERE': true,
+    'WHILE': true,
+    'WINDOW': true, // added in 8.0.2 (reserved)
+    'WITH': true,
     'WRITE': true, // for lock table
 
-    'GLOBAL': true,
-    'SESSION': true,
-    'LOCAL': true,
-    'PERSIST': true,
-    'PERSIST_ONLY': true,
+    'XOR': true,
+
+    'YEAR_MONTH': true,
+
+    'ZEROFILL': true,
   };
 
   function createUnaryExpr(op, e) {
@@ -1565,9 +1746,6 @@ set_item
   = tbl:(ident __ DOT)? __ c:column __ '=' __ v:additive_expr {
       return { column: c, value: v, table: tbl && tbl[0] };
   }
-  / tbl:(ident __ DOT)? __ c:column __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
-      return { column: c, value: v, table: tbl && tbl[0], keyword: 'values' };
-  }
 
 insert_value_clause
   = value_clause
@@ -2659,7 +2837,12 @@ proc_func_name
       }
       return name;
     }
-    / KW_LEFT { return 'LEFT' }
+    / n:ident_name {
+      const upperName = n.toUpperCase()
+      if (reservedMap[upperName] === true) return upperName
+      return n
+    }
+    / quoted_ident
 
 proc_func_call
   = name:proc_func_name __ LPAREN __ l:proc_primary_list? __ RPAREN {
