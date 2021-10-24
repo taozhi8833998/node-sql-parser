@@ -694,6 +694,11 @@ describe('AST', () => {
                 sql = `select case FUNC(a) when 1 then 'one' when 2 then 'two' else 'more' END FROM t`;
                 expect(getParsedSql(sql)).to.equal(`SELECT CASE FUNC(\`a\`) WHEN 1 THEN 'one' WHEN 2 THEN 'two' ELSE 'more' END FROM \`t\``);
             });
+
+            it('should support case-when with parenthesis', () => {
+                sql = `SELECT CASE WHEN (a - b) = 1 THEN 1 ELSE 0 END FROM t`;
+                expect(getParsedSql(sql)).to.equal('SELECT CASE WHEN (`a` - `b`) = 1 THEN 1 ELSE 0 END FROM `t`');
+            });
         });
 
         describe('if function', () => {

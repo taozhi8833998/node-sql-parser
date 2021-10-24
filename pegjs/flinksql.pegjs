@@ -2047,16 +2047,9 @@ unary_expr
   }
 
 or_and_where_expr
-	= head:parentheses_or_expr tail:(__ (KW_AND / KW_OR) __ parentheses_or_expr)* {
+	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
     return createBinaryExprChain(head, tail);
 }
-
-parentheses_or_expr
-  = lf:LPAREN __ head:or_expr __ rt:RPAREN {
-    head.parentheses = true
-    return head
-  }
-  / or_expr
 
 or_expr
   = head:and_expr tail:(___ KW_OR __ and_expr)* {
