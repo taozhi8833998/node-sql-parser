@@ -766,7 +766,15 @@ export type string_constants_escape = { type: 'origin'; value: string; };
 
 
 
+
+
 export type column_ref = string_constants_escape | {
+        type: 'column_ref';
+        table: string;
+        column: column | '*';
+        arrow?: '->>' | '->';
+        property?: literal_string | literal_numeric;
+      } | {
         type: 'column_ref';
         table: ident;
         column: column | '*';

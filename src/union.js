@@ -32,6 +32,7 @@ const typeToSQLFn = {
   insert   : insertToSQL,
   drop     : commonCmdToSQL,
   truncate : commonCmdToSQL,
+  replace  : insertToSQL,
   declare  : declareToSQL,
   use      : useToSQL,
   rename   : renameToSQL,

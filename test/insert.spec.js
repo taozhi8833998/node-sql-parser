@@ -4,6 +4,11 @@ const Parser = require('../src/parser').default
 describe('insert', () => {
     const parser = new Parser();
 
+    function getParsedSql(sql, opt) {
+      const ast = parser.astify(sql, opt);
+      return parser.sqlify(ast, opt);
+    }
+
     it('should parse baisc usage', () => {
       const { tableList, columnList, ast } = parser.parse('INSERT INTO t (col1, col2) VALUES (1, 2)');
       expect(tableList).to.eql(['insert::null::t']);
@@ -161,6 +166,11 @@ describe('insert', () => {
       expect(parser.sqlify(parser.astify(`INSERT INTO \`t\`
       (\`a\`) VALUES
       (X'ax')`))).to.be.equal("INSERT INTO `t` (`a`) VALUES (X'ax')")
+    })
+
+    it('should support replace into', () => {
+      const sql = "REPLACE INTO test (test_column1, test_column2) VALUES ('testvalue1', 'testvalue2')"
+      expect(getParsedSql(sql)).to.be.equal("REPLACE INTO `test` (`test_column1`, `test_column2`) VALUES ('testvalue1','testvalue2')")
     })
 
     describe('support ascii pnCtrl single-char', () => {

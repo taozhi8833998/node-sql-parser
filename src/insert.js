@@ -30,6 +30,7 @@ function partitionToSQL(partition) {
 function insertToSQL(stmt) {
   const {
     table,
+    type,
     prefix = 'into',
     columns,
     values,
@@ -40,7 +41,7 @@ function insertToSQL(stmt) {
     set,
   } = stmt
   const { keyword, set: duplicateSet } = onDuplicateUpdate || {}
-  const clauses = ['INSERT', toUpper(prefix), tablesToSQL(table), partitionToSQL(partition)]
+  const clauses = [toUpper(type), toUpper(prefix), tablesToSQL(table), partitionToSQL(partition)]
   if (Array.isArray(columns)) clauses.push(`(${columns.map(identifierToSql).join(', ')})`)
   clauses.push(commonOptionConnector(Array.isArray(values) ? 'VALUES' : '', valuesToSQL, values))
   clauses.push(commonOptionConnector('SET', setToSQL, set))

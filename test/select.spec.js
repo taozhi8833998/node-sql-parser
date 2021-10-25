@@ -7,7 +7,7 @@ describe('select', () => {
   function getParsedSql(sql, opt) {
     const ast = parser.astify(sql, opt);
     return parser.sqlify(ast, opt);
-}
+  }
 
   it('should be null if empty', () => {
     const ast = parser.astify('SELECT a');
