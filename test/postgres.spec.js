@@ -434,7 +434,7 @@ describe('Postgres', () => {
       title: 'String Constants with C-Style Escapes',
       sql: [
         `SELECT E'\\''`,
-        `SELECT E'\''`
+        `SELECT E'\\''`
       ]
     },
   ]
