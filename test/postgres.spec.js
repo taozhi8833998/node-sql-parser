@@ -437,6 +437,22 @@ describe('Postgres', () => {
         `SELECT E'\\''`
       ]
     },
+    {
+      title: 'schema prefix',
+      sql: [
+        `SELECT "public"."Property"."id",
+          "public"."Property"."title",
+          "public"."Property"."description",
+          "public"."Property"."views",
+          "public"."Property"."saves",
+          "public"."Property"."postcode",
+          "public"."Property"."createdAt"
+        FROM "public"."Property"
+        WHERE 1 = 1
+        ORDER BY "public"."Property"."createdAt"`,
+        `SELECT "public.Property"."id", "public.Property"."title", "public.Property"."description", "public.Property"."views", "public.Property"."saves", "public.Property"."postcode", "public.Property"."createdAt" FROM "public"."Property" WHERE 1 = 1 ORDER BY "public.Property"."createdAt" ASC`
+      ]
+    }
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

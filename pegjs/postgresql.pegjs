@@ -2636,6 +2636,21 @@ column_ref
         property: j
       };
   }
+  / dt:ident schema:(__ DOT __ ident) tbl:(__ DOT __ column) {
+    /* => {
+        type: 'column_ref';
+        table: string;
+        column: column | '*';
+        arrow?: '->>' | '->';
+        property?: literal_string | literal_numeric;
+      } */
+      columnList.add(`select::${dt}.${schema[3]}::${tbl[3]}`);
+      return {
+        type: 'column_ref',
+        table: `${dt}.${schema[3]}`,
+        column: tbl[3]
+      };
+    }
   / tbl:ident __ DOT __ col:column {
       /* => {
         type: 'column_ref';
