@@ -450,7 +450,7 @@ describe('Postgres', () => {
         FROM "public"."Property"
         WHERE 1 = 1
         ORDER BY "public"."Property"."createdAt"`,
-        `SELECT "public.Property"."id", "public.Property"."title", "public.Property"."description", "public.Property"."views", "public.Property"."saves", "public.Property"."postcode", "public.Property"."createdAt" FROM "public"."Property" WHERE 1 = 1 ORDER BY "public.Property"."createdAt" ASC`
+        `SELECT "public"."Property"."id", "public"."Property"."title", "public"."Property"."description", "public"."Property"."views", "public"."Property"."saves", "public"."Property"."postcode", "public"."Property"."createdAt" FROM "public"."Property" WHERE 1 = 1 ORDER BY "public"."Property"."createdAt" ASC`
       ]
     }
   ]

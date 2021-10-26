@@ -2646,19 +2646,21 @@ column_ref
         property: j
       };
   }
-  / dt:ident schema:(__ DOT __ ident) tbl:(__ DOT __ column) {
+  / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) {
     /* => {
         type: 'column_ref';
+        schema: string;
         table: string;
         column: column | '*';
         arrow?: '->>' | '->';
         property?: literal_string | literal_numeric;
       } */
-      columnList.add(`select::${dt}.${schema[3]}::${tbl[3]}`);
+      columnList.add(`select::${schema}.${tbl[3]}::${col[3]}`);
       return {
         type: 'column_ref',
-        table: `${dt}.${schema[3]}`,
-        column: tbl[3]
+        schema: schema,
+        table: tbl[3],
+        column: col[3]
       };
     }
   / tbl:ident __ DOT __ col:column {
