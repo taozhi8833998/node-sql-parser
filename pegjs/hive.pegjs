@@ -1453,9 +1453,25 @@ unary_expr
   }
 
 or_and_where_expr
-	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
-    return createBinaryExprChain(head, tail);
-}
+	= head:expr tail:(__ (KW_AND / KW_OR / COMMA) __ expr)* {
+    let result = head;
+    let seperator = ''
+    for (let i = 0; i < tail.length; i++) {
+      if (tail[i][1] === ',') {
+        seperator = ','
+        if (i === 0) result = [head]
+        result.push(tail[i][3])
+      } else {
+        result = createBinaryExpr(tail[i][1], result, tail[i][3]);
+      }
+    }
+    if (seperator === ',') {
+      const el = { type: 'expr_list' };
+      el.value = result
+      return el
+    }
+    return result;
+  }
 
 or_expr
   = head:and_expr tail:(___ KW_OR __ and_expr)* {
@@ -1580,12 +1596,7 @@ primary
   / interval_expr
   / column_ref
   / param
-  / LPAREN __ e:expr __ RPAREN  tail: (___ (KW_AND / KW_OR) __ or_expr)* {
-      e.parentheses = true;
-      if (!tail || tail.length === 0) return e
-      return createBinaryExprChain(e, tail);
-    }
-  / LPAREN __ list:expr_list __ RPAREN {
+  / LPAREN __ list:or_and_where_expr __ RPAREN {
         list.parentheses = true;
         return list;
     }

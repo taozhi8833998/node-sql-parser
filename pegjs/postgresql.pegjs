@@ -2414,10 +2414,26 @@ unary_expr
   }
 
 or_and_where_expr
-	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
-    // => binary_expr
-    return createBinaryExprChain(head, tail);
-}
+	= head:expr tail:(__ (KW_AND / KW_OR / COMMA) __ expr)* {
+    // => binary_expr | { type: 'expr_list'; value: expr[] }
+    let result = head;
+    let seperator = ''
+    for (let i = 0; i < tail.length; i++) {
+      if (tail[i][1] === ',') {
+        seperator = ','
+        if (i === 0) result = [head]
+        result.push(tail[i][3])
+      } else {
+        result = createBinaryExpr(tail[i][1], result, tail[i][3]);
+      }
+    }
+    if (seperator === ',') {
+      const el = { type: 'expr_list' };
+      el.value = result
+      return el
+    }
+    return result;
+  }
 
 or_expr
   = head:and_expr tail:(___ KW_OR __ and_expr)* {
@@ -2584,14 +2600,8 @@ primary
   / interval_expr
   / column_ref
   / param
-  / LPAREN __ e:expr __ RPAREN  tail: (___ (KW_AND / KW_OR) __ or_expr)* {
-    // => expr | binary_expr
-      e.parentheses = true;
-      if (!tail || tail.length === 0) return e
-      return createBinaryExprChain(e, tail);
-    }
-  / LPAREN __ list:expr_list __ RPAREN {
-    // => expr_list
+  / LPAREN __ list:or_and_where_expr __ RPAREN {
+    // => or_and_where_expr
         list.parentheses = true;
         return list;
     }
@@ -2636,19 +2646,21 @@ column_ref
         property: j
       };
   }
-  / dt:ident schema:(__ DOT __ ident) tbl:(__ DOT __ column) {
+  / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) {
     /* => {
         type: 'column_ref';
+        schema: string;
         table: string;
         column: column | '*';
         arrow?: '->>' | '->';
         property?: literal_string | literal_numeric;
       } */
-      columnList.add(`select::${dt}.${schema[3]}::${tbl[3]}`);
+      columnList.add(`select::${schema}.${tbl[3]}::${col[3]}`);
       return {
         type: 'column_ref',
-        table: `${dt}.${schema[3]}`,
-        column: tbl[3]
+        schema: schema,
+        table: tbl[3],
+        column: col[3]
       };
     }
   / tbl:ident __ DOT __ col:column {

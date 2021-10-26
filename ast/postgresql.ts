@@ -708,7 +708,7 @@ export type unary_expr = {
       parentheses?: boolean;
     };
 
-export type or_and_where_expr = binary_expr;
+export type or_and_where_expr = binary_expr | { type: 'expr_list'; value: expr[] };
 
 export type or_expr = binary_expr;
 
@@ -760,7 +760,7 @@ export type multiplicative_expr = binary_expr;
 
 export type multiplicative_operator = "*" | "/" | "%";
 
-export type primary = cast_expr | literal | aggr_func | window_func | func_call | case_expr | interval_expr | column_ref | param | expr | binary_expr | expr_list | var_decl | { type: 'origin'; value: string; };
+export type primary = cast_expr | literal | aggr_func | window_func | func_call | case_expr | interval_expr | column_ref | param | or_and_where_expr | var_decl | { type: 'origin'; value: string; };
 
 export type string_constants_escape = { type: 'origin'; value: string; };
 
@@ -770,6 +770,7 @@ export type string_constants_escape = { type: 'origin'; value: string; };
 
 export type column_ref = string_constants_escape | {
         type: 'column_ref';
+        schema: string;
         table: string;
         column: column | '*';
         arrow?: '->>' | '->';
