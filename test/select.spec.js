@@ -712,6 +712,12 @@ describe('select', () => {
         .to.equal("SELECT * FROM `test` WHERE CONVERT(`column`, DATE) = 'test'")
       expect(getParsedSql(`select * from test where CONVERT(column using utf8)="test";`))
         .to.equal("SELECT * FROM `test` WHERE CONVERT(`column` USING UTF8) = 'test'")
+      expect(getParsedSql(`SELECT CONVERT('test', CHAR CHARACTER SET utf8mb4);`))
+        .to.equal("SELECT CONVERT(`test`, CHAR CHARACTER SET UTF8MB4)")
+      expect(getParsedSql(`SELECT CONVERT('test', CHAR(10) CHARACTER SET utf8mb4);`))
+        .to.equal("SELECT CONVERT(`test`, CHAR(10) CHARACTER SET UTF8MB4)")
+      expect(getParsedSql(`SELECT CONVERT('test' USING utf8mb4) COLLATE utf8mb4_bin;`))
+        .to.equal("SELECT CONVERT(`test` USING UTF8MB4) COLLATE UTF8MB4_BIN")
     })
   })
 

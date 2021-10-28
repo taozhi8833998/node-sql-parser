@@ -204,6 +204,10 @@ describe('AST', () => {
                     `SELECT CAST(a AS BINARY) FROM t`,
                     'SELECT CAST(`a` AS BINARY) FROM `t`'
                 ],
+                'char casts':  [
+                    `SELECT CAST(test AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_bin;`,
+                    'SELECT CAST(`test` AS CHAR CHARACTER SET UTF8MB4) COLLATE UTF8MB4_BIN'
+                ],
             };
             Object.keys(castQueries).forEach(cast => {
                 const [inputQuery, expectedQuery] = castQueries[cast];
