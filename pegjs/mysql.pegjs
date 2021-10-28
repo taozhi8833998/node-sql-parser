@@ -2282,7 +2282,22 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 convert_args
-  = c:column_ref __ COMMA __ d:data_type {
+  = c:column_ref __ COMMA __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_name {
+    const { dataType, length } = ch
+    let dataTypeStr = dataType
+    if (length !== undefined) dataTypeStr = `${dataTypeStr}(${length})`
+    return {
+      type: 'expr_list',
+      value: [
+        c,
+        {
+          type: 'origin',
+          value: `${dataTypeStr} ${cs} ${v}`
+        }
+      ]
+    }
+  }
+  / c:column_ref __ COMMA __ d:data_type {
     return {
       type: 'expr_list',
       value: [c, { value: d.dataType.toUpperCase() }]
@@ -2297,11 +2312,12 @@ convert_args
   }
 
 func_call
-  = 'convert'i __ LPAREN __ l:convert_args __ RPAREN {
+  = 'convert'i __ LPAREN __ l:convert_args __ RPAREN __ ca:collate_expr? {
     return {
         type: 'function',
         name: 'CONVERT',
-        args: l
+        args: l,
+        collate: ca,
     };
   }
   / name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
@@ -2338,7 +2354,21 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
+  = KW_CAST __ LPAREN __ e:expr __ KW_AS __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_name __ RPAREN __ ca:collate_expr? {
+    const { dataType, length } = ch
+    let dataTypeStr = dataType
+    if (length !== undefined) dataTypeStr = `${dataTypeStr}(${length})`
+    return {
+      type: 'cast',
+      expr: e,
+      symbol: 'as',
+      target: {
+        dataType: `${dataTypeStr} ${cs} ${v.toUpperCase()}`
+      },
+      collate: ca,
+    };
+  }
+  / KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
     return {
       type: 'cast',
       expr: e,
