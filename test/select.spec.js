@@ -368,7 +368,7 @@ describe('select', () => {
       const opt = { database: 'postgresql' }
       const ast = parser.astify(sql, opt)
       const backSQL = parser.sqlify(ast,opt )
-      expect(backSQL).to.equal('SELECT "id" FROM "db-name.public"."table-name"')
+      expect(backSQL).to.equal('SELECT "id" FROM "db-name"."public"."table-name"')
     })
 
     it('should parse subselect', () => {
@@ -494,6 +494,12 @@ describe('select', () => {
     it('should parse DUAL table', () => {
       const ast = parser.astify('SELECT * FROM DUAL');
       expect(ast.from).to.eql([{ type: 'dual' }]);
+    });
+
+    it('should parse function as table in pg', () => {
+      const opt = { database: 'postgresql' }
+      const sql = "select * from generate_series('2021-01-01'::date, '2021-12-31'::date, '1 day')"
+      expect(getParsedSql(sql, opt)).to.be.equal("SELECT * FROM generate_series('2021-01-01'::DATE, '2021-12-31'::DATE, '1 day')")
     });
   });
 

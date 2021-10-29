@@ -1874,19 +1874,6 @@ table_base
         type: 'dual'
       };
   }
-  / t:table_name __ alias:alias_clause? {
-    // => table_name & { as?: alias_clause; }
-      if (t.type === 'var') {
-        t.as = alias;
-        return t;
-      } else {
-        return {
-          db: t.db,
-          table: t.table,
-          as: alias
-        };
-      }
-    }
   / LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:alias_clause? {
     // => { expr: union_stmt; as?: alias_clause; }
     if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt }
@@ -1896,6 +1883,22 @@ table_base
       as: alias
     };
   }
+  / e:func_call __ alias:alias_clause? {
+    // => { type: 'expr'; expr: expr; as?: alias_clause; }
+      return { type: 'expr', expr: e, as: alias };
+    }
+  / t:table_name __ alias:alias_clause? {
+    // => table_name & { as?: alias_clause; }
+      if (t.type === 'var') {
+        t.as = alias;
+        return t;
+      } else {
+        return {
+          ...t,
+          as: alias
+        };
+      }
+    }
 
 join_op
   = KW_LEFT __ KW_OUTER? __ KW_JOIN { /* => 'LEFT JOIN' */ return 'LEFT JOIN'; }
@@ -1905,10 +1908,11 @@ join_op
 
 table_name
   = dt:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
-      // => { db?: ident; table: ident | '*'; }
+      // => { db?: ident; schema?: ident, table: ident | '*'; }
       const obj = { db: null, table: dt };
       if (tail !== null) {
-        obj.db = `${dt}.${schema[3]}`;
+        obj.db = dt;
+        obj.schema = schema[3];
         obj.table = tail[3];
       }
       return obj;
