@@ -3,12 +3,13 @@ import { valuesToSQL } from './insert'
 import { identifierToSql, hasVal, commonOptionConnector, toUpper } from './util'
 
 function tableToSQL(tableInfo) {
-  const { table, db, as, expr } = tableInfo
+  const { table, db, as, expr, schema } = tableInfo
   const database = identifierToSql(db)
+  const schemaStr = identifierToSql(schema)
   let tableName = table && identifierToSql(table)
   if (expr && expr.type === 'values') tableName = `(${commonOptionConnector('VALUES', valuesToSQL, expr.values)})`
   if (expr && expr.type !== 'values') tableName = exprToSQL(expr)
-  const str = database ? `${database}.${tableName}` : tableName
+  const str = [database, schemaStr, tableName].filter(hasVal).join('.')
   if (as) return `${str} AS ${identifierToSql(as)}`
   return str
 }
