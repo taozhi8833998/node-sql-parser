@@ -534,7 +534,7 @@ export type table_join = table_base & {join: join_op; using: ident_name[]; } | t
       on?: on_clause;
     };
 
-export type table_base = { type: 'dual' } | table_name & { as?: alias_clause; } | { expr: union_stmt; as?: alias_clause; };
+export type table_base = { type: 'dual' } | { expr: union_stmt; as?: alias_clause; } | { type: 'expr'; expr: expr; as?: alias_clause; } | table_name & { as?: alias_clause; };
 
 
 
@@ -546,7 +546,7 @@ export type table_base = { type: 'dual' } | table_name & { as?: alias_clause; } 
 
 export type join_op = 'LEFT JOIN' | 'RIGHT JOIN' | 'FULL JOIN' | 'INNER JOIN';
 
-export type table_name = { db?: ident; table: ident | '*'; };
+export type table_name = { db?: ident; schema?: ident, table: ident | '*'; };
 
 
 
