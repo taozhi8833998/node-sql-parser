@@ -681,7 +681,7 @@ describe('select', () => {
       ])
       expect(ast.columns).to.eql([
         {
-          expr: { type: 'unary_expr', operator: '-', expr: { type: 'number', value: 1 } },
+          expr: { type: 'number', value: -1 },
           as: null
         },
         {
@@ -711,6 +711,7 @@ describe('select', () => {
       expect(ast.orderby).to.be.null;
       expect(ast.limit).to.be.null;
     })
+
     it('should support left and covert fun', () => {
       expect(getParsedSql(`select * from test where LEFT(column,2)="ts";`))
         .to.equal("SELECT * FROM `test` WHERE LEFT(`column`, 2) = 'ts'")
@@ -724,6 +725,11 @@ describe('select', () => {
         .to.equal("SELECT CONVERT(`test`, CHAR(10) CHARACTER SET UTF8MB4)")
       expect(getParsedSql(`SELECT CONVERT('test' USING utf8mb4) COLLATE utf8mb4_bin;`))
         .to.equal("SELECT CONVERT(`test` USING UTF8MB4) COLLATE UTF8MB4_BIN")
+    })
+
+    it('should support if', () => {
+      expect(getParsedSql(`select a from test where b like IF(-1 = -1, 'a', 'b');`))
+        .to.equal("SELECT `a` FROM `test` WHERE `b` LIKE IF(-1 = -1, 'a', 'b')")
     })
   })
 
@@ -1417,11 +1423,11 @@ describe('select', () => {
   })
 
 
-  describe('unknow type check', () => {
+  describe('unknown type check', () => {
     it('should throw error', () => {
       const sql = 'SELECT * FROM a'
       const whiteList = ['select::null::(.*)']
-      expect(parser.whiteListCheck.bind(parser, sql, whiteList, { type: 'unknow' })).to.throw('unknow is not valid check mode')
+      expect(parser.whiteListCheck.bind(parser, sql, whiteList, { type: 'unknown' })).to.throw('unknown is not valid check mode')
     })
   })
 

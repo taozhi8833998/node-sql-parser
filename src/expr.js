@@ -55,9 +55,11 @@ function exprToSQL(exprOrigin) {
   return exprToSQLConvertFn[expr.type] ? exprToSQLConvertFn[expr.type](expr) : literalToSQL(expr)
 }
 
-function unaryToSQL(expr) {
-  const str = `${expr.operator} ${exprToSQL(expr.expr)}`
-  return expr.parentheses ? `(${str})` : str
+function unaryToSQL(unarExpr) {
+  const { operator, parentheses, expr } = unarExpr
+  const space = (operator === '-' || operator === '+') ? '' : ' '
+  const str = `${operator}${space}${exprToSQL(expr)}`
+  return parentheses ? `(${str})` : str
 }
 
 function getExprListSQL(exprList) {
