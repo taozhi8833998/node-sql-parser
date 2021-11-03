@@ -1944,8 +1944,8 @@ case_else = KW_ELSE __ result:expr {
 
 expr
   = logic_operator_expr // support concatenation operator || and &&
-  / unary_expr
   / or_expr
+  / unary_expr
   / select_stmt
 
 logic_operator_expr
@@ -2554,7 +2554,7 @@ exp
 digits
   = digits:digit+ { return digits.join(""); }
 
-digit   = [0-9]
+digit = [0-9]
 
 hexDigit
   = [0-9a-fA-F]

@@ -664,8 +664,8 @@ expr_list
 expr
   = struct_expr
   / logic_operator_expr // support concatenation operator || and &&
-  / unary_expr
   / or_expr
+  / unary_expr
   / select_stmt
   / array_expr
 

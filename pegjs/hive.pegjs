@@ -1438,8 +1438,8 @@ case_else = KW_ELSE __ result:expr {
 
 expr
   = logic_operator_expr // support concatenation operator || and &&
-  / unary_expr
   / or_expr
+  / unary_expr
   / select_stmt
 
 logic_operator_expr
