@@ -179,7 +179,7 @@ describe('insert', () => {
         const sql = `INSERT INTO posts (content) VALUES('\\'s ')`
         const ast = parser.astify(sql)
         const backSQL = parser.sqlify(ast)
-        expect(backSQL).to.be.equal("INSERT INTO `posts` (`content`) VALUES ('\'s ')")
+        expect(backSQL).to.be.equal("INSERT INTO `posts` (`content`) VALUES ('\\\'s ')")
       })
 
     })

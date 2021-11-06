@@ -1889,10 +1889,10 @@ single_char
   / escape_char
 
 escape_char
-  = "\\'"  { return "'";  }
-  / '\\"'  { return '"';  }
-  / "\\\\" { return "\\"; }
-  / "\\/"  { return "/";  }
+  = "\\'"  { return "\\'";  }
+  / '\\"'  { return '\\"';  }
+  / "\\\\" { return "\\\\"; }
+  / "\\/"  { return "\\/";  }
   / "\\b"  { return "\b"; }
   / "\\f"  { return "\f"; }
   / "\\n"  { return "\n"; }
