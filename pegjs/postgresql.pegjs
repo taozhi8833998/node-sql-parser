@@ -3668,10 +3668,15 @@ data_type
 
 
 array_type
-  = t:(numeric_type / character_string_type) __ LBRAKE __ RBRAKE {
+  = t:(numeric_type / character_string_type) __ LBRAKE __ RBRAKE __ LBRAKE __ RBRAKE {
+    /* => data_type */
+    return { ...t, array: 'two' }
+  }
+  / t:(numeric_type / character_string_type) __ LBRAKE __ RBRAKE {
     /* => data_type */
     return { ...t, array: 'one' }
   }
+
 
 boolean_type
   = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
