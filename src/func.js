@@ -2,6 +2,18 @@ import { exprToSQL } from './expr'
 import { commonTypeValue, hasVal, identifierToSql, toUpper } from './util'
 import { overToSQL } from './over'
 
+function arrayDimensionToSymbol(target) {
+  if (!target || !target.array) return ''
+  switch (target.array) {
+    case 'one':
+      return '[]'
+    case 'two':
+      return '[][]'
+    default:
+      return ''
+  }
+}
+
 function castToSQL(expr) {
   const { collate, target, expr: expression, symbol, as: alias } = expr
   const { length, dataType, parentheses, scale } = target
@@ -18,7 +30,8 @@ function castToSQL(expr) {
   }
   if (alias) suffix += ` AS ${identifierToSql(alias)}`
   if (collate) suffix += ` ${commonTypeValue(collate).join(' ')}`
-  return `${prefix}${symbolChar}${dataType}${str}${suffix}`
+  const arrayDimension = arrayDimensionToSymbol(target)
+  return `${prefix}${symbolChar}${dataType}${arrayDimension}${str}${suffix}`
 }
 
 function extractFunToSQL(stmt) {
