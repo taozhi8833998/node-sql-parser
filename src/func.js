@@ -4,7 +4,12 @@ import { overToSQL } from './over'
 
 function arrayDimensionToSymbol(target) {
   if (!target || !target.array) return ''
-  if (target.array === 'one') return '[]'
+  switch (target.array) {
+    case 'one':
+      return '[]'
+    case 'two':
+      return '[][]'
+  }
 }
 
 function castToSQL(expr) {

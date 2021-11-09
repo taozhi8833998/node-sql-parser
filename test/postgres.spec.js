@@ -459,6 +459,13 @@ describe('Postgres', () => {
         "select '{1,2,3}'::int[]",
         "SELECT '{1,2,3}'::INT[]"
       ]
+    },
+    {
+      title: 'cast to datatype two dimension array',
+      sql: [
+        "select '{{1,2},{2,3},{3,4}}'::int[][]",
+        "SELECT '{{1,2},{2,3},{3,4}}'::INT[][]"
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){
