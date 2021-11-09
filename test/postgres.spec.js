@@ -452,6 +452,20 @@ describe('Postgres', () => {
         ORDER BY "public"."Property"."createdAt"`,
         `SELECT "public"."Property"."id", "public"."Property"."title", "public"."Property"."description", "public"."Property"."views", "public"."Property"."saves", "public"."Property"."postcode", "public"."Property"."createdAt" FROM "public"."Property" WHERE 1 = 1 ORDER BY "public"."Property"."createdAt" ASC`
       ]
+    },
+    {
+      title: 'cast to datatype array',
+      sql: [
+        "select '{1,2,3}'::int[]",
+        "SELECT '{1,2,3}'::INT[]"
+      ]
+    },
+    {
+      title: 'cast to datatype two dimension array',
+      sql: [
+        "select '{{1,2},{2,3},{3,4}}'::int[][]",
+        "SELECT '{{1,2},{2,3},{3,4}}'::INT[][]"
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){

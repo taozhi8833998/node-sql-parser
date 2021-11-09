@@ -3654,7 +3654,8 @@ mem_chain
   }
 
 data_type
-  = character_string_type
+  = array_type
+  /character_string_type
   / numeric_type
   / datetime_type
   / json_type
@@ -3664,6 +3665,17 @@ data_type
   / boolean_type
   / enum_type
   / serial_interval_type
+
+
+array_type
+  = t:(numeric_type / character_string_type) __ LBRAKE __ RBRAKE __ LBRAKE __ RBRAKE {
+    /* => data_type */
+    return { ...t, array: 'two' }
+  }
+  / t:(numeric_type / character_string_type) __ LBRAKE __ RBRAKE {
+    /* => data_type */
+    return { ...t, array: 'one' }
+  }
 
 
 boolean_type
