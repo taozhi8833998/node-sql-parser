@@ -2991,7 +2991,7 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
+  = e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
     /* => {
         as?: alias_clause,
         type: 'cast';

@@ -466,6 +466,14 @@ describe('Postgres', () => {
         "select '{{1,2},{2,3},{3,4}}'::int[][]",
         "SELECT '{{1,2},{2,3},{3,4}}'::INT[][]"
       ]
+    },
+    {
+      title: 'a newline before cast symbol',
+      sql: [
+        `select round(0.598736
+          ::numeric, 2)`,
+        "SELECT round(0.598736::NUMERIC, 2)"
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){
