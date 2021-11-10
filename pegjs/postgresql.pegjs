@@ -1703,7 +1703,7 @@ array_index
 expr_item
   = e:expr __ a:array_index? {
     // => expr & { array_index: array_index }
-    e.array_index = a
+    if (a) e.array_index = a
     return e
   }
 column_list_item
@@ -2602,7 +2602,10 @@ primary
   / func_call
   / case_expr
   / interval_expr
-  / column_ref
+  / c:column_ref __ a:array_index? {
+    if(a) c.array_index = a
+    return c
+  }
   / param
   / LPAREN __ list:or_and_where_expr __ RPAREN {
     // => or_and_where_expr
