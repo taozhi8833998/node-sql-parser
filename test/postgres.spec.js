@@ -474,6 +474,20 @@ describe('Postgres', () => {
           ::numeric, 2)`,
         "SELECT round(0.598736::NUMERIC, 2)"
       ]
+    },
+    {
+      title: 'access array index in func parameter',
+      sql: [
+        'select round(arr[1])',
+        'SELECT round("arr"[1])'
+      ]
+    },
+    {
+      title: 'access array index in where clause',
+      sql: [
+        'SELECT * FROM a INNER JOIN b ON c = d[1]',
+        'SELECT * FROM "a" INNER JOIN "b" ON "c" = "d"[1]'
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){

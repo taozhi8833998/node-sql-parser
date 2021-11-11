@@ -1703,7 +1703,7 @@ array_index
 expr_item
   = e:expr __ a:array_index? {
     // => expr & { array_index: array_index }
-    e.array_index = a
+    if (a) e.array_index = a
     return e
   }
 column_list_item
@@ -1711,7 +1711,7 @@ column_list_item
     // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
-  / e:expr_item s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
+  / e:expr_item __ s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; }
     return {
       as: alias,
@@ -2284,8 +2284,8 @@ value_item
     }
 
 expr_list
-  = head:expr tail:(__ COMMA __ expr)* {
-    // => { type: 'expr_list'; value: expr[] }
+  = head:expr_item tail:(__ COMMA __ expr_item)* {
+    // => { type: 'expr_list'; value: expr_item[] }
       const el = { type: 'expr_list' };
       el.value = createList(head, tail);
       return el;
@@ -2602,7 +2602,10 @@ primary
   / func_call
   / case_expr
   / interval_expr
-  / column_ref
+  / c:column_ref __ a:array_index? {
+    if(a) c.array_index = a
+    return c
+  }
   / param
   / LPAREN __ list:or_and_where_expr __ RPAREN {
     // => or_and_where_expr
