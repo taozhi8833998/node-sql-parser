@@ -488,6 +488,13 @@ describe('Postgres', () => {
         'SELECT * FROM a INNER JOIN b ON c = d[1]',
         'SELECT * FROM "a" INNER JOIN "b" ON "c" = "d"[1]'
       ]
+    },
+    {
+      title: 'distinct on',
+      sql: [
+        'SELECT DISTINCT ON (a, b) a, b, c FROM tbl',
+        'SELECT DISTINCT ON ("a", "b") "a", "b", "c" FROM "tbl"'
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){

@@ -1606,10 +1606,26 @@ cte_column_definition
       return createList(head, tail);
     }
 
+distinct_on
+  = d:KW_DISTINCT __ o:KW_ON __ LPAREN __ c:column_ref_list __ RPAREN {
+    // => {type: string; columns: column_ref_list;}
+    console.lo
+    return {
+      type: `${d} ON`,
+      columns: c
+    }
+  }
+  / d:KW_DISTINCT? {
+    // => { type: string | undefined; }
+    return {
+      type: d,
+    }
+  }
+
 select_stmt_nake
   = __ cte:with_clause? __ KW_SELECT ___
     opts:option_clause? __
-    d:KW_DISTINCT?      __
+    d:distinct_on?      __
     c:column_clause     __
     f:from_clause?      __
     w:where_clause?     __
@@ -1621,7 +1637,7 @@ select_stmt_nake
           with?: with_clause;
           type: 'select';
           options?: option_clause;
-          distinct?: 'DISTINCT';
+          distinct?: {type: string; columns?: column_list; };
           columns: column_clause;
           from?: from_clause;
           where?: where_clause;
