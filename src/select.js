@@ -1,10 +1,18 @@
 import { exprToSQL, getExprListSQL, orderOrPartitionByToSQL } from './expr'
-import { columnsToSQL } from './column'
+import { columnRefToSQL, columnsToSQL } from './column'
 import { limitToSQL } from './limit'
 import { withToSQL } from './with'
 import { tablesToSQL } from './tables'
 import { hasVal, commonOptionConnector, connector, topToSQL, toUpper } from './util'
 
+function distinctToSQL(distinct) {
+  if (!distinct) return
+  if (typeof distinct === 'string') return distinct
+  const { type, columns } = distinct
+  const result = [toUpper(type)]
+  if (columns) result.push(`(${columns.map(columnRefToSQL).join(', ')})`)
+  return result.filter(hasVal).join(' ')
+}
 /**
  * @param {Object}      stmt
  * @param {?Array}      stmt.with
@@ -27,7 +35,7 @@ function selectToSQL(stmt) {
   const clauses = [withToSQL(withInfo), 'SELECT', toUpper(asStructVal)]
   clauses.push(topToSQL(top))
   if (Array.isArray(options)) clauses.push(options.join(' '))
-  clauses.push(distinct, columnsToSQL(columns, from))
+  clauses.push(distinctToSQL(distinct), columnsToSQL(columns, from))
   // FROM + joins
   clauses.push(commonOptionConnector('FROM', tablesToSQL, from))
   const { keyword, expr } = forSystem || {}
