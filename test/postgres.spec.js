@@ -495,7 +495,14 @@ describe('Postgres', () => {
         'SELECT DISTINCT ON (a, b) a, b, c FROM tbl',
         'SELECT DISTINCT ON ("a", "b") "a", "b", "c" FROM "tbl"'
       ]
-    }
+    },
+    {
+      title: 'select current_date only',
+      sql: [
+        'select current_date',
+        'SELECT CURRENT_DATE'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

@@ -2973,7 +2973,7 @@ func_call
       };
     }
   / extract_func
-  / f:KW_CURRENT_TIMESTAMP __ up:on_update_current_timestamp? {
+  / f:scalar_func __ up:on_update_current_timestamp? {
     // => { type: 'function'; name: string; over?: on_update_current_timestamp; }
     return {
         type: 'function',
