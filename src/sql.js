@@ -21,10 +21,7 @@ function toSQL(ast) {
 function goToSQL(stmt) {
   if (!stmt || stmt.length === 0) return ''
   const res = [toSQL(stmt.ast)]
-  if (stmt.go_next) {
-    const goKeyword = (stmt.go || 'go').toUpperCase()
-    res.push(goKeyword, goToSQL(stmt.go_next))
-  }
+  if (stmt.go_next) res.push(stmt.go.toUpperCase(), goToSQL(stmt.go_next))
   return res.filter(sqlItem => sqlItem).join(' ')
 }
 
