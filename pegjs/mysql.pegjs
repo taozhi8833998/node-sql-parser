@@ -83,6 +83,7 @@
 
     'GENERATED': true,
     'GET': true,
+    'GO': true,
     'GRANT': true,
     'GROUP': true,
     'GROUPING': true,
@@ -304,6 +305,8 @@
   function createList(head, tail, po = 3) {
     const result = [head];
     for (let i = 0; i < tail.length; i++) {
+      delete tail[i][po].tableList
+      delete tail[i][po].columnList
       result.push(tail[i][po]);
     }
     return result;
@@ -378,6 +381,26 @@
 }
 
 start
+  = head:start_item __ tail:(__ KW_GO __ start_item)* {
+    if (!tail || tail.length === 0) return head
+    delete head.tableList
+    delete head.columnList
+    let cur = head
+    for (let i = 0; i < tail.length; i++) {
+      delete tail[i][3].tableList
+      delete tail[i][3].columnList
+      cur.go_next = tail[i][3]
+      cur.go = 'go'
+      cur = cur.go_next
+    }
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: head
+      }
+  }
+
+start_item
   = __ n:(multiple_stmt / cmd_stmt / crud_stmt) {
     return n
   }
@@ -2616,6 +2639,7 @@ KW_USING    = "USING"i    !ident_start
 KW_WHERE    = "WHERE"i      !ident_start
 KW_WITH     = "WITH"i       !ident_start
 
+KW_GO       = "GO"i         !ident_start { return 'GO'; }
 KW_GROUP    = "GROUP"i      !ident_start
 KW_BY       = "BY"i         !ident_start
 KW_ORDER    = "ORDER"i      !ident_start
