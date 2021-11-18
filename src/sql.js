@@ -7,7 +7,7 @@ function checkSupported(expr) {
   if (!surportedTypes.includes(ast.type)) throw new Error(`${ast.type} statements not supported at the moment`)
 }
 
-export default function toSQL(ast) {
+function toSQL(ast) {
   if (Array.isArray(ast)) {
     ast.forEach(checkSupported)
     return multipleToSQL(ast)
@@ -16,4 +16,16 @@ export default function toSQL(ast) {
   const { type } = ast
   if (type === 'bigquery') return bigQueryToSQL(ast)
   return unionToSQL(ast)
+}
+
+function goToSQL(stmt) {
+  if (!stmt || stmt.length === 0) return ''
+  const res = [toSQL(stmt.ast)]
+  if (stmt.go_next) res.push(stmt.go.toUpperCase(), goToSQL(stmt.go_next))
+  return res.filter(sqlItem => sqlItem).join(' ')
+}
+
+export default function astToSQL(ast) {
+  if (ast.go === 'go') return goToSQL(ast)
+  return toSQL(ast)
 }

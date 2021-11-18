@@ -156,7 +156,6 @@ describe('Command SQL', () => {
     it(`should support cmd and crud multiple use`, () => {
       expect(getParsedSql('select * from tableD;use databaseA;drop table tableA;truncate table tableB; call sp;delete from tableC;insert into tableE values("123");update tableF set id="333"'))
         .to.equal('SELECT * FROM `tableD` ; USE `databaseA` ; DROP TABLE `tableA` ; TRUNCATE TABLE `tableB` ; CALL sp ; DELETE FROM `tableC` ; INSERT INTO `tableE` VALUES (\'123\') ; UPDATE `tableF` SET `id` = \'333\'');
-
     });
   })
 
@@ -462,5 +461,16 @@ describe('Command SQL', () => {
       expect(getParsedSql('DROP INDEX abc.IX_NAME ON TABLE_NAME algorithm inplace;', opt)).to.equal('DROP INDEX [abc].[IX_NAME] ON [TABLE_NAME] ALGORITHM INPLACE')
       expect(getParsedSql('DROP INDEX abc.IX_NAME ON TABLE_NAME algorithm = copy lock SHARED;', opt)).to.equal('DROP INDEX [abc].[IX_NAME] ON [TABLE_NAME] ALGORITHM = COPY LOCK SHARED')
     })
+  })
+
+  describe('go', () => {
+    it(`should support go`, () => {
+      expect(getParsedSql('use abc go')).to.equal('USE `abc` GO');
+      expect(getParsedSql('use abc; select * from abc go update abc set id = 1')).to.equal('USE `abc` ; SELECT * FROM `abc` GO UPDATE `abc` SET `id` = 1');
+    });
+
+    it(`should support multiple go`, () => {
+      expect(getParsedSql('use abc; select * from abc go update abc set id = 1 go select id from abc')).to.equal('USE `abc` ; SELECT * FROM `abc` GO UPDATE `abc` SET `id` = 1 GO SELECT `id` FROM `abc`');
+    });
   })
 })

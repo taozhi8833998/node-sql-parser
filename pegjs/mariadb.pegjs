@@ -125,6 +125,8 @@
   function createList(head, tail, po = 3) {
     const result = [head];
     for (let i = 0; i < tail.length; i++) {
+      delete tail[i][po].tableList
+      delete tail[i][po].columnList
       result.push(tail[i][po]);
     }
     return result;
