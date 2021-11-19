@@ -19,7 +19,6 @@
     'CALL': true,
     'CASCADE': true,
     'CASE': true,
-    'CREATE': true,
     'CHAR': true,
     'CHECK': true,
     'COLLATE': true,
