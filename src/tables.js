@@ -34,8 +34,6 @@ function tableToSQL(tableInfo) {
  * @return {string}
  */
 function tablesToSQL(tables) {
-  const { type } = tables
-  if (toUpper(type) === 'UNNEST') return unnestToSQL(tables)
   const baseTable = tables[0]
   const clauses = []
   if (baseTable.type === 'dual') return 'DUAL'
