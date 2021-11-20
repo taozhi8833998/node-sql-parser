@@ -448,6 +448,18 @@ describe('BigQuery', () => {
         'SELECT 1 AS `from`'
       ]
     },
+    {
+      title: 'select from with',
+      sql: [
+        `SELECT * FROM (
+          WITH temp AS (
+              SELECT * FROM test
+          )
+          SELECT * FROM temp
+      )`,
+        'SELECT * FROM (WITH temp AS (SELECT * FROM test) SELECT * FROM temp)'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {

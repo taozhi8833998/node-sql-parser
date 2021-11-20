@@ -319,7 +319,7 @@ cte_definition
   }
 
 select_stmt_nake
-  = KW_SELECT ___
+  = __ cte:with_clause? __ KW_SELECT ___
     sv:struct_value? __
     d:(KW_ALL / KW_DISTINCT)? __
     c:column_clause     __
@@ -340,6 +340,7 @@ select_stmt_nake
           from: f,
           for_sys_time_as_of: fs,
           where: w,
+          with: cte,
           groupby: g,
           having: h,
           orderby: o,
