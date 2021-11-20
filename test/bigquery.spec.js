@@ -170,28 +170,28 @@ describe('BigQuery', () => {
       title: 'select from unnest array expr',
       sql: [
         "SELECT * FROM UNNEST(ARRAY<STRUCT<x INT64, y STRING>>[(1, 'foo'), (3, 'bar')]);",
-        "SELECT * FROM UNNEST (ARRAY<STRUCT<x INT64, y STRING>>[(1, 'foo'), (3, 'bar')])"
+        "SELECT * FROM UNNEST(ARRAY<STRUCT<x INT64, y STRING>>[(1, 'foo'), (3, 'bar')])"
       ]
     },
     {
       title: 'select from unnest array path',
       sql: [
         'SELECT * FROM UNNEST ([1, 2, 3]);',
-        'SELECT * FROM UNNEST ([1, 2, 3])'
+        'SELECT * FROM UNNEST([1, 2, 3])'
       ]
     },
     {
       title: 'select from unnest JSON_EXTRACT_ARRAY',
       sql: [
         'SELECT a, b, c, ARRAY(SELECT * FROM UNNEST(JSON_EXTRACT_ARRAY(d))) AS d FROM e WHERE LOWER(f)=\'123\' GROUP BY a, b, c',
-        'SELECT a, b, c, ARRAY(SELECT * FROM UNNEST (JSON_EXTRACT_ARRAY(d))) AS d FROM e WHERE LOWER(f) = \'123\' GROUP BY a, b, c'
+        'SELECT a, b, c, ARRAY(SELECT * FROM UNNEST(JSON_EXTRACT_ARRAY(d))) AS d FROM e WHERE LOWER(f) = \'123\' GROUP BY a, b, c'
       ]
     },
     {
       title: 'select from unnest with offset',
       sql: [
         'SELECT * FROM UNNEST ( ) AS abc WITH OFFSET AS num',
-        'SELECT * FROM UNNEST ( ) AS abc WITH OFFSET AS num'
+        'SELECT * FROM UNNEST() AS abc WITH OFFSET AS num'
       ]
     },
     {
@@ -317,7 +317,7 @@ describe('BigQuery', () => {
         `SELECT *
         FROM UNNEST(ARRAY<STRING>['a', 'b', 'c', 'd', 'e']) AS letter
         ORDER BY letter ASC LIMIT 2`,
-        "SELECT * FROM UNNEST (ARRAY<STRING>['a', 'b', 'c', 'd', 'e']) AS letter ORDER BY letter ASC LIMIT 2"
+        "SELECT * FROM UNNEST(ARRAY<STRING>['a', 'b', 'c', 'd', 'e']) AS letter ORDER BY letter ASC LIMIT 2"
       ]
     },
     {
@@ -326,7 +326,7 @@ describe('BigQuery', () => {
         `SELECT *
         FROM UNNEST(ARRAY<STRING>['a', 'b', 'c', 'd', 'e']) AS letter
         ORDER BY letter ASC LIMIT 2 OFFSET 1`,
-        "SELECT * FROM UNNEST (ARRAY<STRING>['a', 'b', 'c', 'd', 'e']) AS letter ORDER BY letter ASC LIMIT 2 OFFSET 1"
+        "SELECT * FROM UNNEST(ARRAY<STRING>['a', 'b', 'c', 'd', 'e']) AS letter ORDER BY letter ASC LIMIT 2 OFFSET 1"
       ]
     },
     {
@@ -460,6 +460,15 @@ describe('BigQuery', () => {
         'SELECT * FROM (WITH temp AS (SELECT * FROM test) SELECT * FROM temp)'
       ]
     },
+    {
+      title: 'select from unnest item',
+      sql: [
+        `SELECT *
+        FROM product.organization, unnest(array[1,2])
+        LIMIT 10`,
+        'SELECT * FROM product.organization, UNNEST(ARRAY[1, 2]) LIMIT 10'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
@@ -479,9 +488,9 @@ describe('BigQuery', () => {
     expect(columnList).to.be.eql([])
   })
 
-  it('should without parentheses', () => {
+  it(SQL_LIST[16].title, () => {
     const ast = parser.astify(SQL_LIST[16].sql[0], opt)
-    const expr = ast.select.from.expr
+    const expr = ast.select.from[0].expr
     expr.parentheses = false
     expr.expr_list = {
       type: 'string',
