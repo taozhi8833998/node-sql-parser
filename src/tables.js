@@ -2,7 +2,22 @@ import { exprToSQL } from './expr'
 import { valuesToSQL } from './insert'
 import { identifierToSql, hasVal, commonOptionConnector, toUpper } from './util'
 
+function unnestToSQL(unnestExpr) {
+  const { type, as, expr, with_offset: withOffset } = unnestExpr
+  const result = [
+    `${toUpper(type)}(${expr && exprToSQL(expr) || ''})`,
+    commonOptionConnector('AS', identifierToSql, as),
+    commonOptionConnector(
+      toUpper(withOffset && withOffset.keyword),
+      identifierToSql,
+      withOffset && withOffset.as
+    ),
+  ]
+  return result.filter(hasVal).join(' ')
+}
+
 function tableToSQL(tableInfo) {
+  if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
   const { table, db, as, expr, schema } = tableInfo
   const database = identifierToSql(db)
   const schemaStr = identifierToSql(schema)
@@ -14,19 +29,11 @@ function tableToSQL(tableInfo) {
   return str
 }
 
-function unnestToSQL(unnestExpr) {
-  const { type, as, expr, with_offset: withOffset } = unnestExpr
-  const result = [toUpper(type), `(${expr && exprToSQL(expr) || ' '})`, commonOptionConnector('AS', identifierToSql, as), commonOptionConnector(toUpper(withOffset && withOffset.keyword), identifierToSql, withOffset && withOffset.as)]
-  return result.filter(hasVal).join(' ')
-}
-
 /**
  * @param {Array} tables
  * @return {string}
  */
 function tablesToSQL(tables) {
-  const { type } = tables
-  if (toUpper(type) === 'UNNEST') return unnestToSQL(tables)
   const baseTable = tables[0]
   const clauses = []
   if (baseTable.type === 'dual') return 'DUAL'

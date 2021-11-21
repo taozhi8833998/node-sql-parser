@@ -100,6 +100,7 @@
     'LOCAL': true,
     'PERSIST': true,
     'PERSIST_ONLY': true,
+    'UNNEST': true,
   };
 
   const DATA_TYPES = {
@@ -319,7 +320,7 @@ cte_definition
   }
 
 select_stmt_nake
-  = KW_SELECT ___
+  = __ cte:with_clause? __ KW_SELECT ___
     sv:struct_value? __
     d:(KW_ALL / KW_DISTINCT)? __
     c:column_clause     __
@@ -340,6 +341,7 @@ select_stmt_nake
           from: f,
           for_sys_time_as_of: fs,
           where: w,
+          with: cte,
           groupby: g,
           having: h,
           orderby: o,
@@ -439,8 +441,8 @@ alias_clause
   = KW_AS __ i:alias_ident { return i; }
   / KW_AS? __ i:ident { return i; }
 
-from_clause
-  = KW_FROM __ 'UNNEST'i __ LPAREN __ a:expr? __ RPAREN __ alias:alias_clause? __ wf:with_offset? {
+from_unnest_item
+  = 'UNNEST'i __ LPAREN __ a:expr? __ RPAREN __ alias:alias_clause? __ wf:with_offset? {
     return {
       type: 'unnest',
       expr: a,
@@ -449,7 +451,11 @@ from_clause
       with_offset: wf,
     }
   }
-  / KW_FROM __ l:table_ref_list { return l; }
+
+from_clause
+  = KW_FROM __ l:table_ref_list {
+    return l
+  }
 
 with_offset
   = KW_WITH __ KW_OFFSET __ alias:alias_clause? {
@@ -528,6 +534,7 @@ table_base
         as: alias
       };
     }
+  / from_unnest_item
 
 join_op
   = KW_LEFT __ KW_OUTER? __ KW_JOIN { return 'LEFT JOIN'; }
