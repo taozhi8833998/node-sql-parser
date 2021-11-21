@@ -86,6 +86,7 @@
     'WITH': true,
     'WHEN': true,
     'WHERE': true,
+    'WINDOW': true,
 
     'GLOBAL': true,
     'SESSION': true,
@@ -1634,7 +1635,8 @@ select_stmt_nake
     g:group_by_clause?  __
     h:having_clause?    __
     o:order_by_clause?  __
-    l:limit_clause? {
+    l:limit_clause? __
+    win:window_clause? {
       /* => {
           with?: with_clause;
           type: 'select';
@@ -1647,6 +1649,7 @@ select_stmt_nake
           having?: having_clause;
           orderby?: order_by_clause;
           limit?: limit_clause;
+          window?: window_clause;
         }*/
       if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
@@ -1660,7 +1663,8 @@ select_stmt_nake
           groupby: g,
           having: h,
           orderby: o,
-          limit: l
+          limit: l,
+          window: win,
       };
   }
 
@@ -1724,6 +1728,7 @@ expr_item
     if (a) e.array_index = a
     return e
   }
+
 column_list_item
   = c:string_constants_escape {
     // => { expr: expr; as: null; }
@@ -1977,8 +1982,34 @@ column_ref_list
 having_clause
   = KW_HAVING __ e:expr { /* => expr */ return e; }
 
+window_clause
+  = KW_WINDOW __ l:named_window_expr_list {
+    // => { keyword: 'window'; type: 'window', expr: named_window_expr_list; }
+    return {
+      keyword: 'window',
+      type: 'window',
+      expr: l,
+    }
+  }
+
+named_window_expr_list
+  = head:named_window_expr tail:(__ COMMA __ named_window_expr)* {
+    // => named_window_expr[]
+      return createList(head, tail);
+    }
+
+named_window_expr
+  = nw:ident_name __ KW_AS __ anw:as_window_specification {
+    // => { name: ident_name;  as_window_specification: as_window_specification; }
+    return {
+      name: nw,
+      as_window_specification: anw,
+    }
+  }
+
 as_window_specification
-  = LPAREN __ ws:window_specification? __ RPAREN {
+  = ident_name
+  / LPAREN __ ws:window_specification? __ RPAREN {
     // => { window_specification: window_specification; parentheses: boolean }
     return {
       window_specification: ws || {},
@@ -1989,8 +2020,8 @@ as_window_specification
 window_specification
   = bc:partition_by_clause? __
   l:order_by_clause? __
-  w:window_frame_clause {
-    // => { name: null; partitionby: partition_by_clause; orderby: order_by_clause; window_frame_clause: string }
+  w:window_frame_clause? {
+    // => { name: null; partitionby: partition_by_clause; orderby: order_by_clause; window_frame_clause: string | null; }
     return {
       name: null,
       partitionby: bc,
@@ -2721,7 +2752,7 @@ column_list
 
 ident
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
-      // => indent_name
+      // => ident_name
       return name;
     }
   / name:quoted_ident {
@@ -3323,6 +3354,7 @@ KW_GROUP    = "GROUP"i      !ident_start
 KW_BY       = "BY"i         !ident_start
 KW_ORDER    = "ORDER"i      !ident_start
 KW_HAVING   = "HAVING"i     !ident_start
+KW_WINDOW   = "WINDOW"i     !ident_start
 
 KW_LIMIT    = "LIMIT"i      !ident_start
 KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET' }

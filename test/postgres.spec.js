@@ -503,6 +503,15 @@ describe('Postgres', () => {
         'SELECT CURRENT_DATE'
       ]
     },
+    {
+      title: 'window function',
+      sql: [
+        `SELECT sum(salary) OVER w, avg(salary) OVER w
+        FROM empsalary
+        WINDOW w AS (PARTITION BY depname ORDER BY salary DESC);`,
+        'SELECT SUM("salary") OVER w, AVG("salary") OVER w FROM "empsalary" WINDOW w AS (PARTITION BY "depname" ORDER BY "salary" DESC)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
