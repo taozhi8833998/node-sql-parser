@@ -2662,7 +2662,14 @@ primary
         return list;
     }
   / var_decl
-  / __ prepared_symbol:'$'n:literal_numeric {
+  / __ p:'$''<'n:literal_numeric'>' {
+    // => { type: 'origin'; value: string; }
+    return {
+      type: 'origin',
+      value: `$<${n.value}>`,
+    }
+  }
+  / __ p:'$' n:literal_numeric {
     // => { type: 'origin'; value: string; }
     return {
       type: 'origin',
