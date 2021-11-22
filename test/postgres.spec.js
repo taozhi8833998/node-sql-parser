@@ -512,6 +512,13 @@ describe('Postgres', () => {
         'SELECT SUM("salary") OVER w, AVG("salary") OVER w FROM "empsalary" WINDOW w AS (PARTITION BY "depname" ORDER BY "salary" DESC)'
       ]
     },
+    {
+      title: '$ field id with parameters',
+      sql: [
+        'SELECT * FROM tablea WHERE comment_id = $<3>;',
+        'SELECT * FROM "tablea" WHERE "comment_id" = $<3>'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
