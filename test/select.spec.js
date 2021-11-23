@@ -390,6 +390,7 @@ describe('select', () => {
               having: null,
               orderby: null,
               limit: null,
+              window: null,
           },
           parentheses: true
         },
@@ -457,6 +458,7 @@ describe('select', () => {
                 having: null,
                 orderby: null,
                 limit: null,
+                window: null,
               },
               parentheses: true
             },
@@ -627,6 +629,7 @@ describe('select', () => {
               having: null,
               orderby: null,
               limit: null,
+              window: null,
             },
             parentheses: true
           }
@@ -663,7 +666,8 @@ describe('select', () => {
                   "having": null,
                   "orderby": null,
                   "limit": null,
-                  "for_update": null
+                  "for_update": null,
+                  "window": null,
               }
             ]
         },
@@ -859,6 +863,7 @@ describe('select', () => {
           left: {
             type: 'aggr_func',
             name: 'SUM',
+            over: null,
             args: { expr: { type: 'column_ref', table: null, column: 'col2' } }
           },
           right: { type: 'number', value: 10 }
@@ -881,6 +886,7 @@ describe('select', () => {
         left: {
           type: 'aggr_func',
           name: 'SUM',
+          over: null,
           args: { expr: { type: 'column_ref', table: null, column: 'col2' } }
         },
         right: {
@@ -896,7 +902,8 @@ describe('select', () => {
           having: null,
           orderby: null,
           limit: null,
-          parentheses: true
+          parentheses: true,
+          window: null,
         }
       });
     });
@@ -930,6 +937,7 @@ describe('select', () => {
           expr: {
             type: 'aggr_func',
             name: 'SUM',
+            over: null,
             args: { expr: { type: 'column_ref', table: null, column: 'e' } }
           },
           type: 'ASC'
