@@ -13,6 +13,7 @@ function overToSQL(over) {
     if (args) onUpdate = `${onUpdate}(${args.join(', ')})`
     return onUpdate
   }
+  throw new Error('unknown over type')
 }
 
 export {
