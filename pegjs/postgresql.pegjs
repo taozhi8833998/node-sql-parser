@@ -2652,6 +2652,7 @@ primary
   / case_expr
   / interval_expr
   / c:column_ref __ a:array_index? {
+    // => column_ref
     if(a) c.array_index = a
     return c
   }

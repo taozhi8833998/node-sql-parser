@@ -467,13 +467,15 @@ export type cte_definition = { name: { type: 'default'; value: string; }; stmt: 
 
 export type cte_column_definition = column[];
 
+export type distinct_on = {type: string; columns: column_ref_list;} | { type: string | undefined; };
+
 
 
 export type select_stmt_nake = {
           with?: with_clause;
           type: 'select';
           options?: option_clause;
-          distinct?: 'DISTINCT';
+          distinct?: {type: string; columns?: column_list; };
           columns: column_clause;
           from?: from_clause;
           where?: where_clause;
@@ -481,6 +483,7 @@ export type select_stmt_nake = {
           having?: having_clause;
           orderby?: order_by_clause;
           limit?: limit_clause;
+          window?: window_clause;
         };
 
 export type option_clause = query_option[];
@@ -566,9 +569,15 @@ export type column_ref_list = column_ref[];
 
 export type having_clause = expr;
 
-export type as_window_specification = { window_specification: window_specification; parentheses: boolean };
+export type window_clause = { keyword: 'window'; type: 'window', expr: named_window_expr_list; };
 
-export type window_specification = { name: null; partitionby: partition_by_clause; orderby: order_by_clause; window_frame_clause: string };
+export type named_window_expr_list = named_window_expr[];
+
+export type named_window_expr = { name: ident_name;  as_window_specification: as_window_specification; };
+
+export type as_window_specification = ident_name | { window_specification: window_specification; parentheses: boolean };
+
+export type window_specification = { name: null; partitionby: partition_by_clause; orderby: order_by_clause; window_frame_clause: string | null; };
 
 export type window_specification_frameless = { name: null; partitionby: partition_by_clause; orderby: order_by_clause; window_frame_clause: null };
 
@@ -657,7 +666,7 @@ export type value_list = value_item[];
 
 export type value_item = expr_list;
 
-export type expr_list = { type: 'expr_list'; value: expr[] };
+export type expr_list = { type: 'expr_list'; value: expr_item[] };
 
 export type interval_expr = { type: 'interval', expr: expr; unit: interval_unit; };
 
@@ -1037,6 +1046,8 @@ type KW_ORDER = never;
 
 type KW_HAVING = never;
 
+type KW_WINDOW = never;
+
 type KW_LIMIT = never;
 
 type KW_OFFSET = never;
@@ -1351,6 +1362,12 @@ export type data_type = {
                     parentheses?: boolean;
                     expr?: expr_list;
                 };
+
+
+
+
+
+export type array_type = data_type;
 
 
 
