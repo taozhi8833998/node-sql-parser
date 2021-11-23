@@ -8,6 +8,7 @@ const {
   identifierToSql,
   setParserOpt,
 } = require('../src/util')
+const { overToSQL } = require('../src/over')
 
 describe('util function test', () => {
   it('should throw error when type is unkonwn', () => {
@@ -44,5 +45,11 @@ describe('util function test', () => {
 
   it('should support columnIdentifierToSql without ident', () => {
     expect(columnIdentifierToSql()).to.be.undefined
+  })
+})
+
+describe('over to sql', () => {
+  it('should throw new error when type is unknown', () => {
+    expect(() => overToSQL({ type: 'unknown' })).to.throw('unknown over type')
   })
 })

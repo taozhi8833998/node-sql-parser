@@ -1422,8 +1422,9 @@ select_stmt_nake
     g:group_by_clause?  __
     h:having_clause?    __
     o:order_by_clause?  __
-    l:limit_clause?
-    fu: ('FOR'i __ KW_UPDATE)? {
+    l:limit_clause? __
+    fu: ('FOR'i __ KW_UPDATE)? __
+    win:window_clause? {
       if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
           with: cte,
@@ -1438,6 +1439,7 @@ select_stmt_nake
           orderby: o,
           limit: l,
           for_update: fu && `${fu[0]} ${fu[2][0]}`,
+          window: win,
       };
   }
 
@@ -1662,6 +1664,9 @@ column_ref_list
 
 having_clause
   = KW_HAVING __ e:expr { return e; }
+
+partition_by_clause
+  = KW_PARTITION __ KW_BY __ bc:column_clause { return bc; }
 
 order_by_clause
   = KW_ORDER __ KW_BY __ l:order_by_list { return l; }
@@ -2249,13 +2254,14 @@ aggr_func
   / aggr_fun_smma
 
 aggr_fun_smma
-  = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN {
+  = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN __ bc:over_partition? {
       return {
         type: 'aggr_func',
         name: name,
         args: {
           expr: e
-        }
+        },
+        over: bc,
       };
     }
 
@@ -2277,14 +2283,59 @@ on_update_current_timestamp
       keyword: kw,
     }
   }
+
 over_partition
-  = KW_OVER __ LPAREN __ KW_PARTITION __ KW_BY __ bc:column_clause __ l:order_by_clause? __ RPAREN {
+  = 'OVER'i __ aws:as_window_specification {
     return {
-      partitionby: bc,
-      orderby: l
+      type: 'window',
+      as_window_specification: aws,
     }
   }
   / on_update_current_timestamp
+
+window_clause
+  = 'WINDOW'i __ l:named_window_expr_list {
+    // => { keyword: 'window'; type: 'window', expr: named_window_expr_list; }
+    return {
+      keyword: 'window',
+      type: 'window',
+      expr: l,
+    }
+  }
+
+named_window_expr_list
+  = head:named_window_expr tail:(__ COMMA __ named_window_expr)* {
+    // => named_window_expr[]
+      return createList(head, tail);
+    }
+
+named_window_expr
+  = nw:ident_name __ KW_AS __ anw:as_window_specification {
+    // => { name: ident_name;  as_window_specification: as_window_specification; }
+    return {
+      name: nw,
+      as_window_specification: anw,
+    }
+  }
+
+as_window_specification
+  = ident_name
+  / LPAREN __ ws:window_specification? __ RPAREN {
+    return {
+      window_specification: ws || {},
+      parentheses: true
+    }
+  }
+
+window_specification
+  = bc:partition_by_clause? __ l:order_by_clause? __ {
+    return {
+      name: null,
+      partitionby: bc,
+      orderby: l,
+    }
+  }
+
 aggr_fun_count
   = name:(KW_COUNT / KW_GROUP_CONCAT) __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
       return {
