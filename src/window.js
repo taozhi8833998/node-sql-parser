@@ -36,7 +36,7 @@ function namedWindowExprListToSQL(namedWindowExprInfo) {
 
 function isConsiderNullsInArgs(fnName) {
   // position of IGNORE/RESPECT NULLS varies by function
-  switch (fnName) {
+  switch (toUpper(fnName)) {
     case 'NTH_VALUE':
     case 'LEAD':
     case 'LAG':

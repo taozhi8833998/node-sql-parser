@@ -184,7 +184,7 @@ describe('Postgres', () => {
                 ORDER BY created_at
             ) AS age_window
           FROM roster`,
-          'SELECT LAG("user_name", 10) RESPECT NULLS OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
+          'SELECT LAG("user_name", 10) OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
         ]
     },
     {
@@ -196,7 +196,7 @@ describe('Postgres', () => {
               ORDER BY created_at
           ) AS age_window
         FROM roster`,
-        'SELECT LEAD("user_name", 10) RESPECT NULLS OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
+        'SELECT LEAD("user_name", 10) OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
       ]
     },
     {
@@ -208,7 +208,7 @@ describe('Postgres', () => {
               ORDER BY created_at
           ) AS age_window
         FROM roster`,
-        'SELECT NTH_VALUE("user_name", 10) RESPECT NULLS OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
+        'SELECT NTH_VALUE("user_name", 10) OVER (PARTITION BY "user_city" ORDER BY "created_at" ASC) AS "age_window" FROM "roster"'
       ]
     },
     {
