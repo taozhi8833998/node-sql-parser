@@ -2883,13 +2883,13 @@ window_fun_rank
 window_fun_laglead
   = name:KW_LAG_LEAD __ LPAREN __ l:expr_list __ RPAREN __
   cn:consider_nulls_clause? __ over:over_partition {
-    // => { type: 'window_func'; name: string; args: expr_list; consider_nulls: string; over: over_partition }
+    // => { type: 'window_func'; name: string; args: expr_list; consider_nulls: null | string; over: over_partition }
     return {
       type: 'window_func',
       name: name,
       args: l,
       over: over,
-      consider_nulls: cn || 'RESPECT NULLS'
+      consider_nulls: cn
     };
   }
 
@@ -2903,7 +2903,7 @@ window_fun_firstlast
         type: 'expr_list', value: [l]
       },
       over: over,
-      consider_nulls: cn || 'RESPECT NULLS'
+      consider_nulls: cn
     };
   }
 
