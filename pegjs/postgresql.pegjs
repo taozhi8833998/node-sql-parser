@@ -1734,14 +1734,15 @@ column_list_item
     // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
-  / e:expr_item __ s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
+  / e:expr_item __ s:KW_DOUBLE_COLON t:data_type tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; }
     return {
       as: alias,
       type: 'cast',
       expr: e,
       symbol: '::',
-      target: t
+      target: t,
+      tail: tail && tail[0] && { operator: tail[0][1], expr: tail[0][3] },
     }
   }
   / tbl:ident __ DOT __ STAR {
@@ -3055,7 +3056,7 @@ cast_expr
     /* => {
         as?: alias_clause,
         type: 'cast';
-        expr: expr | literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
+        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
           | expr;
         symbol: '::' | 'as',
         target: data_type;

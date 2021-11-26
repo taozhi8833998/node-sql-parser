@@ -519,6 +519,13 @@ describe('Postgres', () => {
         'SELECT * FROM "tablea" WHERE "comment_id" = $<3>'
       ]
     },
+    {
+      title: 'cast with binary expr',
+      sql: [
+        'select (3-2)::float / (2 * 123) + 111',
+        'SELECT (3 - 2)::FLOAT / (2 * 123) + 111'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
