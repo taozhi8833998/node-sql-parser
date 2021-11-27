@@ -1668,7 +1668,7 @@ or_and_where_expr
     for (let i = 0; i < tail.length; i++) {
       if (tail[i][1] === ',') {
         seperator = ','
-        if (i === 0) result = [head]
+        if (!Array.isArray(result)) result = [result]
         result.push(tail[i][3])
       } else {
         result = createBinaryExpr(tail[i][1], result, tail[i][3]);
@@ -2046,7 +2046,8 @@ func_call
         collate: ca,
     };
   }
-  / name:proc_func_name __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
+  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+    if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
       return {
         type: 'function',
         name: name,
