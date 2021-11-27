@@ -320,6 +320,11 @@ describe('select', () => {
           expect(ast.columns).to.eql(columnAst);
         });
       });
+
+      it('should support function argument with and expr', () => {
+        expect(getParsedSql('SELECT IF((`open_time` <= UNIX_TIMESTAMP()) AND (`close_time` > UNIX_TIMESTAMP()), 1, 0) FROM sometable'))
+          .to.be.equal('SELECT IF((`open_time` <= UNIX_TIMESTAMP()) AND (`close_time` > UNIX_TIMESTAMP()), 1, 0) FROM `sometable`')
+      })
     });
 
     it('should parse multiple columns', () => {
