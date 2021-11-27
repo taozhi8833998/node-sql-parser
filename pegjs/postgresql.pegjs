@@ -1871,7 +1871,7 @@ table_join
   / op:join_op __ t:table_base __ expr:on_clause? {
     // => table_base & {join: join_op; on?: on_clause; }
       t.join = op;
-      t.on   = expr;
+      t.on = expr;
       return t;
     }
   / op:join_op __ LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
@@ -2652,11 +2652,12 @@ primary
   / func_call
   / case_expr
   / interval_expr
-  / c:column_ref __ a:array_index? {
+  / c:column_ref __ a:array_index {
     // => column_ref
-    if(a) c.array_index = a
+    c.array_index = a
     return c
   }
+  / column_ref
   / param
   / LPAREN __ list:or_and_where_expr __ RPAREN {
     // => or_and_where_expr
