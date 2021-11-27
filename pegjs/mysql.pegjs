@@ -1582,7 +1582,7 @@ table_join
     }
   / op:join_op __ t:table_base __ expr:on_clause? {
       t.join = op;
-      t.on   = expr;
+      t.on = expr;
       return t;
     }
   / op:join_op __ LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
