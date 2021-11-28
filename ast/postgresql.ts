@@ -840,7 +840,7 @@ export type window_func = window_fun_rank | window_fun_laglead | window_fun_firs
 
 export type window_fun_rank = { type: 'window_func'; name: string; over: over_partition };
 
-export type window_fun_laglead = { type: 'window_func'; name: string; args: expr_list; consider_nulls: string; over: over_partition };
+export type window_fun_laglead = { type: 'window_func'; name: string; args: expr_list; consider_nulls: null | string; over: over_partition };
 
 export type window_fun_firstlast = window_fun_laglead;
 
@@ -887,7 +887,7 @@ export type scalar_func = KW_CURRENT_DATE | KW_CURRENT_TIME | KW_CURRENT_TIMESTA
 export type cast_expr = {
         as?: alias_clause,
         type: 'cast';
-        expr: expr | literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
+        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
           | expr;
         symbol: '::' | 'as',
         target: data_type;

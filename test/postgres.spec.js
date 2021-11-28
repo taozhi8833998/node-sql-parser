@@ -526,6 +526,15 @@ describe('Postgres', () => {
         'SELECT (3 - 2)::FLOAT / (2 * 123) + 111'
       ]
     },
+    {
+      title: 'on expr with and',
+      sql: [
+        `select *
+        from organization
+        JOIN payment ON organization.id = payment.organization_id and createdat = month`,
+        'SELECT * FROM "organization" INNER JOIN "payment" ON "organization"."id" = "payment"."organization_id" AND "createdat" = "month"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
