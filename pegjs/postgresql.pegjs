@@ -3054,7 +3054,26 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
+  = LPAREN __ e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ RPAREN __ s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
+    /* => {
+        as?: alias_clause,
+        type: 'cast';
+        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
+          | expr;
+        symbol: '::' | 'as',
+        target: data_type;
+      }
+      */
+    e.parentheses = true
+    return {
+      as: alias,
+      type: 'cast',
+      expr: e,
+      symbol: '::',
+      target: t,
+    }
+  }
+  / e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
     /* => {
         as?: alias_clause,
         type: 'cast';
