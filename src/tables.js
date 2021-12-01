@@ -1,6 +1,6 @@
 import { exprToSQL } from './expr'
 import { valuesToSQL } from './insert'
-import { identifierToSql, hasVal, commonOptionConnector, toUpper } from './util'
+import { commonOptionConnector, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
 
 function unnestToSQL(unnestExpr) {
   const { type, as, expr, with_offset: withOffset } = unnestExpr
@@ -18,15 +18,24 @@ function unnestToSQL(unnestExpr) {
 
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
-  const { table, db, as, expr, schema } = tableInfo
+  const { table, db, as, expr, schema, tablesample } = tableInfo
   const database = identifierToSql(db)
   const schemaStr = identifierToSql(schema)
   let tableName = table && identifierToSql(table)
   if (expr && expr.type === 'values') tableName = `(${commonOptionConnector('VALUES', valuesToSQL, expr.values)})`
   if (expr && expr.type !== 'values') tableName = exprToSQL(expr)
   const str = [database, schemaStr, tableName].filter(hasVal).join('.')
-  if (as) return `${str} AS ${identifierToSql(as)}`
-  return str
+  const result = [str]
+  if (tablesample) {
+    const tableSampleSQL = [
+      'TABLESAMPLE',
+      exprToSQL(tablesample.expr),
+      literalToSQL(tablesample.repeatable),
+    ].filter(hasVal).join(' ')
+    result.push(tableSampleSQL)
+  }
+  if (as) result.push('AS', identifierToSql(as))
+  return result.join(' ')
 }
 
 /**
