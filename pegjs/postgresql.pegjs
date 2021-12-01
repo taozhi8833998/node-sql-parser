@@ -1911,6 +1911,17 @@ table_base
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
       return { type: 'expr', expr: e, as: alias };
     }
+  / t:table_name __ 'TABLESAMPLE'i __ f:func_call __ re:('REPEATABLE'i __ LPAREN __ literal_numeric __ RPAREN)? __ alias:alias_clause? {
+    // => table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;}
+    return {
+      ...t,
+      as: alias,
+      tablesample: {
+        expr: f,
+        repeatable: re && re[4],
+      }
+    }
+  }
   / t:table_name __ alias:alias_clause? {
     // => table_name & { as?: alias_clause; }
       if (t.type === 'var') {

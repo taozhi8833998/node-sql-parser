@@ -542,6 +542,13 @@ describe('Postgres', () => {
         'SELECT * FROM "organization" INNER JOIN "payment" ON "organization"."id" = "payment"."organization_id" AND "createdat" = "month"'
       ]
     },
+    {
+      title: 'support tablesample',
+      sql: [
+        'select * from product.organization tablesample bernoulli(1)',
+        'SELECT * FROM "product"."organization" TABLESAMPLE bernoulli(1)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
