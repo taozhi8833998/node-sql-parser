@@ -527,6 +527,13 @@ describe('Postgres', () => {
       ]
     },
     {
+      title: 'cast with binary expr and cast',
+      sql: [
+        'select (2)::float/(3)::float',
+        'SELECT (2)::FLOAT / (3)::FLOAT'
+      ]
+    },
+    {
       title: 'on expr with and',
       sql: [
         `select *
