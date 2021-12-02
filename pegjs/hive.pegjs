@@ -1553,6 +1553,7 @@ between_or_not_between_op
 like_op
   = nk:(KW_NOT __ KW_LIKE) { return nk[0] + ' ' + nk[2]; }
   / KW_LIKE
+  / KW_RLIKE
 
 in_op
   = nk:(KW_NOT __ KW_IN) { return nk[0] + ' ' + nk[2]; }
@@ -2042,6 +2043,7 @@ KW_BETWEEN  = "BETWEEN"i    !ident_start { return 'BETWEEN'; }
 KW_IN       = "IN"i         !ident_start { return 'IN'; }
 KW_IS       = "IS"i         !ident_start { return 'IS'; }
 KW_LIKE     = "LIKE"i       !ident_start { return 'LIKE'; }
+KW_RLIKE     = "RLIKE"i       !ident_start { return 'RLIKE'; }
 KW_EXISTS   = "EXISTS"i     !ident_start { return 'EXISTS'; }
 
 KW_NOT      = "NOT"i        !ident_start { return 'NOT'; }

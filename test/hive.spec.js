@@ -36,4 +36,11 @@ describe('Hive', () => {
     )`
     expect(getParsedSql(sql)).to.be.equal("SELECT * FROM `ab` WHERE ((`upstream`.`created_time` >= from_unixtime((`businessBeginTime` - 3600000) / 1000, 'yyyy-MM-dd hh:mm:ss') AND `upstream`.`created_time` < from_unixtime((`businessEndTime` - 3600000) / 1000, 'yyyy-MM-dd hh:mm:ss')) OR (`item`.`create_time` >= `businessBeginTime` - 3600000 AND `item`.`create_time` < from_unixtime((`businessEndTime` - 3600000) / 1000, 'yyyy-MM-dd hh:mm:ss'))) AND (`upstream`.`upper_amount` IS NULL OR `item`.`amount` IS NULL OR coalesce(`upstream`.`upper_amount`, 0) <> coalesce(`item`.`amount`, 0) OR `upstream`.`settle_type` <> `item`.`settle_type`)")
   })
+
+  it('should support rlike', () => {
+    const sql = `select emp_id,name,email_id
+    from emp_info
+    where email_id RLIKE '^([0-9]|[a-z]|[A-Z])';`
+    expect(getParsedSql(sql)).to.be.equal("SELECT `emp_id`, `name`, `email_id` FROM `emp_info` WHERE `email_id` RLIKE '^([0-9]|[a-z]|[A-Z])'")
+  })
 })
