@@ -22,7 +22,12 @@ function tableToSQL(tableInfo) {
   const database = identifierToSql(db)
   const schemaStr = identifierToSql(schema)
   let tableName = table && identifierToSql(table)
-  if (expr && expr.type === 'values') tableName = `(${commonOptionConnector('VALUES', valuesToSQL, expr.values)})`
+  if (expr && expr.type === 'values') {
+    const { parentheses, values } = expr
+    const valueSQL = [parentheses && '(', '', parentheses && ')']
+    valueSQL[1] = `${commonOptionConnector('VALUES', valuesToSQL, values)}`
+    tableName = valueSQL.filter(hasVal).join('')
+  }
   if (expr && expr.type !== 'values') tableName = exprToSQL(expr)
   const str = [database, schemaStr, tableName].filter(hasVal).join('.')
   const result = [str]

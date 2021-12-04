@@ -371,6 +371,13 @@ describe('Postgres', () => {
       ]
     },
     {
+      title: 'select from values as without parentheses',
+      sql: [
+        `select last(col) FROM VALUES(10),(5),(20) AS tab(col)`,
+        `SELECT last("col") FROM VALUES (10), (5), (20) AS "tab(col)"`
+      ]
+    },
+    {
       title: 'aggr_fun percentile_cont',
       sql: [
         `select percentile_cont(0.25) within group (order by a asc) as p25
