@@ -1898,8 +1898,15 @@ table_base
         type: 'dual'
       };
   }
+  / stmt:value_clause __ alias:alias_clause? {
+    // => { expr: value_clause; as?: alias_clause; }
+    return {
+      expr: { type: 'values', values: stmt },
+      as: alias
+    };
+  }
   / LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:alias_clause? {
-    // => { expr: union_stmt; as?: alias_clause; }
+    // => { expr: union_stmt | value_clause; as?: alias_clause; }
     if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt }
     stmt.parentheses = true;
     return {
