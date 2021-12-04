@@ -43,4 +43,11 @@ describe('Hive', () => {
     where email_id RLIKE '^([0-9]|[a-z]|[A-Z])';`
     expect(getParsedSql(sql)).to.be.equal("SELECT `emp_id`, `name`, `email_id` FROM `emp_info` WHERE `email_id` RLIKE '^([0-9]|[a-z]|[A-Z])'")
   })
+
+  it('should support not rlike', () => {
+    const sql = `select emp_id,name,email_id
+    from emp_info
+    where email_id NOT RLIKE '^([0-9]|[a-z]|[A-Z])';`
+    expect(getParsedSql(sql)).to.be.equal("SELECT `emp_id`, `name`, `email_id` FROM `emp_info` WHERE `email_id` NOT RLIKE '^([0-9]|[a-z]|[A-Z])'")
+  })
 })
