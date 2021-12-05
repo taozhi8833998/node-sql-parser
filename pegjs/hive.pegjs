@@ -1518,6 +1518,7 @@ comparison_op_right
   / between_op_right
   / is_op_right
   / like_op_right
+  / rlike_op_right
 
 arithmetic_op_right
   = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
@@ -1553,6 +1554,9 @@ between_or_not_between_op
 like_op
   = nk:(KW_NOT __ KW_LIKE) { return nk[0] + ' ' + nk[2]; }
   / KW_LIKE
+
+rlike_op
+  = nk:(KW_NOT __ KW_RLIKE) { return nk[0] + ' ' + nk[2]; }
   / KW_RLIKE
 
 in_op
@@ -1561,6 +1565,11 @@ in_op
 
 like_op_right
   = op:like_op __ right:(literal / comparison_expr) {
+      return { op: op, right: right };
+    }
+
+rlike_op_right
+  = op:rlike_op __ right:(literal / comparison_expr) {
       return { op: op, right: right };
     }
 
