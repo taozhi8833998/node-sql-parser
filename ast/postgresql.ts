@@ -537,7 +537,7 @@ export type table_join = table_base & {join: join_op; using: ident_name[]; } | t
       on?: on_clause;
     };
 
-export type table_base = { type: 'dual' } | { expr: union_stmt; as?: alias_clause; } | { type: 'expr'; expr: expr; as?: alias_clause; } | table_name & { as?: alias_clause; };
+export type table_base = { type: 'dual' } | { expr: value_clause; as?: alias_clause; } | { expr: union_stmt | value_clause; as?: alias_clause; } | { type: 'expr'; expr: expr; as?: alias_clause; } | table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;} | table_name & { as?: alias_clause; };
 
 
 
@@ -881,6 +881,8 @@ export type extract_filed = "CENTURY" | "DAY" | "DECADE" | "DOW" | "DOY" | "EPOC
 export type extract_func = { type: 'extract'; args: { field: extract_filed; cast_type: 'TIMESTAMP' | 'INTERVAL' | 'TIME'; source: expr; }};
 
 export type scalar_func = KW_CURRENT_DATE | KW_CURRENT_TIME | KW_CURRENT_TIMESTAMP | KW_CURRENT_USER | KW_USER | KW_SESSION_USER | KW_SYSTEM_USER;
+
+
 
 
 
