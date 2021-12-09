@@ -469,6 +469,13 @@ describe('BigQuery', () => {
         'SELECT * FROM product.organization, UNNEST(ARRAY[1, 2]) LIMIT 10'
       ]
     },
+    {
+      title: 'strikethrough in tablename',
+      sql: [
+        `SELECT previous_block FROM raintank-dev.bitcoin_blockchain.blocks LIMIT 1`,
+        'SELECT previous_block FROM raintank-dev.bitcoin_blockchain.blocks LIMIT 1'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
