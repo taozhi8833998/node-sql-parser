@@ -472,7 +472,7 @@ describe('BigQuery', () => {
     {
       title: 'strikethrough in tablename',
       sql: [
-        `SELECT previous_block FROM raintank-dev.bitcoin_blockchain.blocks LIMIT 1`,
+        'SELECT previous_block FROM raintank-dev.bitcoin_blockchain.blocks LIMIT 1',
         'SELECT previous_block FROM raintank-dev.bitcoin_blockchain.blocks LIMIT 1'
       ]
     },
