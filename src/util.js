@@ -221,6 +221,9 @@ function literalToSQL(literal) {
     case 'timestamp':
       str = `${type.toUpperCase()} '${value}'`
       break
+    case 'var_string':
+      str = `N'${escape(value)}'`
+      break
     default:
       break
   }

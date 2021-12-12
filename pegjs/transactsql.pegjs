@@ -238,6 +238,7 @@ cmd_stmt
   / lock_stmt
   / unlock_stmt
   / declare_stmt
+  / exec_stmt
 
 create_stmt
   = create_table_stmt
@@ -608,6 +609,34 @@ declare_stmt
           definition: t,
         }]
       }
+    }
+  }
+
+exec_stmt
+  = kw:('EXEC'i / 'EXECUTE'i) __ t:table_name __ v:exec_varibale_list {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'exec',
+        keyword: kw,
+        module: t,
+        parameters: v,
+      }
+    }
+  }
+
+exec_varibale_list
+  = head:exec_variable tail:(__ COMMA __ exec_variable)* {
+      return createList(head, tail);
+  }
+
+exec_variable
+  = '@'n:ident __ KW_ASSIGIN_EQUAL __ e:expr {
+    return {
+      type: 'variable',
+      name: n,
+      value: e,
     }
   }
 drop_index_opt
@@ -2178,10 +2207,10 @@ literal_bool
     }
 
 literal_string
-  = ca:("'" single_char* "'") {
+  =  r:'N'i? ca:("'" single_char* "'") {
       return {
-        type: 'string',
-        value: ca[1].join('')
+        type: r ? 'var_string' : 'string',
+        value: ca[1].join(''),
       };
     }
   / ca:("\"" single_quote_char* "\"") {

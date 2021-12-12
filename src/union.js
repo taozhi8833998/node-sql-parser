@@ -14,6 +14,7 @@ import {
   setVarToSQL,
   lockUnlockToSQL,
 } from './command'
+import { execToSQL } from './exec'
 import { orderOrPartitionByToSQL } from './expr'
 import { limitToSQL } from './limit'
 import { showToSQL } from './show'
@@ -28,6 +29,7 @@ const typeToSQLFn = {
   create   : createToSQL,
   select   : selectToSQL,
   delete   : deleteToSQL,
+  exec     : execToSQL,
   update   : updateToSQL,
   insert   : insertToSQL,
   drop     : commonCmdToSQL,
