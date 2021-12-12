@@ -2100,7 +2100,6 @@ window_frame_value
   }
   / literal_numeric
 
-
 partition_by_clause
   = KW_PARTITION __ KW_BY __ bc:column_clause { /* => column_clause */ return bc; }
 

@@ -50,4 +50,24 @@ describe('Hive', () => {
     where email_id NOT RLIKE '^([0-9]|[a-z]|[A-Z])';`
     expect(getParsedSql(sql)).to.be.equal("SELECT `emp_id`, `name`, `email_id` FROM `emp_info` WHERE `email_id` NOT RLIKE '^([0-9]|[a-z]|[A-Z])'")
   })
+
+  it('should support window function', () => {
+    let sql = `SELECT COALESCE(
+      LAST_VALUE(prop1) OVER (PARTITION BY duid, vid, inserteddate ORDER BY STAMP ASC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),
+      LAST_VALUE(prop2) OVER (PARTITION BY duid, vid, inserteddate ORDER BY STAMP ASC ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING),
+      'unknown')`
+    expect(getParsedSql(sql)).to.be.equal("SELECT COALESCE(LAST_VALUE(`prop1`) OVER (PARTITION BY `duid`, `vid`, `inserteddate` ORDER BY `STAMP` ASC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), LAST_VALUE(`prop2`) OVER (PARTITION BY `duid`, `vid`, `inserteddate` ORDER BY `STAMP` ASC ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING), 'unknown')")
+    sql = `SELECT CASE
+      WHEN(
+          LAST_VALUE(
+              CASE
+                  WHEN prop1='const1' THEN 'const2'
+                  ELSE NULL
+              END, True
+          ) OVER (PARTITION BY duid, vid, market ORDER BY stamp ASC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) = 'const3'
+      ) THEN 'const4'
+      ELSE NULL
+    END`
+    expect(getParsedSql(sql)).to.be.equal("SELECT CASE WHEN (LAST_VALUE(CASE WHEN `prop1` = 'const1' THEN 'const2' ELSE NULL END, TRUE) OVER (PARTITION BY `duid`, `vid`, `market` ORDER BY `stamp` ASC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) = 'const3') THEN 'const4' ELSE NULL END")
+  })
 })

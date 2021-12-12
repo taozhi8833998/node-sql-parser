@@ -1175,8 +1175,80 @@ column_ref_list
 having_clause
   = KW_HAVING __ e:expr { return e; }
 
+as_window_specification
+  = ident_name
+  / LPAREN __ ws:window_specification? __ RPAREN {
+    return {
+      window_specification: ws || {},
+      parentheses: true
+    }
+  }
+
+window_specification
+  = bc:partition_by_clause? __
+  l:order_by_clause? __
+  w:window_frame_clause? {
+    return {
+      name: null,
+      partitionby: bc,
+      orderby: l,
+      window_frame_clause: w
+    }
+  }
+
+window_specification_frameless
+  = bc:partition_by_clause? __
+  l:order_by_clause? {
+    return {
+      name: null,
+      partitionby: bc,
+      orderby: l,
+      window_frame_clause: null
+    }
+  }
+
+window_frame_clause
+  = kw:KW_ROWS __ s:(window_frame_following / window_frame_preceding) {
+    return `rows ${s.value}`
+  }
+  / KW_ROWS __ KW_BETWEEN __ p:window_frame_preceding __ KW_AND __ f:window_frame_following {
+    return `rows between ${p.value} and ${f.value}`
+  }
+
+window_frame_following
+  = s:window_frame_value __ 'FOLLOWING'i  {
+    // => string
+    s.value += ' FOLLOWING'
+    return s
+  }
+  / window_frame_current_row
+
+window_frame_preceding
+  = s:window_frame_value __ 'PRECEDING'i  {
+    // => string
+    s.value += ' PRECEDING'
+    return s
+  }
+  / window_frame_current_row
+
+window_frame_current_row
+  = 'CURRENT'i __ 'ROW'i {
+    // => { type: 'single_quote_string'; value: string }
+    return { type: 'single_quote_string', value: 'current row' }
+  }
+
+window_frame_value
+  = s:'UNBOUNDED'i {
+    // => literal_string
+    return { type: 'single_quote_string', value: s.toUpperCase() }
+  }
+  / literal_numeric
+
 order_by_clause
   = KW_ORDER __ KW_BY __ l:order_by_list { return l; }
+
+partition_by_clause
+  = KW_PARTITION __ KW_BY __ bc:column_clause { return bc; }
 
 order_by_list
   = head:order_by_element tail:(__ COMMA __ order_by_element)* {
@@ -1727,7 +1799,13 @@ on_update_current_timestamp
   }
 
 over_partition
-  = KW_OVER __ LPAREN __ KW_PARTITION __ KW_BY __ bc:column_clause __ l:order_by_clause? __ RPAREN {
+  = 'OVER'i __ aws:as_window_specification {
+    return {
+      type: 'window',
+      as_window_specification: aws,
+    }
+  }
+  / 'OVER'i __ LPAREN __ bc:partition_by_clause? __ l:order_by_clause? __ RPAREN {
     return {
       partitionby: bc,
       orderby: l
@@ -2097,6 +2175,7 @@ KW_FLOAT   = "FLOAT"i   !ident_start { return 'FLOAT'; }
 KW_DOUBLE   = "DOUBLE"i   !ident_start { return 'DOUBLE'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
+KW_ROWS     = "ROWS"i     !ident_start { return 'ROWS'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
