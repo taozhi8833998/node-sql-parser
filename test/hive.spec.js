@@ -70,4 +70,9 @@ describe('Hive', () => {
     END`
     expect(getParsedSql(sql)).to.be.equal("SELECT CASE WHEN (LAST_VALUE(CASE WHEN `prop1` = 'const1' THEN 'const2' ELSE NULL END, TRUE) OVER (PARTITION BY `duid`, `vid`, `market` ORDER BY `stamp` ASC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) = 'const3') THEN 'const4' ELSE NULL END")
   })
+
+  it('should support cross join', () => {
+    const sql = 'SELECT * FROM a CROSS JOIN b ON (a.id = b.id AND a.department = b.department)'
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM `a` CROSS JOIN `b` ON (`a`.`id` = `b`.`id` AND `a`.`department` = `b`.`department`)')
+  })
 })

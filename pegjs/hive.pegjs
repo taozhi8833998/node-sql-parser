@@ -13,6 +13,7 @@
     'CALL': true,
     'CASE': true,
     'CREATE': true,
+    'CROSS': true,
     'CONTAINS': true,
     'CURRENT_DATE': true,
     'CURRENT_TIME': true,
@@ -1142,6 +1143,7 @@ join_op
   / KW_RIGHT __ KW_OUTER? __ KW_JOIN { return 'RIGHT JOIN'; }
   / KW_FULL __ KW_OUTER? __ KW_JOIN { return 'FULL JOIN'; }
   / (KW_INNER __)? KW_JOIN { return 'INNER JOIN'; }
+  / KW_CROSS __ KW_JOIN { return 'CROSS JOIN'; }
 
 table_name
   = dt:ident tail:(__ DOT __ ident)? {
@@ -2101,6 +2103,7 @@ KW_ON       = "ON"i       !ident_start
 KW_LEFT     = "LEFT"i     !ident_start
 KW_RIGHT    = "RIGHT"i    !ident_start
 KW_FULL     = "FULL"i     !ident_start
+KW_CROSS    = "CROSS"i    !ident_start
 KW_INNER    = "INNER"i    !ident_start
 KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
