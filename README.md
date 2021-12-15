@@ -92,7 +92,7 @@ Import the JS file in your page:
 - DB2
 - Hive
 - MariaDB
-- Mysql
+- MySQL
 - PostgresQL
 - Sqlite(developing)
 - TransactSQL
