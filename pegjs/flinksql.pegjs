@@ -2453,7 +2453,7 @@ func_call
         over: bc,
       };
     }
-  / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN {
+  / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
@@ -2462,7 +2462,8 @@ func_call
       };
     }
   / extract_func
-  / f:KW_CURRENT_TIMESTAMP __ up:on_update_current_timestamp? {
+  / f:scalar_func __ up:on_update_current_timestamp? {
+    // => { type: 'function'; name: string; over?: on_update_current_timestamp; }
     return {
         type: 'function',
         name: f,
