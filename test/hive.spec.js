@@ -75,4 +75,9 @@ describe('Hive', () => {
     const sql = 'SELECT * FROM a CROSS JOIN b ON (a.id = b.id AND a.department = b.department)'
     expect(getParsedSql(sql)).to.be.equal('SELECT * FROM `a` CROSS JOIN `b` ON (`a`.`id` = `b`.`id` AND `a`.`department` = `b`.`department`)')
   })
+
+  it('should support ==', () => {
+    const sql = "select * from some_table where column1 == 'value'"
+    expect(getParsedSql(sql)).to.be.equal("SELECT * FROM `some_table` WHERE `column1` == 'value'")
+  })
 })
