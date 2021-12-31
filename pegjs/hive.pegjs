@@ -1600,7 +1600,7 @@ arithmetic_op_right
     }
 
 arithmetic_comparison_operator
-  = ">=" / ">" / "<=" / "<>" / "<" / "=" / "!="
+  = ">=" / ">" / "<=" / "<>" / "<" / "==" / "=" / "!="
 
 is_op_right
   = KW_IS __ right:additive_expr {
