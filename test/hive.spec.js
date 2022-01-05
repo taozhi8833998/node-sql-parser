@@ -80,4 +80,9 @@ describe('Hive', () => {
     const sql = "select * from some_table where column1 == 'value'"
     expect(getParsedSql(sql)).to.be.equal("SELECT * FROM `some_table` WHERE `column1` == 'value'")
   })
+
+  it('should support array index', () => {
+    const sql = "select some_array[0] from some_table;"
+    expect(getParsedSql(sql)).to.be.equal("SELECT `some_array`[0] FROM `some_table`")
+  })
 })
