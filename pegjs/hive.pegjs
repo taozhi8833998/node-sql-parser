@@ -998,6 +998,20 @@ column_clause
       return createList(head, tail);
     }
 
+array_index
+  = LBRAKE __ n:number __ RBRAKE {
+    return {
+      brackets: true,
+      number: n
+    }
+  }
+
+expr_item
+  = e:expr __ a:array_index? {
+    if (a) e.array_index = a
+    return e
+  }
+
 column_list_item
   = tbl:ident __ DOT __ STAR {
       columnList.add(`select::${tbl}::(.*)`);
@@ -1010,8 +1024,8 @@ column_list_item
         as: null
       };
     }
-  / e:expr __ alias:alias_clause? {
-      return { expr: e, as: alias };
+  / e:expr_item __ alias:alias_clause? {
+      return { type: 'expr', expr: e, as: alias };
     }
 
 alias_clause
