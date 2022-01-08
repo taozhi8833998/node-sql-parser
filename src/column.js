@@ -27,7 +27,10 @@ function columnRefToSQL(expr) {
   let str = column === '*' ? '*' : columnOffsetToSQL(column, isDual)
   if (table) str = `${identifierToSql(table)}.${str}`
   if (schema) str = `${identifierToSql(schema)}.${str}`
-  if (array_index) str = `${str}[${array_index.number}]`
+  if (array_index) {
+    str = `${str}[${array_index.number}]`
+    if (array_index.property) str = `${str}.${array_index.property.value}`
+  }
   const result = [
     str,
     commonOptionConnector('AS', exprToSQL, as),

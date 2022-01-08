@@ -999,7 +999,17 @@ column_clause
     }
 
 array_index
-  = LBRAKE __ n:number __ RBRAKE {
+  = LBRAKE __ n:number __ RBRAKE __ "." __ s:ident {
+    return {
+      brackets: true,
+      number: n,
+      property: {
+        type: 'origin',
+        value: s
+      }
+    }
+  }
+  / LBRAKE __ n:number __ RBRAKE {
     return {
       brackets: true,
       number: n
@@ -1694,6 +1704,11 @@ primary
   / func_call
   / case_expr
   / interval_expr
+  / c:column_ref __ a:array_index {
+    // => column_ref
+    c.array_index = a
+    return c
+  }
   / column_ref
   / param
   / LPAREN __ list:or_and_where_expr __ RPAREN {

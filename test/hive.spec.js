@@ -82,7 +82,13 @@ describe('Hive', () => {
   })
 
   it('should support array index', () => {
-    const sql = "select some_array[0] from some_table;"
+    let sql = "select some_array[0] from some_table;"
     expect(getParsedSql(sql)).to.be.equal("SELECT `some_array`[0] FROM `some_table`")
+    sql = "select lower(some_array[0]) from some_table;"
+    expect(getParsedSql(sql)).to.be.equal("SELECT lower(`some_array`[0]) FROM `some_table`")
+    sql = "select some_array[0].some_prop from some_table;"
+    expect(getParsedSql(sql)).to.be.equal("SELECT `some_array`[0].some_prop FROM `some_table`")
+    sql = "select lower(some_array[0].some_prop) from some_table;"
+    expect(getParsedSql(sql)).to.be.equal("SELECT lower(`some_array`[0].some_prop) FROM `some_table`")
   })
 })
