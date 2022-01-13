@@ -690,7 +690,7 @@ export type case_when_then = { type: 'when'; cond: binary_expr; result: expr; };
 
 export type case_else = { type: 'else'; condition?: never; result: expr; };
 
-export type expr = logic_operator_expr | or_expr | unary_expr | select_stmt;
+export type expr = logic_operator_expr | or_expr | unary_expr | union_stmt;
 
 export type BINARY_OPERATORS = LOGIC_OPERATOR | 'OR' | 'AND' | multiplicative_operator | additive_operator
       | arithmetic_comparison_operator
