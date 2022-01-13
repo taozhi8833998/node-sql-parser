@@ -644,40 +644,8 @@ describe('select', () => {
 
     it('should parse exists condition', () => {
       const operator = 'EXISTS'
-      const ast = parser.astify(`SELECT * FROM t WHERE ${operator} (SELECT 1)`);
-      expect(ast.where).to.eql({
-        "type": "function",
-        "name": "EXISTS",
-        "args": {
-            "type": "expr_list",
-            "value": [
-              {
-                  "with": null,
-                  "type": "select",
-                  "options": null,
-                  "distinct": null,
-                  "columns": [
-                    {
-                      "expr": {
-                        "type": "number",
-                        "value": 1
-                      },
-                        "as": null
-                    }
-                  ],
-                  "from": null,
-                  "where": null,
-                  "groupby": null,
-                  "having": null,
-                  "orderby": null,
-                  "limit": null,
-                  "for_update": null,
-                  "window": null,
-              }
-            ]
-        },
-        "over": null
-      });
+      const sql = `SELECT * FROM t WHERE ${operator} (SELECT 1)`
+      expect(getParsedSql(sql)).to.be.equal('SELECT * FROM `t` WHERE EXISTS(SELECT 1)')
     });
 
     it(`should parse + and - unary`, () => {
@@ -883,34 +851,8 @@ describe('select', () => {
     });
 
     it('should parse subselects', () => {
-      const ast = parser.astify('SELECT col1 FROM t GROUP BY col2 HAVING SUM(col2) > (SELECT 10)');
-
-      expect(ast.having).to.eql({
-        type: 'binary_expr',
-        operator: '>',
-        left: {
-          type: 'aggr_func',
-          name: 'SUM',
-          over: null,
-          args: { expr: { type: 'column_ref', table: null, column: 'col2' } }
-        },
-        right: {
-          with: null,
-          type: 'select',
-          options: null,
-          distinct: null,
-          for_update: null,
-          columns: [{ expr: { type: 'number', value: 10 }, as: null }],
-          from: null,
-          where: null,
-          groupby: null,
-          having: null,
-          orderby: null,
-          limit: null,
-          parentheses: true,
-          window: null,
-        }
-      });
+      const sql = 'SELECT col1 FROM t GROUP BY col2 HAVING SUM(col2) > (SELECT 10)';
+      expect(getParsedSql(sql)).to.be.equal('SELECT `col1` FROM `t` GROUP BY `col2` HAVING SUM(`col2`) > (SELECT 10)')
     });
   });
 
@@ -1059,6 +1001,16 @@ describe('select', () => {
         .to.have.property('stmt')
         .and.to.be.an('object');
     });
+
+    it('should support union in in_op', () => {
+      const sql = `select 1 from pg_database a where a.oid in
+        (
+      select 1 from pg_database b where b.oid = 1
+      union
+      select 1 from pg_database c where c.oid=2
+      )`
+      expect(getParsedSql(sql)).to.be.equal("SELECT 1 FROM `pg_database` AS `a` WHERE `a`.`oid` IN (SELECT 1 FROM `pg_database` AS `b` WHERE `b`.`oid` = 1 UNION SELECT 1 FROM `pg_database` AS `c` WHERE `c`.`oid` = 2)")
+    })
 
     it('should parse multiple CTEs', () => {
       const ast = parser.astify(`WITH cte1 AS (SELECT 1), cte2 AS (SELECT 2)
@@ -1361,6 +1313,16 @@ describe('select', () => {
     it('should properly escape column aliases that contain special characters', () => {
       const sql = `select column_name as "Column Name" from table_name`
       expect(getParsedSql(sql, opt)).to.equal('SELECT "column_name" AS "Column Name" FROM "table_name"')
+    })
+
+    it('should support union in in_op', () => {
+      const sql = `select 1 from pg_database a where a.oid in
+        (
+      select 1 from pg_database b where b.oid = 1
+      union
+      select 1 from pg_database c where c.oid=2
+      )`
+      expect(getParsedSql(sql, opt)).to.be.equal('SELECT 1 FROM "pg_database" AS "a" WHERE "a"."oid" IN (SELECT 1 FROM "pg_database" AS "b" WHERE "b"."oid" = 1 UNION SELECT 1 FROM "pg_database" AS "c" WHERE "c"."oid" = 2)')
     })
 
     it('should support array_agg', () => {
