@@ -675,7 +675,7 @@ expr
   / logic_operator_expr // support concatenation operator || and &&
   / or_expr
   / unary_expr
-  / select_stmt
+  / union_stmt
   / array_expr
 
 parentheses_list_expr

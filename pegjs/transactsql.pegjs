@@ -1790,7 +1790,7 @@ expr
   = logic_operator_expr // support concatenation operator || and &&
   / or_expr
   / unary_expr
-  / select_stmt
+  / union_stmt
 
 logic_operator_expr
   = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ {
