@@ -3019,6 +3019,7 @@ trim_position
 
 trim_rem
   = p:trim_position? __ rm:literal_string? __ k:KW_FROM {
+    // => expr_list
     let value = []
     if (p) value.push({type: 'origin', value: p })
     if (rm) value.push(rm)
@@ -3031,6 +3032,7 @@ trim_rem
 
 trim_func_clause
   = 'trim'i __ LPAREN __ tr:trim_rem? __ s:expr __ RPAREN {
+    // => { type: 'function'; name: string; args: expr_list; }
     let args = tr || { type: 'expr_list', value: [] }
     args.value.push(s)
     return {
