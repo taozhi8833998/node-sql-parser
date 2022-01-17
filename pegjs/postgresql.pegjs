@@ -3014,8 +3014,35 @@ aggr_array_agg
 star_expr
   = "*" { /* => { type: 'star'; value: '*' } */ return { type: 'star', value: '*' }; }
 
+trim_position
+  = 'BOTH'i / 'LEADING'i / 'TRAILING'i
+
+trim_rem
+  = p:trim_position? __ rm:literal_string? __ k:KW_FROM {
+    let value = []
+    if (p) value.push({type: 'origin', value: p })
+    if (rm) value.push(rm)
+    value.push({type: 'origin', value: 'from' })
+    return {
+      type: 'expr_list',
+      value,
+    }
+  }
+
+trim_func_clause
+  = 'trim'i __ LPAREN __ tr:trim_rem? __ s:expr __ RPAREN {
+    let args = tr || { type: 'expr_list', value: [] }
+    args.value.push(s)
+    return {
+        type: 'function',
+        name: 'TRIM',
+        args,
+    };
+  }
+
 func_call
-  = name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
+  = trim_func_clause
+  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
       // => { type: 'function'; name: string; args: expr_list; }
       if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
       return {

@@ -2087,9 +2087,35 @@ convert_args
       value: [c]
     }
   }
+trim_position
+  = 'BOTH'i / 'LEADING'i / 'TRAILING'i
+
+trim_rem
+  = p:trim_position? __ rm:literal_string? __ k:KW_FROM {
+    let value = []
+    if (p) value.push({type: 'origin', value: p })
+    if (rm) value.push(rm)
+    value.push({type: 'origin', value: 'from' })
+    return {
+      type: 'expr_list',
+      value,
+    }
+  }
+
+trim_func_clause
+  = 'trim'i __ LPAREN __ tr:trim_rem? __ s:expr __ RPAREN {
+    let args = tr || { type: 'expr_list', value: [] }
+    args.value.push(s)
+    return {
+        type: 'function',
+        name: 'TRIM',
+        args,
+    };
+  }
 
 func_call
-  = 'convert'i __ LPAREN __ l:convert_args __ RPAREN __ ca:collate_expr? {
+  = trim_func_clause
+  / 'convert'i __ LPAREN __ l:convert_args __ RPAREN __ ca:collate_expr? {
     return {
         type: 'function',
         name: 'CONVERT',

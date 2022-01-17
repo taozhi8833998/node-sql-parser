@@ -172,6 +172,34 @@ describe('mysql', () => {
           "SELECT * FROM `pg_database` AS `a` INNER JOIN `pg_database` AS `b` ON upper(`a`.`datctype`) = upper(`b`.`datctype`) AND `a`.`oid` = `b`.`oid`"
         ]
       },
+      {
+        title: 'support trim function',
+        sql: [
+          `SELECT TRIM('.' from "....test.....") AS TrimmedString;`,
+          "SELECT TRIM('.' FROM '....test.....') AS `TrimmedString`"
+        ]
+      },
+      {
+        title: 'support trim function with position',
+        sql: [
+          `SELECT TRIM(BOTH '.' from "....test.....") AS TrimmedString;`,
+          "SELECT TRIM(BOTH '.' FROM '....test.....') AS `TrimmedString`"
+        ]
+      },
+      {
+        title: 'support trim function with position',
+        sql: [
+          `SELECT TRIM(TRAILING  from " test ") AS TrimmedString;`,
+          "SELECT TRIM(TRAILING FROM ' test ') AS `TrimmedString`"
+        ]
+      },
+      {
+        title: 'support trim function without config',
+        sql: [
+          `SELECT TRIM(" test ") AS TrimmedString;`,
+          "SELECT TRIM(' test ') AS `TrimmedString`"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

@@ -565,6 +565,13 @@ describe('Postgres', () => {
         'SELECT * FROM "pg_database" AS "a" INNER JOIN "pg_database" AS "b" ON "a"."oid" = "b"."oid" AND upper("a"."datctype") = upper("b"."datctype")'
       ]
     },
+    {
+      title: 'support trim function',
+      sql: [
+        `SELECT TRIM('.' from '....test.....') AS TrimmedString;`,
+        `SELECT TRIM('.' FROM '....test.....') AS "TrimmedString"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
