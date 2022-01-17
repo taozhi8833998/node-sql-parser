@@ -556,6 +556,22 @@ describe('Postgres', () => {
         'SELECT * FROM "product"."organization" TABLESAMPLE bernoulli(1)'
       ]
     },
+    {
+      title: 'support on clause with function and expr',
+      sql: [
+        `select * from pg_database a
+        join pg_database b
+        on a.oid = b.oid AND upper(a.datctype) = upper(b.datctype)`,
+        'SELECT * FROM "pg_database" AS "a" INNER JOIN "pg_database" AS "b" ON "a"."oid" = "b"."oid" AND upper("a"."datctype") = upper("b"."datctype")'
+      ]
+    },
+    {
+      title: 'support trim function',
+      sql: [
+        `SELECT TRIM('.' from '....test.....') AS TrimmedString;`,
+        `SELECT TRIM('.' FROM '....test.....') AS "TrimmedString"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

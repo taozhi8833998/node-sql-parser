@@ -1667,7 +1667,7 @@ table_name
     }
 
 on_clause
-  = KW_ON __ e:expr { /* => expr */ return e; }
+  = KW_ON __ e:or_and_where_expr { /* => expr */ return e; }
 
 where_clause
   = KW_WHERE __ e:(or_and_where_expr / expr) { /* => expr */ return e; }

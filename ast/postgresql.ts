@@ -553,7 +553,7 @@ export type table_name = { db?: ident; schema?: ident, table: ident | '*'; };
 
 
 
-export type on_clause = expr;
+export type on_clause = or_and_where_expr;
 
 
 
@@ -874,7 +874,13 @@ export type aggr_array_agg = { type: 'aggr_func'; args:count_arg; name: 'ARRAY_A
 
 export type star_expr = { type: 'star'; value: '*' };
 
-export type func_call = { type: 'function'; name: string; args: expr_list; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; };
+export type trim_position = "BOTH" | "LEADING" | "TRAILING";
+
+export type trim_rem = expr_list;
+
+export type trim_func_clause = { type: 'function'; name: string; args: expr_list; };
+
+export type func_call = trim_func_clause | { type: 'function'; name: string; args: expr_list; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; };
 
 export type extract_filed = "CENTURY" | "DAY" | "DECADE" | "DOW" | "DOY" | "EPOCH" | "HOUR" | "ISODOW" | "ISOYEAR" | "MICROSECONDS" | "MILLENNIUM" | "MILLISECONDS" | "MINUTE" | "MONTH" | "QUARTER" | "SECOND" | "TIMEZONE" | "TIMEZONE_HOUR" | "TIMEZONE_MINUTE" | "WEEK" | 'string';
 
