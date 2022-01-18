@@ -1887,6 +1887,16 @@ func_call
         over: up
     }
   }
+  / name:(KW_DATE / KW_TIME / KW_TIMESTAMP / 'AT TIME ZONE'i) __ l:or_and_where_expr? __ bc:over_partition? {
+    if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
+      return {
+        type: 'function',
+        name: name,
+        args: l ? l: { type: 'expr_list', value: [] },
+        over: bc,
+        args_parentheses: false,
+      };
+    }
 
 scalar_func
   = KW_CURRENT_DATE
