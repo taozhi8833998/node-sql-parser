@@ -91,4 +91,13 @@ describe('Hive', () => {
     sql = "select lower(some_array[0].some_prop) from some_table;"
     expect(getParsedSql(sql)).to.be.equal("SELECT lower(`some_array`[0].some_prop) FROM `some_table`")
   })
+
+  it('should support date interval cal', () => {
+    let sql = `SELECT id from origindb.tt WHERE _update_timestamp >= timestamp businessBeginTime - interval '3' day`
+    expect(getParsedSql(sql)).to.be.equal("SELECT `id` FROM `origindb`.`tt` WHERE `_update_timestamp` >= TIMESTAMP `businessBeginTime` - INTERVAL '3' DAY")
+    sql = `select id from origindb.tt where date '2012-08-08' + interval '2' day`
+    expect(getParsedSql(sql)).to.be.equal("SELECT `id` FROM `origindb`.`tt` WHERE DATE '2012-08-08' + INTERVAL '2' DAY")
+    sql = "SELECT timestamp '2012-10-31 01:00 UTC';"
+    expect(getParsedSql(sql)).to.be.equal("SELECT TIMESTAMP '2012-10-31 01:00 UTC'")
+  })
 })
