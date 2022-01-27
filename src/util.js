@@ -1,5 +1,4 @@
 import { columnRefToSQL, columnOrderToSQL } from './column'
-import { exprToSQL } from './expr'
 
 // const escapeMap = {
 //   '\0'   : '\\0',
@@ -256,12 +255,11 @@ function onPartitionsToSQL(expr) {
 }
 
 function dataTypeToSQL(expr) {
-  const { dataType, expr: dataTypeExpr, length, parentheses, scale, suffix } = expr
+  const { dataType, length, parentheses, scale, suffix } = expr
   let str = ''
   if (length != null) str = scale ? `${length}, ${scale}` : length
   if (parentheses) str = `(${str})`
   if (suffix && suffix.length) str += ` ${suffix.join(' ')}`
-  if (dataTypeExpr) str += exprToSQL(dataTypeExpr)
   return `${dataType}${str}`
 }
 

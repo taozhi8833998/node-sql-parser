@@ -704,6 +704,8 @@ describe('select', () => {
         .to.equal("SELECT CONVERT(`test` USING UTF8MB4) COLLATE UTF8MB4_BIN")
       expect(getParsedSql(`select TYPE,taxpayer_Type,CONVERT(tax_Amount, DECIMAL(12,2)) AS tax_amount,CAST(tax_currency AS DECIMAL(12,2))  tax_currency from rs_order_tax where billno="{{billno}}" and Business_Type="order";`))
         .to.equal("SELECT `TYPE`, `taxpayer_Type`, CONVERT(`tax_Amount`, DECIMAL(12, 2)) AS `tax_amount`, CAST(`tax_currency` AS DECIMAL(12, 2)) AS `tax_currency` FROM `rs_order_tax` WHERE `billno` = '{{billno}}' AND `Business_Type` = 'order'")
+      expect(getParsedSql(`SELECT CONVERT('test', INT(11) unsigned);`))
+        .to.equal("SELECT CONVERT(`test`, INT(11) UNSIGNED)")
     })
 
     it('should support if', () => {
