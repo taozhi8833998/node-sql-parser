@@ -2077,7 +2077,7 @@ convert_args
   / c:column_ref __ COMMA __ d:data_type {
     return {
       type: 'expr_list',
-      value: [c, { value: d.dataType.toUpperCase() }]
+       value: [c, { type: 'datatype', ...d, }]
     }
   }
   / c:column_ref __ KW_USING __ d:ident_name {
