@@ -254,6 +254,15 @@ function onPartitionsToSQL(expr) {
   return result.join(' ')
 }
 
+function dataTypeToSQL(expr) {
+  const { dataType, length, parentheses, scale, suffix } = expr
+  let str = ''
+  if (length != null) str = scale ? `${length}, ${scale}` : length
+  if (parentheses) str = `(${str})`
+  if (suffix && suffix.length) str += ` ${suffix.join(' ')}`
+  return `${dataType}${str}`
+}
+
 function arrayStructTypeToSQL(expr) {
   if (!expr) return
   const { dataType, definition, anglebracket } = expr
@@ -320,7 +329,7 @@ export {
   arrayStructTypeToSQL, autoIncreatementToSQL,
   columnOrderListToSQL, commonKeywordArgsToSQL, commonOptionConnector,
   connector, commonTypeValue,commentToSQL, createBinaryExpr,
-  createValueExpr, DEFAULT_OPT, escape, literalToSQL, columnIdentifierToSql,
+  createValueExpr, dataTypeToSQL, DEFAULT_OPT, escape, literalToSQL, columnIdentifierToSql,
   identifierToSql, onPartitionsToSQL, replaceParams, returningToSQL,
   hasVal, setParserOpt, toUpper, topToSQL, triggerEventToSQL,
 }

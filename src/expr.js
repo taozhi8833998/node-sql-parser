@@ -1,4 +1,4 @@
-import { literalToSQL, toUpper, connector } from './util'
+import { literalToSQL, toUpper, connector, dataTypeToSQL } from './util'
 import { alterExprToSQL } from './alter'
 import { aggrToSQL } from './aggregation'
 import { assignToSQL } from './assign'
@@ -23,6 +23,7 @@ const exprToSQLConvertFn = {
   case        : caseToSQL,
   cast        : castToSQL,
   column_ref  : columnRefToSQL,
+  datatype    : dataTypeToSQL,
   extract     : extractFunToSQL,
   function    : funcToSQL,
   interval    : intervalToSQL,
