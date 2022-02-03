@@ -1163,6 +1163,7 @@ scalar_func
   = KW_CURRENT_DATE
   / KW_CURRENT_TIME
   / KW_CURRENT_TIMESTAMP
+  / KW_SESSION_USER
 
 extract_filed
   = f:'CENTURY'i / 'DAY'i / 'DECADE'i / 'DOW'i / 'DOY'i / 'EPOCH'i / 'HOUR'i / 'ISODOW'i / 'ISOYEAR'i / 'MICROSECONDS'i / 'MILLENNIUM'i / 'MILLISECONDS'i / 'MINUTE'i / 'MONTH'i / 'QUARTER'i / 'SECOND'i / 'TIMEZONE'i / 'TIMEZONE_HOUR'i / 'TIMEZONE_MINUTE'i / 'WEEK'i / 'YEAR'i {
@@ -1503,6 +1504,7 @@ KW_UNIT_MINUTE      = "MINUTE"i !ident_start { return 'MINUTE'; }
 KW_UNIT_SECOND      = "SECOND"i !ident_start { return 'SECOND'; }
 KW_CURRENT_TIME     = "CURRENT_TIME"i !ident_start { return 'CURRENT_TIME'; }
 KW_CURRENT_TIMESTAMP= "CURRENT_TIMESTAMP"i !ident_start { return 'CURRENT_TIMESTAMP'; }
+KW_SESSION_USER     = "SESSION_USER"i !ident_start { return 'SESSION_USER'; }
 
 KW_GLOBAL         = "GLOBAL"i    !ident_start { return 'GLOBAL'; }
 KW_SESSION        = "SESSION"i   !ident_start { return 'SESSION'; }
