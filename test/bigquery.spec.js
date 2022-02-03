@@ -489,6 +489,13 @@ describe('BigQuery', () => {
         'SELECT date_week, AVG(nb_users) OVER (ORDER BY date_week ASC ROWS BETWEEN 3 PRECEDING AND CURRENT ROW) AS nb_users_ma FROM active_users_per_week'
       ]
     },
+    {
+      title: 'session user',
+      sql:[
+        'select session_user()',
+        'SELECT SESSION_USER()'
+      ]
+    }
   ]
 
   SQL_LIST.forEach(sqlInfo => {
