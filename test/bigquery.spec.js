@@ -476,6 +476,19 @@ describe('BigQuery', () => {
         'SELECT previous_block FROM raintank-dev.bitcoin_blockchain.blocks LIMIT 1'
       ]
     },
+    {
+      title: 'over window spec',
+      sql: [
+        `select
+        date_week,
+        avg(nb_users) over (
+          order by date_week
+          rows between 3 preceding and current row
+      ) as nb_users_ma
+      from active_users_per_week`,
+        'SELECT date_week, AVG(nb_users) OVER (ORDER BY date_week ASC ROWS BETWEEN 3 PRECEDING AND CURRENT ROW) AS nb_users_ma FROM active_users_per_week'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {

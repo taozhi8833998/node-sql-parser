@@ -621,9 +621,43 @@ window_frame_clause
   = 'RANGE'i __ KW_BETWEEN 'UNBOUNDED'i __ 'PRECEDING'i __ KW_AND __ 'CURRENT'i __ 'ROW' {
     return 'range between unbounded preceding and current row'
   }
-  / 'ROWS'i __ KW_BETWEEN __ s:literal_numeric __ 'PRECEDING'i __ KW_AND __ e:literal_numeric __ 'FOLLOWING'i {
-    return `rows between ${s.value} preceding and ${e.value} following`
+  / kw:KW_ROWS __ s:(window_frame_following / window_frame_preceding) {
+    // => string
+    return `rows ${s.value}`
   }
+  / KW_ROWS __ KW_BETWEEN __ p:window_frame_preceding __ KW_AND __ f:window_frame_following {
+    // => string
+    return `rows between ${p.value} and ${f.value}`
+  }
+
+window_frame_following
+  = s:window_frame_value __ 'FOLLOWING'i  {
+    // => string
+    s.value += ' FOLLOWING'
+    return s
+  }
+  / window_frame_current_row
+
+window_frame_preceding
+  = s:window_frame_value __ 'PRECEDING'i  {
+    // => string
+    s.value += ' PRECEDING'
+    return s
+  }
+  / window_frame_current_row
+
+window_frame_current_row
+  = 'CURRENT'i __ 'ROW'i {
+    // => { type: 'single_quote_string'; value: string }
+    return { type: 'single_quote_string', value: 'current row' }
+  }
+
+window_frame_value
+  = s:'UNBOUNDED'i {
+    // => literal_string
+    return { type: 'single_quote_string', value: s.toUpperCase() }
+  }
+  / literal_numeric
 
 partition_by_clause
   = KW_PARTITION __ KW_BY __ bc:column_clause { return bc; }
@@ -1025,13 +1059,14 @@ aggr_func
   / aggr_fun_smma
 
 aggr_fun_smma
-  = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN {
+  = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN __ bc:over_partition? {
       return {
         type: 'aggr_func',
         name: name,
         args: {
           expr: e
-        }
+        },
+        over: bc,
       };
     }
 
@@ -1451,6 +1486,7 @@ KW_FLOAT_64   = "FLOAT64"i   !ident_start { return 'FLOAT64'; }
 KW_DOUBLE   = "DOUBLE"i   !ident_start { return 'DOUBLE'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_DATETIME = "DATETIME"i     !ident_start { return 'DATETIME'; }
+KW_ROWS     = "ROWS"i     !ident_start { return 'ROWS'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
