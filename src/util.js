@@ -134,6 +134,7 @@ function columnIdentifierToSql(ident) {
     case 'mysql':
     case 'mariadb':
     case 'bigquery':
+    case 'snowflake':
     default:
       return `\`${ident}\``
   }
@@ -153,6 +154,7 @@ function identifierToSql(ident, isDual) {
     case 'transactsql':
       return `[${ident}]`
     case 'bigquery':
+    case 'snowflake':
     case 'db2':
       return ident
     default:

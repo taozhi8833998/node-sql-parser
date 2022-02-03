@@ -7,7 +7,7 @@
   "scripts": {
     "start": "webpack --config webpack.config.js",
     "build": "npm run lint && npm run compile && webpack --config webpack.config.js --prod",
-    "test": "npm run lint && mochapack \"test/**/*.spec.js\"",
+    "test": "mochapack \"test/**/*.spec.js\"",
     "lint": "eslint src",
     "compile": "babel src -d lib",
     "coverLocal": "cross-env NODE_ENV=coverage nyc --reporter=lcov --reporter=text npm run test",
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/taozhi8833998/node-sql-parser.git"
+    "url": "git+https://github.com/Eppo-exp/node-sql-parser"
   },
   "pre-commit": "coverLocal",
   "keywords": [
@@ -31,7 +31,7 @@
     "ast",
     "sql-ast"
   ],
-  "author": "taozhi8833998 <taozhi8833998@163.com>",
+  "author": "pavel@fluxon.com",
   "files": [
     "ast/",
     "build",
@@ -46,10 +46,6 @@
     "LICENSE"
   ],
   "license": "GPLv2",
-  "bugs": {
-    "url": "https://github.com/taozhi8833998/node-sql-parser/issues"
-  },
-  "homepage": "https://github.com/taozhi8833998/node-sql-parser#readme",
   "engines": {
     "node": ">=8"
   },
