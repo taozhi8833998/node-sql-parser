@@ -32,6 +32,7 @@ function pivotOperatorToSQL(operator) {
 }
 
 function operatorToSQL(operator) {
+  if (!operator) return
   const { type } = operator
   switch (type) {
     case 'pivot':
@@ -55,8 +56,7 @@ function tableToSQL(tableInfo) {
   }
   if (expr && expr.type !== 'values') tableName = exprToSQL(expr)
   const str = [database, schemaStr, tableName].filter(hasVal).join('.')
-  const result = [str]
-  if (operator) result.push(operatorToSQL(operator))
+  const result = [str, operatorToSQL(operator)]
   if (tablesample) {
     const tableSampleSQL = [
       'TABLESAMPLE',
@@ -66,7 +66,7 @@ function tableToSQL(tableInfo) {
     result.push(tableSampleSQL)
   }
   if (as) result.push('AS', identifierToSql(as))
-  return result.join(' ')
+  return result.filter(hasVal).join(' ')
 }
 
 /**
