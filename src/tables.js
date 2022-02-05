@@ -1,3 +1,5 @@
+import { binaryToSQL } from './binary'
+import { columnRefToSQL } from './column'
 import { exprToSQL } from './expr'
 import { valuesToSQL } from './insert'
 import { commonOptionConnector, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
@@ -16,9 +18,32 @@ function unnestToSQL(unnestExpr) {
   return result.filter(hasVal).join(' ')
 }
 
+function pivotOperatorToSQL(operator) {
+  const { as, column, expr, in_expr, type } = operator
+  const result = [
+    exprToSQL(expr),
+    'FOR',
+    columnRefToSQL(column),
+    binaryToSQL(in_expr),
+  ]
+  const sql = [`${toUpper(type)}(${result.join(' ')})`]
+  if (as) sql.push('AS', identifierToSql(as))
+  return sql.join(' ')
+}
+
+function operatorToSQL(operator) {
+  const { type } = operator
+  switch (type) {
+    case 'pivot':
+      return pivotOperatorToSQL(operator)
+    default:
+      return ''
+  }
+}
+
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
-  const { table, db, as, expr, schema, tablesample } = tableInfo
+  const { table, db, as, expr, operator, schema, tablesample } = tableInfo
   const database = identifierToSql(db)
   const schemaStr = identifierToSql(schema)
   let tableName = table && identifierToSql(table)
@@ -31,6 +56,7 @@ function tableToSQL(tableInfo) {
   if (expr && expr.type !== 'values') tableName = exprToSQL(expr)
   const str = [database, schemaStr, tableName].filter(hasVal).join('.')
   const result = [str]
+  if (operator) result.push(operatorToSQL(operator))
   if (tablesample) {
     const tableSampleSQL = [
       'TABLESAMPLE',

@@ -1,4 +1,5 @@
 import { exprToSQL } from './expr'
+import { hasVal } from './util'
 
 function binaryToSQL(expr) {
   let { operator } = expr
@@ -22,7 +23,7 @@ function binaryToSQL(expr) {
     }
     if (!isBetween) rstr = `(${rstr.join(', ')})`
   }
-  const str = [exprToSQL(expr.left), operator, rstr].join(' ')
+  const str = [exprToSQL(expr.left), operator, rstr].filter(hasVal).join(' ')
   return expr.parentheses ? `(${str})` : str
 }
 

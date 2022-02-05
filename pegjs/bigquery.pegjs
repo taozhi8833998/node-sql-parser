@@ -65,6 +65,7 @@
     'OUTER': true,
 
     'PARTITION': true,
+    'PIVOT': true,
 
     'RECURSIVE': true,
     'RENAME': true,
@@ -453,8 +454,21 @@ from_unnest_item
   }
 
 from_clause
-  = KW_FROM __ l:table_ref_list {
+  = KW_FROM __ l:table_ref_list __ op:pivot_operator? {
+    if (l[0]) l[0].operator = op
     return l
+  }
+
+pivot_operator
+  = KW_PIVOT __ LPAREN __ a:aggr_func_list __ 'FOR'i __ c:column_ref __ i:in_op_right __ RPAREN __ as:alias_clause? {
+    i.operator = '='
+    return {
+      'type': 'pivot',
+      'expr': a,
+      column: c,
+      in_expr: i,
+      as,
+    }
   }
 
 with_offset
@@ -1054,6 +1068,13 @@ param
       return { type: 'param', value: l[1] };
     }
 
+aggr_func_list
+  = head:aggr_func __ as:alias_clause? tail:(__ COMMA __ aggr_func __ alias_clause?)* {
+      const el = { type: 'expr_list' };
+      el.value = createList(head, tail);
+      return el;
+  }
+
 aggr_func
   = aggr_fun_count
   / aggr_fun_smma
@@ -1509,6 +1530,7 @@ KW_SESSION_USER     = "SESSION_USER"i !ident_start { return 'SESSION_USER'; }
 KW_GLOBAL         = "GLOBAL"i    !ident_start { return 'GLOBAL'; }
 KW_SESSION        = "SESSION"i   !ident_start { return 'SESSION'; }
 KW_LOCAL          = "LOCAL"i     !ident_start { return 'LOCAL'; }
+KW_PIVOT          = "PIVOT"i   !ident_start { return 'PIVOT'; }
 KW_PERSIST        = "PERSIST"i   !ident_start { return 'PERSIST'; }
 KW_PERSIST_ONLY   = "PERSIST_ONLY"i   !ident_start { return 'PERSIST_ONLY'; }
 

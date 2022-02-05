@@ -495,6 +495,20 @@ describe('BigQuery', () => {
         'select session_user()',
         'SELECT SESSION_USER()'
       ]
+    },
+    {
+      title: 'from pivot operator',
+      sql:[
+        "SELECT sales, quarter FROM Produce PIVOT(sum(sales) FOR quarter IN ('Q1', 'Q2', 'Q3', 'Q4'))",
+        "SELECT sales, quarter FROM Produce PIVOT(SUM(sales) FOR quarter IN ('Q1', 'Q2', 'Q3', 'Q4'))"
+      ]
+    },
+    {
+      title: 'from pivot operator with as',
+      sql:[
+        "SELECT sales, quarter FROM Produce PIVOT(sum(sales) FOR quarter IN ('Q1', 'Q2', 'Q3', 'Q4')) as abc",
+        "SELECT sales, quarter FROM Produce PIVOT(SUM(sales) FOR quarter IN ('Q1', 'Q2', 'Q3', 'Q4')) AS abc"
+      ]
     }
   ]
 
