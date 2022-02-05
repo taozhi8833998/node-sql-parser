@@ -1,6 +1,7 @@
 const { expect } = require('chai')
 const Parser = require('../src/parser').default
 const { arrayStructValueToSQL } = require('../src/array-struct')
+const { operatorToSQL } = require('../src/tables')
 const { arrayStructTypeToSQL } = require('../src/util')
 
 describe('BigQuery', () => {
@@ -14,6 +15,11 @@ describe('BigQuery', () => {
       return parser.sqlify(ast, opt);
   }
 
+  describe('operator type', () => {
+    it('should return empty when type is unknown', () => {
+      expect(operatorToSQL({ type: 'unknown'})).to.be.equals('')
+    })
+  })
   const SQL_LIST = [
     {
       title: 'select *',

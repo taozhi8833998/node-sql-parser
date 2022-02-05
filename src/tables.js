@@ -100,6 +100,7 @@ function tableOptionToSQL(tableOption) {
 }
 
 export {
+  operatorToSQL,
   tablesToSQL,
   tableOptionToSQL,
   tableToSQL,
