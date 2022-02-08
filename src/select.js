@@ -91,5 +91,6 @@ function selectToSQL(stmt) {
 }
 
 export {
+  selectIntoToSQL,
   selectToSQL,
 }

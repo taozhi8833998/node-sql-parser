@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const Parser = require('../src/parser').default
+const { selectIntoToSQL } = require('../src/select')
 
 describe('mysql', () => {
   const parser = new Parser();
@@ -246,7 +247,11 @@ describe('mysql', () => {
         const parsedSQL = "SELECT * FROM (VALUES ROW(1,2,3), ROW(4,5,6), ROW(7,8,9)) AS `t` INTO DUMPFILE '/tmp/select-values.txt'"
         expect(getParsedSql(sql)).to.equal(parsedSQL)
         expect(getParsedSql(sql, mariadb)).to.equal(parsedSQL)
+      })
 
+      it('should return empty when into is null', () => {
+        expect(selectIntoToSQL()).to.be.undefined
+        expect(selectIntoToSQL({})).to.be.undefined
       })
     })
   })
