@@ -49,9 +49,11 @@ function tableToSQL(tableInfo) {
   const schemaStr = identifierToSql(schema)
   let tableName = table && identifierToSql(table)
   if (expr && expr.type === 'values') {
-    const { parentheses, values } = expr
+    const { parentheses, values, prefix } = expr
     const valueSQL = [parentheses && '(', '', parentheses && ')']
-    valueSQL[1] = `${commonOptionConnector('VALUES', valuesToSQL, values)}`
+    let valuesExpr = valuesToSQL(values)
+    if (prefix) valuesExpr = valuesExpr.split('(').slice(1).map(val => `${toUpper(prefix)}(${val}`).join('')
+    valueSQL[1] = `VALUES ${valuesExpr}`
     tableName = valueSQL.filter(hasVal).join('')
   }
   if (expr && expr.type !== 'values') tableName = exprToSQL(expr)

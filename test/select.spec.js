@@ -390,6 +390,7 @@ describe('select', () => {
               for_update: null,
               from: [{ db: null, table: 't1', as: null }],
               columns: [{ expr: { type: 'column_ref', table: null, column: 'id' }, as: null }],
+              into: { position: null },
               where: null,
               groupby: null,
               having: null,
@@ -458,6 +459,7 @@ describe('select', () => {
                   { expr: { type: 'column_ref', table: null, 'column': 'id' }, as: null },
                   { expr: { type: 'column_ref', table: null, 'column': 'col1' }, as: null }
                 ],
+                into: { position: null },
                 where: null,
                 groupby: null,
                 having: null,
@@ -628,6 +630,7 @@ describe('select', () => {
               distinct: null,
               for_update: null,
               columns: [{ expr: { type: 'number', value: 1 }, as: null }],
+              into: { position: null },
               from: null,
               where: null,
               groupby: null,
