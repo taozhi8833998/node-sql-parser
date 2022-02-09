@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const Parser = require('../src/parser').default
+const { selectIntoToSQL } = require('../src/select')
 
 describe('mysql', () => {
   const parser = new Parser();
@@ -7,6 +8,7 @@ describe('mysql', () => {
     const ast = parser.astify(sql, opt);
     return parser.sqlify(ast, opt);
   }
+  const mariadb = { database: 'mariadb' }
 
   describe('select', () => {
     const SQL_LIST = [
@@ -206,9 +208,50 @@ describe('mysql', () => {
       it(`should support ${title}`, () => {
         expect(getParsedSql(sql[0])).to.equal(sql[1])
       })
-      const mariadb = { database: 'mariadb' }
       it(`should support ${title} in mariadb`, () => {
         expect(getParsedSql(sql[0], mariadb)).to.equal(sql[1])
+      })
+    })
+
+    describe('into', () => {
+      it('should support select into variables', () => {
+        let sql = 'SELECT * INTO @myvar FROM t1;'
+        let parsedSQL = 'SELECT * INTO @myvar FROM `t1`'
+        expect(getParsedSql(sql)).to.equal(parsedSQL)
+        expect(getParsedSql(sql, mariadb)).to.equal(parsedSQL)
+        sql = 'SELECT * FROM t1 INTO @myvar FOR UPDATE;'
+        parsedSQL = 'SELECT * FROM `t1` INTO @myvar FOR UPDATE'
+        expect(getParsedSql(sql)).to.equal(parsedSQL)
+        expect(getParsedSql(sql, mariadb)).to.equal(parsedSQL)
+        sql = 'SELECT * FROM t1 FOR UPDATE INTO @myvar;'
+        parsedSQL = 'SELECT * FROM `t1` FOR UPDATE INTO @myvar'
+        expect(getParsedSql(sql)).to.equal(parsedSQL)
+        expect(getParsedSql(sql, mariadb)).to.equal(parsedSQL)
+        sql = 'SELECT id, data INTO @x, @y FROM test.t1 LIMIT 1;'
+        parsedSQL = 'SELECT `id`, `data` INTO @x, @y FROM `test`.`t1` LIMIT 1'
+        expect(getParsedSql(sql)).to.equal(parsedSQL)
+        expect(getParsedSql(sql, mariadb)).to.equal(parsedSQL)
+      })
+
+      it('should support select into outfile', () => {
+        const sql = `SELECT * FROM (VALUES ROW(1,2,3),ROW(4,5,6),ROW(7,8,9)) AS t
+        INTO OUTFILE '/tmp/select-values.txt';`
+        const parsedSQL = "SELECT * FROM (VALUES ROW(1,2,3), ROW(4,5,6), ROW(7,8,9)) AS `t` INTO OUTFILE '/tmp/select-values.txt'"
+        expect(getParsedSql(sql)).to.equal(parsedSQL)
+        expect(getParsedSql(sql, mariadb)).to.equal(parsedSQL)
+      })
+
+      it('should support select into dumpfile', () => {
+        const sql = `SELECT * FROM (VALUES ROW(1,2,3),ROW(4,5,6),ROW(7,8,9)) AS t
+        INTO DUMPFILE '/tmp/select-values.txt';`
+        const parsedSQL = "SELECT * FROM (VALUES ROW(1,2,3), ROW(4,5,6), ROW(7,8,9)) AS `t` INTO DUMPFILE '/tmp/select-values.txt'"
+        expect(getParsedSql(sql)).to.equal(parsedSQL)
+        expect(getParsedSql(sql, mariadb)).to.equal(parsedSQL)
+      })
+
+      it('should return empty when into is null', () => {
+        expect(selectIntoToSQL()).to.be.undefined
+        expect(selectIntoToSQL({})).to.be.undefined
       })
     })
   })

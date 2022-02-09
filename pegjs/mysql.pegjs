@@ -1417,14 +1417,20 @@ select_stmt_nake
     opts:option_clause? __
     d:KW_DISTINCT?      __
     c:column_clause     __
+    ci:into_clause?      __
     f:from_clause?      __
+    fi:into_clause?      __
     w:where_clause?     __
     g:group_by_clause?  __
     h:having_clause?    __
     o:order_by_clause?  __
     l:limit_clause? __
     fu: ('FOR'i __ KW_UPDATE)? __
-    win:window_clause? {
+    win:window_clause? __
+    li:into_clause? {
+      if ((ci && fi) || (ci && li) || (fi && li) || (ci && fi && li)) {
+        throw new Error('A given SQL statement can contain at most one INTO clause')
+      }
       if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
           with: cte,
@@ -1432,6 +1438,10 @@ select_stmt_nake
           options: opts,
           distinct: d,
           columns: c,
+          into: {
+            ...(ci || fi || li || {}),
+            position: ci && 'column' || fi && 'from' || li && 'end'
+          },
           from: f,
           where: w,
           groupby: g,
@@ -1501,6 +1511,22 @@ column_list_item
 alias_clause
   = KW_AS __ i:alias_ident { return i; }
   / KW_AS? __ i:ident { return i; }
+
+into_clause
+  = KW_INTO __ v:var_decl_list {
+    return {
+      keyword: 'var',
+      type: 'into',
+      expr: v
+    }
+  }
+  / KW_INTO __ k:('OUTFILE'i / 'DUMPFILE'i) __ f:literal_string {
+    return {
+      keyword: k,
+      type: 'into',
+      expr: f
+    }
+  }
 
 from_clause
   = KW_FROM __ l:table_ref_list { return l; }
@@ -1613,7 +1639,14 @@ table_base
         };
       }
     }
-  / LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? {
+  / stmt:value_clause __ alias:alias_clause? {
+    return {
+      expr: { type: 'values', values: stmt, prefix: 'row' },
+      as: alias
+    };
+  }
+  / LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:alias_clause? {
+      if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt, prefix: 'row' }
       stmt.parentheses = true;
       return {
         expr: stmt,
@@ -1896,7 +1929,7 @@ value_list
     }
 
 value_item
-  = LPAREN __ l:expr_list  __ RPAREN {
+  = 'ROW'i? __ LPAREN __ l:expr_list  __ RPAREN {
       return l;
     }
 
@@ -3071,6 +3104,11 @@ proc_primary_list
 proc_array =
   LBRAKE __ l:proc_primary_list __ RBRAKE {
     return { type: 'array', value: l };
+  }
+
+var_decl_list
+  = head:var_decl tail:(__ COMMA __ var_decl)* {
+    return createList(head, tail)
   }
 
 var_decl
