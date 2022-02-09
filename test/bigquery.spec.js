@@ -515,7 +515,21 @@ describe('BigQuery', () => {
         "SELECT sales, quarter FROM Produce PIVOT(sum(sales) FOR quarter IN ('Q1', 'Q2', 'Q3', 'Q4')) as abc",
         "SELECT sales, quarter FROM Produce PIVOT(SUM(sales) FOR quarter IN ('Q1', 'Q2', 'Q3', 'Q4')) AS abc"
       ]
-    }
+    },
+    {
+      title: 'select distinct parentheses',
+      sql:[
+        `select count (
+          distinct (
+            case
+              when order_purchase_timestamp between '2018-01-01' and '2018-12-31' then order_id
+            end
+          )
+        ) as nb_orders
+        from retail.orders`,
+        "SELECT COUNT(DISTINCT(CASE WHEN order_purchase_timestamp BETWEEN '2018-01-01' AND '2018-12-31' THEN order_id END)) AS nb_orders FROM retail.orders"
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
