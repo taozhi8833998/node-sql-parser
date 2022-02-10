@@ -1845,7 +1845,7 @@ aggr_fun_count
 count_arg
   = e:star_expr { return { expr: e }; }
   / d:KW_DISTINCT? __ c:column_ref { return { distinct: d, expr: c }; }
-  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN {  c.parentheses = true; return { distinct: d, expr: c }; }
+  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN { return { distinct: d, expr: c, parentheses: true }; }
 
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
