@@ -530,6 +530,14 @@ describe('BigQuery', () => {
         "SELECT COUNT(DISTINCT(CASE WHEN order_purchase_timestamp BETWEEN '2018-01-01' AND '2018-12-31' THEN order_id END)) AS nb_orders FROM retail.orders"
       ]
     },
+    {
+      title: 'select column and star',
+      sql: [
+        'select row_number() over(), * from retail.orders',
+        'SELECT row_number() OVER (), * FROM retail.orders'
+      ]
+
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {

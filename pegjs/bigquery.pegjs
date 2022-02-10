@@ -411,7 +411,18 @@ column_offset_expr
   }
 
 column_list_item
-  = tbl:ident __ DOT pro:((column_offset_expr / ident) __ DOT)? __ STAR {
+  = tbl:STAR {
+      columnList.add('select::null::(.*)');
+      return {
+        expr: {
+          type: 'column_ref',
+          table: null,
+          column: '*'
+        },
+        as: null
+      };
+    }
+  / tbl:ident __ DOT pro:((column_offset_expr / ident) __ DOT)? __ STAR {
       columnList.add(`select::${tbl}::(.*)`)
       let column = '*'
       const mid = pro && pro[0]
