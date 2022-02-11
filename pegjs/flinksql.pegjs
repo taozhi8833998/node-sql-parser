@@ -1450,15 +1450,13 @@ column_list_item
       target: t
     }
   }
-  / tbl:ident __ DOT __ STAR {
-    // => { type: 'star_ref'; expr: column_ref; as: null; }
-
-      columnList.add(`select::${tbl}::(.*)`);
+  / tbl:(ident __ DOT)? __ STAR {
+      const table = tbl && tbl[0] || null
+      columnList.add(`select::${table}::(.*)`);
       return {
-        type: 'star_ref',
         expr: {
           type: 'column_ref',
-          table: tbl,
+          table: table,
           column: '*'
         },
         as: null
@@ -2241,12 +2239,13 @@ primary
   }
 
 column_ref
-  = tbl:ident __ DOT __ STAR {
+  = tbl:(ident __ DOT)? __ STAR {
     // => IGNORE
-      columnList.add(`select::${tbl}::(.*)`);
+      const table = tbl && tbl[0] || null
+      columnList.add(`select::${table}::(.*)`);
       return {
           type: 'column_ref',
-          table: tbl,
+          table: table,
           column: '*'
       }
     }

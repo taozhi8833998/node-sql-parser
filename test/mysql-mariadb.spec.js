@@ -202,6 +202,13 @@ describe('mysql', () => {
           "SELECT TRIM(' test ') AS `TrimmedString`"
         ]
       },
+      {
+        title: 'column with start',
+        sql: [
+          `SELECT abc, * from tableName`,
+          "SELECT `abc`, * FROM `tableName`"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

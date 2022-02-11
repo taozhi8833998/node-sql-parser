@@ -1207,12 +1207,13 @@ column_clause
     }
 
 column_list_item
-  = tbl:ident __ DOT __ STAR {
-      columnList.add(`select::${tbl}::(.*)`);
+  = tbl:(ident __ DOT)? __ STAR {
+      const table = tbl && tbl[0] || null
+      columnList.add(`select::${table}::(.*)`);
       return {
         expr: {
           type: 'column_ref',
-          table: tbl,
+          table: table,
           column: '*'
         },
         as: null

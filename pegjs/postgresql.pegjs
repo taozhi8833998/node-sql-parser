@@ -1745,14 +1745,14 @@ column_list_item
       tail: tail && tail[0] && { operator: tail[0][1], expr: tail[0][3] },
     }
   }
-  / tbl:ident __ DOT __ STAR {
-    // => { type: 'star_ref'; expr: column_ref; as: null; }
-      columnList.add(`select::${tbl}::(.*)`);
+  / tbl:(ident __ DOT)? __ STAR {
+      // => { type: 'star_ref'; expr: column_ref; as: null; }
+      const table = tbl && tbl[0] || null
+      columnList.add(`select::${table}::(.*)`);
       return {
-        type: 'star_ref',
         expr: {
           type: 'column_ref',
-          table: tbl,
+          table: table,
           column: '*'
         },
         as: null
@@ -2708,12 +2708,13 @@ string_constants_escape
 
 column_ref
   = string_constants_escape
-  / tbl:ident __ DOT __ STAR {
+  / tbl:(ident __ DOT)? __ STAR {
     // => IGNORE
-      columnList.add(`select::${tbl}::(.*)`);
+      const table = tbl && tbl[0] || null
+      columnList.add(`select::${table}::(.*)`);
       return {
           type: 'column_ref',
-          table: tbl,
+          table: table,
           column: '*'
       }
     }
