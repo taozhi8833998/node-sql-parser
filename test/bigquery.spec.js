@@ -536,7 +536,13 @@ describe('BigQuery', () => {
         'select row_number() over(), * from retail.orders',
         'SELECT row_number() OVER (), * FROM retail.orders'
       ]
-
+    },
+    {
+      title: 'function name with more dot',
+      sql: [
+        'SELECT bqutil.fn.degrees(3.141592653589793) is_this_pi',
+        'SELECT bqutil.fn.degrees(3.141592653589793) AS is_this_pi'
+      ]
     },
   ]
 

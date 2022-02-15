@@ -1183,10 +1183,10 @@ func_call
   }
 
 proc_func_name
-  = dt:ident tail:(__ DOT __ ident)? {
+  = dt:ident tail:(__ DOT __ ident)* {
       let name = dt
       if (tail !== null) {
-        name = `${dt}.${tail[3]}`
+        tail.forEach(t => name = `${name}.${t[3]}`)
       }
       return name;
     }
