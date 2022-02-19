@@ -1705,6 +1705,9 @@ regexp_op_right
   = op:regexp_op __ b:'BINARY'i? __ e:literal_string {
     return  { op: b ? `${op} ${b}` :  op, right: e };
   }
+  / 'glob'i __ e:literal_string {
+    return { op: 'GLOB', right: e }
+  }
 
 like_op_right
   = op:like_op __ right:(literal / comparison_expr) {

@@ -80,4 +80,9 @@ describe('sqlite', () => {
     floor.id = 1;`
     expect(getParsedSql(sql)).to.be.equal("SELECT `id`, json_object('hasGeometry', CASE WHEN json_extract(`floor`.`rect`, '$') IS '{\"boundariesList\":[]}' THEN json('false') ELSE json('true') END) AS `metadata` FROM `floor` WHERE `floor`.`id` = 1")
   })
+
+  it('should support glob operator', () => {
+    const sql = "SELECT device.id FROM device WHERE device.model GLOB '*XYZ';"
+    expect(getParsedSql(sql)).to.be.equal("SELECT `device`.`id` FROM `device` WHERE `device`.`model` GLOB '*XYZ'")
+  })
 })
