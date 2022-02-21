@@ -295,13 +295,13 @@ create_table_stmt
     tp:KW_TEMPORARY? __
     KW_TABLE __
     ife:KW_IF_NOT_EXISTS? __
-    t:table_ref_list __
-    c:create_table_definition __
+    t:table_name __
+    c:create_table_definition? __
     to:table_options? __
     ir: (KW_IGNORE / KW_REPLACE)? __
     as: KW_AS? __
     qe: union_stmt? {
-      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
+      if(t) tableList.add(`create::${t.db}::${t.table}`)
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -310,7 +310,7 @@ create_table_stmt
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists: ife && ife[0].toLowerCase(),
-          table: t,
+          table: [t],
           ignore_replace: ir && ir[0].toLowerCase(),
           as: as && as[0].toLowerCase(),
           query_expr: qe && qe.ast,
@@ -323,9 +323,9 @@ create_table_stmt
     tp:KW_TEMPORARY? __
     KW_TABLE __
     ife:KW_IF_NOT_EXISTS? __
-    t:table_ref_list __
+    t:table_name __
     lt:create_like_table {
-      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
+      if(t) tableList.add(`create::${t.db}::${t.table}`)
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -334,7 +334,7 @@ create_table_stmt
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists: ife && ife[0].toLowerCase(),
-          table: t,
+          table: [t],
           like: lt
         }
       }
