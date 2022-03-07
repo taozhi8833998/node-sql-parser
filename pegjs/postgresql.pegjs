@@ -1763,6 +1763,9 @@ column_list_item
       return { type: 'expr', expr: e, as: alias };
     }
 
+value_alias_clause
+  = KW_AS? __ i:alias_ident { /*=>alias_ident*/ return i; }
+
 alias_clause
   = KW_AS __ i:alias_ident { /*=>alias_ident*/ return i; }
   / KW_AS? __ i:ident { /*=>ident*/ return i; }
@@ -1898,14 +1901,14 @@ table_base
         type: 'dual'
       };
   }
-  / stmt:value_clause __ alias:alias_clause? {
+  / stmt:value_clause __ alias:value_alias_clause? {
     // => { expr: value_clause; as?: alias_clause; }
     return {
       expr: { type: 'values', values: stmt },
       as: alias
     };
   }
-  / LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:alias_clause? {
+  / LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:value_alias_clause? {
     // => { expr: union_stmt | value_clause; as?: alias_clause; }
     if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt }
     stmt.parentheses = true;
