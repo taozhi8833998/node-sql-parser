@@ -584,6 +584,20 @@ describe('Postgres', () => {
         `WITH statuses AS (SELECT "a" FROM (VALUES ('Closed'), ('Verified'), ('Done')) AS "s(a)") SELECT * FROM "statuses"`
       ]
     },
+    {
+      title: 'dollar-quoted string',
+      sql: [
+        'SELECT $$foo bar$$;',
+        'SELECT $$foo bar$$'
+      ]
+    },
+    {
+      title: 'dollar-quoted string',
+      sql: [
+        "select $SomeTag$Dianne's horse$SomeTag$",
+        "SELECT $SomeTag$Dianne's horse$SomeTag$"
+      ]
+    }
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
