@@ -572,6 +572,18 @@ describe('Postgres', () => {
         `SELECT TRIM('.' FROM '....test.....') AS "TrimmedString"`
       ]
     },
+    {
+      title: 'from values without as',
+      sql: [
+        `with statuses as (
+          select a
+          from (
+            values ('Closed'), ('Verified'), ('Done')
+          ) s(a)
+        ) select * from statuses`,
+        `WITH statuses AS (SELECT "a" FROM (VALUES ('Closed'), ('Verified'), ('Done')) AS "s(a)") SELECT * FROM "statuses"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
