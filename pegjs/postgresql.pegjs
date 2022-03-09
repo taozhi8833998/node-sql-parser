@@ -3534,6 +3534,7 @@ KW_PERSIST_ONLY   = "PERSIST_ONLY"i   !ident_start { return 'PERSIST_ONLY'; }
 KW_VAR__PRE_AT = '@'
 KW_VAR__PRE_AT_AT = '@@'
 KW_VAR_PRE_DOLLAR = '$'
+KW_VAR_PRE_DOLLAR_DOUBLE = '$$'
 KW_VAR_PRE
   = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR
 KW_RETURN = 'return'i
@@ -3753,7 +3754,25 @@ proc_array
   }
 
 var_decl
-  = p: KW_VAR_PRE d: without_prefix_var_decl {
+  = p: KW_VAR_PRE_DOLLAR_DOUBLE d:[^$]* s:KW_VAR_PRE_DOLLAR_DOUBLE {
+    // { type: 'var'; name: string; prefix: string; suffix: string; };
+    return {
+      type: 'var',
+      name: d.join(''),
+      prefix: '$$',
+      suffix: '$$'
+    };
+  }
+  / KW_VAR_PRE_DOLLAR f:ident KW_VAR_PRE_DOLLAR d:[^$]* KW_VAR_PRE_DOLLAR s:ident !{ if (f !== s) return true } KW_VAR_PRE_DOLLAR {
+    // { type: 'var'; name: string; prefix: string; suffix: string; };
+    return {
+      type: 'var',
+      name: d.join(''),
+      prefix: `$${f}$`,
+      suffix: `$${s}$`
+    };
+  }
+  / p: KW_VAR_PRE d: without_prefix_var_decl {
     // => without_prefix_var_decl & { type: 'var'; prefix: string; };
     //push for analysis
     return {
