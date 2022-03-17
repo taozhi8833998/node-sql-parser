@@ -842,16 +842,22 @@ reference_definition
         on_update: ou,
       }
   }
+  / oa:on_reference {
+    const key = oa.type.split(' ').join('_')
+    return {
+      [key]: oa
+    }
+  }
 
 on_reference
-  = kw: ('ON DELETE'i / 'ON UPDATE'i) __ ro:reference_option {
+  = on_kw:'ON'i __ kw: ('DELETE'i / 'UPDATE'i) __ ro:reference_option {
     return {
-      type: kw.toLowerCase(),
+      type: `${on_kw.toLowerCase()} ${kw.toLowerCase()}`,
       value: ro
     }
   }
 reference_option
-  = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i) {
+  = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
     return kc.toLowerCase()
   }
 

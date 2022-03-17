@@ -1121,6 +1121,12 @@ reference_definition
         on_update: ou,
       }
   }
+  / oa:on_reference {
+    const key = oa.type.split(' ').join('_')
+    return {
+      [key]: oa
+    }
+  }
 
 on_reference
   = on_kw:'ON'i __ kw: ('DELETE'i / 'UPDATE'i) __ ro:reference_option {
@@ -1130,7 +1136,7 @@ on_reference
     }
   }
 reference_option
-  = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i) {
+  = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
     return kc.toLowerCase()
   }
 

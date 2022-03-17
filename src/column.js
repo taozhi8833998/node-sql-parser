@@ -62,9 +62,9 @@ function columnReferenceDefinitionToSQL(referenceDefinition) {
     on_delete: onDelete,
     on_update: onUpdate,
   } = referenceDefinition
-  reference.push(keyword.toUpperCase())
+  reference.push(toUpper(keyword))
   reference.push(tablesToSQL(table))
-  reference.push(`(${definition.map(identifierToSql).join(', ')})`)
+  reference.push(definition && `(${definition.map(identifierToSql).join(', ')})`)
   reference.push(toUpper(match))
   reference.push(...commonTypeValue(onDelete))
   reference.push(...commonTypeValue(onUpdate))
