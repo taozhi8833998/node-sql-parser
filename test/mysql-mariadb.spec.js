@@ -209,6 +209,20 @@ describe('mysql', () => {
           "SELECT `abc`, * FROM `tableName`"
         ]
       },
+      {
+        title: 'timestamp diff',
+        sql: [
+          'SELECT TIMESTAMPDIFF(SECOND,"2003-05-01 12:05:55","2003-05-01 12:06:32")',
+          "SELECT TIMESTAMPDIFF(SECOND, '2003-05-01 12:05:55', '2003-05-01 12:06:32')"
+        ],
+      },
+      {
+        title: 'timestamp add',
+        sql: [
+          'SELECT TIMESTAMPADD(MINUTE,1,"2003-01-02")',
+          "SELECT TIMESTAMPADD(MINUTE, 1, '2003-01-02')"
+        ],
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
