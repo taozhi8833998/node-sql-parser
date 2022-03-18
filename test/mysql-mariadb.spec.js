@@ -230,6 +230,13 @@ describe('mysql', () => {
           "CREATE TABLE `t1` (`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, `name` VARCHAR(64) NOT NULL DEFAULT 'ttt', `zf` INT(10) UNSIGNED ZEROFILL DEFAULT NULL, `created_at` TIMESTAMP NULL DEFAULT NULL, `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`)) ENGINE = INNODB AUTO_INCREMENT = 5 DEFAULT CHARSET = utf8mb4"
         ],
       },
+      {
+        title: 'insert ignore into',
+        sql: [
+          "INSERT IGNORE INTO t1 (c1, c2) VALUES (1,1)",
+          "INSERT IGNORE INTO `t1` (`c1`, `c2`) VALUES (1,1)"
+        ],
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

@@ -1532,7 +1532,8 @@ insert_partition
 
 replace_insert_stmt
   = ri:replace_insert       __
-    KW_INTO?                 __
+    ig:KW_IGNORE? __
+    it:KW_INTO?                 __
     t:table_name  __
     p:insert_partition? __ LPAREN __ c:column_list  __ RPAREN __
     v:insert_value_clause __
@@ -1552,6 +1553,7 @@ replace_insert_stmt
         }
         c.forEach(c => columnList.add(`insert::${table}::${c}`));
       }
+      let prefix = [ig, it].filter(v => v).map(v => v[0] && v[0].toLowerCase()).join(' ')
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -1561,6 +1563,7 @@ replace_insert_stmt
           columns: c,
           values: v,
           partition: p,
+          prefix,
           on_duplicate_update: odp,
         }
       };
