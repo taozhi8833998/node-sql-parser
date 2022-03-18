@@ -76,6 +76,7 @@ function tableToSQL(tableInfo) {
  * @return {string}
  */
 function tablesToSQL(tables) {
+  if (!tables) return ''
   const baseTable = tables[0]
   const clauses = []
   if (baseTable.type === 'dual') return 'DUAL'
