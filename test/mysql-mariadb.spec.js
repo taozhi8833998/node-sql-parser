@@ -237,6 +237,13 @@ describe('mysql', () => {
           "INSERT IGNORE INTO `t1` (`c1`, `c2`) VALUES (1,1)"
         ],
       },
+      {
+        title: 'select into',
+        sql: [
+          "select c1, c2 into t1 from t2",
+          "SELECT `c1`, `c2` INTO `t1` FROM `t2`"
+        ],
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

@@ -1527,7 +1527,7 @@ into_clause
       expr: v
     }
   }
-  / KW_INTO __ k:('OUTFILE'i / 'DUMPFILE'i) __ f:literal_string {
+  / KW_INTO __ k:('OUTFILE'i / 'DUMPFILE'i)? __ f:(literal_string / ident) {
     return {
       keyword: k,
       type: 'into',

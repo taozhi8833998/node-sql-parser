@@ -3,7 +3,7 @@ import { columnRefToSQL, columnsToSQL } from './column'
 import { limitToSQL } from './limit'
 import { withToSQL } from './with'
 import { tablesToSQL } from './tables'
-import { hasVal, commonOptionConnector, connector, topToSQL, toUpper } from './util'
+import { hasVal, commonOptionConnector, connector, identifierToSql, topToSQL, toUpper } from './util'
 
 function distinctToSQL(distinct) {
   if (!distinct) return
@@ -26,7 +26,7 @@ function selectIntoToSQL(into) {
       result.push(expr.map(varToSQL).join(', '))
       break
     default:
-      result.push(intoType, exprToSQL(expr))
+      result.push(intoType, typeof expr === 'string' ? identifierToSql(expr) : exprToSQL(expr))
   }
   return result.filter(hasVal).join(' ')
 }
