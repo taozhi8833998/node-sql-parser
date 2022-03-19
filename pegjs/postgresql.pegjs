@@ -1630,13 +1630,16 @@ select_stmt_nake
     opts:option_clause? __
     d:distinct_on?      __
     c:column_clause     __
+    ci:into_clause?      __
     f:from_clause?      __
+    fi:into_clause?      __
     w:where_clause?     __
     g:group_by_clause?  __
     h:having_clause?    __
     o:order_by_clause?  __
     l:limit_clause? __
-    win:window_clause? {
+    win:window_clause? __
+    li:into_clause? {
       /* => {
           with?: with_clause;
           type: 'select';
@@ -1644,6 +1647,7 @@ select_stmt_nake
           distinct?: {type: string; columns?: column_list; };
           columns: column_clause;
           from?: from_clause;
+          into?: into_clause;
           where?: where_clause;
           groupby?: group_by_clause;
           having?: having_clause;
@@ -1651,6 +1655,9 @@ select_stmt_nake
           limit?: limit_clause;
           window?: window_clause;
         }*/
+      if ((ci && fi) || (ci && li) || (fi && li) || (ci && fi && li)) {
+        throw new Error('A given SQL statement can contain at most one INTO clause')
+      }
       if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
           with: cte,
@@ -1658,6 +1665,10 @@ select_stmt_nake
           options: opts,
           distinct: d,
           columns: c,
+          into: {
+            ...(ci || fi || li || {}),
+            position: ci && 'column' || fi && 'from' || li && 'end'
+          },
           from: f,
           where: w,
           groupby: g,
@@ -1769,6 +1780,24 @@ value_alias_clause
 alias_clause
   = KW_AS __ i:alias_ident { /*=>alias_ident*/ return i; }
   / KW_AS? __ i:ident { /*=>ident*/ return i; }
+
+into_clause
+  = KW_INTO __ v:var_decl_list {
+    // => { keyword: 'var'; type: 'into'; expr: var_decl_list; }
+    return {
+      keyword: 'var',
+      type: 'into',
+      expr: v
+    }
+  }
+  / KW_INTO __ k:('OUTFILE'i / 'DUMPFILE'i)? __ f:(literal_string / ident) {
+    // => { keyword: 'var'; type: 'into'; expr: literal_string | ident; }
+    return {
+      keyword: k,
+      type: 'into',
+      expr: f
+    }
+  }
 
 from_clause
   = KW_FROM __ l:table_ref_list { /*=>table_ref_list*/return l; }
@@ -3751,6 +3780,12 @@ proc_array
   = LBRAKE __ l:proc_primary_list __ RBRAKE {
     // => { type: 'array'; value: proc_primary_list }
     return { type: 'array', value: l };
+  }
+
+var_decl_list
+  = head:var_decl tail:(__ COMMA __ var_decl)* {
+    // => var_decl[]
+    return createList(head, tail)
   }
 
 var_decl
