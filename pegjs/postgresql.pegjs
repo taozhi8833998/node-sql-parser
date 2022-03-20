@@ -1571,7 +1571,13 @@ show_stmt
   }
 
 select_stmt
-  = select_stmt_nake
+  = KW_SELECT __ ';' {
+    // => { type: 'select'; }
+    return {
+      type: 'select',
+    }
+  }
+  / select_stmt_nake
   / s:('(' __ select_stmt __ ')') {
     /*
     export interface select_stmt_node extends select_stmt_nake  {

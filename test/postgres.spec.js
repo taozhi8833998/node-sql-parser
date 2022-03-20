@@ -604,6 +604,13 @@ describe('Postgres', () => {
         "select c1, c2 into t1 from t2",
         'SELECT "c1", "c2" INTO "t1" FROM "t2"'
       ]
+    },
+    {
+      title: 'select;',
+      sql: [
+        "select;",
+        'SELECT'
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){
