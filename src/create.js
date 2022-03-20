@@ -147,6 +147,30 @@ function createDatabaseToSQL(stmt) {
   return sql.filter(hasVal).join(' ')
 }
 
+function createViewToSQL(stmt) {
+  const {
+    algorithm, columns, definer, keyword,
+    replace, select, sql_security: sqlSecurity,
+    type, view, with: withClause,
+  } = stmt
+  const { db, view: name } = view
+  const viewName = [identifierToSql(db), identifierToSql(name)].filter(hasVal).join('.')
+  const sql = [
+    toUpper(type),
+    toUpper(replace),
+    algorithm && `ALGORITHM = ${toUpper(algorithm)}`,
+    definer && `DEFINER = ${definer}`,
+    sqlSecurity && `SQL SECURITY ${toUpper(sqlSecurity)}`,
+    toUpper(keyword),
+    viewName,
+    columns && `(${columns.map(columnIdentifierToSql).join(', ')})`,
+    'AS',
+    unionToSQL(select),
+    toUpper(withClause),
+  ]
+  return sql.filter(hasVal).join(' ')
+}
+
 function createToSQL(stmt) {
   const { keyword } = stmt
   let sql = ''
@@ -168,6 +192,9 @@ function createToSQL(stmt) {
       break
     case 'database':
       sql = createDatabaseToSQL(stmt)
+      break
+    case 'view':
+      sql = createViewToSQL(stmt)
       break
     default:
       throw new Error(`unknown create resource ${keyword}`)
