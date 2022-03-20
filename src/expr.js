@@ -26,6 +26,7 @@ const exprToSQLConvertFn = {
   datatype    : dataTypeToSQL,
   extract     : extractFunToSQL,
   function    : funcToSQL,
+  insert      : unionToSQL,
   interval    : intervalToSQL,
   show        : showToSQL,
   struct      : arrayStructExprToSQL,

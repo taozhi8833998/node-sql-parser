@@ -611,7 +611,20 @@ describe('Postgres', () => {
         "select;",
         'SELECT'
       ]
-    }
+    },
+    {
+      title: 'with insert',
+      sql: [
+        `CREATE TABLE stuff(id SERIAL PRIMARY KEY, name VARCHAR);
+
+        WITH new_stuff AS (
+            INSERT INTO stuff (name) VALUES ('foo'), ('bar') RETURNING id
+        )
+        SELECT id
+        FROM new_stuff;`,
+        `CREATE TABLE "stuff" ("id" SERIAL PRIMARY KEY, "name" VARCHAR) ; WITH new_stuff AS (INSERT INTO "stuff" ("name") VALUES ('foo'), ('bar') RETURNING "id") SELECT "id" FROM "new_stuff"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
