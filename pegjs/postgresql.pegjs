@@ -3796,7 +3796,7 @@ var_decl_list
 
 var_decl
   = p: KW_VAR_PRE_DOLLAR_DOUBLE d:[^$]* s:KW_VAR_PRE_DOLLAR_DOUBLE {
-    // { type: 'var'; name: string; prefix: string; suffix: string; };
+    // => { type: 'var'; name: string; prefix: string; suffix: string; };
     return {
       type: 'var',
       name: d.join(''),
@@ -3805,7 +3805,7 @@ var_decl
     };
   }
   / KW_VAR_PRE_DOLLAR f:ident KW_VAR_PRE_DOLLAR d:[^$]* KW_VAR_PRE_DOLLAR s:ident !{ if (f !== s) return true } KW_VAR_PRE_DOLLAR {
-    // { type: 'var'; name: string; prefix: string; suffix: string; };
+    // => { type: 'var'; name: string; prefix: string; suffix: string; };
     return {
       type: 'var',
       name: d.join(''),
@@ -3815,7 +3815,7 @@ var_decl
   }
   / p: KW_VAR_PRE d: without_prefix_var_decl {
     // => without_prefix_var_decl & { type: 'var'; prefix: string; };
-    //push for analysis
+    // push for analysis
     return {
       type: 'var',
       ...d,

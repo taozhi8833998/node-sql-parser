@@ -89,12 +89,12 @@ const getPlugins = (parserName, target, plugins) => [
                         ...getDbFile(),
                         ...getSrcFile(),
                     ],
-                    delete: [
-                        `${outputPath}/*.umd.d.ts`,
-                        `${outputPath}/*.umd.js`,
-                        `${outputPath}/*.umd.js.map`,
-                        `${outputPath}/index.d.ts`
-                    ]
+                    // delete: [
+                    //     `${outputPath}/*.umd.d.ts`,
+                    //     `${outputPath}/*.umd.js`,
+                    //     `${outputPath}/*.umd.js.map`,
+                    //     `${outputPath}/index.d.ts`
+                    // ]
                 }
             })
         ] : [

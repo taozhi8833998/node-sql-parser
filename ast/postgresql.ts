@@ -459,11 +459,11 @@ export interface select_stmt_node extends select_stmt_nake  {
        parentheses_symbol: true;
       }
 
-export type select_stmt = select_stmt_nake | select_stmt_node;
+export type select_stmt = { type: 'select'; } | select_stmt_nake | select_stmt_node;
 
 export type with_clause = cte_definition[] | [cte_definition & {recursive: true; }];
 
-export type cte_definition = { name: { type: 'default'; value: string; }; stmt: union_stmt; columns?: cte_column_definition; };
+export type cte_definition = { name: { type: 'default'; value: string; }; stmt: crud_stmt; columns?: cte_column_definition; };
 
 export type cte_column_definition = column[];
 
@@ -478,6 +478,7 @@ export type select_stmt_nake = {
           distinct?: {type: string; columns?: column_list; };
           columns: column_clause;
           from?: from_clause;
+          into?: into_clause;
           where?: where_clause;
           groupby?: group_by_clause;
           having?: having_clause;
@@ -500,9 +501,15 @@ export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr:
 
 
 
+export type value_alias_clause = alias_ident;
+
+
+
 
 
 export type alias_clause = alias_ident | ident;
+
+export type into_clause = { keyword: 'var'; type: 'into'; expr: var_decl_list; } | { keyword: 'var'; type: 'into'; expr: literal_string | ident; };
 
 
 
@@ -1228,6 +1235,8 @@ type KW_VAR__PRE_AT_AT = never;
 
 type KW_VAR_PRE_DOLLAR = never;
 
+type KW_VAR_PRE_DOLLAR_DOUBLE = never;
+
 type KW_VAR_PRE = never;
 
 type KW_RETURN = never;
@@ -1356,7 +1365,9 @@ export type proc_primary_list = proc_primary[];
 
 export type proc_array = { type: 'array'; value: proc_primary_list };
 
-export type var_decl = without_prefix_var_decl & { type: 'var'; prefix: string; };;
+export type var_decl_list = var_decl[];
+
+export type var_decl = { type: 'var'; name: string; prefix: string; suffix: string; }; | without_prefix_var_decl & { type: 'var'; prefix: string; };;
 
 export type without_prefix_var_decl = { type: 'var'; prefix: string; name: ident_name; members: mem_chain; };
 
