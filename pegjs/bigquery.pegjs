@@ -1643,7 +1643,7 @@ numeric_type
   = t:(KW_NUMERIC / KW_INT_64 / KW_FLOAT_64) { return { dataType: t }; }
 
 datetime_type
-  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) __ LPAREN __ l:[0-9]+ __ RPAREN { return { dataType: t, length: parseInt(l.join(''), 10) }; }
+  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) __ LPAREN __ l:[0-9]+ __ RPAREN { return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
   / t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
 
 bool_byte_geography_type

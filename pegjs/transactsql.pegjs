@@ -2754,7 +2754,7 @@ numeric_type
   }
 datetime_type
   = lb:LBRAKE? __ t:(KW_DATETIME2 / KW_DATETIMEOFFSET / KW_TIME) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN {
-    return  {dataType: t, length: parseInt(l.join(''), 10) }
+    return  {dataType: t, length: parseInt(l.join(''), 10), parentheses: true }
   }
   / lb:LBRAKE? __ t:(KW_DATE / KW_SMALLDATETIME / KW_DATETIME / KW_DATETIME2 / KW_DATETIMEOFFSET / KW_TIME / KW_TIMESTAMP) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
     return { dataType: t };

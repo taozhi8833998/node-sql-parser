@@ -208,6 +208,14 @@ describe('AST', () => {
                     `SELECT CAST(test AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_bin;`,
                     'SELECT CAST(`test` AS CHAR CHARACTER SET UTF8MB4) COLLATE UTF8MB4_BIN'
                 ],
+                'time casts': [
+                    "SELECT CAST('12:31:41.8418443' AS TIME(6)) AS `time`;",
+                    "SELECT CAST('12:31:41.8418443' AS TIME(6)) AS `time`"
+                ],
+                'datetime casts': [
+                    "SELECT CAST('2000-01-01 12:31:41.8418443' AS DATETIME(6)) AS `datetime`;",
+                    "SELECT CAST('2000-01-01 12:31:41.8418443' AS DATETIME(6)) AS `datetime`"
+                ]
             };
             Object.keys(castQueries).forEach(cast => {
                 const [inputQuery, expectedQuery] = castQueries[cast];
