@@ -244,6 +244,20 @@ describe('mysql', () => {
           "SELECT `c1`, `c2` INTO `t1` FROM `t2`"
         ],
       },
+      {
+        title: 'in bracket',
+        sql: [
+          "SELECT * FROM `tableName` WHERE POSITION('\n' IN `largeText`) > 0;",
+          "SELECT * FROM `tableName` WHERE POSITION('\n' IN `largeText`) > 0"
+        ],
+      },
+      {
+        title: 'in bracket in column',
+        sql: [
+          "SELECT POSITION('\n' IN `largeText`) AS `charPosition` FROM `tableName`;",
+          "SELECT POSITION('\n' IN `largeText`) AS `charPosition` FROM `tableName`"
+        ],
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

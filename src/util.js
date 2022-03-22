@@ -184,6 +184,9 @@ function literalToSQL(literal) {
   const { type, parentheses, value } = literal
   let str = value
   switch (type) {
+    case 'backticks_quote_string':
+      str = `\`${escape(value)}\``
+      break
     case 'string':
       str = `'${escape(value)}'`
       break
