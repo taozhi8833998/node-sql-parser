@@ -2344,6 +2344,12 @@ literal_string
         value: ca[1].join('')
       };
     }
+  / ca:("`" [^`]* "`") {
+      return {
+        type: 'backticks_quote_string',
+        value: ca[1].join('')
+      };
+    }
 
 literal_datetime
   = type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("'" single_char* "'") {
