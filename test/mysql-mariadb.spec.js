@@ -264,6 +264,13 @@ describe('mysql', () => {
           "select '''1'''",
           "SELECT '''1'''"
         ]
+      },
+      {
+        title: 'rlike column',
+        sql: [
+          "select c1 from t1 where 'abc' rlike c2",
+          "SELECT `c1` FROM `t1` WHERE 'abc' RLIKE `c2`"
+        ]
       }
     ]
     SQL_LIST.forEach(sqlInfo => {

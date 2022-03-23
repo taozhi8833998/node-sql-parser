@@ -2175,7 +2175,7 @@ in_op
   / KW_IN
 
 regexp_op_right
-  = op:regexp_op __ b:'BINARY'i? __ e:literal_string {
+  = op:regexp_op __ b:'BINARY'i? __ e:(literal_string / column_ref) {
     return  { op: b ? `${op} ${b}` :  op, right: e };
   }
 
