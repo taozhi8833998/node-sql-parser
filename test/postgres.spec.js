@@ -625,6 +625,13 @@ describe('Postgres', () => {
         `CREATE TABLE "stuff" ("id" SERIAL PRIMARY KEY, "name" VARCHAR) ; WITH new_stuff AS (INSERT INTO "stuff" ("name") VALUES ('foo'), ('bar') RETURNING "id") SELECT "id" FROM "new_stuff"`
       ]
     },
+    {
+      title: 'offset without limit',
+      sql: [
+        'select c1 from t1 offset 11',
+        'SELECT "c1" FROM "t1" OFFSET 11'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

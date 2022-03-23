@@ -56,6 +56,7 @@
     'NULL': true,
     'NULLS': true,
 
+    'OFFSET': true,
     'ON': true,
     'OR': true,
     'ORDER': true,
@@ -2163,11 +2164,10 @@ number_or_param
   / param
 
 limit_clause
-  = KW_LIMIT __ i1:(number_or_param / KW_ALL) __ tail:(KW_OFFSET __ number_or_param)? {
+  = l:(KW_LIMIT __ (number_or_param / KW_ALL))? __ tail:(KW_OFFSET __ number_or_param)? {
     // => { separator: 'offset' | ''; value: [number_or_param | { type: 'origin', value: 'all' }, number_or_param?] }
       const res = []
-      if (typeof i1 === 'string') res.push({ type: 'origin', value: 'all' })
-      else res.push(i1)
+      if (l) res.push(typeof l[2] === 'string' ? { type: 'origin', value: 'all' } : l[2])
       if (tail) res.push(tail[2]);
       return {
         seperator: tail && tail[0] && tail[0].toLowerCase() || '',
