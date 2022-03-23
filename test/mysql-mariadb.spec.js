@@ -258,6 +258,13 @@ describe('mysql', () => {
           "SELECT POSITION('\n' IN `largeText`) AS `charPosition` FROM `tableName`"
         ],
       },
+      {
+        title: 'triple single quote',
+        sql: [
+          "select '''1'''",
+          "SELECT '''1'''"
+        ]
+      }
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
