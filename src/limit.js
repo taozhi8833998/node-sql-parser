@@ -14,6 +14,7 @@ function fetchOffsetToSQL(stmt) {
 
 function limitOffsetToSQL(limit) {
   const { seperator, value } = limit
+  if (value.length === 1 && seperator === 'offset') return connector('OFFSET', exprToSQL(value[0]))
   return connector('LIMIT', value.map(exprToSQL).join(`${seperator === 'offset' ? ' ' : ''}${toUpper(seperator)} `))
 }
 
