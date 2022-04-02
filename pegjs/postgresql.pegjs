@@ -1752,7 +1752,7 @@ column_list_item
     // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
-  / e:expr_item __ s:KW_DOUBLE_COLON t:data_type tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
+  / e:expr_item __ s:KW_DOUBLE_COLON __ t:data_type tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; }
     return {
       as: alias,
@@ -2272,6 +2272,9 @@ set_item
       // => { column: ident; value: column_ref; table?: ident; keyword: 'values' }
       return { column: c, value: v, table: tbl && tbl[0], keyword: 'values' };
   }
+conflict_stmt
+  = KW_ON __ 'CONFLICT'i __
+
 returning_stmt
   = k:KW_RETURNING __ c:(STAR / column_ref_list) {
     // => { type: 'returning'; columns: column_ref_list | column_ref; }
@@ -3139,7 +3142,7 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = LPAREN __ e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ RPAREN __ s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
+  = LPAREN __ e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ RPAREN __ s:KW_DOUBLE_COLON __ t:data_type __ alias:alias_clause? {
     /* => {
         as?: alias_clause,
         type: 'cast';
@@ -3158,7 +3161,7 @@ cast_expr
       target: t,
     }
   }
-  / e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ s:KW_DOUBLE_COLON t:data_type __ alias:alias_clause? {
+  / e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ s:KW_DOUBLE_COLON __ t:data_type __ alias:alias_clause? {
     /* => {
         as?: alias_clause,
         type: 'cast';
