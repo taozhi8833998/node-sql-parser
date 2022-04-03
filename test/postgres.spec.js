@@ -632,6 +632,13 @@ describe('Postgres', () => {
         'SELECT "c1" FROM "t1" OFFSET 11'
       ]
     },
+    {
+      title: 'support empty space after ::',
+      sql: [
+        'SELECT (COALESCE(wp.weight,  0))::double(10) as net_weight , wp.gross_weight:: double(10) FROM  wp ;',
+        'SELECT (COALESCE("wp"."weight", 0))::DOUBLE(10) AS "net_weight", "wp"."gross_weight"::DOUBLE(10) FROM "wp"'
+      ]
+    }
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

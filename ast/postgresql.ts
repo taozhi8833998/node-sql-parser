@@ -640,6 +640,8 @@ export type set_list = set_item[];
 
 export type set_item = { column: ident; value: additive_expr; table?: ident;} | { column: ident; value: column_ref; table?: ident; keyword: 'values' };
 
+type conflict_stmt = never;
+
 export type returning_stmt = { type: 'returning'; columns: column_ref_list | column_ref; };
 
 export type insert_value_clause = value_clause | select_stmt_nake;
