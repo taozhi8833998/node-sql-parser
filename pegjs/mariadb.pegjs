@@ -1166,8 +1166,8 @@ cte_definition
   }
 
 cte_column_definition
-  = LPAREN __ head:column tail:(__ COMMA __ column)* __ RPAREN {
-      return createList(head, tail);
+  = LPAREN __ l:column_ref_index __ RPAREN {
+      return l
     }
 
 select_stmt_nake
@@ -1443,6 +1443,9 @@ where_clause
 
 group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list { return e.value; }
+
+column_ref_index
+  = column_ref_list / literal_list
 
 column_ref_list
   = head:column_ref tail:(__ COMMA __ column_ref)* {
@@ -1867,7 +1870,7 @@ in_op_right
   = op:in_op __ LPAREN  __ l:expr_list __ RPAREN {
       return { op: op, right: l };
     }
-  / op:in_op __ e:(var_decl / literal_string) {
+  / op:in_op __ e:(var_decl / column_ref / literal_string) {
       return { op: op, right: e };
     }
 
@@ -1908,14 +1911,14 @@ primary
   / var_decl
 
 column_ref
-  = tbl:ident __ DOT __ col:column {
+  = tbl:(ident_name / backticks_quoted_ident) __ DOT __ col:column_without_kw {
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
         table: tbl,
         column: col
       };
-    }
+  }
   / col:column {
       columnList.add(`select::null::${col}`);
       return {
@@ -1934,9 +1937,7 @@ ident
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
       return name;
     }
-  / name:quoted_ident {
-      return name;
-    }
+  / quoted_ident
 
 alias_ident
   = name:ident_name !{
@@ -1945,9 +1946,7 @@ alias_ident
     } {
       return name;
     }
-  / name:quoted_ident {
-      return name;
-    }
+  / quoted_ident
 
 quoted_ident
   = double_quoted_ident
@@ -1963,9 +1962,15 @@ single_quoted_ident
 backticks_quoted_ident
   = "`" chars:[^`]+ "`" { return chars.join(''); }
 
+column_without_kw
+  = name:column_name {
+    return name;
+  }
+  / quoted_ident
+
 column
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { return name; }
-  / quoted_ident
+  / backticks_quoted_ident
 
 column_name
   =  start:ident_start parts:column_part* { return start + parts.join(''); }
@@ -2141,7 +2146,7 @@ count_arg
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
 convert_args
-  = c:column_ref __ COMMA __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_name {
+  = c:(column_ref / literal_string) __ COMMA __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_name {
     const { dataType, length } = ch
     let dataTypeStr = dataType
     if (length !== undefined) dataTypeStr = `${dataTypeStr}(${length})`
@@ -2156,13 +2161,13 @@ convert_args
       ]
     }
   }
-  / c:column_ref __ COMMA __ d:data_type {
+  / c:(column_ref / literal_string) __ COMMA __ d:data_type {
     return {
       type: 'expr_list',
       value: [c, { type: 'datatype', ...d, }]
     }
   }
-  / c:column_ref __ KW_USING __ d:ident_name {
+  / c:(column_ref / literal_string) __ KW_USING __ d:ident_name {
     c.suffix = `USING ${d}`
     return {
       type: 'expr_list',
@@ -2341,12 +2346,6 @@ literal_string
   / ca:("\"" single_quote_char* "\"") {
       return {
         type: 'string',
-        value: ca[1].join('')
-      };
-    }
-  / ca:("`" [^`]* "`") {
-      return {
-        type: 'backticks_quote_string',
         value: ca[1].join('')
       };
     }

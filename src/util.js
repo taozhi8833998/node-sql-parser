@@ -234,7 +234,7 @@ function literalToSQL(literal) {
   const result = []
   if (prefix) result.push(toUpper(prefix))
   result.push(str)
-  if (suffix && suffix.collate) result.push(commonTypeValue(suffix.collate).join(' '))
+  if (suffix) result.push(typeof suffix === 'object' && suffix.collate ? commonTypeValue(suffix.collate).join(' ') : toUpper(suffix))
   str = result.join(' ')
   return parentheses ? `(${str})` : str
 }

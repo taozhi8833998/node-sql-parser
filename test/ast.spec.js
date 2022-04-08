@@ -61,14 +61,14 @@ describe('AST', () => {
                 const sql = `WITH cte (col1) AS (SELECT 1)
                             SELECT * FROM cte`;
 
-                expect(getParsedSql(sql)).to.contain('(col1)');
+                expect(getParsedSql(sql)).to.contain('(`col1`)');
             });
 
             it('should support CTE with multiple columns', () => {
                 const sql = `WITH cte (col1, col2) AS (SELECT 1, 2)
                              SELECT * FROM \`cte\``;
 
-                expect(getParsedSql(sql)).to.contain('(col1, col2)');
+                expect(getParsedSql(sql)).to.contain('(`col1`, `col2`)');
             });
 
             it('should support recursive CTE', () => {

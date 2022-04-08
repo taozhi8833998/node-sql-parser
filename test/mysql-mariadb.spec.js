@@ -271,6 +271,13 @@ describe('mysql', () => {
           "select c1 from t1 where 'abc' rlike c2",
           "SELECT `c1` FROM `t1` WHERE 'abc' RLIKE `c2`"
         ]
+      },
+      {
+        title: 'column with bracket',
+        sql: [
+          'SELECT `T`.`ddd` FROM `TABLE` AS `T`',
+          'SELECT `T`.`ddd` FROM `TABLE` AS `T`'
+        ]
       }
     ]
     SQL_LIST.forEach(sqlInfo => {

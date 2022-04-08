@@ -1611,9 +1611,9 @@ cte_definition
     }
 
 cte_column_definition
-  = LPAREN __ head:column tail:(__ COMMA __ column)* __ RPAREN {
-    // => column[]
-      return createList(head, tail);
+  = LPAREN __ l:column_ref_list __ RPAREN {
+    // => column_ref_list
+      return l
     }
 
 distinct_on
