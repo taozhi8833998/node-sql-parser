@@ -64,7 +64,7 @@ function columnReferenceDefinitionToSQL(referenceDefinition) {
   } = referenceDefinition
   reference.push(toUpper(keyword))
   reference.push(tablesToSQL(table))
-  reference.push(definition && `(${definition.map(identifierToSql).join(', ')})`)
+  reference.push(definition && `(${definition.map(col => exprToSQL(col)).join(', ')})`)
   reference.push(toUpper(match))
   reference.push(...commonTypeValue(onDelete))
   reference.push(...commonTypeValue(onUpdate))

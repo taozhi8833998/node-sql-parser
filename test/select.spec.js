@@ -700,15 +700,15 @@ describe('select', () => {
       expect(getParsedSql(`select * from test where CONVERT(column using utf8)="test";`))
         .to.equal("SELECT * FROM `test` WHERE CONVERT(`column` USING UTF8) = 'test'")
       expect(getParsedSql(`SELECT CONVERT('test', CHAR CHARACTER SET utf8mb4);`))
-        .to.equal("SELECT CONVERT(`test`, CHAR CHARACTER SET UTF8MB4)")
+        .to.equal("SELECT CONVERT('test', CHAR CHARACTER SET UTF8MB4)")
       expect(getParsedSql(`SELECT CONVERT('test', CHAR(10) CHARACTER SET utf8mb4);`))
-        .to.equal("SELECT CONVERT(`test`, CHAR(10) CHARACTER SET UTF8MB4)")
+        .to.equal("SELECT CONVERT('test', CHAR(10) CHARACTER SET UTF8MB4)")
       expect(getParsedSql(`SELECT CONVERT('test' USING utf8mb4) COLLATE utf8mb4_bin;`))
-        .to.equal("SELECT CONVERT(`test` USING UTF8MB4) COLLATE UTF8MB4_BIN")
+        .to.equal("SELECT CONVERT('test' USING UTF8MB4) COLLATE UTF8MB4_BIN")
       expect(getParsedSql(`select TYPE,taxpayer_Type,CONVERT(tax_Amount, DECIMAL(12,2)) AS tax_amount,CAST(tax_currency AS DECIMAL(12,2))  tax_currency from rs_order_tax where billno="{{billno}}" and Business_Type="order";`))
         .to.equal("SELECT `TYPE`, `taxpayer_Type`, CONVERT(`tax_Amount`, DECIMAL(12, 2)) AS `tax_amount`, CAST(`tax_currency` AS DECIMAL(12, 2)) AS `tax_currency` FROM `rs_order_tax` WHERE `billno` = '{{billno}}' AND `Business_Type` = 'order'")
       expect(getParsedSql(`SELECT CONVERT('test', INT(11) unsigned);`))
-        .to.equal("SELECT CONVERT(`test`, INT(11) UNSIGNED)")
+        .to.equal("SELECT CONVERT('test', INT(11) UNSIGNED)")
     })
 
     it('should support if', () => {
@@ -1039,7 +1039,11 @@ describe('select', () => {
       const cte = ast.with[0];
       expect(cte)
         .to.have.property('columns')
-        .and.to.eql(['col1']);
+        .and.to.be.eql([{
+              "column": "col1",
+              "table": null,
+              "type": "column_ref"
+        }]);
     });
 
     it('should parse CTE with multiple columns', () => {
@@ -1047,7 +1051,18 @@ describe('select', () => {
                 SELECT * FROM cte`);
 
       const cte = ast.with[0];
-      expect(cte.columns).to.eql(['col1', 'col2']);
+      expect(cte.columns).to.be.eql([
+        {
+          "column": "col1",
+          "table": null,
+          "type": "column_ref"
+        },
+        {
+          "column": "col2",
+          "table": null,
+          "type": "column_ref"
+        }
+      ]);
     });
 
     it('should parse recursive CTE', () => {

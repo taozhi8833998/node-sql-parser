@@ -46,6 +46,10 @@ describe('util function test', () => {
   it('should support columnIdentifierToSql without ident', () => {
     expect(columnIdentifierToSql()).to.be.undefined
   })
+
+  it('should sqlify backticks_quote_string', () => {
+    expect(literalToSQL({ type: 'backticks_quote_string', parentheses: true , value: "abc" })).to.equal('(`abc`)')
+  })
 })
 
 describe('over to sql', () => {
