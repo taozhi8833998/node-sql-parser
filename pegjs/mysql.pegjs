@@ -1761,6 +1761,12 @@ order_by_element
 number_or_param
   = literal_numeric
   / param
+  / '?' {
+    return {
+      type: 'origin',
+      value: '?'
+    }
+  }
 
 limit_clause
   = KW_LIMIT __ i1:(number_or_param) __ tail:((COMMA / KW_OFFSET) __ number_or_param)? {

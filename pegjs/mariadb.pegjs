@@ -1476,6 +1476,12 @@ order_by_element
 number_or_param
   = literal_numeric
   / param
+  / '?' {
+    return {
+      type: 'origin',
+      value: '?'
+    }
+  }
 
 limit_clause
   = KW_LIMIT __ i1:(number_or_param) __ tail:((COMMA / KW_OFFSET) __ number_or_param)? {
@@ -1909,6 +1915,12 @@ primary
         return list;
     }
   / var_decl
+  / __ prepared_symbol:'?' {
+    return {
+      type: 'origin',
+      value: prepared_symbol
+    }
+  }
 
 column_ref
   = tbl:(ident_name / backticks_quoted_ident) __ DOT __ col:column_without_kw {
