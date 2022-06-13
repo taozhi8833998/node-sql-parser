@@ -255,12 +255,16 @@ update_stmt
     t:table_ref_list __
     KW_SET       __
     l:set_list   __
+	f:from_clause? __
     w:where_clause? __
     or:order_by_clause? __
     lc:limit_clause? {
       if (t) t.forEach(tableInfo => {
         const { db, as, table } = tableInfo
         tableList.add(`update::${db}::${table}`)
+      });
+	  if(f) f.forEach(info => {
+        info.table && tableList.add(`update::${info.db}::${info.table}`);
       });
       if(l) {
         l.forEach(col => columnList.add(`update::${col.table}::${col.column}`));
@@ -282,10 +286,13 @@ update_stmt
 delete_stmt
   = KW_DELETE    __
     t: table_ref_list? __
-    f:from_clause __
+    f:from_clause? __
     w:where_clause? __
     or:order_by_clause? __
     l:limit_clause? {
+	  if(t) t.forEach(tt => {
+		tableList.add(`delete::${tt.db}::${tt.table}`)
+	  });
       if(f) f.forEach(info => {
         info.table && tableList.add(`delete::${info.db}::${info.table}`);
         columnList.add(`delete::${info.table}::(.*)`);
@@ -351,7 +358,7 @@ replace_insert_stmt
 
 insert_no_columns_stmt
   = ri:replace_insert       __
-    KW_INTO                 __
+    KW_INTO?                 __
     t:table_name  __
     p:insert_partition? __
     v:insert_value_clause __
@@ -377,7 +384,7 @@ insert_no_columns_stmt
 
 insert_into_set
   = ri:replace_insert __
-    KW_INTO __
+    KW_INTO? __
     t:table_name  __
     p:insert_partition? __
     KW_SET       __
@@ -1443,11 +1450,8 @@ query_expr
   }
 
 set_op
-  = u:KW_UNION __ s:(KW_ALL / KW_DISTINCT)? {
-    return s ? `union ${s.toLowerCase()}` : 'union'
-  }
-  / u:('INTERSECT'i / 'EXCEPT'i) __ s:KW_DISTINCT {
-    return `${u.toLowerCase()} ${s.toLowerCase()}`
+  = u:(KW_UNION / KW_INTERSECT / KW_EXCEPT ) __ s:(KW_ALL / KW_DISTINCT)? {
+    return s ? `${u[0].toLowerCase()} ${s.toLowerCase()}` : `${u[0].toLowerCase()}`;
   }
 
 union_stmt
@@ -1464,7 +1468,7 @@ union_stmt_nake
       let cur = head
       for (let i = 0; i < tail.length; i++) {
         cur._next = tail[i][3]
-        cur.union = tail[i][1]
+        cur.set = tail[i][1]
         cur = cur._next
       }
       return {
@@ -1711,9 +1715,18 @@ table_join
     };
   }
 
+hint 
+  = ([\@])([\{]) __ ident_name __ ([\=]) __ ident_name __ ([}])
+  
+tablesample 
+  = 'TABLESAMPLE'i __ ( 'BERNOULLI'i / 'RESERVOIR'i ) __ '(' __ number  __ ( 'PERCENT'i / 'ROWS'i ) __ ')' 
+
 //NOTE that, the table assigned to `var` shouldn't write in `table_join`
 table_base
-  = t:table_name __ alias:alias_clause? {
+  = t:table_name
+    ht:hint? __
+	ts:tablesample? __
+	alias:alias_clause? {
       if (t.type === 'var') {
         t.as = alias;
         return t;
@@ -1725,7 +1738,9 @@ table_base
         };
       }
     }
-  / LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? {
+  / LPAREN __ stmt:union_stmt __ RPAREN __ 
+  	ts:tablesample? __
+    alias:alias_clause? {
       stmt.parentheses = true;
       return {
         expr: stmt,
@@ -1869,7 +1884,9 @@ order_by_list
     }
 
 order_by_element
-  = e:expr __ d:(KW_DESC / KW_ASC)? {
+  = e:expr __ 
+    c:('COLLATE'i __ literal_string)? __
+    d:(KW_DESC / KW_ASC)? {
     const obj = { expr: e, type: 'ASC' };
     if (d === 'DESC') obj.type = 'DESC';
     return obj;
@@ -1921,7 +1938,7 @@ parentheses_expr
   }
 
 array_expr
-  = LBRAKE __ c:column_clause __ RBRAKE {
+  = LBRAKE __ c:column_clause? __ RBRAKE {
     return {
       array_path: c,
       type: 'array',
@@ -2616,6 +2633,9 @@ KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
 KW_OVER     = "OVER"i     !ident_start
 KW_UNION    = "UNION"i    !ident_start
+KW_INTERSECT    = "INTERSECT"i    !ident_start
+KW_EXCEPT    = "EXCEPT"i    !ident_start
+
 KW_VALUE    = "VALUE"i    !ident_start { return 'VALUE' }
 KW_VALUES   = "VALUES"i   !ident_start
 KW_USING    = "USING"i    !ident_start
