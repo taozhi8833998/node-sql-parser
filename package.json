@@ -3,10 +3,10 @@
   "version": "4.4.0",
   "description": "simple node sql parser",
   "main": "index.js",
-  "types": "types.d.ts",
+  "types": "index.d.ts",
   "scripts": {
     "start": "webpack --config webpack.config.js",
-    "build": "npm run lint && npm run compile && webpack --config webpack.config.js --prod",
+    "build": "npm run lint && npm run compile && webpack --config webpack.config.js --mode production",
     "test": "npm run lint && mochapack \"test/**/*.spec.js\"",
     "lint": "eslint src",
     "compile": "babel src -d lib",
@@ -36,14 +36,14 @@
     "ast/",
     "build",
     "lib",
-    "index.js",
-    "index.d.ts",
-    "index.js.map",
     "umd/",
-    "README.md",
+    "index.d.ts",
+    "index.js",
+    "index.js.map",
+    "LICENSE",
     "package.json",
-    "types.d.ts",
-    "LICENSE"
+    "README.md",
+    "types.d.ts"
   ],
   "license": "GPLv2",
   "bugs": {

@@ -6,8 +6,8 @@ const webpack = require('webpack')
 const nodeExternals = require('webpack-node-externals')
 
 const isCoverage = process.env.NODE_ENV === 'coverage'
-const isProd = process.argv.includes('--prod')
-const isTest = isCoverage || process.argv.includes('--test')
+const isProd = process.argv.includes('production')
+const isTest = isCoverage || process.argv.includes('test')
 const subDir = isProd ? 'output/prod' : isTest ? 'output/test' : 'output/dev'
 const outputPath = path.join(__dirname, subDir)
 const srcPath = path.join(__dirname, 'src')
@@ -48,58 +48,58 @@ const getCopyFile = (database) => {
     ]
 }
 
-const getDbFile = () => ['bigquery', 'db2', 'hive', 'mariadb', 'mysql', 'sqlite', 'postgresql', 'transactsql', 'flinksql'].map(getCopyFile).reduce((prev, curr) => [...prev, ...curr], [])
-
 const getSrcFile = () => fs.readdirSync(srcPath).filter(name => name !== 'parser.all.js' || name !== 'parser.single.js').map(name => ({ source: `${outputPath}/${name}`, destination: `${outputPath}/lib/${name}` }))
 
-const getPlugins = (parserName, target, plugins) => [
-    new webpack.DefinePlugin({
-        PARSER_NAME: parserName ? JSON.stringify(parserName) : 'null',
-    }),
-    ...(plugins || []),
-    ...(isProd
-        ? [
-            new CopyPlugin({
-                patterns: [
-                    'LICENSE',
-                    'lib',
-                    'README.md',
-                    'package.json',
-                    'types.d.ts',
-                    'ast/**',
-                    {
-                        from: 'index.d.ts',
-                        to: (parserName || 'index') + (target === 'web' ? '.umd' : '') + '.d.ts',
-                    }
-                ],
-            }),
-            new FileManagerPlugin({
-                onEnd: {
-                    mkdir: [
-                        `${outputPath}/umd`,
-                        `${outputPath}/build`,
-                        `${outputPath}/lib`,
-                    ],
-                    copy: [
-                        { source: `${outputPath}/*.umd.d.ts`, destination: `${outputPath}/umd` },
-                        { source: `${outputPath}/*.umd.js`, destination: `${outputPath}/umd` },
-                        { source: `${outputPath}/*.umd.js.map`, destination: `${outputPath}/umd` },
-                    ],
-                    move: [
-                        ...getDbFile(),
-                        ...getSrcFile(),
-                    ],
-                    // delete: [
-                    //     `${outputPath}/*.umd.d.ts`,
-                    //     `${outputPath}/*.umd.js`,
-                    //     `${outputPath}/*.umd.js.map`,
-                    //     `${outputPath}/index.d.ts`
-                    // ]
-                }
-            })
-        ] : [
-        ])
-    ]
+const getPlugins = (parserName, target, plugins = []) => {
+  const pluginList = [new webpack.DefinePlugin({ PARSER_NAME: parserName ? JSON.stringify(parserName) : 'null' }), ...plugins]
+  if (isProd) {
+    const tsFileName = (parserName || 'index') + (target === 'web' ? '.umd' : '') + '.d.ts'
+    pluginList.push(
+      new CopyPlugin({
+        patterns: [
+          'LICENSE',
+          'lib',
+          'README.md',
+          'package.json',
+          'types.d.ts',
+          'ast/**',
+          {
+            from: 'index.d.ts',
+            to: tsFileName,
+          }
+        ],
+      }),
+    )
+    const fileConfig = {
+      events: { onEnd: {} },
+      runTasksInSeries: true,
+    }
+    if (parserName === null) {
+      if (target === 'web') {
+        fileConfig.events.onEnd.mkdir = [
+          `${outputPath}/umd`,
+          `${outputPath}/build`,
+          `${outputPath}/lib`,
+        ]
+        fileConfig.events.onEnd.move = [
+          { source: `${outputPath}/index.umd.js`, destination: `${outputPath}/umd/index.umd.js` },
+          { source: `${outputPath}/index.umd.d.ts`, destination: `${outputPath}/umd/index.umd.d.ts` },
+          { source: `${outputPath}/index.umd.js.map`, destination: `${outputPath}/umd/index.umd.js.map` },
+        ]
+      }
+      if (target === 'node') fileConfig.events.onEnd.move = getSrcFile()
+    } else {
+      if (target === 'node') fileConfig.events.onEnd.move = getCopyFile(parserName)
+      if (target === 'web') fileConfig.events.onEnd.move = [
+        { source: `${outputPath}/${parserName}.umd.d.ts`, destination: `${outputPath}/umd/${parserName}.umd.d.ts` },
+        { source: `${outputPath}/${parserName}.umd.js`, destination: `${outputPath}/umd/${parserName}.umd.js` },
+        { source: `${outputPath}/${parserName}.umd.js.map`, destination: `${outputPath}/umd/${parserName}.umd.js.map` },
+      ]
+    }
+    pluginList.push(new FileManagerPlugin(fileConfig))
+  }
+  return pluginList
+}
 const getOutput = (target) => ({
     path: outputPath,
     library: '',
