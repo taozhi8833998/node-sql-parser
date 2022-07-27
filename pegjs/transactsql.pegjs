@@ -48,7 +48,7 @@
 
     'KEY': true,
 
-    'LEFT': true,
+    // 'LEFT': true,
     'LIKE': true,
     'LIMIT': true,
     'LOW_PRIORITY': true, // for lock table
@@ -66,7 +66,7 @@
     'RENAME': true,
     // 'REPLACE': true,
     'READ': true, // for lock table
-    'RIGHT': true,
+    // 'RIGHT': true,
 
     'SELECT': true,
     'SESSION_USER': true,
