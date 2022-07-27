@@ -47,4 +47,13 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal("EXEC [msdb.dbo].[sp_delete_database_backuphistory] @database_name = N'Test' GO")
   })
 
+  it('should support over in aggregation function', () => {
+    const sql = `select sum(order_rate) over(
+      order by quarter_time
+      rows between 4 preceding and 1 preceding -- window frame
+    ) as new_sum from t
+    `
+    expect(getParsedSql(sql)).to.equal("SELECT SUM([order_rate]) OVER (ORDER BY [quarter_time] ASC ROWS BETWEEN 4 PRECEDING AND 1 PRECEDING) AS [new_sum] FROM [t]")
+  })
+
 })

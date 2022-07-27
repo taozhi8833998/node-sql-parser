@@ -1531,6 +1531,9 @@ column_ref_list
 having_clause
   = KW_HAVING __ e:expr { return e; }
 
+partition_by_clause
+  = KW_PARTITION __ KW_BY __ bc:column_clause { return bc; }
+
 order_by_clause
   = KW_ORDER __ KW_BY __ l:order_by_list { return l; }
 
@@ -2040,13 +2043,14 @@ aggr_func
   / aggr_fun_smma
 
 aggr_fun_smma
-  = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN {
+  = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN __ bc:over_partition? {
       return {
         type: 'aggr_func',
         name: name,
         args: {
           expr: e
-        }
+        },
+        over: bc
       };
     }
 
@@ -2070,13 +2074,108 @@ on_update_current_timestamp
   }
 
 over_partition
-  = KW_OVER __ LPAREN __ KW_PARTITION __ KW_BY __ bc:column_clause __ l:order_by_clause? __ RPAREN {
+  = 'OVER'i __ aws:as_window_specification {
     return {
-      partitionby: bc,
-      orderby: l
+      type: 'window',
+      as_window_specification: aws,
     }
   }
   / on_update_current_timestamp
+
+window_clause
+  = 'WINDOW'i __ l:named_window_expr_list {
+    // => { keyword: 'window'; type: 'window', expr: named_window_expr_list; }
+    return {
+      keyword: 'window',
+      type: 'window',
+      expr: l,
+    }
+  }
+
+named_window_expr_list
+  = head:named_window_expr tail:(__ COMMA __ named_window_expr)* {
+    // => named_window_expr[]
+      return createList(head, tail);
+    }
+
+named_window_expr
+  = nw:ident_name __ KW_AS __ anw:as_window_specification {
+    // => { name: ident_name;  as_window_specification: as_window_specification; }
+    return {
+      name: nw,
+      as_window_specification: anw,
+    }
+  }
+
+as_window_specification
+  = ident_name
+  / LPAREN __ ws:window_specification? __ RPAREN {
+    return {
+      window_specification: ws || {},
+      parentheses: true
+    }
+  }
+
+window_specification
+  = bc:partition_by_clause? __ l:order_by_clause? __ w:window_frame_clause? {
+    return {
+      name: null,
+      partitionby: bc,
+      orderby: l,
+      window_frame_clause: w,
+    }
+  }
+
+window_specification_frameless
+  = bc:partition_by_clause? __ l:order_by_clause? {
+    return {
+      name: null,
+      partitionby: bc,
+      orderby: l,
+      window_frame_clause: null
+    }
+  }
+
+window_frame_clause
+  = kw:KW_ROWS __ s:(window_frame_following / window_frame_preceding) {
+    // => string
+    return `rows ${s.value}`
+  }
+  / KW_ROWS __ KW_BETWEEN __ p:window_frame_bound __ KW_AND __ f:window_frame_bound {
+    // => string
+    return `rows between ${p.value} and ${f.value}`
+  }
+window_frame_bound = window_frame_preceding / window_frame_following
+
+window_frame_following
+  = s:window_frame_value __ 'FOLLOWING'i  {
+    // => string
+    s.value += ' FOLLOWING'
+    return s
+  }
+  / window_frame_current_row
+
+window_frame_preceding
+  = s:window_frame_value __ 'PRECEDING'i  {
+    // => string
+    s.value += ' PRECEDING'
+    return s
+  }
+  / window_frame_current_row
+
+window_frame_current_row
+  = 'CURRENT'i __ 'ROW'i {
+    // => { type: 'single_quote_string'; value: string }
+    return { type: 'single_quote_string', value: 'current row' }
+  }
+
+window_frame_value
+  = s:'UNBOUNDED'i {
+    // => literal_string
+    return { type: 'single_quote_string', value: s.toUpperCase() }
+  }
+  / literal_numeric
+
 aggr_fun_count
   = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
       return {
@@ -2449,6 +2548,7 @@ KW_SMALLDATETIME   = "SMALLDATETIME"i     !ident_start { return 'SMALLDATETIME';
 KW_DATETIME   = "DATETIME"i     !ident_start { return 'DATETIME'; }
 KW_DATETIME2  = "DATETIME2"i    !ident_start { return 'DATETIME2'; }
 KW_DATETIMEOFFSET  = "DATETIMEOFFSET"i    !ident_start { return 'DATETIMEOFFSET'; }
+KW_ROWS     = "ROWS"i     !ident_start { return 'ROWS'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }

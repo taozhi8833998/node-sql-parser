@@ -113,7 +113,7 @@ function buildConfig(parserName, target, entry, plugins) {
         devtool: 'source-map',
         externals: target == 'web' ? [] : [
             nodeExternals({
-                whitelist: ['webpack/hot/poll?100'],
+                allowlist: ['webpack/hot/poll?100'],
             }),
         ],
         entry,

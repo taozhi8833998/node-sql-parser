@@ -294,8 +294,8 @@ function commentToSQL(comment) {
 
 function triggerEventToSQL(events) {
   return events.map(event => {
-    const { keyword: kw, args } = event
-    const result = [toUpper(kw)]
+    const { keyword: eventKw, args } = event
+    const result = [toUpper(eventKw)]
     if (args) {
       const { keyword: kwArgs, columns } = args
       result.push(toUpper(kwArgs), columns.map(columnRefToSQL).join(', '))
