@@ -65,4 +65,9 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal("SELECT LEFT('test', 2), RIGHT('test', 2) FROM [test]")
   })
 
+  it('should support distinct without parentheses', () => {
+    const sql = 'select count(DISTINCT ISNULL([email],-1)) from demo'
+    expect(getParsedSql(sql)).to.equal("SELECT COUNT(DISTINCT ISNULL([email], -1)) FROM [demo]")
+  })
+
 })
