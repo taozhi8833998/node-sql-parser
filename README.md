@@ -145,7 +145,7 @@ const { Parser } = require('node-sql-parser/build/mysql');
 const parser = new Parser()
 // opt is optional
 const ast = parser.astify('SELECT * FROM t', opt);
-const sql = parse.sqlify(ast, opt);
+const sql = parser.sqlify(ast, opt);
 
 console.log(sql); // SELECT * FROM `t`
 ```
