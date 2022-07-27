@@ -12,8 +12,8 @@ function callToSQL(stmt) {
 }
 
 function commonCmdToSQL(stmt) {
-  const { type, keyword, name } = stmt
-  const clauses = [toUpper(type), toUpper(keyword)]
+  const { type, keyword, name, prefix } = stmt
+  const clauses = [toUpper(type), toUpper(keyword), toUpper(prefix)]
   switch (keyword) {
     case 'table':
       clauses.push(tablesToSQL(name))
