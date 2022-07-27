@@ -465,7 +465,7 @@ export type with_clause = cte_definition[] | [cte_definition & {recursive: true;
 
 export type cte_definition = { name: { type: 'default'; value: string; }; stmt: crud_stmt; columns?: cte_column_definition; };
 
-export type cte_column_definition = column[];
+export type cte_column_definition = column_ref_list;
 
 export type distinct_on = {type: string; columns: column_ref_list;} | { type: string | undefined; };
 
