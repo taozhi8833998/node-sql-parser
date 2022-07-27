@@ -299,6 +299,13 @@ describe('mysql', () => {
           'DROP TABLE IF EXISTS event_log',
           'DROP TABLE IF EXISTS `event_log`'
         ]
+      },
+      {
+        title: 'sql column name wrapped by bracket',
+        sql: [
+          'SELECT `sometable`.`id` FROM sometable',
+          'SELECT `sometable`.`id` FROM `sometable`'
+        ]
       }
     ]
     SQL_LIST.forEach(sqlInfo => {
