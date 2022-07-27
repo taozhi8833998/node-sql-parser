@@ -47,4 +47,27 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal("EXEC [msdb.dbo].[sp_delete_database_backuphistory] @database_name = N'Test' GO")
   })
 
+  it('should support over in aggregation function', () => {
+    const sql = `select sum(order_rate) over(
+      order by quarter_time
+      rows between 4 preceding and 1 preceding -- window frame
+    ) as new_sum from t
+    `
+    expect(getParsedSql(sql)).to.equal("SELECT SUM([order_rate]) OVER (ORDER BY [quarter_time] ASC ROWS BETWEEN 4 PRECEDING AND 1 PRECEDING) AS [new_sum] FROM [t]")
+  })
+
+  it('should support status as column or table name, left and right as function name', () => {
+    let sql = 'select * from status where 1=1'
+    expect(getParsedSql(sql)).to.equal("SELECT * FROM [status] WHERE 1 = 1")
+    sql = 'select status from test where 1=1'
+    expect(getParsedSql(sql)).to.equal("SELECT [status] FROM [test] WHERE 1 = 1")
+    sql = "select LEFT('test',2) ,RIGHT('test', 2) from [test]"
+    expect(getParsedSql(sql)).to.equal("SELECT LEFT('test', 2), RIGHT('test', 2) FROM [test]")
+  })
+
+  it('should support distinct without parentheses', () => {
+    const sql = 'select count(DISTINCT ISNULL([email],-1)) from demo'
+    expect(getParsedSql(sql)).to.equal("SELECT COUNT(DISTINCT ISNULL([email], -1)) FROM [demo]")
+  })
+
 })

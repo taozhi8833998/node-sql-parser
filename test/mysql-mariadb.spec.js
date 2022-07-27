@@ -285,6 +285,13 @@ describe('mysql', () => {
           'SELECT t0.xid, t0.xname FROM ORG_DEFINTION t0 WHERE (t0.xname = ?) LIMIT ?',
           'SELECT `t0`.`xid`, `t0`.`xname` FROM `ORG_DEFINTION` AS `t0` WHERE (`t0`.`xname` = ?) LIMIT ?'
         ]
+      },
+      {
+        title: 'count distinct without parentheses',
+        sql: [
+          'SELECT COUNT(DISTINCT IF(active = 1, dep_id, NULL)) AS active_deps FROM users',
+          'SELECT COUNT(DISTINCT IF(`active` = 1, `dep_id`, NULL)) AS `active_deps` FROM `users`'
+        ]
       }
     ]
     SQL_LIST.forEach(sqlInfo => {
