@@ -292,6 +292,13 @@ describe('mysql', () => {
           'SELECT COUNT(DISTINCT IF(active = 1, dep_id, NULL)) AS active_deps FROM users',
           'SELECT COUNT(DISTINCT IF(`active` = 1, `dep_id`, NULL)) AS `active_deps` FROM `users`'
         ]
+      },
+      {
+        title: 'drop table if exists',
+        sql: [
+          'DROP TABLE IF EXISTS event_log',
+          'DROP TABLE IF EXISTS `event_log`'
+        ]
       }
     ]
     SQL_LIST.forEach(sqlInfo => {

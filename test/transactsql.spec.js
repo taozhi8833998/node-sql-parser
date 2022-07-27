@@ -70,4 +70,9 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal("SELECT COUNT(DISTINCT ISNULL([email], -1)) FROM [demo]")
   })
 
+  it('should support drop table if exists', () => {
+    const sql = 'DROP TABLE IF EXISTS event_log'
+    expect(getParsedSql(sql)).to.equal("DROP TABLE IF EXISTS [event_log]")
+  })
+
 })
