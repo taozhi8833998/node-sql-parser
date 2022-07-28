@@ -1348,9 +1348,10 @@ describe('select', () => {
     })
 
     it('should support array_agg', () => {
-      const sql = `SELECT shipmentId, ARRAY_AGG(distinct abc order by name) AS shipmentStopIDs, ARRAY_AGG (first_name || ' ' || last_name) actors FROM table_name GROUP BY shipmentId
-      `
+      let sql = `SELECT shipmentId, ARRAY_AGG(distinct abc order by name) AS shipmentStopIDs, ARRAY_AGG (first_name || ' ' || last_name) actors FROM table_name GROUP BY shipmentId`
       expect(getParsedSql(sql, opt)).to.equal('SELECT "shipmentId", ARRAY_AGG(DISTINCT "abc" ORDER BY "name" ASC) AS "shipmentStopIDs", ARRAY_AGG("first_name" || \' \' || "last_name") AS "actors" FROM "table_name" GROUP BY "shipmentId"')
+      sql = 'select pg_catalog.array_agg(c1 order by c2) from t1'
+      expect(getParsedSql(sql, opt)).to.equal('SELECT pg_catalog.ARRAY_AGG("c1" ORDER BY "c2" ASC) FROM "t1"')
     })
 
     it('should support array_agg in coalesce', () => {
