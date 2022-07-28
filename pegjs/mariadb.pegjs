@@ -1269,6 +1269,9 @@ column_list_item
         as: null
       };
     }
+  / a:assign_stmt {
+    return { expr: a, as: null }
+  }
   / e:expr __ alias:alias_clause? {
       return { expr: e, as: alias };
     }
@@ -2774,6 +2777,7 @@ proc_join
 proc_primary
   = literal
   / var_decl
+  / column_ref
   / proc_func_call
   / param
   / LPAREN __ e:proc_additive_expr __ RPAREN {

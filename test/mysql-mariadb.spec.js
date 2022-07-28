@@ -306,6 +306,13 @@ describe('mysql', () => {
           'SELECT `sometable`.`id` FROM sometable',
           'SELECT `sometable`.`id` FROM `sometable`'
         ]
+      },
+      {
+        title: 'assigning a value to a sql variable within a select query',
+        sql: [
+          "SELECT @id := cust_id FROM customers WHERE cust_id='customer name';",
+          "SELECT @id := `cust_id` FROM `customers` WHERE `cust_id` = 'customer name'"
+        ]
       }
     ]
     SQL_LIST.forEach(sqlInfo => {
