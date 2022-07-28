@@ -3043,11 +3043,11 @@ count_arg
   / distinct_args
 
 aggr_array_agg
-  = name:KW_ARRAY_AGG __ LPAREN __ arg:distinct_args __ o:order_by_clause? __ RPAREN {
+  = pre:(ident __ DOT)? __ name:KW_ARRAY_AGG __ LPAREN __ arg:distinct_args __ o:order_by_clause? __ RPAREN {
     // => { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG'; orderby?: order_by_clause  }
       return {
         type: 'aggr_func',
-        name: name,
+        name: pre ? `${pre[0]}.${name}` : name,
         args: arg,
         orderby: o,
       };
