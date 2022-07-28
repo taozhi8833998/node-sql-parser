@@ -2358,7 +2358,21 @@ literal_bool
     }
 
 literal_string
-  = ca:("'" single_char* "'") {
+  = r:'X'i ca:("'" [0-9A-Fa-f]* "'") {
+      return {
+        type: 'hex_string',
+        prefix: 'X',
+        value: ca[1].join('')
+      };
+    }
+  / r:'0x' ca:([0-9A-Fa-f]*) {
+    return {
+        type: 'hex_string',
+        prefix: '0x',
+        value: ca.join('')
+      };
+  }
+  / ca:("'" single_char* "'") {
       return {
         type: 'single_quote_string',
         value: ca[1].join('')

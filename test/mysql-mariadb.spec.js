@@ -313,7 +313,15 @@ describe('mysql', () => {
           "SELECT @id := cust_id FROM customers WHERE cust_id='customer name';",
           "SELECT @id := `cust_id` FROM `customers` WHERE `cust_id` = 'customer name'"
         ]
-      }
+      },
+      {
+        title: 'support hexadecimal literals',
+        sql: [
+          "SELECT X'4D7953514C', 0x01AF, x'01afd' from t1 where id = 0x1ecc96ce15;",
+          "SELECT X'4D7953514C', 0x01AF, X'01afd' FROM `t1` WHERE `id` = 0x1ecc96ce15"
+        ]
+      },
+
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

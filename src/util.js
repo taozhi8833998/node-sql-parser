@@ -181,7 +181,8 @@ function hasVal(val) {
 
 function literalToSQL(literal) {
   if (!literal) return
-  const { type, parentheses, value } = literal
+  const { type, parentheses, suffix, value } = literal
+  let { prefix } = literal
   let str = value
   switch (type) {
     case 'backticks_quote_string':
@@ -194,7 +195,8 @@ function literalToSQL(literal) {
       str = `r"${escape(value)}"`
       break
     case 'hex_string':
-      str = `X'${escape(value)}'`
+      str = prefix === '0x' ? `0x${escape(value)}` : `X'${escape(value)}'`
+      prefix = ''
       break
     case 'double_quote_string':
       str = `"${escape(value)}"`
@@ -230,7 +232,6 @@ function literalToSQL(literal) {
     default:
       break
   }
-  const { prefix, suffix } = literal
   const result = []
   if (prefix) result.push(toUpper(prefix))
   result.push(str)
