@@ -213,7 +213,7 @@ describe('Command SQL', () => {
           "type": "alter"
         }
       ]
-      const resource = 'unknow'
+      const resource = 'unknown'
       const ast = {
         "type": "alter",
         "table": [
