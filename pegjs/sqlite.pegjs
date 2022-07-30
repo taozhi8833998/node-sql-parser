@@ -2034,15 +2034,29 @@ literal_bool
     }
 
 literal_string
-  = r:'X'i? ca:("'" single_char* "'") {
+  = r:'X'i ca:("'" [0-9A-Fa-f]* "'") {
       return {
-        type: r ? 'hex_string' : 'single_quote_string',
+        type: 'hex_string',
+        prefix: 'X',
         value: ca[1].join('')
       };
     }
-  / r:'X'i? ca:("\"" single_quote_char* "\"") {
+  / r:'0x' ca:([0-9A-Fa-f]*) {
+    return {
+        type: 'hex_string',
+        prefix: '0x',
+        value: ca.join('')
+      };
+  }
+  / ca:("'" single_char* "'") {
       return {
-        type: r ? 'hex_string' : 'string',
+        type: 'single_quote_string',
+        value: ca[1].join('')
+      };
+    }
+  / ca:("\"" single_quote_char* "\"") {
+      return {
+        type: 'string',
         value: ca[1].join('')
       };
     }
