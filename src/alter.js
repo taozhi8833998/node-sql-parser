@@ -41,6 +41,7 @@ function alterExprToSQL(expr) {
       break
     case 'algorithm':
     case 'lock':
+    case 'table-option':
       name = [symbol, toUpper(expr[resource])].filter(hasVal).join(' ')
       break
     case 'constraint':
@@ -51,6 +52,7 @@ function alterExprToSQL(expr) {
       name = identifierToSql(expr[resource])
       break
     default:
+      name = [symbol, expr[resource]].filter(val => val !== null).join(' ')
       break
   }
   const alterArray = [
@@ -59,7 +61,7 @@ function alterExprToSQL(expr) {
     toUpper(ifNotExists),
     oldColumn && columnRefToSQL(oldColumn),
     toUpper(prefix),
-    name,
+    name && name.trim(),
     dataType.filter(hasVal).join(' '),
     firstAfter && `${toUpper(firstAfter.keyword)} ${columnRefToSQL(firstAfter.column)}`,
   ]

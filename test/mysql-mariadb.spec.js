@@ -321,7 +321,13 @@ describe('mysql', () => {
           "SELECT X'4D7953514C', 0x01AF, X'01afd' FROM `t1` WHERE `id` = 0x1ecc96ce15"
         ]
       },
-
+      {
+        title: 'alter table set auto_increment',
+        sql: [
+          'ALTER TABLE myTable AUTO_INCREMENT = 1;',
+          'ALTER TABLE `myTable` AUTO_INCREMENT = 1'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

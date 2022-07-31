@@ -622,15 +622,15 @@ use_stmt
 alter_table_stmt
   = KW_ALTER  __
     KW_TABLE __
-    t:table_ref_list __
+    t:table_name __
     e:alter_action_list {
-      if (t && t.length > 0) t.forEach(table => tableList.add(`alter::${table.db}::${table.table}`));
+      tableList.add(`alter::${t.db}::${t.table}`)
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: 'alter',
-          table: t,
+          table: [t],
           expr: e
         }
       };
@@ -651,6 +651,15 @@ alter_action
   / ALTER_ALGORITHM
   / ALTER_LOCK
   / ALTER_CHANGE_COLUMN
+  / t:table_option {
+    t.resource = t.keyword
+    t[t.keyword] = t.value
+    delete t.value
+    return {
+      type: 'alter',
+      ...t,
+    }
+  }
 
 ALTER_ADD_COLUMN
   = KW_ADD __

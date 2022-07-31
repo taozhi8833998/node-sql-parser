@@ -858,6 +858,15 @@ alter_action
   / ALTER_ALGORITHM
   / ALTER_LOCK
   / ALTER_CHANGE_COLUMN
+  / t:table_option {
+    t.resource = t.keyword
+    t[t.keyword] = t.value
+    delete t.value
+    return {
+      type: 'alter',
+      ...t,
+    }
+  }
 
 ALTER_ADD_COLUMN
   = KW_ADD __
