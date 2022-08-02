@@ -1,6 +1,6 @@
 import { exprToSQL } from './expr'
 import { limitToSQL } from './limit'
-import { tablesToSQL } from './tables'
+import { tableToSQL, tablesToSQL } from './tables'
 import { commonOptionConnector, hasVal, literalToSQL, toUpper } from './util'
 
 function showEventToSQL(showEventExpr) {
@@ -42,6 +42,9 @@ function showToSQL(showExpr) {
       break
     case 'GRANTS':
       str = showGrantsForUser(showExpr)
+      break
+    case 'CREATE VIEW':
+      str = commonOptionConnector('', tableToSQL, showExpr.view)
       break
     default:
       break

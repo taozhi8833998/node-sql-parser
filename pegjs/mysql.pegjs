@@ -1397,6 +1397,17 @@ show_stmt
       }
     }
   }
+  / KW_SHOW __ KW_CREATE __ KW_VIEW __ t:table_name {
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'show',
+          keyword: 'create view',
+          view: t
+        }
+      };
+  }
   / show_grant_stmt
 
 show_grant_stmt
