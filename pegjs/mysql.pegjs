@@ -1403,7 +1403,8 @@ show_stmt
         columnList: columnListTableAlias(columnList),
         ast: {
           type: 'show',
-          keyword: 'create view',
+          keyword: 'create',
+          suffix: 'view',
           view: t
         }
       };

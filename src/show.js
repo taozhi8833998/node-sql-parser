@@ -43,7 +43,7 @@ function showToSQL(showExpr) {
     case 'GRANTS':
       str = showGrantsForUser(showExpr)
       break
-    case 'CREATE VIEW':
+    case 'CREATE':
       str = commonOptionConnector('', tableToSQL, showExpr.view)
       break
     default:
