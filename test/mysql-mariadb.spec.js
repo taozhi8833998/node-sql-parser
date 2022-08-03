@@ -328,6 +328,13 @@ describe('mysql', () => {
           'ALTER TABLE `myTable` AUTO_INCREMENT = 1'
         ]
       },
+      {
+        title: 'show create view',
+        sql: [
+          'SHOW CREATE VIEW abc.test',
+          'SHOW CREATE VIEW `abc`.`test`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
