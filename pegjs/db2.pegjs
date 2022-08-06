@@ -1696,7 +1696,7 @@ primary
   / var_decl
 
 column_ref
-  = tbl:(ident __ DOT __)? col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) __ ca:collate_expr? {
+  = tbl:(ident __ DOT __)? col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ __ ca:collate_expr? {
       const tableName = tbl && tbl[0] || null
       columnList.add(`select::${tableName}::${col}`);
       return {
@@ -1704,8 +1704,8 @@ column_ref
         table: tableName,
         column: col,
         collate: ca,
-        arrow: a,
-        property: j
+        arrows: a.map(item => item[0]),
+        properties: a.map(item => item[2])
       };
   }
   / tbl:ident __ DOT __ col:column_without_kw {

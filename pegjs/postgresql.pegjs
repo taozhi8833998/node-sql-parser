@@ -2759,16 +2759,16 @@ column_ref
           column: '*'
       }
     }
-  / tbl:(ident __ DOT)? __ col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) {
+  / tbl:(ident __ DOT)? __ col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
     // => IGNORE
       const tableName = tbl && tbl[0] || null
-      columnList.add(`select::${tableName}::${col}`);
+      columnList.add(`select::${tableName}::${col}`)
       return {
         type: 'column_ref',
         table: tableName,
         column: col,
-        arrow: a,
-        property: j
+        arrows: a.map(item => item[0]),
+        properties: a.map(item => item[2])
       };
   }
   / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) {
@@ -2777,8 +2777,8 @@ column_ref
         schema: string;
         table: string;
         column: column | '*';
-        arrow?: '->>' | '->';
-        property?: literal_string | literal_numeric;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
       } */
       columnList.add(`select::${schema}.${tbl[3]}::${col[3]}`);
       return {
@@ -2793,8 +2793,8 @@ column_ref
         type: 'column_ref';
         table: ident;
         column: column | '*';
-        arrow?: '->>' | '->';
-        property?: literal_string | literal_numeric;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
       } */
       columnList.add(`select::${tbl}::${col}`);
       return {

@@ -2249,7 +2249,7 @@ column_ref
           column: '*'
       }
     }
-  / tbl:(ident __ DOT)? __ col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) {
+  / tbl:(ident __ DOT)? __ col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
     // => IGNORE
       const tableName = tbl && tbl[0] || null
       columnList.add(`select::${tableName}::${col}`);
@@ -2257,8 +2257,8 @@ column_ref
         type: 'column_ref',
         table: tableName,
         column: col,
-        arrow: a,
-        property: j
+        arrows: a.map(item => item[0]),
+        properties: a.map(item => item[2])
       };
   }
   / tbl:ident __ DOT __ col:column {
