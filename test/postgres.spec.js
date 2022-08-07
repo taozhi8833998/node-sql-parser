@@ -638,6 +638,13 @@ describe('Postgres', () => {
         'SELECT (COALESCE(wp.weight,  0))::double(10) as net_weight , wp.gross_weight:: double(10) FROM  wp ;',
         'SELECT (COALESCE("wp"."weight", 0))::DOUBLE(10) AS "net_weight", "wp"."gross_weight"::DOUBLE(10) FROM "wp"'
       ]
+    },
+    {
+      title: 'support nested json traversal',
+      sql: [
+        "SELECT meta.data->'foo'->'bar' as value FROM meta;",
+        `SELECT "meta"."data" -> 'foo' -> 'bar' AS "value" FROM "meta"`
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){
