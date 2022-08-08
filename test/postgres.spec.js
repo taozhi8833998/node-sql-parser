@@ -659,6 +659,33 @@ describe('Postgres', () => {
         'SELECT has_geometry FROM rooms WHERE rooms.index = 200 ORDER BY has_geometry ASC NULLS;',
         'SELECT "has_geometry" FROM "rooms" WHERE "rooms"."index" = 200 ORDER BY "has_geometry" ASC NULLS LAST'
       ]
+    },
+    {
+      title: 'support lateral with subquery',
+      sql: [
+        'SELECT * FROM foo, LATERAL (SELECT * FROM bar WHERE bar.id = foo.bar_id) ss;',
+        'SELECT * FROM "foo", LATERAL (SELECT * FROM "bar" WHERE "bar"."id" = "foo"."bar_id") AS "ss"'
+      ]
+    },
+    {
+      title: 'support lateral with function',
+      sql: [
+        `SELECT p1.id, p2.id, v1, v2
+        FROM polygons p1, polygons p2,
+             LATERAL vertices(p1.poly) v1,
+             LATERAL vertices(p2.poly) v2
+        WHERE (v1 - v2) < 10 AND p1.id != p2.id;`,
+        'SELECT "p1"."id", "p2"."id", "v1", "v2" FROM "polygons" AS "p1", "polygons" AS "p2", LATERAL vertices("p1"."poly") AS "v1", LATERAL vertices("p2"."poly") AS "v2" WHERE ("v1" - "v2") < 10 AND "p1"."id" != "p2"."id"'
+      ]
+    },
+    {
+      title: 'support lateral with join',
+      sql: [
+        `SELECT m.name
+        FROM manufacturers m LEFT JOIN LATERAL get_product_names(m.id) pname ON true
+        WHERE pname IS NULL;`,
+        'SELECT "m"."name" FROM "manufacturers" AS "m" LEFT JOIN LATERAL get_product_names("m"."id") AS "pname" ON TRUE WHERE "pname" IS NULL'
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){
