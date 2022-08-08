@@ -645,6 +645,20 @@ describe('Postgres', () => {
         "SELECT meta.data->'foo'->'bar' as value FROM meta;",
         `SELECT "meta"."data" -> 'foo' -> 'bar' AS "value" FROM "meta"`
       ]
+    },
+    {
+      title: 'support nulls first or last after order by',
+      sql: [
+        'SELECT has_geometry FROM rooms WHERE rooms.index = 200 ORDER BY has_geometry DESC NULLS LAST;',
+        'SELECT "has_geometry" FROM "rooms" WHERE "rooms"."index" = 200 ORDER BY "has_geometry" DESC NULLS LAST'
+      ]
+    },
+    {
+      title: 'support nulls after order by with default val',
+      sql: [
+        'SELECT has_geometry FROM rooms WHERE rooms.index = 200 ORDER BY has_geometry ASC NULLS;',
+        'SELECT "has_geometry" FROM "rooms" WHERE "rooms"."index" = 200 ORDER BY "has_geometry" ASC NULLS LAST'
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){

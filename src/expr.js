@@ -1,4 +1,4 @@
-import { literalToSQL, toUpper, connector, dataTypeToSQL } from './util'
+import { literalToSQL, toUpper, connector, dataTypeToSQL, hasVal } from './util'
 import { alterExprToSQL } from './alter'
 import { aggrToSQL } from './aggregation'
 import { assignToSQL } from './assign'
@@ -89,13 +89,13 @@ function orderOrPartitionByToSQL(expr, prefix) {
   const upperPrefix = toUpper(prefix)
   switch (upperPrefix) {
     case 'ORDER BY':
-      expressions = expr.map(info => `${exprToSQL(info.expr)} ${info.type}`)
+      expressions = expr.map(info => [exprToSQL(info.expr), info.type, toUpper(info.nulls)].filter(hasVal).join(' '))
       break
     case 'PARTITION BY':
-      expressions = expr.map(info => `${exprToSQL(info.expr)}`)
+      expressions = expr.map(info => exprToSQL(info.expr))
       break
     default:
-      expressions = expr.map(info => `${exprToSQL(info.expr)}`)
+      expressions = expr.map(info => exprToSQL(info.expr))
       break
   }
   return connector(upperPrefix, expressions.join(', '))
