@@ -44,7 +44,7 @@ function operatorToSQL(operator) {
 
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
-  const { table, db, as, expr, operator, schema, tablesample } = tableInfo
+  const { table, db, as, expr, operator, prefix: prefixStr, schema, tablesample } = tableInfo
   const database = identifierToSql(db)
   const schemaStr = identifierToSql(schema)
   let tableName = table && identifierToSql(table)
@@ -57,6 +57,7 @@ function tableToSQL(tableInfo) {
     tableName = valueSQL.filter(hasVal).join('')
   }
   if (expr && expr.type !== 'values') tableName = exprToSQL(expr)
+  tableName = [toUpper(prefixStr), tableName].filter(hasVal).join(' ')
   const str = [database, schemaStr, tableName].filter(hasVal).join('.')
   const result = [str, operatorToSQL(operator)]
   if (tablesample) {
