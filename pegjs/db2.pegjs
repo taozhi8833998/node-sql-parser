@@ -1384,7 +1384,8 @@ replace_insert_stmt
 
 insert_no_columns_stmt
   = ri:replace_insert       __
-    KW_INTO                 __
+    ig:KW_IGNORE?  __
+    it:KW_INTO?   __
     t:table_name  __
     p:insert_partition? __
     v:insert_value_clause __
@@ -1394,6 +1395,7 @@ insert_no_columns_stmt
         columnList.add(`insert::${t.table}::(.*)`);
         t.as = null
       }
+      const prefix = [ig, it].filter(v => v).map(v => v[0] && v[0].toLowerCase()).join(' ')
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -1403,6 +1405,7 @@ insert_no_columns_stmt
           columns: null,
           values: v,
           partition: p,
+          prefix,
           on_duplicate_update: odp,
         }
       };
