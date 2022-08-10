@@ -238,6 +238,13 @@ describe('mysql', () => {
         ],
       },
       {
+        title: 'insert ignore into without columns',
+        sql: [
+          "INSERT IGNORE INTO t1 VALUES (1, 'hi')",
+          "INSERT IGNORE INTO `t1` VALUES (1,'hi')"
+        ],
+      },
+      {
         title: 'select into',
         sql: [
           "select c1, c2 into t1 from t2",
