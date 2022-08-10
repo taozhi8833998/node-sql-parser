@@ -686,6 +686,13 @@ describe('Postgres', () => {
         WHERE pname IS NULL;`,
         'SELECT "m"."name" FROM "manufacturers" AS "m" LEFT JOIN LATERAL get_product_names("m"."id") AS "pname" ON TRUE WHERE "pname" IS NULL'
       ]
+    },
+    {
+      title: 'support escape char patten matching',
+      sql: [
+        "select c1 from t1 where c2 like 'abc' escape '!'",
+        `SELECT "c1" FROM "t1" WHERE "c2" LIKE 'abc' ESCAPE '!'`
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){
