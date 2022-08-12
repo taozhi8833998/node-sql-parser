@@ -693,7 +693,21 @@ describe('Postgres', () => {
           `CREATE TEMPORARY SEQUENCE if not exists public.table_id_seq increment 10 no minvalue no maxvalue start with 1 cache 3 cycle owned by none`,
           'CREATE TEMPORARY SEQUENCE IF NOT EXISTS "public"."table_id_seq" INCREMENT 10 NO MINVALUE NO MAXVALUE START WITH 1 CACHE 3 CYCLE OWNED BY NONE'
         ]
-      },
+      }, 
+      {
+        title: 'test !~ operator',
+        sql: [
+          `SELECT * FROM partitions WHERE code !~ xyz;`,
+          `SELECT * FROM "partitions" WHERE "code" !~ "xyz"`
+        ]
+      }, 
+      {
+        title: 'test ~ operator',
+        sql: [
+          `SELECT * FROM partitions WHERE code ~ xyz;`,
+          `SELECT * FROM "partitions" WHERE "code" ~ "xyz"`
+        ]
+      }
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
