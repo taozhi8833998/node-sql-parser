@@ -1944,18 +1944,19 @@ table_base
       as: alias
     };
   }
-  / LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:value_alias_clause? {
-    // => { expr: union_stmt | value_clause; as?: alias_clause; }
+  / l:('LATERAL'i)? __ LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:value_alias_clause? {
+    // => { prefix?: string; expr: union_stmt | value_clause; as?: alias_clause; }
     if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt }
     stmt.parentheses = true;
     return {
+      prefix: l,
       expr: stmt,
       as: alias
     };
   }
-  / e:func_call __ alias:alias_clause? {
-    // => { type: 'expr'; expr: expr; as?: alias_clause; }
-      return { type: 'expr', expr: e, as: alias };
+  / l:('LATERAL'i)? __ e:func_call __ alias:alias_clause? {
+    // => { prefix?: string; type: 'expr'; expr: expr; as?: alias_clause; }
+      return { prefix: l, type: 'expr', expr: e, as: alias };
     }
   / t:table_name __ 'TABLESAMPLE'i __ f:func_call __ re:('REPEATABLE'i __ LPAREN __ literal_numeric __ RPAREN)? __ alias:alias_clause? {
     // => table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;}
@@ -1985,6 +1986,7 @@ join_op
   = KW_LEFT __ KW_OUTER? __ KW_JOIN { /* => 'LEFT JOIN' */ return 'LEFT JOIN'; }
   / KW_RIGHT __ KW_OUTER? __ KW_JOIN { /* =>  'RIGHT JOIN' */ return 'RIGHT JOIN'; }
   / KW_FULL __ KW_OUTER? __ KW_JOIN { /* => 'FULL JOIN' */ return 'FULL JOIN'; }
+  / 'CROSS'i __ KW_JOIN { /* => 'CROSS JOIN' */ return 'CROSS JOIN'; }
   / (KW_INNER __)? KW_JOIN { /* => 'INNER JOIN' */ return 'INNER JOIN'; }
 
 table_name
@@ -2152,10 +2154,11 @@ order_by_list
     }
 
 order_by_element
-  = e:expr __ d:(KW_DESC / KW_ASC)? {
-    // => { expr: expr; type: 'ASC' | 'DESC'; }
+  = e:expr __ d:(KW_DESC / KW_ASC)? __ nl:('NULLS'i __ ('FIRST'i / 'LAST'i)?)? {
+    // => { expr: expr; type: 'ASC' | 'DESC';  nulls: 'NULLS FIRST' | 'NULLS LAST' | undefined }
     const obj = { expr: e, type: 'ASC' };
     if (d === 'DESC') obj.type = 'DESC';
+    obj.nulls = nl && `${nl[0]} ${nl[2] ? nl[2] : obj.type === 'ASC' ? 'LAST' : 'FIRST' }`;
     return obj;
   }
 
@@ -2595,7 +2598,8 @@ comparison_op_right
   / between_op_right
   / is_op_right
   / like_op_right
-  / jsonb_op_right
+  / jsonb_op_right 
+  / regex_op_right
 
 arithmetic_op_right
   = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
@@ -2604,7 +2608,7 @@ arithmetic_op_right
     }
 
 arithmetic_comparison_operator
-  = ">=" / ">" / "<=" / "<>" / "<" / "=" / "!="
+  = ">=" / ">" / "<=" / "<>" / "<" / "=" / "!=" 
 
 is_op_right
   = KW_IS __ right:additive_expr {
@@ -2645,8 +2649,7 @@ between_or_not_between_op
 like_op
   = nk:(KW_NOT __ (KW_LIKE / KW_ILIKE)) { /* => 'LIKE' */ return nk[0] + ' ' + nk[2]; }
   / KW_LIKE
-  / KW_ILIKE 
-  / "!~"
+  / KW_ILIKE
   / 'SIMILAR'i __ KW_TO {
     // => 'SIMILAR TO'
     return 'SIMILAR TO'
@@ -2682,6 +2685,15 @@ jsonb_op_right
       right: c && c.expr || c
     }
   }
+
+regex_op 
+  = "~" / "!~"
+
+regex_op_right 
+= op:regex_op __ right:(literal / comparison_expr) {
+     // => { op: regex_op; right: literal | comparison_expr}
+      return { op: op, right: right };
+    } 
 
 additive_expr
   = head:multiplicative_expr
@@ -2760,16 +2772,16 @@ column_ref
           column: '*'
       }
     }
-  / tbl:(ident __ DOT)? __ col:column __ a:(DOUBLE_ARROW / SINGLE_ARROW) __ j:(literal_string / literal_numeric) {
+  / tbl:(ident __ DOT)? __ col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
     // => IGNORE
       const tableName = tbl && tbl[0] || null
-      columnList.add(`select::${tableName}::${col}`);
+      columnList.add(`select::${tableName}::${col}`)
       return {
         type: 'column_ref',
         table: tableName,
         column: col,
-        arrow: a,
-        property: j
+        arrows: a.map(item => item[0]),
+        properties: a.map(item => item[2])
       };
   }
   / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) {
@@ -2778,8 +2790,8 @@ column_ref
         schema: string;
         table: string;
         column: column | '*';
-        arrow?: '->>' | '->';
-        property?: literal_string | literal_numeric;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
       } */
       columnList.add(`select::${schema}.${tbl[3]}::${col[3]}`);
       return {
@@ -2794,8 +2806,8 @@ column_ref
         type: 'column_ref';
         table: ident;
         column: column | '*';
-        arrow?: '->>' | '->';
-        property?: literal_string | literal_numeric;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
       } */
       columnList.add(`select::${tbl}::${col}`);
       return {
