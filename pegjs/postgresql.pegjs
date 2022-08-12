@@ -2595,7 +2595,8 @@ comparison_op_right
   / between_op_right
   / is_op_right
   / like_op_right
-  / jsonb_op_right
+  / jsonb_op_right 
+  / regex_op_right
 
 arithmetic_op_right
   = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
@@ -2646,7 +2647,6 @@ like_op
   = nk:(KW_NOT __ (KW_LIKE / KW_ILIKE)) { /* => 'LIKE' */ return nk[0] + ' ' + nk[2]; }
   / KW_LIKE
   / KW_ILIKE 
-  / "!~"
   / 'SIMILAR'i __ KW_TO {
     // => 'SIMILAR TO'
     return 'SIMILAR TO'
@@ -2681,7 +2681,16 @@ jsonb_op_right
       op: s,
       right: c && c.expr || c
     }
-  }
+  } 
+
+regex_op 
+  = "~" / "!~"
+
+regex_op_right 
+= op:regex_op __ right:(literal / comparison_expr) {
+     // => { op: regex_op; right: literal | comparison_expr}
+      return { op: op, right: right };
+    } 
 
 additive_expr
   = head:multiplicative_expr
