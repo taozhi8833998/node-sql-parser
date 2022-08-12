@@ -1,6 +1,6 @@
 import { columnRefToSQL } from './column'
 import { exprToSQL } from './expr'
-import { literalToSQL } from './util'
+import { identifierToSql, literalToSQL } from './util'
 
 /**
  * @param {Array<Object>} withExpr
@@ -11,7 +11,7 @@ function withToSQL(withExpr) {
   const withExprStr = withExpr.map(cte => {
     const { name, stmt, columns } = cte
     const column = Array.isArray(columns) ? `(${columns.map(columnRefToSQL).join(', ')})` : ''
-    return `${literalToSQL(name)}${column} AS (${exprToSQL(stmt)})`
+    return `${name.type === 'default' ? identifierToSql(name.value) : literalToSQL(name)}${column} AS (${exprToSQL(stmt)})`
   }).join(', ')
 
   return `WITH ${isRecursive}${withExprStr}`

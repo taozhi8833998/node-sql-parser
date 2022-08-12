@@ -104,7 +104,7 @@
     };
   }
 
-  function createBinaryExpr(op, left, right, others = {}) {
+  function createBinaryExpr(op, left, right) {
     return {
       type: 'binary_expr',
       operator: op,

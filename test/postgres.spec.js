@@ -20,7 +20,7 @@ describe('Postgres', () => {
         subQ1 AS (SELECT * FROM Roster WHERE SchoolID = 52),
         subQ2 AS (SELECT SchoolID FROM subQ1)
       SELECT DISTINCT * FROM subQ2;`,
-      `WITH subQ1 AS (SELECT * FROM "Roster" WHERE "SchoolID" = 52), subQ2 AS (SELECT "SchoolID" FROM "subQ1") SELECT DISTINCT * FROM "subQ2"`
+      `WITH "subQ1" AS (SELECT * FROM "Roster" WHERE "SchoolID" = 52), "subQ2" AS (SELECT "SchoolID" FROM "subQ1") SELECT DISTINCT * FROM "subQ2"`
      ]
     },
     {
@@ -264,7 +264,7 @@ describe('Postgres', () => {
         )
         select a[2]
         from t`,
-        `WITH t AS (SELECT ARRAY['a','b','c'] AS "a") SELECT "a"[2] FROM "t"`
+        `WITH "t" AS (SELECT ARRAY['a','b','c'] AS "a") SELECT "a"[2] FROM "t"`
       ]
     },
     {
@@ -581,7 +581,7 @@ describe('Postgres', () => {
             values ('Closed'), ('Verified'), ('Done')
           ) s(a)
         ) select * from statuses`,
-        `WITH statuses AS (SELECT "a" FROM (VALUES ('Closed'), ('Verified'), ('Done')) AS "s(a)") SELECT * FROM "statuses"`
+        `WITH "statuses" AS (SELECT "a" FROM (VALUES ('Closed'), ('Verified'), ('Done')) AS "s(a)") SELECT * FROM "statuses"`
       ]
     },
     {
@@ -622,7 +622,7 @@ describe('Postgres', () => {
         )
         SELECT id
         FROM new_stuff;`,
-        `CREATE TABLE "stuff" ("id" SERIAL PRIMARY KEY, "name" VARCHAR) ; WITH new_stuff AS (INSERT INTO "stuff" ("name") VALUES ('foo'), ('bar') RETURNING "id") SELECT "id" FROM "new_stuff"`
+        `CREATE TABLE "stuff" ("id" SERIAL PRIMARY KEY, "name" VARCHAR) ; WITH "new_stuff" AS (INSERT INTO "stuff" ("name") VALUES ('foo'), ('bar') RETURNING "id") SELECT "id" FROM "new_stuff"`
       ]
     },
     {

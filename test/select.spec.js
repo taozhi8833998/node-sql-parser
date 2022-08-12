@@ -230,7 +230,7 @@ describe('select', () => {
       SELECT
         EXTRACT(EPOCH FROM ts)
       FROM
-        tss`, opt), opt)).to.eql('WITH tss AS (SELECT CURRENT_TIMESTAMP AS "ts") SELECT EXTRACT(EPOCH FROM "ts") FROM "tss"');
+        tss`, opt), opt)).to.eql('WITH "tss" AS (SELECT CURRENT_TIMESTAMP AS "ts") SELECT EXTRACT(EPOCH FROM "ts") FROM "tss"');
       });
 
       it('should parse function expression', () => {
