@@ -1606,6 +1606,7 @@ into_clause
 
 from_clause
   = KW_FROM __ l:table_ref_list { return l; }
+   / KW_FROM __ LPAREN __ l:table_ref_list __ RPAREN { return l; }
 
 table_to_list
   = head:table_to_item tail:(__ COMMA __ table_to_item)* {
