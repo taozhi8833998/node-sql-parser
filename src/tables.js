@@ -58,7 +58,8 @@ function tableToSQL(tableInfo) {
   }
   if (expr && expr.type !== 'values') tableName = exprToSQL(expr)
   tableName = [toUpper(prefixStr), tableName].filter(hasVal).join(' ')
-  const str = [database, schemaStr, tableName].filter(hasVal).join('.')
+  let str = [database, schemaStr, tableName].filter(hasVal).join('.')
+  if (tableInfo.parentheses) str = `(${str})`
   const result = [str, operatorToSQL(operator)]
   if (tablesample) {
     const tableSampleSQL = [
