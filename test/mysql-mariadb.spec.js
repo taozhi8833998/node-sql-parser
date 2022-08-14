@@ -348,6 +348,13 @@ describe('mysql', () => {
           'WITH cte AS (SELECT id, ROW_NUMBER() OVER (PARTITION BY id, uid ORDER BY time DESC) ranking FROM t) SELECT id FROM cte WHERE ranking = 1',
           'WITH `cte` AS (SELECT `id`, ROW_NUMBER() OVER (PARTITION BY `id`, `uid` ORDER BY `time` DESC) AS `ranking` FROM `t`) SELECT `id` FROM `cte` WHERE `ranking` = 1'
         ]
+      },
+      {
+        title: 'parentheses',
+        sql: [
+          'SELECT * FROM (user)',
+          'SELECT * FROM `user`'
+        ]
       }
     ]
     SQL_LIST.forEach(sqlInfo => {
