@@ -352,8 +352,8 @@ describe('mysql', () => {
       {
         title: 'parentheses',
         sql: [
-          'SELECT * FROM (user)',
-          'SELECT * FROM `user`'
+          'SELECT * FROM (user), (`name`)',
+          'SELECT * FROM (`user`), (`name`)'
         ]
       }
     ]
