@@ -71,6 +71,41 @@ describe('select', () => {
     expect(parser.sqlify(ast)).to.eql('SELECT `SOME_COLUMN` FROM `TABLE_NAME` WHERE `ID_COLUMN` = 0 FOR UPDATE');
   });
 
+  it('should support for update with wait', () => {
+    const ast = parser.astify('select SOME_COLUMN from TABLE_NAME where ID_COLUMN = 0 for update wait 1234');
+    expect(parser.sqlify(ast)).to.eql('SELECT `SOME_COLUMN` FROM `TABLE_NAME` WHERE `ID_COLUMN` = 0 FOR UPDATE WAIT 1234');
+  });
+
+  it('should support for update with nowait', () => {
+    const ast = parser.astify('select SOME_COLUMN from TABLE_NAME where ID_COLUMN = 0 for update nowait');
+    expect(parser.sqlify(ast)).to.eql('SELECT `SOME_COLUMN` FROM `TABLE_NAME` WHERE `ID_COLUMN` = 0 FOR UPDATE NOWAIT');
+  });
+
+  it('should support for update with skip locked', () => {
+    const ast = parser.astify('select SOME_COLUMN from TABLE_NAME where ID_COLUMN = 0 for update skip locked');
+    expect(parser.sqlify(ast)).to.eql('SELECT `SOME_COLUMN` FROM `TABLE_NAME` WHERE `ID_COLUMN` = 0 FOR UPDATE SKIP LOCKED');
+  });
+
+  it('should support lock in share mode', () => {
+    const ast = parser.astify('select SOME_COLUMN from TABLE_NAME where ID_COLUMN = 0 lock in share mode');
+    expect(parser.sqlify(ast)).to.eql('SELECT `SOME_COLUMN` FROM `TABLE_NAME` WHERE `ID_COLUMN` = 0 LOCK IN SHARE MODE');
+  });
+
+  it('should support lock in share mode with wait', () => {
+    const ast = parser.astify('select SOME_COLUMN from TABLE_NAME where ID_COLUMN = 0 lock in share mode wait 1234');
+    expect(parser.sqlify(ast)).to.eql('SELECT `SOME_COLUMN` FROM `TABLE_NAME` WHERE `ID_COLUMN` = 0 LOCK IN SHARE MODE WAIT 1234');
+  });
+
+   it('should support lock in share mode witn nowait', () => {
+    const ast = parser.astify('select SOME_COLUMN from TABLE_NAME where ID_COLUMN = 0 lock in share mode nowait');
+    expect(parser.sqlify(ast)).to.eql('SELECT `SOME_COLUMN` FROM `TABLE_NAME` WHERE `ID_COLUMN` = 0 LOCK IN SHARE MODE NOWAIT');
+  });
+
+  it('should support lock in share mode with skip locked', () => {
+    const ast = parser.astify('select SOME_COLUMN from TABLE_NAME where ID_COLUMN = 0 lock in share mode skip locked');
+    expect(parser.sqlify(ast)).to.eql('SELECT `SOME_COLUMN` FROM `TABLE_NAME` WHERE `ID_COLUMN` = 0 LOCK IN SHARE MODE SKIP LOCKED');
+  });
+
   it('should support div as divsion', () => {
     expect(getParsedSql('SELECT * FROM businesses WHERE  SUBSTRING(street_physical, 1, LENGTH(street_physical) div 2) = SUBSTRING(street_physical, LENGTH(street_physical) DIV 2 + 1, LENGTH(street_physical) / 2);'))
     .to.be.equal('SELECT * FROM `businesses` WHERE SUBSTRING(`street_physical`, 1, LENGTH(`street_physical`) DIV 2) = SUBSTRING(`street_physical`, LENGTH(`street_physical`) DIV 2 + 1, LENGTH(`street_physical`) / 2)')
@@ -387,7 +422,7 @@ describe('select', () => {
               type: 'select',
               options: null,
               distinct: null,
-              for_update: null,
+              locking_read: null,
               from: [{ db: null, table: 't1', as: null }],
               columns: [{ expr: { type: 'column_ref', table: null, column: 'id' }, as: null }],
               into: { position: null },
@@ -453,7 +488,7 @@ describe('select', () => {
                 type: 'select',
                 options: null,
                 distinct: null,
-                for_update: null,
+                locking_read: null,
                 from: [{ db: null, table: 't2', as: null }],
                 columns: [
                   { expr: { type: 'column_ref', table: null, 'column': 'id' }, as: null },
@@ -628,7 +663,7 @@ describe('select', () => {
               type: 'select',
               options: null,
               distinct: null,
-              for_update: null,
+              locking_read: null,
               columns: [{ expr: { type: 'number', value: 1 }, as: null }],
               into: { position: null },
               from: null,
