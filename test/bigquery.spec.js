@@ -544,6 +544,17 @@ describe('BigQuery', () => {
         'SELECT bqutil.fn.degrees(3.141592653589793) AS is_this_pi'
       ]
     },
+    {
+      title: 'extract date',
+      sql:[
+        `SELECT
+        CONCAT('transaction ',transaction_id,' from ',
+        EXTRACT(date from TIMESTAMP_SECONDS(CAST(CAST(event_timestamp AS INT64)/1000000 AS INT64))))
+      FROM
+        transactions`,
+        "SELECT CONCAT('transaction ', transaction_id, ' from ', EXTRACT(DATE FROM TIMESTAMP_SECONDS(CAST(CAST(event_timestamp AS INT64) / 1000000 AS INT64)))) FROM transactions"
+      ]
+    }
   ]
 
   SQL_LIST.forEach(sqlInfo => {
