@@ -52,7 +52,7 @@ function selectToSQL(stmt) {
     distinct,
     from,
     for_sys_time_as_of: forSystem = {},
-    for_update: forUpdate,
+    locking_read: lockingRead,
     groupby,
     having,
     into = {},
@@ -84,7 +84,7 @@ function selectToSQL(stmt) {
   clauses.push(commonOptionConnector('WINDOW', exprToSQL, windowInfo))
   clauses.push(orderOrPartitionByToSQL(orderby, 'order by'))
   clauses.push(limitToSQL(limit))
-  clauses.push(toUpper(forUpdate))
+  clauses.push(toUpper(lockingRead))
   if (position === 'end') clauses.push(intoSQL)
   const sql = clauses.filter(hasVal).join(' ')
   return parentheses ? `(${sql})` : sql

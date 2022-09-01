@@ -1484,6 +1484,26 @@ cte_column_definition
       return l
     }
 
+for_update
+  = fu:('FOR'i __ KW_UPDATE) {
+    return `${fu[0]} ${fu[2][0]}`
+  }
+
+lock_in_share_mode
+  = m:('LOCK'i __ 'IN'i __ 'SHARE'i __ 'MODE'i) {
+    return `${m[0]} ${m[2]} ${m[4]} ${m[6]}`
+  }
+
+lock_option
+  = w:('WAIT'i __ literal_numeric) { return `${w[0]} ${w[2].value}` }
+  / nw:'NOWAIT'i
+  / sl:('SKIP'i __ 'LOCKED'i) { return `${sl[0]} ${sl[2]}` }
+
+locking_read
+  = t:(for_update / lock_in_share_mode) __ lo:lock_option? {
+    return t + (lo ? ` ${lo}` : '')
+  }
+
 select_stmt_nake
   = __ cte:with_clause? __ KW_SELECT ___
     opts:option_clause? __
@@ -1497,7 +1517,7 @@ select_stmt_nake
     h:having_clause?    __
     o:order_by_clause?  __
     l:limit_clause? __
-    fu: ('FOR'i __ KW_UPDATE)? __
+    lr: locking_read? __
     win:window_clause? __
     li:into_clause? {
       if ((ci && fi) || (ci && li) || (fi && li) || (ci && fi && li)) {
@@ -1520,7 +1540,7 @@ select_stmt_nake
           having: h,
           orderby: o,
           limit: l,
-          for_update: fu && `${fu[0]} ${fu[2][0]}`,
+          locking_read: lr && lr,
           window: win,
       };
   }
