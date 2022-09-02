@@ -3285,9 +3285,13 @@ data_type
   / enum_type
   / boolean_type
   / binary_type
+  / blob_type
 
 boolean_type
   = 'boolean'i { return { dataType: 'BOOLEAN' }; }
+
+blob_type
+  = b:('blob'i / 'tinyblob'i / 'mediumblob'i / 'longblob'i) { return { dataType: b.toUpperCase() }; }
 
 binary_type
   = 'binary'i { return { dataType: 'BINARY' }; }

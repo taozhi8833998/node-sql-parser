@@ -962,6 +962,13 @@ table_option
       value: c.toUpperCase()
     }
   }
+  / kw:'ROW_FORMAT'i __ s:(KW_ASSIGIN_EQUAL)? __ c:(KW_DEFAULT / 'DYNAMIC'i / 'FIXED'i / 'COMPRESSED'i / 'REDUNDANT'i / 'COMPACT'i) {
+    return {
+      keyword: kw.toLowerCase(),
+      symbol: s,
+      value: c.toUpperCase()
+    }
+  }
 
 
 ALTER_ADD_FULLETXT_SPARITAL_INDEX
@@ -2941,9 +2948,13 @@ data_type
   / enum_type
   / boolean_type
   / binary_type
+  / blob_type
 
 boolean_type
   = 'boolean'i { return { dataType: 'BOOLEAN' }; }
+
+blob_type
+  = b:('blob'i / 'tinyblob'i / 'mediumblob'i / 'longblob'i) { return { dataType: b.toUpperCase() }; }
 
 binary_type
   = 'binary'i { return { dataType: 'BINARY' }; }
