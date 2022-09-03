@@ -3,8 +3,9 @@ const Parser = require('../src/parser').default
 
 describe('transactsql', () => {
   const parser = new Parser();
+  const tsqlOpt = { database: 'transactsql' }
 
-  function getParsedSql(sql, opt = { database: 'transactsql' }) {
+  function getParsedSql(sql, opt = tsqlOpt) {
     const ast = parser.astify(sql, opt);
     return parser.sqlify(ast, opt);
   }
@@ -75,6 +76,20 @@ describe('transactsql', () => {
   it('should support drop table if exists', () => {
     const sql = 'DROP TABLE IF EXISTS event_log'
     expect(getParsedSql(sql)).to.equal("DROP TABLE IF EXISTS [event_log]")
+  })
+
+  it('should support left join', () => {
+    const sql = `select
+    trpriv_seq, trpriv_titulo, trpriv_id, trprivc_data
+    from termos_privacidade
+    left join termos_privacidade_versoes on (trprivv_trpriv_id = trpriv_id and trprivv_unidg_id is null and trprivv_inicio <= '2022-08-16T15:00:04.832Z' and (trprivv_fim >= '2022-08-16T15:00:04.832Z' or trprivv_fim is null))
+    left join termos_privacidade_consentimentos on (trprivc_trprivv_id = trprivv_id and trpriv_individual = 0 and trprivc_pes_id = 'null')
+    where 1 = 1 AND trprivv_id is not null   AND 1 = 2
+    order by 1,2`
+
+    const ast = parser.astify(sql, tsqlOpt)
+    expect(ast.from[1].join).to.equal('LEFT JOIN')
+    expect(parser.sqlify(ast, tsqlOpt)).to.equal("SELECT [trpriv_seq], [trpriv_titulo], [trpriv_id], [trprivc_data] FROM [termos_privacidade] LEFT JOIN [termos_privacidade_versoes] ON ([trprivv_trpriv_id] = [trpriv_id] AND [trprivv_unidg_id] IS NULL AND [trprivv_inicio] <= '2022-08-16T15:00:04.832Z' AND ([trprivv_fim] >= '2022-08-16T15:00:04.832Z' OR [trprivv_fim] IS NULL)) LEFT JOIN [termos_privacidade_consentimentos] ON ([trprivc_trprivv_id] = [trprivv_id] AND [trpriv_individual] = 0 AND [trprivc_pes_id] = 'null') WHERE 1 = 1 AND [trprivv_id] IS NOT NULL AND 1 = 2 ORDER BY 1 ASC, 2 ASC")
   })
 
 })
