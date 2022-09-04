@@ -14,10 +14,11 @@ function arrayDimensionToSymbol(target) {
 
 function castToSQL(expr) {
   const { collate, target, expr: expression, symbol, as: alias, tail } = expr
-  const { length, dataType, parentheses, scale } = target
+  const { length, dataType, parentheses, scale, suffix: dataTypeSuffix } = target
   let str = ''
   if (length != null) str = scale ? `${length}, ${scale}` : length
   if (parentheses) str = `(${str})`
+  if (dataTypeSuffix && dataTypeSuffix.length) str += ` ${dataTypeSuffix.join(' ')}`
   let prefix = exprToSQL(expression)
   let symbolChar = '::'
   let suffix = ''

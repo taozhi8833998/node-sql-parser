@@ -3870,7 +3870,7 @@ mem_chain
 
 data_type
   = array_type
-  /character_string_type
+  / character_string_type
   / numeric_type
   / datetime_type
   / json_type
@@ -3917,9 +3917,20 @@ numeric_type
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE)l:[0-9]+ __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ s:numeric_type_suffix? __{ /* =>  data_type */ return { dataType: t, suffix: s }; }
 
+timezone
+  = w:('WITHOUT'i / 'WITH'i) __ KW_TIME __ 'ZONE'i {
+    // => string[];
+    return [w.toUpperCase(), 'TIME', 'ZONE']
+  }
+
+time_type
+  = t:(KW_TIME / KW_TIMESTAMP) __ LPAREN __ l:[0-9]+ __ RPAREN __ tz:timezone? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true, suffix: tz }; }
+  / t:(KW_TIME / KW_TIMESTAMP) __ tz:timezone? { /* =>  data_type */  return { dataType: t, suffix: tz }; }
+
 datetime_type
-  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
-  / t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) { /* =>  data_type */  return { dataType: t }; }
+  = t:(KW_DATE / KW_DATETIME) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
+  / t:(KW_DATE / KW_DATETIME) { /* =>  data_type */  return { dataType: t }; }
+  / time_type
 
 enum_type
   = t:KW_ENUM __ e:value_item {
