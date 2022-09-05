@@ -693,6 +693,20 @@ describe('Postgres', () => {
         "select c1 from t1 where c2 like 'abc' escape '!'",
         `SELECT "c1" FROM "t1" WHERE "c2" LIKE 'abc' ESCAPE '!'`
       ]
+    },
+    {
+      title: 'with or without timezone',
+      sql: [
+        'select cast(c as time with time zone)',
+        'SELECT CAST("c" AS TIME WITH TIME ZONE)'
+      ]
+    },
+    {
+      title: 'with or without timezone',
+      sql: [
+        'select cast(c as timestamp without time zone)',
+        'SELECT CAST("c" AS TIMESTAMP WITHOUT TIME ZONE)'
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){
