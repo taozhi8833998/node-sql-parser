@@ -135,7 +135,6 @@ function fulltextSearchToSQL(expr) {
 function columnToSQL(column, isDual) {
   const { expr, type } = column
   if (type === 'cast') return castToSQL(column)
-  if (type === 'fulltext_search') return fulltextSearchToSQL(column)
   if (isDual) expr.isDual = isDual
   let str = exprToSQL(expr)
   if (expr.parentheses && Reflect.has(expr, 'array_index')) str = `(${str})`
