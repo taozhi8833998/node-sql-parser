@@ -4,7 +4,7 @@ import { aggrToSQL } from './aggregation'
 import { assignToSQL } from './assign'
 import { binaryToSQL } from './binary'
 import { caseToSQL } from './case'
-import { columnRefToSQL } from './column'
+import { columnRefToSQL, fulltextSearchToSQL } from './column'
 import { castToSQL, extractFunToSQL, funcToSQL } from './func'
 import { intervalToSQL } from './interval'
 import { selectToSQL } from './select'
@@ -14,23 +14,24 @@ import { unionToSQL } from './union'
 import { namedWindowExprListToSQL, windowFuncToSQL } from './window'
 
 const exprToSQLConvertFn = {
-  alter       : alterExprToSQL,
-  aggr_func   : aggrToSQL,
-  window_func : windowFuncToSQL,
-  'array'     : arrayStructExprToSQL,
-  assign      : assignToSQL,
-  binary_expr : binaryToSQL,
-  case        : caseToSQL,
-  cast        : castToSQL,
-  column_ref  : columnRefToSQL,
-  datatype    : dataTypeToSQL,
-  extract     : extractFunToSQL,
-  function    : funcToSQL,
-  insert      : unionToSQL,
-  interval    : intervalToSQL,
-  show        : showToSQL,
-  struct      : arrayStructExprToSQL,
-  'window'    : namedWindowExprListToSQL,
+  alter           : alterExprToSQL,
+  aggr_func       : aggrToSQL,
+  window_func     : windowFuncToSQL,
+  'array'         : arrayStructExprToSQL,
+  assign          : assignToSQL,
+  binary_expr     : binaryToSQL,
+  case            : caseToSQL,
+  cast            : castToSQL,
+  column_ref      : columnRefToSQL,
+  datatype        : dataTypeToSQL,
+  extract         : extractFunToSQL,
+  fulltext_search : fulltextSearchToSQL,
+  function        : funcToSQL,
+  insert          : unionToSQL,
+  interval        : intervalToSQL,
+  show            : showToSQL,
+  struct          : arrayStructExprToSQL,
+  'window'        : namedWindowExprListToSQL,
 }
 
 function varToSQL(expr) {

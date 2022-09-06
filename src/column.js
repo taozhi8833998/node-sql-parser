@@ -120,6 +120,18 @@ function columnDefinitionToSQL(columnDefinition) {
   return column.filter(hasVal).join(' ')
 }
 
+function asToSQL(asStr) {
+  if (!asStr) return ''
+  return ['AS', /^(`?)[a-z_][0-9a-z_]*(`?)$/i.test(asStr) ? identifierToSql(asStr) : columnIdentifierToSql(asStr)].join(' ')
+}
+
+function fulltextSearchToSQL(expr) {
+  const { against, as, columns, match, mode } = expr
+  const matchExpr = [toUpper(match), `(${columns.map(col => columnRefToSQL(col)).join(', ')})`].join(' ')
+  const againstExpr = [toUpper(against), ['(', exprToSQL(expr.expr), mode && ` ${literalToSQL(mode)}`, ')'].filter(hasVal).join('')].join(' ')
+  return [matchExpr, againstExpr, asToSQL(as)].filter(hasVal).join(' ')
+}
+
 function columnToSQL(column, isDual) {
   const { expr, type } = column
   if (type === 'cast') return castToSQL(column)
@@ -127,12 +139,7 @@ function columnToSQL(column, isDual) {
   let str = exprToSQL(expr)
   if (expr.parentheses && Reflect.has(expr, 'array_index')) str = `(${str})`
   if (expr.array_index && expr.type !== 'column_ref') str = `${str}[${expr.array_index.number}]`
-  if (column.as !== null) {
-    str = `${str} AS `
-    if (/^(`?)[a-z_][0-9a-z_]*(`?)$/i.test(column.as)) str = `${str}${identifierToSql(column.as)}`
-    else str = `${str}${columnIdentifierToSql(column.as)}`
-  }
-  return str
+  return [str, asToSQL(column.as)].filter(hasVal).join(' ')
 }
 
 function getDual(tables) {
@@ -165,4 +172,5 @@ export {
   columnDataType,
   columnOrderToSQL,
   columnReferenceDefinitionToSQL,
+  fulltextSearchToSQL,
 }

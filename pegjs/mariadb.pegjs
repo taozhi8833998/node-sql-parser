@@ -9,6 +9,7 @@
 
     'BETWEEN': true,
     'BY': true,
+    'BOOLEAN': true,
 
     'CALL': true,
     'CASE': true,
@@ -54,6 +55,7 @@
     'LIMIT': true,
     'LOW_PRIORITY': true, // for lock table
 
+    'NATURAL': true,
     'NOT': true,
     'NULL': true,
 
@@ -1304,8 +1306,40 @@ column_clause
       return createList(head, tail);
     }
 
+fulltext_search_mode
+  = KW_IN __ 'NATURAL'i __ 'LANGUAGE'i __ 'MODE'i __ 'WITH'i __ 'QUERY'i __ 'EXPANSION'i  {
+    return { type: 'origin', value: 'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION' }
+  }
+  / KW_IN __ 'NATURAL'i __ 'LANGUAGE'i __ 'MODE'i {
+    return { type: 'origin', value: 'IN NATURAL LANGUAGE MODE' }
+  }
+  / KW_IN __ 'BOOLEAN'i __ 'MODE'i {
+    return { type: 'origin', value: 'IN BOOLEAN MODE' }
+  }
+  / KW_WITH __ 'QUERY'i __ 'EXPANSION'i {
+    return { type: 'origin', value: 'WITH QUERY EXPANSION' }
+  }
+
+fulltext_search
+  = 'MATCH'i __ LPAREN __ c:column_ref_list __ RPAREN __ 'AGAINST' __ LPAREN __ e:expr __ mo:fulltext_search_mode? __ RPAREN __ as:alias_clause? {
+    const expr = {
+      against: 'against',
+      columns: c,
+      expr: e,
+      match: 'match',
+      mode: mo,
+      type: 'fulltext_search',
+      as,
+    }
+    return expr
+  }
+
 column_list_item
-  = tbl:(ident __ DOT)? __ STAR {
+  = fs:fulltext_search {
+    const { as, ...expr } = fs
+    return { expr, as }
+  }
+  / tbl:(ident __ DOT)? __ STAR {
       const table = tbl && tbl[0] || null
       columnList.add(`select::${table}::(.*)`);
       return {
@@ -1978,6 +2012,7 @@ multiplicative_operator
 primary
   = cast_expr
   / literal
+  / fulltext_search
   / aggr_func
   / func_call
   / case_expr
