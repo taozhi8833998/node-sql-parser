@@ -374,7 +374,7 @@ describe('mysql', () => {
       })
     })
 
-    describe('fulltext search', () => {
+    describe('column clause', () => {
       it('should support fulltext search', () => {
         const sqlList = [
           'SELECT MATCH (`label`) AGAINST (?) AS `score` FROM `TABLE` ORDER BY `score` DESC',
@@ -408,6 +408,24 @@ describe('mysql', () => {
           'SELECT MATCH (`label`) AGAINST (? WITH QUERY EXPANSION) AS `score` FROM `TABLE` WHERE MATCH (`label`) AGAINST (? WITH QUERY EXPANSION) > 0 ORDER BY `score` DESC',
           'SELECT `label`, MATCH (`label`) AGAINST (? WITH QUERY EXPANSION) AS `score` FROM `TABLE` WHERE MATCH (`label`) AGAINST (? WITH QUERY EXPANSION) > 0 ORDER BY `score` DESC',
           'SELECT `label` FROM `TABLE` ORDER BY MATCH (`label`) AGAINST (? WITH QUERY EXPANSION) DESC',
+        ]
+        sqlList.forEach(sql => {
+          expect(getParsedSql(sql)).to.equal(sql)
+          expect(getParsedSql(sql, mariadb)).to.equal(sql)
+        })
+      })
+
+      it('should support bit function and operators', () => {
+        const sqlList = [
+          'SELECT 127 | 128, 128 << 2, BIT_COUNT(15)',
+          `SELECT '127' | '128', '128' << 2, BIT_COUNT('15')`,
+          `SELECT X'7F' | X'80', X'80' << 2, BIT_COUNT(X'0F')`,
+          `SELECT HEX(UUID_TO_BIN('6ccd780c-baba-1026-9564-5b8c656024db'))`,
+          `SELECT HEX(INET6_ATON('fe80::219:d1ff:fe91:1a72'))`,
+          `SELECT X'40' | X'01', b'11110001' & b'01001111'`,
+          `SELECT _BINARY X'40' | X'01', b'11110001' & _BINARY b'01001111'`,
+          `SELECT _BINARY X'4040404040404040' | X'0102030405060708'`,
+          `SELECT 64 | 1, X'40' | X'01'`,
         ]
         sqlList.forEach(sql => {
           expect(getParsedSql(sql)).to.equal(sql)

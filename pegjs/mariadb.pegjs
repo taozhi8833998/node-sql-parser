@@ -1995,7 +1995,7 @@ additive_expr
     }
 
 additive_operator
-  = "+" / "-"
+  = "+" / "-" / "~"
 
 multiplicative_expr
   = head:primary
@@ -2008,6 +2008,7 @@ multiplicative_operator
   / "div"i {
     return 'DIV'
   }
+  / '&' / '>>' / '<<' / '^' / '|' / '~'
 
 primary
   = cast_expr
@@ -2458,17 +2459,24 @@ literal_bool
     }
 
 literal_string
-  = r:'X'i ca:("'" [0-9A-Fa-f]* "'") {
+  = b:'_binary'i ? __ r:'X'i ca:("'" [0-9A-Fa-f]* "'") {
       return {
         type: 'hex_string',
-        prefix: 'X',
+        prefix: b,
         value: ca[1].join('')
       };
     }
-  / r:'0x' ca:([0-9A-Fa-f]*) {
+  / b:'_binary'i ? __ r:'b'i ca:("'" [0-9A-Fa-f]* "'") {
+      return {
+        type: 'bit_string',
+        prefix: b,
+        value: ca[1].join('')
+      };
+    }
+  / b:'_binary'i ? __ r:'0x' ca:([0-9A-Fa-f]*) {
     return {
-        type: 'hex_string',
-        prefix: '0x',
+        type: 'full_hex_string',
+        prefix: b,
         value: ca.join('')
       };
   }
