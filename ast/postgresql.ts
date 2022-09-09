@@ -544,7 +544,7 @@ export type table_join = table_base & {join: join_op; using: ident_name[]; } | t
       on?: on_clause;
     };
 
-export type table_base = { type: 'dual' } | { expr: value_clause; as?: alias_clause; } | { expr: union_stmt | value_clause; as?: alias_clause; } | { type: 'expr'; expr: expr; as?: alias_clause; } | table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;} | table_name & { as?: alias_clause; };
+export type table_base = { type: 'dual' } | { expr: value_clause; as?: alias_clause; } | { prefix?: string; expr: union_stmt | value_clause; as?: alias_clause; } | { prefix?: string; type: 'expr'; expr: expr; as?: alias_clause; } | table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;} | table_name & { as?: alias_clause; };
 
 
 
@@ -554,7 +554,9 @@ export type table_base = { type: 'dual' } | { expr: value_clause; as?: alias_cla
 
 
 
-export type join_op = 'LEFT JOIN' | 'RIGHT JOIN' | 'FULL JOIN' | 'INNER JOIN';
+
+
+export type join_op = 'LEFT JOIN' | 'RIGHT JOIN' | 'FULL JOIN' | 'CROSS JOIN' | 'INNER JOIN';
 
 export type table_name = { db?: ident; schema?: ident, table: ident | '*'; };
 
@@ -608,7 +610,7 @@ export type order_by_clause = order_by_list;
 
 export type order_by_list = order_by_element[];
 
-export type order_by_element = { expr: expr; type: 'ASC' | 'DESC'; };
+export type order_by_element = { expr: expr; type: 'ASC' | 'DESC';  nulls: 'NULLS FIRST' | 'NULLS LAST' | undefined };
 
 export type number_or_param = literal_numeric | param;
 
@@ -758,13 +760,15 @@ export type between_or_not_between_op = 'NOT BETWEEN' | KW_BETWEEN;
 
 
 
-export type like_op = 'LIKE' | KW_LIKE | KW_ILIKE | 'SIMILAR TO';
+export type like_op = 'LIKE' | KW_LIKE | KW_ILIKE | 'SIMILAR TO' | 'NOT SIMILAR TO';
+
+export type escape_op = { type: 'ESCAPE'; value: literal_string };
 
 
 
 export type in_op = 'NOT IN' | KW_IN;
 
-export type like_op_right = { op: like_op; right: literal | comparison_expr};
+export type like_op_right = { op: like_op; right: (literal | comparison_expr) & { escape?: escape_op }; };
 
 export type in_op_right = {op: in_op; right: expr_list | var_decl | literal_string; };
 
@@ -791,14 +795,14 @@ export type column_ref = string_constants_escape | {
         schema: string;
         table: string;
         column: column | '*';
-        arrow?: '->>' | '->';
-        property?: literal_string | literal_numeric;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
       } | {
         type: 'column_ref';
         table: ident;
         column: column | '*';
-        arrow?: '->>' | '->';
-        property?: literal_string | literal_numeric;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
       };
 
 export type column_list = column[];
@@ -891,7 +895,7 @@ export type trim_func_clause = { type: 'function'; name: string; args: expr_list
 
 export type func_call = trim_func_clause | { type: 'function'; name: string; args: expr_list; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; };
 
-export type extract_filed = "CENTURY" | "DAY" | "DECADE" | "DOW" | "DOY" | "EPOCH" | "HOUR" | "ISODOW" | "ISOYEAR" | "MICROSECONDS" | "MILLENNIUM" | "MILLISECONDS" | "MINUTE" | "MONTH" | "QUARTER" | "SECOND" | "TIMEZONE" | "TIMEZONE_HOUR" | "TIMEZONE_MINUTE" | "WEEK" | 'string';
+export type extract_filed = "CENTURY" | "DAY" | "DATE" | "DECADE" | "DOW" | "DOY" | "EPOCH" | "HOUR" | "ISODOW" | "ISOYEAR" | "MICROSECONDS" | "MILLENNIUM" | "MILLISECONDS" | "MINUTE" | "MONTH" | "QUARTER" | "SECOND" | "TIMEZONE" | "TIMEZONE_HOUR" | "TIMEZONE_MINUTE" | "WEEK" | 'string';
 
 export type extract_func = { type: 'extract'; args: { field: extract_filed; cast_type: 'TIMESTAMP' | 'INTERVAL' | 'TIME'; source: expr; }};
 
@@ -1410,11 +1414,19 @@ export type numeric_type_suffix = any[];;
 
 export type numeric_type = data_type;
 
+export type timezone = string[];;
 
 
 
 
-export type datetime_type = data_type;
+
+export type time_type = data_type;
+
+
+
+
+
+export type datetime_type = data_type | time_type;
 
 
 
