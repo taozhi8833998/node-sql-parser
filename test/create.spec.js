@@ -526,7 +526,7 @@ describe('create', () => {
     })
 
     it('should suport create a clustered, unique, nonclustered', () => {
-      expect(getParsedSql('CREATE CLUSTERED INDEX i1 ON d1.s1.t1 (col1);', { database: 'transactsql' })).to.equal('CREATE CLUSTERED INDEX [i1] ON [d1.s1].[t1] ([col1] ASC)')
+      expect(getParsedSql('CREATE CLUSTERED INDEX i1 ON d1.s1.t1 (col1);', { database: 'transactsql' })).to.equal('CREATE CLUSTERED INDEX [i1] ON [d1].[s1].[t1] ([col1] ASC)')
       expect(getParsedSql('CREATE UNIQUE INDEX i1 ON t1 (col1 DESC, col2 ASC, col3 DESC);', { database: 'transactsql' })).to.equal('CREATE UNIQUE INDEX [i1] ON [t1] ([col1] DESC, [col2] ASC, [col3] DESC)')
       expect(getParsedSql('CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]);', { database: 'transactsql' })).to.equal('CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col] ASC)')
     })

@@ -45,7 +45,7 @@ describe('transactsql', () => {
   it('should support exec stmt', () => {
     const sql = `EXEC msdb.dbo.sp_delete_database_backuphistory @database_name = N'Test'
     GO`
-    expect(getParsedSql(sql)).to.equal("EXEC [msdb.dbo].[sp_delete_database_backuphistory] @database_name = N'Test' GO")
+    expect(getParsedSql(sql)).to.equal("EXEC [msdb].[dbo].[sp_delete_database_backuphistory] @database_name = N'Test' GO")
   })
 
   it('should support over in aggregation function', () => {
@@ -90,6 +90,12 @@ describe('transactsql', () => {
     const ast = parser.astify(sql, tsqlOpt)
     expect(ast.from[1].join).to.equal('LEFT JOIN')
     expect(parser.sqlify(ast, tsqlOpt)).to.equal("SELECT [trpriv_seq], [trpriv_titulo], [trpriv_id], [trprivc_data] FROM [termos_privacidade] LEFT JOIN [termos_privacidade_versoes] ON ([trprivv_trpriv_id] = [trpriv_id] AND [trprivv_unidg_id] IS NULL AND [trprivv_inicio] <= '2022-08-16T15:00:04.832Z' AND ([trprivv_fim] >= '2022-08-16T15:00:04.832Z' OR [trprivv_fim] IS NULL)) LEFT JOIN [termos_privacidade_consentimentos] ON ([trprivc_trprivv_id] = [trprivv_id] AND [trpriv_individual] = 0 AND [trprivc_pes_id] = 'null') WHERE 1 = 1 AND [trprivv_id] IS NOT NULL AND 1 = 2 ORDER BY 1 ASC, 2 ASC")
+  })
+
+  it('should support table schema', () => {
+    const sql = `INSERT INTO source.dbo.movie (genre_id, title, release_date)
+    VALUES (@param1, @param2, @param3), (@param1, @param2, @param3);`
+    expect(getParsedSql(sql)).to.equal("INSERT INTO [source].[dbo].[movie] ([genre_id], [title], [release_date]) VALUES (@param1,@param2,@param3), (@param1,@param2,@param3)")
   })
 
 })

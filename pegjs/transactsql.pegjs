@@ -1466,16 +1466,8 @@ table_base
       };
   }
   / t:table_name __ alias:alias_clause? {
-      if (t.type === 'var') {
-        t.as = alias;
-        return t;
-      } else {
-        return {
-          db: t.db,
-          table: t.table,
-          as: alias
-        };
-      }
+      t.as = alias
+      return t
     }
   / LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? {
       stmt.parentheses = true;
@@ -1494,8 +1486,9 @@ join_op
 table_name
   = dt:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
       const obj = { db: null, table: dt };
-      if (tail !== null) {
-        obj.db = `${dt}.${schema[3]}`;
+       if (tail !== null) {
+        obj.db = dt;
+        obj.schema = schema[3];
         obj.table = tail[3];
       }
       return obj;
