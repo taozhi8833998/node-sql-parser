@@ -42,9 +42,29 @@ function operatorToSQL(operator) {
   }
 }
 
+function tableHintToSQL(tableHintExpr) {
+  if (!tableHintExpr) return
+  const { keyword, expr, index, index_columns, parentheses, prefix } = tableHintExpr
+  const result = []
+  switch (keyword.toLowerCase()) {
+    case 'forceseek':
+      result.push(toUpper(keyword), `(${identifierToSql(index)}`, `(${index_columns.map(exprToSQL).filter(hasVal).join(', ')}))`)
+      break
+    case 'spatial_window_max_cells':
+      result.push(toUpper(keyword), '=', exprToSQL(expr))
+      break
+    case 'index':
+      result.push(toUpper(prefix), toUpper(keyword), parentheses ? `(${expr.map(identifierToSql).join(', ')})` : `= ${identifierToSql(expr)}`)
+      break
+    default:
+      result.push(exprToSQL(expr))
+  }
+  return result.filter(hasVal).join(' ')
+}
+
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
-  const { table, db, as, expr, operator, prefix: prefixStr, schema, tablesample } = tableInfo
+  const { table, db, as, expr, operator, prefix: prefixStr, schema, tablesample, table_hint } = tableInfo
   const database = identifierToSql(db)
   const schemaStr = identifierToSql(schema)
   let tableName = table && identifierToSql(table)
@@ -62,14 +82,11 @@ function tableToSQL(tableInfo) {
   if (tableInfo.parentheses) str = `(${str})`
   const result = [str, operatorToSQL(operator)]
   if (tablesample) {
-    const tableSampleSQL = [
-      'TABLESAMPLE',
-      exprToSQL(tablesample.expr),
-      literalToSQL(tablesample.repeatable),
-    ].filter(hasVal).join(' ')
+    const tableSampleSQL = ['TABLESAMPLE', exprToSQL(tablesample.expr), literalToSQL(tablesample.repeatable)].filter(hasVal).join(' ')
     result.push(tableSampleSQL)
   }
   if (as) result.push('AS', identifierToSql(as))
+  if (table_hint) result.push(`${toUpper(table_hint.keyword)}`, `(${table_hint.expr.map(tableHintToSQL).filter(hasVal).join(', ')})`)
   return result.filter(hasVal).join(' ')
 }
 
@@ -106,6 +123,7 @@ function tableOptionToSQL(tableOption) {
 
 export {
   operatorToSQL,
+  tableHintToSQL,
   tablesToSQL,
   tableOptionToSQL,
   tableToSQL,
