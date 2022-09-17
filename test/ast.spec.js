@@ -1243,7 +1243,7 @@ describe('AST', () => {
             const opt = { database: 'transactsql' }
             const ast = parser.astify(sql, opt)
             const backSQL = parser.sqlify(ast, opt)
-            expect(backSQL).to.equals(`SELECT [col], [col2] FROM [dba.schemab].[tbl_c]`)
+            expect(backSQL).to.equals(`SELECT [col], [col2] FROM [dba].[schemab].[tbl_c]`)
         })
     })
 
