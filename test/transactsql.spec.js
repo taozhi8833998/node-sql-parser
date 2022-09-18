@@ -1,4 +1,5 @@
 const { expect } = require('chai')
+const { tableHintToSQL } = require('../src/tables')
 const Parser = require('../src/parser').default
 
 describe('transactsql', () => {
@@ -96,6 +97,22 @@ describe('transactsql', () => {
     const sql = `INSERT INTO source.dbo.movie (genre_id, title, release_date)
     VALUES (@param1, @param2, @param3), (@param1, @param2, @param3);`
     expect(getParsedSql(sql)).to.equal("INSERT INTO [source].[dbo].[movie] ([genre_id], [title], [release_date]) VALUES (@param1,@param2,@param3), (@param1,@param2,@param3)")
+  })
+
+  describe('table hint', () => {
+    it('should support table hint', () => {
+      let sql = "SELECT title FROM dbo.movie WITH (nolock) WHERE release_date >= '01/01/2021';"
+      expect(getParsedSql(sql)).to.equal("SELECT [title] FROM [dbo].[movie] WITH (NOLOCK) WHERE [release_date] >= '01/01/2021'")
+      sql = "select title FROM dbo.MyTable WITH (FORCESEEK (MyIndex (col1, col2, col3))) WHERE [release_date] >= '01/01/2021'"
+      expect(getParsedSql(sql)).to.equal("SELECT [title] FROM [dbo].[MyTable] WITH (FORCESEEK ([MyIndex] ([col1], [col2], [col3]))) WHERE [release_date] >= '01/01/2021'")
+      sql = "select title FROM dbo.MyTable WITH (NOEXPAND INDEX (MyIndex, MyIndex2)) WHERE [release_date] >= '01/01/2021'"
+      expect(getParsedSql(sql)).to.equal("SELECT [title] FROM [dbo].[MyTable] WITH (NOEXPAND INDEX ([MyIndex], [MyIndex2])) WHERE [release_date] >= '01/01/2021'")
+      sql = "select title FROM dbo.MyTable WITH (INDEX = MyIndex) WHERE [release_date] >= '01/01/2021'"
+      expect(getParsedSql(sql)).to.equal("SELECT [title] FROM [dbo].[MyTable] WITH (INDEX = [MyIndex]) WHERE [release_date] >= '01/01/2021'")
+      sql = "select title FROM dbo.MyTable WITH (spatial_window_max_cells = 12) WHERE [release_date] >= '01/01/2021'"
+      expect(getParsedSql(sql)).to.equal("SELECT [title] FROM [dbo].[MyTable] WITH (SPATIAL_WINDOW_MAX_CELLS = 12) WHERE [release_date] >= '01/01/2021'")
+      expect(tableHintToSQL()).to.be.undefined
+    })
   })
 
 })

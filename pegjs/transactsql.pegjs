@@ -1395,9 +1395,7 @@ index_option
       expr: k.toLowerCase()
     }
   }
-  / k:('PAD_INDEX'i / 'SORT_IN_TEMPDB'i / 'IGNORE_DUP_KEY'i / 'STATISTICS_NORECOMPUTE'i / 'STATISTICS_INCREMENTAL'i / 'DROP_EXISTING'i / 'ONLINE'i / 'RESUMABLE'i / 'ALLOW_ROW_LOCKS'i / 'ALLOW_PAGE_LOCKS'i / 'OPTIMIZE_FOR_SEQUENTIAL_KEY'i ) __
-  e:KW_ASSIGIN_EQUAL __
-  r:(KW_ON / KW_OFF) {
+  / k:('PAD_INDEX'i / 'SORT_IN_TEMPDB'i / 'IGNORE_DUP_KEY'i / 'STATISTICS_NORECOMPUTE'i / 'STATISTICS_INCREMENTAL'i / 'DROP_EXISTING'i / 'ONLINE'i / 'RESUMABLE'i / 'ALLOW_ROW_LOCKS'i / 'ALLOW_PAGE_LOCKS'i / 'OPTIMIZE_FOR_SEQUENTIAL_KEY'i ) __ e:KW_ASSIGIN_EQUAL __ r:(KW_ON / KW_OFF) {
     return {
       type: k.toLowerCase(),
       symbol: e,
@@ -1436,11 +1434,10 @@ table_ref
   = __ COMMA __ t:table_base { return t; }
   / __ t:table_join { return t; }
 
-
 table_join
-  = op:join_op __ t:table_base __ KW_USING __ LPAREN __ head:ident_name tail:(__ COMMA __ ident_name)* __ RPAREN {
+  = op:join_op __ t:table_base __ KW_USING __ LPAREN __ il:ident_name_list __ RPAREN {
       t.join = op;
-      t.using = createList(head, tail);
+      t.using = il;
       return t;
     }
   / op:join_op __ t:table_base __ expr:on_clause? {
@@ -1457,6 +1454,56 @@ table_join
       on: expr
     };
   }
+table_hint_item
+  = 'FORCESEEK'i __ LPAREN __ i:ident __ LPAREN __ ic:column_ref_index __ RPAREN __ RPAREN {
+    return {
+      keyword: 'forceseek',
+      index: i,
+      index_columns: ic,
+      parentheses: true
+    }
+  }
+  / 'SPATIAL_WINDOW_MAX_CELLS'i __ KW_ASSIGIN_EQUAL __ n:literal_numeric {
+    return {
+      keyword: 'spatial_window_max_cells',
+      expr: n
+    }
+  }
+  / p:'NOEXPAND'i? __ KW_INDEX __ LPAREN __ il:ident_name_list __ RPAREN {
+    return {
+      keyword: 'index',
+      expr: il,
+      parentheses: true,
+      prefix: p && p.toLowerCase()
+    }
+  }
+  / p:'NOEXPAND'i?  __ KW_INDEX __ KW_ASSIGIN_EQUAL __ i:ident {
+    return {
+      keyword: 'index',
+      expr: i,
+      prefix: p && p.toLowerCase()
+    }
+  }
+  / i:('NOEXPAND'i / 'FORCESCAN'i / 'FORCESEEK'i / 'HOLDLOCK'i / 'NOLOCK'i / 'NOWAIT'i / 'PAGLOCK'i / 'READCOMMITTED'i / 'READCOMMITTEDLOCK'i / 'READPAST'i / 'READUNCOMMITTED'i / 'REPEATABLEREAD 'i  / 'ROWLOCK'i / 'SERIALIZABLE'i / 'SNAPSHOT'i / 'TABLOCK'i / 'TABLOCKX'i / 'UPDLOCK'i / 'XLOCK'i) {
+    return {
+      keyword: 'literal_string',
+      expr: { type: 'origin', value: i }
+    }
+  }
+
+table_hint_item_list
+  = head:table_hint_item tail:(__ COMMA __ table_hint_item)* {
+    return createList(head, tail)
+  }
+
+table_hint
+  = KW_WITH __ LPAREN __ t:table_hint_item_list __ RPAREN {
+    return {
+      keyword: 'with',
+      expr: t,
+      parentheses: true,
+    }
+  }
 
 //NOTE that, the table assigned to `var` shouldn't write in `table_join`
 table_base
@@ -1465,8 +1512,9 @@ table_base
         type: 'dual'
       };
   }
-  / t:table_name __ alias:alias_clause? {
+  / t:table_name __ alias:alias_clause? __ th:table_hint? {
       t.as = alias
+      t.table_hint = th
       return t
     }
   / LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? {
@@ -1486,7 +1534,7 @@ join_op
 table_name
   = dt:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
       const obj = { db: null, table: dt };
-       if (tail !== null) {
+      if (tail !== null) {
         obj.db = dt;
         obj.schema = schema[3];
         obj.table = tail[3];
@@ -1517,8 +1565,7 @@ group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list { return e.value; }
 
 column_ref_index
-  = l:column_ref_list
-  / l: literal_list {
+  = l:(column_ref_list / literal_list) {
     return l
   }
 
@@ -1638,8 +1685,8 @@ insert_value_clause
   / select_stmt_nake
 
 insert_partition
-  = KW_PARTITION __ LPAREN __ head:ident_name tail:(__ COMMA __ ident_name)* __ RPAREN {
-      return createList(head, tail)
+  = KW_PARTITION __ LPAREN __ il:ident_name_list __ RPAREN {
+      return il
     }
   / KW_PARTITION __ v: value_item {
     return v
@@ -2027,6 +2074,11 @@ column_name
 
 ident_name
   =  start:ident_start parts:ident_part* { return start + parts.join(''); }
+
+ident_name_list
+  = head:ident_name tail:(__ COMMA __ ident_name)* {
+    return createList(head, tail)
+  }
 
 ident_start = [A-Za-z_]
 
