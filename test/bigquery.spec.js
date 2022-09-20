@@ -554,6 +554,20 @@ describe('BigQuery', () => {
         transactions`,
         "SELECT CONCAT('transaction ', transaction_id, ' from ', EXTRACT(DATE FROM TIMESTAMP_SECONDS(CAST(CAST(event_timestamp AS INT64) / 1000000 AS INT64)))) FROM transactions"
       ]
+    },
+    {
+      title: 'support schema table and column',
+      sql: [
+        'SELECT * FROM t LEFT JOIN e ON (t.a = e.x.y)',
+        'SELECT * FROM t LEFT JOIN e ON (t.a = e.x.y)'
+      ]
+    },
+    {
+      title: 'support schema table and nested column fields',
+      sql: [
+        'SELECT * FROM t LEFT JOIN e ON (t.a = e.x.y.z.b.c)',
+        'SELECT * FROM t LEFT JOIN e ON (t.a = e.x.y.z.b.c)'
+      ]
     }
   ]
 

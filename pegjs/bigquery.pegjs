@@ -2188,7 +2188,17 @@ case_else = KW_ELSE __ result:expr {
   }
 
 column_ref
-  = tbl:ident __ DOT __ col:column_without_kw {
+  =  schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column)+ {
+      const columns = col.map(c => c[3]).join('.') || null
+      columnList.add(`select::${schema}.${tbl[3]}::${col[0][3]}`);
+      return {
+        type: 'column_ref',
+        schema: schema,
+        table: tbl[3],
+        column: columns
+      };
+    }
+  / tbl:ident __ DOT __ col:column_without_kw {
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
