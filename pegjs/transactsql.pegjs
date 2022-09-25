@@ -2695,7 +2695,7 @@ comment
   / pound_sign_comment
 
 block_comment
-  = "/*" (!"*/" char)* "*/"
+  = "/*" (!"*/" !"/*" char / block_comment)* "*/"
 
 line_comment
   = "--" (!EOL char)*
