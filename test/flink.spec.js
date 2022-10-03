@@ -14,13 +14,41 @@ describe('Flink', () => {
 
   const SQL_LIST = [
     {
-      title: 'select current_date',
+      title: "select current_date",
       sql: [
-        'SELECT CURRENT_DATE FROM mytable',
-        "SELECT CURRENT_DATE FROM `mytable`"
-      ]
+        "SELECT CURRENT_DATE FROM mytable",
+        "SELECT CURRENT_DATE FROM `mytable`",
+      ],
     },
-  ]
+    {
+      title: "trim function",
+      sql: [
+        `SELECT TRIM('.' from "....test.....") AS TrimmedString;`,
+        "SELECT TRIM('.' FROM '....test.....') AS `TrimmedString`",
+      ],
+    },
+    {
+      title: "trim function with position",
+      sql: [
+        `SELECT TRIM(BOTH '.' from "....test.....") AS TrimmedString;`,
+        "SELECT TRIM(BOTH '.' FROM '....test.....') AS `TrimmedString`",
+      ],
+    },
+    {
+      title: "trim function with position",
+      sql: [
+        `SELECT TRIM(TRAILING  from " test ") AS TrimmedString;`,
+        "SELECT TRIM(TRAILING FROM ' test ') AS `TrimmedString`",
+      ],
+    },
+    {
+      title: "trim function without config",
+      sql: [
+        `SELECT TRIM(" test ") AS TrimmedString;`,
+        "SELECT TRIM(' test ') AS `TrimmedString`",
+      ],
+    },
+  ];
 
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
