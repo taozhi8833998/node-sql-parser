@@ -599,6 +599,13 @@ describe('Postgres', () => {
       ]
     },
     {
+      title: 'nested block comments',
+      sql: [
+        "select /* /* */ */ col from tbl",
+        'SELECT "col" FROM "tbl"'
+      ]
+    },
+    {
       title: 'select into',
       sql: [
         "select c1, c2 into t1 from t2",

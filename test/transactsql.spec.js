@@ -38,6 +38,11 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal('CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1) PRIMARY KEY)')
   })
 
+  it('should support nested block comments', () => {
+    const sql = "select col /* /* */ /* */ */ FROM tbl"
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [tbl]')
+  })
+
   it('should properly escape column aliases that contain special characters', () => {
     const sql = `select column_name as [Column Name] from table_name`
     expect(getParsedSql(sql)).to.equal('SELECT [column_name] AS [Column Name] FROM [table_name]')
