@@ -27,6 +27,8 @@ export interface union_stmt_node extends select_stmt_node  {
 
 export type union_stmt = AstStatement<union_stmt_node>;
 
+export type if_not_exists_stmt = 'IF NOT EXISTS';
+
 export type nameOrLiteral = literal_string | { type: 'same', value: string; };
 
 export type create_extension_stmt = {
@@ -992,8 +994,6 @@ type KW_CREATE = never;
 type KW_TEMPORARY = never;
 
 type KW_TEMP = never;
-
-type KW_IF_NOT_EXISTS = never;
 
 type KW_DELETE = never;
 

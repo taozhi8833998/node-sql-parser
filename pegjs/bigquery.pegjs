@@ -817,11 +817,16 @@ drop_index_opt
     return createList(head, tail, 1)
   }
 
+if_not_exists_stmt
+  = 'IF'i __ KW_NOT __ KW_EXISTS {
+    return 'IF NOT EXISTS'
+  }
+
 create_table_stmt
   = a:KW_CREATE __
     tp:KW_TEMPORARY? __
     KW_TABLE __
-    ife:KW_IF_NOT_EXISTS? __
+    ife:if_not_exists_stmt? __
     t:table_ref_list __
     c:create_table_definition __
 	con:(create_constraint_definition)* __
@@ -837,7 +842,7 @@ create_table_stmt
           type: a[0].toLowerCase(),
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
-          if_not_exists: ife && ife[0].toLowerCase(),
+          if_not_exists:ife,
           table: t,
           ignore_replace: ir && ir[0].toLowerCase(),
           as: as && as[0].toLowerCase(),
@@ -851,7 +856,7 @@ create_table_stmt
   / a:KW_CREATE __
     tp:KW_TEMPORARY? __
     KW_TABLE __
-    ife:KW_IF_NOT_EXISTS? __
+    ife:if_not_exists_stmt? __
     t:table_ref_list __
     lt:create_like_table {
       if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
@@ -862,7 +867,7 @@ create_table_stmt
           type: a[0].toLowerCase(),
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
-          if_not_exists: ife && ife[0].toLowerCase(),
+          if_not_exists:ife,
           table: t,
           like: lt
         }
@@ -872,7 +877,7 @@ create_table_stmt
 create_db_stmt
   = a:KW_CREATE __
     k:(KW_DATABASE / KW_SCHEMA) __
-    ife:KW_IF_NOT_EXISTS? __
+    ife:if_not_exists_stmt? __
     t:ident_name __
     c:create_db_definition? {
       return {
@@ -881,7 +886,7 @@ create_db_stmt
         ast: {
           type: a[0].toLowerCase(),
           keyword: 'database',
-          if_not_exists: ife && ife[0].toLowerCase(),
+          if_not_exists:ife,
           database: t,
           create_definitions: c,
         }
@@ -2617,7 +2622,6 @@ KW_FALSE    = "FALSE"i      !ident_start
 KW_DROP     = "DROP"i       !ident_start { return 'DROP'; }
 KW_USE      = "USE"i        !ident_start
 KW_SELECT   = "SELECT"i     !ident_start
-KW_IF_NOT_EXISTS = "IF NOT EXISTS"i !ident_start
 KW_RECURSIVE= "RECURSIVE"   !ident_start
 KW_IGNORE   = "IGNORE"i     !ident_start
 KW_EXPLAIN  = "EXPLAIN"i    !ident_start
