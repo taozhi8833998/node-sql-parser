@@ -64,12 +64,12 @@ describe('create', () => {
     })
 
     it('should support create if not exists table', () => {
-      expect(getParsedSql(`create table if not exists dbname.tableName (id INT(11) primary key) ENGINE = MEMORY`))
+      expect(getParsedSql(`create table if /*comments*/ not  exists dbname.tableName (id INT(11) primary key) ENGINE = MEMORY`))
         .to.equal('CREATE TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY');
     })
 
     it('should support create temporary if not exists table', () => {
-      expect(getParsedSql(`create temporary table if not exists dbname.tableName (id INT(11) primary key) ENGINE = MEMORY`))
+      expect(getParsedSql(`create temporary table if  not exists dbname.tableName (id INT(11) primary key) ENGINE = MEMORY`))
         .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY');
     })
 

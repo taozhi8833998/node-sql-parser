@@ -271,10 +271,15 @@ create_db_definition
     return createList(head, tail, 1)
   }
 
+if_not_exists_stmt
+  = 'IF'i __ KW_NOT __ KW_EXISTS {
+    return 'IF NOT EXISTS'
+  }
+
 create_db_stmt
   = a:KW_CREATE __
     k:(KW_DATABASE / KW_SCHEME) __
-    ife:KW_IF_NOT_EXISTS? __
+    ife:if_not_exists_stmt? __
     t:ident_name __
     c:create_db_definition? {
       return {
@@ -283,7 +288,7 @@ create_db_stmt
         ast: {
           type: a[0].toLowerCase(),
           keyword: 'database',
-          if_not_exists: ife && ife[0].toLowerCase(),
+          if_not_exists: ife,
           database: t,
           create_definitions: c,
         }
@@ -294,7 +299,7 @@ create_table_stmt
   = a:KW_CREATE __
     tp:KW_TEMPORARY? __
     KW_TABLE __
-    ife:KW_IF_NOT_EXISTS? __
+    ife:if_not_exists_stmt? __
     t:table_name __
     c:create_table_definition? __
     to:table_options? __
@@ -309,7 +314,7 @@ create_table_stmt
           type: a[0].toLowerCase(),
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
-          if_not_exists: ife && ife[0].toLowerCase(),
+          if_not_exists:ife,
           table: [t],
           ignore_replace: ir && ir[0].toLowerCase(),
           as: as && as[0].toLowerCase(),
@@ -322,7 +327,7 @@ create_table_stmt
   / a:KW_CREATE __
     tp:KW_TEMPORARY? __
     KW_TABLE __
-    ife:KW_IF_NOT_EXISTS? __
+    ife:if_not_exists_stmt? __
     t:table_name __
     lt:create_like_table {
       if(t) tableList.add(`create::${t.db}::${t.table}`)
@@ -333,7 +338,7 @@ create_table_stmt
           type: a[0].toLowerCase(),
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
-          if_not_exists: ife && ife[0].toLowerCase(),
+          if_not_exists:ife,
           table: [t],
           like: lt
         }
@@ -2189,7 +2194,6 @@ KW_SELECT   = "SELECT"i     !ident_start
 KW_UPDATE   = "UPDATE"i     !ident_start
 KW_CREATE   = "CREATE"i     !ident_start
 KW_TEMPORARY = "TEMPORARY"i !ident_start
-KW_IF_NOT_EXISTS = "IF NOT EXISTS"i !ident_start
 KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
 KW_RECURSIVE= "RECURSIVE"   !ident_start
