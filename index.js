@@ -6,6 +6,8 @@ export {
   util,
 }
 
+if (!global && window) window.global = window
+
 if (global && global.window) {
   global.window.NodeSQLParser = {
     Parser,
