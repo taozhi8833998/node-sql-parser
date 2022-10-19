@@ -369,6 +369,13 @@ describe('mysql', () => {
           'select +5; select -5',
           'SELECT 5 ; SELECT -5'
         ]
+      },
+      {
+        title: 'support xor operator',
+        sql: [
+          'SELECT (true xor false)',
+          'SELECT (TRUE XOR FALSE)'
+        ]
       }
     ]
     SQL_LIST.forEach(sqlInfo => {
