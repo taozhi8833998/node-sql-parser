@@ -2591,8 +2591,8 @@ number
 int
   = digits
   / digit:digit
-  / op:("-" / "+" ) digits:digits { return "-" + digits; }
-  / op:("-" / "+" ) digit:digit { return "-" + digit; }
+  / op:("-" / "+" ) digits:digits { return op + digits; }
+   / op:("-" / "+" ) digit:digit { return op + digit; }
 
 frac
   = "." digits:digits { return "." + digits; }
