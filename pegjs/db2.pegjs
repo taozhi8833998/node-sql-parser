@@ -1052,7 +1052,7 @@ column_list_item
         as: null
       };
     }
-  / e:expr __ alias:alias_clause? {
+  / e:(binary_column_expr / expr) __ alias:alias_clause? {
       return { expr: e, as: alias };
     }
 
@@ -1553,25 +1553,46 @@ unary_expr
     return createUnaryExpr(op, tail[0][1]);
   }
 
+binary_column_expr
+  = head:expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ expr)+ {
+    const len = tail.length
+    let result = tail[len - 1][3]
+    for (let i = len - 1; i >= 0; i--) {
+      const left = i === 0 ? head : tail[i - 1][3]
+      result = createBinaryExpr(tail[i][1], left, result)
+    }
+    return result
+  }
+
 or_and_where_expr
-	= head:expr tail:(__ (KW_AND / KW_OR / COMMA) __ expr)* {
-    let result = head;
+  = head:expr tail:(__ (KW_AND / KW_OR / COMMA) __ expr)* {
+    let result = head
     let seperator = ''
-    for (let i = 0; i < tail.length; i++) {
+    const len = tail.length
+    let i = 0
+    while(i < len) {
       if (tail[i][1] === ',') {
         seperator = ','
         if (!Array.isArray(result)) result = [result]
-        result.push(tail[i][3])
+        result.push(tail[i++][3])
       } else {
-        result = createBinaryExpr(tail[i][1], result, tail[i][3]);
+        let lastBinaryIndex = i
+        while(lastBinaryIndex < len && tail[lastBinaryIndex][1] !== ',') lastBinaryIndex++
+        let temp = tail[lastBinaryIndex - 1][3]
+        for (let j = lastBinaryIndex - 1; j >= i; --j) {
+          const left = j === 0 ? head : tail[j - 1][3]
+          temp = createBinaryExpr(tail[j][1], left, temp)
+        }
+        result = temp
+        i = lastBinaryIndex
       }
     }
     if (seperator === ',') {
-      const el = { type: 'expr_list' };
+      const el = { type: 'expr_list' }
       el.value = result
       return el
     }
-    return result;
+    return result
   }
 
 or_expr
@@ -2275,8 +2296,8 @@ DOUBLE_ARROW = '->>'
 
 OPERATOR_CONCATENATION = '||'
 OPERATOR_AND = '&&'
-LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
-
+OPERATOR_XOR = 'XOR'i !ident_start { return 'XOR' }
+LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND / OPERATOR_XOR
 // separator
 __
   = (whitespace / comment)*
