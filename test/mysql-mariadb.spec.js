@@ -390,7 +390,21 @@ describe('mysql', () => {
           'SELECT x>3 || x<9 && x=3;',
           'SELECT `x` > 3 || `x` < 9 && `x` = 3'
         ]
-      }
+      },
+      {
+        title: 'escape double quoted',
+        sql: [
+          'SELECT "foo""bar" AS col;',
+          'SELECT \'foo""bar\' AS `col`'
+        ]
+      },
+      {
+        title: 'escape bracket quoted',
+        sql: [
+          'SELECT `foo``bar`',
+          'SELECT `foo``bar`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
