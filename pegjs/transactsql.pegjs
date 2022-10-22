@@ -1013,7 +1013,7 @@ reference_definition
   }
 
 on_reference
-  = on_kw:'ON'i __ kw: ('DELETE'i / 'UPDATE'i) __ ro:reference_option {
+  = on_kw:'ON'i ___ kw: ('DELETE'i / 'UPDATE'i) ___ ro:reference_option {
     return {
       type: `${on_kw.toLowerCase()} ${kw.toLowerCase()}`,
       value: ro
@@ -2705,8 +2705,7 @@ SEMICOLON = ';'
 
 OPERATOR_CONCATENATION = '||'
 OPERATOR_AND = '&&'
-OPERATOR_XOR = 'XOR'i !ident_start { return 'XOR' }
-LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND / OPERATOR_XOR
+LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
 
 // separator
 __

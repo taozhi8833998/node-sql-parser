@@ -1254,7 +1254,7 @@ reference_definition
   }
 
 on_reference
-  = kw: ('ON DELETE'i / 'ON UPDATE'i) __ ro:reference_option {
+  = kw: ('ON DELETE'i / 'ON UPDATE'i) ___ ro:reference_option {
     // => { type: 'on delete' | 'on update'; value: reference_option; }
     return {
       type: kw.toLowerCase(),
@@ -3671,8 +3671,7 @@ DOUBLE_WELL_ARROW = '#>>'
 
 OPERATOR_CONCATENATION = '||'
 OPERATOR_AND = '&&'
-OPERATOR_XOR = 'XOR'i !ident_start { return 'XOR' }
-LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND / OPERATOR_XOR
+LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
 
 // separator
 __
