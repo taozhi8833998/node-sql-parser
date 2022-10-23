@@ -416,6 +416,12 @@ describe('mysql', () => {
       })
     })
 
+    it('should have spaces between keywords', () => {
+      const sql = 'CREATE TABLE `foo` (`id` int UNIQUEKEYONUPDATECASCADE)'
+      expect(parser.astify.bind(parser, sql)).to.throw('Expected "#", "--", "/*", or [ \\t\\n\\r] but "U" found.')
+      expect(parser.astify.bind(parser, sql, mariadb)).to.throw('Expected "#", "--", "/*", or [ \\t\\n\\r] but "U" found.')
+    })
+
     describe('column clause', () => {
       it('should support fulltext search', () => {
         const sqlList = [
