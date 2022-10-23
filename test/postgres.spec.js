@@ -714,6 +714,13 @@ describe('Postgres', () => {
         'select cast(c as timestamp without time zone)',
         'SELECT CAST("c" AS TIMESTAMP WITHOUT TIME ZONE)'
       ]
+    },
+    {
+      title: 'bytea datatype',
+      sql: [
+        'SELECT \'abc \\153\\154\\155 \\052\\251\\124\'::bytea;',
+        "SELECT 'abc \\153\\154\\155 \\052\\251\\124'::BYTEA"
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){
