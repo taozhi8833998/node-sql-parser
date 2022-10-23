@@ -1612,26 +1612,17 @@ binary_column_expr
   }
 
 or_and_where_expr
-  = head:expr tail:(__ (KW_AND / KW_OR / COMMA) __ expr)* {
-    let result = head
-    let seperator = ''
+	= head:expr tail:(__ (KW_AND / KW_OR / COMMA) __ expr)* {
     const len = tail.length
-    let i = 0
-    while(i < len) {
+    let result = head;
+    let seperator = ''
+    for (let i = 0; i < len; ++i) {
       if (tail[i][1] === ',') {
         seperator = ','
         if (!Array.isArray(result)) result = [result]
-        result.push(tail[i++][3])
+        result.push(tail[i][3])
       } else {
-        let lastBinaryIndex = i
-        while(lastBinaryIndex < len && tail[lastBinaryIndex][1] !== ',') lastBinaryIndex++
-        let temp = tail[lastBinaryIndex - 1][3]
-        for (let j = lastBinaryIndex - 1; j >= i; --j) {
-          const left = j === 0 ? head : tail[j - 1][3]
-          temp = createBinaryExpr(tail[j][1], left, temp)
-        }
-        result = temp
-        i = lastBinaryIndex
+        result = createBinaryExpr(tail[i][1], result, tail[i][3]);
       }
     }
     if (seperator === ',') {
