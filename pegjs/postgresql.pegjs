@@ -3898,6 +3898,7 @@ data_type
   / boolean_type
   / enum_type
   / serial_interval_type
+  / binary_type
 
 
 array_type
@@ -3910,9 +3911,11 @@ array_type
     return { ...t, array: 'one' }
   }
 
-
 boolean_type
   = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
+
+binary_type
+  = 'bytea'i { return { dataType: 'BYTEA' }; }
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
