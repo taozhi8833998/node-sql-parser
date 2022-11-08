@@ -556,17 +556,24 @@ describe('BigQuery', () => {
       ]
     },
     {
-      title: 'support schema table and column',
+      title: 'schema table and column',
       sql: [
         'SELECT * FROM t LEFT JOIN e ON (t.a = e.x.y)',
         'SELECT * FROM t LEFT JOIN e ON (t.a = e.x.y)'
       ]
     },
     {
-      title: 'support schema table and nested column fields',
+      title: 'schema table and nested column fields',
       sql: [
         'SELECT * FROM t LEFT JOIN e ON (t.a = e.x.y.z.b.c)',
         'SELECT * FROM t LEFT JOIN e ON (t.a = e.x.y.z.b.c)'
+      ]
+    },
+    {
+      title: 'extract time',
+      sql: [
+        'SELECT extract(time from ts) FROM events',
+        'SELECT EXTRACT(TIME FROM ts) FROM events'
       ]
     },
   ]
