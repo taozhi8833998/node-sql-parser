@@ -568,7 +568,7 @@ describe('BigQuery', () => {
         'SELECT * FROM t LEFT JOIN e ON (t.a = e.x.y.z.b.c)',
         'SELECT * FROM t LEFT JOIN e ON (t.a = e.x.y.z.b.c)'
       ]
-    }
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
@@ -580,6 +580,20 @@ describe('BigQuery', () => {
 
   it('should return empty str for non-array-struct', () => {
     expect(arrayStructValueToSQL({ type: 'non-array-struct' })).to.equal('')
+  })
+
+  it('should support schema in bigquery from clause', () => {
+    const catalog = 'project'
+    const schema = 'retail'
+    const table = 'customers'
+    const sql = `select * from ${catalog}.${schema}.${table} limit 3`
+    const ast = parser.astify(sql, opt)
+    const fromClause = ast.select.from[0]
+    expect(fromClause.catalog).to.be.equal(catalog)
+    expect(fromClause.db).to.be.equal(catalog)
+    expect(fromClause.schema).to.be.equal(schema)
+    expect(fromClause.table).to.be.equal(table)
+    expect(parser.sqlify(ast, opt)).to.be.equal('SELECT * FROM project.retail.customers LIMIT 3')
   })
 
   it('should return empty column list for extract column only', () => {

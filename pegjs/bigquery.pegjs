@@ -1741,8 +1741,7 @@ table_base
         return t;
       }
       return {
-        db: t.db,
-        table: t.table,
+        ...t,
         as: alias
       };
     }
@@ -1763,10 +1762,12 @@ join_op
   / k:KW_INNER? __ KW_JOIN { return k ? `${k[0].toUpperCase()} JOIN` : 'JOIN'; }
 
 table_name
-  = project:ident dt:(__ DOT __ ident) tail:(__ DOT __ ident) {
-      const obj = { db: null, table: project };
+  = db:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
+      const obj = { db: null, table: db };
       if (tail !== null) {
-        obj.db = `${project}.${dt[3]}`;
+        obj.db = db;
+        obj.catalog = db;
+        obj.schema = schema[3];
         obj.table = tail[3];
       }
       return obj;
