@@ -49,7 +49,7 @@
     'JOIN': true,
     'JSON': true,
 
-    'KEY': true,
+    'KEY': false,
 
     'LEFT': true,
     'LIKE': true,
