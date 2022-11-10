@@ -576,6 +576,13 @@ describe('BigQuery', () => {
         'SELECT EXTRACT(TIME FROM ts) FROM events'
       ]
     },
+    {
+      title: 'key as column name',
+      sql: [
+        'select key from x',
+        'SELECT key FROM x',
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
