@@ -593,6 +593,13 @@ describe('BigQuery', () => {
         'SELECT a OR b FROM ds.tbl',
       ]
     },
+    {
+      title: 'right as function name',
+      sql: [
+        "select right('lorem ipsum', 2)",
+        "SELECT right('lorem ipsum', 2)"
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
