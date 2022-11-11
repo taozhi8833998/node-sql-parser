@@ -583,6 +583,16 @@ describe('BigQuery', () => {
         'SELECT key FROM x',
       ]
     },
+    {
+      title: 'or operator in column',
+      sql: [
+        `SELECT
+        a OR b
+      FROM
+        ds.tbl`,
+        'SELECT a OR b FROM ds.tbl',
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
