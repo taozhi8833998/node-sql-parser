@@ -70,7 +70,7 @@
     'RECURSIVE': true,
     'RENAME': true,
     'READ': true, // for lock table
-    'RIGHT': true,
+    'RIGHT': false,
 
     'SELECT': true,
     'SESSION_USER': true,
