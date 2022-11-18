@@ -50,7 +50,7 @@
   },
   "homepage": "https://github.com/taozhi8833998/node-sql-parser#readme",
   "engines": {
-    "node": ">=8 <15"
+    "node": ">=8"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
