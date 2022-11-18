@@ -13,7 +13,7 @@ const outputPath = path.join(__dirname, subDir)
 const srcPath = path.join(__dirname, 'src')
 require('rimraf').sync(outputPath)
 
-if (isProd) require('./typegen')
+// if (isProd) require('./typegen')
 
 const moduleCfg = {
     rules: [
