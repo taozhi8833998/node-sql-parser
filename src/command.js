@@ -97,6 +97,11 @@ function lockUnlockToSQL(stmt) {
   return result.filter(hasVal).join(' ')
 }
 
+function deallocateToSQL(stmt) {
+  const { type, keyword, expr } = stmt
+  return [toUpper(type), toUpper(keyword), exprToSQL(expr)].filter(hasVal).join(' ')
+}
+
 function declareToSQL(stmt) {
   const { type, declare } = stmt
   const result = [toUpper(type)]
@@ -126,6 +131,7 @@ function declareToSQL(stmt) {
 export {
   callToSQL,
   commonCmdToSQL,
+  deallocateToSQL,
   declareToSQL,
   descToSQL,
   renameToSQL,
