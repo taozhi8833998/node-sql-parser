@@ -600,6 +600,13 @@ describe('BigQuery', () => {
         "SELECT right('lorem ipsum', 2)"
       ]
     },
+    {
+      title: 'extract function',
+      sql: [
+        'select extract(year from current_date())',
+        'SELECT EXTRACT(YEAR FROM CURRENT_DATE())'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
