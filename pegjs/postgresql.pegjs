@@ -219,6 +219,7 @@ cmd_stmt
   / set_stmt
   / lock_stmt
   / show_stmt
+  / deallocate_stmt
 
 create_stmt
   = create_table_stmt
@@ -1574,6 +1575,27 @@ show_stmt
         type: 'show',
         keyword: 'tables'
       }
+    }
+  }
+
+deallocate_stmt
+  = KW_DEALLOCATE __ p:('PREPARE'i)? __ i:(ident_name / KW_ALL) {
+    return {
+      /*
+        export interface deallocate_stmt_node {
+          type: 'deallocate';
+          keyword: 'PREPARE' | undefined;
+          expr: { type: 'default', value: string }
+        }
+        => AstStatement<deallocate_stmt_node>
+       */
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'deallocate',
+        keyword: p,
+        expr: { type: 'default', value: i }
+      },
     }
   }
 
@@ -3490,6 +3512,7 @@ KW_SCHEME   = "SCHEME"i      !ident_start { return 'SCHEME'; }
 KW_SEQUENCE   = "SEQUENCE"i      !ident_start { return 'SEQUENCE'; }
 KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
+KW_DEALLOCATE  = "DEALLOCATE"i    !ident_start { return 'DEALLOCATE'; }
 
 KW_ON       = "ON"i       !ident_start
 KW_LEFT     = "LEFT"i     !ident_start

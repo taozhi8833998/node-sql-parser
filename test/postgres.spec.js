@@ -721,7 +721,21 @@ describe('Postgres', () => {
         'SELECT \'abc \\153\\154\\155 \\052\\251\\124\'::bytea;',
         "SELECT 'abc \\153\\154\\155 \\052\\251\\124'::BYTEA"
       ]
-    }
+    },
+    {
+      title: 'deallocate statement',
+      sql: [
+        'DEALLOCATE pdo_stmt_1',
+        'DEALLOCATE pdo_stmt_1'
+      ]
+    },
+    {
+      title: 'deallocate statement with prepare',
+      sql: [
+        'DEALLOCATE PREPARE ALL',
+        'DEALLOCATE PREPARE ALL'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
