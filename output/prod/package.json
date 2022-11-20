@@ -19,7 +19,6 @@
     "type": "git",
     "url": "git+https://github.com/taozhi8833998/node-sql-parser.git"
   },
-  "pre-commit": "coverLocal",
   "keywords": [
     "sql",
     "sql-parser",
@@ -51,7 +50,7 @@
   },
   "homepage": "https://github.com/taozhi8833998/node-sql-parser#readme",
   "engines": {
-    "node": ">=8 <15"
+    "node": ">=8"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
@@ -79,7 +78,6 @@
     "nyc": "15.1.0",
     "pegjs": "^0.10.0",
     "pegjs-loader": "^0.5.6",
-    "pre-commit": "^1.2.2",
     "rimraf": "^3.0.2",
     "source-map-support": "^0.5.19",
     "tinyify": "^4.0.0",
