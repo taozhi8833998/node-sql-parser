@@ -2237,7 +2237,7 @@ column_list
     }
 
 ident
-  = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
+  = name:ident_name !{ return reservedMap[`${name}`.toUpperCase()] === true; } {
       return name;
     }
   / name:quoted_ident {
@@ -2401,7 +2401,7 @@ func_call
   }
 
 proc_func_name
-  = dt:ident tail:(__ DOT __ ident)* {
+  = dt:ident_name tail:(__ DOT __ ident_name)* {
       let name = dt
       if (tail !== null) {
         tail.forEach(t => name = `${name}.${t[3]}`)
