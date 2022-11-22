@@ -3257,7 +3257,7 @@ proc_primary
     }
 
 proc_func_name
-  = dt:ident tail:(__ DOT __ ident)? {
+  = dt:(ident_name / quoted_ident) tail:(__ DOT __ (ident_name / quoted_ident))? {
       let name = dt
       if (tail !== null) {
         name = `${dt}.${tail[3]}`

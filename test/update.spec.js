@@ -202,7 +202,7 @@ describe('update', () => {
 
   it('should support set value', () => {
     expect(getParsedSql('update a set id = 123, name = values(abc) where age > 15 order by name'))
-      .to.be.equal('UPDATE `a` SET `id` = 123, `name` = VALUES(`abc`) WHERE `age` > 15 ORDER BY `name` ASC')
+      .to.be.equal('UPDATE `a` SET `id` = 123, `name` = values(`abc`) WHERE `age` > 15 ORDER BY `name` ASC')
   })
 
   it('should support order by and limit in update sql', () => {
