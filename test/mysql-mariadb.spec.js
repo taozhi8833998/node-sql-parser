@@ -405,6 +405,13 @@ describe('mysql', () => {
           'SELECT `foo``bar`'
         ]
       },
+      {
+        title: 'insert set statement without into',
+        sql: [
+          'insert t1 set c1 = 1',
+          'INSERT `t1` SET `c1` = 1'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
