@@ -2039,7 +2039,7 @@ insert_no_columns_stmt
 
 insert_into_set
   = ri:replace_insert __
-    KW_INTO __
+    it:KW_INTO? __
     t:table_name  __
     p:insert_partition? __
     KW_SET       __
@@ -2058,6 +2058,7 @@ insert_into_set
           table: [t],
           columns: null,
           partition: p,
+          prefix: it === null ? '' : it[0],
           set: l,
           on_duplicate_update: odp,
         }

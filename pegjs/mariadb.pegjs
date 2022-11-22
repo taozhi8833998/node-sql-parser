@@ -236,6 +236,7 @@ crud_stmt
   / update_stmt
   / replace_insert_stmt
   / insert_no_columns_stmt
+  / insert_into_set
   / delete_stmt
   / cmd_stmt
   / proc_stmts
@@ -1750,6 +1751,34 @@ insert_no_columns_stmt
           values: v,
           partition: p,
           prefix,
+          on_duplicate_update: odp,
+        }
+      };
+    }
+
+insert_into_set
+  = ri:replace_insert __
+    it:KW_INTO? __
+    t:table_name  __
+    p:insert_partition? __
+    KW_SET       __
+    l:set_list   __
+    odp:on_duplicate_update_stmt? {
+      if (t) {
+        tableList.add(`insert::${t.db}::${t.table}`)
+        columnList.add(`insert::${t.table}::(.*)`);
+        t.as = null
+      }
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: ri,
+          table: [t],
+          columns: null,
+          partition: p,
+          prefix: it === null ? '' : it[0],
+          set: l,
           on_duplicate_update: odp,
         }
       };
