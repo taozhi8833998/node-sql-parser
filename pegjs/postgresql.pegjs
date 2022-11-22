@@ -2981,10 +2981,22 @@ over_partition
   }
   / on_update_current_timestamp
 
+aggr_filter
+  = 'FILTER'i __ LPAREN __ wc:where_clause __ RPAREN {
+    // => { keyword: 'filter'; parentheses: true, where: where_clause }
+    return {
+      keyword: 'filter',
+      parentheses: true,
+      where: wc,
+    }
+  }
+
 aggr_func
-  = aggr_fun_count
-  / aggr_fun_smma
-  / aggr_array_agg
+  = e:(aggr_fun_count / aggr_fun_smma / aggr_array_agg) __ f:aggr_filter? {
+    // => { type: 'aggr_func'; name: string; args: { expr: additive_expr } | count_arg; over: over_partition; filter?: aggr_filter; }
+    if (f) e.filter = f
+    return e
+  }
 
 window_func
   = window_fun_rank
@@ -3002,8 +3014,7 @@ window_fun_rank
   }
 
 window_fun_laglead
-  = name:KW_LAG_LEAD __ LPAREN __ l:expr_list __ RPAREN __
-  cn:consider_nulls_clause? __ over:over_partition {
+  = name:KW_LAG_LEAD __ LPAREN __ l:expr_list __ RPAREN __ cn:consider_nulls_clause? __ over:over_partition {
     // => { type: 'window_func'; name: string; args: expr_list; consider_nulls: null | string; over: over_partition }
     return {
       type: 'window_func',
