@@ -1592,7 +1592,7 @@ columns_list
     }
 
 column_offset_expr
-  = n:expr __ LBRAKE __ t:(KW_OFFSET / KW_ORDINAL) __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
+  = n:expr __ LBRAKE __ t:(KW_OFFSET / KW_ORDINAL / KW_SAFE_OFFSET / KW_SAFE_ORDINAL) __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
     return {
       expr: n,
       offset: `[${t}(${l.value})]`
@@ -2678,9 +2678,11 @@ KW_ORDER    = "ORDER"i      !ident_start
 KW_HAVING   = "HAVING"i     !ident_start
 KW_WINDOW   = "WINDOW"i  !ident_start
 KW_ORDINAL  = "ORDINAL"i !ident_start { return 'ORDINAL' }
+KW_SAFE_ORDINAL  = "SAFE_ORDINAL"i !ident_start { return 'SAFE_ORDINAL' }
 
 KW_LIMIT    = "LIMIT"i      !ident_start
 KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET'; }
+KW_SAFE_OFFSET   = "SAFE_OFFSET"i     !ident_start { return 'SAFE_OFFSET'; }
 
 KW_ASC      = "ASC"i        !ident_start { return 'ASC'; }
 KW_DESC     = "DESC"i       !ident_start { return 'DESC'; }
