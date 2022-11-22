@@ -222,12 +222,12 @@
 }
 
 start
-  = __ n:(multiple_stmt / query_statement / crud_stmt) {
+  = __ n:(multiple_stmt) {
     return n
   }
 
 multiple_stmt
-  = head:query_statement tail:(__ SEMICOLON __ query_statement)+ {
+  = head:stmt tail:(__ SEMICOLON __ stmt)* {
       const cur = [head && head.ast || head];
       for (let i = 0; i < tail.length; i++) {
         if(!tail[i][3] || tail[i][3].length === 0) continue;
@@ -239,6 +239,9 @@ multiple_stmt
         ast: cur
       }
     }
+    
+stmt 
+  = query_statement / crud_stmt
 
 crud_stmt
   = union_stmt
@@ -1440,7 +1443,7 @@ query_expr
   s:union_stmt __
   o:order_by_clause?  __
   l:limit_clause? __
-  se:SEMICOLON? {
+  {
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
