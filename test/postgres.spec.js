@@ -736,6 +736,13 @@ describe('Postgres', () => {
         'DEALLOCATE PREPARE ALL'
       ]
     },
+    {
+      title: 'filter after aggregate expression',
+      sql: [
+        "SELECT date_trunc('month', buy_window) AS month_window, marketplace, SUM(currency_amount_a) FILTER (WHERE currency_symbol_a IN ('REN', 'EUR')) + SUM(currency_amount_b) FILTER (WHERE currency_symbol_b IN ('REN', 'EUR')) as volume FROM currency.forex WHERE buy_window >= to_timestamp(1522540800) GROUP BY project, month",
+        `SELECT date_trunc('month', "buy_window") AS "month_window", "marketplace", SUM("currency_amount_a") FILTER (WHERE "currency_symbol_a" IN ('REN', 'EUR')) + SUM("currency_amount_b") FILTER (WHERE "currency_symbol_b" IN ('REN', 'EUR')) AS "volume" FROM "currency"."forex" WHERE "buy_window" >= to_timestamp(1522540800) GROUP BY "project", "month"`,
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

@@ -4,7 +4,7 @@ import { overToSQL } from './over'
 
 function aggrToSQL(expr) {
   /** @type {Object} */
-  const { args, over, orderby, within_group_orderby } = expr
+  const { args, filter, over, orderby, within_group_orderby } = expr
   let str = exprToSQL(args.expr)
   const fnName = expr.name
   const overStr = overToSQL(over)
@@ -21,7 +21,8 @@ function aggrToSQL(expr) {
   if (args.orderby) str = `${str} ${orderOrPartitionByToSQL(args.orderby, 'order by')}`
   if (orderby) str = `${str} ${orderOrPartitionByToSQL(orderby, 'order by')}`
   const withinGroup = within_group_orderby ? `WITHIN GROUP (${orderOrPartitionByToSQL(within_group_orderby, 'order by')})` : ''
-  return [`${fnName}(${str})`, withinGroup, overStr].filter(hasVal).join(' ')
+  const filterStr = filter ? `FILTER (WHERE ${exprToSQL(filter.where)})` : ''
+  return [`${fnName}(${str})`, withinGroup, overStr, filterStr].filter(hasVal).join(' ')
 }
 
 export {
