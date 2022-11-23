@@ -3949,7 +3949,7 @@ boolean_type
   = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
 
 binary_type
-  = 'bytea'i { return { dataType: 'BYTEA' }; }
+  = 'bytea'i { /* => data_type */ return { dataType: 'BYTEA' }; }
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
