@@ -743,6 +743,13 @@ describe('Postgres', () => {
         `SELECT date_trunc('month', "buy_window") AS "month_window", "marketplace", SUM("currency_amount_a") FILTER (WHERE "currency_symbol_a" IN ('REN', 'EUR')) + SUM("currency_amount_b") FILTER (WHERE "currency_symbol_b" IN ('REN', 'EUR')) AS "volume" FROM "currency"."forex" WHERE "buy_window" >= to_timestamp(1522540800) GROUP BY "project", "month"`,
       ]
     },
+    {
+      title: 'decimal without prefix 0',
+      sql: [
+        `SELECT date_trunc('month', time_window) , SUM(ren) * .999 as ren_normalized FROM currencies."forex" WHERE memory_address = '\x881d40237659c251811cec9c364ef91dc08d300c' GROUP BY 1`,
+        `SELECT date_trunc('month', "time_window"), SUM("ren") * 0.999 AS "ren_normalized" FROM "currencies"."forex" WHERE "memory_address" = '\x881d40237659c251811cec9c364ef91dc08d300c' GROUP BY 1`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

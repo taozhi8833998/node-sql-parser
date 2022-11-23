@@ -7,7 +7,7 @@
 
 export type start = multiple_stmt | cmd_stmt | crud_stmt;
 
-export type cmd_stmt = drop_stmt | create_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt | show_stmt;
+export type cmd_stmt = drop_stmt | create_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt | show_stmt | deallocate_stmt;
 
 export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence | create_db_stmt;
 
@@ -457,6 +457,14 @@ export interface show_stmt_node {
 
 export type show_stmt = AstStatement<show_stmt_node>;
 
+export interface deallocate_stmt_node {
+          type: 'deallocate';
+          keyword: 'PREPARE' | undefined;
+          expr: { type: 'default', value: string }
+        }
+
+export type deallocate_stmt = AstStatement<deallocate_stmt_node>;
+
 export interface select_stmt_node extends select_stmt_nake  {
        parentheses_symbol: true;
       }
@@ -497,7 +505,7 @@ export type column_clause = 'ALL' | '*' | column_list_item[] | column_list_item[
 
 export type array_index = { brackets: boolean, number: number };
 
-export type expr_item = expr & { array_index: array_index };
+export type expr_item = (expr || binary_expr) & { array_index: array_index };
 
 export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; } | { type: 'star_ref'; expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
 
@@ -730,6 +738,8 @@ export type unary_expr = {
       parentheses?: boolean;
     };
 
+export type binary_column_expr = binary_expr;
+
 export type or_and_where_expr = binary_expr | { type: 'expr_list'; value: expr[] };
 
 export type or_expr = binary_expr;
@@ -849,7 +859,9 @@ export type on_update_current_timestamp = { type: 'on update'; keyword: string; 
 
 export type over_partition = { type: 'windows'; as_window_specification: as_window_specification } | { partitionby: partition_by_clause; orderby: order_by_clause } | on_update_current_timestamp;
 
-export type aggr_func = aggr_fun_count | aggr_fun_smma | aggr_array_agg;
+export type aggr_filter = { keyword: 'filter'; parentheses: true, where: where_clause };
+
+export type aggr_func = { type: 'aggr_func'; name: string; args: { expr: additive_expr } | count_arg; over: over_partition; filter?: aggr_filter; };
 
 export type window_func = window_fun_rank | window_fun_laglead | window_fun_firstlast;
 
@@ -897,7 +909,7 @@ export type trim_func_clause = { type: 'function'; name: string; args: expr_list
 
 export type func_call = trim_func_clause | { type: 'function'; name: string; args: expr_list; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; };
 
-export type extract_filed = "CENTURY" | "DAY" | "DATE" | "DECADE" | "DOW" | "DOY" | "EPOCH" | "HOUR" | "ISODOW" | "ISOYEAR" | "MICROSECONDS" | "MILLENNIUM" | "MILLISECONDS" | "MINUTE" | "MONTH" | "QUARTER" | "SECOND" | "TIMEZONE" | "TIMEZONE_HOUR" | "TIMEZONE_MINUTE" | "WEEK" | 'string';
+export type extract_filed = 'string';
 
 export type extract_func = { type: 'extract'; args: { field: extract_filed; cast_type: 'TIMESTAMP' | 'INTERVAL' | 'TIME'; source: expr; }};
 
@@ -1034,6 +1046,8 @@ type KW_SEQUENCE = never;
 type KW_TABLESPACE = never;
 
 type KW_COLLATE = never;
+
+type KW_DEALLOCATE = never;
 
 type KW_ON = never;
 
@@ -1397,6 +1411,10 @@ export type array_type = data_type;
 
 
 export type boolean_type = data_type;
+
+
+
+export type binary_type = data_type;
 
 
 

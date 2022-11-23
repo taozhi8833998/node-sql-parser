@@ -3428,17 +3428,17 @@ literal_numeric
     }
 
 number
-  = int_:int frac:frac exp:exp {
-    const numStr = int_ + frac + exp
+  = int_:int? frac:frac exp:exp {
+    const numStr = (int_ || '') + frac + exp
     return {
       type: 'bigint',
       value: numStr
     }
   }
-  / int_:int frac:frac {
+  / int_:int? frac:frac {
     // => IGNORE
-    const numStr = int_ + frac
-    if (isBigInt(int_)) return {
+    const numStr = (int_ || '') + frac
+    if (int_ && isBigInt(int_)) return {
       type: 'bigint',
       value: numStr
     }
@@ -3949,7 +3949,7 @@ boolean_type
   = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
 
 binary_type
-  = 'bytea'i { return { dataType: 'BYTEA' }; }
+  = 'bytea'i { /* => data_type */ return { dataType: 'BYTEA' }; }
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
