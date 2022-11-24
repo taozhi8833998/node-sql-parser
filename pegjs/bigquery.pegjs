@@ -222,12 +222,12 @@
 }
 
 start
-  = __ n:(multiple_stmt / query_statement / crud_stmt) {
+  = __ n:(multiple_stmt) {
     return n
   }
 
 multiple_stmt
-  = head:query_statement tail:(__ SEMICOLON __ query_statement)+ {
+  = head:stmt tail:(__ SEMICOLON __ stmt)* {
       const cur = [head && head.ast || head];
       for (let i = 0; i < tail.length; i++) {
         if(!tail[i][3] || tail[i][3].length === 0) continue;
@@ -239,6 +239,9 @@ multiple_stmt
         ast: cur
       }
     }
+    
+stmt 
+  = query_statement / crud_stmt
 
 crud_stmt
   = union_stmt
@@ -1440,7 +1443,7 @@ query_expr
   s:union_stmt __
   o:order_by_clause?  __
   l:limit_clause? __
-  se:SEMICOLON? {
+  {
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
@@ -1589,7 +1592,7 @@ columns_list
     }
 
 column_offset_expr
-  = n:expr __ LBRAKE __ t:(KW_OFFSET / KW_ORDINAL) __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
+  = n:expr __ LBRAKE __ t:(KW_OFFSET / KW_ORDINAL / KW_SAFE_OFFSET / KW_SAFE_ORDINAL) __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
     return {
       expr: n,
       offset: `[${t}(${l.value})]`
@@ -2141,6 +2144,7 @@ multiplicative_operator
 
 primary
   = array_expr
+  / struct_expr
   / cast_expr
   / literal
   / aggr_func
@@ -2675,9 +2679,11 @@ KW_ORDER    = "ORDER"i      !ident_start
 KW_HAVING   = "HAVING"i     !ident_start
 KW_WINDOW   = "WINDOW"i  !ident_start
 KW_ORDINAL  = "ORDINAL"i !ident_start { return 'ORDINAL' }
+KW_SAFE_ORDINAL  = "SAFE_ORDINAL"i !ident_start { return 'SAFE_ORDINAL' }
 
 KW_LIMIT    = "LIMIT"i      !ident_start
 KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET'; }
+KW_SAFE_OFFSET   = "SAFE_OFFSET"i     !ident_start { return 'SAFE_OFFSET'; }
 
 KW_ASC      = "ASC"i        !ident_start { return 'ASC'; }
 KW_DESC     = "DESC"i       !ident_start { return 'DESC'; }
