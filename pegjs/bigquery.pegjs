@@ -1854,9 +1854,9 @@ window_frame_clause
   }
 
 window_frame_following
-  = s:window_frame_value __ 'FOLLOWING'i  {
+  = s:window_frame_value __ c:('FOLLOWING'i / 'PRECEDING'i) {
     // => string
-    s.value += ' FOLLOWING'
+    s.value += ` ${c.toUpperCase()}`
     return s
   }
   / window_frame_current_row
