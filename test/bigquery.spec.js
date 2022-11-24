@@ -642,7 +642,7 @@ describe('BigQuery', () => {
 
   it(SQL_LIST[16].title, () => {
     const ast = parser.astify(SQL_LIST[16].sql[0], opt)
-    const expr = ast.select.from[0].expr
+    const expr = ast[0].select.from[0].expr
     expr.parentheses = false
     expr.expr_list = {
       type: 'string',
