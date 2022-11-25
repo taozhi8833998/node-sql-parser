@@ -69,11 +69,12 @@ function bigQueryToSQL(stmt) {
   return result.filter(val => val).join(' ')
 }
 
+typeToSQLFn.bigquery = bigQueryToSQL
+
 function multipleToSQL(stmt) {
   const res = []
   for (let i = 0, len = stmt.length; i < len; ++i) {
-    let astInfo = stmt[i] && stmt[i].ast
-    if (!astInfo) astInfo = stmt[i]
+    const astInfo = stmt[i] && stmt[i].ast ? stmt[i].ast : stmt[i]
     res.push(unionToSQL(astInfo))
   }
   return res.join(' ; ')

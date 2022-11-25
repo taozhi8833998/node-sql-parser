@@ -607,6 +607,20 @@ describe('BigQuery', () => {
         'SELECT EXTRACT(YEAR FROM current_date())'
       ]
     },
+    {
+      title: 'and preceding after between in over clause',
+      sql: [
+        'SELECT MAX(amount) OVER (ORDER BY invoice_date ASC ROWS BETWEEN UNBOUNDED PRECEDING AND 3 PRECEDING) FROM invoice',
+        'SELECT MAX(amount) OVER (ORDER BY invoice_date ASC ROWS BETWEEN UNBOUNDED PRECEDING AND 3 PRECEDING) FROM invoice',
+      ]
+    },
+    {
+      title: 'multiple statement',
+      sql: [
+        'select abc from table1; select def from table2',
+        'SELECT abc FROM table1 ; SELECT def FROM table2'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
@@ -642,7 +656,7 @@ describe('BigQuery', () => {
 
   it(SQL_LIST[16].title, () => {
     const ast = parser.astify(SQL_LIST[16].sql[0], opt)
-    const expr = ast.select.from[0].expr
+    const expr = ast[0].select.from[0].expr
     expr.parentheses = false
     expr.expr_list = {
       type: 'string',

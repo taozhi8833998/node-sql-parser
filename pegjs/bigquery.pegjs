@@ -222,12 +222,12 @@
 }
 
 start
-  = __ n:(multiple_stmt) {
+  = __ n:(multiple_stmt / stmt) {
     return n
   }
 
 multiple_stmt
-  = head:stmt tail:(__ SEMICOLON __ stmt)* {
+  = head:stmt tail:(__ SEMICOLON __ stmt)+ {
       const cur = [head && head.ast || head];
       for (let i = 0; i < tail.length; i++) {
         if(!tail[i][3] || tail[i][3].length === 0) continue;
@@ -239,8 +239,8 @@ multiple_stmt
         ast: cur
       }
     }
-    
-stmt 
+
+stmt
   = query_statement / crud_stmt
 
 crud_stmt
@@ -258,7 +258,7 @@ update_stmt
     t:table_ref_list __
     KW_SET       __
     l:set_list   __
-	f:from_clause? __
+    f:from_clause? __
     w:where_clause? __
     or:order_by_clause? __
     lc:limit_clause? {
@@ -266,7 +266,7 @@ update_stmt
         const { db, as, table } = tableInfo
         tableList.add(`update::${db}::${table}`)
       });
-	  if(f) f.forEach(info => {
+      if(f) f.forEach(info => {
         info.table && tableList.add(`update::${info.db}::${info.table}`);
       });
       if(l) {
@@ -429,7 +429,7 @@ cmd_stmt
   / show_stmt
   / desc_stmt
 
- proc_stmts
+proc_stmts
   = proc_stmt*
 
 proc_stmt
@@ -627,7 +627,7 @@ drop_stmt
       };
     }
 
- create_stmt
+create_stmt
   = create_table_stmt
   / create_db_stmt
 
@@ -1854,9 +1854,9 @@ window_frame_clause
   }
 
 window_frame_following
-  = s:window_frame_value __ 'FOLLOWING'i  {
+  = s:window_frame_value __ c:('FOLLOWING'i / 'PRECEDING'i) {
     // => string
-    s.value += ' FOLLOWING'
+    s.value += ` ${c.toUpperCase()}`
     return s
   }
   / window_frame_current_row

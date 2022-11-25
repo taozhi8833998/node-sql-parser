@@ -2540,8 +2540,7 @@ window_specification
   }
 
 window_specification_frameless
-  = bc:partition_by_clause? __
-  l:order_by_clause? {
+  = bc:partition_by_clause? __ l:order_by_clause? {
     return {
       name: null,
       partitionby: bc,
