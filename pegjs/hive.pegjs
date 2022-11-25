@@ -1898,7 +1898,7 @@ func_call
         over: bc
       };
     }
-  / f:KW_CURRENT_TIMESTAMP __ up:on_update_current_timestamp? {
+  / f:scalar_time_func __ up:on_update_current_timestamp? {
     return {
         type: 'function',
         name: f,
@@ -1915,11 +1915,12 @@ func_call
         args_parentheses: false,
       };
     }
-
-scalar_func
+scalar_time_func
   = KW_CURRENT_DATE
   / KW_CURRENT_TIME
   / KW_CURRENT_TIMESTAMP
+scalar_func
+  = scalar_time_func
   / KW_CURRENT_USER
   / KW_USER
   / KW_SESSION_USER

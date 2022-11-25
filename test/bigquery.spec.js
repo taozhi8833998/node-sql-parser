@@ -621,6 +621,13 @@ describe('BigQuery', () => {
         'SELECT abc FROM table1 ; SELECT def FROM table2'
       ]
     },
+    {
+      title: 'current date time without parentheses',
+      sql: [
+        'select current_date',
+        'SELECT CURRENT_DATE'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
