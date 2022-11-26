@@ -2396,7 +2396,7 @@ func_call
         over: bc
       };
     }
-  / f:KW_CURRENT_TIMESTAMP __ up:on_update_current_timestamp? {
+  / f:scalar_time_func __ up:on_update_current_timestamp? {
     return {
         type: 'function',
         name: f,
@@ -2413,11 +2413,12 @@ proc_func_name
       return name;
     }
 
-scalar_func
+scalar_time_func
   = KW_CURRENT_DATE
   / KW_CURRENT_TIME
   / KW_CURRENT_TIMESTAMP
-  / KW_SESSION_USER
+scalar_func
+  = scalar_time_func / KW_SESSION_USER
 
 extract_filed
   = f:('CENTURY'i / 'DAY'i / 'DATE'i / 'DECADE'i / 'DOW'i / 'DOY'i / 'EPOCH'i / 'HOUR'i / 'ISODOW'i / 'ISOYEAR'i / 'MICROSECONDS'i / 'MILLENNIUM'i / 'MILLISECONDS'i / 'MINUTE'i / 'MONTH'i / 'QUARTER'i / 'SECOND'i /  'TIME'i / 'TIMEZONE'i / 'TIMEZONE_HOUR'i / 'TIMEZONE_MINUTE'i / 'WEEK'i / 'YEAR'i) {
