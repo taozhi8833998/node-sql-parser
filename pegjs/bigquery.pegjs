@@ -1519,6 +1519,7 @@ select_stmt_nake
     w:where_clause?     __
     g:group_by_clause?  __
     h:having_clause?    __
+    q:qualify_clause? __
     o:order_by_clause?  __
     l:limit_clause? __
     win:window_clause? {
@@ -1534,6 +1535,7 @@ select_stmt_nake
           with: cte,
           groupby: g,
           having: h,
+          qualify: q,
           orderby: o,
           limit: l,
           window:win,
@@ -1795,6 +1797,9 @@ group_by_clause
 
 having_clause
   = KW_HAVING __ e:expr { return e; }
+
+qualify_clause
+  = KW_QUALIFY __ e:expr { return e }
 
 window_clause
   = KW_WINDOW __ l:named_window_expr_list {
@@ -2680,6 +2685,7 @@ KW_GROUP    = "GROUP"i      !ident_start
 KW_BY       = "BY"i         !ident_start
 KW_ORDER    = "ORDER"i      !ident_start
 KW_HAVING   = "HAVING"i     !ident_start
+KW_QUALIFY  = "QUALIFY"i     !ident_start
 KW_WINDOW   = "WINDOW"i  !ident_start
 KW_ORDINAL  = "ORDINAL"i !ident_start { return 'ORDINAL' }
 KW_SAFE_ORDINAL  = "SAFE_ORDINAL"i !ident_start { return 'SAFE_ORDINAL' }

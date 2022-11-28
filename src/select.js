@@ -60,6 +60,7 @@ function selectToSQL(stmt) {
     options,
     orderby,
     parentheses_symbol: parentheses,
+    qualify,
     top,
     window: windowInfo,
     with: withInfo,
@@ -81,6 +82,7 @@ function selectToSQL(stmt) {
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
   clauses.push(connector('GROUP BY', getExprListSQL(groupby).join(', ')))
   clauses.push(commonOptionConnector('HAVING', exprToSQL, having))
+  clauses.push(commonOptionConnector('QUALIFY', exprToSQL, qualify))
   clauses.push(commonOptionConnector('WINDOW', exprToSQL, windowInfo))
   clauses.push(orderOrPartitionByToSQL(orderby, 'order by'))
   clauses.push(limitToSQL(limit))

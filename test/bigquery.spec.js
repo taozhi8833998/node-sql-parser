@@ -640,6 +640,18 @@ describe('BigQuery', () => {
         'SELECT COUNT(DISTINCT CASE WHEN active IS TRUE THEN id END) AS nb_active FROM dataset.users'
       ]
     },
+    {
+      title: 'qualify clause',
+      sql: [
+        `SELECT
+          item,
+          RANK() OVER (PARTITION BY category ORDER BY purchases DESC) as rank
+        FROM Produce
+        WHERE Produce.category = 'vegetable'
+        QUALIFY rank <= 3`,
+        "SELECT item, RANK() OVER (PARTITION BY category ORDER BY purchases DESC) AS rank FROM Produce WHERE Produce.category = 'vegetable' QUALIFY rank <= 3"
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
