@@ -628,6 +628,18 @@ describe('BigQuery', () => {
         'SELECT CURRENT_DATE'
       ]
     },
+    {
+      title: 'count distinct case when without parentheses',
+      sql: [
+        `SELECT
+        COUNT(
+          DISTINCT CASE WHEN active IS TRUE THEN id END
+        ) AS nb_active
+      FROM
+        dataset.users`,
+        'SELECT COUNT(DISTINCT CASE WHEN active IS TRUE THEN id END) AS nb_active FROM dataset.users'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
