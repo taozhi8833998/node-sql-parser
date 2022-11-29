@@ -750,6 +750,16 @@ describe('Postgres', () => {
         `SELECT date_trunc('month', "time_window"), SUM("ren") * 0.999 AS "ren_normalized" FROM "currencies"."forex" WHERE "memory_address" = '\x881d40237659c251811cec9c364ef91dc08d300c' GROUP BY 1`
       ]
     },
+    {
+      title: 'values as table name',
+      sql: [
+        `with values as (
+          select 1 as value
+        )
+        select * from values`,
+        'WITH "values" AS (SELECT 1 AS "value") SELECT * FROM "values"',
+      ]
+    }
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
