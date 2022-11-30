@@ -82,7 +82,7 @@
     'THEN': true,
     'TRUE': true,
     'TRUNCATE': true,
-    'TYPE': true,   // reserved (MySQL)
+    // 'TYPE': true,   // reserved (MySQL)
 
     'UNION': true,
     'UPDATE': true,
@@ -1613,7 +1613,7 @@ column_list_item
         as: null
       };
     }
-  / tbl:ident __ DOT pro:((column_offset_expr / ident) __ DOT)? __ STAR {
+  / tbl:column_without_kw __ DOT pro:((column_offset_expr / column_without_kw) __ DOT)? __ STAR {
       columnList.add(`select::${tbl}::(.*)`)
       let column = '*'
       const mid = pro && pro[0]
@@ -1737,7 +1737,8 @@ tablesample
 
 //NOTE that, the table assigned to `var` shouldn't write in `table_join`
 table_base
-  = t:table_name
+  = from_unnest_item
+  / t:table_name
     ht:hint? __
 	  ts:tablesample? __
 	  alias:alias_clause? {
@@ -1757,7 +1758,6 @@ table_base
         as: alias
       };
     }
-  / from_unnest_item
 
 join_op
   = KW_LEFT __ KW_OUTER? __ KW_JOIN { return 'LEFT JOIN'; }
@@ -1767,7 +1767,7 @@ join_op
   / k:KW_INNER? __ KW_JOIN { return k ? `${k[0].toUpperCase()} JOIN` : 'JOIN'; }
 
 table_name
-  = db:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
+  = db:ident_without_kw schema:(__ DOT __ ident_without_kw) tail:(__ DOT __ ident_without_kw) {
       const obj = { db: null, table: db };
       if (tail !== null) {
         obj.db = db;
@@ -1777,7 +1777,7 @@ table_name
       }
       return obj;
     }
-  / dt:ident tail:(__ DOT __ ident)? {
+  / dt:ident_without_kw tail:(__ DOT __ ident_without_kw)? {
       const obj = { db: null, table: dt };
       if (tail !== null) {
         obj.db = dt;
@@ -2213,7 +2213,7 @@ case_else = KW_ELSE __ result:expr {
   }
 
 column_ref
-  =  schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column)+ {
+  =  schema:column_without_kw tbl:(__ DOT __ column_without_kw) col:(__ DOT __ column_without_kw)+ {
       const columns = col.map(c => c[3]).join('.') || null
       columnList.add(`select::${schema}.${tbl[3]}::${col[0][3]}`);
       return {
@@ -2223,7 +2223,7 @@ column_ref
         column: columns
       };
     }
-  / tbl:ident __ DOT __ col:column_without_kw {
+  / tbl:column_without_kw __ DOT __ col:column_without_kw {
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
@@ -2279,10 +2279,10 @@ backticks_quoted_ident
   = "`" chars:[^`]+ "`" { return `\`${chars.join('')}\``; }
 
 column_without_kw
-  = name:column_name {
-    return name;
-  }
-  / quoted_ident
+  = column_name / quoted_ident
+
+ident_without_kw
+  = ident_name / quoted_ident
 
 column
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { return name; }
@@ -2299,7 +2299,7 @@ ident_start = [A-Za-z_]
 ident_part  = [A-Za-z0-9_-]
 
 // to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_:]
+column_part  = [A-Za-z0-9_:-]
 
 param
   = l:(':' ident_name) {
