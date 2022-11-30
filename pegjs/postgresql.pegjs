@@ -2018,7 +2018,7 @@ join_op
   / (KW_INNER __)? KW_JOIN { /* => 'INNER JOIN' */ return 'INNER JOIN'; }
 
 table_name
-  = dt:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
+  = dt:ident_without_kw schema:(__ DOT __ ident_without_kw) tail:(__ DOT __ ident_without_kw) {
       // => { db?: ident; schema?: ident, table: ident | '*'; }
       const obj = { db: null, table: dt };
       if (tail !== null) {
@@ -2028,7 +2028,7 @@ table_name
       }
       return obj;
     }
-  / dt:ident __ DOT __ STAR {
+  / dt:ident_without_kw __ DOT __ STAR {
     // => IGNORE
       tableList.add(`select::${dt}::(.*)`);
       return {
@@ -2036,7 +2036,7 @@ table_name
         table: '*'
       }
     }
-  / dt:ident tail:(__ DOT __ ident)? {
+  / dt:ident_without_kw tail:(__ DOT __ ident_without_kw)? {
     // => IGNORE
       const obj = { db: null, table: dt };
       if (tail !== null) {
@@ -2919,6 +2919,9 @@ single_quoted_ident
 
 backticks_quoted_ident
   = "`" chars:[^`]+ "`" { /* => string */ return chars.join(''); }
+
+ident_without_kw
+  = ident_name / quoted_ident
 
 column
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { /* => string */ return name; }
