@@ -652,6 +652,31 @@ describe('BigQuery', () => {
         "SELECT item, RANK() OVER (PARTITION BY category ORDER BY purchases DESC) AS rank FROM Produce WHERE Produce.category = 'vegetable' QUALIFY rank <= 3"
       ]
     },
+    {
+      title: 'keyword in table name',
+      sql: [
+        'select * from a_dataset.table',
+        'SELECT * FROM a_dataset.table'
+      ]
+    },
+    {
+      title: 'keyword in with clause table name',
+      sql: [
+        `with table as (
+          select *
+          from unnest(array[1, 2])
+      )
+      select * from table`,
+        'WITH table AS (SELECT * FROM UNNEST(ARRAY[1, 2])) SELECT * FROM table'
+      ]
+    },
+    {
+      title: 'keyword in column',
+      sql: [
+        "SELECT * FROM shop.clothes WHERE type = 'shoe'",
+        "SELECT * FROM shop.clothes WHERE type = 'shoe'"
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
