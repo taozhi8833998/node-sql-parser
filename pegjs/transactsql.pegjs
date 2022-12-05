@@ -2428,6 +2428,9 @@ escape_char
       return String.fromCharCode(parseInt("0x" + h1 + h2 + h3 + h4));
     }
   / "\\" { return "\\"; }
+  / "''" { return "''" }
+  / '""' { return '""' }
+  / '``' { return '``' }
 
 line_terminator
   = [\n\r]

@@ -1102,7 +1102,7 @@ column_list_item
     }
 
 alias_clause
-  = KW_AS __ i:alias_ident { return i; }
+  = KW_AS ___ i:alias_ident { return i; }
   / KW_AS? __ i:ident { return i; }
 
 from_clause
@@ -2125,6 +2125,9 @@ escape_char
       return String.fromCharCode(parseInt("0x" + h1 + h2 + h3 + h4));
     }
   / "\\" { return "\\"; }
+  / "''" { return "''" }
+  / '""' { return '""' }
+  / '``' { return '``' }
 
 line_terminator
   = [\n\r]
