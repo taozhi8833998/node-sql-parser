@@ -837,6 +837,8 @@ export type single_quoted_ident = string;
 
 export type backticks_quoted_ident = string;
 
+export type ident_without_kw = ident_name | quoted_ident;
+
 
 
 export type column = string | quoted_ident;
@@ -913,7 +915,9 @@ export type extract_filed = 'string';
 
 export type extract_func = { type: 'extract'; args: { field: extract_filed; cast_type: 'TIMESTAMP' | 'INTERVAL' | 'TIME'; source: expr; }};
 
-export type scalar_func = KW_CURRENT_DATE | KW_CURRENT_TIME | KW_CURRENT_TIMESTAMP | KW_CURRENT_USER | KW_USER | KW_SESSION_USER | KW_SYSTEM_USER;
+export type scalar_time_func = KW_CURRENT_DATE | KW_CURRENT_TIME | KW_CURRENT_TIMESTAMP;
+
+export type scalar_func = scalar_time_func | KW_CURRENT_USER | KW_USER | KW_SESSION_USER | KW_SYSTEM_USER;
 
 
 
