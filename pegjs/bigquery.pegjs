@@ -97,7 +97,7 @@
     'WRITE': true, // for lock table
 
     'GLOBAL': true,
-    'SESSION': true,
+    // 'SESSION': true,
     'LOCAL': true,
     'PERSIST': true,
     'PERSIST_ONLY': true,
