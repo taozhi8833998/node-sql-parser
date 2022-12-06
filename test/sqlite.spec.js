@@ -90,4 +90,9 @@ describe('sqlite', () => {
     const sql = `CREATE TABLE IF NOT EXISTS stg_devices AS SELECT * FROM devices WHERE 1 = 0;`
     expect(getParsedSql(sql)).to.be.equal('CREATE TABLE IF NOT EXISTS `stg_devices` AS SELECT * FROM `devices` WHERE 1 = 0')
   })
+
+  it('should support escape single quote', () => {
+    const sql = "SELECT name, 'doesn''t smoke' FROM people WHERE name = 'John';"
+    expect(getParsedSql(sql)).to.be.equal("SELECT `name`, 'doesn''t smoke' FROM `people` WHERE `name` = 'John'")
+  })
 })
