@@ -677,6 +677,13 @@ describe('BigQuery', () => {
         "SELECT * FROM shop.clothes WHERE type = 'shoe'"
       ]
     },
+    {
+      title: 'alias clause using keyword',
+      sql: [
+        "select 'hello' as session",
+        "SELECT 'hello' AS session",
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
