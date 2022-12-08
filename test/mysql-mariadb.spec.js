@@ -412,6 +412,13 @@ describe('mysql', () => {
           'INSERT `t1` SET `c1` = 1'
         ]
       },
+      {
+        title: 'support $ in alias ident',
+        sql: [
+          'select 1 as stuff$id from dual',
+          'SELECT 1 AS `stuff$id` FROM DUAL',
+        ]
+      }
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

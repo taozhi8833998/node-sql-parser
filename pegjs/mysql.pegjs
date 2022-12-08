@@ -2441,7 +2441,7 @@ ident_name
 
 ident_start = [A-Za-z_]
 
-ident_part  = [A-Za-z0-9_]
+ident_part  = [A-Za-z0-9_$]
 
 // to support column name like `cf1:name` in hbase
 column_part  = [A-Za-z0-9_:]
