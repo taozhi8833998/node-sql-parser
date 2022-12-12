@@ -19,7 +19,7 @@ import { execToSQL } from './exec'
 import { orderOrPartitionByToSQL } from './expr'
 import { limitToSQL } from './limit'
 import { showToSQL } from './show'
-import { analyzeToSQL, attachToSQL } from './sqlite'
+import { analyzeToSQL, attachToSQL } from './analyze'
 import { withToSQL } from './with'
 import { hasVal } from './util'
 
