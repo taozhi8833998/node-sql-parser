@@ -60,7 +60,7 @@
     "@babel/preset-env": "^7.10.4",
     "@babel/register": "^7.10.5",
     "@types/chai": "^4.1.7",
-    "@types/mocha": "^9.0.0",
+    "@types/mocha": "^10.0.1",
     "babel-loader": "^8.1.0",
     "browserify": "^17.0.0",
     "chai": "^4.2.0",
