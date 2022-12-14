@@ -418,6 +418,13 @@ describe('mysql', () => {
           'select 1 as stuff$id from dual',
           'SELECT 1 AS `stuff$id` FROM DUAL',
         ]
+      },
+      {
+        title: 'group concat with separator',
+        sql: [
+          "select GROUP_CONCAT(DISTINCT abc order by abc SEPARATOR ';') as abc from business_table",
+          "SELECT GROUP_CONCAT(DISTINCT `abc` ORDER BY `abc` ASC SEPARATOR ';') AS `abc` FROM `business_table`"
+        ]
       }
     ]
     SQL_LIST.forEach(sqlInfo => {
