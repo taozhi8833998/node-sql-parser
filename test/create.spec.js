@@ -120,6 +120,16 @@ describe('create', () => {
         expect(getParsedSql(`CREATE TABLE parts (part_no VARCHAR(18) PRIMARY KEY,description VARCHAR(40),cost DECIMAL(10,2 ) NOT NULL CHECK (cost >= 0) enforced,price DECIMAL(10,2) NOT NULL CHECK (price >= 0) not enforced);`))
           .to.equal('CREATE TABLE `parts` (`part_no` VARCHAR(18) PRIMARY KEY, `description` VARCHAR(40), `cost` DECIMAL(10, 2) NOT NULL CHECK (`cost` >= 0) ENFORCED, `price` DECIMAL(10, 2) NOT NULL CHECK (`price` >= 0) NOT ENFORCED)');
       })
+
+      it('should support binary and columns with or without length', () => {
+        expect(getParsedSql(`create table dbname.tableName (id1 BINARY(16), id2 BINARY);`))
+        .to.equal('CREATE TABLE `dbname`.`tableName` (`id1` BINARY(16), `id2` BINARY)');
+      })
+
+      it('should support varbinary columns with length', () => {
+        expect(getParsedSql(`create table dbname.tableName (id VARBINARY(16));`))
+        .to.equal('CREATE TABLE `dbname`.`tableName` (`id` VARBINARY(16))');
+      })
     })
 
     describe('create index or key', () => {

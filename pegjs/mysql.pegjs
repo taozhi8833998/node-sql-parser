@@ -3046,6 +3046,8 @@ KW_END      = "END"i        !ident_start
 
 KW_CAST     = "CAST"i       !ident_start
 
+KW_BINARY    = "BINARY"i    !ident_start { return 'BINARY'; }
+KW_VARBINARY = "VARBINARY"i !ident_start { return 'VARBINARY'; }
 KW_BIT      = "BIT"i      !ident_start { return 'BIT'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
@@ -3364,8 +3366,10 @@ blob_type
   = b:('blob'i / 'tinyblob'i / 'mediumblob'i / 'longblob'i) { return { dataType: b.toUpperCase() }; }
 
 binary_type
-  = 'binary'i { return { dataType: 'BINARY' }; }
-  / 'varbinary'i { return { dataType: 'VARBINARY' }; }
+  = t:(KW_BINARY / KW_VARBINARY) __ LPAREN __ l:[0-9]+ __ RPAREN {
+    return { dataType: t, length: parseInt(l.join(''), 10) };
+  }
+  / t:KW_BINARY { return { dataType: t }; }
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
