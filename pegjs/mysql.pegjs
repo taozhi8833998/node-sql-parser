@@ -755,15 +755,20 @@ default_expr
     }
   }
 
-generated
-  = 'GENERATED'i __ 'ALWAYS'i __ 'AS'i __ LPAREN __ expr:(literal / expr) __ RPAREN {
-    return {
-      type: 'generated',
-      expr: expr,
-      //generated_always: ga && ga.toLowerCase(),
-      //storage_type: vs && vs.toLowerCase()
-    }
+generated_always
+  = g:'GENERATED'i __ a:'ALWAYS'i {
+    return [g, a].join(' ').toLowerCase()
   }
+
+generated
+  = gn:(generated_always? __ 'AS'i) __ LPAREN __ expr:(literal / expr) __ RPAREN __ st:('STORED'i / 'VIRTUAL'i)* {
+      return {
+        type: 'generated',
+        expr: expr,
+        value: gn.filter(s => typeof s === 'string').join(' ').toLowerCase(),
+        storage_type: st && st[0] && st[0].toLowerCase()
+      }
+    }
 
 drop_index_opt
   = head:(ALTER_ALGORITHM / ALTER_LOCK) tail:(__ (ALTER_ALGORITHM / ALTER_LOCK))* {

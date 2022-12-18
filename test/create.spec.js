@@ -132,18 +132,27 @@ describe('create', () => {
       })
 
       it('should support generated columns', () =>{
-        // expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) AS (CONCAT(first_name,' ',last_name)))`))
-        //   .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` varchar(101) AS (CONCAT(`first_name`,' ',`last_name`)))");
+        expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) AS (CONCAT(first_name,' ',last_name)));`))
+          .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) AS (CONCAT(`first_name`, ' ', `last_name`)))");
 
+        expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) AS (CONCAT(first_name,' ',last_name)) STORED);`))
+        .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) AS (CONCAT(`first_name`, ' ', `last_name`)) STORED)");
+
+        expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) AS (CONCAT(first_name,' ',last_name)) VIRTUAL);`))
+        .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) AS (CONCAT(`first_name`, ' ', `last_name`)) VIRTUAL)");
+      })
+
+      it('should support generated columns with generated always', () =>{
         expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) GENERATED ALWAYS AS (CONCAT(first_name,' ',last_name)));`))
           .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) GENERATED ALWAYS AS (CONCAT(`first_name`, ' ', `last_name`)))");
 
-        // expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) GENERATED ALWAYS AS (CONCAT(first_name,' ',last_name))) VIRTUAL`))
-        //   .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` varchar(101) GENERATED ALWAYS AS (CONCAT(`first_name`,' ',`last_name`))) VIRTUAL;");
+        expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) GENERATED ALWAYS AS (CONCAT(first_name,' ',last_name)) VIRTUAL);`))
+          .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) GENERATED ALWAYS AS (CONCAT(`first_name`, ' ', `last_name`)) VIRTUAL)");
 
-        // expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) GENERATED ALWAYS AS (CONCAT(first_name,' ',last_name))) STORED`))
-        //   .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` varchar(101) GENERATED ALWAYS AS (CONCAT(`first_name`,' ',`last_name`))) STORED;");
+        expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) GENERATED ALWAYS AS (CONCAT(first_name,' ',last_name)) STORED);`))
+          .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) GENERATED ALWAYS AS (CONCAT(`first_name`, ' ', `last_name`)) STORED)");
       })
+
     })
 
     describe('create index or key', () => {

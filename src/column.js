@@ -111,7 +111,7 @@ function columnOrderToSQL(columnOrder) {
 
 function generatedExpressionToSQL(generated) {
   if (!generated) return
-  const result = ['GENERATED ALWAYS AS', `(${exprToSQL(generated.expr)})`]
+  const result = [toUpper(generated.value), `(${exprToSQL(generated.expr)})`, toUpper(generated.storage_type)]
   return result.filter(hasVal).join(' ')
 }
 
