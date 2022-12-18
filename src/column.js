@@ -109,6 +109,12 @@ function columnOrderToSQL(columnOrder) {
   return result.filter(hasVal).join(' ')
 }
 
+function generatedExpressionToSQL(generated) {
+  if (!generated) return
+  const result = ['GENERATED ALWAYS AS', `(${exprToSQL(generated.expr)})`]
+  return result.filter(hasVal).join(' ')
+}
+
 function columnDefinitionToSQL(columnDefinition) {
   const column = []
   const name = columnRefToSQL(columnDefinition.column)
@@ -117,6 +123,8 @@ function columnDefinitionToSQL(columnDefinition) {
   column.push(dataType)
   const columnOpt = columnOption(columnDefinition)
   column.push(columnOpt)
+  const generated = generatedExpressionToSQL(columnDefinition.generated)
+  column.push(generated)
   return column.filter(hasVal).join(' ')
 }
 
