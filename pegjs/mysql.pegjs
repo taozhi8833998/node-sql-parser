@@ -756,8 +756,8 @@ default_expr
   }
 
 generated_always
-  = g:'GENERATED'i __ a:'ALWAYS'i {
-    return [g, a].join(' ').toLowerCase()
+  = ga:('GENERATED'i __ 'ALWAYS'i) {
+    return ga.join('').toLowerCase()
   }
 
 generated
