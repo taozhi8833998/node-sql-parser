@@ -713,11 +713,13 @@ column_definition_opt_list
 create_column_definition
   = c:column_ref __
     d:data_type __
+    g:generated? __
     cdo:column_definition_opt_list? {
       columnList.add(`create::${c.table}::${c.column}`)
       return {
         column: c,
         definition: d,
+        generated: g,
         resource: 'column',
         ...(cdo || {})
       }
@@ -752,6 +754,22 @@ default_expr
       value: ce
     }
   }
+
+generated_always
+  = ga:('GENERATED'i __ 'ALWAYS'i) {
+    return ga.join('').toLowerCase()
+  }
+
+generated
+  = gn:(generated_always? __ 'AS'i) __ LPAREN __ expr:(literal / expr) __ RPAREN __ st:('STORED'i / 'VIRTUAL'i)* {
+      return {
+        type: 'generated',
+        expr: expr,
+        value: gn.filter(s => typeof s === 'string').join(' ').toLowerCase(),
+        storage_type: st && st[0] && st[0].toLowerCase()
+      }
+    }
+
 drop_index_opt
   = head:(ALTER_ALGORITHM / ALTER_LOCK) tail:(__ (ALTER_ALGORITHM / ALTER_LOCK))* {
     return createList(head, tail, 1)
