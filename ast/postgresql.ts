@@ -887,11 +887,13 @@ type KW_SUM_MAX_MIN_AVG = never;
 
 export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'; args:count_arg; over: over_partition } | { type: 'aggr_func'; name: 'PERCENTILE_CONT' | 'PERCENTILE_DISC'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition } | { type: 'aggr_func'; name: 'MODE'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition };
 
+export type concat_separator = { keyword: string | null; value: literal_string; };
 
 
 
 
-export type distinct_args = { distinct: 'DISTINCT'; expr: column_ref; } | { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; parentheses: boolean };
+
+export type distinct_args = { distinct: 'DISTINCT'; expr: column_ref; } | { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; parentheses: boolean; separator?: concat_separator; };
 
 
 
