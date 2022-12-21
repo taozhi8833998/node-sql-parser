@@ -166,7 +166,7 @@ describe('create', () => {
       });
 
       ['index', 'key'].forEach(type => {
-        it(`should support create table ${type}`, () => {
+        it.only(`should support create table ${type}`, () => {
           expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} idx_name using hash (name) key_block_size 128) engine = innodb auto_increment = 10`))
             .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} idx_name USING HASH (\`name\`) KEY_BLOCK_SIZE 128) ENGINE = INNODB AUTO_INCREMENT = 10`);
 
@@ -181,6 +181,9 @@ describe('create', () => {
 
           expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} using btree (name) key_block_size = 128 invisible with parser newparser comment "index comment")`))
             .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} USING BTREE (\`name\`) KEY_BLOCK_SIZE = 128 INVISIBLE WITH PARSER newparser COMMENT 'index comment')`);
+
+          expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} using btree (id asc, name desc) key_block_size = 128 invisible with parser newparser comment "index comment")`))
+          .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} USING BTREE (\`id\` ASC, \`name\` DESC) KEY_BLOCK_SIZE = 128 INVISIBLE WITH PARSER newparser COMMENT 'index comment')`);
         })
       })
 
