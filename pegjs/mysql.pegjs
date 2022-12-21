@@ -1511,7 +1511,8 @@ cte_column_definition
 column_idx_ref
   = c:column __ so:(KW_ASC / KW_DESC)? {
       return {
-        column: c,
+        type: 'column_in_index',
+        name: c,
         sort_order: so
       }
     }

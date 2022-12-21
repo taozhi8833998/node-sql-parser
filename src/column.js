@@ -173,9 +173,16 @@ function columnsToSQL(columns, tables) {
   return result.filter(hasVal).join(' ')
 }
 
+function columnInIndexToSQL(column) {
+  const { name: columnName, sort_order: sortOrder } = column
+  const result = [identifierToSql(columnName), toUpper(sortOrder)]
+  return result.filter(hasVal).join(' ')
+}
+
 export {
   columnDefinitionToSQL,
   columnRefToSQL,
+  columnInIndexToSQL,
   columnsToSQL,
   columnDataType,
   columnOrderToSQL,
