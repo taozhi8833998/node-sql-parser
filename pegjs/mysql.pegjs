@@ -1509,12 +1509,12 @@ cte_column_definition
     }
 
 column_idx_ref
-  = c:column __ so:(KW_ASC / KW_DESC)? {
+  = col:column_without_kw __ ob:(KW_ASC / KW_DESC)? {
       return {
-        type: 'column_in_index',
-        name: c,
-        sort_order: so
-      }
+        type: 'column_ref',
+        column: col,
+        order_by: ob
+      };
     }
 
 column_ref_idx_list
