@@ -281,7 +281,7 @@ describe('Command SQL', () => {
       })
     })
 
-    it.only(`should support MySQL alter add index or key`, () => {
+    it(`should support MySQL alter add index or key`, () => {
       ["index", "key"].forEach(keyword => {
         expect(getParsedSql(`alter table a add ${keyword} (\`name\`, \`alias\`)`))
         .to.equal(`ALTER TABLE \`a\` ADD ${keyword.toUpperCase()} (\`name\`, \`alias\`)`);
