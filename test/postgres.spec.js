@@ -818,4 +818,14 @@ describe('Postgres', () => {
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
+
+  describe('pg ast', () => {
+    it('should get correct columns and tables', () => {
+      const sql = 'SELECT "Id" FROM "Test";'
+      const ast = parser.parse(sql, opt)
+      expect(ast.tableList).to.be.eql(['select::null::Test'])
+      expect(ast.columnList).to.be.eql(['select::null::Id'])
+      expect(parser.sqlify(ast.ast, opt)).to.be.equals(sql.slice(0, -1))
+    })
+  })
 })
