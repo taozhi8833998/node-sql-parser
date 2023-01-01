@@ -1,5 +1,5 @@
 import { exprToSQL, orderOrPartitionByToSQL } from './expr'
-import { hasVal, literalToSQL } from './util'
+import { hasVal, literalToSQL, toUpper } from './util'
 import { overToSQL } from './over'
 
 function aggrToSQL(expr) {
@@ -20,7 +20,7 @@ function aggrToSQL(expr) {
   }
   if (args.orderby) str = `${str} ${orderOrPartitionByToSQL(args.orderby, 'order by')}`
   if (orderby) str = `${str} ${orderOrPartitionByToSQL(orderby, 'order by')}`
-  if (args.separator) str = [str, args.separator.keyword, literalToSQL(args.separator.value)].filter(hasVal).join(' ')
+  if (args.separator) str = [str, toUpper(args.separator.keyword), literalToSQL(args.separator.value)].filter(hasVal).join(' ')
   const withinGroup = within_group_orderby ? `WITHIN GROUP (${orderOrPartitionByToSQL(within_group_orderby, 'order by')})` : ''
   const filterStr = filter ? `FILTER (WHERE ${exprToSQL(filter.where)})` : ''
   return [`${fnName}(${str})`, withinGroup, overStr, filterStr].filter(hasVal).join(' ')
