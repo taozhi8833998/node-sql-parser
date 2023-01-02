@@ -700,6 +700,9 @@ column_definition_opt
   / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_name {
     return { character_set: { type: t, value: v, symbol: s }}
   }
+  / g:generated {
+    return { generated: g }
+  }
 
 column_definition_opt_list
   = head:column_definition_opt __ tail:(__ column_definition_opt)* {
@@ -713,13 +716,11 @@ column_definition_opt_list
 create_column_definition
   = c:column_ref __
     d:data_type __
-    g:generated? __
     cdo:column_definition_opt_list? {
       columnList.add(`create::${c.table}::${c.column}`)
       return {
         column: c,
         definition: d,
-        generated: g,
         resource: 'column',
         ...(cdo || {})
       }

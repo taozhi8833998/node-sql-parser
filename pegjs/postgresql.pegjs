@@ -1804,6 +1804,11 @@ column_list_item
         as: null
       };
     }
+  / c:double_quoted_ident __ d:DOT? !{ if(d) return true } __  alias: alias_clause? {
+      // => { type: 'expr'; expr: expr; as?: alias_clause; }
+      columnList.add(`select::null::${c}`)
+      return { type: 'expr', expr: { type: 'column_ref', table: null, column: c }, as: alias };
+  }
   / e:expr_item __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
       return { type: 'expr', expr: e, as: alias };
