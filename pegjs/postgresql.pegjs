@@ -82,7 +82,7 @@
     'UPDATE': true,
     'USING': true,
 
-    'VALUES': true,
+    // 'VALUES': true,
 
     'WITH': true,
     'WHEN': true,
@@ -2023,7 +2023,7 @@ join_op
   / (KW_INNER __)? KW_JOIN { /* => 'INNER JOIN' */ return 'INNER JOIN'; }
 
 table_name
-  = dt:ident_without_kw schema:(__ DOT __ ident_without_kw) tail:(__ DOT __ ident_without_kw) {
+  = dt:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
       // => { db?: ident; schema?: ident, table: ident | '*'; }
       const obj = { db: null, table: dt };
       if (tail !== null) {
@@ -2033,7 +2033,7 @@ table_name
       }
       return obj;
     }
-  / dt:ident_without_kw __ DOT __ STAR {
+  / dt:ident __ DOT __ STAR {
     // => IGNORE
       tableList.add(`select::${dt}::(.*)`);
       return {
@@ -2041,7 +2041,7 @@ table_name
         table: '*'
       }
     }
-  / dt:ident_without_kw tail:(__ DOT __ ident_without_kw)? {
+  / dt:ident tail:(__ DOT __ ident)? {
     // => IGNORE
       const obj = { db: null, table: dt };
       if (tail !== null) {
@@ -2249,7 +2249,7 @@ update_stmt
 
 delete_stmt
   = KW_DELETE    __
-    t: table_ref_list? __
+    t:table_ref_list? __
     f:from_clause __
     w:where_clause? {
       /*
