@@ -767,6 +767,13 @@ describe('Postgres', () => {
         'CREATE TABLE IF NOT EXISTS "users" ("id" BIGSERIAL, "name" VARCHAR(128) NOT NULL, "second_name" VARCHAR(128) DEFAULT NULL)',
       ]
     },
+    {
+      title: 'delete statement',
+      sql: [
+        'DELETE FROM users WHERE id = 2;',
+        'DELETE FROM "users" WHERE "id" = 2',
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

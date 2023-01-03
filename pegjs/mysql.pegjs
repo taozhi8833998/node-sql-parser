@@ -1949,7 +1949,7 @@ update_stmt
 
 delete_stmt
   = KW_DELETE    __
-    t: table_ref_list? __
+    t:table_ref_list? __
     f:from_clause __
     w:where_clause? __
     or:order_by_clause? __

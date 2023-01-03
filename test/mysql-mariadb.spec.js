@@ -425,7 +425,19 @@ describe('mysql', () => {
           "select GROUP_CONCAT(DISTINCT abc order by abc separator ';') as abc from business_table",
           "SELECT GROUP_CONCAT(DISTINCT `abc` ORDER BY `abc` ASC SEPARATOR ';') AS `abc` FROM `business_table`"
         ]
-      }
+      },
+      {
+        title: 'group concat',
+        sql: [
+          `select
+          (SELECT group_concat(v SEPARATOR ', ' )
+          FROM category_table WHERE category = 3)
+          AS category
+          FROM fssa_esg_issues
+          group by id`,
+          "SELECT (SELECT GROUP_CONCAT(`v` SEPARATOR ', ') FROM `category_table` WHERE `category` = 3) AS `category` FROM `fssa_esg_issues` GROUP BY `id`",
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

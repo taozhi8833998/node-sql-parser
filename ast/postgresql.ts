@@ -1201,6 +1201,10 @@ type KW_FLOAT = never;
 
 type KW_DOUBLE = never;
 
+type KW_BIGSERIAL = never;
+
+type KW_REAL = never;
+
 type KW_DATE = never;
 
 type KW_DATETIME = never;
