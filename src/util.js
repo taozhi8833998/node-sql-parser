@@ -181,7 +181,8 @@ function hasVal(val) {
 
 function literalToSQL(literal) {
   if (!literal) return
-  const { type, parentheses, prefix, suffix, value } = literal
+  let { prefix } = literal
+  const { type, parentheses, suffix, value } = literal
   let str = value
   switch (type) {
     case 'backticks_quote_string':
@@ -219,7 +220,8 @@ function literalToSQL(literal) {
       str = '*'
       break
     case 'param':
-      str = `:${value}`
+      str = `${prefix || ':'}${value}`
+      prefix = null
       break
     case 'origin':
       str = value.toUpperCase()

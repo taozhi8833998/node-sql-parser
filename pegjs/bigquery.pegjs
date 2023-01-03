@@ -2302,8 +2302,8 @@ ident_part  = [A-Za-z0-9_-]
 column_part  = [A-Za-z0-9_:-]
 
 param
-  = l:(':' ident_name) {
-      return { type: 'param', value: l[1] };
+  = s:(':'/'@') n:ident_name {
+      return { type: 'param', value: n, prefix: s };
     }
 
 aggr_func_list
