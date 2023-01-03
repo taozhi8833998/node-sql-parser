@@ -759,7 +759,14 @@ describe('Postgres', () => {
         select * from values`,
         'WITH "values" AS (SELECT 1 AS "value") SELECT * FROM "values"',
       ]
-    }
+    },
+    {
+      title: 'bigserial datatype',
+      sql: [
+        'create table if not exists "users" ( "id" bigserial, "name" varchar(128) not null, "second_name" varchar(128) default null )',
+        'CREATE TABLE IF NOT EXISTS "users" ("id" BIGSERIAL, "name" VARCHAR(128) NOT NULL, "second_name" VARCHAR(128) DEFAULT NULL)',
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
