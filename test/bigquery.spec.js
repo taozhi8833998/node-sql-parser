@@ -684,6 +684,13 @@ describe('BigQuery', () => {
         "SELECT 'hello' AS session",
       ]
     },
+    {
+      title: 'unset parameter using @',
+      sql: [
+        'select * from unnest(@whatever)',
+        'SELECT * FROM UNNEST(@whatever)'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
