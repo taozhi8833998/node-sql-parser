@@ -2618,7 +2618,7 @@ aggr_fun_count
     }
 
 concat_separator
-  = kw:'SEPARATOR'? __ s:literal_string {
+  = kw:'SEPARATOR'i? __ s:literal_string {
     return {
       keyword: kw,
       value: s

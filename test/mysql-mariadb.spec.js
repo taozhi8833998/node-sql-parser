@@ -422,7 +422,7 @@ describe('mysql', () => {
       {
         title: 'group concat with separator',
         sql: [
-          "select GROUP_CONCAT(DISTINCT abc order by abc SEPARATOR ';') as abc from business_table",
+          "select GROUP_CONCAT(DISTINCT abc order by abc separator ';') as abc from business_table",
           "SELECT GROUP_CONCAT(DISTINCT `abc` ORDER BY `abc` ASC SEPARATOR ';') AS `abc` FROM `business_table`"
         ]
       }
