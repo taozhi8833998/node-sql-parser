@@ -3628,6 +3628,8 @@ KW_BIGINT   = "BIGINT"i   !ident_start { return 'BIGINT'; }
 KW_ENUM     = "ENUM"i   !ident_start { return 'ENUM'; }
 KW_FLOAT   = "FLOAT"i   !ident_start { return 'FLOAT'; }
 KW_DOUBLE   = "DOUBLE"i   !ident_start { return 'DOUBLE'; }
+KW_BIGSERIAL   = "BIGSERIAL"i   !ident_start { return 'BIGSERIAL'; }
+KW_REAL     = "REAL"i   !ident_start { return 'REAL'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
 KW_ROWS     = "ROWS"i     !ident_start { return 'ROWS'; }
@@ -3986,9 +3988,9 @@ numeric_type_suffix
     return result
   }
 numeric_type
-  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE)l:[0-9]+ __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ s:numeric_type_suffix? __{ /* =>  data_type */ return { dataType: t, suffix: s }; }
+  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_SERIAL / KW_BIGSERIAL /  KW_REAL) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_SERIAL / KW_BIGSERIAL /  KW_REAL)l:[0-9]+ __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_SERIAL / KW_BIGSERIAL /  KW_REAL) __ s:numeric_type_suffix? __{ /* =>  data_type */ return { dataType: t, suffix: s }; }
 
 timezone
   = w:('WITHOUT'i / 'WITH'i) __ KW_TIME __ 'ZONE'i {
