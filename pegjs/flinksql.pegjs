@@ -26,6 +26,7 @@
 
     'ELSE': true,
     'END': true,
+    'EXCEPT': true,
     'EXISTS': true,
     'EXPLAIN': true,
 
@@ -40,6 +41,7 @@
     'IN': true,
     'INNER': true,
     'INSERT': true,
+    'INTERSECT': true,
     'INTO': true,
     'INTERVAL': true,
     'IS': true,
@@ -257,8 +259,13 @@ multiple_stmt
       }
     }
 
+set_op
+  = u:(KW_UNION / KW_INTERSECT / KW_EXCEPT) __ s:KW_ALL? {
+    return s ? `${u.toLowerCase()} ${s.toLowerCase()}` : `${u.toLowerCase()}`
+  }
+
 union_stmt
-  = head:select_stmt tail:(__ KW_UNION __ KW_ALL? __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
+  = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
      /* export interface union_stmt_node extends select_stmt_node  {
          _next: union_stmt_node;
          union: 'union' | 'union all';
@@ -267,8 +274,8 @@ union_stmt
      */
       let cur = head
       for (let i = 0; i < tail.length; i++) {
-        cur._next = tail[i][5]
-        cur.union = tail[i][3] ? 'union all' : 'union'
+        cur._next = tail[i][3]
+        cur.union = tail[i][1]
         cur = cur._next
       }
       if(ob) head._orderby = ob
@@ -2131,6 +2138,7 @@ exists_op
 comparison_op_right
   = arithmetic_op_right
   / in_op_right
+  / exists_op_right
   / between_op_right
   / is_op_right
   / like_op_right
@@ -2203,6 +2211,12 @@ in_op_right
   / op:in_op __ e:(var_decl / literal_string) {
     // => IGNORE
       return { op: op, right: e };
+    }
+
+exists_op_right
+  = op:exists_op __ LPAREN  __ l:expr_list __ RPAREN {
+    // => {op: exists_op; right: expr_list | var_decl | literal_string; }
+      return { op: op, right: l };
     }
 
 jsonb_op_right
@@ -2817,7 +2831,9 @@ KW_FULL     = "FULL"i     !ident_start
 KW_INNER    = "INNER"i    !ident_start
 KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
-KW_UNION    = "UNION"i    !ident_start
+KW_UNION    = "UNION"i    !ident_start { return 'UNION'; }
+KW_INTERSECT    = "INTERSECT"i    !ident_start { return 'INTERSECT'; }
+KW_EXCEPT   = "EXCEPT"i   !ident_start { return 'EXCEPT'; }
 KW_VALUES   = "VALUES"i   !ident_start
 KW_USING    = "USING"i    !ident_start
 
@@ -2830,7 +2846,7 @@ KW_ORDER    = "ORDER"i      !ident_start
 KW_HAVING   = "HAVING"i     !ident_start
 
 KW_LIMIT    = "LIMIT"i      !ident_start
-KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET' }
+KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET'; }
 
 KW_ASC      = "ASC"i        !ident_start { return 'ASC'; }
 KW_DESC     = "DESC"i       !ident_start { return 'DESC'; }
