@@ -48,6 +48,13 @@ describe('Flink', () => {
         "SELECT TRIM(' test ') AS `TrimmedString`",
       ],
     },
+    {
+      title: "status as column name",
+      sql: [
+        `SELECT status FROM users;`,
+        "SELECT `status` FROM `users`",
+      ],
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
