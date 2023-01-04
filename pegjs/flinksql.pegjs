@@ -71,7 +71,7 @@
     'SESSION_USER': true,
     'SET': true,
     'SHOW': true,
-    'STATUS': true, // reserved (MySQL)
+    // 'STATUS': true,
     'SYSTEM_USER': true,
 
     'TABLE': true,
