@@ -445,6 +445,20 @@ describe('mysql', () => {
           "SELECT N'hello'",
         ]
       },
+      {
+        title: '_latin1 string',
+        sql: [
+          "SELECT _latin1 x'AAFF00';",
+          "SELECT _LATIN1 X'AAFF00'"
+        ]
+      },
+      {
+        title: 'binary string without x',
+        sql: [
+          "SELECT _binary 'hello';",
+          "SELECT _BINARY 'hello'"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

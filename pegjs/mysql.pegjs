@@ -2615,13 +2615,11 @@ window_frame_preceding
 
 window_frame_current_row
   = 'CURRENT'i __ 'ROW'i {
-    // => { type: 'single_quote_string'; value: string }
     return { type: 'single_quote_string', value: 'current row' }
   }
 
 window_frame_value
   = s:'UNBOUNDED'i {
-    // => literal_string
     return { type: 'single_quote_string', value: s.toUpperCase() }
   }
   / literal_numeric
@@ -2812,7 +2810,7 @@ signedness
   / KW_UNSIGNED
 
 literal
-  = b:'BINARY'i? __ s:literal_string ca:(__ collate_expr)? {
+  = b:('binary'i / '_binary'i)? __ s:literal_string ca:(__ collate_expr)? {
     if (b) s.prefix = b.toLowerCase()
     if (ca) s.suffix = { collate: ca[1] }
     return s
@@ -2848,22 +2846,23 @@ literal_bool
       return { type: 'bool', value: false };
     }
 
+
 literal_string
-  = b:'_binary'i ? __ r:'X'i ca:("'" [0-9A-Fa-f]* "'") {
+  = b:('_binary'i / '_latin1'i)? __ r:'X'i ca:("'" [0-9A-Fa-f]* "'") {
       return {
         type: 'hex_string',
         prefix: b,
         value: ca[1].join('')
       };
     }
-  / b:'_binary'i ? __ r:'b'i ca:("'" [0-9A-Fa-f]* "'") {
+  / b:('_binary'i / '_latin1'i)? __ r:'b'i ca:("'" [0-9A-Fa-f]* "'") {
       return {
         type: 'bit_string',
         prefix: b,
         value: ca[1].join('')
       };
     }
-  / b:'_binary'i ? __ r:'0x' ca:([0-9A-Fa-f]*) {
+  / b:('_binary'i / '_latin1'i)? __ r:'0x'i ca:([0-9A-Fa-f]*) {
     return {
         type: 'full_hex_string',
         prefix: b,

@@ -2493,7 +2493,7 @@ signedness
   / KW_UNSIGNED
 
 literal
-  = b:'BINARY'i? __ s:literal_string ca:(__ collate_expr)? {
+  = b:('binary'i / '_binary'i)? __ s:literal_string ca:(__ collate_expr)? {
     if (b) s.prefix = b.toLowerCase()
     if (ca) s.suffix = { collate: ca[1] }
     return s
@@ -2530,21 +2530,21 @@ literal_bool
     }
 
 literal_string
-  = b:'_binary'i ? __ r:'X'i ca:("'" [0-9A-Fa-f]* "'") {
+  = b:('_binary'i / '_latin1'i)? __ r:'X'i ca:("'" [0-9A-Fa-f]* "'") {
       return {
         type: 'hex_string',
         prefix: b,
         value: ca[1].join('')
       };
     }
-  / b:'_binary'i ? __ r:'b'i ca:("'" [0-9A-Fa-f]* "'") {
+  / b:('_binary'i / '_latin1'i)? __ r:'b'i ca:("'" [0-9A-Fa-f]* "'") {
       return {
         type: 'bit_string',
         prefix: b,
         value: ca[1].join('')
       };
     }
-  / b:'_binary'i ? __ r:'0x' ca:([0-9A-Fa-f]*) {
+  / b:('_binary'i / '_latin1'i)? __ r:'0x'i ca:([0-9A-Fa-f]*) {
     return {
         type: 'full_hex_string',
         prefix: b,
