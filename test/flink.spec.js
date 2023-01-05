@@ -161,6 +161,27 @@ describe('Flink', () => {
         "SELECT `user`, `amount` FROM `Orders` WHERE `product` NOT EXISTS (SELECT `product` FROM `NewProducts`)",
       ],
     },
+    {
+      title: "DISTINCT FROM",
+      sql: [
+        `SELECT * FROM users WHERE a IS DISTINCT FROM 'b'`,
+        "SELECT * FROM `users` WHERE `a` IS DISTINCT FROM 'b'",
+      ],
+    },
+    {
+      title: "NOT DISTINCT FROM",
+      sql: [
+        `SELECT * FROM users WHERE a IS NOT DISTINCT FROM b`,
+        "SELECT * FROM `users` WHERE `a` IS NOT DISTINCT FROM `b`",
+      ],
+    },
+    {
+      title: "DISTINCT FROM NULL",
+      sql: [
+        `SELECT * FROM users WHERE a IS DISTINCT FROM NULL`,
+        "SELECT * FROM `users` WHERE `a` IS DISTINCT FROM NULL",
+      ],
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
