@@ -27,6 +27,7 @@
     'ELSE': true,
     'END': true,
     'EXCEPT': true,
+    'ESCAPE': true,
     'EXISTS': true,
     'EXPLAIN': true,
 
@@ -2193,13 +2194,23 @@ like_op
   = nk:(KW_NOT __ KW_LIKE) { /* => 'LIKE' */ return nk[0] + ' ' + nk[2]; }
   / KW_LIKE
 
+escape_op
+  = kw:'ESCAPE'i __ c:literal_string {
+    // => { type: 'ESCAPE'; value: literal_string }
+    return {
+      type: 'ESCAPE',
+      value: c,
+    }
+  }
+
 in_op
   = nk:(KW_NOT __ KW_IN) { /* => 'NOT IN' */ return nk[0] + ' ' + nk[2]; }
   / KW_IN
 
 like_op_right
-  = op:like_op __ right:(literal / comparison_expr) {
-     // => { op: like_op; right: comparison_expr}
+  = op:like_op __ right:(literal / comparison_expr) __ es:escape_op? {
+     // => { op: like_op; right: (literal | comparison_expr) & { escape?: escape_op }; }
+      if (es) right.escape = es
       return { op: op, right: right };
     }
 

@@ -161,6 +161,13 @@ describe('Flink', () => {
         "SELECT `user`, `amount` FROM `Orders` WHERE `product` NOT EXISTS (SELECT `product` FROM `NewProducts`)",
       ],
     },
+    {
+      title: "like with escape",
+      sql: [
+        `SELECT * FROM users WHERE a LIKE '%abc%' ESCAPE '-'`,
+        "SELECT * FROM `users` WHERE `a` LIKE '%abc%' ESCAPE '-'",
+      ],
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
