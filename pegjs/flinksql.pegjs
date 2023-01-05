@@ -2028,9 +2028,9 @@ expr
   / union_stmt
 
 logic_operator_expr
-  = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ {
+  = head:primary tail:(__ (KW_AND / KW_OR) __ primary)+ {
     /*
-    export type BINARY_OPERATORS = LOGIC_OPERATOR | 'OR' | 'AND' | multiplicative_operator | additive_operator
+    export type BINARY_OPERATORS = 'OR' | 'AND' | multiplicative_operator | additive_operator
       | arithmetic_comparison_operator
       | 'IN' | 'NOT IN'
       | 'BETWEEN' | 'NOT BETWEEN'
@@ -2049,7 +2049,7 @@ logic_operator_expr
   }
 
 unary_expr
-  = op: additive_operator tail: (__ primary)+ {
+  = op:additive_operator tail:(__ primary)+ {
     /*
     export type UNARY_OPERATORS = '+' | '-' | 'EXISTS' | 'NOT EXISTS'  | 'NULL'
     => {
@@ -2061,7 +2061,7 @@ unary_expr
     return createUnaryExpr(op, tail[0][1]);
   }
 binary_column_expr
-  = head:expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ expr)+ {
+  = head:expr tail:(__ (KW_AND / KW_OR) __ expr)+ {
     const len = tail.length
     let result = tail[len - 1][3]
     for (let i = len - 1; i >= 0; i--) {
@@ -2246,8 +2246,10 @@ multiplicative_expr
       return createBinaryExprChain(head, tail)
     }
 
+// The concatenation operator has the same precedence as all multiplicative operators
+// Ref: https://calcite.apache.org/docs/reference.html#operator-precedence
 multiplicative_operator
-  = "*" / "/" / "%"
+  = "*" / "/" / "%" / OPERATOR_CONCATENATION
 
 primary
   = cast_expr
@@ -3016,8 +3018,6 @@ WELL_ARROW = '#>'
 DOUBLE_WELL_ARROW = '#>>'
 
 OPERATOR_CONCATENATION = '||'
-OPERATOR_AND = '&&'
-LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
 
 // separator
 __

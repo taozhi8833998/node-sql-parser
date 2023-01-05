@@ -161,6 +161,13 @@ describe('Flink', () => {
         "SELECT `user`, `amount` FROM `Orders` WHERE `product` NOT EXISTS (SELECT `product` FROM `NewProducts`)",
       ],
     },
+    {
+      title: "string concatenation function",
+      sql: [
+        `SELECT a || b FROM users WHERE a || b = 'ab';`,
+        "SELECT `a` || `b` FROM `users` WHERE `a` || `b` = 'ab'",
+      ],
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
