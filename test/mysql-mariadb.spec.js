@@ -438,6 +438,13 @@ describe('mysql', () => {
           "SELECT (SELECT GROUP_CONCAT(`v` SEPARATOR ', ') FROM `category_table` WHERE `category` = 3) AS `category` FROM `fssa_esg_issues` GROUP BY `id`",
         ]
       },
+      {
+        title: 'natural charset strings',
+        sql: [
+          "SELECT N'hello'",
+          "SELECT N'hello'",
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

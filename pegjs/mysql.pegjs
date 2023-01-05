@@ -2870,6 +2870,12 @@ literal_string
         value: ca.join('')
       };
   }
+  / r:'N'i ca:("'" single_char* "'") {
+    return {
+        type: 'natural_string',
+        value: ca[1].join('')
+      };
+  }
   / ca:("'" single_char* "'") {
       return {
         type: 'single_quote_string',
