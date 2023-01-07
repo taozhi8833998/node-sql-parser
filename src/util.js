@@ -200,6 +200,9 @@ function literalToSQL(literal) {
     case 'full_hex_string':
       str = `0x${escape(value)}`
       break
+    case 'natural_string':
+      str = `N'${escape(value)}'`
+      break
     case 'bit_string':
       str = `b'${escape(value)}'`
       break
