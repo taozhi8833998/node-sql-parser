@@ -1,4 +1,4 @@
-import { exprToSQL } from './expr'
+import { exprToSQL, varToSQL } from './expr'
 import { limitToSQL } from './limit'
 import { tableToSQL, tablesToSQL } from './tables'
 import { commonOptionConnector, hasVal, literalToSQL, toUpper } from './util'
@@ -30,7 +30,8 @@ function showGrantsForUser(showGrantsForExpr) {
 }
 
 function showToSQL(showExpr) {
-  const { suffix, keyword } = showExpr
+  let { keyword } = showExpr
+  const { suffix } = showExpr
   let str = ''
   switch (toUpper(keyword)) {
     case 'BINLOG':
@@ -46,11 +47,14 @@ function showToSQL(showExpr) {
     case 'CREATE':
       str = commonOptionConnector('', tableToSQL, showExpr.view)
       break
+    case 'VAR':
+      str = varToSQL(showExpr.var)
+      keyword = ''
+      break
     default:
       break
   }
-  const result = ['SHOW', toUpper(keyword), toUpper(suffix), str]
-  return result.filter(hasVal).join(' ')
+  return ['SHOW', toUpper(keyword), toUpper(suffix), str].filter(hasVal).join(' ')
 }
 
 export {

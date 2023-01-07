@@ -452,7 +452,8 @@ export type call_stmt = AstStatement<call_stmt_node>;
 
 export interface show_stmt_node {
           type: 'show';
-          keyword: 'tables';
+          keyword: 'tables' | 'var';
+          var?: without_prefix_var_decl;
         }
 
 export type show_stmt = AstStatement<show_stmt_node>;
@@ -507,7 +508,9 @@ export type array_index = { brackets: boolean, number: number };
 
 export type expr_item = (expr || binary_expr) & { array_index: array_index };
 
-export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; } | { type: 'star_ref'; expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
+export type cast_data_type = data_type & { quoted?: string };
+
+export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; } | { type: 'star_ref'; expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
 
 
 
@@ -1399,7 +1402,7 @@ export type var_decl_list = var_decl[];
 
 export type var_decl = { type: 'var'; name: string; prefix: string; suffix: string; }; | without_prefix_var_decl & { type: 'var'; prefix: string; };;
 
-export type without_prefix_var_decl = { type: 'var'; prefix: string; name: ident_name; members: mem_chain; };
+export type without_prefix_var_decl = { type: 'var'; prefix: string; name: ident_name; members: mem_chain; quoted: string | null };
 
 export type mem_chain = ident_name[];;
 
