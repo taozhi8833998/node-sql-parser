@@ -774,6 +774,13 @@ describe('Postgres', () => {
         'DELETE FROM "users" WHERE "id" = 2',
       ]
     },
+    {
+      title: 'column quoted data type',
+      sql: [
+        `select 'a'::"char" as b;`,
+        `SELECT 'a'::"CHAR" AS "b"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

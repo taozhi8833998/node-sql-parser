@@ -1775,13 +1775,21 @@ expr_item
     return e
   }
 
+cast_data_type
+  // => data_type & { quoted?: string }
+  = '"' t: data_type '"' {
+    t.quoted = '"'
+    return t
+  }
+  / data_type
+
 column_list_item
   = c:string_constants_escape {
     // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
-  / e:expr_item __ s:KW_DOUBLE_COLON __ t:data_type tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
-    // => { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; }
+  / e:expr_item __ s:KW_DOUBLE_COLON __ t:cast_data_type tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
+    // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; }
     return {
       as: alias,
       type: 'cast',
