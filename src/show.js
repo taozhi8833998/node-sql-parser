@@ -54,8 +54,7 @@ function showToSQL(showExpr) {
     default:
       break
   }
-  const result = ['SHOW', toUpper(keyword), toUpper(suffix), str]
-  return result.filter(hasVal).join(' ')
+  return ['SHOW', toUpper(keyword), toUpper(suffix), str].filter(hasVal).join(' ')
 }
 
 export {
