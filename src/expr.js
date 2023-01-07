@@ -35,14 +35,14 @@ const exprToSQLConvertFn = {
 }
 
 function varToSQL(expr) {
-  const { prefix = '@', name, members, keyword, suffix } = expr
+  const { prefix = '@', name, members, keyword, quoted, suffix } = expr
   const val = []
   if (keyword) val.push(keyword)
   const varName = members && members.length > 0 ? `${name}.${members.join('.')}` : name
   let result = `${prefix || ''}${varName}`
   if (suffix) result += suffix
   val.push(result)
-  return val.join(' ')
+  return [quoted, val.join(' '), quoted].filter(hasVal).join('')
 }
 
 exprToSQLConvertFn.var = varToSQL

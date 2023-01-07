@@ -1565,7 +1565,8 @@ show_stmt
       /*
         export interface show_stmt_node {
           type: 'show';
-          keyword: 'tables';
+          keyword: 'tables' | 'var';
+          var?: without_prefix_var_decl;
         }
         => AstStatement<show_stmt_node>
        */
@@ -1574,6 +1575,18 @@ show_stmt
       ast: {
         type: 'show',
         keyword: 'tables'
+      }
+    }
+  }
+  / KW_SHOW __ c:without_prefix_var_decl {
+    return {
+      // => AstStatement<show_stmt_node>
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'show',
+        keyword: 'var',
+        var: c,
       }
     }
   }
@@ -1776,12 +1789,12 @@ expr_item
   }
 
 cast_data_type
-  // => data_type & { quoted?: string }
-  = '"' t: data_type '"' {
-    t.quoted = '"'
+  = p:'"'? t: data_type s:'"'? {
+    // => data_type & { quoted?: string }
+    if ((p && !s) || (!p && s)) throw new Error('double quoted not match')
+    if (p && s) t.quoted = '"'
     return t
   }
-  / data_type
 
 column_list_item
   = c:string_constants_escape {
@@ -3926,14 +3939,16 @@ var_decl
   }
 
 without_prefix_var_decl
-  = name:ident_name m:mem_chain {
-    // => { type: 'var'; prefix: string; name: ident_name; members: mem_chain; }
+  = p:'"'? name:ident_name m:mem_chain s:'"'? {
+    // => { type: 'var'; prefix: string; name: ident_name; members: mem_chain; quoted: string | null }
     //push for analysis
+    if ((p && !s) || (!p && s)) throw new Error('double quoted not match')
     varList.push(name);
     return {
       type: 'var',
       name: name,
       members: m,
+      quoted: p && s ? '"' : null,
       prefix: null,
     };
   }
