@@ -168,6 +168,27 @@ describe('Flink', () => {
         "SELECT * FROM `users` WHERE `a` LIKE '%abc%' ESCAPE '-'",
       ],
     },
+    {
+      title: "DISTINCT FROM",
+      sql: [
+        `SELECT * FROM users WHERE a IS DISTINCT FROM 'b'`,
+        "SELECT * FROM `users` WHERE `a` IS DISTINCT FROM 'b'",
+      ],
+    },
+    {
+      title: "NOT DISTINCT FROM",
+      sql: [
+        `SELECT * FROM users WHERE a IS NOT DISTINCT FROM b`,
+        "SELECT * FROM `users` WHERE `a` IS NOT DISTINCT FROM `b`",
+      ],
+    },
+    {
+      title: "DISTINCT FROM NULL",
+      sql: [
+        `SELECT * FROM users WHERE a IS DISTINCT FROM NULL`,
+        "SELECT * FROM `users` WHERE `a` IS DISTINCT FROM NULL",
+      ],
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
