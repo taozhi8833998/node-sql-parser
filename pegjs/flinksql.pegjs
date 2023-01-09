@@ -2140,6 +2140,7 @@ comparison_op_right
   / in_op_right
   / exists_op_right
   / between_op_right
+  / distinct_from_op_right
   / is_op_right
   / like_op_right
   / jsonb_op_right
@@ -2188,6 +2189,15 @@ between_op_right
 between_or_not_between_op
   = nk:(KW_NOT __ KW_BETWEEN) { /* => 'NOT BETWEEN' */ return nk[0] + ' ' + nk[2]; }
   / KW_BETWEEN
+
+distinct_from_op
+  = KW_IS __ KW_NOT __ KW_DISTINCT __ KW_FROM { /* => 'IS NOT DISTINCT FROM' */ return 'IS NOT DISTINCT FROM'; }
+  / KW_IS __ KW_DISTINCT __ KW_FROM { /* => 'IS DISTINCT FROM' */ return 'IS DISTINCT FROM'; }
+
+distinct_from_op_right
+  = op:distinct_from_op __ right:(expr) {
+      return { op: op, right: right };
+    }
 
 like_op
   = nk:(KW_NOT __ KW_LIKE) { /* => 'LIKE' */ return nk[0] + ' ' + nk[2]; }
