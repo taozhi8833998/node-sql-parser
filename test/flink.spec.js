@@ -162,6 +162,13 @@ describe('Flink', () => {
       ],
     },
     {
+      title: "like with escape",
+      sql: [
+        `SELECT * FROM users WHERE a LIKE '%abc%' ESCAPE '-'`,
+        "SELECT * FROM `users` WHERE `a` LIKE '%abc%' ESCAPE '-'",
+      ],
+    },
+    {
       title: "DISTINCT FROM",
       sql: [
         `SELECT * FROM users WHERE a IS DISTINCT FROM 'b'`,
