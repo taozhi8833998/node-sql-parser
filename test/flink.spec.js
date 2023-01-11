@@ -102,63 +102,63 @@ describe('Flink', () => {
       sql: [
         `SELECT *
            FROM (
-             (SELECT user FROM Orders WHERE a % 2 = 0)
+             (SELECT user_id FROM Orders WHERE a % 2 = 0)
            INTERSECT
-             (SELECT user FROM Orders WHERE b = 0)
+             (SELECT user_id FROM Orders WHERE b = 0)
          )`,
-        "SELECT * FROM ((SELECT `user` FROM `Orders` WHERE `a` % 2 = 0) INTERSECT (SELECT `user` FROM `Orders` WHERE `b` = 0))",
+        "SELECT * FROM ((SELECT `user_id` FROM `Orders` WHERE `a` % 2 = 0) INTERSECT (SELECT `user_id` FROM `Orders` WHERE `b` = 0))",
       ],
     },
     {
       title: "IN",
       sql: [
         `
-          SELECT user, amount
+          SELECT user_id, amount
           FROM Orders
           WHERE product IN (
             SELECT product FROM NewProducts
           )
         `,
-        "SELECT `user`, `amount` FROM `Orders` WHERE `product` IN (SELECT `product` FROM `NewProducts`)",
+        "SELECT `user_id`, `amount` FROM `Orders` WHERE `product` IN (SELECT `product` FROM `NewProducts`)",
       ],
     },
     {
       title: "NOT IN",
       sql: [
         `
-          SELECT user, amount
+          SELECT user_id, amount
           FROM Orders
           WHERE product NOT IN (
             SELECT product FROM NewProducts
           )
         `,
-        "SELECT `user`, `amount` FROM `Orders` WHERE `product` NOT IN (SELECT `product` FROM `NewProducts`)",
+        "SELECT `user_id`, `amount` FROM `Orders` WHERE `product` NOT IN (SELECT `product` FROM `NewProducts`)",
       ],
     },
     {
       title: "EXISTS",
       sql: [
         `
-          SELECT user, amount
+          SELECT user_id, amount
           FROM Orders
           WHERE product EXISTS (
               SELECT product FROM NewProducts
           )
         `,
-        "SELECT `user`, `amount` FROM `Orders` WHERE `product` EXISTS (SELECT `product` FROM `NewProducts`)",
+        "SELECT `user_id`, `amount` FROM `Orders` WHERE `product` EXISTS (SELECT `product` FROM `NewProducts`)",
       ],
     },
     {
       title: "NOT EXISTS",
       sql: [
         `
-          SELECT user, amount
+          SELECT user_id, amount
           FROM Orders
           WHERE product NOT EXISTS (
               SELECT product FROM NewProducts
           )
         `,
-        "SELECT `user`, `amount` FROM `Orders` WHERE `product` NOT EXISTS (SELECT `product` FROM `NewProducts`)",
+        "SELECT `user_id`, `amount` FROM `Orders` WHERE `product` NOT EXISTS (SELECT `product` FROM `NewProducts`)",
       ],
     },
     {
