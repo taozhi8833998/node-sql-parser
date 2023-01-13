@@ -2094,7 +2094,7 @@ column_ref_list
     }
 
 having_clause
-  = KW_HAVING __ e:expr { /* => expr */ return e; }
+  = KW_HAVING __ e:or_and_where_expr { /* => expr */ return e; }
 
 window_clause
   = KW_WINDOW __ l:named_window_expr_list {

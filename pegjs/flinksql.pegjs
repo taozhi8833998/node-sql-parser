@@ -1693,7 +1693,7 @@ column_ref_list
     }
 
 having_clause
-  = KW_HAVING __ e:expr { /* => expr */ return e; }
+  = KW_HAVING __ e:or_and_where_expr { /* => expr */ return e; }
 
 order_by_clause
   = KW_ORDER __ KW_BY __ l:order_by_list { /* => order_by_list */ return l; }
