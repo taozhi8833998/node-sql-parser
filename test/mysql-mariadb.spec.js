@@ -468,6 +468,17 @@ describe('mysql', () => {
           'CREATE TABLE `GeoCoordinateTable` (`geoCoordinate` POINT NOT NULL) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci'
         ]
       },
+      {
+        title: 'have clause with parentheses',
+        sql: [
+          `SELECT col1, col2
+          FROM table1
+          HAVING (col1 LIKE '%foo%' OR
+                  col2 LIKE '%bar%')
+             AND col1 <> 'test'`,
+          "SELECT `col1`, `col2` FROM `table1` HAVING (`col1` LIKE '%foo%' OR `col2` LIKE '%bar%') AND `col1` <> 'test'"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
