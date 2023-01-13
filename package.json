@@ -80,7 +80,7 @@
     "pegjs": "^0.10.0",
     "pegjs-loader": "^0.5.6",
     "pre-commit": "^1.2.2",
-    "rimraf": "^3.0.2",
+    "rimraf": "^4.0.4",
     "source-map-support": "^0.5.19",
     "tinyify": "^4.0.0",
     "vscode-mocha-hmr": "^1.0.0",
