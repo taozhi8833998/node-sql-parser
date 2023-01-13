@@ -459,6 +459,15 @@ describe('mysql', () => {
           "SELECT _BINARY 'hello'"
         ]
       },
+      {
+        title: 'geometry type',
+        sql: [
+          `CREATE TABLE \`GeoCoordinateTable\` (
+            \`geoCoordinate\` point NOT NULL
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`,
+          'CREATE TABLE `GeoCoordinateTable` (`geoCoordinate` POINT NOT NULL) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

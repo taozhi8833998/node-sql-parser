@@ -3142,6 +3142,15 @@ KW_PERSIST        = "PERSIST"i   !ident_start { return 'PERSIST'; }
 KW_PERSIST_ONLY   = "PERSIST_ONLY"i   !ident_start { return 'PERSIST_ONLY'; }
 KW_VIEW           = "VIEW"i    !ident_start { return 'VIEW'; }
 
+KW_GEOMETRY             = "GEOMETRY"i    !ident_start { return 'GEOMETRY'; }
+KW_POINT                = "POINT"i    !ident_start { return 'POINT'; }
+KW_LINESTRING           = "LINESTRING"i    !ident_start { return 'LINESTRING'; }
+KW_POLYGON              = "POLYGON"i    !ident_start { return 'POLYGON'; }
+KW_MULTIPOINT           = "MULTIPOINT"i    !ident_start { return 'MULTIPOINT'; }
+KW_MULTILINESTRING      = "MULTILINESTRING"i    !ident_start { return 'MULTILINESTRING'; }
+KW_MULTIPOLYGON         = "MULTIPOLYGON"i    !ident_start { return 'MULTIPOLYGON'; }
+KW_GEOMETRYCOLLECTION   = "GEOMETRYCOLLECTION"i    !ident_start { return 'GEOMETRYCOLLECTION'; }
+
 KW_VAR__PRE_AT = '@'
 KW_VAR__PRE_AT_AT = '@@'
 KW_VAR_PRE_DOLLAR = '$'
@@ -3401,6 +3410,7 @@ data_type
   / boolean_type
   / binary_type
   / blob_type
+  / geometry_type
 
 boolean_type
   = 'boolean'i { return { dataType: 'BOOLEAN' }; }
@@ -3452,3 +3462,6 @@ json_type
 
 text_type
   = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) { return { dataType: t }}
+
+geometry_type
+  = t:(KW_GEOMETRY / KW_POINT / KW_LINESTRING / KW_POLYGON / KW_MULTIPOINT / KW_MULTILINESTRING / KW_MULTIPOLYGON / KW_GEOMETRYCOLLECTION ) { return { dataType: t }}
