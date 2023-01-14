@@ -1878,7 +1878,7 @@ column_ref_list
     }
 
 having_clause
-  = KW_HAVING __ e:expr { return e; }
+  = KW_HAVING __ e:or_and_where_expr { return e; }
 
 partition_by_clause
   = KW_PARTITION __ KW_BY __ bc:column_clause { return bc; }

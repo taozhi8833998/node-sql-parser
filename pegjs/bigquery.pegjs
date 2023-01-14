@@ -1796,7 +1796,7 @@ group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list { return e.value; }
 
 having_clause
-  = KW_HAVING __ e:expr { return e; }
+  = KW_HAVING __ e:or_and_where_expr { return e; }
 
 qualify_clause
   = KW_QUALIFY __ e:expr { return e }

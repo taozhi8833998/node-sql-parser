@@ -1205,7 +1205,7 @@ column_ref_list
     }
 
 having_clause
-  = KW_HAVING __ e:expr { return e; }
+  = KW_HAVING __ e:or_and_where_expr { return e; }
 
 as_window_specification
   = ident_name
