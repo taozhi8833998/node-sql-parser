@@ -189,6 +189,13 @@ describe('Flink', () => {
         "SELECT * FROM `users` WHERE `a` IS DISTINCT FROM NULL",
       ],
     },
+    {
+      title: "string concatenation function",
+      sql: [
+        `SELECT a || b FROM users WHERE a || b = 'ab';`,
+        "SELECT `a` || `b` FROM `users` WHERE `a` || `b` = 'ab'",
+      ],
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
