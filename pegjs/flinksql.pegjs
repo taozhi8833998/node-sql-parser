@@ -2029,7 +2029,7 @@ expr
   / union_stmt
 
 logic_operator_expr
-  = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ {
+  = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ __ rh:comparison_op_right?  {
     /*
     export type BINARY_OPERATORS = LOGIC_OPERATOR | 'OR' | 'AND' | multiplicative_operator | additive_operator
       | arithmetic_comparison_operator
@@ -2046,7 +2046,10 @@ logic_operator_expr
     }
     => binary_expr
     */
-    return createBinaryExprChain(head, tail);
+    const logicExpr = createBinaryExprChain(head, tail)
+    if (rh === null) return logicExpr
+    else if (rh.type === 'arithmetic') return createBinaryExprChain(logicExpr, rh.tail)
+    else return createBinaryExpr(rh.op, logicExpr, rh.right)
   }
 
 unary_expr
