@@ -2336,7 +2336,7 @@ concat_separator
 count_arg
   = e:star_expr { return { expr: e }; }
   / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ or:order_by_clause? __ s:concat_separator? { return { distinct: d, expr: c, orderby: or, parentheses: true, separator: s }; }
-  / d:KW_DISTINCT? __ c:primary __ or:order_by_clause? __ s:concat_separator?  { return { distinct: d, expr: c, orderby: or, separator: s }; }
+  / d:KW_DISTINCT? __ c:expr __ or:order_by_clause? __ s:concat_separator?  { return { distinct: d, expr: c, orderby: or, separator: s }; }
 
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
