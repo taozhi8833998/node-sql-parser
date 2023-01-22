@@ -698,6 +698,13 @@ describe('BigQuery', () => {
         'SELECT COUNT(DISTINCT id || name) FROM product.organization'
       ]
     },
+    {
+      title: 'integer type',
+      sql: [
+        "select cast ('2' as integer)",
+        "SELECT CAST('2' AS INTEGER)"
+      ],
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {

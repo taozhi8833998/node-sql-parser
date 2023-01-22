@@ -2878,7 +2878,7 @@ character_string_type
   = t:KW_STRING (__ LPAREN __ l:[0-9]+ __ RPAREN)* { return { dataType: t }; }
 
 numeric_type
-  = t:(KW_NUMERIC / KW_INT_64 / KW_FLOAT_64) { return { dataType: t }; }
+  = t:(KW_NUMERIC / KW_INT_64 / KW_FLOAT_64 / KW_INTEGER) { return { dataType: t }; }
 
 datetime_type
   = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) __ LPAREN __ l:[0-9]+ __ RPAREN { return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
