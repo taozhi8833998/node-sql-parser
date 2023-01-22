@@ -2263,7 +2263,7 @@ aggr_fun_count
 count_arg
   = e:star_expr { return { expr: e }; }
   / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ or:order_by_clause? { return { distinct: d, expr: c, orderby: or, parentheses: true }; }
-  / d:KW_DISTINCT? __ c:primary __ or:order_by_clause? { return { distinct: d, expr: c, orderby: or }; }
+  / d:KW_DISTINCT? __ c:expr __ or:order_by_clause? { return { distinct: d, expr: c, orderby: or }; }
 
 star_expr
   = "*" { return { type: 'star', value: '*' }; }

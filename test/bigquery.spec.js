@@ -691,6 +691,13 @@ describe('BigQuery', () => {
         'SELECT * FROM UNNEST(@whatever)'
       ]
     },
+    {
+      title: 'count distinct',
+      sql: [
+        'select count(distinct id || name) from product.organization',
+        'SELECT COUNT(DISTINCT id || name) FROM product.organization'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
