@@ -705,6 +705,13 @@ describe('BigQuery', () => {
         "SELECT CAST('2' AS INTEGER)"
       ],
     },
+    {
+      title: 'data_trunc function column',
+      sql: [
+        'SELECT DATE_TRUNC(my_date, YEAR)',
+        'SELECT DATE_TRUNC(my_date, YEAR)'
+      ],
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
@@ -756,7 +763,10 @@ describe('BigQuery', () => {
 
   it('should get the correct column list', () => {
     let sql = 'SELECT EXTRACT(ISOWEEK FROM mydate)'
-    const ast = parser.parse(sql, opt)
+    let ast = parser.parse(sql, opt)
     expect(ast.columnList).to.be.eql(['select::null::mydate'])
+    sql = 'SELECT DATE_TRUNC(my_date, YEAR)'
+    ast = parser.parse(sql, opt)
+    expect(ast.columnList).to.be.eql(['select::null::my_date'])
   })
 })

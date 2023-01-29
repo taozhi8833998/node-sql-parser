@@ -2442,6 +2442,14 @@ extract_func
         }
     }
   }
+  / 'DATE_TRUNC'i __  LPAREN __ e:expr __ COMMA __ f:extract_filed __ RPAREN {
+    return {
+        type: 'function',
+        name: 'DATE_TRUNC',
+        args: { type: 'expr_list', value: [e, { type: 'origin', value: f }] },
+        over: null,
+      };
+  }
 
 cast_expr
   = KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
