@@ -753,4 +753,10 @@ describe('BigQuery', () => {
     expect(arrayStructTypeToSQL()).to.equal(undefined)
     expect(arrayStructTypeToSQL({ dataType: 'array' })).to.equal('ARRAY undefined')
   })
+
+  it('should get the correct column list', () => {
+    let sql = 'SELECT EXTRACT(ISOWEEK FROM mydate)'
+    const ast = parser.parse(sql, opt)
+    expect(ast.columnList).to.be.eql(['select::null::mydate'])
+  })
 })
