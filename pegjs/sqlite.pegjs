@@ -370,33 +370,60 @@ create_definition
   / create_index_definition
   / create_fulltext_spatial_index_definition
 
+column_definition_opt
+  = n:(literal_not_null / literal_null) {
+    if (n && !n.value) n.value = 'null'
+    return { nullable: n }
+  }
+  / d:default_expr {
+    return { default_val: d }
+  }
+  / a:('AUTO_INCREMENT'i / 'AUTOINCREMENT'i) {
+    return { auto_increment: a.toLowerCase() }
+  }
+  / u:(('UNIQUE'i __ ('KEY'i)?) / (('PRIMARY'i)? __ 'KEY'i)) {
+    const unique_or_primary = []
+    if (u) unique_or_primary.push(u[0], u[2])
+    return { unique_or_primary: unique_or_primary.filter(v => v).join(' ').toLowerCase('') }
+  }
+  / co:keyword_comment {
+    return { comment: co }
+  }
+  / ca:collate_expr {
+    return { collate: ca }
+  }
+  / cf:column_format {
+    return { column_format: cf }
+  }
+  / s:storage {
+    return { storage: s }
+  }
+  / re:reference_definition {
+    return { reference_definition: re }
+  }
+  / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_name {
+    return { character_set: { type: t, value: v, symbol: s }}
+  }
+
+column_definition_opt_list
+  = head:column_definition_opt __ tail:(__ column_definition_opt)* {
+    let opt = head
+    for (let i = 0; i < tail.length; i++) {
+      opt = { ...opt, ...tail[i][1] }
+    }
+    return opt
+  }
+
 create_column_definition
   = c:column_ref __
-    d:data_type __
-    n:(literal_not_null / literal_null)? __
-    df:default_expr? __
-    a:('AUTO_INCREMENT'i)? __
-    u:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i)? __
-    co:keyword_comment? __
-    ca:collate_expr? __
-    cf:column_format? __
-    s:storage? __
-    re:reference_definition? {
+    d:data_type? __
+    cdo:column_definition_opt_list? {
       columnList.add(`create::${c.table}::${c.column}`)
-      if (n && !n.value) n.value = 'null'
       return {
         column: c,
         definition: d,
-        nullable: n,
-        default_val: df,
-        auto_increment: a && a.toLowerCase(),
-        unique_or_primary: u && `${u[0].toLowerCase()} ${u[2].toLowerCase()}`,
-        comment: co,
-        collate: ca,
-        column_format: cf,
-        storage:s,
-        reference_definition: re,
-        resource: 'column'
+        resource: 'column',
+        ...(cdo || {})
       }
     }
 
@@ -2583,6 +2610,10 @@ data_type
   / json_type
   / text_type
   / enum_type
+  / boolean_type
+
+boolean_type
+  = 'boolean'i { return { dataType: 'BOOLEAN' }; }
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {

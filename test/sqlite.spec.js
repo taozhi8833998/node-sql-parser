@@ -95,4 +95,11 @@ describe('sqlite', () => {
     const sql = "SELECT name, 'doesn''t smoke' FROM people WHERE name = 'John';"
     expect(getParsedSql(sql)).to.be.equal("SELECT `name`, 'doesn''t smoke' FROM `people` WHERE `name` = 'John'")
   })
+
+  it('should support create with autoincrement, boolean type and definition could be empty', () => {
+    let sql = 'CREATE TABLE `foobar1` (`id` integer not null primary key autoincrement, `name` varchar(255), `batch` boolean, `migration_time` datetime)'
+    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE `foobar1` (`id` INTEGER NOT NULL AUTOINCREMENT PRIMARY KEY, `name` VARCHAR(255), `batch` BOOLEAN, `migration_time` DATETIME)')
+    sql = 'CREATE TABLE sqlite_stat4(tbl,idx,neq,nlt,ndlt,sample)'
+    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE `sqlite_stat4` (`tbl`, `idx`, `neq`, `nlt`, `ndlt`, `sample`)')
+  })
 })
