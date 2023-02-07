@@ -479,6 +479,18 @@ describe('mysql', () => {
           "SELECT `col1`, `col2` FROM `table1` HAVING (`col1` LIKE '%foo%' OR `col2` LIKE '%bar%') AND `col1` <> 'test'"
         ]
       },
+      {
+        title: 'regexep right could be function call',
+        sql: [
+          `select
+          (SELECT group_concat(v)
+          FROM keyperson WHERE e.keyperson
+          REGEXP concat('\b', k, '\b'))
+          AS keyperson
+          FROM abc e`,
+          "SELECT (SELECT GROUP_CONCAT(`v`) FROM `keyperson` WHERE `e`.`keyperson` REGEXP concat('\b', `k`, '\b')) AS `keyperson` FROM `abc` AS `e`"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
