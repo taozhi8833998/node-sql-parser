@@ -1626,12 +1626,21 @@ update_stmt
     KW_SET       __
     l:set_list   __
     w:where_clause? {
+      const dbObj = {}
       if (t) t.forEach(tableInfo => {
-        const { db, as, table } = tableInfo
-        tableList.add(`update::${db}::${table}`)
+        const { db, as, table, join } = tableInfo
+        const action = join ? 'select' : 'update'
+        if (db) dbObj[table] = db
+        tableList.add(`${action}::${db}::${table}`)
       });
       if(l) {
-        l.forEach(col => columnList.add(`update::${col.table}::${col.column}`));
+        l.forEach(col => {
+          if (col.table) {
+            const table = queryTableAlias(col.table)
+            tableList.add(`update::${dbObj[table] || null}::${table}`)
+          }
+          columnList.add(`update::${col.table}::${col.column}`)
+        });
       }
       return {
         tableList: Array.from(tableList),
@@ -2806,6 +2815,7 @@ KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
 KW_INTERVAL         = "INTERVAL"i !ident_start { return 'INTERVAL'; }
 KW_UNIT_YEAR        = "YEAR"i !ident_start { return 'YEAR'; }
 KW_UNIT_MONTH       = "MONTH"i !ident_start { return 'MONTH'; }
+KW_UNIT_WEEK        = "WEEK"i !ident_start { return 'WEEK'; }
 KW_UNIT_DAY         = "DAY"i !ident_start { return 'DAY'; }
 KW_UNIT_HOUR        = "HOUR"i !ident_start { return 'HOUR'; }
 KW_UNIT_MINUTE      = "MINUTE"i !ident_start { return 'MINUTE'; }
@@ -2919,6 +2929,7 @@ char = .
 interval_unit
   = KW_UNIT_YEAR
   / KW_UNIT_MONTH
+  / KW_UNIT_WEEK
   / KW_UNIT_DAY
   / KW_UNIT_HOUR
   / KW_UNIT_MINUTE

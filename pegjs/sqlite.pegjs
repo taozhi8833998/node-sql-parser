@@ -1341,12 +1341,21 @@ update_stmt
     w:where_clause? __
     or:order_by_clause? __
     lc:limit_clause? {
+      const dbObj = {}
       if (t) t.forEach(tableInfo => {
-        const { db, as, table } = tableInfo
-        tableList.add(`update::${db}::${table}`)
+        const { db, as, table, join } = tableInfo
+        const action = join ? 'select' : 'update'
+        if (db) dbObj[table] = db
+        tableList.add(`${action}::${db}::${table}`)
       });
       if(l) {
-        l.forEach(col => columnList.add(`update::${col.table}::${col.column}`));
+        l.forEach(col => {
+          if (col.table) {
+            const table = queryTableAlias(col.table)
+            tableList.add(`update::${dbObj[table] || null}::${table}`)
+          }
+          columnList.add(`update::${col.table}::${col.column}`)
+        });
       }
       return {
         tableList: Array.from(tableList),

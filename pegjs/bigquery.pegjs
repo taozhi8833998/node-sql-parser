@@ -263,8 +263,9 @@ update_stmt
     or:order_by_clause? __
     lc:limit_clause? {
       if (t) t.forEach(tableInfo => {
-        const { db, as, table } = tableInfo
-        tableList.add(`update::${db}::${table}`)
+        const { db, as, table, join } = tableInfo
+        const action = join ? 'select' : 'update'
+        tableList.add(`${action}::${db}::${table}`)
       });
       if(f) f.forEach(info => {
         info.table && tableList.add(`update::${info.db}::${info.table}`);
