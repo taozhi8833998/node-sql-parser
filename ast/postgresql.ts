@@ -896,7 +896,7 @@ export type concat_separator = { keyword: string | null; value: literal_string; 
 
 
 
-export type distinct_args = { distinct: 'DISTINCT'; expr: column_ref; } | { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; parentheses: boolean; separator?: concat_separator; };
+export type distinct_args = { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; parentheses: boolean; separator?: concat_separator; };
 
 
 
