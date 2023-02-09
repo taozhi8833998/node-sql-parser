@@ -126,6 +126,7 @@ describe('update', () => {
       const { tableList, columnList, ast } = parser.parse("UPDATE Reservations r JOIN Train t ON (r.Train = t.TrainID) SET t.Capacity = t.Capacity + r.NoSeats WHERE r.ReservationID = 12");
       expect(tableList).to.eql([
         "update::null::Reservations",
+        "select::null::Train",
         "update::null::Train"
      ]);
       expect(columnList).to.eql([
@@ -217,5 +218,18 @@ describe('update', () => {
     const ast = parser.astify(sql, { database: 'postgresql' })
     const backSQL = parser.sqlify(ast)
     expect(backSQL).to.be.equal("UPDATE `account` SET `id` = 1 WHERE `name` = \"abc\" RETURNING `id`")
+  })
+
+  it('should get tableList in right action', () => {
+    const sql = `UPDATE empdb.employees t1 INNER JOIN empdb.merits t2 ON t1.performance = t2.performance SET t1.salary = t1.salary + t1.salary * t2.percentage;`
+    const { tableList, columnList } = parser.parse(sql)
+    expect(tableList).to.eql(["update::empdb::employees", "select::empdb::merits"])
+    expect(columnList).to.eql([
+      "select::employees::performance",
+      "select::merits::performance",
+      "select::employees::salary",
+      "select::merits::percentage",
+      "update::employees::salary"
+    ])
   })
 });
