@@ -295,9 +295,11 @@ delete_stmt
     or:order_by_clause? __
     l:limit_clause? {
       if(t) t.forEach(tt => tableList.add(`delete::${tt.db}::${tt.table}`));
-      if(f) f.forEach(info => {
-        info.table && tableList.add(`delete::${info.db}::${info.table}`);
-        columnList.add(`delete::${info.table}::(.*)`);
+     if(f) f.forEach(tableInfo => {
+        const { db, as, table, join } = tableInfo
+        const action = join ? 'select' : 'delete'
+        if (table) tableList.add(`${action}::${db}::${table}`)
+        if (!join) columnList.add(`delete::${table}::(.*)`);
       });
       if (t === null && f.length === 1) {
         const tableInfo = f[0]
