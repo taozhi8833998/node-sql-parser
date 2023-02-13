@@ -1,3 +1,4 @@
+import { exprToSQL } from './expr'
 import parsers from './parser.all'
 import astToSQL from './sql'
 import { DEFAULT_OPT, setParserOpt } from './util'
@@ -11,6 +12,11 @@ class Parser {
   sqlify(ast, opt = DEFAULT_OPT) {
     setParserOpt(opt)
     return astToSQL(ast, opt)
+  }
+
+  exprToSQL(expr, opt = DEFAULT_OPT) {
+    setParserOpt(opt)
+    return exprToSQL(expr)
   }
 
   parse(sql, opt = DEFAULT_OPT) {

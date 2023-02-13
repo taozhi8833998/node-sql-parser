@@ -1,10 +1,10 @@
 import { bigQueryToSQL, unionToSQL, multipleToSQL } from './union'
 
-const surportedTypes = ['analyze', 'attach', 'select', 'deallocate', 'delete', 'exec', 'update', 'insert', 'drop', 'rename', 'truncate', 'call', 'desc', 'use', 'alter', 'set', 'create', 'lock', 'unlock', 'bigquery', 'declare', 'show', 'replace']
+const supportedTypes = ['analyze', 'attach', 'select', 'deallocate', 'delete', 'exec', 'update', 'insert', 'drop', 'rename', 'truncate', 'call', 'desc', 'use', 'alter', 'set', 'create', 'lock', 'unlock', 'bigquery', 'declare', 'show', 'replace']
 
 function checkSupported(expr) {
   const ast = expr && expr.ast ? expr.ast : expr
-  if (!surportedTypes.includes(ast.type)) throw new Error(`${ast.type} statements not supported at the moment`)
+  if (!supportedTypes.includes(ast.type)) throw new Error(`${ast.type} statements not supported at the moment`)
 }
 
 function toSQL(ast) {
