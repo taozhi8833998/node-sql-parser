@@ -2219,6 +2219,13 @@ order_by_element
 number_or_param
   = literal_numeric
   / param
+  / __ p:'$' n:literal_numeric {
+    // => { type: 'origin'; value: string; }
+    return {
+      type: 'origin',
+      value: `$${n.value}`,
+    }
+  }
 
 limit_clause
   = l:(KW_LIMIT __ (number_or_param / KW_ALL))? __ tail:(KW_OFFSET __ number_or_param)? {

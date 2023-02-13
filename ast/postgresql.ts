@@ -625,7 +625,7 @@ export type order_by_list = order_by_element[];
 
 export type order_by_element = { expr: expr; type: 'ASC' | 'DESC';  nulls: 'NULLS FIRST' | 'NULLS LAST' | undefined };
 
-export type number_or_param = literal_numeric | param;
+export type number_or_param = literal_numeric | param | { type: 'origin'; value: string; };
 
 export type limit_clause = { separator: 'offset' | ''; value: [number_or_param | { type: 'origin', value: 'all' }, number_or_param?] };
 
