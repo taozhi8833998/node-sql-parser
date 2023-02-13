@@ -2015,17 +2015,19 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
+  = c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
     return {
       type: 'cast',
+      keyword: c.toLowerCase(),
       expr: e,
       symbol: 'as',
       target: t
     };
   }
-  / KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
+  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
     return {
       type: 'cast',
+      keyword: c.toLowerCase(),
       expr: e,
       symbol: 'as',
       target: {
@@ -2033,9 +2035,10 @@ cast_expr
       }
     };
   }
-  / KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
+  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
       return {
         type: 'cast',
+        keyword: c.toLowerCase(),
         expr: e,
         symbol: 'as',
         target: {
@@ -2043,9 +2046,10 @@ cast_expr
         }
       };
     }
-  / KW_CAST __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
+  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
     return {
       type: 'cast',
+      keyword: c.toLowerCase(),
       expr: e,
       symbol: 'as',
       target: {
@@ -2327,7 +2331,7 @@ KW_THEN     = "THEN"i       !ident_start
 KW_ELSE     = "ELSE"i       !ident_start
 KW_END      = "END"i        !ident_start
 
-KW_CAST     = "CAST"i       !ident_start
+KW_CAST     = "CAST"i       !ident_start { return 'CAST' }
 
 KW_BIT      = "BIT"i      !ident_start { return 'BIT'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
