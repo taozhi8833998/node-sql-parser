@@ -74,11 +74,13 @@
     'SESSION_USER': true,
     'SET': true,
     'SHOW': true,
+    'SIMILAR': true,
     // 'STATUS': true,
     'SYSTEM_USER': true,
 
     'TABLE': true,
     'THEN': true,
+    'TO': true,
     'TRUE': true,
     'TRUNCATE': true,
     'TYPE': true,   // reserved (MySQL)
@@ -2158,6 +2160,7 @@ comparison_op_right
   / distinct_from_op_right
   / is_op_right
   / like_op_right
+  / similar_to_op_right
   / jsonb_op_right
 
 arithmetic_op_right
@@ -2218,6 +2221,10 @@ like_op
   = nk:(KW_NOT __ KW_LIKE) { /* => 'LIKE' */ return nk[0] + ' ' + nk[2]; }
   / KW_LIKE
 
+similar_to_op
+  = nk:(KW_NOT __ KW_SIMILAR __ KW_TO) { /* => 'NOT SIMILAR TO' */ return 'NOT SIMILAR TO'; }
+  / KW_SIMILAR __ KW_TO { /* => 'SIMILAR TO' */ return 'SIMILAR TO' }
+
 escape_op
   = kw:'ESCAPE'i __ c:literal_string {
     // => { type: 'ESCAPE'; value: literal_string }
@@ -2234,6 +2241,13 @@ in_op
 like_op_right
   = op:like_op __ right:(literal / comparison_expr) __ es:escape_op? {
      // => { op: like_op; right: (literal | comparison_expr) & { escape?: escape_op }; }
+      if (es) right.escape = es
+      return { op: op, right: right };
+    }
+
+similar_to_op_right
+  = op:similar_to_op __ right:(literal / comparison_expr) __ es:escape_op? {
+     // => { op: similar_to_op; right: (literal | comparison_expr) & { escape?: escape_op }; }
       if (es) right.escape = es
       return { op: op, right: right };
     }
@@ -2893,6 +2907,7 @@ KW_BETWEEN  = "BETWEEN"i    !ident_start { return 'BETWEEN'; }
 KW_IN       = "IN"i         !ident_start { return 'IN'; }
 KW_IS       = "IS"i         !ident_start { return 'IS'; }
 KW_LIKE     = "LIKE"i       !ident_start { return 'LIKE'; }
+KW_SIMILAR  = "SIMILAR"i    !ident_start { return 'SIMILAR'; }
 KW_EXISTS   = "EXISTS"i     !ident_start { /* => 'EXISTS' */ return 'EXISTS'; }
 
 KW_NOT      = "NOT"i        !ident_start { return 'NOT'; }

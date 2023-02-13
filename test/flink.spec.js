@@ -196,6 +196,27 @@ describe('Flink', () => {
         "SELECT `a` || `b` FROM `users` WHERE `a` || `b` = 'ab'",
       ],
     },
+    {
+      title: "SIMILAR TO",
+      sql: [
+        `SELECT * FROM users WHERE a SIMILAR TO '%[^a-z0-9 .]%'`,
+        "SELECT * FROM `users` WHERE `a` SIMILAR TO '%[^a-z0-9 .]%'",
+      ],
+    },
+    {
+      title: "NOT SIMILAR TO",
+      sql: [
+        `SELECT * FROM users WHERE a NOT SIMILAR TO 'abc'`,
+        "SELECT * FROM `users` WHERE `a` NOT SIMILAR TO 'abc'",
+      ],
+    },
+    {
+      title: "SIMILAR with escape",
+      sql: [
+        `SELECT * FROM users WHERE a SIMILAR TO '%[^a-z0-9 .]%' ESCAPE '-'`,
+        "SELECT * FROM `users` WHERE `a` SIMILAR TO '%[^a-z0-9 .]%' ESCAPE '-'",
+      ],
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
