@@ -221,10 +221,10 @@ describe('update', () => {
   })
 
   it('should get tableList in right action', () => {
-    const sql = `UPDATE empdb.employees t1 INNER JOIN empdb.merits t2 ON t1.performance = t2.performance SET t1.salary = t1.salary + t1.salary * t2.percentage;`
-    const { tableList, columnList } = parser.parse(sql)
-    expect(tableList).to.eql(["update::empdb::employees", "select::empdb::merits"])
-    expect(columnList).to.eql([
+    let sql = `UPDATE empdb.employees t1 INNER JOIN empdb.merits t2 ON t1.performance = t2.performance SET t1.salary = t1.salary + t1.salary * t2.percentage;`
+    let ast = parser.parse(sql)
+    expect(ast.tableList).to.eql(["update::empdb::employees", "select::empdb::merits"])
+    expect(ast.columnList).to.eql([
       "select::employees::performance",
       "select::merits::performance",
       "select::employees::salary",
@@ -232,4 +232,20 @@ describe('update', () => {
       "update::employees::salary"
     ])
   })
+  sql = `UPDATE empdb.employees t1 INNER JOIN (select t2.percentage,t2.performance from empdb.merits t2) as t3 ON t1.performance = t3.performance SET t1.salary = t1.salary + t1.salary * t3.percentage;`
+  ast = parser.parse(sql)
+  expect(ast.tableList).to.eql(["select::empdb::merits", "update::empdb::employees"])
+  expect(ast.columnList).to.eql([
+    "select::merits::percentage",
+    "select::merits::performance",
+    "select::employees::performance",
+    "select::t3::performance",
+    "select::employees::salary",
+    "select::t3::percentage",
+    "update::employees::salary"
+  ])
+  sql = `DELETE t1 FROM t1 INNER JOIN  t2 ON t2.ref = t1.id;`
+  ast = parser.parse(sql)
+  expect(ast.tableList).to.eql(["delete::null::t1","select::null::t2"])
+  expect(ast.columnList).to.eql(["select::t2::ref", "select::t1::id", "delete::t1::(.*)" ])
 });
