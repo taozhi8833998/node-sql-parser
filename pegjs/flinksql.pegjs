@@ -1926,10 +1926,16 @@ table_base
     }
 
 join_op
-  = KW_LEFT __ KW_OUTER? __ KW_JOIN { /* => 'LEFT JOIN' */ return 'LEFT JOIN'; }
-  / KW_RIGHT __ KW_OUTER? __ KW_JOIN { /* =>  'RIGHT JOIN' */ return 'RIGHT JOIN'; }
-  / KW_FULL __ KW_OUTER? __ KW_JOIN { /* => 'FULL JOIN' */ return 'FULL JOIN'; }
-  / (KW_INNER __)? KW_JOIN { /* => 'INNER JOIN' */ return 'INNER JOIN'; }
+  = n:KW_NATURAL? __ d:(KW_LEFT / KW_RIGHT / KW_FULL)? __ o:KW_OUTER? __ KW_JOIN {
+      /* => [ NATURAL ] [ { LEFT | RIGHT | FULL } [ OUTER ] ] JOIN */
+      const natural = n ? 'NATURAL ' : '';
+      const direction = d ? `${d} ` : '';
+      const outer = o ? 'OUTER ' : '';
+      return `${natural}${direction}${outer}JOIN`;
+    }
+  / i:(KW_INNER __)? KW_JOIN { /* => 'INNER JOIN' */ return i ? 'INNER JOIN' : 'JOIN'; }
+  / KW_CROSS __ KW_JOIN { /* => 'CROSS JOIN' */ return 'CROSS JOIN'; }
+  / ko:(KW_CROSS / KW_OUTER) __ KW_APPLY { /* => '[ CROSS | OUTER ] APPLY' */ return `${ko[0].toUpperCase()} APPLY`; }
 
 table_name
   = dt:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
@@ -3204,11 +3210,14 @@ KW_SCHEME   = "SCHEME"i      !ident_start { return 'SCHEME'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
 
 KW_ON       = "ON"i       !ident_start
-KW_LEFT     = "LEFT"i     !ident_start
-KW_RIGHT    = "RIGHT"i    !ident_start
-KW_FULL     = "FULL"i     !ident_start
-KW_INNER    = "INNER"i    !ident_start
+KW_NATURAL  = "NATURAL"i  !ident_start { return 'NATURAL'; }
+KW_LEFT     = "LEFT"i     !ident_start { return 'LEFT'; }
+KW_RIGHT    = "RIGHT"i    !ident_start { return 'RIGHT'; }
+KW_FULL     = "FULL"i     !ident_start { return 'FULL'; }
+KW_INNER    = "INNER"i    !ident_start { return 'INNER'; }
 KW_JOIN     = "JOIN"i     !ident_start
+KW_CROSS    = "CROSS"i    !ident_start
+KW_APPLY    = "APPLY"i    !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
 KW_UNION    = "UNION"i    !ident_start { return 'UNION'; }
 KW_INTERSECT    = "INTERSECT"i    !ident_start { return 'INTERSECT'; }
