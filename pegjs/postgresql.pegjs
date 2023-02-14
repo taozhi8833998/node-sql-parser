@@ -2218,6 +2218,7 @@ order_by_element
 
 number_or_param
   = literal_numeric
+  / var_decl
   / param
 
 limit_clause
@@ -2828,13 +2829,6 @@ primary
     return {
       type: 'origin',
       value: `$<${n.value}>`,
-    }
-  }
-  / __ p:'$' n:literal_numeric {
-    // => { type: 'origin'; value: string; }
-    return {
-      type: 'origin',
-      value: `$${n.value}`,
     }
   }
 
@@ -3708,7 +3702,7 @@ KW_VAR__PRE_AT_AT = '@@'
 KW_VAR_PRE_DOLLAR = '$'
 KW_VAR_PRE_DOLLAR_DOUBLE = '$$'
 KW_VAR_PRE
-  = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR
+  = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR / KW_VAR_PRE_DOLLAR
 KW_RETURN = 'return'i
 KW_ASSIGN = ':='
 KW_DOUBLE_COLON = '::'
@@ -3973,6 +3967,16 @@ without_prefix_var_decl
       quoted: p && s ? '"' : null,
       prefix: null,
     };
+  }
+  / n:literal_numeric {
+    // => { type: 'var'; prefix: null; name: number; members: []; quoted: null }
+    return {
+      type: 'var',
+      name: n.value,
+      members: [],
+      quoted: null,
+      prefix: null,
+    }
   }
 
 mem_chain

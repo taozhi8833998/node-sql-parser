@@ -809,6 +809,15 @@ without_prefix_var_decl
       prefix: null,
     };
   }
+  / n:literal_numeric {
+    return {
+      type: 'var',
+      name: n.value,
+      members: [],
+      quoted: null,
+      prefix: null,
+    }
+  }
 
 value_item
   = LPAREN __ l:expr_list  __ RPAREN {
