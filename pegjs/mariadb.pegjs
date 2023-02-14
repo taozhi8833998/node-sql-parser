@@ -2453,12 +2453,13 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = KW_CAST __ LPAREN __ e:expr __ KW_AS __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_name __ RPAREN __ ca:collate_expr? {
+  = c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_name __ RPAREN __ ca:collate_expr? {
     const { dataType, length } = ch
     let dataTypeStr = dataType
     if (length !== undefined) dataTypeStr = `${dataTypeStr}(${length})`
     return {
       type: 'cast',
+      keyword: c.toLowerCase(),
       expr: e,
       symbol: 'as',
       target: {
@@ -2467,34 +2468,38 @@ cast_expr
       collate: ca,
     };
   }
-  / KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
+  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
     return {
       type: 'cast',
+      keyword: c.toLowerCase(),
       expr: e,
       target: t
     };
   }
-  / KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
+  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
     return {
       type: 'cast',
+      keyword: c.toLowerCase(),
       expr: e,
       target: {
         dataType: 'DECIMAL(' + precision + ')'
       }
     };
   }
-  / KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
+  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
       return {
         type: 'cast',
+        keyword: c.toLowerCase(),
         expr: e,
         target: {
           dataType: 'DECIMAL(' + precision + ', ' + scale + ')'
         }
       };
     }
-  / KW_CAST __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
+  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
     return {
       type: 'cast',
+      keyword: c.toLowerCase(),
       expr: e,
       target: {
         dataType: s + (t ? ' ' + t: '')
@@ -2782,7 +2787,7 @@ KW_THEN     = "THEN"i       !ident_start
 KW_ELSE     = "ELSE"i       !ident_start
 KW_END      = "END"i        !ident_start
 
-KW_CAST     = "CAST"i       !ident_start
+KW_CAST     = "CAST"i       !ident_start { return 'CAST' }
 
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}

@@ -712,6 +712,13 @@ describe('BigQuery', () => {
         'SELECT DATE_TRUNC(my_date, YEAR)'
       ],
     },
+    {
+      title: 'safe cast',
+      sql: [
+        'SELECT SAFE_CAST(1 AS STRING)',
+        'SELECT SAFE_CAST(1 AS STRING)'
+      ],
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
