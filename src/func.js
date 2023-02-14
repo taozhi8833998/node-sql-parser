@@ -48,7 +48,7 @@ function funcToSQL(expr) {
   const collateStr = commonTypeValue(collate).join(' ')
   const overStr = overToSQL(over)
   if (!args) return [name, overStr].filter(hasVal).join(' ')
-  let separator = ', '
+  let separator = expr.separator || ', '
   if (toUpper(name) === 'TRIM') separator = ' '
   let str = [name]
   str.push(args_parentheses === false ? ' ' : '(')

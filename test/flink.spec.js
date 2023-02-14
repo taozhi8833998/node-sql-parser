@@ -217,6 +217,20 @@ describe('Flink', () => {
         "SELECT * FROM `users` WHERE `a` SIMILAR TO '%[^a-z0-9 .]%' ESCAPE '-'",
       ],
     },
+    {
+      title: "SUBSTRING",
+      sql: [
+        `SELECT * FROM users WHERE SUBSTRING('abcde' FROM 2) = 'llo'`,
+        "SELECT * FROM `users` WHERE SUBSTRING('abcde' FROM 2) = 'llo'",
+      ],
+    },
+    {
+      title: "SUBSTRING with length",
+      sql: [
+        `SELECT * FROM users WHERE SUBSTRING(a FROM 2 FOR 2) = 'll'`,
+        "SELECT * FROM `users` WHERE SUBSTRING(`a` FROM 2 FOR 2) = 'll'",
+      ],
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
