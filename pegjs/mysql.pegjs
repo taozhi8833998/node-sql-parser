@@ -3392,7 +3392,6 @@ var_decl_list
 
 var_decl
   = p: KW_VAR_PRE d: without_prefix_var_decl {
-    //push for analysis
     return {
       type: 'var',
       ...d,
@@ -3410,6 +3409,15 @@ without_prefix_var_decl
       members: m,
       prefix: null,
     };
+  }
+  / n:literal_numeric {
+    return {
+      type: 'var',
+      name: n.value,
+      members: [],
+      quoted: null,
+      prefix: null,
+    }
   }
 
 mem_chain

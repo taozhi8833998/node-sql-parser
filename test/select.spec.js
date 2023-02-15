@@ -1435,6 +1435,10 @@ describe('select', () => {
       .to.be.equal('SELECT "bar", "baz", "foo" FROM "tablename" WHERE "bar" = $1', opt)
       expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = $1 and baz = $2', opt))
       .to.be.equal('SELECT "bar", "baz", "foo" FROM "tablename" WHERE "bar" = $1 AND "baz" = $2', opt)
+      expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = $1 and baz = $2 LIMIT $3', opt))
+      .to.be.equal('SELECT "bar", "baz", "foo" FROM "tablename" WHERE "bar" = $1 AND "baz" = $2 LIMIT $3', opt)
+      expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = $1 and baz = $2 LIMIT $3 OFFSET $4', opt))
+      .to.be.equal('SELECT "bar", "baz", "foo" FROM "tablename" WHERE "bar" = $1 AND "baz" = $2 LIMIT $3 OFFSET $4', opt)
     })
   })
 
