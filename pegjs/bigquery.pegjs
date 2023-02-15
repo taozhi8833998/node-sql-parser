@@ -1492,7 +1492,7 @@ union_stmt_nake
       let cur = head
       for (let i = 0; i < tail.length; i++) {
         cur._next = tail[i][3]
-        cur.union = tail[i][1]
+        cur.set_op = tail[i][1]
         cur = cur._next
       }
       return {

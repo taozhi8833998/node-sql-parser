@@ -491,6 +491,20 @@ describe('mysql', () => {
           "SELECT (SELECT GROUP_CONCAT(`v`) FROM `keyperson` WHERE `e`.`keyperson` REGEXP concat('\b', `k`, '\b')) AS `keyperson` FROM `abc` AS `e`"
         ]
       },
+      {
+        title: 'set op INTERSECT',
+        sql: [
+          `SELECT * FROM (SELECT 1) INTERSECT SELECT * FROM (SELECT 2)`,
+          'SELECT * FROM (SELECT 1) INTERSECT SELECT * FROM (SELECT 2)'
+        ]
+      },
+      {
+        title: 'set op minus',
+        sql: [
+          `SELECT * FROM (SELECT 1) minus SELECT * FROM (SELECT 2)`,
+          'SELECT * FROM (SELECT 1) MINUS SELECT * FROM (SELECT 2)'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

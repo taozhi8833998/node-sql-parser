@@ -53,7 +53,7 @@ function unionToSQL(stmt) {
   const res = [fun(stmt)]
   const { _orderby, _limit } = stmt
   while (stmt._next) {
-    const unionKeyword = (stmt.union || 'union').toUpperCase()
+    const unionKeyword = (stmt.set_op || 'union').toUpperCase()
     res.push(unionKeyword, fun(stmt._next))
     stmt = stmt._next
   }
