@@ -494,7 +494,7 @@ describe('mysql', () => {
       {
         title: 'set op INTERSECT',
         sql: [
-          `SELECT * FROM (SELECT 1) INTERSECT SELECT * FROM (SELECT 2)`,
+          `SELECT * FROM (SELECT 1) intersect SELECT * FROM (SELECT 2)`,
           'SELECT * FROM (SELECT 1) INTERSECT SELECT * FROM (SELECT 2)'
         ]
       },
