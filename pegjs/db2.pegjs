@@ -245,13 +245,16 @@ multiple_stmt
         ast: cur
       }
     }
+set_op
+  = KW_UNION __ KW_ALL { return 'union all' }
+  / KW_UNION { return 'union' }
 
 union_stmt
-  = head:select_stmt tail:(__ KW_UNION __ KW_ALL? __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
+  = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
       let cur = head
       for (let i = 0; i < tail.length; i++) {
-        cur._next = tail[i][5]
-        cur.union = tail[i][3] ? 'union all' : 'union'
+        cur._next = tail[i][3]
+        cur.set_op = tail[i][1]
         cur = cur._next
       }
       if(ob) head._orderby = ob

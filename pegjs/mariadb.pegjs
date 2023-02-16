@@ -42,6 +42,7 @@
     'IN': true,
     'INNER': true,
     'INSERT': true,
+    'INTERSECT': true,
     'INTO': true,
     'IS': true,
 
@@ -56,6 +57,7 @@
     'LOW_PRIORITY': true, // for lock table
 
     'NATURAL': true,
+    'MINUS': true,
     'NOT': true,
     'NULL': true,
 
@@ -232,7 +234,7 @@ alter_stmt
   = alter_table_stmt
 
 crud_stmt
-  = union_stmt
+  = set_op_stmt
   / update_stmt
   / replace_insert_stmt
   / insert_no_columns_stmt
@@ -255,12 +257,18 @@ multiple_stmt
       }
     }
 
-union_stmt
-  = head:select_stmt tail:(__ KW_UNION __ KW_ALL? __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
+set_op
+  = KW_UNION __ KW_ALL { return 'union all' }
+  / KW_UNION { return 'union' }
+  / KW_MINUS { return 'minus' }
+  / KW_INTERSECT { return 'intersect' }
+
+set_op_stmt
+  = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
       let cur = head
       for (let i = 0; i < tail.length; i++) {
-        cur._next = tail[i][5]
-        cur.union = tail[i][3] ? 'union all' : 'union'
+        cur._next = tail[i][3]
+        cur.set_op = tail[i][1]
         cur = cur._next
       }
       if(ob) head._orderby = ob
@@ -271,6 +279,7 @@ union_stmt
         ast: head
       }
     }
+
 column_order_list
   = head:column_order_item tail:(__ COMMA __ column_order_item)* {
     return createList(head, tail)
@@ -398,7 +407,7 @@ create_table_stmt
     to:table_options? __
     ir: (KW_IGNORE / KW_REPLACE)? __
     as: KW_AS? __
-    qe: union_stmt? {
+    qe: set_op_stmt? {
       if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
@@ -1218,7 +1227,7 @@ with_clause
     }
 
 cte_definition
-  = name:(literal_string / ident_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
+  = name:(literal_string / ident_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:set_op_stmt __ RPAREN {
     if (typeof name === 'string') name = { type: 'default', value: name }
     return { name, stmt, columns };
   }
@@ -1483,7 +1492,7 @@ table_join
       t.on   = expr;
       return t;
     }
-  / op:join_op __ LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
+  / op:join_op __ LPAREN __ stmt:set_op_stmt __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
     stmt.parentheses = true;
     return {
       expr: stmt,
@@ -1532,7 +1541,7 @@ table_base
       as: alias
     };
   }
-  / LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:alias_clause? {
+  / LPAREN __ stmt:(set_op_stmt / value_clause) __ RPAREN __ alias:alias_clause? {
       if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt, prefix: 'row' }
       stmt.parentheses = true;
       return {
@@ -1909,7 +1918,7 @@ expr
   = logic_operator_expr // support concatenation operator || and &&
   / or_expr
   / unary_expr
-  / union_stmt
+  / set_op_stmt
 
 logic_operator_expr
   = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ __ rh:comparison_op_right? {
@@ -1985,7 +1994,7 @@ comparison_expr
   / column_ref
 
 exists_expr
-  = op:exists_op __ LPAREN __ stmt:union_stmt __ RPAREN {
+  = op:exists_op __ LPAREN __ stmt:set_op_stmt __ RPAREN {
     stmt.parentheses = true;
     return createUnaryExpr(op, stmt);
   }
@@ -2739,6 +2748,8 @@ KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
 KW_OVER     = "OVER"i     !ident_start
 KW_UNION    = "UNION"i    !ident_start
+KW_MINUS    = "MINUS"i    !ident_start
+KW_INTERSECT    = "INTERSECT"i    !ident_start
 KW_VALUES   = "VALUES"i   !ident_start
 KW_USING    = "USING"i    !ident_start
 

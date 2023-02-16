@@ -651,7 +651,7 @@ describe('AST', () => {
                 sql = `select 1 union all select '1' union select a from t union all (select true)`;
                 const ast = parser.astify(sql)
                 ast.union = null
-                expect(parser.sqlify(ast)).to.equal(`SELECT 1 UNION SELECT '1' UNION SELECT \`a\` FROM \`t\` UNION ALL (SELECT TRUE)`);
+                expect(parser.sqlify(ast)).to.equal(`SELECT 1 UNION ALL SELECT '1' UNION SELECT \`a\` FROM \`t\` UNION ALL (SELECT TRUE)`);
             });
 
 

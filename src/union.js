@@ -21,7 +21,7 @@ import { limitToSQL } from './limit'
 import { showToSQL } from './show'
 import { analyzeToSQL, attachToSQL } from './analyze'
 import { withToSQL } from './with'
-import { hasVal } from './util'
+import { hasVal, toUpper } from './util'
 
 const typeToSQLFn = {
   alter      : alterToSQL,
@@ -53,7 +53,7 @@ function unionToSQL(stmt) {
   const res = [fun(stmt)]
   const { _orderby, _limit } = stmt
   while (stmt._next) {
-    const unionKeyword = (stmt.union || 'union').toUpperCase()
+    const unionKeyword = toUpper(stmt.set_op)
     res.push(unionKeyword, fun(stmt._next))
     stmt = stmt._next
   }
