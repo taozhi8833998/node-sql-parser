@@ -218,6 +218,20 @@ describe('Flink', () => {
       ],
     },
     {
+      title: "POSITION",
+      sql: [
+        `SELECT * FROM users WHERE POSITION('a' IN a) = 2`,
+        "SELECT * FROM `users` WHERE POSITION('a' IN `a`) = 2",
+      ],
+    },
+    {
+      title: "POSITION with start",
+      sql: [
+        `SELECT * FROM users WHERE POSITION('a' IN a FROM 3) = 2`,
+        "SELECT * FROM `users` WHERE POSITION('a' IN `a` FROM 3) = 2",
+      ],
+    },
+    {
       title: "SUBSTRING",
       sql: [
         `SELECT * FROM users WHERE SUBSTRING('abcde' FROM 2) = 'llo'`,
