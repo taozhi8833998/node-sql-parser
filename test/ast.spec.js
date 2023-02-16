@@ -1257,4 +1257,12 @@ describe('AST', () => {
             expect(parser.sqlify.bind(null, {ast: {type: 'Alter'}})).to.throw(Error, `Alter statements not supported at the moment`);
             });
         });
+
+    describe('expression parsing', () => {
+        it('should be able to reconstruct a where expression in isolation', () => {
+            const ast = parser.astify('select * from t where id = 1');
+            const sql = parser.exprToSQL(ast.where);
+            expect(sql).to.equal('`id` = 1');
+        });
+    })
 });

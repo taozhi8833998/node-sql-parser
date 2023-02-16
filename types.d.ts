@@ -9,10 +9,10 @@ export interface With {
   stmt: any[];
   columns?: any[];
 }
-export type WhilteListCheckMode = 'table' | 'column';
+export type WhilteListCheckMode = "table" | "column";
 export interface Option {
-  database?: string,
-  type?: string,
+  database?: string;
+  type?: string;
 }
 export interface TableColumnAst {
   tableList: string[];
@@ -25,7 +25,7 @@ export interface From {
   as: string | null;
 }
 export interface Dual {
-  type: 'dual';
+  type: "dual";
 }
 export interface LimitValue {
   type: string;
@@ -36,11 +36,11 @@ export interface Limit {
   value: LimitValue[];
 }
 export interface OrderBy {
-  type: 'ASC' | 'DESC';
+  type: "ASC" | "DESC";
   expr: any;
 }
 export interface ColumnRef {
-  type: 'column_ref';
+  type: "column_ref";
   table: string | null;
   column: string;
 }
@@ -50,16 +50,16 @@ export interface SetList {
   table: string | null;
 }
 export interface InsertReplaceValue {
-  type: 'expr_list';
+  type: "expr_list";
   value: any[];
 }
 
 export interface Star {
-  type: 'star';
-  value: '*';
+  type: "star";
+  value: "*";
 }
 export interface AggrFunc {
-  type: 'aggr_func';
+  type: "aggr_func";
   name: string;
   args: ColumnRef | AggrFunc | Star | null;
 }
@@ -70,10 +70,10 @@ export interface Column {
 
 export interface Select {
   with: With | null;
-  type: 'select';
+  type: "select";
   options: any[] | null;
-  distinct: 'DISTINCT' | null;
-  columns: any[] | Column[] | '*';
+  distinct: "DISTINCT" | null;
+  columns: any[] | Column[] | "*";
   from: Array<From | Dual | any> | null;
   where: any;
   groupby: ColumnRef[] | null;
@@ -82,80 +82,87 @@ export interface Select {
   limit: Limit | null;
 }
 export interface Insert_Replace {
-  type: 'replace' | 'insert';
+  type: "replace" | "insert";
   db: string | null;
   table: any;
   columns: string[] | null;
   values: InsertReplaceValue[];
 }
 export interface Update {
-  type: 'update';
+  type: "update";
   db: string | null;
   table: Array<From | Dual> | null;
   set: SetList[];
   where: any;
 }
 export interface Delete {
-  type: 'delete';
+  type: "delete";
   table: any;
   from: Array<From | Dual>;
   where: any;
 }
 
 export interface Alter {
-  type: 'alter',
-  table: From,
-  expr: any
+  type: "alter";
+  table: From;
+  expr: any;
 }
 
 export interface Use {
-  type: 'use';
+  type: "use";
   db: string;
 }
 
 export interface Create {
-  type: 'create',
-  keyword: 'table' | 'index' | 'database',
-  temporary?: 'temporary' | null,
-  table?: {db: string, table: string}[],
-  if_not_exists?: 'if not exists' | null,
+  type: "create";
+  keyword: "table" | "index" | "database";
+  temporary?: "temporary" | null;
+  table?: { db: string; table: string }[];
+  if_not_exists?: "if not exists" | null;
   like?: {
-    type: 'like',
-    table: string,
-    parentheses?: boolean
-  } | null,
-  ignore_replace?: 'ignore' | 'replace' | null,
-  as?: string | null,
-  query_expr?: any | null,
-  create_definitions?: any[] | null,
-  table_options?: any[] | null,
+    type: "like";
+    table: string;
+    parentheses?: boolean;
+  } | null;
+  ignore_replace?: "ignore" | "replace" | null;
+  as?: string | null;
+  query_expr?: any | null;
+  create_definitions?: any[] | null;
+  table_options?: any[] | null;
   index_using?: {
-    keyword: 'using',
-    type: 'btree' | 'hash'
-  } | null,
-  index?: string | null,
-  on_kw?: 'on' | null;
-  index_columns?: any[] | null,
-  index_type?: 'unique' | 'fulltext' | 'spatial' | null,
-  index_options?: any[] | null,
+    keyword: "using";
+    type: "btree" | "hash";
+  } | null;
+  index?: string | null;
+  on_kw?: "on" | null;
+  index_columns?: any[] | null;
+  index_type?: "unique" | "fulltext" | "spatial" | null;
+  index_options?: any[] | null;
   algorithm_option?: {
-    type: 'alter',
-    keyword: 'algorithm',
-    resource: 'algorithm',
-    symbol: '=' | null,
-    algorithm: 'default' | 'instant' | 'inplace' | 'copy'
-  } | null,
+    type: "alter";
+    keyword: "algorithm";
+    resource: "algorithm";
+    symbol: "=" | null;
+    algorithm: "default" | "instant" | "inplace" | "copy";
+  } | null;
   lock_option?: {
-    type: 'alter',
-    keyword: 'lock',
-    resource: 'lock',
-    symbol: '=' | null,
-    lock: 'default' | 'none' | 'shared' | 'exclusive',
-  } | null,
-  database?: string
+    type: "alter";
+    keyword: "lock";
+    resource: "lock";
+    symbol: "=" | null;
+    lock: "default" | "none" | "shared" | "exclusive";
+  } | null;
+  database?: string;
 }
 
-export type AST = Use | Select | Insert_Replace | Update | Delete | Alter | Create;
+export type AST =
+  | Use
+  | Select
+  | Insert_Replace
+  | Update
+  | Delete
+  | Alter
+  | Create;
 
 export class Parser {
   constructor();
@@ -166,7 +173,13 @@ export class Parser {
 
   sqlify(ast: AST[] | AST, opt?: Option): string;
 
-  whiteListCheck(sql: string, whiteList: string[], opt?: Option): Error | undefined;
+  exprToSQL(ast: any, opt?: Option): string;
+
+  whiteListCheck(
+    sql: string,
+    whiteList: string[],
+    opt?: Option
+  ): Error | undefined;
 
   tableList(sql: string, opt?: Option): string[];
 
