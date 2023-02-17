@@ -1518,7 +1518,15 @@ cte_column_definition
     }
 
 column_idx_ref
-  = col:column_without_kw __ ob:(KW_ASC / KW_DESC)? {
+  = col:column_without_kw __ LPAREN __ l:[0-9]+ __ RPAREN __ ob:(KW_ASC / KW_DESC)? {
+      return {
+        type: 'column_ref',
+        column: col,
+        suffix: `(${parseInt(l.join(''), 10)})`,
+        order_by: ob
+      };
+    }
+  / col:column_without_kw __ ob:(KW_ASC / KW_DESC)? {
       return {
         type: 'column_ref',
         column: col,
