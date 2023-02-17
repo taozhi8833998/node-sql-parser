@@ -231,6 +231,20 @@ describe('Flink', () => {
         "SELECT * FROM `users` WHERE SUBSTRING(`a` FROM 2 FOR 2) = 'll'",
       ],
     },
+    {
+      title: "CAST",
+      sql: [
+        `SELECT SHA512(CAST(CONCAT(a, b, c) AS VARCHAR)) AS Hashed FROM v`,
+        "SELECT SHA512(CAST(CONCAT(`a`, `b`, `c`) AS VARCHAR)) AS `Hashed` FROM `v`",
+      ],
+    },
+    {
+      title: "TRY_CAST",
+      sql: [
+        `SELECT SHA512(TRY_CAST(CONCAT(a, b, c) AS VARCHAR)) AS Hashed FROM v`,
+        "SELECT SHA512(TRY_CAST(CONCAT(`a`, `b`, `c`) AS VARCHAR)) AS `Hashed` FROM `v`",
+      ],
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
