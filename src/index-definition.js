@@ -73,10 +73,7 @@ function indexTypeAndOptionToSQL(indexDefinition) {
 
 function indexDefinitionToSQL(indexDefinition) {
   const indexSQL = []
-  const {
-    keyword,
-    index,
-  } = indexDefinition
+  const { keyword, index } = indexDefinition
   indexSQL.push(toUpper(keyword))
   indexSQL.push(index)
   indexSQL.push(...indexTypeAndOptionToSQL(indexDefinition))

@@ -798,12 +798,38 @@ ALTER_CHANGE_COLUMN
         },
       }
   }
+column_idx_ref
+  = col:column_without_kw __ LPAREN __ l:[0-9]+ __ RPAREN __ ob:(KW_ASC / KW_DESC)? {
+      return {
+        type: 'column_ref',
+        column: col,
+        suffix: `(${parseInt(l.join(''), 10)})`,
+        order_by: ob
+      };
+    }
+  / col:column_without_kw __ ob:(KW_ASC / KW_DESC)? {
+      return {
+        type: 'column_ref',
+        column: col,
+        order_by: ob
+      };
+    }
+
+column_ref_idx_list
+  = head:column_idx_ref tail:(__ COMMA __ column_idx_ref)* {
+      return createList(head, tail);
+    }
+
+cte_idx_column_definition
+  = LPAREN __ l:column_ref_idx_list __ RPAREN {
+      return l
+    }
 
 create_index_definition
   = kc:(KW_INDEX / KW_KEY) __
     c:column? __
     t:index_type? __
-    de:cte_column_definition __
+    de:cte_idx_column_definition __
     id:index_options? __
      {
       return {
