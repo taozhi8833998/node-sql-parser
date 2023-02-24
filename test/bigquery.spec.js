@@ -719,6 +719,13 @@ describe('BigQuery', () => {
         'SELECT SAFE_CAST(1 AS STRING)'
       ],
     },
+    {
+      title: 'extract timestamp',
+      sql: [
+        'select extract(year from timestamp)',
+        'SELECT EXTRACT(YEAR FROM timestamp)',
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
