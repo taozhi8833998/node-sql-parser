@@ -3252,6 +3252,16 @@ extract_func
         }
     }
   }
+  / kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ s:expr __ RPAREN {
+    // => { type: 'extract'; args: { field: extract_filed; source: expr; }}
+    return {
+        type: kw.toLowerCase(),
+        args: {
+          field: f,
+          source: s,
+        }
+    }
+  }
 scalar_time_func
   = KW_CURRENT_DATE
   / KW_CURRENT_TIME
