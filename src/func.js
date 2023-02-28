@@ -43,10 +43,10 @@ function extractFunToSQL(stmt) {
 }
 
 function funcToSQL(expr) {
-  const { args, name, args_parentheses } = expr
-  const { parentheses, over, collate } = expr
+  const { args, name, args_parentheses, parentheses, over, collate, suffix } = expr
   const collateStr = commonTypeValue(collate).join(' ')
   const overStr = overToSQL(over)
+  const suffixStr = exprToSQL(suffix)
   if (!args) return [name, overStr].filter(hasVal).join(' ')
   let separator = expr.separator || ', '
   if (toUpper(name) === 'TRIM') separator = ' '
@@ -54,7 +54,7 @@ function funcToSQL(expr) {
   str.push(args_parentheses === false ? ' ' : '(')
   str.push(exprToSQL(args).join(separator))
   if (args_parentheses !== false) str.push(')')
-  str = str.join('')
+  str = [str.join(''), suffixStr].filter(hasVal).join(' ')
   return [parentheses ? `(${str})` : str, collateStr, overStr].filter(hasVal).join(' ')
 }
 

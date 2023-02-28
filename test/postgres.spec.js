@@ -795,6 +795,13 @@ describe('Postgres', () => {
         'SHOW "foo.bar"'
       ]
     },
+    {
+      title: 'create now at time zone',
+      sql: [
+        `CREATE TABLE IF NOT EXISTS "users" ( "id"           BIGSERIAL PRIMARY KEY, "date_created" TIMESTAMP WITHOUT TIME ZONE DEFAULT (now() at time zone 'utc'), "first_name"   VARCHAR(128) NOT NULL );`,
+        `CREATE TABLE IF NOT EXISTS "users" ("id" BIGSERIAL PRIMARY KEY, "date_created" TIMESTAMP WITHOUT TIME ZONE DEFAULT (now() AT TIME ZONE 'utc'), "first_name" VARCHAR(128) NOT NULL)`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
