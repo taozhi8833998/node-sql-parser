@@ -116,8 +116,9 @@ function setParserOpt(opt) {
 
 function topToSQL(opt) {
   if (!opt) return
-  const { value, percent } = opt
-  const prefix = `TOP ${value}`
+  const { value, percent, parentheses } = opt
+  const val = parentheses ? `(${value})` : value
+  const prefix = `TOP ${val}`
   if (!percent) return prefix
   return `${prefix} ${percent.toUpperCase()}`
 }

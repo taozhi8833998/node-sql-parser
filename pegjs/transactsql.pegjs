@@ -1244,7 +1244,14 @@ select_stmt_nake
   }
 
 top_clause
-  = KW_TOP __ n:number __ p:('PERCENT'i)? {
+  = KW_TOP __ LPAREN __ n:number __ RPAREN __ p:('PERCENT'i)? {
+    return {
+      value: n,
+      percent: p && p.toLowerCase(),
+      parentheses: true,
+    }
+  }
+  / KW_TOP __ n:number __ p:('PERCENT'i)? {
     return {
       value: n,
       percent: p && p.toLowerCase()
