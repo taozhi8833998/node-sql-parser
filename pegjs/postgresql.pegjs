@@ -3207,6 +3207,16 @@ trim_func_clause
 
 func_call
   = trim_func_clause
+  / name:'now'i __ LPAREN __ l:expr_list? __ RPAREN __ 'at'i __ KW_TIME __ 'zone'i __ z:literal_string {
+    // => { type: 'function'; name: string; args: expr_list; suffix: literal_string; }
+      z.prefix = 'at time zone'
+      return {
+        type: 'function',
+        name: name,
+        args: l ? l: { type: 'expr_list', value: [] },
+        suffix: z
+      };
+    }
   / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
       // => { type: 'function'; name: string; args: expr_list; }
       if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
@@ -3262,10 +3272,12 @@ extract_func
         }
     }
   }
+
 scalar_time_func
   = KW_CURRENT_DATE
   / KW_CURRENT_TIME
   / KW_CURRENT_TIMESTAMP
+
 scalar_func
   = scalar_time_func
   / KW_CURRENT_USER
