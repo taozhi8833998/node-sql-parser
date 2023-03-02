@@ -17,8 +17,10 @@ describe('transactsql', () => {
   })
 
   it('should support select top n percent', () => {
-    const sql = 'select top 3 percent * from tableA'
+    let sql = 'select top 3 percent * from tableA'
     expect(getParsedSql(sql)).to.equal('SELECT TOP 3 PERCENT * FROM [tableA]')
+    sql = 'SELECT TOP (10) PERCENT * FROM myTable'
+    expect(getParsedSql(sql)).to.equal('SELECT TOP (10) PERCENT * FROM [myTable]')
   })
 
   it('should support select count', () => {
