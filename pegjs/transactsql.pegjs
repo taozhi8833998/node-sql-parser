@@ -1210,8 +1210,8 @@ cte_definition
   }
 
 cte_column_definition
-  = LPAREN __ head:column tail:(__ COMMA __ column)* __ RPAREN {
-      return createList(head, tail);
+  = LPAREN __ l:column_ref_index __ RPAREN {
+      return l
     }
 
 select_stmt_nake
@@ -1581,9 +1581,7 @@ group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list { return e.value; }
 
 column_ref_index
-  = l:(column_ref_list / literal_list) {
-    return l
-  }
+  = column_ref_list / literal_list
 
 column_ref_list
   = head:column_ref tail:(__ COMMA __ column_ref)* {

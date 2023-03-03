@@ -106,6 +106,13 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal("INSERT INTO [source].[dbo].[movie] ([genre_id], [title], [release_date]) VALUES (@param1,@param2,@param3), (@param1,@param2,@param3)")
   })
 
+  it('should support with clause', () => {
+    const sql = `WITH mycte (a, b, c) AS
+    (SELECT DISTINCT z.a, z.b, z.c FROM mytable)
+  SELECT a from mycte`
+    expect(getParsedSql(sql)).to.equal("WITH [mycte]([a], [b], [c]) AS (SELECT DISTINCT [z].[a], [z].[b], [z].[c] FROM [mytable]) SELECT [a] FROM [mycte]")
+  })
+
   describe('table hint', () => {
     it('should support table hint', () => {
       let sql = "SELECT title FROM dbo.movie WITH (nolock) WHERE release_date >= '01/01/2021';"

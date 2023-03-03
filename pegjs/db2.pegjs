@@ -972,8 +972,8 @@ cte_definition
   }
 
 cte_column_definition
-  = LPAREN __ head:column tail:(__ COMMA __ column)* __ RPAREN {
-      return createList(head, tail);
+  = LPAREN __ l:column_ref_list __ RPAREN {
+      return l
     }
 
 select_stmt_nake
