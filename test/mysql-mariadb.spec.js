@@ -512,6 +512,24 @@ describe('mysql', () => {
           'CREATE TABLE `Translation` (`id` CHAR(36) NOT NULL CHARACTER SET ASCII COLLATE ASCII_BIN, `en-GB` TEXT, PRIMARY KEY (`id`), KEY Translation_en-GB_btree_idx (`en-GB` (768))) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci',
         ]
       },
+      {
+        title: 'update after with clause',
+        sql: [
+          `with oops as (
+            SELECT from_name,to_ccn, to_name
+            from dolt_commit_diff_hospitals where from_commit = 'qtd6vb07pq7bfgt67m863anntm6fpu7n'
+            and to_commit = 'p730obnbmihnlq54uvenck13h12f7831'
+            and from_name <> to_name
+            )
+            update hospitals h
+            join oops o
+                on h.ccn = o.to_ccn
+                and h.name <> o.from_name
+            set h.name = o.from_name
+          `,
+          "WITH `oops` AS (SELECT `from_name`, `to_ccn`, `to_name` FROM `dolt_commit_diff_hospitals` WHERE `from_commit` = 'qtd6vb07pq7bfgt67m863anntm6fpu7n' AND `to_commit` = 'p730obnbmihnlq54uvenck13h12f7831' AND `from_name` <> `to_name`) UPDATE `hospitals` AS `h` INNER JOIN `oops` AS `o` ON `h`.`ccn` = `o`.`to_ccn` AND `h`.`name` <> `o`.`from_name` SET `h`.`name` = `o`.`from_name`"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
