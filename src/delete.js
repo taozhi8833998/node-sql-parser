@@ -3,10 +3,11 @@ import { exprToSQL, orderOrPartitionByToSQL } from './expr'
 import { limitToSQL } from './limit'
 import { tablesToSQL } from './tables'
 import { commonOptionConnector, hasVal } from './util'
+import { withToSQL } from './with'
 
 function deleteToSQL(stmt) {
-  const clauses = ['DELETE']
-  const { columns, from, table, where, orderby, limit } = stmt
+  const { columns, from, table, where, orderby, with: withInfo, limit } = stmt
+  const clauses = [withToSQL(withInfo), 'DELETE']
   const columnInfo = columnsToSQL(columns, from)
   clauses.push(columnInfo)
   if (Array.isArray(table)) {

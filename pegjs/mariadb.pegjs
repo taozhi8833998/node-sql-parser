@@ -1656,7 +1656,7 @@ limit_clause
     }
 
 update_stmt
-  = KW_UPDATE    __
+  = __ cte:with_clause? __ KW_UPDATE    __
     t:table_ref_list __
     KW_SET       __
     l:set_list   __
@@ -1681,6 +1681,7 @@ update_stmt
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
+          with: cte,
           type: 'update',
           table: t,
           set: l,
@@ -1690,7 +1691,7 @@ update_stmt
     }
 
 delete_stmt
-  = KW_DELETE    __
+  = __ cte:with_clause? __ KW_DELETE    __
     t: table_ref_list? __
     f:from_clause __
     w:where_clause? {
@@ -1713,6 +1714,7 @@ delete_stmt
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
+          with: cte,
           type: 'delete',
           table: t,
           from: f,
