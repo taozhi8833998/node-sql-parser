@@ -15,6 +15,7 @@
     'CASE': true,
     'CREATE': true,
     'CONTAINS': true,
+    'CROSS': true,
     'CURRENT_DATE': true,
     'CURRENT_TIME': true,
     'CURRENT_TIMESTAMP': true,
@@ -1580,6 +1581,7 @@ join_op
   = KW_LEFT __ KW_OUTER? __ KW_JOIN { return 'LEFT JOIN'; }
   / KW_RIGHT __ KW_OUTER? __ KW_JOIN { return 'RIGHT JOIN'; }
   / KW_FULL __ KW_OUTER? __ KW_JOIN { return 'FULL JOIN'; }
+  / KW_CROSS __ KW_JOIN { return 'CROSS JOIN'; }
   / (KW_INNER __)? KW_JOIN { return 'INNER JOIN'; }
 
 table_name
@@ -2772,6 +2774,7 @@ KW_LEFT     = "LEFT"i     !ident_start
 KW_RIGHT    = "RIGHT"i    !ident_start
 KW_FULL     = "FULL"i     !ident_start
 KW_INNER    = "INNER"i    !ident_start
+KW_CROSS    = "CROSS"i    !ident_start
 KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
 KW_OVER     = "OVER"i     !ident_start
