@@ -537,6 +537,20 @@ describe('mysql', () => {
           'SELECT `A`.`id`, `B`.`name` FROM `A` CROSS JOIN `B`'
         ]
       },
+      {
+        title: 'case when list',
+        sql: [
+          `select A.id,B.name
+          from A, B
+          where
+          CASE
+              when A.id = 0 then B.name in ('aaa', 'bbb')
+              when A.id = 1 then B.name in ('bbb', 'ccc')
+              when A.id = 2 then B.name in ('ccc', 'ddd')
+          end;`,
+          "SELECT `A`.`id`, `B`.`name` FROM `A`, `B` WHERE CASE WHEN `A`.`id` = 0 THEN `B`.`name` IN ('aaa', 'bbb') WHEN `A`.`id` = 1 THEN `B`.`name` IN ('bbb', 'ccc') WHEN `A`.`id` = 2 THEN `B`.`name` IN ('ccc', 'ddd') END"
+        ]
+      }
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
