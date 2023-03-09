@@ -530,6 +530,27 @@ describe('mysql', () => {
           "WITH `oops` AS (SELECT `from_name`, `to_ccn`, `to_name` FROM `dolt_commit_diff_hospitals` WHERE `from_commit` = 'qtd6vb07pq7bfgt67m863anntm6fpu7n' AND `to_commit` = 'p730obnbmihnlq54uvenck13h12f7831' AND `from_name` <> `to_name`) UPDATE `hospitals` AS `h` INNER JOIN `oops` AS `o` ON `h`.`ccn` = `o`.`to_ccn` AND `h`.`name` <> `o`.`from_name` SET `h`.`name` = `o`.`from_name`"
         ]
       },
+      {
+        title: 'cross join',
+        sql: [
+          'select A.id,B.name from A CROSS JOIN B',
+          'SELECT `A`.`id`, `B`.`name` FROM `A` CROSS JOIN `B`'
+        ]
+      },
+      {
+        title: 'case when list',
+        sql: [
+          `select A.id,B.name
+          from A, B
+          where
+          CASE
+              when A.id = 0 then B.name in ('aaa', 'bbb')
+              when A.id = 1 then B.name in ('bbb', 'ccc')
+              when A.id = 2 then B.name in ('ccc', 'ddd')
+          end;`,
+          "SELECT `A`.`id`, `B`.`name` FROM `A`, `B` WHERE CASE WHEN `A`.`id` = 0 THEN `B`.`name` IN ('aaa', 'bbb') WHEN `A`.`id` = 1 THEN `B`.`name` IN ('bbb', 'ccc') WHEN `A`.`id` = 2 THEN `B`.`name` IN ('ccc', 'ddd') END"
+        ]
+      }
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
