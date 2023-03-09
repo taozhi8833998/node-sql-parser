@@ -20,9 +20,11 @@ export type crud_stmt = union_stmt | update_stmt | replace_insert_stmt | insert_
 
 export type multiple_stmt = AstStatement<crud_stmt[]>;
 
+export type set_op = 'union' | 'union all';
+
 export interface union_stmt_node extends select_stmt_node  {
          _next: union_stmt_node;
-         union: 'union' | 'union all';
+         set_op: 'union' | 'union all';
       }
 
 export type union_stmt = AstStatement<union_stmt_node>;
@@ -625,7 +627,7 @@ export type order_by_list = order_by_element[];
 
 export type order_by_element = { expr: expr; type: 'ASC' | 'DESC';  nulls: 'NULLS FIRST' | 'NULLS LAST' | undefined };
 
-export type number_or_param = literal_numeric | param;
+export type number_or_param = literal_numeric | var_decl | param;
 
 export type limit_clause = { separator: 'offset' | ''; value: [number_or_param | { type: 'origin', value: 'all' }, number_or_param?] };
 
@@ -657,7 +659,7 @@ export type set_item = { column: ident; value: additive_expr; table?: ident;} | 
 
 type conflict_stmt = never;
 
-export type returning_stmt = { type: 'returning'; columns: column_ref_list | column_ref; };
+export type returning_stmt = { type: 'returning'; columns: column_clause | select_stmt; };
 
 export type insert_value_clause = value_clause | select_stmt_nake;
 
@@ -709,6 +711,8 @@ export type case_expr = {
           // nb: Only the last element is a case_else
           args: (case_when_then | case_else)[];
         };
+
+export type case_when_then_list = case_when_then[];
 
 export type case_when_then = { type: 'when'; cond: binary_expr; result: expr; };
 
@@ -914,11 +918,11 @@ export type trim_rem = expr_list;
 
 export type trim_func_clause = { type: 'function'; name: string; args: expr_list; };
 
-export type func_call = trim_func_clause | { type: 'function'; name: string; args: expr_list; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; };
+export type func_call = trim_func_clause | { type: 'function'; name: string; args: expr_list; suffix: literal_string; } | { type: 'function'; name: string; args: expr_list; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; };
 
 export type extract_filed = 'string';
 
-export type extract_func = { type: 'extract'; args: { field: extract_filed; cast_type: 'TIMESTAMP' | 'INTERVAL' | 'TIME'; source: expr; }};
+export type extract_func = { type: 'extract'; args: { field: extract_filed; cast_type: 'TIMESTAMP' | 'INTERVAL' | 'TIME'; source: expr; }} | { type: 'extract'; args: { field: extract_filed; source: expr; }};
 
 export type scalar_time_func = KW_CURRENT_DATE | KW_CURRENT_TIME | KW_CURRENT_TIMESTAMP;
 
@@ -934,6 +938,7 @@ export type cast_expr = {
         expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
           | expr;
         symbol: '::' | 'as',
+        keyword: 'cast';
         target: data_type;
       };
 
@@ -1402,7 +1407,7 @@ export type var_decl_list = var_decl[];
 
 export type var_decl = { type: 'var'; name: string; prefix: string; suffix: string; }; | without_prefix_var_decl & { type: 'var'; prefix: string; };;
 
-export type without_prefix_var_decl = { type: 'var'; prefix: string; name: ident_name; members: mem_chain; quoted: string | null };
+export type without_prefix_var_decl = { type: 'var'; prefix: string; name: ident_name; members: mem_chain; quoted: string | null } | { type: 'var'; prefix: null; name: number; members: []; quoted: null };
 
 export type mem_chain = ident_name[];;
 

@@ -1,4 +1,4 @@
-import { columnRefToSQL, columnOrderToSQL } from './column'
+import { columnToSQL, columnRefToSQL, columnOrderToSQL } from './column'
 
 // const escapeMap = {
 //   '\0'   : '\\0',
@@ -318,7 +318,7 @@ function triggerEventToSQL(events) {
 function returningToSQL(returning) {
   if (!returning) return ''
   const { columns } = returning
-  return ['RETURNING', columns.map(columnRefToSQL).filter(hasVal).join(', ')].join(' ')
+  return ['RETURNING', columns.map(columnToSQL).filter(hasVal).join(', ')].join(' ')
 }
 
 function commonKeywordArgsToSQL(kwArgs) {
