@@ -726,6 +726,13 @@ describe('BigQuery', () => {
         'SELECT EXTRACT(YEAR FROM timestamp)',
       ]
     },
+    {
+      title: 'in unset expr',
+      sql: [
+        'select a from x where a in unnest(:param)',
+        'SELECT a FROM x WHERE a IN UNNEST(:param)'
+      ],
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {

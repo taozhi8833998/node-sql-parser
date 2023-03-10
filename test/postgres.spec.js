@@ -817,8 +817,8 @@ describe('Postgres', () => {
     it('should parse returning clause', () => {
       let sql = "UPDATE buildings SET address = 'update test 2' WHERE id = 18 RETURNING id, address"
       expect(getParsedSql(sql, opt)).to.equal(`UPDATE "buildings" SET "address" = 'update test 2' WHERE "id" = 18 RETURNING "id", "address"`)
-      sql = "UPDATE buildings SET address = 'update test 2' WHERE id = 18 RETURNING address as newAddress"
-      expect(getParsedSql(sql, opt)).to.equal(`UPDATE "buildings" SET "address" = 'update test 2' WHERE "id" = 18 RETURNING "address" AS "newAddress"`)
+      sql = "UPDATE buildings SET address = 'update test 2' WHERE id = 18 RETURNING *, address as newAddress"
+      expect(getParsedSql(sql, opt)).to.equal(`UPDATE "buildings" SET "address" = 'update test 2' WHERE "id" = 18 RETURNING *, "address" AS "newAddress"`)
       sql = "UPDATE buildings SET address = 'update test 2' WHERE id = 18 RETURNING (SELECT address FROM buildings WHERE id = 18) as old_address;"
       expect(getParsedSql(sql, opt)).to.equal(`UPDATE "buildings" SET "address" = 'update test 2' WHERE "id" = 18 RETURNING (SELECT "address" FROM "buildings" WHERE "id" = 18) AS "old_address"`)
     })
