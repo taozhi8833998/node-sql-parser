@@ -10,6 +10,7 @@ import { intervalToSQL } from './interval'
 import { selectToSQL } from './select'
 import { showToSQL } from './show'
 import { arrayStructExprToSQL } from './array-struct'
+import { unnestToSQL } from './tables'
 import { unionToSQL } from './union'
 import { namedWindowExprListToSQL, windowFuncToSQL } from './window'
 
@@ -31,6 +32,7 @@ const exprToSQLConvertFn = {
   interval        : intervalToSQL,
   show            : showToSQL,
   struct          : arrayStructExprToSQL,
+  unnest          : unnestToSQL,
   'window'        : namedWindowExprListToSQL,
 }
 
