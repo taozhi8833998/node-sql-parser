@@ -177,6 +177,7 @@ function columnsToSQL(columns, tables) {
 export {
   columnDefinitionToSQL,
   columnRefToSQL,
+  columnToSQL,
   columnsToSQL,
   columnDataType,
   columnOrderToSQL,

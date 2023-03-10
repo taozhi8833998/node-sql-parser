@@ -260,8 +260,10 @@ multiple_stmt
     }
 
 set_op
-  = KW_UNION __ KW_ALL { return 'union all' }
-  / KW_UNION { return 'union' }
+  = KW_UNION __ a:KW_ALL? {
+    // => 'union' | 'union all'
+    return a ? 'union all' : 'union'
+  }
 
 union_stmt
   = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
@@ -2349,11 +2351,11 @@ conflict_stmt
   = KW_ON __ 'CONFLICT'i __
 
 returning_stmt
-  = k:KW_RETURNING __ c:(STAR / column_ref_list) {
-    // => { type: 'returning'; columns: column_ref_list | column_ref; }
+  = k:KW_RETURNING __ c:(column_clause / select_stmt) {
+    // => { type: 'returning'; columns: column_clause | select_stmt; }
     return {
       type: k && k.toLowerCase() || 'returning',
-      columns: c === '*' && [{ type: 'columne_ref', table: null, column: '*' }] || c
+      columns: c === '*' && [{ type: 'expr', expr: { type: 'column_ref', table: null, column: '*' }, as: null }] || c
     }
   }
 
@@ -2535,6 +2537,7 @@ case_expr
 
 case_when_then_list
   = head:case_when_then __ tail:(__ case_when_then)* {
+    // => case_when_then[]
     return createList(head, tail, 1)
   }
 
