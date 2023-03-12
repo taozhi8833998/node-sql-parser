@@ -2093,7 +2093,7 @@ comparison_op_right
   / like_op_right
 
 arithmetic_op_right
-  = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
+  = l:(__ arithmetic_comparison_operator __ (logic_operator_expr / additive_expr))+ {
       return { type: 'arithmetic', tail: l };
     }
 
