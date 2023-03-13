@@ -259,6 +259,20 @@ describe('Flink', () => {
         "SELECT SHA512(TRY_CAST(CONCAT(`a`, `b`, `c`) AS VARCHAR)) AS `Hashed` FROM `v`",
       ],
     },
+    {
+      title: "OVERLAY",
+      sql: [
+        `SELECT OVERLAY(a PLACING 'a' FROM 3) FROM users`,
+        "SELECT OVERLAY(`a` PLACING 'a' FROM 3) FROM `users`",
+      ],
+    },
+    {
+      title: "OVERLAY with length",
+      sql: [
+        `SELECT * FROM users WHERE OVERLAY(a PLACING 'abc' FROM 3 FOR 2) = 'abcde'`,
+        "SELECT * FROM `users` WHERE OVERLAY(`a` PLACING 'abc' FROM 3 FOR 2) = 'abcde'",
+      ],
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {

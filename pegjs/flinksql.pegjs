@@ -241,7 +241,7 @@
     'OUTER': true,
     'OVER': true,
     'OVERLAPS': true,
-    'OVERLAPS': true,
+    'OVERLAY': true,
 
     'PARAMETER': true,
     'PARTITION': true,
@@ -2866,6 +2866,31 @@ trim_func_clause
     };
   }
 
+overlay_func_args
+  = s1:expr __ 'placing'i __ s2:expr __ KW_FROM __ start:literal_numeric length:(__ 'for'i __ literal_numeric)? {
+    // => expr_list
+    let value = [s1, { type: 'origin', value: 'placing' }, s2, { type: 'origin', value: 'from' }, start]
+    if (length) {
+      value.push({ type: 'origin', value: 'for' })
+      value.push(length[3])
+    }
+    return {
+      type: 'expr_list',
+      value,
+    }
+  }
+
+overlay_func_clause
+  = 'overlay'i __ LPAREN __ args:overlay_func_args __ RPAREN {
+    // => { type: 'function'; name: string; args: expr_list; }
+    return {
+        type: 'function',
+        name: 'OVERLAY',
+        separator: ' ',
+        args,
+    };
+  }
+
 substring_func_args
   = e:expr __ KW_FROM __ start:literal_numeric length:(__ 'for'i __ literal_numeric)? {
     // => expr_list
@@ -2895,6 +2920,7 @@ func_call
   = position_func_clause
   / trim_func_clause
   / substring_func_clause
+  / overlay_func_clause
   / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
       // => { type: 'function'; name: string; args: expr_list; }
       if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
