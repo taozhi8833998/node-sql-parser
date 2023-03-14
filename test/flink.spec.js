@@ -190,6 +190,85 @@ describe('Flink', () => {
       ],
     },
     {
+      title: "JOIN",
+      sql: [
+        `SELECT * FROM Orders JOIN Product ON Orders.productId = Product.id`,
+        "SELECT * FROM `Orders` JOIN `Product` ON `Orders`.`productId` = `Product`.`id`",
+      ],
+    },
+    {
+      title: "NATURAL JOIN",
+      sql: [
+        `SELECT * FROM Orders NATURAL JOIN Product`,
+        "SELECT * FROM `Orders` NATURAL JOIN `Product`",
+      ],
+    },
+    {
+      title: "INNER JOIN",
+      sql: [
+        `SELECT * FROM Orders INNER JOIN Product ON Orders.productId = Product.id`,
+        "SELECT * FROM `Orders` INNER JOIN `Product` ON `Orders`.`productId` = `Product`.`id`",
+      ],
+    },
+    {
+      title: "LEFT JOIN",
+      sql: [
+        `SELECT * FROM Orders LEFT JOIN Product ON Orders.product_id = Product.id`,
+        "SELECT * FROM `Orders` LEFT JOIN `Product` ON `Orders`.`product_id` = `Product`.`id`",
+      ],
+    },
+    {
+      title: "RIGHT JOIN",
+      sql: [
+        `SELECT * FROM Orders RIGHT JOIN Product ON Orders.product_id = Product.id`,
+        "SELECT * FROM `Orders` RIGHT JOIN `Product` ON `Orders`.`product_id` = `Product`.`id`",
+      ],
+    },
+    {
+      title: "FULL OUTER JOIN",
+      sql: [
+        `SELECT * FROM Orders FULL OUTER JOIN Product ON Orders.product_id = Product.id`,
+        "SELECT * FROM `Orders` FULL OUTER JOIN `Product` ON `Orders`.`product_id` = `Product`.`id`",
+      ],
+    },
+    {
+      title: "CROSS JOIN",
+      sql: [
+        `SELECT column_list FROM A CROSS JOIN B`,
+        "SELECT `column_list` FROM `A` CROSS JOIN `B`",
+      ],
+    },
+    {
+      title: "CROSS APPLY",
+      sql: [
+        `SELECT  t1.*, t2o.*
+         FROM    t1
+         CROSS APPLY
+                (
+                SELECT  *
+                FROM    t2
+                WHERE   t2.t1_id = t1.id
+                ) t2o
+        `,
+        "SELECT `t1`.*, `t2o`.* FROM `t1` CROSS APPLY (SELECT * FROM `t2` WHERE `t2`.`t1_id` = `t1`.`id`) AS `t2o`",
+      ],
+    },
+    {
+      title: "complex JOINs",
+      sql: [
+        `SELECT * FROM (SELECT * FROM table1) t1 FULL OUTER JOIN ( SELECT * FROM ( SELECT * FROM table2 ) JOIN db.table3 ON table2.id=table3.id ) t2 ON t1.id=t2.id`,
+        "SELECT * FROM (SELECT * FROM `table1`) AS `t1` FULL OUTER JOIN (SELECT * FROM (SELECT * FROM `table2`) JOIN `db`.`table3` ON `table2`.`id` = `table3`.`id`) AS `t2` ON `t1`.`id` = `t2`.`id`",
+      ],
+    },
+    {
+      title: "WITH clause",
+      sql: [
+        `WITH orders_with_total AS (SELECT order_id, price + tax AS total FROM Orders)
+         SELECT order_id, SUM(total) FROM orders_with_total GROUP BY order_id;`,
+        "WITH `orders_with_total` AS (SELECT `order_id`, `price` + `tax` AS `total` FROM `Orders`) SELECT `order_id`, SUM(`total`) FROM `orders_with_total` GROUP BY `order_id`",
+      ],
+    },
+    {
       title: "string concatenation function",
       sql: [
         `SELECT a || b FROM users WHERE a || b = 'ab';`,
