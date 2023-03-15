@@ -733,6 +733,16 @@ describe('BigQuery', () => {
         'SELECT a FROM x WHERE a IN UNNEST(:param)'
       ],
     },
+    {
+      title: 'logical operator in where clause',
+      sql: [
+        `select *
+        from
+            unnest([ ('a'), ('b'), ('c'), ('ab')]) as col
+        where col = 'a' || 'b'`,
+        "SELECT * FROM UNNEST([('a'), ('b'), ('c'), ('ab')]) AS col WHERE col = 'a' || 'b'"
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
