@@ -5,7 +5,7 @@ import { assignToSQL } from './assign'
 import { binaryToSQL } from './binary'
 import { caseToSQL } from './case'
 import { columnRefToSQL, fulltextSearchToSQL } from './column'
-import { castToSQL, extractFunToSQL, funcToSQL } from './func'
+import { anyValueFuncToSQL, castToSQL, extractFunToSQL, funcToSQL } from './func'
 import { intervalToSQL } from './interval'
 import { selectToSQL } from './select'
 import { showToSQL } from './show'
@@ -17,6 +17,7 @@ import { namedWindowExprListToSQL, windowFuncToSQL } from './window'
 const exprToSQLConvertFn = {
   alter           : alterExprToSQL,
   aggr_func       : aggrToSQL,
+  any_value       : anyValueFuncToSQL,
   window_func     : windowFuncToSQL,
   'array'         : arrayStructExprToSQL,
   assign          : assignToSQL,

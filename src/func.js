@@ -2,6 +2,16 @@ import { exprToSQL } from './expr'
 import { commonTypeValue, hasVal, identifierToSql, toUpper } from './util'
 import { overToSQL } from './over'
 
+function anyValueFuncToSQL(stmt) {
+  const { args, type, over } = stmt
+  const { expr, having } = args
+  let sql = `${toUpper(type)}(${exprToSQL(expr)}`
+  if (having) sql = `${sql} HAVING ${toUpper(having.prefix)} ${exprToSQL(having.expr)}`
+  sql = `${sql})`
+  const overStr = overToSQL(over)
+  return [sql, overStr].filter(hasVal).join(' ')
+}
+
 function arrayDimensionToSymbol(target) {
   if (!target || !target.array) return ''
   switch (target.array) {
@@ -59,6 +69,7 @@ function funcToSQL(expr) {
 }
 
 export {
+  anyValueFuncToSQL,
   castToSQL,
   extractFunToSQL,
   funcToSQL,
