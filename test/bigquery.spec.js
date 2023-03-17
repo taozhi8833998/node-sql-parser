@@ -750,6 +750,14 @@ describe('BigQuery', () => {
         'SELECT ANY_VALUE(x HAVING MAX y)'
       ]
     },
+    {
+      title: 'any_value function with over',
+      sql: [
+        'SELECT ANY_VALUE(x) OVER (PARTITION BY column1 ORDER BY column2 ASC)',
+        'SELECT ANY_VALUE(x) OVER (PARTITION BY column1 ORDER BY column2 ASC)'
+      ]
+    },
+
   ]
 
   SQL_LIST.forEach(sqlInfo => {
