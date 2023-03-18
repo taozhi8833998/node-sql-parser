@@ -743,6 +743,21 @@ describe('BigQuery', () => {
         "SELECT * FROM UNNEST([('a'), ('b'), ('c'), ('ab')]) AS col WHERE col = 'a' || 'b'"
       ]
     },
+    {
+      title: 'any_value function',
+      sql: [
+        'SELECT ANY_VALUE(x having max y)',
+        'SELECT ANY_VALUE(x HAVING MAX y)'
+      ]
+    },
+    {
+      title: 'any_value function with over',
+      sql: [
+        'SELECT ANY_VALUE(x) OVER (PARTITION BY column1 ORDER BY column2 ASC)',
+        'SELECT ANY_VALUE(x) OVER (PARTITION BY column1 ORDER BY column2 ASC)'
+      ]
+    },
+
   ]
 
   SQL_LIST.forEach(sqlInfo => {

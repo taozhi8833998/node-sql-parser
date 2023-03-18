@@ -2403,6 +2403,7 @@ star_expr
 
 func_call
   = extract_func
+  / any_value_func
   / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
     if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
       return {
@@ -2443,6 +2444,26 @@ scalar_time_func
   / KW_CURRENT_TIMESTAMP
 scalar_func
   = scalar_time_func / KW_SESSION_USER
+
+any_value_having
+  = KW_HAVING __ i:(KW_MAX / KW_MIN) __ e:or_and_where_expr {
+    return {
+      prefix: i,
+      expr: e
+    }
+  }
+
+any_value_func
+  = 'ANY_VALUE'i __ LPAREN __ e:or_and_where_expr __ h:any_value_having? __ RPAREN __ bc:over_partition? {
+    return {
+        type: 'any_value',
+        args: {
+          expr: e,
+          having: h
+        },
+        over: bc
+    }
+  }
 
 extract_filed
   = f:('CENTURY'i / 'DAY'i / 'DATE'i / 'DECADE'i / 'DOW'i / 'DOY'i / 'EPOCH'i / 'HOUR'i / 'ISODOW'i / 'ISOWEEK'i / 'ISOYEAR'i / 'MICROSECONDS'i / 'MILLENNIUM'i / 'MILLISECONDS'i / 'MINUTE'i / 'MONTH'i / 'QUARTER'i / 'SECOND'i / 'TIME'i / 'TIMEZONE'i / 'TIMEZONE_HOUR'i / 'TIMEZONE_MINUTE'i / 'WEEK'i / 'YEAR'i) {
