@@ -267,3 +267,7 @@ If you have made a donation, you can leave your name and email in the issue, you
 
 
 ## [Donation list](https://github.com/taozhi8833998/node-sql-parser/blob/master/DONATIONLIST.md)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=taozhi8833998/node-sql-parser&type=Date)](https://star-history.com/#taozhi8833998/node-sql-parser&Date)
