@@ -102,8 +102,8 @@ describe('AST', () => {
             });
 
             it('should parse multiple expressions', () => {
-                sql = 'SELECT col1 AS a, col2 AS b FROM t';
-                expect(getParsedSql(sql)).to.equal('SELECT `col1` AS `a`, `col2` AS `b` FROM `t`');
+                sql = 'SELECT col1 AS あa漢字, col2 AS b FROM t';
+                expect(getParsedSql(sql)).to.equal('SELECT `col1` AS `あa漢字`, `col2` AS `b` FROM `t`');
             });
 
             it('should escape reserved keywords', () => {
