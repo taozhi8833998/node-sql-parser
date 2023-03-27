@@ -807,6 +807,26 @@ describe('BigQuery', () => {
     expect(arrayStructTypeToSQL({ dataType: 'array' })).to.equal('ARRAY undefined')
   })
 
+  it('should support record type access', () => {
+    const sql = 'select a.b.c.d.e.f from a'
+    const ast = parser.astify(sql, opt)
+    const column = {
+      expr: {
+        type: 'column_ref',
+        table: 'a',
+        column: 'b',
+        subFields: [
+          'c',
+          'd',
+          'e',
+          'f'
+        ]
+      },
+      as: null
+    }
+    expect(ast.select.columns[0]).to.eql(column)
+  })
+
   it('should get the correct column list', () => {
     let sql = 'SELECT EXTRACT(ISOWEEK FROM mydate)'
     let ast = parser.parse(sql, opt)

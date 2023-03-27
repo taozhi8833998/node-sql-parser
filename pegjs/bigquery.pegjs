@@ -1568,7 +1568,7 @@ struct_value
 
 expr_alias
   = e:(binary_column_expr / expr) __ alias:alias_clause? {
-      return { expr: e, as:alias };
+      return { expr: e, as: alias };
     }
 
 column_clause
@@ -1641,6 +1641,7 @@ column_list_item
       }
     }
   / c:column_offset_expr __ as:alias_clause? {
+    columnList.add(`select::null::${c}`)
     return {
         expr: {
           type: 'column_ref',
@@ -2179,8 +2180,8 @@ primary
     }
 
 interval_expr
-  = KW_INTERVAL                    __
-    e:expr                       __
+  = KW_INTERVAL __
+    e:expr __
     u: interval_unit {
       return {
         type: 'interval',
@@ -2190,9 +2191,9 @@ interval_expr
     }
 
 case_expr
-  = KW_CASE                         __
-    condition_list:case_when_then_list  __
-    otherwise:case_else?            __
+  = KW_CASE __
+    condition_list:case_when_then_list __
+    otherwise:case_else? __
     KW_END __ KW_CASE? {
       if (otherwise) condition_list.push(otherwise);
       return {
@@ -2201,10 +2202,10 @@ case_expr
         args: condition_list
       };
     }
-  / KW_CASE                         __
-    expr:expr                      __
-    condition_list:case_when_then_list  __
-    otherwise:case_else?            __
+  / KW_CASE __
+    expr:expr __
+    condition_list:case_when_then_list __
+    otherwise:case_else? __
     KW_END __ KW_CASE? {
       if (otherwise) condition_list.push(otherwise);
       return {
@@ -2233,22 +2234,14 @@ case_else = KW_ELSE __ result:expr {
   }
 
 column_ref
-  =  schema:column_without_kw tbl:(__ DOT __ column_without_kw) col:(__ DOT __ column_without_kw)+ {
-      const columns = col.map(c => c[3]).join('.') || null
-      columnList.add(`select::${schema}.${tbl[3]}::${col[0][3]}`);
-      return {
-        type: 'column_ref',
-        schema: schema,
-        table: tbl[3],
-        column: columns
-      };
-    }
-  / tbl:column_without_kw __ DOT __ col:column_without_kw {
-      columnList.add(`select::${tbl}::${col}`);
+  =  tbl:column_without_kw col:(__ DOT __ column_without_kw)+  {
+      const cols = col.map(c => c[3])
+      columnList.add(`select::${tbl}::${cols[0]}`)
       return {
         type: 'column_ref',
         table: tbl,
-        column: col
+        column: cols[0],
+        subFields: cols.slice(1)
       };
     }
   / col:column {

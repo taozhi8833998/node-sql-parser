@@ -22,7 +22,7 @@ function columnOffsetToSQL(column, isDual) {
 function columnRefToSQL(expr) {
   const {
     array_index, arrows = [], as, collate, column, isDual, schema, table, parentheses, properties,
-    suffix, order_by,
+    suffix, order_by, subFields = [],
   } = expr
   let str = column === '*' ? '*' : columnOffsetToSQL(column, isDual)
   if (table) str = `${identifierToSql(table)}.${str}`
@@ -31,6 +31,7 @@ function columnRefToSQL(expr) {
     str = `${str}[${array_index.number}]`
     if (array_index.property) str = `${str}.${array_index.property.value}`
   }
+  str = [str, ...subFields].join('.')
   const result = [
     str,
     commonOptionConnector('AS', exprToSQL, as),
