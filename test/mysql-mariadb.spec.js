@@ -550,7 +550,14 @@ describe('mysql', () => {
           end;`,
           "SELECT `A`.`id`, `B`.`name` FROM `A`, `B` WHERE CASE WHEN `A`.`id` = 0 THEN `B`.`name` IN ('aaa', 'bbb') WHEN `A`.`id` = 1 THEN `B`.`name` IN ('bbb', 'ccc') WHEN `A`.`id` = 2 THEN `B`.`name` IN ('ccc', 'ddd') END"
         ]
-      }
+      },
+      {
+        title: 'drop database or schema stmt',
+        sql: [
+          'DROP DATABASE IF EXISTS dbName; drop schema abc',
+          'DROP DATABASE IF EXISTS `dbName` ; DROP SCHEMA `abc`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
