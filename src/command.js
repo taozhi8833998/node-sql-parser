@@ -18,6 +18,8 @@ function commonCmdToSQL(stmt) {
     case 'table':
       clauses.push(tablesToSQL(name))
       break
+    case 'database':
+    case 'schema':
     case 'procedure':
       clauses.push(identifierToSql(name))
       break

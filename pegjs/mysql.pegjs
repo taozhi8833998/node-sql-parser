@@ -509,7 +509,7 @@ if_not_exists_stmt
 
 create_db_stmt
   = a:KW_CREATE __
-    k:(KW_DATABASE / KW_SCHEME) __
+    k:(KW_DATABASE / KW_SCHEMA) __
     ife:if_not_exists_stmt? __
     t:ident_name __
     c:create_db_definition? {
@@ -820,6 +820,21 @@ drop_stmt
           name: i,
           table: t,
           options: op
+        }
+      };
+    }
+  / a:KW_DROP __
+    r:(KW_DATABASE / KW_SCHEMA) __
+    ife:if_exists? __
+    t:ident_name {
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: r.toLowerCase(),
+          prefix: ife,
+          name: t
         }
       };
     }
@@ -3069,7 +3084,7 @@ KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
 KW_TABLES    = "TABLES"i      !ident_start { return 'TABLES'; }
 KW_DATABASE = "DATABASE"i      !ident_start { return 'DATABASE'; }
-KW_SCHEME   = "SCHEME"i      !ident_start { return 'SCHEME'; }
+KW_SCHEMA   = "SCHEMA"i      !ident_start { return 'SCHEMA'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
 
 KW_ON       = "ON"i       !ident_start
