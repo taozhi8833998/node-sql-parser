@@ -3164,6 +3164,7 @@ KW_ZEROFILL = "ZEROFILL"i !ident_start { return 'ZEROFILL'; }
 KW_INTEGER  = "INTEGER"i  !ident_start { return 'INTEGER'; }
 KW_JSON     = "JSON"i     !ident_start { return 'JSON'; }
 KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
+KW_MEDIUMINT = "MEDIUMINT"i !ident_start { return 'MEDIUMINT'; }
 KW_TINYINT  = "TINYINT"i  !ident_start { return 'TINYINT'; }
 KW_TINYTEXT = "TINYTEXT"i !ident_start { return 'TINYTEXT'; }
 KW_TEXT     = "TEXT"i     !ident_start { return 'TEXT'; }
@@ -3177,7 +3178,8 @@ KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
 KW_ROWS     = "ROWS"i     !ident_start { return 'ROWS'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
-KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
+KW_TIMESTAMP = "TIMESTAMP"i !ident_start { return 'TIMESTAMP'; }
+KW_YEAR = "YEAR"i !ident_start { return 'YEAR'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
 KW_USER     = "USER"i     !ident_start { return 'USER'; }
 
@@ -3510,17 +3512,17 @@ numeric_type_suffix
     return result
   }
 numeric_type
-  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_BIT) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? { return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE)l:[0-9]+ __ s:numeric_type_suffix? { return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ s:numeric_type_suffix? __{ return { dataType: t, suffix: s }; }
+  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_MEDIUMINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_BIT) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? { return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_MEDIUMINT/ KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE)l:[0-9]+ __ s:numeric_type_suffix? { return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_MEDIUMINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ s:numeric_type_suffix? __{ return { dataType: t, suffix: s }; }
 
 
 datetime_type
-  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) __ LPAREN __ l:[0-6] __ RPAREN __ s:numeric_type_suffix? { return { dataType: t, length: parseInt(l, 10), parentheses: true }; }
-  / t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) { return { dataType: t }; }
+  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP / KW_YEAR) __ LPAREN __ l:[0-6] __ RPAREN __ s:numeric_type_suffix? { return { dataType: t, length: parseInt(l, 10), parentheses: true }; }
+  / t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP / KW_YEAR) { return { dataType: t }; }
 
 enum_type
-  = t:KW_ENUM __ e:value_item {
+  = t:(KW_ENUM / KW_SET) __ e:value_item {
     e.parentheses = true
     return {
       dataType: t,
