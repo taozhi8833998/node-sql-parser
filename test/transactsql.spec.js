@@ -129,4 +129,10 @@ describe('transactsql', () => {
     })
   })
 
+  it('should support type as column name', () => {
+    const sql = `ALTER TABLE test ADD
+    [type] varchar(255) NOT NULL DEFAULT ('default');`
+    expect(getParsedSql(sql)).to.equal("ALTER TABLE [test] ADD [type] VARCHAR(255) NOT NULL DEFAULT ('default')")
+  })
+
 })
