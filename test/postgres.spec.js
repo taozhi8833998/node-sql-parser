@@ -802,6 +802,20 @@ describe('Postgres', () => {
         `CREATE TABLE IF NOT EXISTS "users" ("id" BIGSERIAL PRIMARY KEY, "date_created" TIMESTAMP WITHOUT TIME ZONE DEFAULT (now() AT TIME ZONE 'utc'), "first_name" VARCHAR(128) NOT NULL)`
       ]
     },
+    {
+      title: 'from clause in update',
+      sql: [
+        `UPDATE t1 SET c1 = 'x' FROM t2 WHERE c3 = t2.c2`,
+        `UPDATE "t1" SET "c1" = 'x' WHERE "c3" = "t2"."c2"`,
+      ]
+    },
+    {
+      title: 'from clause in update with select',
+      sql: [
+        `UPDATE t1 SET c1 = 'x' FROM (select c2 from t2) t2 WHERE c3 = c2`,
+        `UPDATE "t1" SET "c1" = 'x' WHERE "c3" = "c2"`,
+      ]
+    }
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

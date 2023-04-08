@@ -2244,6 +2244,7 @@ update_stmt
     t:table_ref_list __
     KW_SET       __
     l:set_list   __
+    f:from_clause? __
     w:where_clause? __
     r:returning_stmt? {
       /* export interface update_stmt_node {
@@ -2271,6 +2272,12 @@ update_stmt
           columnList.add(`update::${col.table}::${col.column}`)
         });
       }
+      if(f) f.forEach(tableInfo => {
+        const { db, as, table, join } = tableInfo
+        const action = join ? 'select' : 'update'
+        if (table) tableList.add(`${action}::${db}::${table}`)
+        if (!join) columnList.add(`update::${table}::(.*)`);
+      });
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -2278,6 +2285,7 @@ update_stmt
           type: 'update',
           table: t,
           set: l,
+          from: f,
           where: w,
           returning: r,
         }
