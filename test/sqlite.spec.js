@@ -102,4 +102,9 @@ describe('sqlite', () => {
     sql = 'CREATE TABLE sqlite_stat4(tbl,idx,neq,nlt,ndlt,sample)'
     expect(getParsedSql(sql)).to.be.equal('CREATE TABLE `sqlite_stat4` (`tbl`, `idx`, `neq`, `nlt`, `ndlt`, `sample`)')
   })
+
+  it('should support with clause table name', () => {
+    const sql = 'with `e` as (select * from employees) SELECT name,`e`.`hired_on` FROM `e`'
+    expect(getParsedSql(sql)).to.be.equal('WITH `e` AS (SELECT * FROM `employees`) SELECT `name`, `e`.`hired_on` FROM `e`')
+  })
 })
