@@ -2244,12 +2244,14 @@ update_stmt
     t:table_ref_list __
     KW_SET       __
     l:set_list   __
+    f:from_clause? __
     w:where_clause? __
     r:returning_stmt? {
       /* export interface update_stmt_node {
          type: 'update';
          table: table_ref_list;
          set: set_list;
+         from?: from_clause;
          where?: where_clause;
          returning?: returning_stmt;
       }
@@ -2278,6 +2280,7 @@ update_stmt
           type: 'update',
           table: t,
           set: l,
+          from: f,
           where: w,
           returning: r,
         }
@@ -2936,14 +2939,11 @@ ident
     }
 
 alias_ident
-  = name:ident_name !{ if (reservedMap[name.toUpperCase()] === true) throw new Error("Error: "+ JSON.stringify(name)+" is a reserved word, can not as alias clause"); return false } __ LPAREN __ c:column_list __ RPAREN {
+  = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } __ LPAREN __ c:column_list __ RPAREN {
     // => string
     return `${name}(${c.join(', ')})`
   }
-  / name:ident_name !{
-      if (reservedMap[name.toUpperCase()] === true) throw new Error("Error: "+ JSON.stringify(name)+" is a reserved word, can not as alias clause");
-      return false
-    } {
+  / name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
       // => string
       return name;
     }
