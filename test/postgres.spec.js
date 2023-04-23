@@ -815,6 +815,13 @@ describe('Postgres', () => {
         `UPDATE t1 SET c1 = 'x' FROM (select c2 from t2) WHERE c3 = c2`,
         `UPDATE "t1" SET "c1" = 'x' FROM (SELECT "c2" FROM "t2") WHERE "c3" = "c2"`,
       ]
+    },
+    {
+      title: 'drop index',
+      sql: [
+        'drop index concurrently title_index cascade',
+        'DROP INDEX CONCURRENTLY "title_index" CASCADE'
+      ],
     }
   ]
   function neatlyNestTestedSQL(sqlList){
