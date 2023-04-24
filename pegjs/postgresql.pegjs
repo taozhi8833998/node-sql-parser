@@ -870,17 +870,17 @@ drop_stmt
     }
   / a:KW_DROP __
     r:KW_INDEX __
+    cu:KW_CONCURRENTLY? __
+    ie:('IF'i __ KW_EXISTS)? __
     i:column_ref __
-    KW_ON __
-    t:table_name __
-    op:drop_index_opt? __ {
+    op:('CASCADE'i / 'RESTRICT'i)? {
       /*
       export interface drop_index_stmt_node {
         type: 'drop';
+        prefix?: 'CONCURRENTLY';
         keyword: string;
         name: column_ref;
-        table: table_name;
-        options?: drop_index_opt;
+        options?: 'cascade' | 'restrict';
       }
       => AstStatement<drop_index_stmt_node>
       */
@@ -890,9 +890,9 @@ drop_stmt
         ast: {
           type: a.toLowerCase(),
           keyword: r.toLowerCase(),
+          prefix: cu,
           name: i,
-          table: t,
-          options: op
+          options: op && [{ type: 'origin', value: op }]
         }
       };
     }
