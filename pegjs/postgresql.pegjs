@@ -2240,7 +2240,7 @@ limit_clause
     }
 
 update_stmt
-  = KW_UPDATE    __
+  = __ cte:with_clause? __ KW_UPDATE    __
     t:table_ref_list __
     KW_SET       __
     l:set_list   __
@@ -2248,6 +2248,7 @@ update_stmt
     w:where_clause? __
     r:returning_stmt? {
       /* export interface update_stmt_node {
+        with?: with_clause;
          type: 'update';
          table: table_ref_list;
          set: set_list;
@@ -2277,6 +2278,7 @@ update_stmt
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
+          with: cte,
           type: 'update',
           table: t,
           set: l,
