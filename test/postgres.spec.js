@@ -822,6 +822,16 @@ describe('Postgres', () => {
         'drop index concurrently title_index cascade',
         'DROP INDEX CONCURRENTLY "title_index" CASCADE'
       ],
+    },
+    {
+      title: 'with clause in update',
+      sql: [
+        `WITH olds AS (SELECT test_field_1, test_field_2 FROM test_tbl WHERE test_field_1=5)
+        UPDATE test_tbl SET test_field_2 ='tested!' WHERE test_field_1=5
+        RETURNING (SELECT test_field_1 FROM olds) AS test_field_1_old,
+        (SELECT test_field_2 FROM olds) AS test_field_2_old;`,
+        `WITH "olds" AS (SELECT "test_field_1", "test_field_2" FROM "test_tbl" WHERE "test_field_1" = 5) UPDATE "test_tbl" SET "test_field_2" = 'tested!' WHERE "test_field_1" = 5 RETURNING (SELECT "test_field_1" FROM "olds") AS "test_field_1_old", (SELECT "test_field_2" FROM "olds") AS "test_field_2_old"`
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){
