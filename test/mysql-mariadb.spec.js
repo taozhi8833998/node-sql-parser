@@ -580,6 +580,13 @@ describe('mysql', () => {
           "SELECT * FROM `tests` WHERE `name` = 'test' || 'abc'"
         ]
       },
+      {
+        title: 'show create table',
+        sql: [
+          'SHOW CREATE TABLE `debug`',
+          'SHOW CREATE TABLE `debug`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

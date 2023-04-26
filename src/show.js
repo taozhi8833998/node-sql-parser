@@ -45,7 +45,7 @@ function showToSQL(showExpr) {
       str = showGrantsForUser(showExpr)
       break
     case 'CREATE':
-      str = commonOptionConnector('', tableToSQL, showExpr.view)
+      str = commonOptionConnector('', tableToSQL, showExpr[suffix])
       break
     case 'VAR':
       str = varToSQL(showExpr.var)
