@@ -2818,7 +2818,7 @@ multiplicative_expr
     }
 
 multiplicative_operator
-  = "*" / "/" / "%"
+  = "*" / "/" / "%" / "||"
 
 primary
   = cast_expr
