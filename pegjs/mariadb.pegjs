@@ -2441,6 +2441,39 @@ convert_args
       value: [c]
     }
   }
+extract_filed
+  = f:('CENTURY'i / 'DAY'i / 'DATE'i / 'DECADE'i / 'DOW'i / 'DOY'i / 'EPOCH'i / 'HOUR'i / 'ISODOW'i / 'ISOWEEK'i / 'ISOYEAR'i / 'MICROSECONDS'i / 'MILLENNIUM'i / 'MILLISECONDS'i / 'MINUTE'i / 'MONTH'i / 'QUARTER'i / 'SECOND'i / 'TIME'i / 'TIMEZONE'i / 'TIMEZONE_HOUR'i / 'TIMEZONE_MINUTE'i / 'WEEK'i / 'YEAR'i) {
+    return f
+  }
+extract_func
+  = kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ t:(KW_TIMESTAMP / KW_INTERVAL / KW_TIME / KW_DATE) __ s:expr __ RPAREN {
+    return {
+        type: kw.toLowerCase(),
+        args: {
+          field: f,
+          cast_type: t,
+          source: s,
+        }
+    }
+  }
+  / kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ s:expr __ RPAREN {
+    return {
+        type: kw.toLowerCase(),
+        args: {
+          field: f,
+          source: s,
+        }
+    }
+  }
+  / 'DATE_TRUNC'i __  LPAREN __ e:expr __ COMMA __ f:extract_filed __ RPAREN {
+    return {
+        type: 'function',
+        name: 'DATE_TRUNC',
+        args: { type: 'expr_list', value: [e, { type: 'origin', value: f }] },
+        over: null,
+      };
+  }
+
 trim_position
   = 'BOTH'i / 'LEADING'i / 'TRAILING'i
 
@@ -2468,7 +2501,7 @@ trim_func_clause
   }
 
 func_call
-  = trim_func_clause
+  = extract_func / trim_func_clause
   / 'convert'i __ LPAREN __ l:convert_args __ RPAREN __ ca:collate_expr? {
     return {
         type: 'function',
@@ -2843,6 +2876,7 @@ KW_MIN      = "MIN"i        !ident_start { return 'MIN'; }
 KW_SUM      = "SUM"i        !ident_start { return 'SUM'; }
 KW_AVG      = "AVG"i        !ident_start { return 'AVG'; }
 
+KW_EXTRACT  = "EXTRACT"i    !ident_start { return 'EXTRACT'; }
 KW_CALL     = "CALL"i       !ident_start { return 'CALL'; }
 
 KW_CASE     = "CASE"i       !ident_start
