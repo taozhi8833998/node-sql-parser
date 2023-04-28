@@ -840,6 +840,13 @@ describe('Postgres', () => {
         `SELECT * FROM "tests" WHERE "name" = 'test' || 'abc'`
       ]
     },
+    {
+      title: 'alter table add constraint',
+      sql: [
+        'ALTER TABLE address ADD CONSTRAINT user_id_address_fk FOREIGN KEY (user_id) REFERENCES user (id);',
+        'ALTER TABLE "address" ADD CONSTRAINT "user_id_address_fk" FOREIGN KEY ("user_id") REFERENCES "user" ("id")'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
