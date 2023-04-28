@@ -843,8 +843,8 @@ describe('Postgres', () => {
     {
       title: 'alter table add constraint',
       sql: [
-        'ALTER TABLE address ADD CONSTRAINT user_id_address_fk FOREIGN KEY (user_id) REFERENCES user (id);',
-        'ALTER TABLE "address" ADD CONSTRAINT "user_id_address_fk" FOREIGN KEY ("user_id") REFERENCES "user" ("id")'
+        'ALTER TABLE address ADD CONSTRAINT user_id_address_fk FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE ON UPDATE RESTRICT;',
+        'ALTER TABLE "address" ADD CONSTRAINT "user_id_address_fk" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE RESTRICT'
       ]
     },
   ]
