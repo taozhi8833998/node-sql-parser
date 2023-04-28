@@ -61,7 +61,7 @@ function columnReferenceDefinitionToSQL(referenceDefinition) {
     keyword,
     match,
     table,
-    on_action: onAction = [],
+    on_action: onAction,
   } = referenceDefinition
   reference.push(toUpper(keyword))
   reference.push(tablesToSQL(table))
