@@ -1218,22 +1218,21 @@ reference_definition
         definition: de,
         table: t,
         keyword: kc.toLowerCase(),
-        match:m && m.toLowerCase(),
-        on_delete: od,
-        on_update: ou,
+        match: m && m.toLowerCase(),
+        on_action: [od, ou].filter(v => v)
       }
   }
   / oa:on_reference {
-    const key = oa.type.split(' ').join('_')
     return {
-      [key]: oa
+      on_action: [oa]
     }
   }
 
 on_reference
-  = on_kw:'ON'i ___ kw: ('DELETE'i / 'UPDATE'i) ___ ro:reference_option {
+  = KW_ON __ kw:(KW_DELETE / KW_UPDATE) __ ro:reference_option {
+    // => { type: 'on delete' | 'on update'; value: reference_option; }
     return {
-      type: `${on_kw.toLowerCase()} ${kw.toLowerCase()}`,
+      type: `on ${kw[0].toLowerCase()}`,
       value: ro
     }
   }

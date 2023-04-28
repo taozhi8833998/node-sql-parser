@@ -600,8 +600,8 @@ describe('mysql', () => {
 
     it('should have spaces between keywords', () => {
       const sql = 'CREATE TABLE `foo` (`id` int UNIQUEKEYONUPDATECASCADE)'
-      expect(parser.astify.bind(parser, sql)).to.throw('Expected "#", "--", "/*", or [ \\t\\n\\r] but "U" found.')
-      expect(parser.astify.bind(parser, sql, mariadb)).to.throw('Expected "#", "--", "/*", or [ \\t\\n\\r] but "U" found.')
+      expect(parser.astify.bind(parser, sql)).to.throw('Expected "#", ")", ",", "--", "/*", "AS", "AUTO_INCREMENT", "CHARACTER", "CHECK", "COLLATE", "COLUMN_FORMAT", "COMMENT", "CONSTRAINT", "DEFAULT", "GENERATED", "KEY", "NOT NULL", "NULL", "PRIMARY", "REFERENCES", "STORAGE", "UNIQUE", or [ \\t\\n\\r] but "O" found.')
+      expect(parser.astify.bind(parser, sql, mariadb)).to.throw('Expected "#", ")", ",", "--", "/*", "AUTO_INCREMENT", "CHARACTER", "CHECK", "COLLATE", "COLUMN_FORMAT", "COMMENT", "CONSTRAINT", "DEFAULT", "KEY", "NOT NULL", "NULL", "PRIMARY", "REFERENCES", "STORAGE", "UNIQUE", or [ \\t\\n\\r] but "O" found.')
     })
 
     describe('column clause', () => {

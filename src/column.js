@@ -61,15 +61,13 @@ function columnReferenceDefinitionToSQL(referenceDefinition) {
     keyword,
     match,
     table,
-    on_delete: onDelete,
-    on_update: onUpdate,
+    on_action: onAction = [],
   } = referenceDefinition
   reference.push(toUpper(keyword))
   reference.push(tablesToSQL(table))
   reference.push(definition && `(${definition.map(col => exprToSQL(col)).join(', ')})`)
   reference.push(toUpper(match))
-  reference.push(...commonTypeValue(onDelete))
-  reference.push(...commonTypeValue(onUpdate))
+  onAction.map(onRef => reference.push(...commonTypeValue(onRef)))
   return reference.filter(hasVal)
 }
 

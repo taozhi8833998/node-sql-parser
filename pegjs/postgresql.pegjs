@@ -1258,30 +1258,27 @@ reference_definition
         table: table_ref_list;
         keyword: 'references';
         match: 'match full' | 'match partial' | 'match simple';
-        on_delete?: on_reference;
-        on_update?: on_reference;
+        on_action: [on_reference?];
       }*/
     return {
         definition: de,
         table: [t],
         keyword: kc.toLowerCase(),
         match:m && m.toLowerCase(),
-        on_delete: od,
-        on_update: ou,
+        on_action: [od, ou].filter(v => v)
       }
   }
   / oa:on_reference {
-    const key = oa.type.split(' ').join('_')
     return {
-      [key]: oa
+      on_action: [oa]
     }
   }
 
 on_reference
-  = kw: ('ON DELETE'i / 'ON UPDATE'i) ___ ro:reference_option {
+  = KW_ON __ kw:(KW_DELETE / KW_UPDATE) __ ro:reference_option {
     // => { type: 'on delete' | 'on update'; value: reference_option; }
     return {
-      type: kw.toLowerCase(),
+      type: `on ${kw[0].toLowerCase()}`,
       value: ro
     }
   }
