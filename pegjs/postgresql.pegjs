@@ -3711,6 +3711,18 @@ KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
 KW_USER     = "USER"i     !ident_start { return 'USER'; }
 KW_UUID     = "UUID"i     !ident_start { return 'UUID'; }
+KW_OID      = "OID"i     !ident_start { return 'OID'; }
+KW_REGCLASS = "REGCLASS"i     !ident_start { return 'REGCLASS'; }
+KW_REGCOLLATION  = "REGCOLLATION"i     !ident_start { return 'REGCOLLATION'; }
+KW_REGCONFIG     = "REGCONFIG"i     !ident_start { return 'REGCONFIG'; }
+KW_REGDICTIONARY = "REGDICTIONARY"i     !ident_start { return 'REGDICTIONARY'; }
+KW_REGNAMESPACE  = "REGNAMESPACE"i     !ident_start { return 'REGNAMESPACE'; }
+KW_REGOPER  = "REGOPER"i     !ident_start { return 'REGOPER'; }
+KW_REGOPERATOR   = "REGOPERATOR"i     !ident_start { return 'REGOPERATOR'; }
+KW_REGPROC  = "REGPROC"i     !ident_start { return 'REGPROC'; }
+KW_REGPROCEDURE  = "REGPROCEDURE"i     !ident_start { return 'REGPROCEDURE'; }
+KW_REGROLE  = "REGROLE"i     !ident_start { return 'REGROLE'; }
+KW_REGTYPE  = "REGTYPE"i     !ident_start { return 'REGTYPE'; }
 
 KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
 KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
@@ -4038,6 +4050,7 @@ data_type
   / enum_type
   / serial_interval_type
   / binary_type
+  / oid_type
 
 
 array_type
@@ -4076,6 +4089,9 @@ numeric_type
   = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_SERIAL / KW_BIGSERIAL /  KW_REAL) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s }; }
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_SERIAL / KW_BIGSERIAL /  KW_REAL)l:[0-9]+ __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_SERIAL / KW_BIGSERIAL /  KW_REAL) __ s:numeric_type_suffix? __{ /* =>  data_type */ return { dataType: t, suffix: s }; }
+
+oid_type
+  = t:(KW_OID / KW_REGCLASS / KW_REGCOLLATION / KW_REGCONFIG / KW_REGDICTIONARY / KW_REGNAMESPACE / KW_REGOPER / KW_REGOPERATOR / KW_REGPROC / KW_REGPROCEDURE / KW_REGROLE / KW_REGTYPE) { /* => data_type */ return { dataType: t }}
 
 timezone
   = w:('WITHOUT'i / 'WITH'i) __ KW_TIME __ 'ZONE'i {
