@@ -975,6 +975,7 @@ alter_action_list
 
 alter_action
   = ALTER_ADD_COLUMN
+  / ALTER_ADD_CONSTRAINT
   / ALTER_DROP_COLUMN
   / ALTER_ADD_INDEX_OR_KEY
   / ALTER_ADD_FULLETXT_SPARITAL_INDEX
@@ -1019,6 +1020,16 @@ ALTER_DROP_COLUMN
         column: c,
         keyword: kc,
         resource: 'column',
+        type: 'alter',
+      }
+    }
+
+ALTER_ADD_CONSTRAINT
+  = KW_ADD __ c:create_constraint_definition {
+      return {
+        action: 'add',
+        create_definitions: c,
+        resource: 'constraint',
         type: 'alter',
       }
     }
@@ -1237,7 +1248,7 @@ create_constraint_foreign
 
 reference_definition
   = kc:KW_REFERENCES __
-  t:table_ref_list __
+  t: table_name __
   de:cte_column_definition __
   m:('MATCH FULL'i / 'MATCH PARTIAL'i / 'MATCH SIMPLE'i)? __
   od: on_reference? __
@@ -1247,24 +1258,27 @@ reference_definition
         table: table_ref_list;
         keyword: 'references';
         match: 'match full' | 'match partial' | 'match simple';
-        on_delete?: on_reference;
-        on_update?: on_reference;
+        on_action: [on_reference?];
       }*/
     return {
         definition: de,
-        table: t,
+        table: [t],
         keyword: kc.toLowerCase(),
         match:m && m.toLowerCase(),
-        on_delete: od,
-        on_update: ou,
+        on_action: [od, ou].filter(v => v)
       }
+  }
+  / oa:on_reference {
+    return {
+      on_action: [oa]
+    }
   }
 
 on_reference
-  = kw: ('ON DELETE'i / 'ON UPDATE'i) ___ ro:reference_option {
+  = KW_ON __ kw:(KW_DELETE / KW_UPDATE) __ ro:reference_option {
     // => { type: 'on delete' | 'on update'; value: reference_option; }
     return {
-      type: kw.toLowerCase(),
+      type: `on ${kw[0].toLowerCase()}`,
       value: ro
     }
   }
@@ -2041,6 +2055,7 @@ table_base
         };
       }
     }
+
 
 join_op
   = KW_LEFT __ KW_OUTER? __ KW_JOIN { /* => 'LEFT JOIN' */ return 'LEFT JOIN'; }
