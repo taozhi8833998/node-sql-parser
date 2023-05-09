@@ -757,7 +757,13 @@ describe('BigQuery', () => {
         'SELECT ANY_VALUE(x) OVER (PARTITION BY column1 ORDER BY column2 ASC)'
       ]
     },
-
+    {
+      title: 'preserving double parenthesis',
+      sql: [
+        'SELECT COUNT(( SELECT x))',
+        'SELECT COUNT((SELECT x))'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
