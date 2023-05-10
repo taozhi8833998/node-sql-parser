@@ -2647,6 +2647,10 @@ data_type
   / text_type
   / enum_type
   / boolean_type
+  / blob_type
+
+blob_type
+  = b:('blob'i / 'tinyblob'i / 'mediumblob'i / 'longblob'i) { return { dataType: b.toUpperCase() }; }
 
 boolean_type
   = 'boolean'i { return { dataType: 'BOOLEAN' }; }
