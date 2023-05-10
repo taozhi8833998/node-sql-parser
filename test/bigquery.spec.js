@@ -764,6 +764,13 @@ describe('BigQuery', () => {
         'SELECT COUNT((SELECT x))'
       ]
     },
+    {
+      title: 'interval isoyear',
+      sql: [
+        'SELECT DATE_TRUNC(CURRENT_DATE(), INTERVAL 1 ISOYEAR)',
+        'SELECT DATE_TRUNC(CURRENT_DATE(), INTERVAL 1 ISOYEAR)'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
