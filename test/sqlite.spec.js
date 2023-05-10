@@ -107,4 +107,14 @@ describe('sqlite', () => {
     const sql = 'with `e` as (select * from employees) SELECT name,`e`.`hired_on` FROM `e`'
     expect(getParsedSql(sql)).to.be.equal('WITH `e` AS (SELECT * FROM `employees`) SELECT `name`, `e`.`hired_on` FROM `e`')
   })
+
+  it('should support blob type', () => {
+    const sql = `CREATE TABLE "session_caches" (
+      "service_name"	TEXT NOT NULL,
+      "session_data"	BLOB NOT NULL,
+      "expires_at"	INTEGER,
+      PRIMARY KEY("service_name","expires_at")
+    )`
+    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE `session_caches` (`service_name` TEXT NOT NULL, `session_data` BLOB NOT NULL, `expires_at` INTEGER, PRIMARY KEY (`service_name`, `expires_at`))')
+  })
 })
