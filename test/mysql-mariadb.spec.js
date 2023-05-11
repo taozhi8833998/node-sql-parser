@@ -594,6 +594,13 @@ describe('mysql', () => {
           'DROP VIEW `test_view` CASCADE'
         ]
       },
+      {
+        title: 'column name startswith "column"',
+        sql: [
+          'ALTER TABLE table_name ADD column4 varchar(255)',
+          'ALTER TABLE `table_name` ADD `column4` VARCHAR(255)'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
