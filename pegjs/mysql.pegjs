@@ -806,6 +806,24 @@ drop_stmt
       };
     }
   / a:KW_DROP __
+    r:KW_VIEW __
+    ife:if_exists? __
+    t:table_ref_list __
+    op:view_options? {
+      if(t) t.forEach(tt => tableList.add(`${a}::${tt.db}::${tt.table}`));
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: r.toLowerCase(),
+          prefix: ife,
+          name: t,
+          options: [{ type: 'origin', value: op }],
+        }
+      };
+    }
+  / a:KW_DROP __
     r:KW_INDEX __
     i:column_ref __
     KW_ON __
@@ -1236,8 +1254,14 @@ on_reference
       value: ro
     }
   }
+
+view_options
+  = kc:('RESTRICT'i / 'CASCADE'i) {
+    return kc.toLowerCase()
+  }
+
 reference_option
-  = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
+  = kc:(view_options / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
     return kc.toLowerCase()
   }
 

@@ -22,6 +22,9 @@ function commonCmdToSQL(stmt) {
     case 'procedure':
       clauses.push(identifierToSql(name))
       break
+    case 'view':
+      clauses.push(tablesToSQL(name), stmt.options && stmt.options.map(exprToSQL).filter(hasVal).join(' '))
+      break
     case 'index':
       clauses.push(
         columnRefToSQL(name),

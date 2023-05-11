@@ -587,6 +587,13 @@ describe('mysql', () => {
           'SHOW CREATE TABLE `debug`'
         ]
       },
+      {
+        title: 'drop view stmt',
+        sql: [
+          'drop view test_view cascade',
+          'DROP VIEW `test_view` CASCADE'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
