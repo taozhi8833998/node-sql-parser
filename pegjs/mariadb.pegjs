@@ -743,15 +743,33 @@ ALTER_ADD_COLUMN
         type: 'alter',
       }
     }
+  / KW_ADD __
+    cd:create_column_definition {
+      return {
+        action: 'add',
+        ...cd,
+        resource: 'column',
+        type: 'alter',
+      }
+    }
 
 ALTER_DROP_COLUMN
   = KW_DROP __
-    kc:KW_COLUMN? __
+    kc:KW_COLUMN __
     c:column_ref {
       return {
         action: 'drop',
         column: c,
         keyword: kc,
+        resource: 'column',
+        type: 'alter',
+      }
+    }
+  / KW_DROP __
+    c:column_ref {
+      return {
+        action: 'drop',
+        column: c,
         resource: 'column',
         type: 'alter',
       }
