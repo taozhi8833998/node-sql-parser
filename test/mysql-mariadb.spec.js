@@ -601,6 +601,13 @@ describe('mysql', () => {
           'ALTER TABLE `table_name` ADD `column4` VARCHAR(255)'
         ]
       },
+      {
+        title: 'convert number to data type',
+        sql: [
+          'select convert(150, char)',
+          'SELECT CONVERT(150, CHAR)'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
