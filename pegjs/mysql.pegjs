@@ -856,6 +856,24 @@ drop_stmt
         }
       };
     }
+  / a:KW_DROP __
+    r:KW_TRIGGER __
+    ife:if_exists? __
+    t:table_base {
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: r.toLowerCase(),
+          prefix: ife,
+          name: [{
+            schema: t.db,
+            trigger: t.table
+          }]
+        }
+      };
+    }
 
 truncate_stmt
   = a:KW_TRUNCATE  __
@@ -3157,6 +3175,7 @@ KW_LOCK     = "LOCK"i       !ident_start
 
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
+KW_TRIGGER    = "TRIGGER"i      !ident_start { return 'TRIGGER'; }
 KW_TABLES    = "TABLES"i      !ident_start { return 'TABLES'; }
 KW_DATABASE = "DATABASE"i      !ident_start { return 'DATABASE'; }
 KW_SCHEMA   = "SCHEMA"i      !ident_start { return 'SCHEMA'; }
