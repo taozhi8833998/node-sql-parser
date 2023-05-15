@@ -608,6 +608,13 @@ describe('mysql', () => {
           'SELECT CONVERT(150, CHAR)'
         ]
       },
+      {
+        title: 'drop trigger',
+        sql: [
+          'drop trigger schema1.trigger1',
+          'DROP TRIGGER `schema1`.`trigger1`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
