@@ -615,6 +615,13 @@ describe('mysql', () => {
           'DROP TRIGGER `schema1`.`trigger1`'
         ]
       },
+      {
+        title: 'drop trigger if exists',
+        sql: [
+          'drop trigger if exists trigger1',
+          'DROP TRIGGER IF EXISTS `trigger1`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
