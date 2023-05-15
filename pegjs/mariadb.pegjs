@@ -2454,7 +2454,7 @@ count_arg
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
 convert_args
-  = c:(column_ref / literal_string) __ COMMA __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_name {
+  = c:(column_ref / literal_string / literal_numeric) __ COMMA __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_name {
     const { dataType, length } = ch
     let dataTypeStr = dataType
     if (length !== undefined) dataTypeStr = `${dataTypeStr}(${length})`
@@ -2469,13 +2469,13 @@ convert_args
       ]
     }
   }
-  / c:(column_ref / literal_string) __ COMMA __ d:data_type {
+  / c:(column_ref / literal_string / literal_numeric) __ COMMA __ d:data_type {
     return {
       type: 'expr_list',
       value: [c, { type: 'datatype', ...d, }]
     }
   }
-  / c:(column_ref / literal_string) __ KW_USING __ d:ident_name {
+  / c:(column_ref / literal_string / literal_numeric) __ KW_USING __ d:ident_name {
     c.suffix = `USING ${d}`
     return {
       type: 'expr_list',
