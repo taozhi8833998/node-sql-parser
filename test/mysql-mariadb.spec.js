@@ -629,6 +629,13 @@ describe('mysql', () => {
           'CREATE TRIGGER `trigger1` BEFORE UPDATE ON `merge` FOR EACH ROW SET `NEW`.`updated_at` = current_timestamp()'
         ]
       },
+      {
+        title: 'create trigger with trigger order',
+        sql: [
+          'create trigger trigger1 before update on merge for each row  follows trigger2 set NEW.updated_at = current_timestamp()',
+          'CREATE TRIGGER `trigger1` BEFORE UPDATE ON `merge` FOR EACH ROW FOLLOWS `trigger2` SET `NEW`.`updated_at` = current_timestamp()'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
