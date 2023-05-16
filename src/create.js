@@ -55,28 +55,17 @@ function createTableToSQL(stmt) {
 
 function createTriggerToSQL(stmt) {
   const {
-    definer,
-    for_each: forEach,
-    keyword,
-    type, table,
-    if_not_exists: ife,
-    trigger,
-    trigger_event: triggerEvent,
-    trigger_order: triggerOrder,
-    trigger_time: triggerTime,
+    definer, for_each: forEach, keyword,
+    type, table, if_not_exists: ife,
+    trigger, trigger_event: triggerEvent,
+    trigger_order: triggerOrder, trigger_time: triggerTime,
     trigger_body: triggerBody,
   } = stmt
   const sql = [
-    toUpper(type),
-    definer,
-    toUpper(keyword),
-    toUpper(ife),
-    identifierToSql(trigger),
-    toUpper(triggerTime),
-    toUpper(triggerEvent),
-    'ON',
-    tableToSQL(table),
-    toUpper(forEach),
+    toUpper(type), definer, toUpper(keyword),
+    toUpper(ife), identifierToSql(trigger),
+    toUpper(triggerTime), toUpper(triggerEvent),
+    'ON', tableToSQL(table), toUpper(forEach),
     triggerOrder && `${toUpper(triggerOrder.keyword)} ${identifierToSql(triggerOrder.trigger)}`,
   ]
   switch (triggerBody.type) {

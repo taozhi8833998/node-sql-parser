@@ -29,11 +29,7 @@ function commonCmdToSQL(stmt) {
       clauses.push(tablesToSQL(name), stmt.options && stmt.options.map(exprToSQL).filter(hasVal).join(' '))
       break
     case 'index':
-      clauses.push(
-        columnRefToSQL(name),
-        ...stmt.table ? ['ON', tableToSQL(stmt.table)] : [],
-        stmt.options && stmt.options.map(exprToSQL).filter(hasVal).join(' ')
-      )
+      clauses.push(columnRefToSQL(name), ...stmt.table ? ['ON', tableToSQL(stmt.table)] : [], stmt.options && stmt.options.map(exprToSQL).filter(hasVal).join(' '))
       break
     default:
       break
