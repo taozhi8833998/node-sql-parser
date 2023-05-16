@@ -423,6 +423,7 @@ cmd_stmt
 
 create_stmt
   = create_table_stmt
+  / create_trigger_stmt
   / create_index_stmt
   / create_db_stmt
   / create_view_stmt
@@ -538,7 +539,7 @@ create_view_stmt
   = a:KW_CREATE __
   or:(KW_OR __ KW_REPLACE)? __
   al:("ALGORITHM"i __ KW_ASSIGIN_EQUAL __ ("UNDEFINED"i / "MERGE"i / "TEMPTABLE"i))? __
-  df:("DEFINER"i __ KW_ASSIGIN_EQUAL __ ident)? __
+  df:trigger_definer? __
   ss:("SQL"i __ "SECURITY"i __ ("DEFINER"i / "INVOKER"i))? __
   KW_VIEW __ v:table_name __ c:(LPAREN __ column_list __ RPAREN)? __
   KW_AS __ s:select_stmt_nake __
@@ -553,7 +554,7 @@ create_view_stmt
         keyword: 'view',
         replace: or && 'or replace',
         algorithm: al && al[4],
-        definer: df && df[4],
+        definer: df,
         sql_security: ss && ss[4],
         columns: c && c[2],
         select: s,
@@ -731,6 +732,67 @@ create_column_definition
         definition: d,
         resource: 'column',
         ...(cdo || {})
+      }
+    }
+
+trigger_definer
+  = 'DEFINER'i __ KW_ASSIGIN_EQUAL __ u:literal_string __ '@' __ h:literal_string {
+    const userNameSymbol = u.type === 'single_quote_string' ? '\'' : '"'
+    const hostSymbol = h.type === 'single_quote_string' ? '\'' : '"'
+    return `DEFINER = ${userNameSymbol}${u.value}${userNameSymbol}@${hostSymbol}${h.value}${hostSymbol}`
+  }
+  / 'DEFINER'i __ KW_ASSIGIN_EQUAL __ KW_CURRENT_USER __ LPAREN __ RPAREN {
+    return `DEFINER = CURRENT_USER()`
+  }
+  / 'DEFINER'i __ KW_ASSIGIN_EQUAL __ KW_CURRENT_USER  {
+    return `DEFINER = CURRENT_USER`
+  }
+trigger_time
+  = 'BEFORE'i /  'AFTER'i
+trigger_event
+  = KW_INSERT / KW_UPDATE / KW_DELETE
+trigger_order
+  = f:('FOLLOWS'i / 'PRECEDES'i) __ t:ident_name {
+    return {
+      keyword: f,
+      trigger: t
+    }
+  }
+trigger_body
+  = KW_SET __ s:set_list {
+    return {
+      type: 'set',
+      trigger: s
+    }
+  }
+
+create_trigger_stmt
+  = a:KW_CREATE __
+    df:trigger_definer? __
+    KW_TRIGGER __
+    ife:if_not_exists_stmt? __
+    t:ident_name __
+    tt:trigger_time __
+    te:trigger_event __
+    KW_ON __ tb:table_name __ 'FOR'i __ 'EACH'i __ 'ROW'i __
+    tr:trigger_order? __
+    tbo:trigger_body __ {
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          definer: df,
+          keyword: 'trigger',
+          for_each: 'for each row',
+          if_not_exists: ife,
+          trigger: t,
+          trigger_time: tt,
+          trigger_event: te[0],
+          trigger_order: tr,
+          table: tb,
+          trigger_body: tbo,
+        }
       }
     }
 

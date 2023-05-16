@@ -622,6 +622,13 @@ describe('mysql', () => {
           'DROP TRIGGER IF EXISTS `trigger1`'
         ]
       },
+      {
+        title: 'create trigger',
+        sql: [
+          'create trigger trigger1 before update on merge for each row set NEW.updated_at = current_timestamp()',
+          'CREATE TRIGGER `trigger1` BEFORE UPDATE ON `merge` FOR EACH ROW SET `NEW`.`updated_at` = current_timestamp()'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
