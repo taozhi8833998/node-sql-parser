@@ -17,6 +17,9 @@ function commonCmdToSQL(stmt) {
     case 'table':
       clauses.push(tablesToSQL(name))
       break
+    case 'trigger':
+      clauses.push([name[0].schema ? `${identifierToSql(name[0].schema)}.` : '', identifierToSql(name[0].trigger)].filter(hasVal).join(''))
+      break
     case 'database':
     case 'schema':
     case 'procedure':
@@ -26,11 +29,7 @@ function commonCmdToSQL(stmt) {
       clauses.push(tablesToSQL(name), stmt.options && stmt.options.map(exprToSQL).filter(hasVal).join(' '))
       break
     case 'index':
-      clauses.push(
-        columnRefToSQL(name),
-        ...stmt.table ? ['ON', tableToSQL(stmt.table)] : [],
-        stmt.options && stmt.options.map(exprToSQL).filter(hasVal).join(' ')
-      )
+      clauses.push(columnRefToSQL(name), ...stmt.table ? ['ON', tableToSQL(stmt.table)] : [], stmt.options && stmt.options.map(exprToSQL).filter(hasVal).join(' '))
       break
     default:
       break

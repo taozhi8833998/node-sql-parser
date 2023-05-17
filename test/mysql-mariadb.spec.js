@@ -608,6 +608,34 @@ describe('mysql', () => {
           'SELECT CONVERT(150, CHAR)'
         ]
       },
+      {
+        title: 'drop trigger',
+        sql: [
+          'drop trigger schema1.trigger1',
+          'DROP TRIGGER `schema1`.`trigger1`'
+        ]
+      },
+      {
+        title: 'drop trigger if exists',
+        sql: [
+          'drop trigger if exists trigger1',
+          'DROP TRIGGER IF EXISTS `trigger1`'
+        ]
+      },
+      {
+        title: 'create trigger',
+        sql: [
+          'create trigger trigger1 before update on merge for each row set NEW.updated_at = current_timestamp()',
+          'CREATE TRIGGER `trigger1` BEFORE UPDATE ON `merge` FOR EACH ROW SET `NEW`.`updated_at` = current_timestamp()'
+        ]
+      },
+      {
+        title: 'create trigger with trigger order',
+        sql: [
+          'create trigger trigger1 before update on merge for each row  follows trigger2 set NEW.updated_at = current_timestamp()',
+          'CREATE TRIGGER `trigger1` BEFORE UPDATE ON `merge` FOR EACH ROW FOLLOWS `trigger2` SET `NEW`.`updated_at` = current_timestamp()'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

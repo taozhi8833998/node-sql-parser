@@ -603,8 +603,8 @@ describe('create', () => {
       expect(getParsedSql("CREATE VIEW v (mycol) AS SELECT 'abc'")).to.equal("CREATE VIEW `v` (`mycol`) AS SELECT 'abc'")
     })
     it('should support optional setting', () => {
-      expect(getParsedSql('CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = user SQL SECURITY INVOKER VIEW test.v AS SELECT * FROM t WITH CHECK OPTION;')).to.equal('CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = user SQL SECURITY INVOKER VIEW `test`.`v` AS SELECT * FROM `t` WITH CHECK OPTION')
-      expect(getParsedSql('CREATE OR REPLACE ALGORITHM = MERGE DEFINER = user SQL SECURITY INVOKER VIEW test.v AS SELECT * FROM t WITH CASCADED CHECK OPTION;')).to.equal('CREATE OR REPLACE ALGORITHM = MERGE DEFINER = user SQL SECURITY INVOKER VIEW `test`.`v` AS SELECT * FROM `t` WITH CASCADED CHECK OPTION')
+      expect(getParsedSql('CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = "abc"@"localhost" SQL SECURITY INVOKER VIEW test.v AS SELECT * FROM t WITH CHECK OPTION;')).to.equal('CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = "abc"@"localhost" SQL SECURITY INVOKER VIEW `test`.`v` AS SELECT * FROM `t` WITH CHECK OPTION')
+      expect(getParsedSql('CREATE OR REPLACE ALGORITHM = MERGE DEFINER = \'abc\'@\'localhost\' SQL SECURITY INVOKER VIEW test.v AS SELECT * FROM t WITH CASCADED CHECK OPTION;')).to.equal('CREATE OR REPLACE ALGORITHM = MERGE DEFINER = \'abc\'@\'localhost\' SQL SECURITY INVOKER VIEW `test`.`v` AS SELECT * FROM `t` WITH CASCADED CHECK OPTION')
     })
   })
   it('throw error when create type is unknown', () => {

@@ -5,6 +5,7 @@ import { columnDefinitionToSQL } from './column'
 import { constraintDefinitionToSQL } from './constrain'
 import { funcToSQL } from './func'
 import { tablesToSQL, tableOptionToSQL, tableToSQL } from './tables'
+import { setToSQL } from './update'
 import { unionToSQL } from './union'
 import { columnIdentifierToSql, columnOrderListToSQL, commonOptionConnector, commonKeywordArgsToSQL, toUpper, hasVal, identifierToSql, triggerEventToSQL, literalToSQL } from './util'
 
@@ -53,6 +54,29 @@ function createTableToSQL(stmt) {
 }
 
 function createTriggerToSQL(stmt) {
+  const {
+    definer, for_each: forEach, keyword,
+    type, table, if_not_exists: ife,
+    trigger, trigger_event: triggerEvent,
+    trigger_order: triggerOrder, trigger_time: triggerTime,
+    trigger_body: triggerBody,
+  } = stmt
+  const sql = [
+    toUpper(type), definer, toUpper(keyword),
+    toUpper(ife), identifierToSql(trigger),
+    toUpper(triggerTime), toUpper(triggerEvent),
+    'ON', tableToSQL(table), toUpper(forEach),
+    triggerOrder && `${toUpper(triggerOrder.keyword)} ${identifierToSql(triggerOrder.trigger)}`,
+  ]
+  switch (triggerBody.type) {
+    case 'set':
+      sql.push(commonOptionConnector('SET', setToSQL, triggerBody.trigger))
+      break
+  }
+  return sql.filter(hasVal).join(' ')
+}
+
+function createConstraintTriggerToSQL(stmt) {
   const {
     constraint, constraint_kw: constraintKw,
     deferrable,
@@ -159,7 +183,7 @@ function createViewToSQL(stmt) {
     toUpper(type),
     toUpper(replace),
     algorithm && `ALGORITHM = ${toUpper(algorithm)}`,
-    definer && `DEFINER = ${definer}`,
+    definer,
     sqlSecurity && `SQL SECURITY ${toUpper(sqlSecurity)}`,
     toUpper(keyword),
     viewName,
@@ -179,7 +203,7 @@ function createToSQL(stmt) {
       sql = createTableToSQL(stmt)
       break
     case 'trigger':
-      sql = createTriggerToSQL(stmt)
+      sql = stmt.resource === 'constraint' ? createConstraintTriggerToSQL(stmt) : createTriggerToSQL(stmt)
       break
     case 'extension':
       sql = createExtensionToSQL(stmt)
