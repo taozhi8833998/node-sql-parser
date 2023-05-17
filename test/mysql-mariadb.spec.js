@@ -643,6 +643,13 @@ describe('mysql', () => {
           'SHOW COLUMNS FROM `table_name`'
         ]
       },
+      {
+        title: 'show indexes from table',
+        sql: [
+          'SHOW INDEXES FROM table_name',
+          'SHOW INDEXES FROM `table_name`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

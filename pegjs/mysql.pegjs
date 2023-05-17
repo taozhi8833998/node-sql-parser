@@ -1566,13 +1566,13 @@ show_stmt
       }
     }
   }
-  / KW_SHOW __ 'COLUMNS'i __ from:from_clause {
+  / KW_SHOW __ keyword:('COLUMNS'i / 'INDEXES'i) __ from:from_clause {
     return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: 'show',
-          keyword: 'columns',
+          keyword: keyword.toLowerCase(),
           from
         }
       };
