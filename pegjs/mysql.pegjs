@@ -1566,6 +1566,17 @@ show_stmt
       }
     }
   }
+  / KW_SHOW __ 'COLUMNS'i __ from:from_clause {
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'show',
+          keyword: 'columns',
+          from
+        }
+      };
+  }
   / KW_SHOW __ KW_CREATE __ k:(KW_VIEW / KW_TABLE) __ t:table_name {
     const suffix = k.toLowerCase()
     return {

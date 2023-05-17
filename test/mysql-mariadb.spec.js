@@ -636,6 +636,13 @@ describe('mysql', () => {
           'CREATE TRIGGER `trigger1` BEFORE UPDATE ON `merge` FOR EACH ROW FOLLOWS `trigger2` SET `NEW`.`updated_at` = current_timestamp()'
         ]
       },
+      {
+        title: 'show columns from table',
+        sql: [
+          'SHOW COLUMNS FROM table_name',
+          'SHOW COLUMNS FROM `table_name`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
