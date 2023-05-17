@@ -650,6 +650,20 @@ describe('mysql', () => {
           'SHOW INDEXES FROM `table_name`'
         ]
       },
+      {
+        title: 'show triggers',
+        sql: [
+          'SHOW TRIGGERS',
+          'SHOW TRIGGERS'
+        ]
+      },
+      {
+        title: 'show status',
+        sql: [
+          'SHOW PROCEDURE STATUS',
+          'SHOW PROCEDURE STATUS'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
