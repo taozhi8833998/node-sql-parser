@@ -913,6 +913,97 @@ describe('Postgres', () => {
           'CREATE TEMPORARY SEQUENCE IF NOT EXISTS "public"."table_id_seq" INCREMENT 10 NO MINVALUE NO MAXVALUE START WITH 1 CACHE 3 CYCLE OWNED BY NONE'
         ]
       },
+      {
+        title: 'cast oid type explicit',
+        sql: [
+          `SELECT CAST(c AS OID) FROM pg_attribute`,
+          'SELECT CAST("c" AS OID) FROM "pg_attribute"'
+        ]
+      },
+      {
+        title: 'cast oid type implicit',
+        sql: [
+          `SELECT c::OID FROM pg_attribute`,
+          'SELECT "c"::OID FROM "pg_attribute"'
+        ]
+      },
+      {
+        title: 'cast regclass oid type',
+        sql: [
+          `SELECT c::REGCLASS FROM pg_attribute`,
+          'SELECT "c"::REGCLASS FROM "pg_attribute"'
+        ]
+      },
+      {
+        title: 'cast regregcollation oid type',
+        sql: [
+          `SELECT c::REGCOLLATION FROM pg_attribute`,
+          'SELECT "c"::REGCOLLATION FROM "pg_attribute"'
+        ]
+      },
+      {
+        title: 'cast regconfig oid type',
+        sql: [
+          `SELECT c::REGCONFIG FROM pg_attribute`,
+          'SELECT "c"::REGCONFIG FROM "pg_attribute"'
+        ]
+      },
+      {
+        title: 'cast regdictionary oid type',
+        sql: [
+          `SELECT c::REGDICTIONARY FROM pg_attribute`,
+          'SELECT "c"::REGDICTIONARY FROM "pg_attribute"'
+        ]
+      },
+      {
+        title: 'cast regnamespace oid type',
+        sql: [
+          `SELECT c::REGNAMESPACE FROM pg_attribute`,
+          'SELECT "c"::REGNAMESPACE FROM "pg_attribute"'
+        ]
+      },
+      {
+        title: 'cast regoper oid type',
+        sql: [
+          `SELECT c::REGOPER FROM pg_attribute`,
+          'SELECT "c"::REGOPER FROM "pg_attribute"'
+        ]
+      },
+      {
+        title: 'cast regoperator oid type',
+        sql: [
+          `SELECT c::REGOPERATOR FROM pg_attribute`,
+          'SELECT "c"::REGOPERATOR FROM "pg_attribute"'
+        ]
+      },
+      {
+        title: 'cast regproc oid type',
+        sql: [
+          `SELECT c::REGPROC FROM pg_attribute`,
+          'SELECT "c"::REGPROC FROM "pg_attribute"'
+        ]
+      },
+      {
+        title: 'cast regprocedure oid type',
+        sql: [
+          `SELECT c::REGPROCEDURE FROM pg_attribute`,
+          'SELECT "c"::REGPROCEDURE FROM "pg_attribute"'
+        ]
+      },
+      {
+        title: 'cast regrole oid type',
+        sql: [
+          `SELECT c::REGROLE FROM pg_attribute`,
+          'SELECT "c"::REGROLE FROM "pg_attribute"'
+        ]
+      },
+      {
+        title: 'cast regtype oid type',
+        sql: [
+          `SELECT c::REGTYPE FROM pg_attribute`,
+          'SELECT "c"::REGTYPE FROM "pg_attribute"'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
