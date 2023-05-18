@@ -158,10 +158,10 @@ describe('create', () => {
     describe('create index or key', () => {
 
       it('should support create index in mysql', () => {
-        expect(getParsedSql('create index city_idx on places(city)')).to.equal('CREATE INDEX `city_idx` ON `places` (`city` ASC)')
-        expect(getParsedSql('create unique index city_idx on places(city, country desc)')).to.equal('CREATE UNIQUE INDEX `city_idx` ON `places` (`city` ASC, `country` DESC)')
-        expect(getParsedSql('create index city_idx on places(city(10), country desc)')).to.equal('CREATE INDEX `city_idx` ON `places` (city(10) ASC, `country` DESC)')
-        expect(getParsedSql('CREATE INDEX idx1 ON t1 ((col1 + col2));')).to.equal('CREATE INDEX `idx1` ON `t1` ((`col1` + `col2`) ASC)')
+        expect(getParsedSql('create index city_idx on places(city)')).to.equal('CREATE INDEX `city_idx` ON `places` (`city`)')
+        expect(getParsedSql('create unique index city_idx on places(city, country desc)')).to.equal('CREATE UNIQUE INDEX `city_idx` ON `places` (`city`, `country` DESC)')
+        expect(getParsedSql('create index city_idx on places(city(10), country desc)')).to.equal('CREATE INDEX `city_idx` ON `places` (city(10), `country` DESC)')
+        expect(getParsedSql('CREATE INDEX idx1 ON t1 ((col1 + col2));')).to.equal('CREATE INDEX `idx1` ON `t1` ((`col1` + `col2`))')
         expect(getParsedSql('CREATE fulltext INDEX idx2 ON t1 ((col1 + col2) asc, (col1 - col2) desc, col1 asc);')).to.equal('CREATE FULLTEXT INDEX `idx2` ON `t1` ((`col1` + `col2`) ASC, (`col1` - `col2`) DESC, `col1` ASC)')
       });
 
@@ -196,7 +196,7 @@ describe('create', () => {
           database: 'transactsql'
         }
         expect(getParsedSql(sql, opt))
-            .to.equal('CREATE INDEX [ix_class_segment_progress_segment_id_user_id_archived] ON [class_segment_progress] ([segment_id] ASC, [user_id] DESC, [archived] ASC)');
+            .to.equal('CREATE INDEX [ix_class_segment_progress_segment_id_user_id_archived] ON [class_segment_progress] ([segment_id], [user_id] DESC, [archived])');
       });
 
       ['fulltext', 'spatial'].forEach(prefix => {
@@ -391,52 +391,52 @@ describe('create', () => {
         {
           origin: 'CREATE UNIQUE INDEX title_idx ON films (title);',
           description: 'should create a B-tree index on the column title in the table films',
-          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title" ASC)'
+          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title")'
         },
         {
           origin: 'CREATE INDEX ON films ((lower(title)));',
           description: 'should create an index on the expression lower(title), allowing efficient case-insensitive searches',
-          sqlify: 'CREATE INDEX ON "films" ((lower("title")) ASC)'
+          sqlify: 'CREATE INDEX ON "films" ((lower("title")))'
         },
         {
           origin: 'CREATE INDEX title_idx_german ON films (title COLLATE "de_DE");',
           description: 'should create an index with non-default collation',
-          sqlify: 'CREATE INDEX "title_idx_german" ON "films" ("title" COLLATE "de_DE" ASC)'
+          sqlify: 'CREATE INDEX "title_idx_german" ON "films" ("title" COLLATE "de_DE")'
         },
         {
           origin: 'CREATE INDEX title_idx_nulls_low ON films (title NULLS FIRST);',
           description: 'should create an index with non-default sort ordering of nulls',
-          sqlify: 'CREATE INDEX "title_idx_nulls_low" ON "films" ("title" ASC NULLS FIRST)'
+          sqlify: 'CREATE INDEX "title_idx_nulls_low" ON "films" ("title" NULLS FIRST)'
         },
         {
           origin: 'CREATE UNIQUE INDEX title_idx ON films (title) WITH (fillfactor = 70);',
           description: 'should create an index with non-default fill factor',
-          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title" ASC) WITH (FILLFACTOR = 70)'
+          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title") WITH (FILLFACTOR = 70)'
         },
         {
           origin: 'CREATE UNIQUE INDEX title_idx ON films (title) WITH (fillfactor = 70) where id > 100',
           description: 'should create an index with non-default fill factor',
-          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title" ASC) WITH (FILLFACTOR = 70) WHERE "id" > 100'
+          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title") WITH (FILLFACTOR = 70) WHERE "id" > 100'
         },
         {
           origin: 'CREATE INDEX gin_idx ON documents_table USING gin (locations) WITH (fastupdate = off);',
           description: 'should create a GIN index with fast updates disabled',
-          sqlify: 'CREATE INDEX "gin_idx" ON "documents_table" USING GIN ("locations" ASC) WITH (FASTUPDATE = OFF)'
+          sqlify: 'CREATE INDEX "gin_idx" ON "documents_table" USING GIN ("locations") WITH (FASTUPDATE = OFF)'
         },
         {
           origin: 'CREATE INDEX code_idx ON films (code) TABLESPACE indexspace;',
           description: 'should create an index on the column code in the table films and have the index reside in the tablespace indexspace',
-          sqlify: 'CREATE INDEX "code_idx" ON "films" ("code" ASC) TABLESPACE INDEXSPACE'
+          sqlify: 'CREATE INDEX "code_idx" ON "films" ("code") TABLESPACE INDEXSPACE'
         },
         {
           origin: 'CREATE INDEX pointloc ON points USING gist (box(location,location))',
           description: 'should create a GiST index on a point attribute so that we can efficiently use box operators on the result of the conversion function',
-          sqlify: 'CREATE INDEX "pointloc" ON "points" USING GIST (box("location", "location") ASC)'
+          sqlify: 'CREATE INDEX "pointloc" ON "points" USING GIST (box("location", "location"))'
         },
         {
           origin: 'CREATE INDEX CONCURRENTLY sales_quantity_index ON sales_table (quantity);',
           description: 'should create an index without locking out writes to the table',
-          sqlify: 'CREATE INDEX CONCURRENTLY "sales_quantity_index" ON "sales_table" ("quantity" ASC)'
+          sqlify: 'CREATE INDEX CONCURRENTLY "sales_quantity_index" ON "sales_table" ("quantity")'
         },
       ]
       indexSQLList.forEach(indexSQL => {
@@ -558,29 +558,29 @@ describe('create', () => {
 
   describe('create index with tsql', () => {
     it('should support a nonclustered index on a table or view', () => {
-      expect(getParsedSql('CREATE INDEX i1 ON t1 (col1, col2 DESC);', { database: 'transactsql' })).to.equal('CREATE INDEX [i1] ON [t1] ([col1] ASC, [col2] DESC)')
+      expect(getParsedSql('CREATE INDEX i1 ON t1 (col1, col2 DESC);', { database: 'transactsql' })).to.equal('CREATE INDEX [i1] ON [t1] ([col1], [col2] DESC)')
     })
 
     it('should suport create a clustered, unique, nonclustered', () => {
-      expect(getParsedSql('CREATE CLUSTERED INDEX i1 ON d1.s1.t1 (col1);', { database: 'transactsql' })).to.equal('CREATE CLUSTERED INDEX [i1] ON [d1].[s1].[t1] ([col1] ASC)')
+      expect(getParsedSql('CREATE CLUSTERED INDEX i1 ON d1.s1.t1 (col1);', { database: 'transactsql' })).to.equal('CREATE CLUSTERED INDEX [i1] ON [d1].[s1].[t1] ([col1])')
       expect(getParsedSql('CREATE UNIQUE INDEX i1 ON t1 (col1 DESC, col2 ASC, col3 DESC);', { database: 'transactsql' })).to.equal('CREATE UNIQUE INDEX [i1] ON [t1] ([col1] DESC, [col2] ASC, [col3] DESC)')
-      expect(getParsedSql('CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]);', { database: 'transactsql' })).to.equal('CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col] ASC)')
+      expect(getParsedSql('CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]);', { database: 'transactsql' })).to.equal('CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col])')
     })
 
     it('should support include', () => {
-      expect(getParsedSql('CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]) include (test_col, test_col2);', { database: 'transactsql' })).to.equal('CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col] ASC) INCLUDE ([test_col], [test_col2])')
+      expect(getParsedSql('CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]) include (test_col, test_col2);', { database: 'transactsql' })).to.equal('CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col]) INCLUDE ([test_col], [test_col2])')
     })
 
     it('should support include and where', () => {
-      expect(getParsedSql("CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]) include (test_col, test_col2) where StartDate > '20000101' AND EndDate <= '20000630' and ComponentID IN (533, 324, 753) and EndDate IS NOT NULL;", { database: 'transactsql' })).to.equal("CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col] ASC) INCLUDE ([test_col], [test_col2]) WHERE [StartDate] > '20000101' AND [EndDate] <= '20000630' AND [ComponentID] IN (533, 324, 753) AND [EndDate] IS NOT NULL")
+      expect(getParsedSql("CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]) include (test_col, test_col2) where StartDate > '20000101' AND EndDate <= '20000630' and ComponentID IN (533, 324, 753) and EndDate IS NOT NULL;", { database: 'transactsql' })).to.equal("CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col]) INCLUDE ([test_col], [test_col2]) WHERE [StartDate] > '20000101' AND [EndDate] <= '20000630' AND [ComponentID] IN (533, 324, 753) AND [EndDate] IS NOT NULL")
     })
 
     it('should support include and where', () => {
-      expect(getParsedSql("CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]) include (test_col, test_col2) where StartDate > '20000101' AND EndDate <= '20000630' and ComponentID IN (533, 324, 753) and EndDate IS NOT NULL with (DATA_COMPRESSION = ROW ON PARTITIONS (2, 4, 6 TO 8));", { database: 'transactsql' })).to.equal("CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col] ASC) INCLUDE ([test_col], [test_col2]) WHERE [StartDate] > '20000101' AND [EndDate] <= '20000630' AND [ComponentID] IN (533, 324, 753) AND [EndDate] IS NOT NULL WITH (DATA_COMPRESSION = ROW ON PARTITIONS (2, 4, 6 TO 6))")
+      expect(getParsedSql("CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]) include (test_col, test_col2) where StartDate > '20000101' AND EndDate <= '20000630' and ComponentID IN (533, 324, 753) and EndDate IS NOT NULL with (DATA_COMPRESSION = ROW ON PARTITIONS (2, 4, 6 TO 8));", { database: 'transactsql' })).to.equal("CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col]) INCLUDE ([test_col], [test_col2]) WHERE [StartDate] > '20000101' AND [EndDate] <= '20000630' AND [ComponentID] IN (533, 324, 753) AND [EndDate] IS NOT NULL WITH (DATA_COMPRESSION = ROW ON PARTITIONS (2, 4, 6 TO 6))")
     })
 
     it('should support include and where', () => {
-      expect(getParsedSql("CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]) include (test_col, test_col2) where StartDate > '20000101' AND EndDate <= '20000630' and ComponentID IN (533, 324, 753) and EndDate IS NOT NULL with (DATA_COMPRESSION = ROW ON PARTITIONS (2, 4, 6 TO 8)) on pn(abc) FILESTREAM_ON filename;", { database: 'transactsql' })).to.equal("CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col] ASC) INCLUDE ([test_col], [test_col2]) WHERE [StartDate] > '20000101' AND [EndDate] <= '20000630' AND [ComponentID] IN (533, 324, 753) AND [EndDate] IS NOT NULL WITH (DATA_COMPRESSION = ROW ON PARTITIONS (2, 4, 6 TO 6)) ON pn([abc]) FILESTREAM_ON filename")
+      expect(getParsedSql("CREATE NONCLUSTERED INDEX ix_test ON [test] ([test_col]) include (test_col, test_col2) where StartDate > '20000101' AND EndDate <= '20000630' and ComponentID IN (533, 324, 753) and EndDate IS NOT NULL with (DATA_COMPRESSION = ROW ON PARTITIONS (2, 4, 6 TO 8)) on pn(abc) FILESTREAM_ON filename;", { database: 'transactsql' })).to.equal("CREATE NONCLUSTERED INDEX [ix_test] ON [test] ([test_col]) INCLUDE ([test_col], [test_col2]) WHERE [StartDate] > '20000101' AND [EndDate] <= '20000630' AND [ComponentID] IN (533, 324, 753) AND [EndDate] IS NOT NULL WITH (DATA_COMPRESSION = ROW ON PARTITIONS (2, 4, 6 TO 6)) ON pn([abc]) FILESTREAM_ON filename")
     })
 
     it('should return undefined for empty index columns', () => {

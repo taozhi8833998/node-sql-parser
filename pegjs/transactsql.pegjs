@@ -298,20 +298,22 @@ column_order_list
   }
 
 column_order_item
-  = LBRAKE __ c:column_ref __ RBRAKE __ o:(KW_ASC / KW_DESC)? { return {
-      column: c,
-      order: o && o.toLowerCase() || 'asc',
+  = LBRAKE __ c:column_ref __ RBRAKE __ o:(KW_ASC / KW_DESC) { return {
+      ...c,
+      order_by: o.toLowerCase()
     }
   }
+  / LBRAKE __ c:column_ref __ RBRAKE __ { return c }
   / column_order
 
 column_order
-  = c:column_ref __ o:(KW_ASC / KW_DESC)? {
+  = c:column_ref __ o:(KW_ASC / KW_DESC) {
     return {
-      column: c,
-      order: o && o.toLowerCase() || 'asc',
+      ...c,
+      order_by: o.toLowerCase()
     }
   }
+  / column_ref
 
 include_column
   = k:'INCLUDE'i __ LPAREN __ c:column_list __ RPAREN {
@@ -892,7 +894,7 @@ create_index_definition
     t:index_type? __
     de:cte_column_definition __
     id:index_options? __
-     {
+    {
       return {
         index: c,
         definition: de,
@@ -909,7 +911,7 @@ create_fulltext_spatial_index_definition
     c:column? __
     de: cte_column_definition __
     id: index_options? __
-     {
+    {
       return {
         index: c,
         definition: de,
@@ -933,12 +935,21 @@ constraint_name
       constraint: c
     }
   }
+
+create_with_index_options
+  = KW_WITH __ LPAREN __ l: index_options_list __ RPAREN __ KW_ON __ LBRAKE __ o:ident_name __ RBRAKE {
+    return { with: l, on:o }
+  }
+  / l:(index_options / index_options_list) {
+    return { index_options: l }
+  }
+
 create_constraint_primary
   = kc:constraint_name? __
   p:('PRIMARY KEY'i) __
   t:index_type? __
   de:cte_column_definition __
-  id:index_options? {
+  id:create_with_index_options? {
     return {
         constraint: kc && kc.constraint,
         definition: de,
@@ -946,7 +957,7 @@ create_constraint_primary
         keyword: kc && kc.keyword,
         index_type: t,
         resource: 'constraint',
-        index_options: id,
+        ...id,
       }
   }
 
@@ -1079,6 +1090,18 @@ table_option
       keyword: kw.toLowerCase(),
       symbol: s,
       value: c.toUpperCase()
+    }
+  }
+  / KW_ON __ LBRAKE __ o:ident_name __ RBRAKE {
+    return {
+      keyword: 'on',
+      value: `[${o}]`
+    }
+  }
+  / 'TEXTIMAGE_ON'i __ LBRAKE __ to:ident_name __ RBRAKE {
+    return {
+      keyword:'textimage_on',
+      value: `[${to}]`
     }
   }
 
@@ -1344,7 +1367,7 @@ index_type
       type: t.toLowerCase(),
     }
   }
-  / k:'NONCLUSTERED'i {
+  / k:(KW_CLUSTERED / KW_NONCLUSTERED)  {
     return {
       keyword: k.toLowerCase()
     }
@@ -1586,7 +1609,7 @@ group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list { return e.value; }
 
 column_ref_index
-  = column_ref_list / literal_list
+  = column_order_list / literal_list
 
 column_ref_list
   = head:column_ref tail:(__ COMMA __ column_ref)* {

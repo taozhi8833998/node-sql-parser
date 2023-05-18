@@ -657,7 +657,6 @@ column_order
   nf:('NULLS'i __ ('FIRST'i / 'LAST'i))? {
     /*
     => {
-      column: expr;
       collate: collate_expr;
       opclass: ident;
       order: 'asc' | 'desc';
@@ -665,10 +664,10 @@ column_order
     }
     */
     return {
-      column: c,
+      ...c,
       collate: ca,
       opclass: op,
-      order: o && o.toLowerCase() || 'asc',
+      order_by: o && o.toLowerCase(),
       nulls: nf && `${nf[0].toLowerCase()} ${nf[2].toLowerCase()}`,
     }
   }

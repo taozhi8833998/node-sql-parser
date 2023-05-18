@@ -10,7 +10,7 @@ import { exprToSQL } from './expr'
 function indexTypeToSQL(indexType) {
   if (!indexType) return []
   const { keyword, type } = indexType
-  return [keyword.toUpperCase(), type.toUpperCase()]
+  return [keyword.toUpperCase(), toUpper(type)]
 }
 
 function indexOptionToSQL(indexOpt) {
@@ -60,6 +60,7 @@ function indexTypeAndOptionToSQL(indexDefinition) {
     index_type: indexType,
     index_options: indexOptions = [],
     definition,
+    on, with: withExpr,
   } = indexDefinition
   const dataType = []
   dataType.push(...indexTypeToSQL(indexType))
@@ -68,6 +69,8 @@ function indexTypeAndOptionToSQL(indexDefinition) {
     dataType.push(definitionSQL)
   }
   dataType.push(indexOptionListToSQL(indexOptions).join(' '))
+  if (withExpr) dataType.push(`WITH (${indexOptionListToSQL(withExpr).join(', ')})`)
+  if (on) dataType.push(`ON [${on}]`)
   return dataType
 }
 
