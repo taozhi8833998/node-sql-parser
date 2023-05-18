@@ -636,6 +636,34 @@ describe('mysql', () => {
           'CREATE TRIGGER `trigger1` BEFORE UPDATE ON `merge` FOR EACH ROW FOLLOWS `trigger2` SET `NEW`.`updated_at` = current_timestamp()'
         ]
       },
+      {
+        title: 'show columns from table',
+        sql: [
+          'SHOW COLUMNS FROM table_name',
+          'SHOW COLUMNS FROM `table_name`'
+        ]
+      },
+      {
+        title: 'show indexes from table',
+        sql: [
+          'SHOW INDEXES FROM table_name',
+          'SHOW INDEXES FROM `table_name`'
+        ]
+      },
+      {
+        title: 'show triggers',
+        sql: [
+          'SHOW TRIGGERS',
+          'SHOW TRIGGERS'
+        ]
+      },
+      {
+        title: 'show status',
+        sql: [
+          'SHOW PROCEDURE STATUS',
+          'SHOW PROCEDURE STATUS'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

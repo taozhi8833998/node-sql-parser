@@ -1232,6 +1232,27 @@ show_stmt
       }
     }
   }
+  / KW_SHOW __ keyword:('TRIGGERS'i / 'STATUS'i / 'PROCESSLIST'i) {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'show',
+        keyword: keyword.toLowerCase()
+      }
+    }
+  }
+  / KW_SHOW __ keyword:('PROCEDURE'i / 'FUNCTION'i) __ 'STATUS'i {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'show',
+        keyword: keyword.toLowerCase(),
+        suffix: 'status',
+      }
+    }
+  }
   / KW_SHOW __ 'BINLOG'i __ 'EVENTS'i __ ins:in_op_right? __ from: from_clause? __ limit: limit_clause? {
     return {
       tableList: Array.from(tableList),
@@ -1258,6 +1279,17 @@ show_stmt
         expr: e
       }
     }
+  }
+  / KW_SHOW __ keyword:('COLUMNS'i / 'INDEXES'i) __ from:from_clause {
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'show',
+          keyword: keyword.toLowerCase(),
+          from
+        }
+      };
   }
   / KW_SHOW __ KW_CREATE __ k:(KW_VIEW / KW_TABLE) __ t:table_name {
     const suffix = k.toLowerCase()

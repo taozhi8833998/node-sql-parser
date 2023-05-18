@@ -41,6 +41,10 @@ function showToSQL(showExpr) {
     case 'COLLATION':
       str = showLikeAndWhereToSQL(showExpr)
       break
+    case 'COLUMNS':
+    case 'INDEXES':
+      str = commonOptionConnector('FROM', tablesToSQL, showExpr.from)
+      break
     case 'GRANTS':
       str = showGrantsForUser(showExpr)
       break
