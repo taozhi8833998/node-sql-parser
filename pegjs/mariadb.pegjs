@@ -289,9 +289,10 @@ column_order_list
   }
 
 column_order_item
-  = c:expr o:(KW_ASC / KW_DESC)? { return {
-      column: c,
-      order: o && o.toLowerCase() || 'asc',
+  = c:expr o:(KW_ASC / KW_DESC)? {
+    return {
+      ...c,
+      order_by: o && o.toLowerCase(),
     }
   }
   / column_order
@@ -299,8 +300,8 @@ column_order_item
 column_order
   = c:column_ref __ o:(KW_ASC / KW_DESC)? {
     return {
-      column: c,
-      order: o && o.toLowerCase() || 'asc',
+      ...c,
+      order_by: o && o.toLowerCase(),
     }
   }
 create_db_definition

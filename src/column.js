@@ -98,12 +98,12 @@ function columnOption(definition) {
 }
 
 function columnOrderToSQL(columnOrder) {
-  const { column, collate, nulls, opclass, order } = columnOrder
+  const { column, collate, nulls, opclass, order_by } = columnOrder
   const result = [
-    exprToSQL(column),
+    exprToSQL(typeof column === 'string' ? { type: 'column_ref', table: columnOrder.table, column } : columnOrder),
     commonOptionConnector(collate && collate.type, identifierToSql, collate && collate.value),
     opclass,
-    toUpper(order),
+    toUpper(order_by),
     toUpper(nulls),
   ]
   return result.filter(hasVal).join(' ')

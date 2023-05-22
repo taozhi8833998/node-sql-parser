@@ -135,4 +135,16 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal("ALTER TABLE [test] ADD [type] VARCHAR(255) NOT NULL DEFAULT ('default')")
   })
 
+  it('should support create table', () => {
+    const sql = `CREATE TABLE [test] (
+      [id] [bigint] IDENTITY(1,1) NOT NULL,
+      [session_id] [int] NOT NULL,
+    PRIMARY KEY CLUSTERED
+    (
+      [id] ASC
+    ) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 90, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) on [PRIMARY]
+    ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]`
+    expect(getParsedSql(sql)).to.equal(`CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1), [session_id] INT NOT NULL, PRIMARY KEY CLUSTERED ([id] ASC) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 90, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]`)
+  })
+
 })
