@@ -100,13 +100,18 @@ const getPlugins = (parserName, target, plugins = []) => {
   }
   return pluginList
 }
-const getOutput = (target) => ({
+const getOutput = (target) => {
+  const output = {
     path: outputPath,
     library: '',
     libraryTarget: target === 'web' ? 'umd' : 'commonjs',
     // this ensures that source maps are mapped to actual files (not "webpack:" uris)
     devtoolModuleFilenameTemplate: info => path.resolve(__dirname, info.resourcePath),
-})
+  }
+  if (target === 'web') output.globalObject = 'this'
+  return output
+}
+
 function buildConfig(parserName, target, entry, plugins) {
     const watch = !(isProd || isTest || isCoverage)
     return {
