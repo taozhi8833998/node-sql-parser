@@ -1025,6 +1025,12 @@ ALTER_DROP_COLUMN
 
 ALTER_ADD_CONSTRAINT
   = KW_ADD __ c:create_constraint_definition {
+    /* => {
+        action: 'add';
+        create_definitions: create_db_definition;
+        resource: 'constraint';
+        type: 'alter';
+      } */
       return {
         action: 'add',
         create_definitions: c,
@@ -1268,6 +1274,10 @@ reference_definition
       }
   }
   / oa:on_reference {
+    /* => {
+      on_action: [on_reference];
+    }
+    */
     return {
       on_action: [oa]
     }
