@@ -132,7 +132,6 @@ export type column_order_list = column_order[];
 
 
 export type column_order = {
-      column: expr;
       collate: collate_expr;
       opclass: ident;
       order: 'asc' | 'desc';
@@ -200,10 +199,10 @@ export interface drop_stmt_node {
 
 export interface drop_index_stmt_node {
         type: 'drop';
+        prefix?: 'CONCURRENTLY';
         keyword: string;
         name: column_ref;
-        table: table_name;
-        options?: drop_index_opt;
+        options?: 'cascade' | 'restrict';
       }
 
 export type drop_stmt = AstStatement<drop_stmt_node> | AstStatement<drop_index_stmt_node>;
@@ -233,7 +232,7 @@ export type alter_table_stmt = AstStatement<alter_table_stmt_node>;
 
 export type alter_action_list = alter_action[];
 
-export type alter_action = ALTER_ADD_COLUMN | ALTER_DROP_COLUMN | ALTER_ADD_INDEX_OR_KEY | ALTER_ADD_FULLETXT_SPARITAL_INDEX | ALTER_RENAME_TABLE | ALTER_ALGORITHM | ALTER_LOCK;
+export type alter_action = ALTER_ADD_COLUMN | ALTER_ADD_CONSTRAINT | ALTER_DROP_COLUMN | ALTER_ADD_INDEX_OR_KEY | ALTER_ADD_FULLETXT_SPARITAL_INDEX | ALTER_RENAME_TABLE | ALTER_ALGORITHM | ALTER_LOCK;
 
 
 
@@ -251,6 +250,15 @@ export type ALTER_DROP_COLUMN = {
         collumn: column_ref;
         keyword: KW_COLUMN;
         resource: 'column';
+        type: 'alter';
+      };
+
+
+
+export type ALTER_ADD_CONSTRAINT = {
+        action: 'add';
+        create_definitions: create_db_definition;
+        resource: 'constraint';
         type: 'alter';
       };
 
@@ -352,14 +360,17 @@ export type create_constraint_foreign = {
 
 
 
+
+
 export type reference_definition = {
         definition: cte_column_definition;
         table: table_ref_list;
         keyword: 'references';
         match: 'match full' | 'match partial' | 'match simple';
-        on_delete?: on_reference;
-        on_update?: on_reference;
-      };
+        on_action: [on_reference?];
+      } | {
+      on_action: [on_reference];
+    };
 
 export type on_reference = { type: 'on delete' | 'on update'; value: reference_option; };
 
@@ -632,9 +643,11 @@ export type number_or_param = literal_numeric | var_decl | param;
 export type limit_clause = { separator: 'offset' | ''; value: [number_or_param | { type: 'origin', value: 'all' }, number_or_param?] };
 
 export interface update_stmt_node {
+        with?: with_clause;
          type: 'update';
          table: table_ref_list;
          set: set_list;
+         from?: from_clause;
          where?: where_clause;
          returning?: returning_stmt;
       }
@@ -799,7 +812,7 @@ export type additive_operator = "+" | "-";
 
 export type multiplicative_expr = binary_expr;
 
-export type multiplicative_operator = "*" | "/" | "%";
+export type multiplicative_operator = "*" | "/" | "%" | "||";
 
 export type primary = cast_expr | literal | aggr_func | window_func | func_call | case_expr | interval_expr | column_ref | param | or_and_where_expr | var_decl | { type: 'origin'; value: string; };
 

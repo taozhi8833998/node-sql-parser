@@ -6,9 +6,17 @@ export {
   util,
 }
 
-if (!global && window) window.global = window
+// for web worker
+if (typeof self === "object" && self) {
+  self.NodeSQLParser = {
+    Parser,
+    util,
+  }
+}
 
-if (global && global.window) {
+if (!global && typeof window === "object" && window) window.global = window
+
+if (typeof global === "object" && global && global.window) {
   global.window.NodeSQLParser = {
     Parser,
     util,
