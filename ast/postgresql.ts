@@ -1242,6 +1242,30 @@ type KW_USER = never;
 
 type KW_UUID = never;
 
+type KW_OID = never;
+
+type KW_REGCLASS = never;
+
+type KW_REGCOLLATION = never;
+
+type KW_REGCONFIG = never;
+
+type KW_REGDICTIONARY = never;
+
+type KW_REGNAMESPACE = never;
+
+type KW_REGOPER = never;
+
+type KW_REGOPERATOR = never;
+
+type KW_REGPROC = never;
+
+type KW_REGPROCEDURE = never;
+
+type KW_REGROLE = never;
+
+type KW_REGTYPE = never;
+
 type KW_CURRENT_DATE = never;
 
 type KW_ADD_DATE = never;
@@ -1462,6 +1486,10 @@ export type numeric_type_suffix = any[];;
 
 
 export type numeric_type = data_type;
+
+
+
+export type oid_type = data_type;
 
 export type timezone = string[];;
 

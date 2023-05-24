@@ -664,6 +664,13 @@ describe('mysql', () => {
           'SHOW PROCEDURE STATUS'
         ]
       },
+      {
+        title: 'alter table modify column',
+        sql: [
+          "ALTER TABLE gifshow.reporter MODIFY update_at BIGINT UNSIGNED NOT NULL COMMENT 'update_at';",
+          "ALTER TABLE `gifshow`.`reporter` MODIFY `update_at` BIGINT UNSIGNED NOT NULL COMMENT 'update_at'"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
