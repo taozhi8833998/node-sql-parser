@@ -997,6 +997,7 @@ alter_action
   / ALTER_DISABLE_CONSTRAINT
   / ALTER_ADD_COLUMN
   / ALTER_DROP_COLUMN
+  / ALTER_MODIFY_COLUMN
   / ALTER_ADD_INDEX_OR_KEY
   / ALTER_ADD_FULLETXT_SPARITAL_INDEX
   / ALTER_RENAME_COLUMN
@@ -1030,6 +1031,17 @@ ALTER_ADD_COLUMN
     cd:create_column_definition {
       return {
         action: 'add',
+        ...cd,
+        resource: 'column',
+        type: 'alter',
+      }
+    }
+
+ALTER_MODIFY_COLUMN
+  = KW_MODIFY __
+    cd:create_column_definition {
+      return {
+        action: 'modify',
         ...cd,
         resource: 'column',
         type: 'alter',
@@ -3419,6 +3431,7 @@ KW_DUAL = "DUAL"i
 KW_ADD     = "ADD"i     !ident_start { return 'ADD'; }
 KW_COLUMN  = "COLUMN"i  !ident_start { return 'COLUMN'; }
 KW_INDEX   = "INDEX"i  !ident_start { return 'INDEX'; }
+KW_MODIFY   = "MODIFY"i  !ident_start { return 'MODIFY'; }
 KW_KEY     = "KEY"i  !ident_start { return 'KEY'; }
 KW_FULLTEXT = "FULLTEXT"i  !ident_start { return 'FULLTEXT'; }
 KW_SPATIAL  = "SPATIAL"i  !ident_start { return 'SPATIAL'; }
