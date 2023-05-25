@@ -80,6 +80,10 @@ export interface Select {
   having: any[] | null;
   orderby: OrderBy[] | null;
   limit: Limit | null;
+  _orderby?: OrderBy[] | null;
+  _limit?: Limit | null;
+  parentheses_symbol?: boolean;
+  _parentheses?: boolean;
 }
 export interface Insert_Replace {
   type: "replace" | "insert";
