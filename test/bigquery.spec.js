@@ -790,7 +790,7 @@ describe('BigQuery', () => {
     const table = 'customers'
     const sql = `select * from ${catalog}.${schema}.${table} limit 3`
     const ast = parser.astify(sql, opt)
-    const fromClause = ast.select.from[0]
+    const fromClause = ast.from[0]
     expect(fromClause.catalog).to.be.equal(catalog)
     expect(fromClause.db).to.be.equal(catalog)
     expect(fromClause.schema).to.be.equal(schema)
@@ -806,7 +806,7 @@ describe('BigQuery', () => {
 
   it(SQL_LIST[16].title, () => {
     const ast = parser.astify(SQL_LIST[16].sql[0], opt)
-    const expr = ast[0].select.from[0].expr
+    const expr = ast[0].from[0].expr
     expr.parentheses = false
     expr.expr_list = {
       type: 'string',
@@ -837,7 +837,7 @@ describe('BigQuery', () => {
       },
       as: null
     }
-    expect(ast.select.columns[0]).to.eql(column)
+    expect(ast.columns[0]).to.eql(column)
   })
 
   it('should get the correct column list', () => {

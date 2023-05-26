@@ -1420,9 +1420,6 @@ reference_option
     return kc.toLowerCase()
   }
 
-
-
-
 KW_UPDATE   = "UPDATE"i     !ident_start
 KW_CREATE   = "CREATE"i     !ident_start
 KW_DELETE   = "DELETE"i     !ident_start
@@ -1452,26 +1449,21 @@ query_statement
   / s:('(' __ select_stmt __ ')') {
       return {
         ...s[2],
-        parentheses: true,
+        parentheses_symbol: true,
       }
     }
 
 query_expr
-  = cte:with_clause? __
-  s:union_stmt __
-  o:order_by_clause?  __
-  l:limit_clause? __
+  = s:union_stmt __ o:order_by_clause?  __ l:limit_clause? __
   {
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
       ast: {
-        type: 'bigquery',
-        with: cte,
-        select: s && s.ast,
-        orderby: o,
-        limit: l,
-        parentheses: s && s.parentheses || false,
+        ...s.ast,
+        _orderby: o,
+        _limit: l,
+        _parentheses: s._parentheses
       }
     }
   }
@@ -1489,12 +1481,12 @@ union_stmt
   / s:('(' __ union_stmt_nake __ ')') {
       return {
         ...s[2],
-        parentheses: true
+        _parentheses: true
       }
     }
 
 union_stmt_nake
-  = head:select_stmt tail:(__ set_op? __ select_stmt)* {
+  = head:select_stmt tail:(__ set_op? __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause?  {
       let cur = head
       for (let i = 0; i < tail.length; i++) {
         cur._next = tail[i][3]
