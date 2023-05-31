@@ -1595,7 +1595,7 @@ column_list_item
   / a:assign_stmt {
     return { expr: a, as: null }
   }
-  / e:(binary_column_expr / expr) __ alias:alias_clause? {
+  / e:(binary_column_expr / _expr) __ alias:alias_clause? {
       return { expr: e, as: alias };
     }
 
@@ -2132,11 +2132,13 @@ case_else = KW_ELSE __ result:expr {
  * ---------------------------------------------------------------------------------------------------
  */
 
-expr
+_expr
   = logic_operator_expr // support concatenation operator || and &&
   / or_expr
   / unary_expr
-  / set_op_stmt
+
+expr
+  = _expr / set_op_stmt
 
 logic_operator_expr
   = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ __ rh:comparison_op_right? {
@@ -2152,7 +2154,7 @@ unary_expr
   }
 
 binary_column_expr
-  = head:expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ expr)+ {
+  = head:_expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ _expr)+ {
     const len = tail.length
     let result = tail[len - 1][3]
     for (let i = len - 1; i >= 0; i--) {
