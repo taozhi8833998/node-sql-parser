@@ -147,4 +147,19 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal(`CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1), [session_id] INT NOT NULL, PRIMARY KEY CLUSTERED ([id] ASC) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 90, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]`)
   })
 
+  it('should support pviot and unpviot clause', () => {
+    let sql = `SELECT VendorID, [250] AS Emp1, [251] AS Emp2, [256] AS Emp3, [257] AS Emp4, [260] AS Emp5
+    FROM
+    (SELECT PurchaseOrderID, EmployeeID, VendorID  FROM Purchasing.PurchaseOrderHeader) p
+    PIVOT  (  COUNT (PurchaseOrderID)  FOR EmployeeID IN  ( [250], [251], [256], [257], [260] )  ) AS pvt
+    ORDER BY pvt.VendorID `
+    expect(getParsedSql(sql)).to.be.equal('SELECT [VendorID], [250] AS [Emp1], [251] AS [Emp2], [256] AS [Emp3], [257] AS [Emp4], [260] AS [Emp5] FROM (SELECT [PurchaseOrderID], [EmployeeID], [VendorID] FROM [Purchasing].[PurchaseOrderHeader]) AS [p] PIVOT(COUNT([PurchaseOrderID]) FOR [EmployeeID] IN ([250], [251], [256], [257], [260])) AS [pvt] ORDER BY [pvt].[VendorID] ASC')
+    sql =  `SELECT VendorID, [250] AS Emp1, [251] AS Emp2, [256] AS Emp3, [257] AS Emp4, [260] AS Emp5
+    FROM
+    (SELECT PurchaseOrderID, EmployeeID, VendorID  FROM Purchasing.PurchaseOrderHeader) p
+    UNPIVOT  ( pvt.VendorID FOR EmployeeID IN  ( [250], [251], [256], [257], [260] )  ) AS pvt
+    ORDER BY pvt.VendorID `
+    expect(getParsedSql(sql)).to.be.equal('SELECT [VendorID], [250] AS [Emp1], [251] AS [Emp2], [256] AS [Emp3], [257] AS [Emp4], [260] AS [Emp5] FROM (SELECT [PurchaseOrderID], [EmployeeID], [VendorID] FROM [Purchasing].[PurchaseOrderHeader]) AS [p] UNPIVOT([pvt].[VendorID] FOR [EmployeeID] IN ([250], [251], [256], [257], [260])) AS [pvt] ORDER BY [pvt].[VendorID] ASC')
+  })
+
 })

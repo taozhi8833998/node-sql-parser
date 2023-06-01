@@ -2,7 +2,7 @@ import { exprToSQL } from './expr'
 import { hasVal, toUpper } from './util'
 
 function binaryToSQL(expr) {
-  let { operator } = expr
+  let operator = expr.operator || expr.op
   let rstr = exprToSQL(expr.right)
   let isBetween = false
   if (Array.isArray(rstr)) {
