@@ -270,4 +270,9 @@ If you have made a donation, you can leave your name and email in the issue, you
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=taozhi8833998/node-sql-parser&type=Date)](https://star-history.com/#taozhi8833998/node-sql-parser&Date)
+<a href="https://star-history.com/#taozhi8833998/node-sql-parser&Date">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=taozhi8833998/node-sql-parser&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=taozhi8833998/node-sql-parser&type=Date" />
+  </picture>
+</a>

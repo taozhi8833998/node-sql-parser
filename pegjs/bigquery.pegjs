@@ -1565,7 +1565,7 @@ struct_value
   }
 
 expr_alias
-  = e:(binary_column_expr / expr) __ alias:alias_clause? {
+  = e:(binary_column_expr / _expr) __ alias:alias_clause? {
       return { expr: e, as: alias };
     }
 
@@ -1945,13 +1945,15 @@ expr_list
       return el;
     }
 
-expr
+_expr
   = struct_expr
   / logic_operator_expr // support concatenation operator || and &&
   / or_expr
   / unary_expr
-  / union_stmt
   / array_expr
+
+expr
+  = _expr / union_stmt
 
 parentheses_list_expr
   = head:parentheses_expr tail:(__ COMMA __ parentheses_expr)* {
@@ -2016,7 +2018,7 @@ unary_expr
   }
 
 binary_column_expr
-  = head:expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ expr)+ {
+  = head:_expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ _expr)+ {
     const len = tail.length
     let result = tail[len - 1][3]
     for (let i = len - 1; i >= 0; i--) {

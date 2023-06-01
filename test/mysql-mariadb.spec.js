@@ -729,6 +729,15 @@ describe('mysql', () => {
         })
       })
 
+      it('should throw error when colum is select stmt', () => {
+        let sql = 'select\nselect * from test_table'
+        let fun = parser.astify.bind(parser, sql)
+        expect(fun).to.throw('Expected "#", "(", "--", ".", "/*", ":=", "=", or [ \\t\\n\\r] but "*" found.')
+        sql = 'select\nselect * from test_table and \nselect * from test_table2'
+        fun = parser.astify.bind(parser, sql)
+        expect(fun).to.throw('Expected "#", "(", "--", ".", "/*", ":=", "=", or [ \\t\\n\\r] but "*" found.')
+      })
+
       it('should support bit function and operators', () => {
         const sqlList = [
           'SELECT 127 | 128, 128 << 2, BIT_COUNT(15)',

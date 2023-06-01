@@ -1817,6 +1817,13 @@ expr_item
     return e
   }
 
+expr_item_without_union
+  = e:(binary_column_expr / _expr) __ a:array_index? {
+    // => (_expr || binary_expr) & { array_index: array_index }
+    if (a) e.array_index = a
+    return e
+  }
+
 cast_data_type
   = p:'"'? t: data_type s:'"'? {
     // => data_type & { quoted?: string }
@@ -1830,7 +1837,7 @@ column_list_item
     // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
-  / e:expr_item __ s:KW_DOUBLE_COLON __ t:cast_data_type tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
+  / e:expr_item_without_union __ s:KW_DOUBLE_COLON __ t:cast_data_type tail:(__ (additive_operator / multiplicative_operator) __ expr_item_without_union)* __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; }
     return {
       as: alias,
@@ -1859,7 +1866,7 @@ column_list_item
       columnList.add(`select::null::${c}`)
       return { type: 'expr', expr: { type: 'column_ref', table: null, column: c }, as: alias };
   }
-  / e:expr_item __ alias:alias_clause? {
+  / e:expr_item_without_union  __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
       return { type: 'expr', expr: e, as: alias };
     }
@@ -2598,11 +2605,13 @@ case_else = KW_ELSE __ result:expr {
  * ---------------------------------------------------------------------------------------------------
  */
 
-expr
+_expr
   = logic_operator_expr // support concatenation operator || and &&
   / or_expr
   / unary_expr
-  / union_stmt
+
+expr
+  = _expr / union_stmt
 
 logic_operator_expr
   = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ __ rh:comparison_op_right? {
@@ -2642,7 +2651,7 @@ unary_expr
   }
 
 binary_column_expr
-  = head:expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ expr)+ {
+  = head:_expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ _expr)+ {
     // => binary_expr
     const len = tail.length
     let result = tail[len - 1][3]
