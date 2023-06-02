@@ -36,6 +36,7 @@ function operatorToSQL(operator) {
   const { type } = operator
   switch (type) {
     case 'pivot':
+    case 'unpivot':
       return pivotOperatorToSQL(operator)
     default:
       return ''
@@ -80,12 +81,12 @@ function tableToSQL(tableInfo) {
   tableName = [toUpper(prefixStr), tableName].filter(hasVal).join(' ')
   let str = [database, schemaStr, tableName].filter(hasVal).join('.')
   if (tableInfo.parentheses) str = `(${str})`
-  const result = [str, operatorToSQL(operator)]
+  const result = [str]
   if (tablesample) {
     const tableSampleSQL = ['TABLESAMPLE', exprToSQL(tablesample.expr), literalToSQL(tablesample.repeatable)].filter(hasVal).join(' ')
     result.push(tableSampleSQL)
   }
-  if (as) result.push('AS', identifierToSql(as))
+  result.push(commonOptionConnector('AS', identifierToSql, as), operatorToSQL(operator))
   if (table_hint) result.push(`${toUpper(table_hint.keyword)}`, `(${table_hint.expr.map(tableHintToSQL).filter(hasVal).join(', ')})`)
   return result.filter(hasVal).join(' ')
 }
@@ -104,7 +105,7 @@ function tablesToSQL(tables) {
     const joinExpr = tables[i]
     const { on, using, join } = joinExpr
     const str = []
-    str.push(join ? ` ${join}` : ',')
+    str.push(join ? ` ${toUpper(join)}` : ',')
     str.push(tableToSQL(joinExpr))
     str.push(commonOptionConnector('ON', exprToSQL, on))
     if (using) str.push(`USING (${using.map(identifierToSql).join(', ')})`)
