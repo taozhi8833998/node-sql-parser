@@ -162,4 +162,21 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.be.equal('SELECT [VendorID], [250] AS [Emp1], [251] AS [Emp2], [256] AS [Emp3], [257] AS [Emp4], [260] AS [Emp5] FROM (SELECT [PurchaseOrderID], [EmployeeID], [VendorID] FROM [Purchasing].[PurchaseOrderHeader]) AS [p] UNPIVOT([pvt].[VendorID] FOR [EmployeeID] IN ([250], [251], [256], [257], [260])) AS [pvt] ORDER BY [pvt].[VendorID] ASC')
   })
 
+  it('should support with clause before update stmt', () => {
+    const sql = `WITH rank_update AS (
+      SELECT
+          [rank],
+          ROW_NUMBER() OVER (
+              PARTITION BY class_id
+              ORDER BY section_id, [rank] ASC, [segment_id], [id]
+          ) AS row_rank
+      FROM
+          [class_segment_class]
+      WHERE
+          [section_id] IS NOT NULL
+    )
+    UPDATE [rank_update]
+    SET [rank] = [row_rank];`
+    expect(getParsedSql(sql)).to.be.equal('WITH [rank_update] AS (SELECT [rank], ROW_NUMBER() OVER (PARTITION BY [class_id] ORDER BY [section_id] ASC, [rank] ASC, [segment_id] ASC, [id] ASC) AS [row_rank] FROM [class_segment_class] WHERE [section_id] IS NOT NULL) UPDATE [rank_update] SET [rank] = [row_rank]')
+  })
 })
