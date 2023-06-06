@@ -1681,7 +1681,7 @@ limit_clause
     }
 
 update_stmt
-  = KW_UPDATE    __
+  = __ cte:with_clause? __ KW_UPDATE    __
     t:table_ref_list __
     KW_SET       __
     l:set_list   __
@@ -1706,6 +1706,7 @@ update_stmt
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
+          with: cte,
           type: 'update',
           table: t,
           set: l,
