@@ -20,6 +20,13 @@ describe('mysql', () => {
         ]
       },
       {
+        title: 'escape char patten matching',
+        sql: [
+          "select c1 from t1 where c2 like 'abc' escape '!'",
+          "SELECT `c1` FROM `t1` WHERE `c2` LIKE 'abc' ESCAPE '!'"
+        ]
+      },
+      {
         title: 'basic regexp with newline',
         sql: [
           "SELECT 'new*\n*line' REGEXP 'new\\*.\\*line';",

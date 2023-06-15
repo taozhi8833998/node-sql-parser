@@ -113,7 +113,7 @@
     };
   }
 
-  function createBinaryExpr(op, left, right) {
+  function createBinaryExpr(op, left, right,  others = {}) {
     return {
       type: 'binary_expr',
       operator: op,
@@ -275,7 +275,7 @@ set_op_stmt
         cur = cur._next
       }
       if(ob) head._orderby = ob
-      if(l) head._limit = l
+      if(l && l.value && l.value.length > 0) head._limit = l
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -2271,12 +2271,22 @@ like_op
   = nk:(KW_NOT __ KW_LIKE) { return nk[0] + ' ' + nk[2]; }
   / KW_LIKE
 
+escape_op
+  = kw:'ESCAPE'i __ c:literal_string {
+    // => { type: 'ESCAPE'; value: literal_string }
+    return {
+      type: 'ESCAPE',
+      value: c,
+    }
+  }
+
 in_op
   = nk:(KW_NOT __ KW_IN) { return nk[0] + ' ' + nk[2]; }
   / KW_IN
 
 like_op_right
-  = op:like_op __ right:(literal / comparison_expr) {
+  = op:like_op __ right:(literal / comparison_expr) __ es:escape_op? {
+    if (es) right.escape = es
       return { op: op, right: right };
     }
 
