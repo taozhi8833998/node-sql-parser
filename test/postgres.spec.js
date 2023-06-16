@@ -878,6 +878,14 @@ describe('Postgres', () => {
   }
   neatlyNestTestedSQL(SQL_LIST)
 
+  describe('tables to sql', () => {
+    it('should parse object tables', () => {
+      const ast = parser.astify(SQL_LIST[97].sql[0], opt)
+      ast[0].from[0].expr.parentheses = false
+      expect(parser.sqlify(ast, opt)).to.be.equal('SELECT "last_name", "salary" FROM "employees" INNER JOIN "salaries" ON "employees"."emp_no" = "salaries"."emp_no"')
+    })
+  })
+
   describe('returning', () => {
     it('should parse returning clause', () => {
       let sql = "UPDATE buildings SET address = 'update test 2' WHERE id = 18 RETURNING id, address"
