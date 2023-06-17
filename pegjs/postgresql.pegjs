@@ -1989,7 +1989,6 @@ table_ref
   = __ COMMA __ t:table_base { /* => table_base */ return t; }
   / __ t:table_join { /* => table_join */ return t; }
 
-
 table_join
   = op:join_op __ t:table_base __ KW_USING __ LPAREN __ head:ident_name tail:(__ COMMA __ ident_name)* __ RPAREN {
       // => table_base & {join: join_op; using: ident_name[]; }
@@ -2003,13 +2002,14 @@ table_join
       t.on = expr;
       return t;
     }
-  / op:join_op __ LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
+  / op:join_op __ LPAREN __ stmt:(union_stmt / table_ref_list) __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
     /* => {
-      expr: union_stmt & { parentheses: true; };
+      expr: (union_stmt || table_ref_list) & { parentheses: true; };
       as?: alias_clause;
       join: join_op;
       on?: on_clause;
     }*/
+    if (Array.isArray(stmt)) stmt = { type: 'tables', expr: stmt }
     stmt.parentheses = true;
     return {
       expr: stmt,
@@ -2038,6 +2038,15 @@ table_base
     // => { prefix?: string; expr: union_stmt | value_clause; as?: alias_clause; }
     if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt }
     stmt.parentheses = true;
+    return {
+      prefix: l,
+      expr: stmt,
+      as: alias
+    };
+  }
+  / l:('LATERAL'i)? __ LPAREN __ stmt:table_ref_list __ RPAREN __ alias:value_alias_clause? {
+    // => { prefix?: string; expr: table_ref_list; as?: alias_clause; }
+    stmt = { type: 'tables', expr: stmt, parentheses: true }
     return {
       prefix: l,
       expr: stmt,

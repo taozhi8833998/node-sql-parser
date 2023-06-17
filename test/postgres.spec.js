@@ -847,6 +847,26 @@ describe('Postgres', () => {
         'ALTER TABLE "address" ADD CONSTRAINT "user_id_address_fk" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE RESTRICT'
       ]
     },
+    {
+      title: 'table constructor in join',
+      sql: [
+        `select last_name, salary, title
+        from employees e left join (
+            salaries s inner join titles t on s.emp_no = t.emp_no
+        ) on e.emp_no = s.emp_no`,
+        'SELECT "last_name", "salary", "title" FROM "employees" AS "e" LEFT JOIN ("salaries" AS "s" INNER JOIN "titles" AS "t" ON "s"."emp_no" = "t"."emp_no") ON "e"."emp_no" = "s"."emp_no"'
+      ]
+    },
+    {
+      title: 'table constructor in from',
+      sql: [
+        `select last_name, salary
+        from (
+           employees inner join salaries on employees.emp_no = salaries.emp_no
+        );`,
+        'SELECT "last_name", "salary" FROM ("employees" INNER JOIN "salaries" ON "employees"."emp_no" = "salaries"."emp_no")'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
@@ -857,6 +877,14 @@ describe('Postgres', () => {
     })
   }
   neatlyNestTestedSQL(SQL_LIST)
+
+  describe('tables to sql', () => {
+    it('should parse object tables', () => {
+      const ast = parser.astify(SQL_LIST[97].sql[0], opt)
+      ast[0].from[0].expr.parentheses = false
+      expect(parser.sqlify(ast, opt)).to.be.equal('SELECT "last_name", "salary" FROM "employees" INNER JOIN "salaries" ON "employees"."emp_no" = "salaries"."emp_no"')
+    })
+  })
 
   describe('returning', () => {
     it('should parse returning clause', () => {

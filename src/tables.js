@@ -97,6 +97,12 @@ function tableToSQL(tableInfo) {
  */
 function tablesToSQL(tables) {
   if (!tables) return ''
+  if (!Array.isArray(tables)) {
+    const { expr, parentheses } = tables
+    const sql = tablesToSQL(expr)
+    if (parentheses) return `(${sql})`
+    return sql
+  }
   const baseTable = tables[0]
   const clauses = []
   if (baseTable.type === 'dual') return 'DUAL'
