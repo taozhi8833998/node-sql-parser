@@ -247,6 +247,7 @@ create_stmt
 
 alter_stmt
   = alter_table_stmt
+  / alter_view_stmt
 
 crud_stmt
   = union_stmt
@@ -737,6 +738,42 @@ use_stmt
         }
       };
     }
+view_attribute
+  = 'ENCRYPTION'i / 'SCHEMABINDING'i / 'VIEW_METADATA'i
+
+view_attribute_list
+  = head:view_attribute tail:(__ COMMA __ view_attribute)* {
+    return createList(head, tail)
+  }
+
+view_with
+  = KW_WITH __ "CHECK"i __ "OPTION"i {
+    return 'with check option'
+  }
+
+alter_view_stmt
+  = KW_ALTER  __
+    KW_VIEW __
+    t:table_name __
+    c:(LPAREN __ column_ref_list __ RPAREN)? __
+    w:(KW_WITH __ view_attribute_list)? __
+    KW_AS __ s:select_stmt_nake __
+    e:view_with? {
+      if (t && t.length > 0) t.forEach(table => tableList.add(`alter::${table.db}::${table.table}`));
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword: 'view',
+          view: t,
+          columns: c && c[2],
+          attributes: w && w[2],
+          select: s,
+          with: e
+        }
+      };
+    }
 
 alter_table_stmt
   = KW_ALTER  __
@@ -749,6 +786,7 @@ alter_table_stmt
         columnList: columnListTableAlias(columnList),
         ast: {
           type: 'alter',
+          keyword: 'table',
           table: t,
           expr: e
         }
@@ -2622,6 +2660,7 @@ KW_LOCK     = "LOCK"i       !ident_start
 
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
+KW_VIEW    = "VIEW"i      !ident_start { return 'VIEW'; }
 KW_DATABASE = "DATABASE"i      !ident_start { return 'DATABASE'; }
 KW_SCHEME   = "SCHEME"i      !ident_start { return 'SCHEME'; }
 KW_TABLES   = "TABLES"i      !ident_start { return 'TABLES'; }

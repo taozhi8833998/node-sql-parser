@@ -1,17 +1,40 @@
 import { columnDefinitionToSQL, columnRefToSQL } from './column'
 import { createDefinitionToSQL } from './create'
 import { indexTypeAndOptionToSQL } from './index-definition'
-import { tablesToSQL } from './tables'
+import { tablesToSQL, tableToSQL } from './tables'
 import { exprToSQL } from './expr'
+import { selectToSQL } from './select'
 import { hasVal, toUpper, identifierToSql } from './util'
 
-function alterToSQL(stmt) {
+function alterTableToSQL(stmt) {
   const { type, table, expr = [] } = stmt
   const action = toUpper(type)
   const tableName = tablesToSQL(table)
   const exprList = expr.map(exprToSQL)
   const result = [action, 'TABLE', tableName, exprList.join(', ')]
   return result.filter(hasVal).join(' ')
+}
+
+function alterViewToSQL(stmt) {
+  const { type, columns, attributes, select, view, with: withExpr } = stmt
+  const action = toUpper(type)
+  const viewName = tableToSQL(view)
+  const result = [action, 'VIEW', viewName]
+  if (columns) result.push(`(${columns.map(columnRefToSQL).join(', ')})`)
+  if (attributes) result.push(`WITH ${attributes.map(toUpper).join(', ')}`)
+  result.push('AS', selectToSQL(select))
+  if (withExpr) result.push(toUpper(withExpr))
+  return result.filter(hasVal).join(' ')
+}
+
+function alterToSQL(stmt) {
+  const { keyword = 'table' } = stmt
+  switch (keyword) {
+    case 'table':
+      return alterTableToSQL(stmt)
+    case 'view':
+      return alterViewToSQL(stmt)
+  }
 }
 
 function alterExprToSQL(expr) {

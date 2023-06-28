@@ -179,4 +179,16 @@ describe('transactsql', () => {
     SET [rank] = [row_rank];`
     expect(getParsedSql(sql)).to.be.equal('WITH [rank_update] AS (SELECT [rank], ROW_NUMBER() OVER (PARTITION BY [class_id] ORDER BY [section_id] ASC, [rank] ASC, [segment_id] ASC, [id] ASC) AS [row_rank] FROM [class_segment_class] WHERE [section_id] IS NOT NULL) UPDATE [rank_update] SET [rank] = [row_rank]')
   })
+  it('should support alter view', () => {
+    let sql = `ALTER VIEW [dbo].[reporting_class]
+    AS
+    SELECT
+      [ClassHexID],
+      [DepartmentID] AS class_source
+    FROM [Class]
+    WHERE [Class].[active] = 1`
+    expect(getParsedSql(sql)).to.be.equal('ALTER VIEW [dbo].[reporting_class] AS SELECT [ClassHexID], [DepartmentID] AS [class_source] FROM [Class] WHERE [Class].[active] = 1')
+    sql = 'ALTER VIEW [dbo].[reporting_class] (id, active) with ENCRYPTION, SCHEMABINDING AS SELECT [ClassHexID], [DepartmentID] AS class_source FROM [Class] WHERE [Class].[active] = 1 with check option'
+    expect(getParsedSql(sql)).to.be.equal('ALTER VIEW [dbo].[reporting_class] ([id], [active]) WITH ENCRYPTION, SCHEMABINDING AS SELECT [ClassHexID], [DepartmentID] AS [class_source] FROM [Class] WHERE [Class].[active] = 1 WITH CHECK OPTION')
+  })
 })
