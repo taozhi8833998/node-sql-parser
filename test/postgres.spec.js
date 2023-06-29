@@ -867,6 +867,13 @@ describe('Postgres', () => {
         'SELECT "last_name", "salary" FROM ("employees" INNER JOIN "salaries" ON "employees"."emp_no" = "salaries"."emp_no")'
       ]
     },
+    {
+      title: 'select from scheme.table.column',
+      sql: [
+        'select public.t1.* from public.t1;',
+        'SELECT "public"."t1".* FROM "public"."t1"'
+      ]
+    }
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

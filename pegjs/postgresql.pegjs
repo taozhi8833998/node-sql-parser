@@ -1848,8 +1848,28 @@ column_list_item
       tail: tail && tail[0] && { operator: tail[0][1], expr: tail[0][3] },
     }
   }
+  / tbl:ident __ DOT pro:(ident __ DOT)? __ STAR {
+      // => { expr: column_ref; as: null; }
+      const mid = pro && pro[0]
+      let schema
+      if (mid) {
+        schema = tbl
+        tbl = mid
+      }
+      columnList.add(`select::${tbl}::(.*)`)
+      const column = '*'
+      return {
+        expr: {
+          type: 'column_ref',
+          table: tbl,
+          schema,
+          column,
+        },
+        as: null
+      }
+    }
   / tbl:(ident __ DOT)? __ STAR {
-      // => { type: 'star_ref'; expr: column_ref; as: null; }
+      // => { expr: column_ref; as: null; }
       const table = tbl && tbl[0] || null
       columnList.add(`select::${table}::(.*)`);
       return {
