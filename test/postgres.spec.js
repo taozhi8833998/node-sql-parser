@@ -887,6 +887,13 @@ describe('Postgres', () => {
         WHERE testId='bugfix.ntile.case1'`,
         `SELECT "name", "amount", NTILE(2) OVER (ORDER BY "amount" ASC) AS "ntile", unset("_id") FROM "function-test-data" WHERE "testId" = 'bugfix.ntile.case1'`
       ]
+    },
+    {
+      title: 'support character data type',
+      sql: [
+        "SELECT 'x'::character varying;",
+        `SELECT 'x'::CHARACTER AS "varying"`
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){

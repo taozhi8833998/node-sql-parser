@@ -3742,6 +3742,7 @@ KW_CAST     = "CAST"i       !ident_start { return 'CAST' }
 KW_BOOL     = "BOOL"i     !ident_start { return 'BOOL'; }
 KW_BOOLEAN  = "BOOLEAN"i  !ident_start { return 'BOOLEAN'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
+KW_CHARACTER = "CHARACTER"i     !ident_start { return 'CHARACTER'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
 KW_NUMERIC  = "NUMERIC"i  !ident_start { return 'NUMERIC'; }
 KW_DECIMAL  = "DECIMAL"i  !ident_start { return 'DECIMAL'; }
@@ -4137,7 +4138,7 @@ character_string_type
     // => data_type
     return { dataType: t, length: parseInt(l.join(''), 10) };
   }
-  / t:KW_CHAR { /* =>  data_type */ return { dataType: t }; }
+  / t:(KW_CHAR / KW_CHARACTER) { /* =>  data_type */ return { dataType: t }; }
   / t:KW_VARCHAR { /* =>  data_type */  return { dataType: t }; }
 
 numeric_type_suffix
