@@ -3289,15 +3289,6 @@ func_call
         suffix: z
       };
     }
-  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
-      // => { type: 'function'; name: string; args: expr_list; }
-      if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
-      return {
-        type: 'function',
-        name: name,
-        args: l ? l: { type: 'expr_list', value: [] }
-      };
-    }
   / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
     // => { type: 'function'; name: string; args: expr_list; over?: over_partition; }
       return {
@@ -3305,6 +3296,15 @@ func_call
         name: name,
         args: l ? l: { type: 'expr_list', value: [] },
         over: bc
+      };
+    }
+  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
+      // => { type: 'function'; name: string; args: expr_list; }
+      if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
+      return {
+        type: 'function',
+        name: name,
+        args: l ? l: { type: 'expr_list', value: [] }
       };
     }
   / extract_func
@@ -3356,6 +3356,7 @@ scalar_func
   / KW_USER
   / KW_SESSION_USER
   / KW_SYSTEM_USER
+  / "NTILE"i
 
 cast_expr
   = LPAREN __ e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ RPAREN __ s:KW_DOUBLE_COLON __ t:data_type __ alias:alias_clause? {
@@ -3741,6 +3742,7 @@ KW_CAST     = "CAST"i       !ident_start { return 'CAST' }
 KW_BOOL     = "BOOL"i     !ident_start { return 'BOOL'; }
 KW_BOOLEAN  = "BOOLEAN"i  !ident_start { return 'BOOLEAN'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
+KW_CHARACTER = "CHARACTER"i     !ident_start { return 'CHARACTER'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
 KW_NUMERIC  = "NUMERIC"i  !ident_start { return 'NUMERIC'; }
 KW_DECIMAL  = "DECIMAL"i  !ident_start { return 'DECIMAL'; }
@@ -4136,7 +4138,7 @@ character_string_type
     // => data_type
     return { dataType: t, length: parseInt(l.join(''), 10) };
   }
-  / t:KW_CHAR { /* =>  data_type */ return { dataType: t }; }
+  / t:(KW_CHAR / KW_CHARACTER) { /* =>  data_type */ return { dataType: t }; }
   / t:KW_VARCHAR { /* =>  data_type */  return { dataType: t }; }
 
 numeric_type_suffix
