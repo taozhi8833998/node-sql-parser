@@ -894,7 +894,21 @@ describe('Postgres', () => {
         "SELECT 'x'::character varying;",
         `SELECT 'x'::CHARACTER AS "varying"`
       ]
-    }
+    },
+    {
+      title: 'cast to jsonb and select key',
+      sql: [
+        "SELECT TextColumn::JSONB->>'name' FROM table1",
+        `SELECT "TextColumn"::JSONB->> 'name' FROM "table1"`
+      ]
+    },
+    {
+      title: 'cast to jsonb and select key in function',
+      sql: [
+        "SELECT CAST(properties AS JSONB)->>'name' FROM table1",
+        `SELECT CAST("properties" AS JSONB)->> 'name' FROM "table1"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

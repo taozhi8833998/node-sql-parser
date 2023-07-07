@@ -1837,8 +1837,8 @@ column_list_item
     // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
-  / e:expr_item_without_union __ s:KW_DOUBLE_COLON __ t:cast_data_type tail:(__ (additive_operator / multiplicative_operator) __ expr_item_without_union)* __ alias:alias_clause? {
-    // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; }
+  / e:expr_item_without_union __ s:KW_DOUBLE_COLON __ t:cast_data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item_without_union)* __ alias:alias_clause? {
+    // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; arrows?: ('->>' | '->')[]; property?: (literal_string | literal_numeric)[]; }
     return {
       as: alias,
       type: 'cast',
@@ -1846,6 +1846,8 @@ column_list_item
       symbol: '::',
       target: t,
       tail: tail && tail[0] && { operator: tail[0][1], expr: tail[0][3] },
+      arrows: a.map(item => item[0]),
+      properties: a.map(item => item[2]),
     }
   }
   / tbl:ident __ DOT pro:(ident __ DOT)? __ STAR {
@@ -3359,7 +3361,7 @@ scalar_func
   / "NTILE"i
 
 cast_expr
-  = LPAREN __ e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ RPAREN __ s:KW_DOUBLE_COLON __ t:data_type __ alias:alias_clause? {
+  = LPAREN __ e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ RPAREN __ s:KW_DOUBLE_COLON __ t:data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ alias:alias_clause? {
     /* => {
         as?: alias_clause,
         type: 'cast';
@@ -3368,6 +3370,8 @@ cast_expr
         symbol: '::' | 'as',
         keyword: 'cast';
         target: data_type;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
       }
       */
     e.parentheses = true
@@ -3378,9 +3382,11 @@ cast_expr
       expr: e,
       symbol: '::',
       target: t,
+      arrows: a.map(item => item[0]),
+      properties: a.map(item => item[2]),
     }
   }
-  / e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ s:KW_DOUBLE_COLON __ t:data_type __ alias:alias_clause? {
+  / e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ s:KW_DOUBLE_COLON __ t:data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ alias:alias_clause? {
     /* => {
         as?: alias_clause,
         type: 'cast';
@@ -3389,6 +3395,8 @@ cast_expr
         symbol: '::' | 'as',
         keyword: 'cast';
         target: data_type;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
       }
       */
     return {
@@ -3397,17 +3405,21 @@ cast_expr
       keyword: 'cast',
       expr: e,
       symbol: '::',
-      target: t
+      target: t,
+      arrows: a.map(item => item[0]),
+      properties: a.map(item => item[2]),
     }
   }
-  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
+  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))*  {
     // => IGNORE
     return {
       type: 'cast',
       keyword: c.toLowerCase(),
       expr: e,
       symbol: 'as',
-      target: t
+      target: t,
+      arrows: a.map(item => item[0]),
+      properties: a.map(item => item[2]),
     };
   }
   / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
