@@ -909,6 +909,20 @@ describe('Postgres', () => {
         `SELECT CAST("properties" AS JSONB)->> 'name' FROM "table1"`
       ]
     },
+    {
+      title: 'test !~ operator',
+      sql: [
+        `SELECT * FROM partitions WHERE code !~ xyz;`,
+        `SELECT * FROM "partitions" WHERE "code" !~ "xyz"`
+      ]
+    },
+    {
+      title: 'test ~ operator',
+      sql: [
+        `SELECT * FROM partitions WHERE code ~ xyz;`,
+        `SELECT * FROM "partitions" WHERE "code" ~ "xyz"`
+      ]
+    }
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

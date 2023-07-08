@@ -2765,6 +2765,7 @@ comparison_op_right
   / is_op_right
   / like_op_right
   / jsonb_op_right
+  / regex_op_right
 
 arithmetic_op_right
   = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
@@ -2823,6 +2824,15 @@ like_op
     // => 'NOT SIMILAR TO'
     return 'NOT SIMILAR TO'
   }
+
+regex_op
+  = "!~*" / "~*" / "~" / "!~"
+
+regex_op_right
+= op:regex_op __ right:(literal / comparison_expr) {
+     // => { op: regex_op; right: literal | comparison_expr}
+      return { op: op, right: right };
+    }
 
 escape_op
   = kw:'ESCAPE'i __ c:literal_string {
