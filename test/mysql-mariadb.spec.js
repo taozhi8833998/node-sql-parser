@@ -671,6 +671,13 @@ describe('mysql', () => {
           "ALTER TABLE `gifshow`.`reporter` MODIFY `update_at` BIGINT UNSIGNED NOT NULL COMMENT 'update_at'"
         ]
       },
+      {
+        title: 'escape char patten matching',
+        sql: [
+          "select c1 from t1 where c2 like 'abc' escape '!'",
+          "SELECT `c1` FROM `t1` WHERE `c2` LIKE 'abc' ESCAPE '!'"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
