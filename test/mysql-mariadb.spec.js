@@ -678,6 +678,13 @@ describe('mysql', () => {
           "SELECT `c1` FROM `t1` WHERE `c2` LIKE 'abc' ESCAPE '!'"
         ]
       },
+      {
+        title: 'frac can be missing',
+        sql: [
+          'SELECT *, a*1., b FROM t',
+          'SELECT *, `a` * 1, `b` FROM `t`'
+        ]
+      }
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

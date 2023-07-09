@@ -2948,7 +2948,10 @@ int
    / op:("-" / "+" ) digit:digit { return op + digit; }
 
 frac
-  = "." digits:digits { return "." + digits; }
+  = "." digits:digits? {
+    if (!digits) return ''
+    return "." + digits;
+  }
 
 exp
   = e:e digits:digits { return e + digits; }

@@ -117,4 +117,8 @@ describe('sqlite', () => {
     )`
     expect(getParsedSql(sql)).to.be.equal('CREATE TABLE `session_caches` (`service_name` TEXT NOT NULL, `session_data` BLOB NOT NULL, `expires_at` INTEGER, PRIMARY KEY (`service_name`, `expires_at`))')
   })
+  it('should support missing number after dot in number', () => {
+    const sql = 'select count(*)*1. from abc'
+    expect(getParsedSql(sql)).to.be.equal('SELECT COUNT(*) * 1 FROM `abc`')
+  })
 })
