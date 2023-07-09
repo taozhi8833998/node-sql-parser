@@ -1551,6 +1551,23 @@ show_stmt
       }
     }
   }
+  / KW_SHOW __ 'TABLES'i {
+    return {
+      /*
+        export interface show_stmt_node {
+          type: 'show';
+          keyword: 'tables';
+        }
+        => AstStatement<show_stmt_node>
+       */
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'show',
+        keyword: 'tables'
+      }
+    }
+  }
   / KW_SHOW __ keyword:('TRIGGERS'i / 'STATUS'i / 'PROCESSLIST'i) {
     return {
       tableList: Array.from(tableList),

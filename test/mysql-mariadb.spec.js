@@ -684,7 +684,14 @@ describe('mysql', () => {
           'SELECT *, a*1., b FROM t',
           'SELECT *, `a` * 1, `b` FROM `t`'
         ]
-      }
+      },
+      {
+        title: 'show tables',
+        sql: [
+          'show tables',
+          'SHOW TABLES',
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
