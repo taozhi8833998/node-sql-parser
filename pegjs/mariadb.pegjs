@@ -1245,15 +1245,8 @@ show_stmt
       }
     }
   }
-  / KW_SHOW __ 'TABLES'i {
+  / KW_SHOW __ KW_TABLES {
     return {
-      /*
-        export interface show_stmt_node {
-          type: 'show';
-          keyword: 'tables';
-        }
-        => AstStatement<show_stmt_node>
-       */
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
       ast: {
