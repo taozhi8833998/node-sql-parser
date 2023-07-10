@@ -1245,6 +1245,16 @@ show_stmt
       }
     }
   }
+  / KW_SHOW __ KW_TABLES {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'show',
+        keyword: 'tables'
+      }
+    }
+  }
   / KW_SHOW __ keyword:('TRIGGERS'i / 'STATUS'i / 'PROCESSLIST'i) {
     return {
       tableList: Array.from(tableList),
@@ -2948,7 +2958,10 @@ int
    / op:("-" / "+" ) digit:digit { return op + digit; }
 
 frac
-  = "." digits:digits { return "." + digits; }
+  = "." digits:digits? {
+    if (!digits) return ''
+    return "." + digits;
+  }
 
 exp
   = e:e digits:digits { return e + digits; }
