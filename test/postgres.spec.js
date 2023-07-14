@@ -1,4 +1,5 @@
 const { expect } = require('chai')
+const { conflictToSQL } = require('../src/insert')
 const Parser = require('../src/parser').default
 
 describe('Postgres', () => {
@@ -922,6 +923,42 @@ describe('Postgres', () => {
         `SELECT * FROM partitions WHERE code ~ xyz;`,
         `SELECT * FROM "partitions" WHERE "code" ~ "xyz"`
       ]
+    },
+    {
+      title: 'insert stmt',
+      sql: [
+        `insert into table1 (id, firstname, lastname, email)
+        values ($id, $firstname, $lastname, $email)
+        RETURNING *`,
+        'INSERT INTO "table1" ("id", "firstname", "lastname", "email") VALUES ($id,$firstname,$lastname,$email) RETURNING *'
+      ]
+    },
+    {
+      title: 'insert with on conflict do update',
+      sql: [
+        `insert into table1 (id, firstname, lastname, email)
+        values ($id, $firstname, $lastname, $email)
+        on conflict (id)
+        do
+        update set
+        firstname = $firstname,
+        lastname = $lastname,
+        email = $email,
+        updatedon = CURRENT_TIMESTAMP
+        RETURNING *`,
+        'INSERT INTO "table1" ("id", "firstname", "lastname", "email") VALUES ($id,$firstname,$lastname,$email) ON CONFLICT ("id") DO UPDATE SET "firstname" = $firstname, "lastname" = $lastname, "email" = $email, "updatedon" = CURRENT_TIMESTAMP RETURNING *'
+      ]
+    },
+    {
+      title: 'insert with on conflict do nothing',
+      sql: [
+        `insert into table1 (id, firstname, lastname, email)
+        values ($id, $firstname, $lastname, $email)
+        on conflict
+        do nothing
+        RETURNING *`,
+        'INSERT INTO "table1" ("id", "firstname", "lastname", "email") VALUES ($id,$firstname,$lastname,$email) ON CONFLICT DO NOTHING RETURNING *'
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){
@@ -1100,5 +1137,10 @@ describe('Postgres', () => {
       expect(ast.columnList).to.be.eql(['select::null::Id'])
       expect(parser.sqlify(ast.ast, opt)).to.be.equals(sql.slice(0, -1))
     })
+
+    it('should support conflict be empty', () => {
+      expect(conflictToSQL(null)).to.be.equal('')
+    })
   })
+
 })

@@ -2414,8 +2414,6 @@ set_item
       // => { column: ident; value: column_ref; table?: ident; keyword: 'values' }
       return { column: c, value: v, table: tbl && tbl[0], keyword: 'values' };
   }
-conflict_stmt
-  = KW_ON __ 'CONFLICT'i __
 
 returning_stmt
   = k:KW_RETURNING __ c:(column_clause / select_stmt) {
@@ -2440,18 +2438,64 @@ insert_partition
     return v
   }
 
+conflict_target
+  = LPAREN __ c:column_ref_list  __ RPAREN {
+    // => { type: 'column'; expr: column_ref_list; parentheses: true; }
+    return {
+      type: 'column',
+      expr: c,
+      parentheses: true,
+    }
+  }
+
+conflict_action
+  = 'DO'i __ 'NOTHING'i {
+    // => { keyword: "do"; expr: {type: 'origin'; value: string; }; }
+    return {
+      keyword: 'do',
+      expr: {
+        type: 'origin',
+        value: 'nothing'
+      }
+    }
+  }
+  / 'DO'i __ KW_UPDATE __ KW_SET __ s:set_list __ w:where_clause? {
+    // => { keyword: "do"; expr: {type: 'update'; set: set_list; where: where_clause; }; }
+    return {
+      keyword: 'do',
+      expr: {
+        type: 'update',
+        set: s,
+        where: w,
+      }
+    }
+  }
+
+on_conflict
+  = KW_ON __ 'CONFLICT'i __ ct:conflict_target? __ ca:conflict_action {
+    // => { type: "conflict"; keyword: "on"; target: conflict_target; action: conflict_action; }
+    return {
+      type: 'conflict',
+      keyword: 'on',
+      target: ct,
+      action: ca,
+    }
+  }
+
 replace_insert_stmt
   = ri:replace_insert       __
     KW_INTO?                 __
     t:table_name  __
     p:insert_partition? __ LPAREN __ c:column_list  __ RPAREN __
     v:insert_value_clause __
+    oc:on_conflict? __
     r:returning_stmt? {
       /*
        export interface replace_insert_stmt_node {
          type: 'insert' | 'replace';
          table?: [table_name];
          columns: column_list;
+         conflict?: on_clifict;
          values: insert_value_clause;
          partition?: insert_partition;
          returning?: returning_stmt;
@@ -2482,6 +2526,7 @@ replace_insert_stmt
           columns: c,
           values: v,
           partition: p,
+          conflict: oc,
           returning: r,
         }
       };

@@ -14,7 +14,7 @@
 [![issues](https://img.shields.io/github/issues/taozhi8833998/node-sql-parser.svg)](https://github.com/taozhi8833998/node-sql-parser/issues)
 
 [![TypeScript definitions on DefinitelyTyped](http://definitelytyped.org/badges/standard.svg)](http://definitelytyped.org)
-[![license](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://github.com/taozhi8833998/node-sql-parser/blob/master/LICENSE)
+[![license](https://img.shields.io/npm/l/node-sql-parser)](https://github.com/taozhi8833998/node-sql-parser/blob/master/LICENSE)
 
 **Parse simple SQL statements into an abstract syntax tree (AST) with the visited tableList, columnList and convert it back to SQL.**
 
@@ -232,11 +232,11 @@ parser.whiteListCheck(sql, whiteColumnList, opt) // if check failed, an error wo
 
 ## :kissing_heart: Acknowledgement
 
-This project is based on the SQL parser extracted from [flora-sql-parser](https://github.com/godmodelabs/flora-sql-parser) module.
+This project is inspired by the SQL parser [flora-sql-parser](https://github.com/godmodelabs/flora-sql-parser) module.
 
 ## License
 
-[GPLv2](LICENSE)
+[Apache-2.0](LICENSE)
 
 ## Buy me a Coffee
 

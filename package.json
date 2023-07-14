@@ -1,6 +1,6 @@
 {
   "name": "node-sql-parser",
-  "version": "4.7.0",
+  "version": "4.8.0",
   "description": "simple node sql parser",
   "main": "index.js",
   "types": "types.d.ts",
@@ -45,7 +45,7 @@
     "README.md",
     "types.d.ts"
   ],
-  "license": "GPLv2",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/taozhi8833998/node-sql-parser/issues"
   },
