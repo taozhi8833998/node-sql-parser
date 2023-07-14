@@ -521,9 +521,11 @@ export type array_index = { brackets: boolean, number: number };
 
 export type expr_item = (expr || binary_expr) & { array_index: array_index };
 
+export type expr_item_without_union = (_expr || binary_expr) & { array_index: array_index };
+
 export type cast_data_type = data_type & { quoted?: string };
 
-export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; } | { type: 'star_ref'; expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
+export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; arrows?: ('->>' | '->')[]; property?: (literal_string | literal_numeric)[]; } | { expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
 
 
 
@@ -564,13 +566,13 @@ export type table_ref = table_base | table_join;
 
 
 export type table_join = table_base & {join: join_op; using: ident_name[]; } | table_base & {join: join_op; on?: on_clause; } | {
-      expr: union_stmt & { parentheses: true; };
+      expr: (union_stmt || table_ref_list) & { parentheses: true; };
       as?: alias_clause;
       join: join_op;
       on?: on_clause;
     };
 
-export type table_base = { type: 'dual' } | { expr: value_clause; as?: alias_clause; } | { prefix?: string; expr: union_stmt | value_clause; as?: alias_clause; } | { prefix?: string; type: 'expr'; expr: expr; as?: alias_clause; } | table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;} | table_name & { as?: alias_clause; };
+export type table_base = { type: 'dual' } | { expr: value_clause; as?: alias_clause; } | { prefix?: string; expr: union_stmt | value_clause; as?: alias_clause; } | { prefix?: string; expr: table_ref_list; as?: alias_clause; } | { prefix?: string; type: 'expr'; expr: expr; as?: alias_clause; } | table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;} | table_name & { as?: alias_clause; };
 
 
 
@@ -670,18 +672,23 @@ export type set_list = set_item[];
 
 export type set_item = { column: ident; value: additive_expr; table?: ident;} | { column: ident; value: column_ref; table?: ident; keyword: 'values' };
 
-type conflict_stmt = never;
-
 export type returning_stmt = { type: 'returning'; columns: column_clause | select_stmt; };
 
 export type insert_value_clause = value_clause | select_stmt_nake;
 
 export type insert_partition = ident_name[] | value_item;
 
+export type conflict_target = { type: 'column'; expr: column_ref_list; parentheses: true; };
+
+export type conflict_action = { keyword: "do"; expr: {type: 'origin'; value: string; }; } | { keyword: "do"; expr: {type: 'update'; set: set_list; where: where_clause; }; };
+
+export type on_conflict = { type: "conflict"; keyword: "on"; target: conflict_target; action: conflict_action; };
+
 export interface replace_insert_stmt_node {
          type: 'insert' | 'replace';
          table?: [table_name];
          columns: column_list;
+         conflict?: on_clifict;
          values: insert_value_clause;
          partition?: insert_partition;
          returning?: returning_stmt;
@@ -731,7 +738,9 @@ export type case_when_then = { type: 'when'; cond: binary_expr; result: expr; };
 
 export type case_else = { type: 'else'; condition?: never; result: expr; };
 
-export type expr = logic_operator_expr | or_expr | unary_expr | union_stmt;
+export type _expr = logic_operator_expr | or_expr | unary_expr;
+
+export type expr = _expr | union_stmt;
 
 export type BINARY_OPERATORS = LOGIC_OPERATOR | 'OR' | 'AND' | multiplicative_operator | additive_operator
       | arithmetic_comparison_operator
@@ -776,7 +785,7 @@ export type exists_expr = unary_expr;
 
 export type exists_op = 'NOT EXISTS' | KW_EXISTS;
 
-export type comparison_op_right = arithmetic_op_right | in_op_right | between_op_right | is_op_right | like_op_right | jsonb_op_right;
+export type comparison_op_right = arithmetic_op_right | in_op_right | between_op_right | is_op_right | like_op_right | jsonb_op_right | regex_op_right;
 
 export type arithmetic_op_right = { type: 'arithmetic'; tail: any };
 
@@ -793,6 +802,10 @@ export type between_or_not_between_op = 'NOT BETWEEN' | KW_BETWEEN;
 
 
 export type like_op = 'LIKE' | KW_LIKE | KW_ILIKE | 'SIMILAR TO' | 'NOT SIMILAR TO';
+
+export type regex_op = "!~*" | "~*" | "~" | "!~";
+
+export type regex_op_right = { op: regex_op; right: literal | comparison_expr};
 
 export type escape_op = { type: 'ESCAPE'; value: literal_string };
 
@@ -931,7 +944,7 @@ export type trim_rem = expr_list;
 
 export type trim_func_clause = { type: 'function'; name: string; args: expr_list; };
 
-export type func_call = trim_func_clause | { type: 'function'; name: string; args: expr_list; suffix: literal_string; } | { type: 'function'; name: string; args: expr_list; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; };
+export type func_call = trim_func_clause | { type: 'function'; name: string; args: expr_list; suffix: literal_string; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | { type: 'function'; name: string; args: expr_list; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; };
 
 export type extract_filed = 'string';
 
@@ -939,7 +952,7 @@ export type extract_func = { type: 'extract'; args: { field: extract_filed; cast
 
 export type scalar_time_func = KW_CURRENT_DATE | KW_CURRENT_TIME | KW_CURRENT_TIMESTAMP;
 
-export type scalar_func = scalar_time_func | KW_CURRENT_USER | KW_USER | KW_SESSION_USER | KW_SYSTEM_USER;
+export type scalar_func = scalar_time_func | KW_CURRENT_USER | KW_USER | KW_SESSION_USER | KW_SYSTEM_USER | "NTILE";
 
 
 
@@ -953,6 +966,8 @@ export type cast_expr = {
         symbol: '::' | 'as',
         keyword: 'cast';
         target: data_type;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
       };
 
 export type signedness = KW_SIGNED | KW_UNSIGNED;
@@ -1177,6 +1192,8 @@ type KW_BOOL = never;
 type KW_BOOLEAN = never;
 
 type KW_CHAR = never;
+
+type KW_CHARACTER = never;
 
 type KW_VARCHAR = never;
 
