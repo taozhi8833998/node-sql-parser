@@ -149,6 +149,7 @@ function tableOptionToSQL(tableOption) {
 export {
   operatorToSQL,
   tableHintToSQL,
+  tableTumbleToSQL,
   tablesToSQL,
   tableOptionToSQL,
   tableToSQL,

@@ -1,5 +1,6 @@
 const { expect } = require('chai')
 const Parser = require('../src/parser').default
+const tableTumbleToSQL = require('../src/tables').tableTumbleToSQL
 
 describe('Flink', () => {
   const parser = new Parser();
@@ -377,6 +378,12 @@ describe('Flink', () => {
     const { title, sql } = sqlInfo
     it(`should support ${title}`, () => {
       expect(getParsedSql(sql[0], opt)).to.equal(sql[1])
+    })
+  })
+
+  describe('test function', () => {
+    it('should return empty when tumble info is null', () => {
+      expect(tableTumbleToSQL(null)).to.be.equals('')
     })
   })
 })
