@@ -352,6 +352,25 @@ describe('Flink', () => {
         "SELECT * FROM `users` WHERE OVERLAY(`a` PLACING 'abc' FROM 3 FOR 2) = 'abcde'",
       ],
     },
+    {
+      title: 'tumble table',
+      sql: [
+        `SELECT
+          window_start,
+          window_end,
+          http_status,
+          count(*) as count_http_status
+        FROM
+        TABLE (
+          TUMBLE (
+            TABLE parsed_logs,
+            DESCRIPTOR (_operationTs),
+            INTERVAL '60' SECONDS
+          )
+        )`,
+        "SELECT `window_start`, `window_end`, `http_status`, COUNT(*) AS `count_http_status` FROM TABLE(TUMBLE(TABLE `parsed_logs` DESCRIPTOR(`_operationTs`) INTERVAL '60' SECONDS))"
+      ]
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
