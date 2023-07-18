@@ -1923,6 +1923,17 @@ table_base
         as: alias
       };
     }
+  / KW_TABLE __ LPAREN __ KW_TUMBLE __ LPAREN __ KW_TABLE __ d:table_name __ COMMA __ 'DESCRIPTOR'i __ LPAREN __ t:column_ref __ RPAREN __ COMMA __ s:interval_expr __ RPAREN __ RPAREN __ alias:alias_clause? {
+    return {
+      expr: {
+        type: 'tumble',
+        data: d,
+        timecol: t,
+        size: s
+      },
+      as: alias
+    }
+  }
 
 join_op
   = n:KW_NATURAL? __ d:(KW_LEFT / KW_RIGHT / KW_FULL)? __ o:KW_OUTER? __ KW_JOIN {
@@ -2260,7 +2271,7 @@ expr_list
 interval_expr
   = KW_INTERVAL __
     e:expr __
-    u: interval_unit {
+    u:interval_unit {
       // => { type: 'interval', expr: expr; unit: interval_unit; }
       return {
         type: 'interval',
@@ -3319,6 +3330,7 @@ KW_LISTAGG  = "LISTAGG"i    !ident_start { return 'LISTAGG'; }
 KW_ROW_NUMBER = "ROW_NUMBER"i !ident_start { return 'ROW_NUMBER'; }
 
 // group window start end functions
+KW_TUMBLE         = "TUMBLE"i  !ident_start { return 'TUMBLE'; }
 KW_TUMBLE_START   = "TUMBLE_START"i  !ident_start { return 'TUMBLE_START'; }
 KW_TUMBLE_END     = "TUMBLE_END"i    !ident_start { return 'TUMEBLE_END'; }
 KW_HOP_START      = "HOP_START"i     !ident_start { return 'HOP_START'; }
@@ -3391,6 +3403,7 @@ KW_UNIT_DAY         = "DAY"i !ident_start { return 'DAY'; }
 KW_UNIT_HOUR        = "HOUR"i !ident_start { return 'HOUR'; }
 KW_UNIT_MINUTE      = "MINUTE"i !ident_start { return 'MINUTE'; }
 KW_UNIT_SECOND      = "SECOND"i !ident_start { return 'SECOND'; }
+KW_UNIT_SECONDS      = "SECONDS"i !ident_start { return 'SECONDS'; }
 KW_CURRENT_TIME     = "CURRENT_TIME"i !ident_start { return 'CURRENT_TIME'; }
 KW_CURRENT_TIMESTAMP= "CURRENT_TIMESTAMP"i !ident_start { return 'CURRENT_TIMESTAMP'; }
 KW_CURRENT_USER     = "CURRENT_USER"i !ident_start { return 'CURRENT_USER'; }
@@ -3502,6 +3515,9 @@ interval_unit
   / KW_UNIT_HOUR
   / KW_UNIT_MINUTE
   / KW_UNIT_SECOND
+  / u:('years'i / 'months'i / 'days'i / 'hours'i / 'minutes'i / 'seconds'i) {
+    return u.toUpperCase()
+  }
 
 whitespace =
   [ \t\n\r]

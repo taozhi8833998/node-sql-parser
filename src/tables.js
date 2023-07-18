@@ -2,6 +2,7 @@ import { binaryToSQL } from './binary'
 import { columnRefToSQL } from './column'
 import { exprToSQL } from './expr'
 import { valuesToSQL } from './insert'
+import { intervalToSQL } from './interval'
 import { commonOptionConnector, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
 
 function unnestToSQL(unnestExpr) {
@@ -63,21 +64,38 @@ function tableHintToSQL(tableHintExpr) {
   return result.filter(hasVal).join(' ')
 }
 
+function tableTumbleToSQL(tumble) {
+  if (!tumble) return ''
+  const { data: tableInfo, timecol, size } = tumble
+  const fullTableName = [identifierToSql(tableInfo.db), identifierToSql(tableInfo.table)].filter(hasVal).join('.')
+  const result = ['TABLE(TUMBLE(TABLE', fullTableName, `DESCRIPTOR(${columnRefToSQL(timecol)})`, `${intervalToSQL(size)}))`]
+  return result.filter(hasVal).join(' ')
+}
+
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
   const { table, db, as, expr, operator, prefix: prefixStr, schema, tablesample, table_hint } = tableInfo
   const database = identifierToSql(db)
   const schemaStr = identifierToSql(schema)
   let tableName = table && identifierToSql(table)
-  if (expr && expr.type === 'values') {
-    const { parentheses, values, prefix } = expr
-    const valueSQL = [parentheses && '(', '', parentheses && ')']
-    let valuesExpr = valuesToSQL(values)
-    if (prefix) valuesExpr = valuesExpr.split('(').slice(1).map(val => `${toUpper(prefix)}(${val}`).join('')
-    valueSQL[1] = `VALUES ${valuesExpr}`
-    tableName = valueSQL.filter(hasVal).join('')
+  if (expr) {
+    const exprType = expr.type
+    switch (exprType) {
+      case 'values':
+        const { parentheses, values, prefix } = expr
+        const valueSQL = [parentheses && '(', '', parentheses && ')']
+        let valuesExpr = valuesToSQL(values)
+        if (prefix) valuesExpr = valuesExpr.split('(').slice(1).map(val => `${toUpper(prefix)}(${val}`).join('')
+        valueSQL[1] = `VALUES ${valuesExpr}`
+        tableName = valueSQL.filter(hasVal).join('')
+        break
+      case 'tumble':
+        tableName = tableTumbleToSQL(expr)
+        break
+      default:
+        tableName = exprToSQL(expr)
+    }
   }
-  if (expr && expr.type !== 'values') tableName = exprToSQL(expr)
   tableName = [toUpper(prefixStr), tableName].filter(hasVal).join(' ')
   let str = [database, schemaStr, tableName].filter(hasVal).join('.')
   if (tableInfo.parentheses) str = `(${str})`
@@ -131,6 +149,7 @@ function tableOptionToSQL(tableOption) {
 export {
   operatorToSQL,
   tableHintToSQL,
+  tableTumbleToSQL,
   tablesToSQL,
   tableOptionToSQL,
   tableToSQL,

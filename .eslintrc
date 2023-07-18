@@ -111,6 +111,7 @@
     "no-plusplus": 0,
     "no-mixed-operators": 0,
     "no-eq-null": 0,
+    "no-case-declarations": 0,
     "no-console": [
       2,
       {

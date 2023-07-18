@@ -1,5 +1,6 @@
 const { expect } = require('chai')
 const Parser = require('../src/parser').default
+const tableTumbleToSQL = require('../src/tables').tableTumbleToSQL
 
 describe('Flink', () => {
   const parser = new Parser();
@@ -352,12 +353,37 @@ describe('Flink', () => {
         "SELECT * FROM `users` WHERE OVERLAY(`a` PLACING 'abc' FROM 3 FOR 2) = 'abcde'",
       ],
     },
+    {
+      title: 'tumble table',
+      sql: [
+        `SELECT
+          window_start,
+          window_end,
+          http_status,
+          count(*) as count_http_status
+        FROM
+        TABLE (
+          TUMBLE (
+            TABLE parsed_logs,
+            DESCRIPTOR (_operationTs),
+            INTERVAL '60' SECONDS
+          )
+        )`,
+        "SELECT `window_start`, `window_end`, `http_status`, COUNT(*) AS `count_http_status` FROM TABLE(TUMBLE(TABLE `parsed_logs` DESCRIPTOR(`_operationTs`) INTERVAL '60' SECONDS))"
+      ]
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
     it(`should support ${title}`, () => {
       expect(getParsedSql(sql[0], opt)).to.equal(sql[1])
+    })
+  })
+
+  describe('test function', () => {
+    it('should return empty when tumble info is null', () => {
+      expect(tableTumbleToSQL(null)).to.be.equals('')
     })
   })
 })
