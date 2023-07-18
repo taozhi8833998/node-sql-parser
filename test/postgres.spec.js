@@ -959,6 +959,13 @@ describe('Postgres', () => {
         RETURNING *`,
         'INSERT INTO "table1" ("id", "firstname", "lastname", "email") VALUES ($id,$firstname,$lastname,$email) ON CONFLICT DO NOTHING RETURNING *'
       ]
+    },
+    {
+      title: 'alter schema',
+      sql: [
+        'ALTER SCHEMA public OWNER TO postgres;',
+        'ALTER SCHEMA public OWNER TO postgres'
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){

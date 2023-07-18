@@ -27,11 +27,20 @@ function alterViewToSQL(stmt) {
   return result.filter(hasVal).join(' ')
 }
 
+function alterSchemaToSQL(stmt) {
+  const { expr, keyword, schema, type } = stmt
+  const { action, value } = expr
+  const result = [toUpper(type), toUpper(keyword), schema, toUpper(action), value]
+  return result.filter(hasVal).join(' ')
+}
+
 function alterToSQL(stmt) {
   const { keyword = 'table' } = stmt
   switch (keyword) {
     case 'table':
       return alterTableToSQL(stmt)
+    case 'schema':
+      return alterSchemaToSQL(stmt)
     case 'view':
       return alterViewToSQL(stmt)
   }

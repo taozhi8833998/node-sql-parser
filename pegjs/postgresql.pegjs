@@ -231,6 +231,7 @@ create_stmt
 
 alter_stmt
   = alter_table_stmt
+  / alter_schema_stmt
 
 crud_stmt
   = union_stmt
@@ -336,14 +337,14 @@ create_db_definition
 
 create_db_stmt
   = a:KW_CREATE __
-    k:(KW_DATABASE / KW_SCHEME) __
+    k:(KW_DATABASE / KW_SCHEMA) __
     ife:if_not_exists_stmt? __
     t:ident_name __
     c:create_db_definition? {
       /*
       export type create_db_stmt = {
         type: 'create',
-        keyword: 'database',
+        keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
         database: string,
         create_definition?: create_db_definition
@@ -940,7 +941,51 @@ use_stmt
         }
       };
     }
+alter_schema_stmt
+  = KW_ALTER __ KW_SCHEMA __ s:ident_name __ KW_RENAME __ KW_TO __ n:ident_name {
+    /*
+      export interface alter_schema_stmt_node {
+        type: 'alter';
+        keyword: 'schema',
+        schema: string;
+        expr: {
+          action: string;
+          value: string;
+        };
+      }
+      => AstStatement<alter_schema_stmt_node>
+      */
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword: 'schema',
+          schema: s,
+          expr: {
+            action: 'rename to',
+            value: n
+          }
+        }
+      };
 
+  }
+  / KW_ALTER __ KW_SCHEMA __ s:ident_name __ 'OWNER'i __ KW_TO __ n:(ident_name / 'CURRENT_ROLE'i / 'CURRENT_USER'i / 'SESSION_USER'i) {
+    // => AstStatement<alter_schema_stmt_node>
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword: 'schema',
+          schema: s,
+          expr: {
+            action: 'owner to',
+            value: n
+          }
+        }
+      }
+  }
 alter_table_stmt
   = KW_ALTER  __
     KW_TABLE __
@@ -3740,7 +3785,7 @@ KW_LOCK     = "LOCK"i       !ident_start
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
 KW_DATABASE = "DATABASE"i      !ident_start { return 'DATABASE'; }
-KW_SCHEME   = "SCHEME"i      !ident_start { return 'SCHEME'; }
+KW_SCHEMA   = "SCHEMA"i      !ident_start { return 'SCHEMA'; }
 KW_SEQUENCE   = "SEQUENCE"i      !ident_start { return 'SEQUENCE'; }
 KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
