@@ -232,6 +232,7 @@ create_stmt
 alter_stmt
   = alter_table_stmt
   / alter_schema_stmt
+  / alter_domain_stmt
 
 crud_stmt
   = union_stmt
@@ -941,6 +942,47 @@ use_stmt
         }
       };
     }
+alter_domain_stmt
+  = KW_ALTER __ 'DOMAIN'i __ s:table_name __ ac:ALTER_RENAME {
+    /*
+      export interface alter_domain_stmt_node {
+        type: 'alter';
+        keyword: 'domain',
+        domain: { schema: string, domain: string };
+        expr: alter_rename_owner;
+      }
+      => AstStatement<alter_domain_stmt_node>
+      */
+    ac.resource = 'domain'
+    ac.domain = ac.table
+    delete ac.table
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword: 'domain',
+          domain: { schema: s.db, domain: s.table },
+          expr: ac
+        }
+      };
+  }
+  / KW_ALTER __ 'DOMAIN'i __ s:table_name __ ac:ALTER_OWNER_TO {
+    // => AstStatement<alter_domain_stmt_node>
+    ac.resource = 'domain'
+    ac.domain = ac.table
+    delete ac.table
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword: 'domain',
+          domain: { schema: s.db, domain: s.table },
+          expr: ac
+        }
+      }
+  }
 
 alter_schema_stmt
   = KW_ALTER __ KW_SCHEMA __ s:ident_name __ ac:ALTER_RENAME {

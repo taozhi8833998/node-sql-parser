@@ -966,6 +966,13 @@ describe('Postgres', () => {
         'ALTER SCHEMA public OWNER TO postgres;',
         'ALTER SCHEMA "public" OWNER TO "postgres"'
       ]
+    },
+    {
+      title: 'alter domain',
+      sql: [
+        'ALTER DOMAIN public."bıgınt" OWNER TO postgres;',
+        'ALTER DOMAIN "public"."bıgınt" OWNER TO "postgres"'
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){
