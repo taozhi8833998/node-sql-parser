@@ -941,20 +941,21 @@ use_stmt
         }
       };
     }
+
 alter_schema_stmt
-  = KW_ALTER __ KW_SCHEMA __ s:ident_name __ KW_RENAME __ KW_TO __ n:ident_name {
+  = KW_ALTER __ KW_SCHEMA __ s:ident_name __ ac:ALTER_RENAME {
     /*
       export interface alter_schema_stmt_node {
         type: 'alter';
         keyword: 'schema',
         schema: string;
-        expr: {
-          action: string;
-          value: string;
-        };
+        expr: alter_rename_owner;
       }
       => AstStatement<alter_schema_stmt_node>
       */
+    ac.resource = 'schema'
+    ac.schema = ac.table
+    delete ac.table
     return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -962,16 +963,15 @@ alter_schema_stmt
           type: 'alter',
           keyword: 'schema',
           schema: s,
-          expr: {
-            action: 'rename to',
-            value: n
-          }
+          expr: ac
         }
       };
-
   }
-  / KW_ALTER __ KW_SCHEMA __ s:ident_name __ 'OWNER'i __ KW_TO __ n:(ident_name / 'CURRENT_ROLE'i / 'CURRENT_USER'i / 'SESSION_USER'i) {
+  / KW_ALTER __ KW_SCHEMA __ s:ident_name __ ac:ALTER_OWNER_TO {
     // => AstStatement<alter_schema_stmt_node>
+    ac.resource = 'schema'
+    ac.schema = ac.table
+    delete ac.table
     return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -979,10 +979,7 @@ alter_schema_stmt
           type: 'alter',
           keyword: 'schema',
           schema: s,
-          expr: {
-            action: 'owner to',
-            value: n
-          }
+          expr: ac
         }
       }
   }
@@ -1023,7 +1020,7 @@ alter_action
   / ALTER_DROP_COLUMN
   / ALTER_ADD_INDEX_OR_KEY
   / ALTER_ADD_FULLETXT_SPARITAL_INDEX
-  / ALTER_RENAME_TABLE
+  / ALTER_RENAME
   / ALTER_ALGORITHM
   / ALTER_LOCK
 
@@ -1099,22 +1096,35 @@ ALTER_ADD_INDEX_OR_KEY
       }
     }
 
-ALTER_RENAME_TABLE
-  = KW_RENAME __
-  kw:(KW_TO / KW_AS)? __
-  tn:ident {
-       /* => {
-         action: 'rename';
-         type: 'alter';
-         resource: 'table';
-         keyword?: 'to' | 'as';
-         table: ident;
-         } */
+ALTER_RENAME
+  = KW_RENAME __ kw:(KW_TO / KW_AS)? __ tn:ident {
+    /*
+      export interface alter_rename_owner {
+        action: string;
+        type: 'alter';
+        resource: string;
+        keyword?: 'to' | 'as';
+        [key: string]: ident_name;
+      }
+      => AstStatement<alter_rename>
+      */
     return {
       action: 'rename',
       type: 'alter',
       resource: 'table',
       keyword: kw && kw[0].toLowerCase(),
+      table: tn
+    }
+  }
+
+ALTER_OWNER_TO
+  = 'OWNER'i __ KW_TO __ tn:(ident_name / 'CURRENT_ROLE'i / 'CURRENT_USER'i / 'SESSION_USER'i) {
+      // => AstStatement<alter_rename_owner>
+    return {
+      action: 'owner',
+      type: 'alter',
+      resource: 'table',
+      keyword: 'to',
       table: tn
     }
   }

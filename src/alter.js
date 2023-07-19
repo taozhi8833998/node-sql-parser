@@ -6,46 +6,6 @@ import { exprToSQL } from './expr'
 import { selectToSQL } from './select'
 import { hasVal, toUpper, identifierToSql } from './util'
 
-function alterTableToSQL(stmt) {
-  const { type, table, expr = [] } = stmt
-  const action = toUpper(type)
-  const tableName = tablesToSQL(table)
-  const exprList = expr.map(exprToSQL)
-  const result = [action, 'TABLE', tableName, exprList.join(', ')]
-  return result.filter(hasVal).join(' ')
-}
-
-function alterViewToSQL(stmt) {
-  const { type, columns, attributes, select, view, with: withExpr } = stmt
-  const action = toUpper(type)
-  const viewName = tableToSQL(view)
-  const result = [action, 'VIEW', viewName]
-  if (columns) result.push(`(${columns.map(columnRefToSQL).join(', ')})`)
-  if (attributes) result.push(`WITH ${attributes.map(toUpper).join(', ')}`)
-  result.push('AS', selectToSQL(select))
-  if (withExpr) result.push(toUpper(withExpr))
-  return result.filter(hasVal).join(' ')
-}
-
-function alterSchemaToSQL(stmt) {
-  const { expr, keyword, schema, type } = stmt
-  const { action, value } = expr
-  const result = [toUpper(type), toUpper(keyword), schema, toUpper(action), value]
-  return result.filter(hasVal).join(' ')
-}
-
-function alterToSQL(stmt) {
-  const { keyword = 'table' } = stmt
-  switch (keyword) {
-    case 'table':
-      return alterTableToSQL(stmt)
-    case 'schema':
-      return alterSchemaToSQL(stmt)
-    case 'view':
-      return alterViewToSQL(stmt)
-  }
-}
-
 function alterExprToSQL(expr) {
   if (!expr) return ''
   const {
@@ -69,6 +29,7 @@ function alterExprToSQL(expr) {
       name = expr[resource]
       break
     case 'table':
+    case 'schema':
       name = identifierToSql(expr[resource])
       break
     case 'algorithm':
@@ -98,6 +59,45 @@ function alterExprToSQL(expr) {
     firstAfter && `${toUpper(firstAfter.keyword)} ${columnRefToSQL(firstAfter.column)}`,
   ]
   return alterArray.filter(hasVal).join(' ')
+}
+
+function alterTableToSQL(stmt) {
+  const { type, table, expr = [] } = stmt
+  const action = toUpper(type)
+  const tableName = tablesToSQL(table)
+  const exprList = expr.map(exprToSQL)
+  const result = [action, 'TABLE', tableName, exprList.join(', ')]
+  return result.filter(hasVal).join(' ')
+}
+
+function alterViewToSQL(stmt) {
+  const { type, columns, attributes, select, view, with: withExpr } = stmt
+  const action = toUpper(type)
+  const viewName = tableToSQL(view)
+  const result = [action, 'VIEW', viewName]
+  if (columns) result.push(`(${columns.map(columnRefToSQL).join(', ')})`)
+  if (attributes) result.push(`WITH ${attributes.map(toUpper).join(', ')}`)
+  result.push('AS', selectToSQL(select))
+  if (withExpr) result.push(toUpper(withExpr))
+  return result.filter(hasVal).join(' ')
+}
+
+function alterSchemaToSQL(stmt) {
+  const { expr, keyword, schema, type } = stmt
+  const result = [toUpper(type), toUpper(keyword), identifierToSql(schema), alterExprToSQL(expr)]
+  return result.filter(hasVal).join(' ')
+}
+
+function alterToSQL(stmt) {
+  const { keyword = 'table' } = stmt
+  switch (keyword) {
+    case 'table':
+      return alterTableToSQL(stmt)
+    case 'schema':
+      return alterSchemaToSQL(stmt)
+    case 'view':
+      return alterViewToSQL(stmt)
+  }
 }
 
 export {

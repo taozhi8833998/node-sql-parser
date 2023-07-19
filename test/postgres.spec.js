@@ -964,7 +964,7 @@ describe('Postgres', () => {
       title: 'alter schema',
       sql: [
         'ALTER SCHEMA public OWNER TO postgres;',
-        'ALTER SCHEMA public OWNER TO postgres'
+        'ALTER SCHEMA "public" OWNER TO "postgres"'
       ]
     }
   ]
