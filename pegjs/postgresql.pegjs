@@ -232,7 +232,7 @@ create_stmt
 alter_stmt
   = alter_table_stmt
   / alter_schema_stmt
-  / alter_domain_stmt
+  / alter_domain_type_stmt
 
 crud_stmt
   = union_stmt
@@ -942,19 +942,20 @@ use_stmt
         }
       };
     }
-alter_domain_stmt
-  = KW_ALTER __ 'DOMAIN'i __ s:table_name __ ac:ALTER_RENAME {
+alter_domain_type_stmt
+  = KW_ALTER __ t:('DOMAIN'i / 'TYPE'i) __ s:table_name __ ac:ALTER_RENAME {
     /*
-      export interface alter_domain_stmt_node {
+      export interface alter_domain_type_stmt_node {
         type: 'alter';
-        keyword: 'domain',
-        domain: { schema: string, domain: string };
+        keyword: 'domain' | 'type',
+        name: { schema: string, name: string };
         expr: alter_rename_owner;
       }
-      => AstStatement<alter_domain_stmt_node>
+      => AstStatement<alter_domain_type_stmt_node>
       */
-    ac.resource = 'domain'
-    ac.domain = ac.table
+    const keyword = t.toLowerCase()
+    ac.resource = keyword
+    ac[keyword] = ac.table
     delete ac.table
     return {
         tableList: Array.from(tableList),
@@ -962,23 +963,24 @@ alter_domain_stmt
         ast: {
           type: 'alter',
           keyword: 'domain',
-          domain: { schema: s.db, domain: s.table },
+          name: { schema: s.db, name: s.table },
           expr: ac
         }
       };
   }
-  / KW_ALTER __ 'DOMAIN'i __ s:table_name __ ac:ALTER_OWNER_TO {
-    // => AstStatement<alter_domain_stmt_node>
-    ac.resource = 'domain'
-    ac.domain = ac.table
+  / KW_ALTER __ t:('DOMAIN'i / 'TYPE'i) __ s:table_name __ ac:ALTER_OWNER_TO {
+    // => AstStatement<alter_domain_type_stmt_node>
+    const keyword = t.toLowerCase()
+    ac.resource = keyword
+    ac[keyword] = ac.table
     delete ac.table
     return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: 'alter',
-          keyword: 'domain',
-          domain: { schema: s.db, domain: s.table },
+          keyword,
+          name: { schema: s.db, name: s.table },
           expr: ac
         }
       }

@@ -973,7 +973,14 @@ describe('Postgres', () => {
         'ALTER DOMAIN public."bıgınt" OWNER TO postgres;',
         'ALTER DOMAIN "public"."bıgınt" OWNER TO "postgres"'
       ]
-    }
+    },
+    {
+      title: 'alter type',
+      sql: [
+        'ALTER TYPE public.mpaa_rating OWNER TO postgres;',
+        'ALTER TYPE "public"."mpaa_rating" OWNER TO "postgres"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

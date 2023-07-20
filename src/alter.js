@@ -33,6 +33,7 @@ function alterExprToSQL(expr) {
       name = identifierToSql(expr[resource])
       break
     case 'domain':
+    case 'type':
       name = identifierToSql(expr[resource])
       break
     case 'algorithm':
@@ -91,12 +92,12 @@ function alterSchemaToSQL(stmt) {
   return result.filter(hasVal).join(' ')
 }
 
-function alterDomainToSQL(stmt) {
-  const { expr, keyword, domain, type } = stmt
+function alterDomainTypeToSQL(stmt) {
+  const { expr, keyword, name, type } = stmt
   const result = [
     toUpper(type),
     toUpper(keyword),
-    [identifierToSql(domain.schema), identifierToSql(domain.domain)].filter(hasVal).join('.'),
+    [identifierToSql(name.schema), identifierToSql(name.name)].filter(hasVal).join('.'),
     alterExprToSQL(expr),
   ]
   return result.filter(hasVal).join(' ')
@@ -110,7 +111,8 @@ function alterToSQL(stmt) {
     case 'schema':
       return alterSchemaToSQL(stmt)
     case 'domain':
-      return alterDomainToSQL(stmt)
+    case 'type':
+      return alterDomainTypeToSQL(stmt)
     case 'view':
       return alterViewToSQL(stmt)
   }
