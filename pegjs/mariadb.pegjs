@@ -2601,7 +2601,7 @@ count_arg
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
 convert_args
-  = c:(column_ref / literal_string / literal_numeric) __ COMMA __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_name {
+  = c:proc_primary __ COMMA __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_name {
     const { dataType, length } = ch
     let dataTypeStr = dataType
     if (length !== undefined) dataTypeStr = `${dataTypeStr}(${length})`
@@ -2616,7 +2616,7 @@ convert_args
       ]
     }
   }
-  / c:(column_ref / literal_string / literal_numeric) __ COMMA __ d:data_type {
+  / c:proc_primary __ COMMA __ d:data_type {
     return {
       type: 'expr_list',
       value: [c, { type: 'datatype', ...d, }]
@@ -3302,10 +3302,11 @@ proc_join
     }
 
 proc_primary
-  = literal
+  = proc_func_call_args
+  / literal
   / var_decl
   / column_ref
-  / proc_func_call
+  / proc_fun_call_without_args
   / param
   / LPAREN __ e:proc_additive_expr __ RPAREN {
       e.parentheses = true;
@@ -3321,7 +3322,7 @@ proc_func_name
       return name;
     }
 
-proc_func_call
+proc_func_call_args
   = name:proc_func_name __ LPAREN __ l:proc_primary_list? __ RPAREN {
       //compatible with original func_call
       return {
@@ -3333,13 +3334,16 @@ proc_func_call
         }
       };
     }
-  / name:proc_func_name {
+proc_fun_call_without_args
+  = name:proc_func_name {
     return {
         type: 'function',
         name: name,
         args: null
       };
   }
+proc_func_call
+  = proc_func_call_args / proc_fun_call_without_args
 
 proc_primary_list
   = head:proc_primary tail:(__ COMMA __ proc_primary)* {

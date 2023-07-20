@@ -609,6 +609,13 @@ describe('mysql', () => {
         ]
       },
       {
+        title: 'convert func to data type',
+        sql: [
+          'SELECT CONVERT(SEC_TO_TIME(2378), TIME);',
+          'SELECT CONVERT(SEC_TO_TIME(2378), TIME)'
+        ]
+      },
+      {
         title: 'drop trigger',
         sql: [
           'drop trigger schema1.trigger1',
