@@ -233,6 +233,7 @@ alter_stmt
   = alter_table_stmt
   / alter_schema_stmt
   / alter_domain_type_stmt
+  / alter_function_stmt
 
 crud_stmt
   = union_stmt
@@ -942,34 +943,68 @@ use_stmt
         }
       };
     }
-alter_domain_type_stmt
-  = KW_ALTER __ t:('DOMAIN'i / 'TYPE'i) __ s:table_name __ ac:ALTER_RENAME {
-    /*
-      export interface alter_domain_type_stmt_node {
-        type: 'alter';
-        keyword: 'domain' | 'type',
-        name: { schema: string, name: string };
-        expr: alter_rename_owner;
-      }
-      => AstStatement<alter_domain_type_stmt_node>
-      */
+
+alter_func_argmode
+  = t:(KW_IN / 'OUT'i / 'VARIADIC'i / 'INOUT'i) {
+    // => ignore
+    return t.toUpperCase()
+  }
+
+alter_func_arg_item
+  = m:alter_func_argmode? __ ad:data_type {
+    // => { mode?: string; name?: string; type: data_type; }
+    return {
+      mode: m,
+      type: ad,
+    }
+  }
+  / m:alter_func_argmode? __ an:ident_name __ ad:data_type {
+    // => { mode?: string; name?: string; type: data_type; }
+    return {
+      mode: m,
+      name: an,
+      type: ad,
+    }
+  }
+alter_func_args
+  = head:alter_func_arg_item tail:(__ COMMA __ alter_func_arg_item)* {
+      // => alter_func_arg_item[]
+      return createList(head, tail)
+    }
+alter_function_stmt
+  = KW_ALTER __ t:'FUNCTION'i __ s:table_name __ ags:(LPAREN __ alter_func_args? __ RPAREN)? __ ac:(ALTER_RENAME / ALTER_OWNER_TO) {
+    // => AstStatement<alter_resource_stmt_node>
     const keyword = t.toLowerCase()
     ac.resource = keyword
     ac[keyword] = ac.table
     delete ac.table
+    const args = {}
+    if (ags && ags[0]) args.parentheses = true
+    args.expr = ags && ags[2]
     return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: 'alter',
-          keyword: 'domain',
+          keyword,
           name: { schema: s.db, name: s.table },
+          args,
           expr: ac
         }
       };
   }
-  / KW_ALTER __ t:('DOMAIN'i / 'TYPE'i) __ s:table_name __ ac:ALTER_OWNER_TO {
-    // => AstStatement<alter_domain_type_stmt_node>
+alter_domain_type_stmt
+  = KW_ALTER __ t:('DOMAIN'i / 'TYPE'i) __ s:table_name __ ac:(ALTER_RENAME / ALTER_OWNER_TO) {
+    /*
+      export interface alter_resource_stmt_node {
+        type: 'alter';
+        keyword: 'domain' | 'type',
+        name: string | { schema: string, name: string };
+        args?: alter_func_args;
+        expr: alter_rename_owner;
+      }
+      => AstStatement<alter_resource_stmt_node>
+      */
     const keyword = t.toLowerCase()
     ac.resource = keyword
     ac[keyword] = ac.table
@@ -983,50 +1018,28 @@ alter_domain_type_stmt
           name: { schema: s.db, name: s.table },
           expr: ac
         }
-      }
+      };
   }
 
 alter_schema_stmt
-  = KW_ALTER __ KW_SCHEMA __ s:ident_name __ ac:ALTER_RENAME {
-    /*
-      export interface alter_schema_stmt_node {
-        type: 'alter';
-        keyword: 'schema',
-        schema: string;
-        expr: alter_rename_owner;
-      }
-      => AstStatement<alter_schema_stmt_node>
-      */
-    ac.resource = 'schema'
-    ac.schema = ac.table
+  = KW_ALTER __ t:KW_SCHEMA __ s:ident_name __ ac:(ALTER_RENAME / ALTER_OWNER_TO) {
+    // => AstStatement<alter_resource_stmt_node>
+    const keyword = t.toLowerCase()
+    ac.resource = keyword
+    ac[keyword] = ac.table
     delete ac.table
     return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: 'alter',
-          keyword: 'schema',
+          keyword,
           schema: s,
           expr: ac
         }
       };
   }
-  / KW_ALTER __ KW_SCHEMA __ s:ident_name __ ac:ALTER_OWNER_TO {
-    // => AstStatement<alter_schema_stmt_node>
-    ac.resource = 'schema'
-    ac.schema = ac.table
-    delete ac.table
-    return {
-        tableList: Array.from(tableList),
-        columnList: columnListTableAlias(columnList),
-        ast: {
-          type: 'alter',
-          keyword: 'schema',
-          schema: s,
-          expr: ac
-        }
-      }
-  }
+
 alter_table_stmt
   = KW_ALTER  __
     KW_TABLE __
@@ -1148,7 +1161,7 @@ ALTER_RENAME
         type: 'alter';
         resource: string;
         keyword?: 'to' | 'as';
-        [key: string]: ident_name;
+        [key: string]: ident;
       }
       => AstStatement<alter_rename>
       */
@@ -1162,7 +1175,7 @@ ALTER_RENAME
   }
 
 ALTER_OWNER_TO
-  = 'OWNER'i __ KW_TO __ tn:(ident_name / 'CURRENT_ROLE'i / 'CURRENT_USER'i / 'SESSION_USER'i) {
+  = 'OWNER'i __ KW_TO __ tn:(ident / 'CURRENT_ROLE'i / 'CURRENT_USER'i / 'SESSION_USER'i) {
       // => AstStatement<alter_rename_owner>
     return {
       action: 'owner',

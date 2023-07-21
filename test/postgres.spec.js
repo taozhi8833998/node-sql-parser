@@ -981,6 +981,20 @@ describe('Postgres', () => {
         'ALTER TYPE "public"."mpaa_rating" OWNER TO "postgres"'
       ]
     },
+    {
+      title: 'alter function',
+      sql: [
+        'ALTER FUNCTION public.film_in_stock(p_film_id integer, p_store_id integer, OUT p_film_count integer, p_effective_date timestamp with time zone, timestamp with time zone) OWNER TO postgres;',
+        'ALTER FUNCTION "public"."film_in_stock"(p_film_id INTEGER, p_store_id INTEGER, OUT p_film_count INTEGER, p_effective_date TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE) OWNER TO "postgres"'
+      ]
+    },
+    {
+      title: 'alter function without args',
+      sql: [
+        'ALTER FUNCTION public.last_updated() OWNER TO postgres;',
+        'ALTER FUNCTION "public"."last_updated"() OWNER TO "postgres"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

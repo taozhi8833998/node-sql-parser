@@ -4,7 +4,7 @@ import { indexTypeAndOptionToSQL } from './index-definition'
 import { tablesToSQL, tableToSQL } from './tables'
 import { exprToSQL } from './expr'
 import { selectToSQL } from './select'
-import { hasVal, toUpper, identifierToSql } from './util'
+import { dataTypeToSQL, hasVal, toUpper, identifierToSql } from './util'
 
 function alterExprToSQL(expr) {
   if (!expr) return ''
@@ -34,6 +34,7 @@ function alterExprToSQL(expr) {
       break
     case 'domain':
     case 'type':
+    case 'function':
       name = identifierToSql(expr[resource])
       break
     case 'algorithm':
@@ -103,6 +104,20 @@ function alterDomainTypeToSQL(stmt) {
   return result.filter(hasVal).join(' ')
 }
 
+function alterFunctionToSQL(stmt) {
+  const { args, expr, keyword, name, type } = stmt
+  const result = [
+    toUpper(type),
+    toUpper(keyword),
+    [
+      [identifierToSql(name.schema), identifierToSql(name.name)].filter(hasVal).join('.'),
+      args && `(${args.expr ? args.expr.map(arg => [toUpper(arg.mode), arg.name, dataTypeToSQL(arg.type)].filter(hasVal).join(' ')).join(', ') : ''})`,
+    ].filter(hasVal).join(''),
+    alterExprToSQL(expr),
+  ]
+  return result.filter(hasVal).join(' ')
+}
+
 function alterToSQL(stmt) {
   const { keyword = 'table' } = stmt
   switch (keyword) {
@@ -113,6 +128,8 @@ function alterToSQL(stmt) {
     case 'domain':
     case 'type':
       return alterDomainTypeToSQL(stmt)
+    case 'function':
+      return alterFunctionToSQL(stmt)
     case 'view':
       return alterViewToSQL(stmt)
   }
