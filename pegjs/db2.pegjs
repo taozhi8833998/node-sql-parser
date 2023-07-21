@@ -792,8 +792,18 @@ on_reference
   }
 
 reference_option
-  = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i) {
-    return kc.toLowerCase()
+  = kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
+    return {
+      type: 'function',
+      name: kw,
+      args: l
+    }
+  }
+  / kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
+    return {
+      type: 'origin',
+      value: kc.toLowerCase()
+    }
   }
 
 table_options

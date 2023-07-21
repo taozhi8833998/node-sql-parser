@@ -67,7 +67,7 @@ function columnReferenceDefinitionToSQL(referenceDefinition) {
   reference.push(tablesToSQL(table))
   reference.push(definition && `(${definition.map(col => exprToSQL(col)).join(', ')})`)
   reference.push(toUpper(match))
-  onAction.map(onRef => reference.push(...commonTypeValue(onRef)))
+  onAction.map(onRef => reference.push(toUpper(onRef.type), exprToSQL(onRef.value)))
   return reference.filter(hasVal)
 }
 

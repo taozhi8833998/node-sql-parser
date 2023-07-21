@@ -1403,10 +1403,22 @@ on_reference
       value: ro
     }
   }
+
 reference_option
-  = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i) {
-    // => 'restrict' | 'cascade' | 'set null' | 'no action' | 'set default'
-    return kc.toLowerCase()
+  = kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
+    // => { type: 'function'; name: string; args: expr_list; }
+    return {
+      type: 'function',
+      name: kw,
+      args: l
+    }
+  }
+  / kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
+    // => 'restrict' | 'cascade' | 'set null' | 'no action' | 'set default' | 'current_timestamp'
+    return {
+      type: 'origin',
+      value: kc.toLowerCase()
+    }
   }
 
 create_constraint_trigger

@@ -1371,8 +1371,18 @@ view_options
   }
 
 reference_option
-  = kc:(view_options / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
-    return kc.toLowerCase()
+  = kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
+    return {
+      type: 'function',
+      name: kw,
+      args: l
+    }
+  }
+  / kc:(view_options / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
+    return {
+      type: 'origin',
+      value: kc.toLowerCase()
+    }
   }
 
 table_options
@@ -2751,7 +2761,7 @@ KW_SUM_MAX_MIN_AVG
   = KW_SUM / KW_MAX / KW_MIN / KW_AVG
 
 on_update_current_timestamp
-  = KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN{
+  = KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
     return {
       type: 'on update',
       keyword: kw,

@@ -1119,8 +1119,18 @@ view_options
   }
 
 reference_option
-  = kc:(view_options / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
-    return kc.toLowerCase()
+  = kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
+    return {
+      type: 'function',
+      name: kw,
+      args: l
+    }
+  }
+  / kc:(view_options / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
+    return {
+      type: 'origin',
+      value: kc.toLowerCase()
+    }
   }
 
 table_options
