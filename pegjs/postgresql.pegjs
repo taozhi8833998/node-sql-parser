@@ -234,6 +234,7 @@ alter_stmt
   / alter_schema_stmt
   / alter_domain_type_stmt
   / alter_function_stmt
+  / alter_aggregate_stmt
 
 crud_stmt
   = union_stmt
@@ -944,6 +945,21 @@ use_stmt
       };
     }
 
+aggregate_signature
+  = STAR {
+    return [
+      {
+        name: '*'
+      }
+    ]
+  }
+  / s:alter_func_args? __ KW_ORDER __ KW_BY __ o:alter_func_args {
+    const ans = s || []
+    ans.orderby = o
+    return ans
+  }
+  / alter_func_args
+
 alter_func_argmode
   = t:(KW_IN / 'OUT'i / 'VARIADIC'i / 'INOUT'i) {
     // => ignore
@@ -970,9 +986,32 @@ alter_func_args
   = head:alter_func_arg_item tail:(__ COMMA __ alter_func_arg_item)* {
       // => alter_func_arg_item[]
       return createList(head, tail)
-    }
+  }
+alter_aggregate_stmt
+  = KW_ALTER __ t:'AGGREGATE'i __ s:table_name __ LPAREN __ as:aggregate_signature __ RPAREN __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
+    // => AstStatement<alter_resource_stmt_node>
+    const keyword = t.toLowerCase()
+    ac.resource = keyword
+    ac[keyword] = ac.table
+    delete ac.table
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword,
+          name: { schema: s.db, name: s.table },
+          args: {
+            parentheses: true,
+            expr: as,
+            orderby: as.orderby
+          },
+          expr: ac
+        }
+      };
+  }
 alter_function_stmt
-  = KW_ALTER __ t:'FUNCTION'i __ s:table_name __ ags:(LPAREN __ alter_func_args? __ RPAREN)? __ ac:(ALTER_RENAME / ALTER_OWNER_TO) {
+  = KW_ALTER __ t:'FUNCTION'i __ s:table_name __ ags:(LPAREN __ alter_func_args? __ RPAREN)? __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
     // => AstStatement<alter_resource_stmt_node>
     const keyword = t.toLowerCase()
     ac.resource = keyword
@@ -994,13 +1033,13 @@ alter_function_stmt
       };
   }
 alter_domain_type_stmt
-  = KW_ALTER __ t:('DOMAIN'i / 'TYPE'i) __ s:table_name __ ac:(ALTER_RENAME / ALTER_OWNER_TO) {
+  = KW_ALTER __ t:('DOMAIN'i / 'TYPE'i) __ s:table_name __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
     /*
       export interface alter_resource_stmt_node {
         type: 'alter';
         keyword: 'domain' | 'type',
         name: string | { schema: string, name: string };
-        args?: alter_func_args;
+        args?: { parentheses: true; expr?: alter_func_args; orderby?: alter_func_args; };
         expr: alter_rename_owner;
       }
       => AstStatement<alter_resource_stmt_node>
@@ -1022,7 +1061,7 @@ alter_domain_type_stmt
   }
 
 alter_schema_stmt
-  = KW_ALTER __ t:KW_SCHEMA __ s:ident_name __ ac:(ALTER_RENAME / ALTER_OWNER_TO) {
+  = KW_ALTER __ t:KW_SCHEMA __ s:ident_name __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
     // => AstStatement<alter_resource_stmt_node>
     const keyword = t.toLowerCase()
     ac.resource = keyword
@@ -1183,6 +1222,18 @@ ALTER_OWNER_TO
       resource: 'table',
       keyword: 'to',
       table: tn
+    }
+  }
+
+ALTER_SET_SCHEMA
+  = KW_SET __ KW_SCHEMA __ s:ident {
+    // => AstStatement<alter_rename_owner>
+    return {
+      action: 'set',
+      type: 'alter',
+      resource: 'table',
+      keyword: 'schema',
+      table: s
     }
   }
 

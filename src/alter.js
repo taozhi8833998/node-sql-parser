@@ -32,9 +32,10 @@ function alterExprToSQL(expr) {
     case 'schema':
       name = identifierToSql(expr[resource])
       break
+    case 'aggregate':
+    case 'function':
     case 'domain':
     case 'type':
-    case 'function':
       name = identifierToSql(expr[resource])
       break
     case 'algorithm':
@@ -86,6 +87,9 @@ function alterViewToSQL(stmt) {
   if (withExpr) result.push(toUpper(withExpr))
   return result.filter(hasVal).join(' ')
 }
+function alterArgsToSQL(arg) {
+  return [toUpper(arg.mode), arg.name, dataTypeToSQL(arg.type)].filter(hasVal).join(' ')
+}
 
 function alterSchemaToSQL(stmt) {
   const { expr, keyword, schema, type } = stmt
@@ -111,7 +115,22 @@ function alterFunctionToSQL(stmt) {
     toUpper(keyword),
     [
       [identifierToSql(name.schema), identifierToSql(name.name)].filter(hasVal).join('.'),
-      args && `(${args.expr ? args.expr.map(arg => [toUpper(arg.mode), arg.name, dataTypeToSQL(arg.type)].filter(hasVal).join(' ')).join(', ') : ''})`,
+      args && `(${args.expr ? args.expr.map(alterArgsToSQL).join(', ') : ''})`,
+    ].filter(hasVal).join(''),
+    alterExprToSQL(expr),
+  ]
+  return result.filter(hasVal).join(' ')
+}
+
+function alterAggregateToSQL(stmt) {
+  const { args, expr, keyword, name, type } = stmt
+  const { expr: argsExpr, orderby } = args
+  const result = [
+    toUpper(type),
+    toUpper(keyword),
+    [
+      [identifierToSql(name.schema), identifierToSql(name.name)].filter(hasVal).join('.'),
+      `(${argsExpr.map(alterArgsToSQL).join(', ')}${orderby ? [' ORDER', 'BY', orderby.map(alterArgsToSQL).join(', ')].join(' ') : ''})`,
     ].filter(hasVal).join(''),
     alterExprToSQL(expr),
   ]
@@ -121,6 +140,8 @@ function alterFunctionToSQL(stmt) {
 function alterToSQL(stmt) {
   const { keyword = 'table' } = stmt
   switch (keyword) {
+    case 'aggregate':
+      return alterAggregateToSQL(stmt)
     case 'table':
       return alterTableToSQL(stmt)
     case 'schema':

@@ -995,6 +995,20 @@ describe('Postgres', () => {
         'ALTER FUNCTION "public"."last_updated"() OWNER TO "postgres"'
       ]
     },
+    {
+      title: 'alter aggregate',
+      sql: [
+        'ALTER AGGREGATE public.group_concat(text) OWNER TO postgres;',
+        'ALTER AGGREGATE "public"."group_concat"(TEXT) OWNER TO "postgres"'
+      ]
+    },
+    {
+      title: 'alter aggregate with order by',
+      sql: [
+        'ALTER AGGREGATE mypercentile(float8 ORDER BY integer) SET SCHEMA mynewpercentile;',
+        'ALTER AGGREGATE "mypercentile"(FLOAT8 ORDER BY INTEGER) SET SCHEMA "mynewpercentile"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
