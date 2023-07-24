@@ -1009,6 +1009,27 @@ describe('Postgres', () => {
         'ALTER AGGREGATE "mypercentile"(FLOAT8 ORDER BY INTEGER) SET SCHEMA "mynewpercentile"'
       ]
     },
+    {
+      title: 'create domain',
+      sql: [
+        'CREATE DOMAIN public."bıgınt" AS bigint;',
+        'CREATE DOMAIN "public"."bıgınt" AS BIGINT',
+      ]
+    },
+    {
+      title: 'create domain with constraint',
+      sql: [
+        'CREATE DOMAIN public.year AS integer CONSTRAINT year_check CHECK (((VALUE >= 1901) AND (VALUE <= 2155)));',
+        'CREATE DOMAIN "public"."year" AS INTEGER CONSTRAINT "year_check" CHECK ((("VALUE" >= 1901) AND ("VALUE" <= 2155)))',
+      ]
+    },
+    {
+      title: 'create domain with full definition',
+      sql: [
+        'CREATE DOMAIN public.year AS integer collate utf8mb4_bin default 0 CONSTRAINT year_check CHECK (((VALUE >= 1901) AND (VALUE <= 2155)));',
+        'CREATE DOMAIN "public"."year" AS INTEGER COLLATE UTF8MB4_BIN DEFAULT 0 CONSTRAINT "year_check" CHECK ((("VALUE" >= 1901) AND ("VALUE" <= 2155)))',
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

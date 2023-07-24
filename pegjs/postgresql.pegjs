@@ -228,6 +228,7 @@ create_stmt
   / create_index_stmt
   / create_sequence
   / create_db_stmt
+  / create_domain_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -366,7 +367,34 @@ create_db_stmt
         }
       }
     }
-
+create_domain_stmt
+  = a:KW_CREATE __ k:'DOMAIN'i __ s:table_name __ as:KW_AS? __ d:data_type __ ce:collate_expr? __ de:default_expr? __ ccc: create_constraint_check? {
+      /*
+      export type create_domain_stmt = {
+        type: 'create',
+        keyword: 'domain',
+        domain: { schema: string; name: string },
+        as?: string,
+        target: data_type,
+        create_definition?: domain_definition_list
+      }
+      => AstStatement<create_domain_stmt>
+      */
+     if (ccc) ccc.type = 'constraint'
+     const definitions = [ce, de, ccc].filter(v => v)
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: k.toLowerCase(),
+          domain: { schema: s.db, name: s.table },
+          as: as && as[0] && as[0].toLowerCase(),
+          target: d,
+          create_definitions: definitions,
+        }
+      }
+    }
 create_table_stmt
   = a:KW_CREATE __
     tp:KW_TEMPORARY? __
@@ -1325,15 +1353,32 @@ create_constraint_definition
   = create_constraint_primary
   / create_constraint_unique
   / create_constraint_foreign
+  / create_constraint_check
 
 constraint_name
-  = kc:KW_CONSTRAINT __
-  c:ident? {
+  = kc:KW_CONSTRAINT __ c:ident? {
     // => { keyword: 'constraint'; constraint: ident; }
     return {
       keyword: kc.toLowerCase(),
       constraint: c
     }
+  }
+create_constraint_check
+  = kc:constraint_name? __ p:'CHECK'i __ LPAREN __ e:expr __ RPAREN {
+    /* => {
+      constraint?: constraint_name['constraint'];
+      definition: [expr];
+      keyword?: constraint_name['keyword'];
+      constraint_type: 'check';
+      resource: 'constraint';
+    }*/
+    return {
+        constraint: kc && kc.constraint,
+        definition: [e],
+        constraint_type: p.toLowerCase(),
+        keyword: kc && kc.keyword,
+        resource: 'constraint',
+      }
   }
 create_constraint_primary
   = kc:constraint_name? __
@@ -1345,6 +1390,7 @@ create_constraint_primary
       constraint?: constraint_name['constraint'];
       definition: cte_column_definition;
       constraint_type: 'primary key';
+      keyword?: constraint_name['keyword'];
       index_type?: index_type;
       resource: 'constraint';
       index_options?: index_options;
@@ -1372,6 +1418,7 @@ create_constraint_unique
       constraint?: constraint_name['constraint'];
       definition: cte_column_definition;
       constraint_type: 'unique key' | 'unique' | 'unique index';
+      keyword?: constraint_name['keyword'];
       index_type?: index_type;
       resource: 'constraint';
       index_options?: index_options;
