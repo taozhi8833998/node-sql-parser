@@ -229,6 +229,7 @@ create_stmt
   / create_sequence
   / create_db_stmt
   / create_domain_stmt
+  / create_type_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -351,7 +352,7 @@ create_db_stmt
         keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
         database: string,
-        create_definition?: create_db_definition
+        create_definitions?: create_db_definition
       }
       => AstStatement<create_db_stmt>
       */
@@ -367,6 +368,44 @@ create_db_stmt
         }
       }
     }
+create_type_stmt
+  = a:KW_CREATE __ k:'TYPE'i __ s:table_name __ as:KW_AS __ r:KW_ENUM __ LPAREN __ e:expr_list? __ RPAREN {
+      /*
+      export type create_type_stmt = {
+        type: 'create',
+        keyword: 'type',
+        name: { schema: string; name: string },
+        as?: string,
+        resource?: string,
+        create_definitions?: any
+      }
+      => AstStatement<create_type_stmt>
+      */
+      e.parentheses = true
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: k.toLowerCase(),
+          name: { schema: s.db, name: s.table },
+          as: as && as[0] && as[0].toLowerCase(),
+          resource: r.toLowerCase(),
+          create_definitions: e,
+        }
+      }
+    }
+  / a:KW_CREATE __ k:'TYPE'i __ s:table_name {
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: k.toLowerCase(),
+          name: { schema: s.db, name: s.table },
+        }
+      }
+  }
 create_domain_stmt
   = a:KW_CREATE __ k:'DOMAIN'i __ s:table_name __ as:KW_AS? __ d:data_type __ ce:collate_expr? __ de:default_expr? __ ccc: create_constraint_check? {
       /*
@@ -376,7 +415,7 @@ create_domain_stmt
         domain: { schema: string; name: string },
         as?: string,
         target: data_type,
-        create_definition?: domain_definition_list
+        create_definitions?: any[]
       }
       => AstStatement<create_domain_stmt>
       */
@@ -419,7 +458,7 @@ create_table_stmt
         ignore_replace?: 'ignore' | 'replace';
         as?: 'as';
         query_expr?: union_stmt_node;
-        create_definition?: create_table_definition;
+        create_definitions?: create_table_definition;
         table_options?: table_options;
       }
       => AstStatement<create_table_stmt_node>
@@ -484,7 +523,7 @@ create_sequence
         temporary?: 'temporary' | 'temp',
         if_not_exists?: 'if not exists',
         table: table_ref_list,
-        create_definition?: create_sequence_definition_list
+        create_definitions?: create_sequence_definition_list
       }
       => AstStatement<create_sequence_stmt>
       */

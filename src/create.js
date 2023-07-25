@@ -240,6 +240,27 @@ function createDomainToSQL(stmt) {
   return sql.filter(hasVal).join(' ')
 }
 
+function createTypeToSQL(stmt) {
+  const { as, create_definitions: createDefinition, keyword, name, resource, type } = stmt
+  const sql = [
+    toUpper(type),
+    toUpper(keyword),
+    [identifierToSql(name.schema), identifierToSql(name.name)].filter(hasVal).join('.'),
+    toUpper(as),
+    toUpper(resource),
+  ]
+  if (createDefinition) {
+    const definitionSQL = []
+    switch (resource) {
+      case 'enum':
+        definitionSQL.push(exprToSQL(createDefinition))
+        break
+    }
+    sql.push(definitionSQL.filter(hasVal).join(' '))
+  }
+  return sql.filter(hasVal).join(' ')
+}
+
 function createToSQL(stmt) {
   const { keyword } = stmt
   let sql = ''
@@ -267,6 +288,9 @@ function createToSQL(stmt) {
       break
     case 'domain':
       sql = createDomainToSQL(stmt)
+      break
+    case 'type':
+      sql = createTypeToSQL(stmt)
       break
     default:
       throw new Error(`unknown create resource ${keyword}`)

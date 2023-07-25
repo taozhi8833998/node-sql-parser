@@ -1030,6 +1030,26 @@ describe('Postgres', () => {
         'CREATE DOMAIN "public"."year" AS INTEGER COLLATE UTF8MB4_BIN DEFAULT 0 CONSTRAINT "year_check" CHECK ((("VALUE" >= 1901) AND ("VALUE" <= 2155)))',
       ]
     },
+    {
+      title: 'create type as enum',
+      sql: [
+        `CREATE TYPE public.mpaa_rating AS ENUM (
+          'G',
+          'PG',
+          'PG-13',
+          'R',
+          'NC-17'
+      );`,
+        `CREATE TYPE "public"."mpaa_rating" AS ENUM ('G', 'PG', 'PG-13', 'R', 'NC-17')`
+      ]
+    },
+    {
+      title: 'create type name',
+      sql: [
+        'create type public.test',
+        'CREATE TYPE "public"."test"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
