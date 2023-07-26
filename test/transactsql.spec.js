@@ -147,6 +147,16 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal(`CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1), [session_id] INT NOT NULL, PRIMARY KEY CLUSTERED ([id] ASC) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 90, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]`)
   })
 
+  it('should support alter table', () => {
+    const sql = `ALTER TABLE [Class]
+    ADD CONSTRAINT [chk_quizId_or_QuizLink]
+    CHECK (
+        ([quizId] IS NOT NULL AND [QuizLink] IS NULL) OR
+        ([quizId] IS NULL AND [QuizLink] IS NOT NULL)
+    );`
+    expect(getParsedSql(sql)).to.equal(`ALTER TABLE [Class] ADD CONSTRAINT [chk_quizId_or_QuizLink] CHECK (([quizId] IS NOT NULL AND [QuizLink] IS NULL) OR ([quizId] IS NULL AND [QuizLink] IS NOT NULL))`)
+  })
+
   it('should support pviot and unpviot clause', () => {
     let sql = `SELECT VendorID, [250] AS Emp1, [251] AS Emp2, [256] AS Emp3, [257] AS Emp4, [260] AS Emp5
     FROM

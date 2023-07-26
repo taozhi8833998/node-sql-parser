@@ -228,9 +228,15 @@ create_stmt
   / create_index_stmt
   / create_sequence
   / create_db_stmt
+  / create_domain_stmt
+  / create_type_stmt
 
 alter_stmt
   = alter_table_stmt
+  / alter_schema_stmt
+  / alter_domain_type_stmt
+  / alter_function_stmt
+  / alter_aggregate_stmt
 
 crud_stmt
   = union_stmt
@@ -336,17 +342,17 @@ create_db_definition
 
 create_db_stmt
   = a:KW_CREATE __
-    k:(KW_DATABASE / KW_SCHEME) __
+    k:(KW_DATABASE / KW_SCHEMA) __
     ife:if_not_exists_stmt? __
     t:ident_name __
     c:create_db_definition? {
       /*
       export type create_db_stmt = {
         type: 'create',
-        keyword: 'database',
+        keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
         database: string,
-        create_definition?: create_db_definition
+        create_definitions?: create_db_definition
       }
       => AstStatement<create_db_stmt>
       */
@@ -362,7 +368,72 @@ create_db_stmt
         }
       }
     }
-
+create_type_stmt
+  = a:KW_CREATE __ k:'TYPE'i __ s:table_name __ as:KW_AS __ r:KW_ENUM __ LPAREN __ e:expr_list? __ RPAREN {
+      /*
+      export type create_type_stmt = {
+        type: 'create',
+        keyword: 'type',
+        name: { schema: string; name: string },
+        as?: string,
+        resource?: string,
+        create_definitions?: any
+      }
+      => AstStatement<create_type_stmt>
+      */
+      e.parentheses = true
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: k.toLowerCase(),
+          name: { schema: s.db, name: s.table },
+          as: as && as[0] && as[0].toLowerCase(),
+          resource: r.toLowerCase(),
+          create_definitions: e,
+        }
+      }
+    }
+  / a:KW_CREATE __ k:'TYPE'i __ s:table_name {
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: k.toLowerCase(),
+          name: { schema: s.db, name: s.table },
+        }
+      }
+  }
+create_domain_stmt
+  = a:KW_CREATE __ k:'DOMAIN'i __ s:table_name __ as:KW_AS? __ d:data_type __ ce:collate_expr? __ de:default_expr? __ ccc: create_constraint_check? {
+      /*
+      export type create_domain_stmt = {
+        type: 'create',
+        keyword: 'domain',
+        domain: { schema: string; name: string },
+        as?: string,
+        target: data_type,
+        create_definitions?: any[]
+      }
+      => AstStatement<create_domain_stmt>
+      */
+     if (ccc) ccc.type = 'constraint'
+     const definitions = [ce, de, ccc].filter(v => v)
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: k.toLowerCase(),
+          domain: { schema: s.db, name: s.table },
+          as: as && as[0] && as[0].toLowerCase(),
+          target: d,
+          create_definitions: definitions,
+        }
+      }
+    }
 create_table_stmt
   = a:KW_CREATE __
     tp:KW_TEMPORARY? __
@@ -387,7 +458,7 @@ create_table_stmt
         ignore_replace?: 'ignore' | 'replace';
         as?: 'as';
         query_expr?: union_stmt_node;
-        create_definition?: create_table_definition;
+        create_definitions?: create_table_definition;
         table_options?: table_options;
       }
       => AstStatement<create_table_stmt_node>
@@ -452,7 +523,7 @@ create_sequence
         temporary?: 'temporary' | 'temp',
         if_not_exists?: 'if not exists',
         table: table_ref_list,
-        create_definition?: create_sequence_definition_list
+        create_definitions?: create_sequence_definition_list
       }
       => AstStatement<create_sequence_stmt>
       */
@@ -941,6 +1012,140 @@ use_stmt
       };
     }
 
+aggregate_signature
+  = STAR {
+    return [
+      {
+        name: '*'
+      }
+    ]
+  }
+  / s:alter_func_args? __ KW_ORDER __ KW_BY __ o:alter_func_args {
+    const ans = s || []
+    ans.orderby = o
+    return ans
+  }
+  / alter_func_args
+
+alter_func_argmode
+  = t:(KW_IN / 'OUT'i / 'VARIADIC'i / 'INOUT'i) {
+    // => ignore
+    return t.toUpperCase()
+  }
+
+alter_func_arg_item
+  = m:alter_func_argmode? __ ad:data_type {
+    // => { mode?: string; name?: string; type: data_type; }
+    return {
+      mode: m,
+      type: ad,
+    }
+  }
+  / m:alter_func_argmode? __ an:ident_name __ ad:data_type {
+    // => { mode?: string; name?: string; type: data_type; }
+    return {
+      mode: m,
+      name: an,
+      type: ad,
+    }
+  }
+alter_func_args
+  = head:alter_func_arg_item tail:(__ COMMA __ alter_func_arg_item)* {
+      // => alter_func_arg_item[]
+      return createList(head, tail)
+  }
+alter_aggregate_stmt
+  = KW_ALTER __ t:'AGGREGATE'i __ s:table_name __ LPAREN __ as:aggregate_signature __ RPAREN __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
+    // => AstStatement<alter_resource_stmt_node>
+    const keyword = t.toLowerCase()
+    ac.resource = keyword
+    ac[keyword] = ac.table
+    delete ac.table
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword,
+          name: { schema: s.db, name: s.table },
+          args: {
+            parentheses: true,
+            expr: as,
+            orderby: as.orderby
+          },
+          expr: ac
+        }
+      };
+  }
+alter_function_stmt
+  = KW_ALTER __ t:'FUNCTION'i __ s:table_name __ ags:(LPAREN __ alter_func_args? __ RPAREN)? __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
+    // => AstStatement<alter_resource_stmt_node>
+    const keyword = t.toLowerCase()
+    ac.resource = keyword
+    ac[keyword] = ac.table
+    delete ac.table
+    const args = {}
+    if (ags && ags[0]) args.parentheses = true
+    args.expr = ags && ags[2]
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword,
+          name: { schema: s.db, name: s.table },
+          args,
+          expr: ac
+        }
+      };
+  }
+alter_domain_type_stmt
+  = KW_ALTER __ t:('DOMAIN'i / 'TYPE'i) __ s:table_name __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
+    /*
+      export interface alter_resource_stmt_node {
+        type: 'alter';
+        keyword: 'domain' | 'type',
+        name: string | { schema: string, name: string };
+        args?: { parentheses: true; expr?: alter_func_args; orderby?: alter_func_args; };
+        expr: alter_rename_owner;
+      }
+      => AstStatement<alter_resource_stmt_node>
+      */
+    const keyword = t.toLowerCase()
+    ac.resource = keyword
+    ac[keyword] = ac.table
+    delete ac.table
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword,
+          name: { schema: s.db, name: s.table },
+          expr: ac
+        }
+      };
+  }
+
+alter_schema_stmt
+  = KW_ALTER __ t:KW_SCHEMA __ s:ident_name __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
+    // => AstStatement<alter_resource_stmt_node>
+    const keyword = t.toLowerCase()
+    ac.resource = keyword
+    ac[keyword] = ac.table
+    delete ac.table
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword,
+          schema: s,
+          expr: ac
+        }
+      };
+  }
+
 alter_table_stmt
   = KW_ALTER  __
     KW_TABLE __
@@ -978,7 +1183,7 @@ alter_action
   / ALTER_DROP_COLUMN
   / ALTER_ADD_INDEX_OR_KEY
   / ALTER_ADD_FULLETXT_SPARITAL_INDEX
-  / ALTER_RENAME_TABLE
+  / ALTER_RENAME
   / ALTER_ALGORITHM
   / ALTER_LOCK
 
@@ -1054,23 +1259,48 @@ ALTER_ADD_INDEX_OR_KEY
       }
     }
 
-ALTER_RENAME_TABLE
-  = KW_RENAME __
-  kw:(KW_TO / KW_AS)? __
-  tn:ident {
-       /* => {
-         action: 'rename';
-         type: 'alter';
-         resource: 'table';
-         keyword?: 'to' | 'as';
-         table: ident;
-         } */
+ALTER_RENAME
+  = KW_RENAME __ kw:(KW_TO / KW_AS)? __ tn:ident {
+    /*
+      export interface alter_rename_owner {
+        action: string;
+        type: 'alter';
+        resource: string;
+        keyword?: 'to' | 'as';
+        [key: string]: ident;
+      }
+      => AstStatement<alter_rename>
+      */
     return {
       action: 'rename',
       type: 'alter',
       resource: 'table',
       keyword: kw && kw[0].toLowerCase(),
       table: tn
+    }
+  }
+
+ALTER_OWNER_TO
+  = 'OWNER'i __ KW_TO __ tn:(ident / 'CURRENT_ROLE'i / 'CURRENT_USER'i / 'SESSION_USER'i) {
+      // => AstStatement<alter_rename_owner>
+    return {
+      action: 'owner',
+      type: 'alter',
+      resource: 'table',
+      keyword: 'to',
+      table: tn
+    }
+  }
+
+ALTER_SET_SCHEMA
+  = KW_SET __ KW_SCHEMA __ s:ident {
+    // => AstStatement<alter_rename_owner>
+    return {
+      action: 'set',
+      type: 'alter',
+      resource: 'table',
+      keyword: 'schema',
+      table: s
     }
   }
 
@@ -1162,15 +1392,32 @@ create_constraint_definition
   = create_constraint_primary
   / create_constraint_unique
   / create_constraint_foreign
+  / create_constraint_check
 
 constraint_name
-  = kc:KW_CONSTRAINT __
-  c:ident? {
+  = kc:KW_CONSTRAINT __ c:ident? {
     // => { keyword: 'constraint'; constraint: ident; }
     return {
       keyword: kc.toLowerCase(),
       constraint: c
     }
+  }
+create_constraint_check
+  = kc:constraint_name? __ p:'CHECK'i __ LPAREN __ e:or_and_where_expr __ RPAREN {
+    /* => {
+      constraint?: constraint_name['constraint'];
+      definition: or_and_where_expr;
+      keyword?: constraint_name['keyword'];
+      constraint_type: 'check';
+      resource: 'constraint';
+    }*/
+    return {
+        constraint: kc && kc.constraint,
+        definition: [e],
+        constraint_type: p.toLowerCase(),
+        keyword: kc && kc.keyword,
+        resource: 'constraint',
+      }
   }
 create_constraint_primary
   = kc:constraint_name? __
@@ -1182,6 +1429,7 @@ create_constraint_primary
       constraint?: constraint_name['constraint'];
       definition: cte_column_definition;
       constraint_type: 'primary key';
+      keyword?: constraint_name['keyword'];
       index_type?: index_type;
       resource: 'constraint';
       index_options?: index_options;
@@ -1209,6 +1457,7 @@ create_constraint_unique
       constraint?: constraint_name['constraint'];
       definition: cte_column_definition;
       constraint_type: 'unique key' | 'unique' | 'unique index';
+      keyword?: constraint_name['keyword'];
       index_type?: index_type;
       resource: 'constraint';
       index_options?: index_options;
@@ -1291,10 +1540,22 @@ on_reference
       value: ro
     }
   }
+
 reference_option
-  = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i) {
-    // => 'restrict' | 'cascade' | 'set null' | 'no action' | 'set default'
-    return kc.toLowerCase()
+  = kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
+    // => { type: 'function'; name: string; args: expr_list; }
+    return {
+      type: 'function',
+      name: kw,
+      args: l
+    }
+  }
+  / kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
+    // => 'restrict' | 'cascade' | 'set null' | 'no action' | 'set default' | 'current_timestamp'
+    return {
+      type: 'origin',
+      value: kc.toLowerCase()
+    }
   }
 
 create_constraint_trigger
@@ -3740,7 +4001,7 @@ KW_LOCK     = "LOCK"i       !ident_start
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
 KW_DATABASE = "DATABASE"i      !ident_start { return 'DATABASE'; }
-KW_SCHEME   = "SCHEME"i      !ident_start { return 'SCHEME'; }
+KW_SCHEMA   = "SCHEMA"i      !ident_start { return 'SCHEMA'; }
 KW_SEQUENCE   = "SEQUENCE"i      !ident_start { return 'SEQUENCE'; }
 KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }

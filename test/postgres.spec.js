@@ -959,7 +959,97 @@ describe('Postgres', () => {
         RETURNING *`,
         'INSERT INTO "table1" ("id", "firstname", "lastname", "email") VALUES ($id,$firstname,$lastname,$email) ON CONFLICT DO NOTHING RETURNING *'
       ]
-    }
+    },
+    {
+      title: 'alter schema',
+      sql: [
+        'ALTER SCHEMA public OWNER TO postgres;',
+        'ALTER SCHEMA "public" OWNER TO "postgres"'
+      ]
+    },
+    {
+      title: 'alter domain',
+      sql: [
+        'ALTER DOMAIN public."bıgınt" OWNER TO postgres;',
+        'ALTER DOMAIN "public"."bıgınt" OWNER TO "postgres"'
+      ]
+    },
+    {
+      title: 'alter type',
+      sql: [
+        'ALTER TYPE public.mpaa_rating OWNER TO postgres;',
+        'ALTER TYPE "public"."mpaa_rating" OWNER TO "postgres"'
+      ]
+    },
+    {
+      title: 'alter function',
+      sql: [
+        'ALTER FUNCTION public.film_in_stock(p_film_id integer, p_store_id integer, OUT p_film_count integer, p_effective_date timestamp with time zone, timestamp with time zone) OWNER TO postgres;',
+        'ALTER FUNCTION "public"."film_in_stock"(p_film_id INTEGER, p_store_id INTEGER, OUT p_film_count INTEGER, p_effective_date TIMESTAMP WITH TIME ZONE, TIMESTAMP WITH TIME ZONE) OWNER TO "postgres"'
+      ]
+    },
+    {
+      title: 'alter function without args',
+      sql: [
+        'ALTER FUNCTION public.last_updated() OWNER TO postgres;',
+        'ALTER FUNCTION "public"."last_updated"() OWNER TO "postgres"'
+      ]
+    },
+    {
+      title: 'alter aggregate',
+      sql: [
+        'ALTER AGGREGATE public.group_concat(text) OWNER TO postgres;',
+        'ALTER AGGREGATE "public"."group_concat"(TEXT) OWNER TO "postgres"'
+      ]
+    },
+    {
+      title: 'alter aggregate with order by',
+      sql: [
+        'ALTER AGGREGATE mypercentile(float8 ORDER BY integer) SET SCHEMA mynewpercentile;',
+        'ALTER AGGREGATE "mypercentile"(FLOAT8 ORDER BY INTEGER) SET SCHEMA "mynewpercentile"'
+      ]
+    },
+    {
+      title: 'create domain',
+      sql: [
+        'CREATE DOMAIN public."bıgınt" AS bigint;',
+        'CREATE DOMAIN "public"."bıgınt" AS BIGINT',
+      ]
+    },
+    {
+      title: 'create domain with constraint',
+      sql: [
+        'CREATE DOMAIN public.year AS integer CONSTRAINT year_check CHECK (((VALUE >= 1901) AND (VALUE <= 2155)));',
+        'CREATE DOMAIN "public"."year" AS INTEGER CONSTRAINT "year_check" CHECK ((("VALUE" >= 1901) AND ("VALUE" <= 2155)))',
+      ]
+    },
+    {
+      title: 'create domain with full definition',
+      sql: [
+        'CREATE DOMAIN public.year AS integer collate utf8mb4_bin default 0 CONSTRAINT year_check CHECK (((VALUE >= 1901) AND (VALUE <= 2155)));',
+        'CREATE DOMAIN "public"."year" AS INTEGER COLLATE UTF8MB4_BIN DEFAULT 0 CONSTRAINT "year_check" CHECK ((("VALUE" >= 1901) AND ("VALUE" <= 2155)))',
+      ]
+    },
+    {
+      title: 'create type as enum',
+      sql: [
+        `CREATE TYPE public.mpaa_rating AS ENUM (
+          'G',
+          'PG',
+          'PG-13',
+          'R',
+          'NC-17'
+      );`,
+        `CREATE TYPE "public"."mpaa_rating" AS ENUM ('G', 'PG', 'PG-13', 'R', 'NC-17')`
+      ]
+    },
+    {
+      title: 'create type name',
+      sql: [
+        'create type public.test',
+        'CREATE TYPE "public"."test"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

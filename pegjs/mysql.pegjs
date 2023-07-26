@@ -1371,8 +1371,18 @@ view_options
   }
 
 reference_option
-  = kc:(view_options / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
-    return kc.toLowerCase()
+  = kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
+    return {
+      type: 'function',
+      name: kw,
+      args: l
+    }
+  }
+  / kc:(view_options / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
+    return {
+      type: 'origin',
+      value: kc.toLowerCase()
+    }
   }
 
 table_options
@@ -2751,7 +2761,7 @@ KW_SUM_MAX_MIN_AVG
   = KW_SUM / KW_MAX / KW_MIN / KW_AVG
 
 on_update_current_timestamp
-  = KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN{
+  = KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
     return {
       type: 'on update',
       keyword: kw,
@@ -2893,7 +2903,7 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 convert_args
-  = c:(column_ref / literal_string  / literal_numeric) __ COMMA __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_name {
+  = c:proc_primary __ COMMA __ ch:(character_string_type / datetime_type)  __ cs:create_option_character_set_kw __ v:ident_name {
     const { dataType, length } = ch
     let dataTypeStr = dataType
     if (length !== undefined) dataTypeStr = `${dataTypeStr}(${length})`
@@ -2908,7 +2918,7 @@ convert_args
       ]
     }
   }
-  / c:(column_ref / literal_string / literal_numeric) __ COMMA __ d:data_type {
+  / c:proc_primary __ COMMA __ d:data_type {
     return {
       type: 'expr_list',
       value: [c, { type: 'datatype', ...d, }]
@@ -3601,10 +3611,11 @@ proc_join
     }
 
 proc_primary
-  = literal
+  = proc_func_call_args
+  / literal
   / var_decl
   / column_ref
-  / proc_func_call
+  / proc_fun_call_without_args
   / param
   / LPAREN __ e:proc_additive_expr __ RPAREN {
       e.parentheses = true;
@@ -3626,7 +3637,7 @@ proc_func_name
     }
     / quoted_ident
 
-proc_func_call
+proc_func_call_args
   = name:proc_func_name __ LPAREN __ l:proc_primary_list? __ RPAREN {
       //compatible with original func_call
       return {
@@ -3638,13 +3649,16 @@ proc_func_call
         }
       };
     }
-  / name:proc_func_name {
+proc_fun_call_without_args
+  = name:proc_func_name {
     return {
         type: 'function',
         name: name,
         args: null
       };
   }
+proc_func_call
+  = proc_func_call_args / proc_fun_call_without_args
 
 proc_primary_list
   = head:proc_primary tail:(__ COMMA __ proc_primary)* {

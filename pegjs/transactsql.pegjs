@@ -1020,7 +1020,7 @@ create_constraint_unique
   }
 
 create_constraint_check
-  = kc:constraint_name? __ u:'CHECK'i __ nfr:('NOT'i __ 'FOR'i __ 'REPLICATION'i __)? LPAREN __ c:expr __ RPAREN {
+  = kc:constraint_name? __ u:'CHECK'i __ nfr:('NOT'i __ 'FOR'i __ 'REPLICATION'i __)? LPAREN __ c:or_and_where_expr __ RPAREN {
     return {
         constraint_type: u.toLowerCase(),
         keyword: kc && kc.keyword,
@@ -1078,8 +1078,18 @@ on_reference
     }
   }
 reference_option
-  = kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i) {
-    return kc.toLowerCase()
+  = kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
+    return {
+      type: 'function',
+      name: kw,
+      args: l
+    }
+  }
+  / kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
+    return {
+      type: 'origin',
+      value: kc.toLowerCase()
+    }
   }
 
 table_options

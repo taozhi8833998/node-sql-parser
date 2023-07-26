@@ -7,7 +7,19 @@ import { funcToSQL } from './func'
 import { tablesToSQL, tableOptionToSQL, tableToSQL } from './tables'
 import { setToSQL } from './update'
 import { unionToSQL } from './union'
-import { columnIdentifierToSql, columnOrderListToSQL, commonOptionConnector, commonKeywordArgsToSQL, toUpper, hasVal, identifierToSql, triggerEventToSQL, literalToSQL } from './util'
+import {
+  columnIdentifierToSql,
+  columnOrderListToSQL,
+  commonOptionConnector,
+  commonKeywordArgsToSQL,
+  commonTypeValue,
+  dataTypeToSQL,
+  toUpper,
+  hasVal,
+  identifierToSql,
+  triggerEventToSQL,
+  literalToSQL,
+} from './util'
 
 function createDefinitionToSQL(definition) {
   if (!definition) return []
@@ -195,6 +207,60 @@ function createViewToSQL(stmt) {
   return sql.filter(hasVal).join(' ')
 }
 
+function createDomainToSQL(stmt) {
+  const {
+    as, domain, type, keyword, target,
+    create_definitions: createDefinition,
+  } = stmt
+  const sql = [
+    toUpper(type),
+    toUpper(keyword),
+    [identifierToSql(domain.schema), identifierToSql(domain.name)].filter(hasVal).join('.'),
+    toUpper(as),
+    dataTypeToSQL(target),
+  ]
+  if (createDefinition && createDefinition.length > 0) {
+    const definitionSQL = []
+    for (const definition of createDefinition) {
+      const definitionType = definition.type
+      switch (definitionType) {
+        case 'collate':
+          definitionSQL.push(commonTypeValue(definition).join(' '))
+          break
+        case 'default':
+          definitionSQL.push(toUpper(definitionType), exprToSQL(definition.value))
+          break
+        case 'constraint':
+          definitionSQL.push(constraintDefinitionToSQL(definition))
+          break
+      }
+    }
+    sql.push(definitionSQL.filter(hasVal).join(' '))
+  }
+  return sql.filter(hasVal).join(' ')
+}
+
+function createTypeToSQL(stmt) {
+  const { as, create_definitions: createDefinition, keyword, name, resource, type } = stmt
+  const sql = [
+    toUpper(type),
+    toUpper(keyword),
+    [identifierToSql(name.schema), identifierToSql(name.name)].filter(hasVal).join('.'),
+    toUpper(as),
+    toUpper(resource),
+  ]
+  if (createDefinition) {
+    const definitionSQL = []
+    switch (resource) {
+      case 'enum':
+        definitionSQL.push(exprToSQL(createDefinition))
+        break
+    }
+    sql.push(definitionSQL.filter(hasVal).join(' '))
+  }
+  return sql.filter(hasVal).join(' ')
+}
+
 function createToSQL(stmt) {
   const { keyword } = stmt
   let sql = ''
@@ -219,6 +285,12 @@ function createToSQL(stmt) {
       break
     case 'view':
       sql = createViewToSQL(stmt)
+      break
+    case 'domain':
+      sql = createDomainToSQL(stmt)
+      break
+    case 'type':
+      sql = createTypeToSQL(stmt)
       break
     default:
       throw new Error(`unknown create resource ${keyword}`)
