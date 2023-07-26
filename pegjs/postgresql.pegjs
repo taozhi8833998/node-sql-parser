@@ -1403,10 +1403,10 @@ constraint_name
     }
   }
 create_constraint_check
-  = kc:constraint_name? __ p:'CHECK'i __ LPAREN __ e:expr __ RPAREN {
+  = kc:constraint_name? __ p:'CHECK'i __ LPAREN __ e:or_and_where_expr __ RPAREN {
     /* => {
       constraint?: constraint_name['constraint'];
-      definition: [expr];
+      definition: or_and_where_expr;
       keyword?: constraint_name['keyword'];
       constraint_type: 'check';
       resource: 'constraint';
