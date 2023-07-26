@@ -230,6 +230,7 @@ create_stmt
   / create_db_stmt
   / create_domain_stmt
   / create_type_stmt
+  / create_view_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -368,6 +369,68 @@ create_db_stmt
         }
       }
     }
+view_with
+  = KW_WITH __ c:("CASCADED"i / "LOCAL"i) __ "CHECK"i __ "OPTION" {
+    // => string
+    return `with ${c.toLowerCase()} check option`
+  }
+  / KW_WITH __ "CHECK"i __ "OPTION" {
+    // => string
+    return 'with check option'
+  }
+
+with_view_option
+  = 'check_option'i __ KW_ASSIGIN_EQUAL __ t:("CASCADED"i / "LOCAL"i) {
+    // => {type: string; value: string; symbol: string; }
+    return  { type: 'check_option', value: t, symbol: '=' }
+  }
+  / k:('security_barrier'i / 'security_invoker'i) __ KW_ASSIGIN_EQUAL __ t:literal_bool {
+    // => {type: string; value: string; symbol: string; }
+    return { type: k.toLowerCase(), value: t.value ? 'true' : 'false', symbol: '=' }
+  }
+with_view_options
+  = head:with_view_option tail:(__ COMMA __ with_view_option)* {
+      // => with_view_option[]
+      return createList(head, tail);
+    }
+create_view_stmt
+  = a:KW_CREATE __ or:(KW_OR __ KW_REPLACE)? __ tp:(KW_TEMP / KW_TEMPORARY)? __ r:KW_RECURSIVE? __
+  KW_VIEW __ v:table_name __ c:(LPAREN __ column_list __ RPAREN)? __ wo:(KW_WITH __ LPAREN __ with_view_options __ RPAREN)? __
+  KW_AS __ s:select_stmt_nake __ w:view_with? {
+    /*
+      export type create_view_stmt = {
+        type: 'create',
+        keyword: 'view',
+        replace?: 'or replace',
+        temporary?: 'temporary' | 'temp',
+        recursive?: 'recursive',
+        view: table_name,
+        columns?: column_list,
+        select: select_stmt_nake,
+        with_options?: with_options,
+        with?: string,
+      }
+      => AstStatement<create_view_stmt>
+      */
+    v.view = v.table
+    delete v.table
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: a[0].toLowerCase(),
+        keyword: 'view',
+        replace: or && 'or replace',
+        temporary: tp && tp.toLowerCase(),
+        recursive: r && r.toLowerCase(),
+        columns: c && c[2],
+        select: s,
+        view: v,
+        with_options: wo && wo[4],
+        with: w,
+      }
+    }
+  }
 create_type_stmt
   = a:KW_CREATE __ k:'TYPE'i __ s:table_name __ as:KW_AS __ r:KW_ENUM __ LPAREN __ e:expr_list? __ RPAREN {
       /*
@@ -396,6 +459,7 @@ create_type_stmt
       }
     }
   / a:KW_CREATE __ k:'TYPE'i __ s:table_name {
+    // => AstStatement<create_type_stmt>
     return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -1014,6 +1078,7 @@ use_stmt
 
 aggregate_signature
   = STAR {
+    // => { name: ”*“ }
     return [
       {
         name: '*'
@@ -1021,6 +1086,7 @@ aggregate_signature
     ]
   }
   / s:alter_func_args? __ KW_ORDER __ KW_BY __ o:alter_func_args {
+    // => alter_func_args
     const ans = s || []
     ans.orderby = o
     return ans
@@ -1929,7 +1995,7 @@ with_clause
       return createList(head, tail);
     }
   / __ KW_WITH __ KW_RECURSIVE __ cte:cte_definition {
-      // => [cte_definition & {recursive: true; }]
+      // => [cte_definition & { recursive: true; }]
       cte.recursive = true;
       return [cte]
     }
@@ -3985,7 +4051,7 @@ KW_TEMPORARY = "TEMPORARY"i !ident_start { return 'TEMPORARY'; }
 KW_TEMP     = "TEMP"i !ident_start { return 'TEMP'; }
 KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
-KW_RECURSIVE= "RECURSIVE"   !ident_start
+KW_RECURSIVE= "RECURSIVE"   !ident_start { return 'RECURSIVE'; }
 KW_REPLACE  = "REPLACE"i    !ident_start
 KW_RETURNING  = "RETURNING"i    !ident_start { return 'RETURNING' }
 KW_RENAME   = "RENAME"i     !ident_start
@@ -4136,6 +4202,7 @@ KW_SESSION        = "SESSION"i   !ident_start { return 'SESSION'; }
 KW_LOCAL          = "LOCAL"i     !ident_start { return 'LOCAL'; }
 KW_PERSIST        = "PERSIST"i   !ident_start { return 'PERSIST'; }
 KW_PERSIST_ONLY   = "PERSIST_ONLY"i   !ident_start { return 'PERSIST_ONLY'; }
+KW_VIEW           = "VIEW"i    !ident_start { return 'VIEW'; }
 
 KW_VAR__PRE_AT = '@'
 KW_VAR__PRE_AT_AT = '@@'

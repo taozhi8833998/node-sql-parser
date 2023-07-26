@@ -186,20 +186,23 @@ function createDatabaseToSQL(stmt) {
 function createViewToSQL(stmt) {
   const {
     algorithm, columns, definer, keyword,
-    replace, select, sql_security: sqlSecurity,
-    type, view, with: withClause,
+    recursive, replace, select, sql_security: sqlSecurity,
+    temporary, type, view, with: withClause, with_options: withOptions,
   } = stmt
   const { db, view: name } = view
   const viewName = [identifierToSql(db), identifierToSql(name)].filter(hasVal).join('.')
   const sql = [
     toUpper(type),
     toUpper(replace),
+    toUpper(temporary),
+    toUpper(recursive),
     algorithm && `ALGORITHM = ${toUpper(algorithm)}`,
     definer,
     sqlSecurity && `SQL SECURITY ${toUpper(sqlSecurity)}`,
     toUpper(keyword),
     viewName,
     columns && `(${columns.map(columnIdentifierToSql).join(', ')})`,
+    withOptions && ['WITH', `(${withOptions.map(withOpt => commonTypeValue(withOpt).join(' ')).join(', ')})`].join(' '),
     'AS',
     unionToSQL(select),
     toUpper(withClause),

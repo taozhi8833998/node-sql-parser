@@ -1050,6 +1050,19 @@ describe('Postgres', () => {
         'CREATE TYPE "public"."test"'
       ]
     },
+    {
+      title: 'create view',
+      sql: [
+        `CREATE OR REPLACE TEMPORARY RECURSIVE VIEW universal_comedies
+        with (check_option = local, security_barrier = false)
+        AS
+        SELECT *
+        FROM comedies
+        WHERE classification = 'U'
+        WITH LOCAL CHECK OPTION;`,
+        `CREATE OR REPLACE TEMPORARY RECURSIVE VIEW "universal_comedies" WITH (CHECK_OPTION = LOCAL, SECURITY_BARRIER = FALSE) AS SELECT * FROM "comedies" WHERE "classification" = 'U' WITH LOCAL CHECK OPTION`
+      ]
+    }
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
