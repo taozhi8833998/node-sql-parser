@@ -562,7 +562,7 @@ describe('mysql', () => {
         title: 'create table with multiple data types',
         sql: [
           "CREATE TABLE `table_name` (`type_TINYINT` tinyint DEFAULT NULL, `type_SMALLINT` smallint DEFAULT NULL, `type_MEDIUMINT` mediumint DEFAULT NULL, `type_INT` int DEFAULT NULL, `type_BIGINT` bigint DEFAULT NULL, `type_FLOAT` float DEFAULT NULL, `type_DOUBLE` double DEFAULT NULL, `type_BIT` bit(1) DEFAULT NULL, `type_DATE` date DEFAULT NULL, `type_TIME` time DEFAULT NULL, `type_DATETIME` datetime DEFAULT NULL, `type_TIMESTAMP` timestamp NULL DEFAULT NULL, `type_YEAR` year DEFAULT NULL, `type_CHAR` char(10) DEFAULT NULL, `type_VARCHAR` varchar(255) DEFAULT NULL, `type_DECIMAL` decimal(10,2) DEFAULT NULL, `type_NUMERIC` decimal(10,2) DEFAULT NULL, `type_TINYTEXT` tinytext, `type_TEXT` text, `type_MEDIUMTEXT` mediumtext, `type_LONGTEXT` longtext, `type_ENUM` enum('A','B','C') DEFAULT NULL, `type_SET` set('A','B','C') DEFAULT NULL, `type_BINARY` binary(10) DEFAULT NULL, `type_VARBINARY` varbinary(255) DEFAULT NULL, `type_TINYBLOB` tinyblob, `type_BLOB` blob, `type_MEDIUMBLOB` mediumblob, `type_LONGBLOB` longblob) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci",
-          "CREATE TABLE `table_name` (`type_TINYINT` TINYINT DEFAULT NULL, `type_SMALLINT` SMALLINT DEFAULT NULL, `type_MEDIUMINT` MEDIUMINT DEFAULT NULL, `type_INT` INT DEFAULT NULL, `type_BIGINT` BIGINT DEFAULT NULL, `type_FLOAT` FLOAT DEFAULT NULL, `type_DOUBLE` DOUBLE DEFAULT NULL, `type_BIT` BIT(1) DEFAULT NULL, `type_DATE` DATE DEFAULT NULL, `type_TIME` TIME DEFAULT NULL, `type_DATETIME` DATETIME DEFAULT NULL, `type_TIMESTAMP` TIMESTAMP NULL DEFAULT NULL, `type_YEAR` YEAR DEFAULT NULL, `type_CHAR` CHAR(10) DEFAULT NULL, `type_VARCHAR` VARCHAR(255) DEFAULT NULL, `type_DECIMAL` DECIMAL(10, 2) DEFAULT NULL, `type_NUMERIC` DECIMAL(10, 2) DEFAULT NULL, `type_TINYTEXT` TINYTEXT, `type_TEXT` TEXT, `type_MEDIUMTEXT` MEDIUMTEXT, `type_LONGTEXT` LONGTEXT, `type_ENUM` ENUM('A', 'B', 'C') DEFAULT NULL, `type_SET` set,('A', 'B', 'C') DEFAULT NULL, `type_BINARY` BINARY(10) DEFAULT NULL, `type_VARBINARY` VARBINARY(255) DEFAULT NULL, `type_TINYBLOB` TINYBLOB, `type_BLOB` BLOB, `type_MEDIUMBLOB` MEDIUMBLOB, `type_LONGBLOB` LONGBLOB) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci",
+          "CREATE TABLE `table_name` (`type_TINYINT` TINYINT DEFAULT NULL, `type_SMALLINT` SMALLINT DEFAULT NULL, `type_MEDIUMINT` MEDIUMINT DEFAULT NULL, `type_INT` INT DEFAULT NULL, `type_BIGINT` BIGINT DEFAULT NULL, `type_FLOAT` FLOAT DEFAULT NULL, `type_DOUBLE` DOUBLE DEFAULT NULL, `type_BIT` BIT(1) DEFAULT NULL, `type_DATE` DATE DEFAULT NULL, `type_TIME` TIME DEFAULT NULL, `type_DATETIME` DATETIME DEFAULT NULL, `type_TIMESTAMP` TIMESTAMP NULL DEFAULT NULL, `type_YEAR` YEAR DEFAULT NULL, `type_CHAR` CHAR(10) DEFAULT NULL, `type_VARCHAR` VARCHAR(255) DEFAULT NULL, `type_DECIMAL` DECIMAL(10, 2) DEFAULT NULL, `type_NUMERIC` DECIMAL(10, 2) DEFAULT NULL, `type_TINYTEXT` TINYTEXT, `type_TEXT` TEXT, `type_MEDIUMTEXT` MEDIUMTEXT, `type_LONGTEXT` LONGTEXT, `type_ENUM` ENUM('A', 'B', 'C') DEFAULT NULL, `type_SET` SET('A', 'B', 'C') DEFAULT NULL, `type_BINARY` BINARY(10) DEFAULT NULL, `type_VARBINARY` VARBINARY(255) DEFAULT NULL, `type_TINYBLOB` TINYBLOB, `type_BLOB` BLOB, `type_MEDIUMBLOB` MEDIUMBLOB, `type_LONGBLOB` LONGBLOB) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci",
         ],
       },
       {
@@ -697,6 +697,13 @@ describe('mysql', () => {
         sql: [
           'show tables',
           'SHOW TABLES',
+        ]
+      },
+      {
+        title: 'create table with set dataType',
+        sql: [
+          "CREATE TABLE `users` (`id` int unsigned NOT NULL AUTO_INCREMENT, `name` varchar(20) DEFAULT NULL, `score` float DEFAULT '0', `coins` set('gold','silver','bronze','white','black') DEFAULT NULL, PRIMARY KEY (`id`), UNIQUE KEY `name` (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_c",
+          "CREATE TABLE `users` (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT, `name` VARCHAR(20) DEFAULT NULL, `score` FLOAT DEFAULT '0', `coins` SET('gold', 'silver', 'bronze', 'white', 'black') DEFAULT NULL, PRIMARY KEY (`id`), UNIQUE KEY `name` (`name`)) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_c",
         ]
       },
     ]
