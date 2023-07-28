@@ -9,9 +9,9 @@ export type start = multiple_stmt | cmd_stmt | crud_stmt;
 
 export type cmd_stmt = drop_stmt | create_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt | show_stmt | deallocate_stmt;
 
-export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence | create_db_stmt;
+export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence | create_db_stmt | create_domain_stmt | create_type_stmt | create_view_stmt;
 
-export type alter_stmt = alter_table_stmt;
+export type alter_stmt = alter_table_stmt | alter_schema_stmt | alter_domain_type_stmt | alter_function_stmt | alter_aggregate_stmt;
 
 export type crud_stmt = union_stmt | update_stmt | replace_insert_stmt | insert_no_columns_stmt | delete_stmt | cmd_stmt | proc_stmts;
 
@@ -48,13 +48,56 @@ export type create_db_definition = create_option_character_set[];
 
 export type create_db_stmt = {
         type: 'create',
-        keyword: 'database',
+        keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
         database: string,
-        create_definition?: create_db_definition
+        create_definitions?: create_db_definition
       }
 
 export type create_db_stmt = AstStatement<create_db_stmt>;
+
+export type view_with = string;
+
+export type with_view_option = {type: string; value: string; symbol: string; };
+
+export type with_view_options = with_view_option[];
+
+export type create_view_stmt = {
+        type: 'create',
+        keyword: 'view',
+        replace?: 'or replace',
+        temporary?: 'temporary' | 'temp',
+        recursive?: 'recursive',
+        view: table_name,
+        columns?: column_list,
+        select: select_stmt_nake,
+        with_options?: with_options,
+        with?: string,
+      }
+
+export type create_view_stmt = AstStatement<create_view_stmt>;
+
+export type create_type_stmt = {
+        type: 'create',
+        keyword: 'type',
+        name: { schema: string; name: string },
+        as?: string,
+        resource?: string,
+        create_definitions?: any
+      }
+
+export type create_type_stmt = AstStatement<create_type_stmt>;
+
+export type create_domain_stmt = {
+        type: 'create',
+        keyword: 'domain',
+        domain: { schema: string; name: string },
+        as?: string,
+        target: data_type,
+        create_definitions?: any[]
+      }
+
+export type create_domain_stmt = AstStatement<create_domain_stmt>;
 
 export type create_table_stmt_node = create_table_stmt_node_simple | create_table_stmt_node_like;
       export interface create_table_stmt_node_base {
@@ -68,7 +111,7 @@ export type create_table_stmt_node = create_table_stmt_node_simple | create_tabl
         ignore_replace?: 'ignore' | 'replace';
         as?: 'as';
         query_expr?: union_stmt_node;
-        create_definition?: create_table_definition;
+        create_definitions?: create_table_definition;
         table_options?: table_options;
       }
 
@@ -84,7 +127,7 @@ export type create_sequence_stmt = {
         temporary?: 'temporary' | 'temp',
         if_not_exists?: 'if not exists',
         table: table_ref_list,
-        create_definition?: create_sequence_definition_list
+        create_definitions?: create_sequence_definition_list
       }
 
 export type create_sequence = AstStatement<create_sequence_stmt>;
@@ -222,6 +265,30 @@ export interface use_stmt_node {
 
 export type use_stmt = AstStatement<use_stmt_node>;
 
+export type aggregate_signature = { name: ”*“ } | alter_func_args;
+
+export type alter_func_argmode = ignore;
+
+export type alter_func_arg_item = { mode?: string; name?: string; type: data_type; };
+
+export type alter_func_args = alter_func_arg_item[];
+
+export type alter_aggregate_stmt = AstStatement<alter_resource_stmt_node>;
+
+export type alter_function_stmt = AstStatement<alter_resource_stmt_node>;
+
+export interface alter_resource_stmt_node {
+        type: 'alter';
+        keyword: 'domain' | 'type',
+        name: string | { schema: string, name: string };
+        args?: { parentheses: true; expr?: alter_func_args; orderby?: alter_func_args; };
+        expr: alter_rename_owner;
+      }
+
+export type alter_domain_type_stmt = AstStatement<alter_resource_stmt_node>;
+
+export type alter_schema_stmt = AstStatement<alter_resource_stmt_node>;
+
 export interface alter_table_stmt_node {
         type: 'alter';
         table: table_ref_list;
@@ -232,7 +299,7 @@ export type alter_table_stmt = AstStatement<alter_table_stmt_node>;
 
 export type alter_action_list = alter_action[];
 
-export type alter_action = ALTER_ADD_COLUMN | ALTER_ADD_CONSTRAINT | ALTER_DROP_COLUMN | ALTER_ADD_INDEX_OR_KEY | ALTER_ADD_FULLETXT_SPARITAL_INDEX | ALTER_RENAME_TABLE | ALTER_ALGORITHM | ALTER_LOCK;
+export type alter_action = ALTER_ADD_COLUMN | ALTER_ADD_CONSTRAINT | ALTER_DROP_COLUMN | ALTER_ADD_INDEX_OR_KEY | ALTER_ADD_FULLETXT_SPARITAL_INDEX | ALTER_RENAME | ALTER_ALGORITHM | ALTER_LOCK;
 
 
 
@@ -269,15 +336,19 @@ export type ALTER_ADD_INDEX_OR_KEY = {
          type: 'alter';
          } & create_index_definition;
 
+export interface alter_rename_owner {
+        action: string;
+        type: 'alter';
+        resource: string;
+        keyword?: 'to' | 'as';
+        [key: string]: ident;
+      }
 
+export type ALTER_RENAME = AstStatement<alter_rename>;
 
-export type ALTER_RENAME_TABLE = {
-         action: 'rename';
-         type: 'alter';
-         resource: 'table';
-         keyword?: 'to' | 'as';
-         table: ident;
-         };
+export type ALTER_OWNER_TO = AstStatement<alter_rename_owner>;
+
+export type ALTER_SET_SCHEMA = AstStatement<alter_rename_owner>;
 
 
 
@@ -320,9 +391,19 @@ export type create_fulltext_spatial_index_definition = {
           resource: 'index';
         };
 
-export type create_constraint_definition = create_constraint_primary | create_constraint_unique | create_constraint_foreign;
+export type create_constraint_definition = create_constraint_primary | create_constraint_unique | create_constraint_foreign | create_constraint_check;
 
 export type constraint_name = { keyword: 'constraint'; constraint: ident; };
+
+
+
+export type create_constraint_check = {
+      constraint?: constraint_name['constraint'];
+      definition: or_and_where_expr;
+      keyword?: constraint_name['keyword'];
+      constraint_type: 'check';
+      resource: 'constraint';
+    };
 
 
 
@@ -330,6 +411,7 @@ export type create_constraint_primary = {
       constraint?: constraint_name['constraint'];
       definition: cte_column_definition;
       constraint_type: 'primary key';
+      keyword?: constraint_name['keyword'];
       index_type?: index_type;
       resource: 'constraint';
       index_options?: index_options;
@@ -341,6 +423,7 @@ export type create_constraint_unique = {
       constraint?: constraint_name['constraint'];
       definition: cte_column_definition;
       constraint_type: 'unique key' | 'unique' | 'unique index';
+      keyword?: constraint_name['keyword'];
       index_type?: index_type;
       resource: 'constraint';
       index_options?: index_options;
@@ -374,7 +457,7 @@ export type reference_definition = {
 
 export type on_reference = { type: 'on delete' | 'on update'; value: reference_option; };
 
-export type reference_option = 'restrict' | 'cascade' | 'set null' | 'no action' | 'set default';
+export type reference_option = { type: 'function'; name: string; args: expr_list; } | 'restrict' | 'cascade' | 'set null' | 'no action' | 'set default' | 'current_timestamp';
 
 
 
@@ -485,7 +568,7 @@ export interface select_stmt_node extends select_stmt_nake  {
 
 export type select_stmt = { type: 'select'; } | select_stmt_nake | select_stmt_node;
 
-export type with_clause = cte_definition[] | [cte_definition & {recursive: true; }];
+export type with_clause = cte_definition[] | [cte_definition & { recursive: true; }];
 
 export type cte_definition = { name: { type: 'default'; value: string; }; stmt: crud_stmt; columns?: cte_column_definition; };
 
@@ -1081,7 +1164,7 @@ type KW_TABLE = never;
 
 type KW_DATABASE = never;
 
-type KW_SCHEME = never;
+type KW_SCHEMA = never;
 
 type KW_SEQUENCE = never;
 
@@ -1320,6 +1403,8 @@ type KW_LOCAL = never;
 type KW_PERSIST = never;
 
 type KW_PERSIST_ONLY = never;
+
+type KW_VIEW = never;
 
 type KW_VAR__PRE_AT = never;
 
