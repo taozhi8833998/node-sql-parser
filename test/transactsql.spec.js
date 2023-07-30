@@ -130,9 +130,16 @@ describe('transactsql', () => {
   })
 
   it('should support type as column name', () => {
-    const sql = `ALTER TABLE test ADD
+    let sql = `ALTER TABLE test ADD
     [type] varchar(255) NOT NULL DEFAULT ('default');`
     expect(getParsedSql(sql)).to.equal("ALTER TABLE [test] ADD [type] VARCHAR(255) NOT NULL DEFAULT ('default')")
+    sql = `SELECT tipo, [120232] AS 'INTERNAL_FIELD'
+    FROM (
+         SELECT 'Realizado' AS tipo,  'DESIRED_VALUE' AS [120232]
+         FROM docs                -- <<  Replace docs with any table of yours
+         WHERE doc_id = '1'
+    ) AS result`
+    expect(getParsedSql(sql)).to.equal("SELECT [tipo], [120232] AS [INTERNAL_FIELD] FROM (SELECT 'Realizado' AS [tipo], 'DESIRED_VALUE' AS [120232] FROM [docs] WHERE [doc_id] = '1') AS [result]")
   })
 
   it('should support create table', () => {
