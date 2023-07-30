@@ -3272,7 +3272,7 @@ KW_PARTITION = "PARTITION"i !ident_start { return 'PARTITION' }
 
 KW_INTO     = "INTO"i       !ident_start
 KW_FROM     = "FROM"i       !ident_start
-KW_SET      = "SET"i        !ident_start
+KW_SET      = "SET"i        !ident_start { return 'SET' }
 KW_LOCK     = "LOCK"i       !ident_start
 
 KW_AS       = "AS"i         !ident_start
