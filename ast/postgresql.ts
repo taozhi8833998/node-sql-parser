@@ -910,7 +910,9 @@ export type multiplicative_expr = binary_expr;
 
 export type multiplicative_operator = "*" | "/" | "%" | "||";
 
-export type primary = cast_expr | literal | aggr_func | window_func | func_call | case_expr | interval_expr | column_ref | param | or_and_where_expr | var_decl | { type: 'origin'; value: string; };
+export type column_ref_array_index = column_ref;
+
+export type primary = cast_expr | or_and_where_expr | var_decl | { type: 'origin'; value: string; };
 
 export type string_constants_escape = { type: 'origin'; value: string; };
 
@@ -1027,7 +1029,7 @@ export type trim_rem = expr_list;
 
 export type trim_func_clause = { type: 'function'; name: string; args: expr_list; };
 
-export type func_call = trim_func_clause | { type: 'function'; name: string; args: expr_list; suffix: literal_string; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | { type: 'function'; name: string; args: expr_list; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; };
+export type func_call = trim_func_clause | { type: 'function'; name: string; args: expr_list; suffix: literal_string; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; } | { type: 'function'; name: string; args: expr_list; };
 
 export type extract_filed = 'string';
 
@@ -1039,18 +1041,24 @@ export type scalar_func = scalar_time_func | KW_CURRENT_USER | KW_USER | KW_SESS
 
 
 
-
-
-export type cast_expr = {
+export type cast_double_colon = {
         as?: alias_clause,
-        type: 'cast';
-        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
-          | expr;
         symbol: '::' | 'as',
-        keyword: 'cast';
         target: data_type;
         arrows?: ('->>' | '->')[];
         property?: (literal_string | literal_numeric)[];
+      };
+
+
+
+
+
+export type cast_expr = {
+        type: 'cast';
+        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
+          | expr;
+        keyword: 'cast';
+        ...cast_double_colon;
       };
 
 export type signedness = KW_SIGNED | KW_UNSIGNED;

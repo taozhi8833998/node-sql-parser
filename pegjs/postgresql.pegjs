@@ -3737,6 +3737,14 @@ scalar_func
 
 cast_double_colon
   = s:KW_DOUBLE_COLON __ t:data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ alias:alias_clause? {
+    /* => {
+        as?: alias_clause,
+        symbol: '::' | 'as',
+        target: data_type;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
+      }
+      */
     return {
       as: alias,
       symbol: '::',
@@ -3796,15 +3804,11 @@ cast_expr
   }
   / LPAREN __ e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref_array_index / param) __ RPAREN __ c:cast_double_colon?  {
     /* => {
-        as?: alias_clause,
         type: 'cast';
         expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
           | expr;
-        symbol: '::' | 'as',
         keyword: 'cast';
-        target: data_type;
-        arrows?: ('->>' | '->')[];
-        property?: (literal_string | literal_numeric)[];
+        ...cast_double_colon;
       }
       */
     e.parentheses = true
@@ -3818,15 +3822,11 @@ cast_expr
   }
   / e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref_array_index / param) __ c:cast_double_colon? {
     /* => {
-        as?: alias_clause,
         type: 'cast';
         expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
           | expr;
-        symbol: '::' | 'as',
         keyword: 'cast';
-        target: data_type;
-        arrows?: ('->>' | '->')[];
-        property?: (literal_string | literal_numeric)[];
+        ...cast_double_colon;
       }
       */
     if (!c) return e

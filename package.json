@@ -1,6 +1,6 @@
 {
   "name": "node-sql-parser",
-  "version": "4.8.0",
+  "version": "4.9.0",
   "description": "simple node sql parser",
   "main": "index.js",
   "types": "types.d.ts",
@@ -18,6 +18,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/taozhi8833998/node-sql-parser.git"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
   },
   "pre-commit": "coverLocal",
   "keywords": [
