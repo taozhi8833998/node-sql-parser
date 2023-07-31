@@ -19,9 +19,6 @@
     "type": "git",
     "url": "git+https://github.com/taozhi8833998/node-sql-parser.git"
   },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org"
-  },
   "pre-commit": "coverLocal",
   "keywords": [
     "sql",
