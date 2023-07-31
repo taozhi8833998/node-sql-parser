@@ -2407,15 +2407,6 @@ star_expr
 func_call
   = extract_func
   / any_value_func
-  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
-    if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
-      return {
-        type: 'function',
-        name: name,
-        args: l ? l: { type: 'expr_list', value: [] },
-        over: bc
-      };
-    }
   / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
@@ -2431,6 +2422,15 @@ func_call
         over: up
     }
   }
+  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+    if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
+      return {
+        type: 'function',
+        name: name,
+        args: l ? l: { type: 'expr_list', value: [] },
+        over: bc
+      };
+    }
 
 proc_func_name
   = dt:ident_name tail:(__ DOT __ ident_name)* {

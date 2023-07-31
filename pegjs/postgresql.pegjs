@@ -3266,21 +3266,14 @@ multiplicative_expr
 multiplicative_operator
   = "*" / "/" / "%" / "||"
 
-primary
-  = cast_expr
-  / literal
-  / aggr_func
-  / window_func
-  / func_call
-  / case_expr
-  / interval_expr
-  / c:column_ref __ a:array_index {
+column_ref_array_index
+  = c:column_ref __ a:array_index? {
     // => column_ref
-    c.array_index = a
+    if (a) c.array_index = a
     return c
   }
-  / column_ref
-  / param
+primary
+  = cast_expr
   / LPAREN __ list:or_and_where_expr __ RPAREN {
     // => or_and_where_expr
         list.parentheses = true;
@@ -3682,15 +3675,6 @@ func_call
         over: bc
       };
     }
-  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
-      // => { type: 'function'; name: string; args: expr_list; }
-      if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
-      return {
-        type: 'function',
-        name: name,
-        args: l ? l: { type: 'expr_list', value: [] }
-      };
-    }
   / extract_func
   / f:scalar_time_func __ up:on_update_current_timestamp? {
     // => { type: 'function'; name: string; over?: on_update_current_timestamp; }
@@ -3700,6 +3684,15 @@ func_call
         over: up
     }
   }
+  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
+      // => { type: 'function'; name: string; args: expr_list; }
+      if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
+      return {
+        type: 'function',
+        name: name,
+        args: l ? l: { type: 'expr_list', value: [] }
+      };
+    }
 
 extract_filed
   = f:('CENTURY'i / 'DAY'i / 'DATE'i / 'DECADE'i / 'DOW'i / 'DOY'i / 'EPOCH'i / 'HOUR'i / 'ISODOW'i / 'ISOYEAR'i / 'MICROSECONDS'i / 'MILLENNIUM'i / 'MILLISECONDS'i / 'MINUTE'i / 'MONTH'i / 'QUARTER'i / 'SECOND'i / 'TIMEZONE'i / 'TIMEZONE_HOUR'i / 'TIMEZONE_MINUTE'i / 'WEEK'i / 'YEAR'i) {
@@ -3742,57 +3735,18 @@ scalar_func
   / KW_SYSTEM_USER
   / "NTILE"i
 
+cast_double_colon
+  = s:KW_DOUBLE_COLON __ t:data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ alias:alias_clause? {
+    return {
+      as: alias,
+      symbol: '::',
+      target: t,
+      arrows: a.map(item => item[0]),
+      properties: a.map(item => item[2]),
+    }
+  }
 cast_expr
-  = LPAREN __ e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ RPAREN __ s:KW_DOUBLE_COLON __ t:data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ alias:alias_clause? {
-    /* => {
-        as?: alias_clause,
-        type: 'cast';
-        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
-          | expr;
-        symbol: '::' | 'as',
-        keyword: 'cast';
-        target: data_type;
-        arrows?: ('->>' | '->')[];
-        property?: (literal_string | literal_numeric)[];
-      }
-      */
-    e.parentheses = true
-    return {
-      as: alias,
-      type: 'cast',
-      keyword: 'cast',
-      expr: e,
-      symbol: '::',
-      target: t,
-      arrows: a.map(item => item[0]),
-      properties: a.map(item => item[2]),
-    }
-  }
-  / e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref / param) __ s:KW_DOUBLE_COLON __ t:data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ alias:alias_clause? {
-    /* => {
-        as?: alias_clause,
-        type: 'cast';
-        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
-          | expr;
-        symbol: '::' | 'as',
-        keyword: 'cast';
-        target: data_type;
-        arrows?: ('->>' | '->')[];
-        property?: (literal_string | literal_numeric)[];
-      }
-      */
-    return {
-      as: alias,
-      type: 'cast',
-      keyword: 'cast',
-      expr: e,
-      symbol: '::',
-      target: t,
-      arrows: a.map(item => item[0]),
-      properties: a.map(item => item[2]),
-    }
-  }
-  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))*  {
+  = c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))*  {
     // => IGNORE
     return {
       type: 'cast',
@@ -3840,6 +3794,50 @@ cast_expr
       }
     };
   }
+  / LPAREN __ e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref_array_index / param) __ RPAREN __ c:cast_double_colon?  {
+    /* => {
+        as?: alias_clause,
+        type: 'cast';
+        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
+          | expr;
+        symbol: '::' | 'as',
+        keyword: 'cast';
+        target: data_type;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
+      }
+      */
+    e.parentheses = true
+    if (!c) return e
+    return {
+      type: 'cast',
+      keyword: 'cast',
+      expr: e,
+      ...c,
+    }
+  }
+  / e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref_array_index / param) __ c:cast_double_colon? {
+    /* => {
+        as?: alias_clause,
+        type: 'cast';
+        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
+          | expr;
+        symbol: '::' | 'as',
+        keyword: 'cast';
+        target: data_type;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
+      }
+      */
+    if (!c) return e
+    return {
+      type: 'cast',
+      keyword: 'cast',
+      expr: e,
+      ...c,
+    }
+  }
+
 
 signedness
   = KW_SIGNED

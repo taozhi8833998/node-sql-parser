@@ -1082,6 +1082,32 @@ describe('Postgres', () => {
     })
   })
 
+  describe('test pg parser speed', () => {
+    it('should parse nested function call in ms', () => {
+      const sql = `SELECT
+      f(f(f(
+                  SELECT
+                      f(
+                          f(
+                              f(c1,c2,c3,c4,c5,c6,c7,c8,c9)
+                          )
+                      )
+                  FROM t2
+
+        ))) as cf
+      FROM t1`
+      const opt = { database: 'postgresql' }
+      let start = Date.now()
+      parser.astify(sql, opt)
+      let end = Date.now()
+      expect(end - start).to.be.lessThanOrEqual(300)
+      start = Date.now()
+      parser.astify("SELECT coalesce(JSON_ARRAYAGG(JSON_OBJECT('id', id,'productId', productId,'colorId', colorId,'type', type)), JSON_ARRAY()) FROM abc")
+      end = Date.now()
+      expect(end - start).to.be.lessThan(30)
+    })
+  })
+
   describe('returning', () => {
     it('should parse returning clause', () => {
       let sql = "UPDATE buildings SET address = 'update test 2' WHERE id = 18 RETURNING id, address"

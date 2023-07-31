@@ -2948,16 +2948,6 @@ func_call
   / trim_func_clause
   / substring_func_clause
   / overlay_func_clause
-  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
-      // => { type: 'function'; name: string; args: expr_list; }
-      if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
-      return {
-        type: 'function',
-        name: name,
-        args: l ? l: { type: 'expr_list', value: [] },
-        over: bc,
-      };
-    }
   / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
@@ -2975,6 +2965,16 @@ func_call
         over: up
     }
   }
+  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+      // => { type: 'function'; name: string; args: expr_list; }
+      if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
+      return {
+        type: 'function',
+        name: name,
+        args: l ? l: { type: 'expr_list', value: [] },
+        over: bc,
+      };
+    }
 
 extract_filed
   = f:('CENTURY'i / 'DAY'i / 'DATE'i / 'DECADE'i / 'DOW'i / 'DOY'i / 'EPOCH'i / 'HOUR'i / 'ISODOW'i / 'ISOYEAR'i / 'MICROSECONDS'i / 'MILLENNIUM'i / 'MILLISECONDS'i / 'MINUTE'i / 'MONTH'i / 'QUARTER'i / 'SECOND'i / 'TIMEZONE'i / 'TIMEZONE_HOUR'i / 'TIMEZONE_MINUTE'i / 'WEEK'i / 'YEAR'i) {
