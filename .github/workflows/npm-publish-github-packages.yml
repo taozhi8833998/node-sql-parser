@@ -31,10 +31,10 @@ jobs:
           node-version: 16
           registry-url: https://npm.pkg.github.com/
           scope: '@taozhi8833998'
+      - run: npm install
       - name: Update package.json name
         run: sed -i '2,2s/node-sql-parser/@taozhi8833998\/node-sql-parser/g' package.json
       - run: echo registry=https://npm.pkg.github.com/taozhi8833998 >> .npmrc
-      - run: npm install
       - run: npm build
       - run: cd output/prod && npm publish
         env:
