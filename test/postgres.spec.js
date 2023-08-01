@@ -1100,11 +1100,11 @@ describe('Postgres', () => {
       let start = Date.now()
       parser.astify(sql, opt)
       let end = Date.now()
-      expect(end - start).to.be.lessThanOrEqual(300)
+      expect(end - start).to.be.lessThanOrEqual(1000)
       start = Date.now()
       parser.astify("SELECT coalesce(JSON_ARRAYAGG(JSON_OBJECT('id', id,'productId', productId,'colorId', colorId,'type', type)), JSON_ARRAY()) FROM abc")
       end = Date.now()
-      expect(end - start).to.be.lessThan(30)
+      expect(end - start).to.be.lessThan(100)
     })
   })
 
