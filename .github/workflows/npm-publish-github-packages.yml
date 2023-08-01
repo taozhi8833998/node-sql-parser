@@ -35,7 +35,7 @@ jobs:
       - name: Update package.json name
         run: sed -i '2,2s/node-sql-parser/@taozhi8833998\/node-sql-parser/g' package.json
       - run: echo registry=https://npm.pkg.github.com/taozhi8833998 >> .npmrc
-      - run: npm build
+      - run: npm run build
       - run: cd output/prod && npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.PUBLISH_GITHUB_TOKEN}}
