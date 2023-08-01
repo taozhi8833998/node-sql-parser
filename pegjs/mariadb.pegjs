@@ -2708,16 +2708,6 @@ func_call
         collate: ca,
     };
   }
-  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
-    if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
-    if ((name.toUpperCase() === 'TIMESTAMPDIFF' || name.toUpperCase() === 'TIMESTAMPADD') && l.value && l.value[0]) l.value[0] = { type: 'origin', value: l.value[0].column }
-      return {
-        type: 'function',
-        name: name,
-        args: l ? l: { type: 'expr_list', value: [] },
-        over: bc,
-      };
-    }
   / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
@@ -2733,6 +2723,16 @@ func_call
         over: up
     }
   }
+  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+    if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
+    if ((name.toUpperCase() === 'TIMESTAMPDIFF' || name.toUpperCase() === 'TIMESTAMPADD') && l.value && l.value[0]) l.value[0] = { type: 'origin', value: l.value[0].column }
+      return {
+        type: 'function',
+        name: name,
+        args: l ? l: { type: 'expr_list', value: [] },
+        over: bc,
+      };
+    }
 scalar_time_func
   = KW_CURRENT_DATE
   / KW_CURRENT_TIME

@@ -633,14 +633,14 @@ describe('mysql', () => {
         title: 'create trigger',
         sql: [
           'create trigger trigger1 before update on merge for each row set NEW.updated_at = current_timestamp()',
-          'CREATE TRIGGER `trigger1` BEFORE UPDATE ON `merge` FOR EACH ROW SET `NEW`.`updated_at` = current_timestamp()'
+          'CREATE TRIGGER `trigger1` BEFORE UPDATE ON `merge` FOR EACH ROW SET `NEW`.`updated_at` = CURRENT_TIMESTAMP()'
         ]
       },
       {
         title: 'create trigger with trigger order',
         sql: [
           'create trigger trigger1 before update on merge for each row  follows trigger2 set NEW.updated_at = current_timestamp()',
-          'CREATE TRIGGER `trigger1` BEFORE UPDATE ON `merge` FOR EACH ROW FOLLOWS `trigger2` SET `NEW`.`updated_at` = current_timestamp()'
+          'CREATE TRIGGER `trigger1` BEFORE UPDATE ON `merge` FOR EACH ROW FOLLOWS `trigger2` SET `NEW`.`updated_at` = CURRENT_TIMESTAMP()'
         ]
       },
       {

@@ -499,7 +499,7 @@ describe('BigQuery', () => {
       title: 'session user',
       sql:[
         'select session_user()',
-        'SELECT session_user()'
+        'SELECT SESSION_USER()'
       ]
     },
     {
@@ -604,7 +604,7 @@ describe('BigQuery', () => {
       title: 'extract function',
       sql: [
         'select extract(year from current_date())',
-        'SELECT EXTRACT(YEAR FROM current_date())'
+        'SELECT EXTRACT(YEAR FROM CURRENT_DATE())'
       ]
     },
     {

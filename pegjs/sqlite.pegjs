@@ -2003,16 +2003,7 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 func_call
-  = name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
-    if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
-      return {
-        type: 'function',
-        name: name,
-        args: l ? l: { type: 'expr_list', value: [] },
-        over: bc
-      };
-    }
-  / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
+  = name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
         name: name,
@@ -2027,6 +2018,15 @@ func_call
         over: up
     }
   }
+  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+    if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
+      return {
+        type: 'function',
+        name: name,
+        args: l ? l: { type: 'expr_list', value: [] },
+        over: bc
+      };
+    }
 scalar_time_func
   = KW_CURRENT_DATE
   / KW_CURRENT_TIME
