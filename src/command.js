@@ -3,6 +3,7 @@ import { createDefinitionToSQL } from './create'
 import { identifierToSql, hasVal, toUpper } from './util'
 import { exprToSQL } from './expr'
 import { tablesToSQL, tableToSQL } from './tables'
+import astToSQL from './sql'
 
 function callToSQL(stmt) {
   const type = 'CALL'
@@ -130,12 +131,27 @@ function declareToSQL(stmt) {
   return result.join(' ')
 }
 
+function ifToSQL(stmt) {
+  const {
+    boolean_expr: boolExpr,
+    else_expr: elseExpr,
+    if_expr: ifExpr,
+    go,
+    semicolons,
+    type,
+  } = stmt
+  const result = [toUpper(type), exprToSQL(boolExpr), `${astToSQL(ifExpr.ast)}${semicolons[0]}`, toUpper(go)]
+  if (elseExpr) result.push('ELSE', `${astToSQL(elseExpr.ast)}${semicolons[1]}`)
+  return result.filter(hasVal).join(' ')
+}
+
 export {
   callToSQL,
   commonCmdToSQL,
   deallocateToSQL,
   declareToSQL,
   descToSQL,
+  ifToSQL,
   renameToSQL,
   useToSQL,
   setVarToSQL,

@@ -202,15 +202,16 @@
 }
 
 start
-  = head:start_item __ tail:(__ KW_GO __ start_item)* {
+  = head:start_item __ tail:(__ KW_GO __ start_item?)* {
     if (!tail || tail.length === 0) return head
     delete head.tableList
     delete head.columnList
     let cur = head
     for (let i = 0; i < tail.length; i++) {
-      delete tail[i][3].tableList
-      delete tail[i][3].columnList
-      cur.go_next = tail[i][3]
+      const item = tail[i][3] || []
+      delete item.tableList
+      delete item.columnList
+      cur.go_next = item
       cur.go = 'go'
       cur = cur.go_next
     }
@@ -222,7 +223,7 @@ start
   }
 
 start_item
-  = __ n:(multiple_stmt / cmd_stmt / crud_stmt) {
+  = __ n:(multiple_stmt / cmd_stmt / crud_stmt) __ SEMICOLON? {
     return n
   }
 
@@ -239,6 +240,7 @@ cmd_stmt
   / unlock_stmt
   / declare_stmt
   / exec_stmt
+  / if_else_stmt
 
 create_stmt
   = create_table_stmt
@@ -651,6 +653,24 @@ exec_variable
       value: e,
     }
   }
+
+if_else_stmt
+  = 'if'i __ ie:expr __ ia:crud_stmt __ s:SEMICOLON? __ g:KW_GO? __ el:(KW_ELSE __ crud_stmt)? __ es:SEMICOLON?  {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'if',
+        keyword: 'if',
+        boolean_expr: ie,
+        semicolons: [s || '', es || ''],
+        go: g,
+        if_expr: ia,
+        else_expr: el && el[2],
+      }
+    }
+  }
+
 drop_index_opt
   = head:(ALTER_ALGORITHM / ALTER_LOCK) tail:(__ (ALTER_ALGORITHM / ALTER_LOCK))* {
     return createList(head, tail, 1)
@@ -704,6 +724,21 @@ drop_stmt
           name: i,
           table: t,
           options: op
+        }
+      };
+    }
+  / a:KW_DROP __
+    r:KW_VIEW __
+    ife:if_exists? __
+    t:table_ref_list {
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: r.toLowerCase(),
+          prefix: ife,
+          name: t,
         }
       };
     }
@@ -2897,7 +2932,7 @@ EOF = !.
 
 //begin procedure extension
 proc_stmts
-  = proc_stmt*
+  = proc_stmt+
 
 proc_stmt
   = &{ varList = []; return true; } __ s:(assign_stmt / return_stmt) {
