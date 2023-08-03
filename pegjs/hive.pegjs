@@ -1003,19 +1003,17 @@ query_option
 
 column_clause
   = head: (KW_ALL / (STAR !ident_start) / STAR) tail:(__ COMMA __ column_list_item)* {
-      columnList.add('select::null::(.*)');
-      if (tail && tail.length > 0) {
-        head[0] = {
-          expr: {
-            type: 'column_ref',
-            table: null,
-            column: '*'
-          },
-          as: null
-        };
-        return createList(head[0], tail);
+      columnList.add('select::null::(.*)')
+      const item = {
+        expr: {
+          type: 'column_ref',
+          table: null,
+          column: '*'
+        },
+        as: null
       }
-      return head[0];
+      if (tail && tail.length > 0) return createList(item, tail)
+      return [item]
     }
   / head:column_list_item tail:(__ COMMA __ column_list_item)* {
       return createList(head, tail);
@@ -1040,7 +1038,7 @@ array_index
   }
 
 expr_item
-  = e:(binary_column_expr / _expr) __ a:array_index? {
+  = e:binary_column_expr __ a:array_index? {
     if (a) e.array_index = a
     return e
   }
@@ -1598,7 +1596,12 @@ unary_expr
   }
 
 binary_column_expr
-  = head:_expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ _expr)+ {
+  = head:expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ expr)* {
+    const ast = head.ast
+    if (ast && ast.type === 'select') {
+      if (!(head.parentheses_symbol || head.parentheses || head.ast.parentheses || head.ast.parentheses_symbol) || ast.columns.length !== 1 || ast.columns[0].expr.column === '*') throw new Error('invalid column clause with select statement')
+    }
+    if (!tail || tail.length === 0) return head
     const len = tail.length
     let result = tail[len - 1][3]
     for (let i = len - 1; i >= 0; i--) {

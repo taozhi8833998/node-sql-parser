@@ -563,7 +563,7 @@ export interface deallocate_stmt_node {
 export type deallocate_stmt = AstStatement<deallocate_stmt_node>;
 
 export interface select_stmt_node extends select_stmt_nake  {
-       parentheses_symbol: true;
+       parentheses: true;
       }
 
 export type select_stmt = { type: 'select'; } | select_stmt_nake | select_stmt_node;
@@ -602,9 +602,7 @@ export type column_clause = 'ALL' | '*' | column_list_item[] | column_list_item[
 
 export type array_index = { brackets: boolean, number: number };
 
-export type expr_item = (expr || binary_expr) & { array_index: array_index };
-
-export type expr_item_without_union = (_expr || binary_expr) & { array_index: array_index };
+export type expr_item = binary_expr & { array_index: array_index };
 
 export type cast_data_type = data_type & { quoted?: string };
 
@@ -795,7 +793,7 @@ export type value_list = value_item[];
 
 export type value_item = expr_list;
 
-export type expr_list = { type: 'expr_list'; value: expr_item[] };
+export type expr_list = { type: 'expr_list'; value: expr[] };
 
 export type interval_expr = { type: 'interval', expr: expr; unit: interval_unit; };
 

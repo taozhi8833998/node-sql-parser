@@ -706,6 +706,13 @@ describe('mysql', () => {
           "CREATE TABLE `users` (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT, `name` VARCHAR(20) DEFAULT NULL, `score` FLOAT DEFAULT '0', `coins` SET('gold', 'silver', 'bronze', 'white', 'black') DEFAULT NULL, PRIMARY KEY (`id`), UNIQUE KEY `name` (`name`)) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_c",
         ]
       },
+      {
+        title: 'nested subqueries',
+        sql: [
+          'select t.a,(select ( select POW(1 + 3, 2) from dual) from dual) from db.t',
+          'SELECT `t`.`a`, (SELECT (SELECT POW(1 + 3, 2) FROM DUAL) FROM DUAL) FROM `db`.`t`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
@@ -767,10 +774,10 @@ describe('mysql', () => {
       it('should throw error when colum is select stmt', () => {
         let sql = 'select\nselect * from test_table'
         let fun = parser.astify.bind(parser, sql)
-        expect(fun).to.throw('Expected "#", "(", "--", ".", "/*", ":=", "=", or [ \\t\\n\\r] but "*" found.')
+        expect(fun).to.throw('invalid column clause with select statement')
         sql = 'select\nselect * from test_table and \nselect * from test_table2'
         fun = parser.astify.bind(parser, sql)
-        expect(fun).to.throw('Expected "#", "(", "--", ".", "/*", ":=", "=", or [ \\t\\n\\r] but "*" found.')
+        expect(fun).to.throw('invalid column clause with select statement')
       })
 
       it('should support bit function and operators', () => {

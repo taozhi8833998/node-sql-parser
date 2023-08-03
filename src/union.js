@@ -54,8 +54,9 @@ function unionToSQL(stmt) {
   const { _parentheses, _orderby, _limit } = stmt
   const res = [_parentheses && '(', fun(stmt)]
   while (stmt._next) {
+    const nextFun = typeToSQLFn[stmt._next.type]
     const unionKeyword = toUpper(stmt.set_op)
-    res.push(unionKeyword, fun(stmt._next))
+    res.push(unionKeyword, nextFun(stmt._next))
     stmt = stmt._next
   }
   res.push(_parentheses && ')', orderOrPartitionByToSQL(_orderby, 'order by'), limitToSQL(_limit))
