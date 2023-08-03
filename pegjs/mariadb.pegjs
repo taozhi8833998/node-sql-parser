@@ -673,7 +673,6 @@ drop_stmt
     ife:if_exists? __
     t:table_ref_list __
     op:view_options? {
-      if(t) t.forEach(tt => tableList.add(`${a}::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),

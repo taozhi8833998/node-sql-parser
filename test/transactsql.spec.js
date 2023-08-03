@@ -208,4 +208,19 @@ describe('transactsql', () => {
     sql = 'ALTER VIEW [dbo].[reporting_class] (id, active) with ENCRYPTION, SCHEMABINDING AS SELECT [ClassHexID], [DepartmentID] AS class_source FROM [Class] WHERE [Class].[active] = 1 with check option'
     expect(getParsedSql(sql)).to.be.equal('ALTER VIEW [dbo].[reporting_class] ([id], [active]) WITH ENCRYPTION, SCHEMABINDING AS SELECT [ClassHexID], [DepartmentID] AS [class_source] FROM [Class] WHERE [Class].[active] = 1 WITH CHECK OPTION')
   })
+  describe('if else', () => {
+    it('should support if only statement', () => {
+      const sql = `IF EXISTS(SELECT 1 from sys.views where name='MyView' and type='v')
+          DROP view MyView;
+        GO`
+      expect(getParsedSql(sql)).to.be.equal("IF EXISTS(SELECT 1 FROM [sys].[views] WHERE [name] = 'MyView' AND [type] = 'v') DROP VIEW [MyView]; GO")
+    })
+    it('should support if else statement', () => {
+      const sql = `IF DATENAME(weekday, GETDATE()) IN (N'Saturday', N'Sunday')
+                        SELECT 'Weekend';
+                  ELSE
+                        SELECT 'Weekday';`
+      expect(getParsedSql(sql)).to.be.equal("IF DATENAME([weekday], GETDATE()) IN (N'Saturday', N'Sunday') SELECT 'Weekend'; ELSE SELECT 'Weekday';")
+    })
+  })
 })
