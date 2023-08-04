@@ -1979,7 +1979,7 @@ select_stmt
   / s:('(' __ select_stmt __ ')') {
     /*
     export interface select_stmt_node extends select_stmt_nake  {
-       parentheses_symbol: true;
+       parentheses: true;
       }
       => select_stmt_node
       */
@@ -2109,19 +2109,17 @@ query_option
 column_clause
   = head: (KW_ALL / (STAR !ident_start) / STAR) tail:(__ COMMA __ column_list_item)* {
       // => 'ALL' | '*' | column_list_item[]
-      columnList.add('select::null::(.*)');
-      if (tail && tail.length > 0) {
-        head[0] = {
-          expr: {
-            type: 'column_ref',
-            table: null,
-            column: '*'
-          },
-          as: null
-        };
-        return createList(head[0], tail);
+      columnList.add('select::null::(.*)')
+      const item = {
+        expr: {
+          type: 'column_ref',
+          table: null,
+          column: '*'
+        },
+        as: null
       }
-      return head[0];
+      if (tail && tail.length > 0) return createList(item, tail)
+      return [item]
     }
   / head:column_list_item tail:(__ COMMA __ column_list_item)* {
     // => column_list_item[]
@@ -2138,15 +2136,8 @@ array_index
   }
 
 expr_item
-  = e:(binary_column_expr / expr) __ a:array_index? {
-    // => (expr || binary_expr) & { array_index: array_index }
-    if (a) e.array_index = a
-    return e
-  }
-
-expr_item_without_union
-  = e:(binary_column_expr / _expr) __ a:array_index? {
-    // => (_expr || binary_expr) & { array_index: array_index }
+  = e:binary_column_expr __ a:array_index? {
+    // => binary_expr & { array_index: array_index }
     if (a) e.array_index = a
     return e
   }
@@ -2164,7 +2155,7 @@ column_list_item
     // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
-  / e:expr_item_without_union __ s:KW_DOUBLE_COLON __ t:cast_data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item_without_union)* __ alias:alias_clause? {
+  / e:expr_item __ s:KW_DOUBLE_COLON __ t:cast_data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; arrows?: ('->>' | '->')[]; property?: (literal_string | literal_numeric)[]; }
     return {
       as: alias,
@@ -2215,7 +2206,7 @@ column_list_item
       columnList.add(`select::null::${c}`)
       return { type: 'expr', expr: { type: 'column_ref', table: null, column: c }, as: alias };
   }
-  / e:expr_item_without_union  __ alias:alias_clause? {
+  / e:expr_item  __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
       return { type: 'expr', expr: e, as: alias };
     }
@@ -2909,8 +2900,8 @@ value_item
     }
 
 expr_list
-  = head:expr_item tail:(__ COMMA __ expr_item)* {
-    // => { type: 'expr_list'; value: expr_item[] }
+  = head:expr tail:(__ COMMA __ expr)* {
+    // => { type: 'expr_list'; value: expr[] }
       const el = { type: 'expr_list' };
       el.value = createList(head, tail);
       return el;
@@ -3054,7 +3045,12 @@ unary_expr
   }
 
 binary_column_expr
-  = head:_expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ _expr)+ {
+  = head:expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ expr)* {
+    const ast = head.ast
+    if (ast && ast.type === 'select') {
+      if (!(head.parentheses_symbol || head.parentheses || head.ast.parentheses || head.ast.parentheses_symbol) || ast.columns.length !== 1 || ast.columns[0].expr.column === '*') throw new Error('invalid column clause with select statement')
+    }
+    if (!tail || tail.length === 0) return head
     // => binary_expr
     const len = tail.length
     let result = tail[len - 1][3]

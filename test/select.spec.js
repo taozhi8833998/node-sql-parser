@@ -115,7 +115,14 @@ describe('select', () => {
     const ast = parser.astify('SELECT *from abc');
     expect(ast.options).to.be.null;
     expect(ast.distinct).to.be.null;
-    expect(ast.columns).to.be.eql('*');
+    expect(ast.columns).to.be.eql([{
+      expr: {
+        type: 'column_ref',
+        table: null,
+        column: '*'
+      },
+      as: null
+    }])
     expect(ast.from).to.be.eql([
       {
         "db": null,
@@ -150,7 +157,14 @@ describe('select', () => {
   describe('column clause', () => {
     it('should parse "*" shorthand', () => {
       const ast = parser.astify('SELECT * FROM t');
-      expect(ast.columns).to.equal('*');
+      expect(ast.columns).to.be.eql([{
+        expr: {
+          type: 'column_ref',
+          table: null,
+          column: '*'
+        },
+        as: null
+      }]);
     });
 
     it('should parse "table.*" column expressions', () => {

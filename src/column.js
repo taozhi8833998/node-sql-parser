@@ -133,7 +133,7 @@ function asToSQL(asStr) {
   return ['AS', /^(`?)[a-z_][0-9a-z_]*(`?)$/i.test(asStr) ? identifierToSql(asStr) : columnIdentifierToSql(asStr)].join(' ')
 }
 
-function fulltextSearchToSQL(expr) {
+function fullTextSearchToSQL(expr) {
   const { against, as, columns, match, mode } = expr
   const matchExpr = [toUpper(match), `(${columns.map(col => columnRefToSQL(col)).join(', ')})`].join(' ')
   const againstExpr = [toUpper(against), ['(', exprToSQL(expr.expr), mode && ` ${literalToSQL(mode)}`, ')'].filter(hasVal).join('')].join(' ')
@@ -181,5 +181,5 @@ export {
   columnDataType,
   columnOrderToSQL,
   columnReferenceDefinitionToSQL,
-  fulltextSearchToSQL,
+  fullTextSearchToSQL,
 }
