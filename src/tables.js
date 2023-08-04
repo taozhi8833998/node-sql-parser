@@ -74,7 +74,8 @@ function tableTumbleToSQL(tumble) {
 
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
-  const { table, db, as, expr, operator, prefix: prefixStr, schema, tablesample, table_hint } = tableInfo
+  const { table, db, as, expr, operator, prefix: prefixStr, schema, server, tablesample, table_hint } = tableInfo
+  const serverName = identifierToSql(server)
   const database = identifierToSql(db)
   const schemaStr = identifierToSql(schema)
   let tableName = table && identifierToSql(table)
@@ -97,7 +98,7 @@ function tableToSQL(tableInfo) {
     }
   }
   tableName = [toUpper(prefixStr), tableName].filter(hasVal).join(' ')
-  let str = [database, schemaStr, tableName].filter(hasVal).join('.')
+  let str = [serverName, database, schemaStr, tableName].filter(hasVal).join('.')
   if (tableInfo.parentheses) str = `(${str})`
   const result = [str]
   if (tablesample) {
@@ -105,7 +106,7 @@ function tableToSQL(tableInfo) {
     result.push(tableSampleSQL)
   }
   result.push(commonOptionConnector('AS', identifierToSql, as), operatorToSQL(operator))
-  if (table_hint) result.push(`${toUpper(table_hint.keyword)}`, `(${table_hint.expr.map(tableHintToSQL).filter(hasVal).join(', ')})`)
+  if (table_hint) result.push(toUpper(table_hint.keyword), `(${table_hint.expr.map(tableHintToSQL).filter(hasVal).join(', ')})`)
   return result.filter(hasVal).join(' ')
 }
 

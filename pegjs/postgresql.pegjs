@@ -3376,13 +3376,10 @@ ident
     }
 
 alias_ident
-  = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } __ LPAREN __ c:column_list __ RPAREN {
-    // => string
-    return `${name}(${c.join(', ')})`
-  }
-  / name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
+  = name:ident_name !{ return reservedMap[name.toUpperCase()] === true } c:(__ LPAREN __ column_list __ RPAREN)? {
       // => string
-      return name;
+      if (!c) return name;
+      return `${name}(${c[3].join(', ')})`
     }
   / name:quoted_ident {
       // => IGNORE

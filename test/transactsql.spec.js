@@ -101,9 +101,12 @@ describe('transactsql', () => {
   })
 
   it('should support table schema', () => {
-    const sql = `INSERT INTO source.dbo.movie (genre_id, title, release_date)
+    let sql = `INSERT INTO source.dbo.movie (genre_id, title, release_date)
     VALUES (@param1, @param2, @param3), (@param1, @param2, @param3);`
     expect(getParsedSql(sql)).to.equal("INSERT INTO [source].[dbo].[movie] ([genre_id], [title], [release_date]) VALUES (@param1,@param2,@param3), (@param1,@param2,@param3)")
+    sql = `INSERT INTO server.db.owner.movie (genre_id, title, release_date)
+    VALUES (@param1, @param2, @param3), (@param1, @param2, @param3);`
+    expect(getParsedSql(sql)).to.equal("INSERT INTO [server].[db].[owner].[movie] ([genre_id], [title], [release_date]) VALUES (@param1,@param2,@param3), (@param1,@param2,@param3)")
   })
 
   it('should support with clause', () => {
@@ -123,6 +126,22 @@ describe('transactsql', () => {
       expect(getParsedSql(sql)).to.equal("SELECT [title] FROM [dbo].[MyTable] WITH (NOEXPAND INDEX ([MyIndex], [MyIndex2])) WHERE [release_date] >= '01/01/2021'")
       sql = "select title FROM dbo.MyTable WITH (INDEX = MyIndex) WHERE [release_date] >= '01/01/2021'"
       expect(getParsedSql(sql)).to.equal("SELECT [title] FROM [dbo].[MyTable] WITH (INDEX = [MyIndex]) WHERE [release_date] >= '01/01/2021'")
+      sql = `SELECT
+      '' AS InetSalePaymentBroker,
+       null AS InetSalePaymentDate,
+        '' AS SenderMersisNo,
+      '' AS SenderIsletmeMerkezi,
+      '' AS SenderTicaretSicilNo,
+  NULL AS isExport,
+      NULL AS IhracKayitKodu
+
+      FROM LG_001_01_INVOICE INV
+        LEFT OUTER JOIN LG_001_CLCARD AS CLIENT ON (CLIENT.LOGICALREF = INV.CLIENTREF)
+      LEFT OUTER JOIN LG_001_01_STFICHE AS STFICHE (nolock)  ON (INV.FICHENO = STFICHE.INVNO)
+        WHERE
+        INV.TRCODE IN (3,6,7,8,9, 13)
+        AND INV.DATE_ BETWEEN Convert(datetime,'',102) AND Convert(datetime,'',102)`
+      expect(getParsedSql(sql)).to.equal("SELECT '' AS [InetSalePaymentBroker], NULL AS [InetSalePaymentDate], '' AS [SenderMersisNo], '' AS [SenderIsletmeMerkezi], '' AS [SenderTicaretSicilNo], NULL AS [isExport], NULL AS [IhracKayitKodu] FROM [LG_001_01_INVOICE] AS [INV] LEFT OUTER JOIN [LG_001_CLCARD] AS [CLIENT] ON ([CLIENT].[LOGICALREF] = [INV].[CLIENTREF]) LEFT OUTER JOIN [LG_001_01_STFICHE] AS [STFICHE] (NOLOCK) ON ([INV].[FICHENO] = [STFICHE].[INVNO]) WHERE [INV].[TRCODE] IN (3, 6, 7, 8, 9, 13) AND [INV].[DATE_] BETWEEN Convert([datetime], '', 102) AND Convert([datetime], '', 102)")
       sql = "select title FROM dbo.MyTable WITH (spatial_window_max_cells = 12) WHERE [release_date] >= '01/01/2021'"
       expect(getParsedSql(sql)).to.equal("SELECT [title] FROM [dbo].[MyTable] WITH (SPATIAL_WINDOW_MAX_CELLS = 12) WHERE [release_date] >= '01/01/2021'")
       expect(tableHintToSQL()).to.be.undefined
@@ -221,6 +240,12 @@ describe('transactsql', () => {
                   ELSE
                         SELECT 'Weekday';`
       expect(getParsedSql(sql)).to.be.equal("IF DATENAME([weekday], GETDATE()) IN (N'Saturday', N'Sunday') SELECT 'Weekend'; ELSE SELECT 'Weekday';")
+    })
+  })
+  describe('from values', () => {
+    it('should support from values', () => {
+      const sql = `select * from (values (0, 0), (1, null), (null, 2), (3, 4)) as t(a,b)`
+      expect(getParsedSql(sql)).to.be.equal("SELECT * FROM (VALUES (0,0), (1,NULL), (NULL,2), (3,4)) AS [t(a, b)]")
     })
   })
 })

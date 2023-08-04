@@ -261,7 +261,7 @@ crud_stmt
   / proc_stmts
 
 multiple_stmt
-  = head:crud_stmt tail:(__ SEMICOLON __ crud_stmt)+ {
+  = head:crud_stmt tail:(__ SEMICOLON? __ crud_stmt)+ {
       const cur = [head && head.ast || head];
       for (let i = 0; i < tail.length; i++) {
         if(!tail[i][3] || tail[i][3].length === 0) continue;
@@ -1422,6 +1422,11 @@ column_list_item
   / e:binary_column_expr __ alias:alias_clause? {
       return { expr: e, as: alias };
     }
+value_alias_clause
+  = KW_AS? __ name:ident_name c:(__ LPAREN __ column_list __ RPAREN)? {
+      if (!c) return name;
+      return `${name}(${c[3].join(', ')})`
+    }
 
 alias_clause
   = KW_AS __ i:alias_ident { return i; }
@@ -1651,9 +1656,9 @@ table_hint_item_list
   }
 
 table_hint
-  = KW_WITH __ LPAREN __ t:table_hint_item_list __ RPAREN {
+  = k:KW_WITH? __ LPAREN __ t:table_hint_item_list __ RPAREN {
     return {
-      keyword: 'with',
+      keyword: k && k[0].toLowerCase(),
       expr: t,
       parentheses: true,
     }
@@ -1671,7 +1676,14 @@ table_base
       t.table_hint = th
       return t
     }
-  / LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? {
+  / stmt:value_clause __ alias:value_alias_clause? {
+    return {
+      expr: { type: 'values', values: stmt },
+      as: alias
+    };
+  }
+  / LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:value_alias_clause? {
+      if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt }
       stmt.parentheses = true;
       return {
         expr: stmt,
@@ -1680,20 +1692,24 @@ table_base
     }
 
 join_op
-  = KW_LEFT __ KW_OUTER? __ KW_JOIN { return 'LEFT JOIN'; }
-  / KW_RIGHT __ KW_OUTER? __ KW_JOIN { return 'RIGHT JOIN'; }
-  / KW_FULL __ KW_OUTER? __ KW_JOIN { return 'FULL JOIN'; }
-  / (KW_INNER __)? KW_JOIN { return 'INNER JOIN'; }
+  = a:(KW_LEFT / KW_RIGHT / KW_FULL) __ s:KW_OUTER? __ KW_JOIN { return [a[0].toUpperCase(), s && s[0], 'JOIN'].filter(v => v).join(' '); }
+  / a:(KW_INNER / KW_CROSS) __ KW_JOIN { return `${a[0].toUpperCase()} JOIN` }
 
 table_name
-  = dt:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
-      const obj = { db: null, table: dt };
-      if (tail !== null) {
-        obj.db = dt;
-        obj.schema = schema[3];
-        obj.table = tail[3];
+  = server:ident __ DOT __ db:ident __ DOT __ schema:ident __ DOT __ table:ident {
+    return {
+        server,
+        db,
+        schema,
+        table
       }
-      return obj;
+  }
+  / db:ident __ DOT __ schema:ident __ DOT __ table:ident {
+      return {
+        db,
+        schema,
+        table
+      }
     }
   / dt:ident tail:(__ DOT __ ident)? {
       const obj = { db: null, table: dt };
@@ -2720,6 +2736,7 @@ KW_LEFT     = "LEFT"i     !ident_start
 KW_RIGHT    = "RIGHT"i    !ident_start
 KW_FULL     = "FULL"i     !ident_start
 KW_INNER    = "INNER"i    !ident_start
+KW_CROSS    = "CROSS"i    !ident_start
 KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
 KW_OVER     = "OVER"i     !ident_start
