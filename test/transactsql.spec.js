@@ -240,13 +240,14 @@ describe('transactsql', () => {
     INNER JOIN Sales.SalesOrderHeader OrderHeader
     ON Cust.CustomerID = OrderHeader.CustomerID`
     let sql = [base, 'for xml auto'].join('\n')
-    expect(getParsedSql(sql)).to.be.equal("SELECT [Cust].[CustomerID], [OrderHeader].[CustomerID], [OrderHeader].[SalesOrderID], [OrderHeader].[Status] FROM [Sales].[Customer] AS [Cust] INNER JOIN [Sales].[SalesOrderHeader] AS [OrderHeader] ON [Cust].[CustomerID] = [OrderHeader].[CustomerID] FOR XML AUTO")
+    const sqlfiyBase = "SELECT [Cust].[CustomerID], [OrderHeader].[CustomerID], [OrderHeader].[SalesOrderID], [OrderHeader].[Status] FROM [Sales].[Customer] AS [Cust] INNER JOIN [Sales].[SalesOrderHeader] AS [OrderHeader] ON [Cust].[CustomerID] = [OrderHeader].[CustomerID]"
+    expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML AUTO`)
     sql = [base, 'for xml path'].join('\n')
-    expect(getParsedSql(sql)).to.be.equal("SELECT [Cust].[CustomerID], [OrderHeader].[CustomerID], [OrderHeader].[SalesOrderID], [OrderHeader].[Status] FROM [Sales].[Customer] AS [Cust] INNER JOIN [Sales].[SalesOrderHeader] AS [OrderHeader] ON [Cust].[CustomerID] = [OrderHeader].[CustomerID] FOR XML PATH")
+    expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML PATH`)
     sql = [base, 'for xml path(rowName)'].join('\n')
-    expect(getParsedSql(sql)).to.be.equal("SELECT [Cust].[CustomerID], [OrderHeader].[CustomerID], [OrderHeader].[SalesOrderID], [OrderHeader].[Status] FROM [Sales].[Customer] AS [Cust] INNER JOIN [Sales].[SalesOrderHeader] AS [OrderHeader] ON [Cust].[CustomerID] = [OrderHeader].[CustomerID] FOR XML PATH([rowName])")
+    expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML PATH([rowName])`)
     sql = [base, 'for xml path(\'\')'].join('\n')
-    expect(getParsedSql(sql)).to.be.equal("SELECT [Cust].[CustomerID], [OrderHeader].[CustomerID], [OrderHeader].[SalesOrderID], [OrderHeader].[Status] FROM [Sales].[Customer] AS [Cust] INNER JOIN [Sales].[SalesOrderHeader] AS [OrderHeader] ON [Cust].[CustomerID] = [OrderHeader].[CustomerID] FOR XML PATH('')")
+    expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML PATH('')`)
   })
   describe('if else', () => {
     it('should support if only statement', () => {
