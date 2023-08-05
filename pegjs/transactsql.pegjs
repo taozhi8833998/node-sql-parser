@@ -1336,7 +1336,8 @@ select_stmt_nake
     g:group_by_clause?  __
     h:having_clause?    __
     o:order_by_clause?  __
-    l:limit_clause? {
+    l:limit_clause? __
+    fx:for_xml? {
       if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
           with: cte,
@@ -1345,6 +1346,7 @@ select_stmt_nake
           distinct: d,
           columns: c,
           from: f,
+          for: fx,
           where: w,
           groupby: g,
           having: h,
@@ -1776,6 +1778,25 @@ limit_clause
         value: res
       };
     }
+for_xml_item
+  = i:('RAW'i / 'AUTO'i /  'EXPLICIT'i) {
+    return {
+      keyword: i,
+    }
+  }
+  / i:'PATH'i __ v:(LPAREN __ (column_ref / literal_string)? __ RPAREN)? {
+    return {
+      keyword: i,
+      expr: v && v[2]
+    }
+  }
+for_xml
+  = 'FOR'i __ 'XML'i __ v:for_xml_item {
+    return {
+      type: 'for xml',
+      ...v,
+    }
+  }
 
 update_stmt
   = __ cte:with_clause? __ KW_UPDATE    __
@@ -3137,7 +3158,7 @@ datetime_type
   = lb:LBRAKE? __ t:(KW_DATETIME2 / KW_DATETIMEOFFSET / KW_TIME) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN {
     return  {dataType: t, length: parseInt(l.join(''), 10), parentheses: true }
   }
-  / lb:LBRAKE? __ t:(KW_DATE / KW_SMALLDATETIME / KW_DATETIME / KW_DATETIME2 / KW_DATETIMEOFFSET / KW_TIME / KW_TIMESTAMP) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
+  / lb:LBRAKE? __ t:(KW_DATE / KW_SMALLDATETIME / KW_DATETIME2 / KW_DATETIME / KW_DATETIMEOFFSET / KW_TIME / KW_TIMESTAMP) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
     return { dataType: t };
   }
 

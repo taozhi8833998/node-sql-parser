@@ -227,6 +227,28 @@ describe('transactsql', () => {
     sql = 'ALTER VIEW [dbo].[reporting_class] (id, active) with ENCRYPTION, SCHEMABINDING AS SELECT [ClassHexID], [DepartmentID] AS class_source FROM [Class] WHERE [Class].[active] = 1 with check option'
     expect(getParsedSql(sql)).to.be.equal('ALTER VIEW [dbo].[reporting_class] ([id], [active]) WITH ENCRYPTION, SCHEMABINDING AS SELECT [ClassHexID], [DepartmentID] AS [class_source] FROM [Class] WHERE [Class].[active] = 1 WITH CHECK OPTION')
   })
+  it('should support cast datatime2', () => {
+    const sql = "INSERT [dbo].[testtable] ([NodeID], [Timestamp], [ResponseTime], [PercentLoss], [Availability], [Weight]) VALUES (2, CAST(N'2023-04-11T22:17:13.0864249' AS DateTime2), 0, 0, 100, 120)"
+    expect(getParsedSql(sql)).to.be.equal("INSERT INTO [dbo].[testtable] ([NodeID], [Timestamp], [ResponseTime], [PercentLoss], [Availability], [Weight]) VALUES (2,CAST(N'2023-04-11T22:17:13.0864249' AS DATETIME2),0,0,100,120)")
+  })
+  it('should support for xml', () => {
+    const base = `SELECT Cust.CustomerID,
+        OrderHeader.CustomerID,
+        OrderHeader.SalesOrderID,
+        OrderHeader.Status
+    FROM Sales.Customer Cust
+    INNER JOIN Sales.SalesOrderHeader OrderHeader
+    ON Cust.CustomerID = OrderHeader.CustomerID`
+    let sql = [base, 'for xml auto'].join('\n')
+    const sqlfiyBase = "SELECT [Cust].[CustomerID], [OrderHeader].[CustomerID], [OrderHeader].[SalesOrderID], [OrderHeader].[Status] FROM [Sales].[Customer] AS [Cust] INNER JOIN [Sales].[SalesOrderHeader] AS [OrderHeader] ON [Cust].[CustomerID] = [OrderHeader].[CustomerID]"
+    expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML AUTO`)
+    sql = [base, 'for xml path'].join('\n')
+    expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML PATH`)
+    sql = [base, 'for xml path(rowName)'].join('\n')
+    expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML PATH([rowName])`)
+    sql = [base, 'for xml path(\'\')'].join('\n')
+    expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML PATH('')`)
+  })
   describe('if else', () => {
     it('should support if only statement', () => {
       const sql = `IF EXISTS(SELECT 1 from sys.views where name='MyView' and type='v')

@@ -45,11 +45,20 @@ function selectIntoToSQL(into) {
  * @return {string}
  */
 
+function forXmlToSQL(stmt) {
+  if (!stmt) return
+  const { expr, keyword, type } = stmt
+  const result = [toUpper(type), toUpper(keyword)]
+  if (!expr) return result.join(' ')
+  return `${result.join(' ')}(${exprToSQL(expr)})`
+}
+
 function selectToSQL(stmt) {
   const {
     as_struct_val: asStructVal,
     columns,
     distinct,
+    for: forXml,
     from,
     for_sys_time_as_of: forSystem = {},
     locking_read: lockingRead,
@@ -88,6 +97,7 @@ function selectToSQL(stmt) {
   clauses.push(limitToSQL(limit))
   clauses.push(toUpper(lockingRead))
   if (position === 'end') clauses.push(intoSQL)
+  clauses.push(forXmlToSQL(forXml))
   const sql = clauses.filter(hasVal).join(' ')
   return parentheses ? `(${sql})` : sql
 }
