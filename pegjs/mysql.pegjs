@@ -1924,7 +1924,7 @@ table_to_list
     }
 
 table_to_item
-  = head:table_name __ KW_TO __ tail: (table_name) {
+  = head:table_name __ KW_TO __ tail:table_name {
       return [head, tail]
     }
 
