@@ -728,6 +728,13 @@ describe('mysql', () => {
         ]
       },
       {
+        title: 'grant to role',
+        sql: [
+          "GRANT SELECT ON world.* TO 'role3';",
+          "GRANT SELECT ON `world`.* TO 'role3'"
+        ]
+      },
+      {
         title: 'grant priv type',
         sql: [
           "GRANT SELECT, INSERT ON mydb.* TO 'someuser'@'somehost';",
