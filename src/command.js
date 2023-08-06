@@ -1,6 +1,6 @@
 import { columnDataType, columnRefToSQL } from './column'
 import { createDefinitionToSQL } from './create'
-import { identifierToSql, hasVal, toUpper } from './util'
+import { identifierToSql, hasVal, toUpper, literalToSQL } from './util'
 import { exprToSQL } from './expr'
 import { tablesToSQL, tableToSQL } from './tables'
 import astToSQL from './sql'
@@ -145,12 +145,46 @@ function ifToSQL(stmt) {
   return result.filter(hasVal).join(' ')
 }
 
+function grantUserOrRoleToSQL(stmt) {
+  const { name, host } = stmt
+  const result = [`'${name}'`]
+  if (host) result.push('@', `'${host}'`)
+  return result.join('')
+}
+
+function grantToSQL(stmt) {
+  const { type, keyword, objects, on, to, with: withOpt } = stmt
+  const result = [toUpper(type)]
+  const objStr = objects.map(obj => {
+    const { priv, columns } = obj
+    const privSQL = [exprToSQL(priv)]
+    if (columns) privSQL.push(`(${columns.map(columnRefToSQL).join(', ')})`)
+    return privSQL.join(' ')
+  }).join(', ')
+  result.push(objStr)
+  if (on) {
+    result.push('ON')
+    switch (keyword) {
+      case 'priv':
+        result.push(toUpper(on.object_type), [identifierToSql(on.priv_level.db), identifierToSql(on.priv_level.table)].filter(hasVal).join('.'))
+        break
+      case 'proxy':
+        result.push(grantUserOrRoleToSQL(on))
+        break
+    }
+  }
+  result.push('TO', to.map(grantUserOrRoleToSQL).join(', '))
+  result.push(literalToSQL(withOpt))
+  return result.filter(hasVal).join(' ')
+}
+
 export {
   callToSQL,
   commonCmdToSQL,
   deallocateToSQL,
   declareToSQL,
   descToSQL,
+  grantToSQL,
   ifToSQL,
   renameToSQL,
   useToSQL,

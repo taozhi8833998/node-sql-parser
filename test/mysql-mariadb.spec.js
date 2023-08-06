@@ -713,6 +713,48 @@ describe('mysql', () => {
           'SELECT `t`.`a`, (SELECT (SELECT POW(1 + 3, 2) FROM DUAL) FROM DUAL) FROM `db`.`t`'
         ]
       },
+      {
+        title: 'grant priv all',
+        sql: [
+          "GRANT ALL ON db1.* TO 'jeffrey'@'localhost';",
+          "GRANT ALL ON `db1`.* TO 'jeffrey'@'localhost'"
+        ]
+      },
+      {
+        title: 'grant role',
+        sql: [
+          "GRANT 'role1', 'role2' TO 'user1'@'localhost', 'user2'@'localhost';",
+          "GRANT 'role1', 'role2' TO 'user1'@'localhost', 'user2'@'localhost'"
+        ]
+      },
+      {
+        title: 'grant priv type',
+        sql: [
+          "GRANT SELECT, INSERT ON mydb.* TO 'someuser'@'somehost';",
+          "GRANT SELECT, INSERT ON `mydb`.* TO 'someuser'@'somehost'"
+        ]
+      },
+      {
+        title: 'grant priv type with columns',
+        sql: [
+          "GRANT SELECT (col1), INSERT (col1, col2) ON mydb.mytbl TO 'someuser'@'somehost';",
+          "GRANT SELECT (`col1`), INSERT (`col1`, `col2`) ON `mydb`.`mytbl` TO 'someuser'@'somehost'"
+        ]
+      },
+      {
+        title: 'grant proxy',
+        sql: [
+          "GRANT PROXY ON 'localuser'@'localhost' TO 'externaluser'@'somehost';",
+          "GRANT PROXY ON 'localuser'@'localhost' TO 'externaluser'@'somehost'"
+        ]
+      },
+      {
+        title: 'grant with option',
+        sql: [
+          "GRANT ALL ON *.* TO 'someuser'@'somehost' WITH GRANT OPTION",
+          "GRANT ALL ON *.* TO 'someuser'@'somehost' WITH GRANT OPTION"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

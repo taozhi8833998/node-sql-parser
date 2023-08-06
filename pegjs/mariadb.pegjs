@@ -225,6 +225,7 @@ cmd_stmt
   / unlock_stmt
   / show_stmt
   / desc_stmt
+  / grant_stmt
 
 create_stmt
   = create_table_stmt
@@ -1436,6 +1437,118 @@ call_stmt
     }
   }
 
+priv_type_table
+  =  p:(KW_ALL / KW_ALTER / KW_CREATE __ 'VIEW'i / KW_CREATE / KW_DELETE / KW_DROP / 'GRANT'i __ 'OPTION'i / KW_INDEX / KW_INSERT / KW_REFERENCES / KW_SELECT / KW_SHOW __ KW_VIEW / KW_TRIGGER / KW_UPDATE) {
+    return {
+      type: 'origin',
+      value: Array.isArray(p) ? p[0] : p
+    }
+  }
+priv_type_routine
+  = p:(KW_ALTER __ 'ROUTINE'i / 'EXECUTE'i / 'GRANT'i __ 'OPTION'i / KW_CREATE __ 'ROUTINE'i) {
+    return {
+      type: 'origin',
+      value: Array.isArray(p) ? p[0] : p
+    }
+  }
+priv_type
+  = priv_type_table / priv_type_routine
+priv_item
+  = p:priv_type __ c:(LPAREN __ column_ref_list __ RPAREN)? {
+    return {
+      priv: p,
+      columns: c && c[2],
+    }
+  }
+priv_list
+  = head:priv_item tail:(__ COMMA __ priv_item)* {
+      return createList(head, tail)
+    }
+object_type
+  = o:(KW_TABLE / 'FUNCTION'i / 'PROCEDURE') {
+    return {
+      type: 'origin',
+      value: o.toUpperCase()
+    }
+  }
+priv_level
+  = db:((ident / STAR) __ DOT)? __ table:(ident / STAR) {
+      return {
+          db: db && db[0],
+          table
+      }
+    }
+user_or_role
+  = i:ident __ ho:('@' __ ident)? {
+    return {
+      name: i,
+      host: ho && ho[2]
+    }
+  }
+user_or_role_list
+  = head:user_or_role tail:(__ COMMA __ user_or_role)* {
+      return createList(head, tail)
+    }
+with_grant_option
+  = KW_WITH __ 'GRANT'i __ 'OPTION'i {
+    return {
+      type: 'origin',
+      value: 'with grant option',
+    }
+  }
+with_admin_option
+  = KW_WITH __ 'ADMIN'i __ 'OPTION'i {
+    return {
+      type: 'origin',
+      value: 'with admin option',
+    }
+  }
+grant_stmt
+  = 'GRANT'i __ pl:priv_list __ KW_ON __ ot:object_type? __ le:priv_level __ KW_TO __ to:user_or_role_list __ wo:with_grant_option? {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'grant',
+        keyword: 'priv',
+        objects: pl,
+        on: {
+          object_type: ot,
+          priv_level: le
+        },
+        to,
+        with: wo
+      }
+    }
+  }
+  / 'GRANT' __ 'PROXY' __ KW_ON __ on:user_or_role __ KW_TO __ to:user_or_role_list __ wo:with_admin_option? {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'grant',
+        keyword: 'proxy',
+        objects: [{ priv: { type: 'origin', value: 'proxy' }}],
+        on,
+        to,
+        with: wo
+      }
+    }
+  }
+  / 'GRANT' __ o:ident_list __ KW_TO __ to:user_or_role_list __ wo:with_admin_option? {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'grant',
+        keyword: 'role',
+        objects: o.map(name => ({ priv: { type: 'string', value: name }})),
+        to,
+        with: wo
+      }
+    }
+  }
+
 select_stmt
   = select_stmt_nake
   / s:('(' __ select_stmt __ ')') {
@@ -2397,7 +2510,10 @@ ident
       return name;
     }
   / quoted_ident
-
+ident_list
+  = head:ident tail:(__ COMMA __ ident)* {
+      return createList(head, tail)
+    }
 alias_ident
   = name:ident_name !{
       if (reservedMap[name.toUpperCase()] === true) throw new Error("Error: "+ JSON.stringify(name)+" is a reserved word, can not as alias clause");
