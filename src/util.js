@@ -144,6 +144,7 @@ function identifierToSql(ident, isDual) {
   const { database } = getParserOpt()
   if (isDual === true) return `'${ident}'`
   if (!ident) return
+  if (ident === '*') return ident
   switch (database && database.toLowerCase()) {
     case 'mysql':
     case 'mariadb':
