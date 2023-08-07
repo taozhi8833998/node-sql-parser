@@ -1,12 +1,12 @@
 import { alterExprToSQL } from './alter'
 import { exprToSQL } from './expr'
 import { indexDefinitionToSQL, indexOptionListToSQL, indexTypeToSQL } from './index-definition'
-import { columnDefinitionToSQL } from './column'
+import { columnDefinitionToSQL, columnRefToSQL } from './column'
 import { constraintDefinitionToSQL } from './constrain'
 import { funcToSQL } from './func'
 import { tablesToSQL, tableOptionToSQL, tableToSQL } from './tables'
 import { setToSQL } from './update'
-import { unionToSQL } from './union'
+import { multipleToSQL, unionToSQL } from './union'
 import {
   columnIdentifierToSql,
   columnOrderListToSQL,
@@ -68,23 +68,35 @@ function createTableToSQL(stmt) {
 function createTriggerToSQL(stmt) {
   const {
     definer, for_each: forEach, keyword,
+    execute: triggerBody,
     type, table, if_not_exists: ife,
-    trigger, trigger_event: triggerEvent,
-    trigger_order: triggerOrder, trigger_time: triggerTime,
-    trigger_body: triggerBody,
+    temporary, trigger, events: triggerEvents,
+    order: triggerOrder, time: triggerTime, when,
   } = stmt
   const sql = [
-    toUpper(type), definer, toUpper(keyword),
-    toUpper(ife), identifierToSql(trigger),
-    toUpper(triggerTime), toUpper(triggerEvent),
-    'ON', tableToSQL(table), toUpper(forEach),
+    toUpper(type), toUpper(temporary), definer, toUpper(keyword),
+    toUpper(ife), tableToSQL(trigger),
+    toUpper(triggerTime),
+    triggerEvents.map(event => {
+      const eventStr = [toUpper(event.keyword)]
+      const { args } = event
+      if (args) eventStr.push(toUpper(args.keyword), args.columns.map(columnRefToSQL).join(', '))
+      return eventStr.join(' ')
+    }),
+    'ON', tableToSQL(table), toUpper(forEach && forEach.keyword), toUpper(forEach && forEach.args),
     triggerOrder && `${toUpper(triggerOrder.keyword)} ${identifierToSql(triggerOrder.trigger)}`,
+    commonOptionConnector('WHEN', exprToSQL, when),
+    toUpper(triggerBody.prefix),
   ]
   switch (triggerBody.type) {
     case 'set':
-      sql.push(commonOptionConnector('SET', setToSQL, triggerBody.trigger))
+      sql.push(commonOptionConnector('SET', setToSQL, triggerBody.expr))
+      break
+    case 'multiple':
+      sql.push(multipleToSQL(triggerBody.expr.ast))
       break
   }
+  sql.push(toUpper(triggerBody.suffix))
   return sql.filter(hasVal).join(' ')
 }
 

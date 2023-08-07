@@ -121,4 +121,11 @@ describe('sqlite', () => {
     const sql = 'select count(*)*1. from abc'
     expect(getParsedSql(sql)).to.be.equal('SELECT COUNT(*) * 1 FROM `abc`')
   })
+  it('should support create trigger', () => {
+    let sql = `CREATE TRIGGER update_customer_address UPDATE OF address ON customers
+    BEGIN
+      UPDATE orders SET address = new.address WHERE customer_name = old.name;
+    END;`
+    expect(getParsedSql(sql)).to.be.equal('CREATE TRIGGER `update_customer_address` UPDATE OF `address` ON `customers` BEGIN UPDATE `orders` SET `address` = `new`.`address` WHERE `customer_name` = `old`.`name` END')
+  })
 })

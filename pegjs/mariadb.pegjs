@@ -554,7 +554,18 @@ trigger_definer
 trigger_time
   = 'BEFORE'i /  'AFTER'i
 trigger_event
-  = KW_INSERT / KW_UPDATE / KW_DELETE
+  = kw:(KW_INSERT / KW_UPDATE / KW_DELETE) {
+    return {
+      keyword: kw[0].toLowerCase(),
+    }
+  }
+trigger_for_row
+  = kw:'FOR'i __ e:('EACH'i)? __ ob:('ROW'i / 'STATEMENT'i) {
+    return {
+      keyword: e ? `${kw.toLowerCase()} ${e.toLowerCase()}` : kw.toLowerCase(),
+      args: ob.toLowerCase()
+    }
+  }
 trigger_order
   = f:('FOLLOWS'i / 'PRECEDES'i) __ t:ident_name {
     return {
@@ -566,7 +577,7 @@ trigger_body
   = KW_SET __ s:set_list {
     return {
       type: 'set',
-      trigger: s
+      expr: s
     }
   }
 
@@ -575,12 +586,12 @@ create_trigger_stmt
     df:trigger_definer? __
     KW_TRIGGER __
     ife:if_not_exists_stmt? __
-    t:ident_name __
+    t:table_name __
     tt:trigger_time __
     te:trigger_event __
-    KW_ON __ tb:table_name __ 'FOR'i __ 'EACH'i __ 'ROW'i __
+    KW_ON __ tb:table_name __ fe:trigger_for_row __
     tr:trigger_order? __
-    tbo:trigger_body __ {
+    tbo:trigger_body {
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -588,14 +599,14 @@ create_trigger_stmt
           type: a[0].toLowerCase(),
           definer: df,
           keyword: 'trigger',
-          for_each: 'for each row',
+          for_each: fe,
           if_not_exists: ife,
           trigger: t,
-          trigger_time: tt,
-          trigger_event: te[0],
-          trigger_order: tr,
+          time: tt,
+          events: [te],
+          order: tr,
           table: tb,
-          trigger_body: tbo,
+          execute: tbo,
         }
       }
     }
