@@ -1271,6 +1271,17 @@ describe('Postgres', () => {
       const ast = parser.parse(sql, opt)
       expect(ast.tableList).to.be.eql(['select::null::Test'])
       expect(ast.columnList).to.be.eql(['select::null::Id'])
+      expect(ast.ast[0].columns).to.be.eql([
+        {
+          type: 'expr',
+          expr: {
+              type: 'column_ref',
+              table: null,
+              column: 'Id'
+          },
+          as: null
+        }
+      ])
       expect(parser.sqlify(ast.ast, opt)).to.be.equals(sql.slice(0, -1))
     })
 
