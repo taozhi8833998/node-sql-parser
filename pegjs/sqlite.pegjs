@@ -222,6 +222,7 @@ cmd_stmt
 create_stmt
   = create_table_stmt
   / create_db_stmt
+  / create_trigger_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -237,8 +238,9 @@ crud_stmt
   / proc_stmts
 
 multiple_stmt
-  = head:crud_stmt tail:(__ SEMICOLON __ crud_stmt)+ {
+  = head:crud_stmt tail:(__ SEMICOLON __ crud_stmt)* {
       const cur = [head && head.ast || head];
+      if (!tail) tail = []
       for (let i = 0; i < tail.length; i++) {
         if(!tail[i][3] || tail[i][3].length === 0) continue;
         cur.push(tail[i][3] && tail[i][3].ast || tail[i][3]);
@@ -278,6 +280,78 @@ create_db_definition
 if_not_exists_stmt
   = 'IF'i __ KW_NOT __ KW_EXISTS {
     return 'IF NOT EXISTS'
+  }
+
+create_trigger_stmt
+  = kw: KW_CREATE __
+  tp:(KW_TEMPORARY / KW_TEMP)? __
+  t:('TRIGGER'i) __
+  ife:if_not_exists_stmt? __
+  c:table_name __
+  p:('BEFORE'i / 'AFTER'i / 'INSTEAD OF'i)? __
+  te:trigger_event_list __
+  on:'ON'i __
+  tn:table_name __
+  fe:trigger_for_row? __
+  tw:trigger_when? __
+  ta:trigger_action {
+    return {
+        type: 'create',
+        temporary: tp && tp[0].toLowerCase(),
+        time: p && p.toLowerCase(),
+        events: te,
+        trigger: c,
+        table: tn,
+        for_each: fe,
+        if_not_exists: ife,
+        when: tw,
+        execute: ta,
+        keyword: t && t.toLowerCase(),
+      }
+  }
+
+trigger_event
+  = kw:(KW_INSERT / KW_DELETE) {
+    return {
+      keyword: kw[0].toLowerCase(),
+    }
+  }
+  / kw:KW_UPDATE __ a:('OF'i __ column_ref_list)? {
+    return {
+      keyword: kw[0].toLowerCase(),
+      args: a && { keyword: a[0], columns: a[2] } || null
+    }
+  }
+
+trigger_event_list
+  = head:trigger_event tail:(__ KW_OR __ trigger_event)* {
+    return createList(head, tail)
+  }
+
+trigger_action
+  = b:'BEGIN'i __ ms:multiple_stmt __ e:'END'i {
+    return {
+      type: 'multiple',
+      prefix: b,
+      expr: ms,
+      suffix: e,
+    }
+  }
+
+trigger_for_row
+  = kw:'FOR'i __ e:('EACH'i)? __ ob:('ROW'i / 'STATEMENT'i) {
+    return {
+      keyword: e ? `${kw.toLowerCase()} ${e.toLowerCase()}` : kw.toLowerCase(),
+      args: ob.toLowerCase()
+    }
+  }
+
+trigger_when
+  = KW_WHEN __ condition:expr {
+    return {
+      type: 'when',
+      cond: condition,
+    }
   }
 
 create_db_stmt
@@ -2285,6 +2359,7 @@ KW_SELECT   = "SELECT"i     !ident_start
 KW_UPDATE   = "UPDATE"i     !ident_start
 KW_CREATE   = "CREATE"i     !ident_start
 KW_TEMPORARY = "TEMPORARY"i !ident_start
+KW_TEMP      = "TEMP"i      !ident_start
 KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
 KW_RECURSIVE= "RECURSIVE"   !ident_start
