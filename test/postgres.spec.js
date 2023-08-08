@@ -1062,6 +1062,13 @@ describe('Postgres', () => {
         WITH LOCAL CHECK OPTION;`,
         `CREATE OR REPLACE TEMPORARY RECURSIVE VIEW "universal_comedies" WITH (CHECK_OPTION = LOCAL, SECURITY_BARRIER = FALSE) AS SELECT * FROM "comedies" WHERE "classification" = 'U' WITH LOCAL CHECK OPTION`
       ]
+    },
+    {
+      title: 'create trigger',
+      sql: [
+        "CREATE TRIGGER film_fulltext_trigger BEFORE INSERT OR UPDATE ON public.film FOR EACH ROW EXECUTE FUNCTION tsvector_update_trigger('fulltext', 'pg_catalog.english', 'title', 'description');",
+        `CREATE TRIGGER "film_fulltext_trigger" BEFORE INSERT OR UPDATE ON "public"."film" FOR EACH ROW EXECUTE FUNCTION tsvector_update_trigger('fulltext', 'pg_catalog.english', 'title', 'description')`
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){

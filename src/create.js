@@ -108,10 +108,11 @@ function createConstraintTriggerToSQL(stmt) {
     for_each: forEach, from,
     location,
     keyword,
+    or,
     type, table,
     when,
   } = stmt
-  const sql = [toUpper(type), toUpper(constraintKw), toUpper(keyword), identifierToSql(constraint), toUpper(location)]
+  const sql = [toUpper(type), toUpper(or), toUpper(constraintKw), toUpper(keyword), identifierToSql(constraint), toUpper(location)]
   const event = triggerEventToSQL(events)
   sql.push(event, 'ON', tableToSQL(table))
   if (from) sql.push('FROM', tableToSQL(from))
