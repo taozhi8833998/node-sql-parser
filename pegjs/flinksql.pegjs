@@ -1343,6 +1343,7 @@ reference_option
 
 create_constraint_trigger
   = kw: KW_CREATE __
+  or:(KW_OR __ KW_REPLACE)? __
   kc:KW_CONSTRAINT? __
   t:('TRIGGER'i) __
   c:ident_name __
@@ -1354,31 +1355,11 @@ create_constraint_trigger
   de:trigger_deferrable? __
   fe:trigger_for_row? __
   tw:trigger_when? __
-  fc:'EXECUTE'i __ 'PROCEDURE'i __
+  fc:'EXECUTE'i __ e:('PROCEDURE'i / 'FUNCTION'i) __
   fct:proc_func_call {
-    /*
-    => {
-      type: 'create';
-      constraint: string;
-      location: 'before' | 'after' | 'instead of';
-      events: trigger_event_list;
-      table: table_name;
-      from?: table_name;
-      deferrable?: trigger_deferrable;
-      for_each?: trigger_for_row;
-      when?: trigger_when;
-      execute: {
-        keyword: 'execute procedure';
-        expr: proc_func_call;
-      };
-      constraint_type: 'trigger';
-      keyword: 'trigger';
-      constraint_kw: 'constraint';
-      resource: 'constraint';
-    }
-    */
     return {
         type: 'create',
+        replace: or && 'or replace',
         constraint: c,
         location: p && p.toLowerCase(),
         events: te,
@@ -1388,7 +1369,7 @@ create_constraint_trigger
         for_each: fe,
         when: tw,
         execute: {
-          keyword: 'execute procedure',
+          keyword: `execute ${e.toLowerCase()}`,
           expr: fct
         },
         constraint_type: t && t.toLowerCase(),

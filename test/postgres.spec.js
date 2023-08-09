@@ -1062,6 +1062,13 @@ describe('Postgres', () => {
         WITH LOCAL CHECK OPTION;`,
         `CREATE OR REPLACE TEMPORARY RECURSIVE VIEW "universal_comedies" WITH (CHECK_OPTION = LOCAL, SECURITY_BARRIER = FALSE) AS SELECT * FROM "comedies" WHERE "classification" = 'U' WITH LOCAL CHECK OPTION`
       ]
+    },
+    {
+      title: 'create trigger',
+      sql: [
+        "CREATE TRIGGER film_fulltext_trigger BEFORE INSERT OR UPDATE ON public.film FOR EACH ROW EXECUTE FUNCTION tsvector_update_trigger('fulltext', 'pg_catalog.english', 'title', 'description');",
+        `CREATE TRIGGER "film_fulltext_trigger" BEFORE INSERT OR UPDATE ON "public"."film" FOR EACH ROW EXECUTE FUNCTION tsvector_update_trigger('fulltext', 'pg_catalog.english', 'title', 'description')`
+      ]
     }
   ]
   function neatlyNestTestedSQL(sqlList){
@@ -1264,6 +1271,17 @@ describe('Postgres', () => {
       const ast = parser.parse(sql, opt)
       expect(ast.tableList).to.be.eql(['select::null::Test'])
       expect(ast.columnList).to.be.eql(['select::null::Id'])
+      expect(ast.ast[0].columns).to.be.eql([
+        {
+          type: 'expr',
+          expr: {
+              type: 'column_ref',
+              table: null,
+              column: 'Id'
+          },
+          as: null
+        }
+      ])
       expect(parser.sqlify(ast.ast, opt)).to.be.equals(sql.slice(0, -1))
     })
 
