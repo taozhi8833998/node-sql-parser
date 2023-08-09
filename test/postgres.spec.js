@@ -586,14 +586,14 @@ describe('Postgres', () => {
       ]
     },
     {
-      title: 'dollar-quoted string',
+      title: 'double dollar-quoted string',
       sql: [
         'SELECT $$foo bar$$;',
         'SELECT $$foo bar$$'
       ]
     },
     {
-      title: 'dollar-quoted string',
+      title: 'single dollar-quoted string',
       sql: [
         "select $SomeTag$Dianne's horse$SomeTag$",
         "SELECT $SomeTag$Dianne's horse$SomeTag$"
@@ -1260,6 +1260,20 @@ describe('Postgres', () => {
           `SELECT c::REGTYPE FROM pg_attribute`,
           'SELECT "c"::REGTYPE FROM "pg_attribute"'
         ]
+      },
+      {
+        title: 'chinese oridinary identifier',
+        sql: [
+          'select 中文 from t1;',
+          'SELECT "中文" FROM "t1"'
+        ],
+      },
+      {
+        title: 'chinese delimited identifier',
+        sql: [
+          'select "中文" from t1;',
+          'SELECT "中文" FROM "t1"'
+        ],
       },
     ]
     neatlyNestTestedSQL(SQL_LIST)

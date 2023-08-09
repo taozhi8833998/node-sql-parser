@@ -1020,20 +1020,13 @@ column_clause
     }
 
 array_index
-  = LBRAKE __ n:number __ RBRAKE __ "." __ s:ident {
+  = LBRAKE __ n:(literal_numeric / literal_string) __ RBRAKE s:(__ "." __ ident)? {
+    let property
+    if (s) property = { type: 'default', value: s[3] }
     return {
       brackets: true,
-      number: n,
-      property: {
-        type: 'origin',
-        value: s
-      }
-    }
-  }
-  / LBRAKE __ n:number __ RBRAKE {
-    return {
-      brackets: true,
-      number: n
+      index: n,
+      property,
     }
   }
 
