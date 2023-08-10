@@ -7,6 +7,7 @@ import { parse as postgresql } from '../pegjs/postgresql.pegjs'
 import { parse as sqlite } from '../pegjs/sqlite.pegjs'
 import { parse as transactsql } from '../pegjs/transactsql.pegjs'
 import { parse as flinksql } from '../pegjs/flinksql.pegjs'
+import { parse as snowflake } from '../pegjs/snowflake.pegjs'
 
 export default {
   bigquery,
@@ -15,6 +16,7 @@ export default {
   mysql,
   mariadb,
   postgresql,
+  snowflake,
   sqlite,
   transactsql,
   flinksql,

@@ -151,6 +151,7 @@ function identifierToSql(ident, isDual) {
     case 'sqlite':
       return `\`${ident}\``
     case 'postgresql':
+    case 'snowflake':
       return `"${ident}"`
     case 'transactsql':
       return `[${ident}]`

@@ -53,6 +53,20 @@ function extractFunToSQL(stmt) {
   return `${result.filter(hasVal).join(' ')})`
 }
 
+function flattenArgToSQL(arg) {
+  if (!arg) return ''
+  const { type, symbol, value } = arg
+  const result = [toUpper(type), symbol, exprToSQL(value)]
+  return result.filter(hasVal).join(' ')
+}
+
+function flattenFunToSQL(stmt) {
+  const { args, type } = stmt
+  const keys = ['input', 'path', 'outer', 'recursive', 'mode']
+  const argsStr = keys.map(key => flattenArgToSQL(args[key])).filter(hasVal).join(', ')
+  return `${toUpper(type)}(${argsStr})`
+}
+
 function funcToSQL(expr) {
   const { args, name, args_parentheses, parentheses, over, collate, suffix } = expr
   const collateStr = commonTypeValue(collate).join(' ')
@@ -73,5 +87,6 @@ export {
   anyValueFuncToSQL,
   castToSQL,
   extractFunToSQL,
+  flattenFunToSQL,
   funcToSQL,
 }
