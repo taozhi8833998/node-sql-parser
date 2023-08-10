@@ -105,10 +105,10 @@ describe('transactsql', () => {
   it('should support table schema', () => {
     let sql = `INSERT INTO source.dbo.movie (genre_id, title, release_date)
     VALUES (@param1, @param2, @param3), (@param1, @param2, @param3);`
-    expect(getParsedSql(sql)).to.equal("INSERT INTO [source].[dbo].[movie] ([genre_id], [title], [release_date]) VALUES (@param1,@param2,@param3), (@param1,@param2,@param3)")
+    expect(getParsedSql(sql)).to.equal("INSERT INTO [source].[dbo].[movie] ([genre_id], [title], [release_date]) VALUES ([@param1],[@param2],[@param3]), ([@param1],[@param2],[@param3])")
     sql = `INSERT INTO server.db.owner.movie (genre_id, title, release_date)
     VALUES (@param1, @param2, @param3), (@param1, @param2, @param3);`
-    expect(getParsedSql(sql)).to.equal("INSERT INTO [server].[db].[owner].[movie] ([genre_id], [title], [release_date]) VALUES (@param1,@param2,@param3), (@param1,@param2,@param3)")
+    expect(getParsedSql(sql)).to.equal("INSERT INTO [server].[db].[owner].[movie] ([genre_id], [title], [release_date]) VALUES ([@param1],[@param2],[@param3]), ([@param1],[@param2],[@param3])")
   })
 
   it('should support with clause', () => {

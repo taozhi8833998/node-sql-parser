@@ -28,8 +28,8 @@ function columnRefToSQL(expr) {
   if (table) str = `${identifierToSql(table)}.${str}`
   if (schema) str = `${identifierToSql(schema)}.${str}`
   if (array_index) {
-    str = `${str}[${array_index.number}]`
-    if (array_index.property) str = `${str}.${array_index.property.value}`
+    str = `${str}[${literalToSQL(array_index.index)}]`
+    if (array_index.property) str = `${str}.${literalToSQL(array_index.property)}`
   }
   str = [str, ...subFields].join('.')
   const result = [
@@ -146,7 +146,7 @@ function columnToSQL(column, isDual) {
   if (isDual) expr.isDual = isDual
   let str = exprToSQL(expr)
   if (expr.parentheses && Reflect.has(expr, 'array_index')) str = `(${str})`
-  if (expr.array_index && expr.type !== 'column_ref') str = `${str}[${expr.array_index.number}]`
+  if (expr.array_index && expr.type !== 'column_ref') str = `${str}[${literalToSQL(expr.array_index.index)}]`
   return [str, asToSQL(column.as)].filter(hasVal).join(' ')
 }
 

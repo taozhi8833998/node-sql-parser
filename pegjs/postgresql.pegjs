@@ -2130,11 +2130,11 @@ column_clause
     }
 
 array_index
-  = LBRAKE __ n:number __ RBRAKE {
+  = LBRAKE __ n:(literal_numeric / literal_string) __ RBRAKE {
     // => { brackets: boolean, number: number }
     return {
       brackets: true,
-      number: n
+      index: n
     }
   }
 
@@ -3419,12 +3419,12 @@ ident_name
       return start + parts.join('');
     }
 
-ident_start = [A-Za-z_]
+ident_start = [A-Za-z_\u4e00-\u9fa5]
 
-ident_part  = [A-Za-z0-9_\-]
+ident_part  = [A-Za-z0-9_\-$\u4e00-\u9fa5]
 
 // to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_]
+column_part  = [A-Za-z0-9_\u4e00-\u9fa5]
 
 param
   = l:(':' ident_name) {
@@ -4436,7 +4436,7 @@ var_decl
       suffix: '$$'
     };
   }
-  / KW_VAR_PRE_DOLLAR f:ident KW_VAR_PRE_DOLLAR d:[^$]* KW_VAR_PRE_DOLLAR s:ident !{ if (f !== s) return true } KW_VAR_PRE_DOLLAR {
+  / KW_VAR_PRE_DOLLAR f:column KW_VAR_PRE_DOLLAR d:[^$]* KW_VAR_PRE_DOLLAR s:column !{ if (f !== s) return true } KW_VAR_PRE_DOLLAR {
     // => { type: 'var'; name: string; prefix: string; suffix: string; };
     return {
       type: 'var',
