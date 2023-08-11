@@ -1476,24 +1476,24 @@ priv_list
       return createList(head, tail)
     }
 object_type
-  = o:(KW_TABLE / 'FUNCTION'i / 'PROCEDURE') {
+  = o:(KW_TABLE / 'FUNCTION'i / 'PROCEDURE'i) {
     return {
       type: 'origin',
       value: o.toUpperCase()
     }
   }
 priv_level
-  = db:((ident / STAR) __ DOT)? __ table:(ident / STAR) {
+  = prefix:((ident / STAR) __ DOT)? __ name:(ident / STAR) {
       return {
-          db: db && db[0],
-          table
+          prefix: prefix && prefix[0],
+          name,
       }
     }
 user_or_role
   = i:ident __ ho:('@' __ ident)? {
     return {
-      name: i,
-      host: ho && ho[2]
+      name: { type: 'single_quote_string', value: i },
+      host: ho ? { type: 'single_quote_string', value: ho[2] } : null
     }
   }
 user_or_role_list
@@ -1525,7 +1525,7 @@ grant_stmt
         objects: pl,
         on: {
           object_type: ot,
-          priv_level: le
+          priv_level: [le]
         },
         to,
         with: wo

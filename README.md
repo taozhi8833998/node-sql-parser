@@ -142,13 +142,41 @@ const opt = {
   database: 'MySQL' // MySQL is the default database
 }
 // import mysql parser only
-const { Parser } = require('node-sql-parser/build/mysql');
+const { Parser } = require('node-sql-parser');
 const parser = new Parser()
 // opt is optional
 const ast = parser.astify('SELECT * FROM t', opt);
 const sql = parser.sqlify(ast, opt);
 
 console.log(sql); // SELECT * FROM `t`
+```
+
+### Parse specified Database
+There two ways to parser the specified database.
+
+import Parser from the specified database path `node-sql-parser/build/{database}`
+
+```javascript
+// import transactsql parser only
+const { Parser } = require('node-sql-parser/build/transactsql')
+const parser = new Parser()
+const sql = `SELECT id FROM test AS result`
+const ast = parser.astify(sql)
+console.log(parser.sqlify(ast)) // SELECT [id] FROM [test] AS [result]
+```
+OR you can pass a options object to the parser, and specify the database property.
+
+```javascript
+const opt = {
+  database: 'Postgresql'
+}
+// import all databases parser
+const { Parser } = require('node-sql-parser')
+const parser = new Parser()
+// pass the opt config to the corresponding methods
+const ast = parser.astify('SELECT * FROM t', opt)
+const sql = parser.sqlify(ast, opt)
+console.log(sql); // SELECT * FROM "t"
 ```
 
 ### Get TableList, ColumnList, Ast by `parse` function

@@ -1069,7 +1069,28 @@ describe('Postgres', () => {
         "CREATE TRIGGER film_fulltext_trigger BEFORE INSERT OR UPDATE ON public.film FOR EACH ROW EXECUTE FUNCTION tsvector_update_trigger('fulltext', 'pg_catalog.english', 'title', 'description');",
         `CREATE TRIGGER "film_fulltext_trigger" BEFORE INSERT OR UPDATE ON "public"."film" FOR EACH ROW EXECUTE FUNCTION tsvector_update_trigger('fulltext', 'pg_catalog.english', 'title', 'description')`
       ]
-    }
+    },
+    {
+      title: 'grant on schema',
+      sql: [
+        'GRANT ALL ON SCHEMA public TO PUBLIC;',
+        'GRANT ALL ON SCHEMA "public" TO PUBLIC'
+      ]
+    },
+    {
+      title: 'grant table',
+      sql: [
+        'GRANT INSERT ON TABLE films TO PUBLIC;',
+        'GRANT INSERT ON TABLE "films" TO PUBLIC'
+      ]
+    },
+    {
+      title: 'grant all tables',
+      sql: [
+        'GRANT SELECT ON ALL TABLES IN SCHEMA public, trusted TO PUBLIC;',
+        'GRANT SELECT ON ALL TABLES IN SCHEMA "public", "trusted" TO PUBLIC'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

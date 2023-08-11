@@ -220,6 +220,7 @@ cmd_stmt
   / lock_stmt
   / show_stmt
   / deallocate_stmt
+  / grant_stmt
 
 create_stmt
   = create_table_stmt
@@ -1970,7 +1971,148 @@ deallocate_stmt
       },
     }
   }
-
+priv_type_table
+  =  p:(KW_SELECT / KW_INSERT / KW_UPDATE / KW_DELETE / KW_TRUNCATE / KW_REFERENCES / 'TRIGGER'i) {
+    return {
+      type: 'origin',
+      value: Array.isArray(p) ? p[0] : p
+    }
+  }
+priv_type_sequence
+  = p:('USAGE'i / KW_SELECT / KW_UPDATE) {
+    return {
+      type: 'origin',
+      value: Array.isArray(p) ? p[0] : p
+    }
+  }
+priv_type_database
+  = p:(KW_CREATE / 'CONNECT'i / KW_TEMPORARY / KW_TEMP) {
+    return {
+      type: 'origin',
+      value: Array.isArray(p) ? p[0] : p
+    }
+  }
+prive_type_all
+  = KW_ALL p:(__ 'PRIVILEGES'i)? {
+    return {
+      type: 'origin',
+      value: p ? 'all privileges' : 'all'
+    }
+  }
+prive_type_usage
+  = p:'USAGE'i {
+    return {
+      type: 'origin',
+      value: p
+    }
+  }
+  / prive_type_all
+prive_type_execute
+  = p:'EXECUTE'i {
+    return {
+      type: 'origin',
+      value: p
+    }
+  }
+  / prive_type_all
+priv_type
+  = priv_type_table / priv_type_sequence / priv_type_database / prive_type_usage / prive_type_execute
+priv_item
+  = p:priv_type __ c:(LPAREN __ column_ref_list __ RPAREN)? {
+    return {
+      priv: p,
+      columns: c && c[2],
+    }
+  }
+priv_list
+  = head:priv_item tail:(__ COMMA __ priv_item)* {
+      return createList(head, tail)
+    }
+object_type
+  = o:(KW_TABLE / 'SEQUENCE'i / 'DATABASE'i / 'DOMAIN' / 'FUNCTION' / 'PROCEDURE'i / 'ROUTINE'i / 'LANGUAGE'i / 'LARGE'i / 'SCHEMA') {
+    return {
+      type: 'origin',
+      value: o.toUpperCase()
+    }
+  }
+  / KW_ALL __ i:('TABLES'i / 'SEQUENCE'i / 'FUNCTIONS'i / 'PROCEDURES'i / 'ROUTINES'i) __ KW_IN __ KW_SCHEMA {
+    return {
+      type: 'origin',
+      value: `all ${i} in schema`
+    }
+  }
+priv_level
+  = prefix:(ident __ DOT)? __ name:(ident / STAR) {
+      return {
+          prefix: prefix && prefix[0],
+          name,
+      }
+    }
+priv_level_list
+  = head:priv_level tail:(__ COMMA __ priv_level)* {
+      return createList(head, tail)
+    }
+user_or_role
+  = g:KW_GROUP? __ i:ident {
+    const name = g ? `${group} ${i}` : i
+    return {
+      name: { type: 'origin', value: name },
+    }
+  }
+  / i:('PUBLIC'i / KW_CURRENT_ROLE / KW_CURRENT_USER / KW_SESSION_USER) {
+    return {
+      name: { type: 'origin', value: i },
+    }
+  }
+user_or_role_list
+  = head:user_or_role tail:(__ COMMA __ user_or_role)* {
+      return createList(head, tail)
+    }
+with_grant_option
+  = KW_WITH __ 'GRANT'i __ 'OPTION'i {
+    return {
+      type: 'origin',
+      value: 'with grant option',
+    }
+  }
+with_admin_option
+  = KW_WITH __ 'ADMIN'i __ 'OPTION'i {
+    return {
+      type: 'origin',
+      value: 'with admin option',
+    }
+  }
+grant_stmt
+  = 'GRANT'i __ pl:priv_list __ KW_ON __ ot:object_type? __ le:priv_level_list __ KW_TO __ to:user_or_role_list __ wo:with_grant_option? {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'grant',
+        keyword: 'priv',
+        objects: pl,
+        on: {
+          object_type: ot,
+          priv_level: le
+        },
+        to,
+        with: wo
+      }
+    }
+  }
+  / 'GRANT' __ o:ident_list __ KW_TO __ to:user_or_role_list __ wo:with_admin_option? {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'grant',
+        keyword: 'role',
+        objects: o.map(name => ({ priv: { type: 'string', value: name }})),
+        to,
+        with: wo
+      }
+    }
+  }
 select_stmt
   = KW_SELECT __ ';' {
     // => { type: 'select'; }
@@ -3377,7 +3519,10 @@ ident
       // => indent_name
       return name;
     }
-
+ident_list
+  = head:ident tail:(__ COMMA __ ident)* {
+      return createList(head, tail)
+    }
 alias_ident
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true } c:(__ LPAREN __ column_list __ RPAREN)? {
       // => string
@@ -4188,6 +4333,7 @@ KW_UNIT_SECOND      = "SECOND"i !ident_start { return 'SECOND'; }
 KW_CURRENT_TIME     = "CURRENT_TIME"i !ident_start { return 'CURRENT_TIME'; }
 KW_CURRENT_TIMESTAMP= "CURRENT_TIMESTAMP"i !ident_start { return 'CURRENT_TIMESTAMP'; }
 KW_CURRENT_USER     = "CURRENT_USER"i !ident_start { return 'CURRENT_USER'; }
+KW_CURRENT_ROLE     = "CURRENT_ROLE"i !ident_start { return 'CURRENT_ROLE'; }
 KW_SESSION_USER     = "SESSION_USER"i !ident_start { return 'SESSION_USER'; }
 KW_SYSTEM_USER      = "SYSTEM_USER"i !ident_start { return 'SYSTEM_USER'; }
 

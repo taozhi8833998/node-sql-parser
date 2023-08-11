@@ -147,8 +147,8 @@ function ifToSQL(stmt) {
 
 function grantUserOrRoleToSQL(stmt) {
   const { name, host } = stmt
-  const result = [`'${name}'`]
-  if (host) result.push('@', `'${host}'`)
+  const result = [literalToSQL(name)]
+  if (host) result.push('@', literalToSQL(host))
   return result.join('')
 }
 
@@ -166,7 +166,10 @@ function grantToSQL(stmt) {
     result.push('ON')
     switch (keyword) {
       case 'priv':
-        result.push(toUpper(on.object_type), [identifierToSql(on.priv_level.db), identifierToSql(on.priv_level.table)].filter(hasVal).join('.'))
+        result.push(
+          literalToSQL(on.object_type),
+          on.priv_level.map(privLevel => [identifierToSql(privLevel.prefix), identifierToSql(privLevel.name)].filter(hasVal).join('.')).join(', ')
+        )
         break
       case 'proxy':
         result.push(grantUserOrRoleToSQL(on))
