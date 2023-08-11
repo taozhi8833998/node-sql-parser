@@ -94,9 +94,10 @@ Import the JS file in your page:
 - MariaDB
 - MySQL
 - PostgresQL
-- Sqlite(developing)
+- Sqlite
 - TransactSQL
 - [FlinkSQL](https://ci.apache.org/projects/flink/flink-docs-stable/dev/table/sql/)
+- Snowflake(alpha)
 - New issue could be made for other new database.
 
 ### Create AST for SQL statement

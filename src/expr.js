@@ -5,7 +5,7 @@ import { assignToSQL } from './assign'
 import { binaryToSQL } from './binary'
 import { caseToSQL } from './case'
 import { columnRefToSQL, fullTextSearchToSQL } from './column'
-import { anyValueFuncToSQL, castToSQL, extractFunToSQL, funcToSQL } from './func'
+import { anyValueFuncToSQL, castToSQL, extractFunToSQL, flattenFunToSQL, funcToSQL } from './func'
 import { intervalToSQL } from './interval'
 import { selectToSQL } from './select'
 import { showToSQL } from './show'
@@ -27,6 +27,7 @@ const exprToSQLConvertFn = {
   column_ref      : columnRefToSQL,
   datatype        : dataTypeToSQL,
   extract         : extractFunToSQL,
+  flatten         : flattenFunToSQL,
   fulltext_search : fullTextSearchToSQL,
   function        : funcToSQL,
   insert          : unionToSQL,
