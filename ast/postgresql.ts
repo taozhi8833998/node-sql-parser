@@ -20,11 +20,11 @@ export type crud_stmt = union_stmt | update_stmt | replace_insert_stmt | insert_
 
 export type multiple_stmt = AstStatement<crud_stmt[]>;
 
-export type set_op = 'union' | 'union all';
+export type set_op = 'union' | 'union all' | 'union distinct';
 
 export interface union_stmt_node extends select_stmt_node  {
          _next: union_stmt_node;
-         set_op: 'union' | 'union all';
+         set_op: 'union' | 'union all' | 'union distinct';
       }
 
 export type union_stmt = AstStatement<union_stmt_node>;

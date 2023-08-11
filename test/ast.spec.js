@@ -661,6 +661,12 @@ describe('AST', () => {
                 expect(getParsedSql(sql)).to.equal(`SELECT 1 UNION ALL SELECT '1' UNION SELECT \`a\` FROM \`t\` UNION ALL (SELECT TRUE)`);
             });
 
+            it('should combine multiple statements union distinct', () => {
+              sql = `select 1 union distinct select '1' union select a from t union distinct (select true)`;
+              const ast =
+              expect(getParsedSql(sql)).to.equal(`SELECT 1 UNION DISTINCT SELECT '1' UNION SELECT \`a\` FROM \`t\` UNION DISTINCT (SELECT TRUE)`);
+            });
+
             it('should support sqlify without ast', () => {
                 const ast = [{
                     ast: {

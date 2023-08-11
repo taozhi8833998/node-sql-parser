@@ -71,6 +71,13 @@ describe('Flink', () => {
       ],
     },
     {
+      title: "UNION DISTINCT",
+      sql: [
+        `(SELECT s FROM t1) UNION DISTINCT (SELECT s FROM t2)`,
+        "(SELECT `s` FROM `t1`) UNION DISTINCT (SELECT `s` FROM `t2`)",
+      ],
+    },
+    {
       title: "INTERSECT",
       sql: [
         `(SELECT s FROM t1) INTERSECT (SELECT s FROM t2)`,

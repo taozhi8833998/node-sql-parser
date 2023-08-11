@@ -267,16 +267,16 @@ multiple_stmt
     }
 
 set_op
-  = KW_UNION __ a:KW_ALL? {
-    // => 'union' | 'union all'
-    return a ? 'union all' : 'union'
+  = KW_UNION __ a:(KW_ALL / KW_DISTINCT)? {
+    // => 'union' | 'union all' | 'union distinct'
+    return a ? `union ${a.toLowerCase()}` : 'union'
   }
 
 union_stmt
   = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
      /* export interface union_stmt_node extends select_stmt_node  {
          _next: union_stmt_node;
-         set_op: 'union' | 'union all';
+         set_op: 'union' | 'union all' | 'union distinct';
       }
      => AstStatement<union_stmt_node>
      */

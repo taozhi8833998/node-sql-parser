@@ -61,6 +61,27 @@ describe('Postgres', () => {
       ]
     },
     {
+      title: 'set op UNION',
+      sql: [
+        `(SELECT s FROM t1) UNION (SELECT s FROM t2)`,
+        '(SELECT "s" FROM "t1") UNION (SELECT "s" FROM "t2")',
+      ],
+    },
+    {
+      title: 'set op UNION ALL',
+      sql: [
+        `(SELECT s FROM t1) UNION ALL (SELECT s FROM t2)`,
+        '(SELECT "s" FROM "t1") UNION ALL (SELECT "s" FROM "t2")',
+      ],
+    },
+    {
+      title: 'set op UNION DISTINCT',
+      sql: [
+        `(SELECT s FROM t1) UNION DISTINCT (SELECT s FROM t2)`,
+        '(SELECT "s" FROM "t1") UNION DISTINCT (SELECT "s" FROM "t2")',
+      ],
+    },
+    {
         title: 'Window Fns with qualified frame clause',
         sql: [
           `SELECT
@@ -1083,7 +1104,7 @@ describe('Postgres', () => {
 
   describe('tables to sql', () => {
     it('should parse object tables', () => {
-      const ast = parser.astify(SQL_LIST[97].sql[0], opt)
+      const ast = parser.astify(SQL_LIST[100].sql[0], opt)
       ast[0].from[0].expr.parentheses = false
       expect(parser.sqlify(ast, opt)).to.be.equal('SELECT "last_name", "salary" FROM "employees" INNER JOIN "salaries" ON "employees"."emp_no" = "salaries"."emp_no"')
     })

@@ -1396,6 +1396,16 @@ describe('select', () => {
       expect(getParsedSql(sql, opt)).to.be.equal('SELECT 1 FROM "pg_database" AS "a" WHERE "a"."oid" IN (SELECT 1 FROM "pg_database" AS "b" WHERE "b"."oid" = 1 UNION SELECT 1 FROM "pg_database" AS "c" WHERE "c"."oid" = 2)')
     })
 
+    it('should support union distinct in in_op', () => {
+      const sql = `select 1 from pg_database a where a.oid in
+        (
+      select 1 from pg_database b where b.oid = 1
+      union distinct
+      select 1 from pg_database c where c.oid=2
+      )`
+      expect(getParsedSql(sql, opt)).to.be.equal('SELECT 1 FROM "pg_database" AS "a" WHERE "a"."oid" IN (SELECT 1 FROM "pg_database" AS "b" WHERE "b"."oid" = 1 UNION DISTINCT SELECT 1 FROM "pg_database" AS "c" WHERE "c"."oid" = 2)')
+    })
+
     it('should support array_agg', () => {
       let sql = `SELECT shipmentId, ARRAY_AGG(distinct abc order by name) AS shipmentStopIDs, ARRAY_AGG (first_name || ' ' || last_name) actors FROM table_name GROUP BY shipmentId`
       expect(getParsedSql(sql, opt)).to.equal('SELECT "shipmentId", ARRAY_AGG(DISTINCT "abc" ORDER BY "name" ASC) AS "shipmentStopIDs", ARRAY_AGG("first_name" || \' \' || "last_name") AS "actors" FROM "table_name" GROUP BY "shipmentId"')

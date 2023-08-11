@@ -457,8 +457,9 @@ multiple_stmt
     }
 
 set_op
-  = KW_UNION __ KW_ALL { return 'union all' }
-  / KW_UNION { return 'union' }
+  = KW_UNION __ s:(KW_ALL / KW_DISTINCT)? {
+    return s ? `union ${s.toLowerCase()}` : 'union'
+  }
   / KW_MINUS { return 'minus' }
   / KW_INTERSECT { return 'intersect' }
 
