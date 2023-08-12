@@ -1516,7 +1516,7 @@ with_admin_option
     }
   }
 grant_stmt
-  = 'GRANT'i __ pl:priv_list __ KW_ON __ ot:object_type? __ le:priv_level __ KW_TO __ to:user_or_role_list __ wo:with_grant_option? {
+  = 'GRANT'i __ pl:priv_list __ KW_ON __ ot:object_type? __ le:priv_level __ t:KW_TO __ to:user_or_role_list __ wo:with_grant_option? {
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
@@ -1528,12 +1528,13 @@ grant_stmt
           object_type: ot,
           priv_level: [le]
         },
-        to,
+        to_from: t[0],
+        user_or_roles: to,
         with: wo
       }
     }
   }
-  / 'GRANT' __ 'PROXY' __ KW_ON __ on:user_or_role __ KW_TO __ to:user_or_role_list __ wo:with_admin_option? {
+  / 'GRANT' __ 'PROXY' __ KW_ON __ on:user_or_role __ t:KW_TO __ to:user_or_role_list __ wo:with_admin_option? {
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
@@ -1542,12 +1543,13 @@ grant_stmt
         keyword: 'proxy',
         objects: [{ priv: { type: 'origin', value: 'proxy' }}],
         on,
-        to,
+        to_from: t[0],
+        user_or_roles: to,
         with: wo
       }
     }
   }
-  / 'GRANT' __ o:ident_list __ KW_TO __ to:user_or_role_list __ wo:with_admin_option? {
+  / 'GRANT' __ o:ident_list __ t:KW_TO __ to:user_or_role_list __ wo:with_admin_option? {
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
@@ -1555,7 +1557,8 @@ grant_stmt
         type: 'grant',
         keyword: 'role',
         objects: o.map(name => ({ priv: { type: 'string', value: name }})),
-        to,
+        to_from: t[0],
+        user_or_roles: to,
         with: wo
       }
     }

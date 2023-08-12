@@ -661,8 +661,8 @@ describe('AST', () => {
             });
 
             it('should combine multiple statements union distinct', () => {
-              sql = `select 1 union distinct select '1' union select a from t union distinct (select true)`;
-              expect(getParsedSql(sql)).to.equal(`SELECT 1 UNION DISTINCT SELECT '1' UNION SELECT \`a\` FROM \`t\` UNION DISTINCT (SELECT TRUE)`);
+                sql = `select 1 union distinct select '1' union select a from t union distinct (select true)`;
+                expect(getParsedSql(sql)).to.equal(`SELECT 1 UNION DISTINCT SELECT '1' UNION SELECT \`a\` FROM \`t\` UNION DISTINCT (SELECT TRUE)`);
             });
 
             it('should support sqlify without ast', () => {

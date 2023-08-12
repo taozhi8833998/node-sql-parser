@@ -10,7 +10,7 @@ import {
   deallocateToSQL,
   declareToSQL,
   descToSQL,
-  grantToSQL,
+  grantAndRevokeToSQL,
   ifToSQL,
   useToSQL,
   renameToSQL,
@@ -48,7 +48,8 @@ const typeToSQLFn = {
   lock       : lockUnlockToSQL,
   unlock     : lockUnlockToSQL,
   show       : showToSQL,
-  grant      : grantToSQL,
+  grant      : grantAndRevokeToSQL,
+  revoke     : grantAndRevokeToSQL,
 }
 
 function unionToSQL(stmt) {

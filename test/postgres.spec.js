@@ -1112,6 +1112,13 @@ describe('Postgres', () => {
         'GRANT SELECT ON ALL TABLES IN SCHEMA "public", "trusted" TO PUBLIC'
       ]
     },
+    {
+      title: 'revoke on schema',
+      sql: [
+        'REVOKE ALL ON SCHEMA public FROM PUBLIC;',
+        'REVOKE ALL ON SCHEMA "public" FROM PUBLIC'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

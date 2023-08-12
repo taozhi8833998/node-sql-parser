@@ -196,7 +196,6 @@
 
   // used for dependency analysis
   let varList = [];
-
   const tableList = new Set();
   const columnList = new Set();
   const tableAlias = {};
@@ -220,7 +219,7 @@ cmd_stmt
   / lock_stmt
   / show_stmt
   / deallocate_stmt
-  / grant_stmt
+  / grant_revoke_stmt
 
 create_stmt
   = create_table_stmt
@@ -2082,33 +2081,55 @@ with_admin_option
       value: 'with admin option',
     }
   }
-grant_stmt
-  = 'GRANT'i __ pl:priv_list __ KW_ON __ ot:object_type? __ le:priv_level_list __ KW_TO __ to:user_or_role_list __ wo:with_grant_option? {
+grant_revoke_keyword
+  = 'GRANT'i {
+    return {
+      type: 'grant'
+    }
+  }
+  / 'REVOKE'i __ i:('GRANT'i __ 'OPTION'i __ 'FOR'i)? {
+    return {
+      type: 'revoke',
+      grant_option_for: i && { type: 'origin', value: 'grant option for' }
+    }
+  }
+
+
+grant_revoke_stmt
+  = g:grant_revoke_keyword __ pl:priv_list __ KW_ON __ ot:object_type? __ le:priv_level_list __ t:(KW_TO / KW_FROM) &{
+      const obj = { revoke: 'from', grant: 'to' }
+      return obj[g.type].toLowerCase() === t[0].toLowerCase()
+    } __ to:user_or_role_list __ wo:with_grant_option? {
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
       ast: {
-        type: 'grant',
+        ...g,
         keyword: 'priv',
         objects: pl,
         on: {
           object_type: ot,
           priv_level: le
         },
-        to,
+        to_from: t[0],
+        user_or_roles: to,
         with: wo
       }
     }
   }
-  / 'GRANT' __ o:ident_list __ KW_TO __ to:user_or_role_list __ wo:with_admin_option? {
+  / g:grant_revoke_keyword __ o:ident_list __ t:(KW_TO / KW_FROM) &{
+      const obj = { revoke: 'from', grant: 'to' }
+      return obj[g.type].toLowerCase() === t[0].toLowerCase()
+    } __ to:user_or_role_list __ wo:with_admin_option? {
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
       ast: {
-        type: 'grant',
+        ...g,
         keyword: 'role',
         objects: o.map(name => ({ priv: { type: 'string', value: name }})),
-        to,
+        to_from: t[0],
+        user_or_roles: to,
         with: wo
       }
     }
