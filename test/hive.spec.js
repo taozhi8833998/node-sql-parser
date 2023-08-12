@@ -100,4 +100,15 @@ describe('Hive', () => {
     sql = "SELECT timestamp '2012-10-31 01:00 UTC';"
     expect(getParsedSql(sql)).to.be.equal("SELECT TIMESTAMP '2012-10-31 01:00 UTC'")
   })
+
+  it("should support union", () => {
+    let sql = `select * from a union select * from b`
+    expect(getParsedSql(sql)).to.be.equal("SELECT * FROM `a` UNION SELECT * FROM `b`")
+
+    sql = `select * from a union all select * from b`
+    expect(getParsedSql(sql)).to.be.equal("SELECT * FROM `a` UNION ALL SELECT * FROM `b`")
+
+    sql = `select * from a union distinct select * from b`
+    expect(getParsedSql(sql)).to.be.equal("SELECT * FROM `a` UNION DISTINCT SELECT * FROM `b`")
+  })
 })

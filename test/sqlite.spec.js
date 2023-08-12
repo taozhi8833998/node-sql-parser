@@ -128,4 +128,15 @@ describe('sqlite', () => {
     END;`
     expect(getParsedSql(sql)).to.be.equal('CREATE TRIGGER `update_customer_address` UPDATE OF `address` ON `customers` BEGIN UPDATE `orders` SET `address` = `new`.`address` WHERE `customer_name` = `old`.`name` END')
   })
+
+  it('should support union', () => {
+    let sql = `SELECT * FROM a UNION SELECT * FROM b`
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM `a` UNION SELECT * FROM `b`')
+
+    sql = `SELECT * FROM a UNION ALL SELECT * FROM b`
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM `a` UNION ALL SELECT * FROM `b`')
+
+    sql = `SELECT * FROM a UNION DISTINCT SELECT * FROM b`
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM `a` UNION DISTINCT SELECT * FROM `b`')
+  })
 })

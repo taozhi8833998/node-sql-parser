@@ -492,6 +492,27 @@ describe('mysql', () => {
         ]
       },
       {
+        title: 'set op UNION',
+        sql: [
+          `SELECT * FROM (SELECT 1) union SELECT * FROM (SELECT 2)`,
+          'SELECT * FROM (SELECT 1) UNION SELECT * FROM (SELECT 2)'
+        ]
+      },
+      {
+        title: 'set op UNION ALL',
+        sql: [
+          `SELECT * FROM (SELECT 1) union all SELECT * FROM (SELECT 2)`,
+          'SELECT * FROM (SELECT 1) UNION ALL SELECT * FROM (SELECT 2)'
+        ]
+      },
+      {
+        title: 'set op UNION DISTINCT',
+        sql: [
+          `SELECT * FROM (SELECT 1) union distinct SELECT * FROM (SELECT 2)`,
+          'SELECT * FROM (SELECT 1) UNION DISTINCT SELECT * FROM (SELECT 2)'
+        ]
+      },
+      {
         title: 'set op INTERSECT',
         sql: [
           `SELECT * FROM (SELECT 1) intersect SELECT * FROM (SELECT 2)`,

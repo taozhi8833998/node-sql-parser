@@ -549,7 +549,7 @@ multiple_stmt
     }
 
 set_op
-  = u:(KW_UNION / KW_INTERSECT / KW_EXCEPT) __ s:KW_ALL? {
+  = u:(KW_UNION / KW_INTERSECT / KW_EXCEPT) __ s:(KW_ALL / KW_DISTINCT)? {
     return s ? `${u.toLowerCase()} ${s.toLowerCase()}` : `${u.toLowerCase()}`
   }
 
@@ -557,7 +557,7 @@ union_stmt
   = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
      /* export interface union_stmt_node extends select_stmt_node  {
          _next: union_stmt_node;
-         union: 'union' | 'union all';
+         union: 'union' | 'union all' | 'union distinct';
       }
      => AstStatement<union_stmt_node>
      */

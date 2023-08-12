@@ -246,8 +246,9 @@ multiple_stmt
       }
     }
 set_op
-  = KW_UNION __ KW_ALL { return 'union all' }
-  / KW_UNION { return 'union' }
+  = KW_UNION __ s:(KW_ALL / KW_DISTINCT)? {
+    return s ? `union ${s.toLowerCase()}` : 'union'
+  }
 
 union_stmt
   = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
