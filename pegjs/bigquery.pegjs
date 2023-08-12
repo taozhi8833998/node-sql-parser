@@ -1921,8 +1921,7 @@ order_by_element
   = e:expr __
     c:('COLLATE'i __ literal_string)? __
     d:(KW_DESC / KW_ASC)? {
-    const obj = { expr: e, type: 'ASC' };
-    if (d === 'DESC') obj.type = 'DESC';
+    const obj = { expr: e, type: d };
     return obj;
   }
 

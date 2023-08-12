@@ -2598,10 +2598,9 @@ order_by_list
 
 order_by_element
   = e:expr __ d:(KW_DESC / KW_ASC)? __ nl:('NULLS'i __ ('FIRST'i / 'LAST'i)?)? {
-    // => { expr: expr; type: 'ASC' | 'DESC';  nulls: 'NULLS FIRST' | 'NULLS LAST' | undefined }
-    const obj = { expr: e, type: 'ASC' };
-    if (d === 'DESC') obj.type = 'DESC';
-    obj.nulls = nl && `${nl[0]} ${nl[2] ? nl[2] : obj.type === 'ASC' ? 'LAST' : 'FIRST' }`;
+    // => { expr: expr; type: 'ASC' | 'DESC' | undefined;  nulls: 'NULLS FIRST' | 'NULLS LAST' | undefined }
+    const obj = { expr: e, type: d };
+    obj.nulls = nl && [nl[0], nl[2]].filter(v => v).join(' ')
     return obj;
   }
 
