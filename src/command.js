@@ -152,9 +152,9 @@ function grantUserOrRoleToSQL(stmt) {
   return result.join('')
 }
 
-function grantToSQL(stmt) {
-  const { type, keyword, objects, on, to, with: withOpt } = stmt
-  const result = [toUpper(type)]
+function grantAndRevokeToSQL(stmt) {
+  const { type, grant_option_for, keyword, objects, on, to_from, user_or_roles, with: withOpt } = stmt
+  const result = [toUpper(type), literalToSQL(grant_option_for)]
   const objStr = objects.map(obj => {
     const { priv, columns } = obj
     const privSQL = [exprToSQL(priv)]
@@ -176,7 +176,7 @@ function grantToSQL(stmt) {
         break
     }
   }
-  result.push('TO', to.map(grantUserOrRoleToSQL).join(', '))
+  result.push(toUpper(to_from), user_or_roles.map(grantUserOrRoleToSQL).join(', '))
   result.push(literalToSQL(withOpt))
   return result.filter(hasVal).join(' ')
 }
@@ -187,7 +187,7 @@ export {
   deallocateToSQL,
   declareToSQL,
   descToSQL,
-  grantToSQL,
+  grantAndRevokeToSQL,
   ifToSQL,
   renameToSQL,
   useToSQL,
