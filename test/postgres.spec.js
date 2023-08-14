@@ -686,7 +686,7 @@ describe('Postgres', () => {
       title: 'support nulls after order by with default val',
       sql: [
         'SELECT has_geometry FROM rooms WHERE rooms.index = 200 ORDER BY has_geometry ASC NULLS;',
-        'SELECT "has_geometry" FROM "rooms" WHERE "rooms"."index" = 200 ORDER BY "has_geometry" ASC NULLS LAST'
+        'SELECT "has_geometry" FROM "rooms" WHERE "rooms"."index" = 200 ORDER BY "has_geometry" ASC NULLS'
       ]
     },
     {

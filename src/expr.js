@@ -95,7 +95,7 @@ function orderOrPartitionByToSQL(expr, prefix) {
   const upperPrefix = toUpper(prefix)
   switch (upperPrefix) {
     case 'ORDER BY':
-      expressions = expr.map(info => [exprToSQL(info.expr), info.type, toUpper(info.nulls)].filter(hasVal).join(' '))
+      expressions = expr.map(info => [exprToSQL(info.expr), info.type || 'ASC', toUpper(info.nulls)].filter(hasVal).join(' '))
       break
     case 'PARTITION BY':
       expressions = expr.map(info => exprToSQL(info.expr))

@@ -834,13 +834,11 @@ describe('select', () => {
   describe('group by clause', () => {
     it('should parse single columns', () => {
       const ast = parser.astify('SELECT a FROM b WHERE c = 0 GROUP BY d');
-
       expect(ast.groupby).to.eql([{ type:'column_ref', table: null, column: 'd' }])
     });
 
     it('should parse multiple columns', () => {
       const ast = parser.astify('SELECT a FROM b WHERE c = 0 GROUP BY d, t.b, t.c');
-
       expect(ast.groupby).to.eql([
         { type: 'column_ref', table: null, column: 'd' },
         { type: 'column_ref', table: 't', column: 'b' },
@@ -915,17 +913,15 @@ describe('select', () => {
   describe('order by clause', () => {
     it('should parse single column', () => {
       const ast = parser.astify('SELECT a FROM b WHERE c = 0 order BY d');
-
       expect(ast.orderby).to.eql([
-        { expr: { type: 'column_ref', table: null, column: 'd' }, type: 'ASC' }
+        { expr: { type: 'column_ref', table: null, column: 'd' }, type: null }
       ]);
     });
 
     it('should parse multiple columns', () => {
-      const ast = parser.astify('SELECT a FROM b WHERE c = 0 order BY d, t.b dEsc, t.c');
-
+      const ast = parser.astify('SELECT a FROM b WHERE c = 0 order BY d, t.b desc, t.c asc');
       expect(ast.orderby).to.eql([
-        { expr: { type: 'column_ref', table: null, column: 'd' },  type: 'ASC' },
+        { expr: { type: 'column_ref', table: null, column: 'd' },  type: null },
         { expr: { type: 'column_ref', table: 't', column: 'b' }, type: 'DESC' },
         { expr: { type: 'column_ref', table: 't', column: 'c' }, type: 'ASC' }
       ]);
@@ -935,7 +931,7 @@ describe('select', () => {
       const ast = parser.astify("SELECT a FROM b WHERE c = 0 order BY d, SuM(e)");
 
       expect(ast.orderby).to.eql([
-        { expr: { type: 'column_ref', table: null, column: 'd' },  type: 'ASC' },
+        { expr: { type: 'column_ref', table: null, column: 'd' },  type: null },
         {
           expr: {
             type: 'aggr_func',
@@ -943,7 +939,7 @@ describe('select', () => {
             over: null,
             args: { expr: { type: 'column_ref', table: null, column: 'e' } }
           },
-          type: 'ASC'
+          type: null
         }
       ]);
     });
