@@ -202,8 +202,8 @@
 }
 
 start
-  = __ n:(multiple_stmt / cmd_stmt / crud_stmt) {
-    // => multiple_stmt | cmd_stmt | crud_stmt
+  = __ n:(create_function_stmt / multiple_stmt) {
+    // => multiple_stmt
     return n
   }
 
@@ -249,7 +249,7 @@ crud_stmt
   / proc_stmts
 
 multiple_stmt
-  = head:crud_stmt tail:(__ SEMICOLON __ crud_stmt)+ {
+  = head:crud_stmt tail:(__ SEMICOLON __ crud_stmt)* {
       /*
       // is in reality: { tableList: any[]; columnList: any[]; ast: T; }
       export type AstStatement<T> = T;
@@ -273,7 +273,7 @@ set_op
   }
 
 union_stmt
-  = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
+  = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob:order_by_clause? __ l:limit_clause? {
      /* export interface union_stmt_node extends select_stmt_node  {
          _next: union_stmt_node;
          set_op: 'union' | 'union all' | 'union distinct';
@@ -431,6 +431,167 @@ create_view_stmt
       }
     }
   }
+column_data_type
+  = c:column_ref __ d:data_type {
+    // => { column: column_ref; definition: data_type; }
+    return {
+      column: c,
+      definition: d,
+    }
+  }
+column_data_type_list
+  = head:column_data_type tail:(__ COMMA __ column_data_type)* {
+    // => column_data_type[]
+      return createList(head, tail)
+    }
+func_returns
+  = 'RETURNS'i __ k:'SETOF'i? __ t:data_type {
+    // => { type: "returns"; keyword?: "setof"; expr: data_type; }
+    return {
+      type: 'returns',
+      keyword: k,
+      expr: t
+    }
+  }
+  / 'RETURNS'i __ KW_TABLE __ LPAREN __ e:column_data_type_list __ RPAREN {
+    // => { type: "returns"; keyword?: "table"; expr: column_data_type_list; }
+    return {
+      type: 'returns',
+      keyword: 'table',
+      expr: e
+    }
+  }
+
+create_func_opt
+  = 'LANGUAGE' __ ln:ident_name __ {
+    // => literal_string
+    return {
+      prefix: 'LANGUAGE',
+      type: 'default',
+      value: ln
+    }
+  }
+  / 'TRANSORM'i __ ft:('FOR' __ 'TYPE' __ ident_name)? __ {
+    // => literal_string
+    if (!ft) return { type: 'origin', value: 'TRANSORM' }
+    return {
+      prefix: ['TRANSORM', ft[0].toUpperCase(), ft[2].toUpperCase()].join(' '),
+      type: 'default',
+      value: ft[4]
+    }
+  }
+  / i:('WINDOW'i / 'IMMUTABLE'i / 'STABLE'i / 'VOLATILE'i / 'STRICT'i) __ {
+    // => literal_string
+    return {
+      type: 'origin',
+      value: i
+    }
+  }
+  / n:('NOT'i)? __ 'LEAKPROOF'i __ {
+    // => literal_string
+    return {
+      type: 'origin',
+      value: [n, 'LEAKPROOF'].filter(v => v).join(' ')
+    }
+  }
+  / i:('CALLED'i / ('RETURNS'i __ 'NULL'i))? __ 'ON'i __ 'NULL'i __ 'INPUT'i __ {
+    // => literal_string
+    if (Array.isArray(i)) i = [i[0], i[2]].join(' ')
+    return {
+      type: 'origin',
+      value: `${i} ON NULL INPUT`
+    }
+  }
+  / e:('EXTERNAL'i)? __ 'SECURITY'i __ i:('INVOKER'i / 'DEFINER'i) __ {
+    // => literal_string
+    return {
+      type: 'origin',
+      value: [e, 'SECURITY', i].filter(v => v).join(' ')
+    }
+  }
+  / 'PARALLEL'i __ i:('UNSAFE'i / 'RESTRICTED'i / 'SAFE'i) __ {
+    // => literal_string
+    return {
+      type: 'origin',
+      value: ['PARALLEL', i].join(' ')
+    }
+  }
+  / KW_AS __ c:[^ \s\t\n\r]+ __ s:multiple_stmt __ l:[^ \s\t\n\r;]+ __ {
+    // => { type: 'as'; start: string; end: string; expr: multiple_stmt; }
+    const start = c.join('')
+    const end = l.join('')
+    if (start !== end) throw new Error(`start symbol '${start}'is not same with end symbol '${end}'`)
+    return {
+      type: 'as',
+      start,
+      end,
+      expr:s.ast
+    }
+  }
+  / p:('COST'i / 'ROWS'i) __ n:literal_numeric __ {
+    // => literal_numeric
+    n.prefix = p
+    return n
+  }
+  / 'SUPPORT'i __ n:proc_func_name __ {
+    // => literal_string
+    return {
+      prefix: 'support',
+      type: 'default',
+      value: n
+    }
+  }
+  / KW_SET __ ca:ident_name __ e:((('TO'i / '=') __ ident_list) / (KW_FROM __ 'CURRENT'i))? __ {
+    // => { type: "set"; parameter: ident_name; value?: { prefix: string; expr: expr }}
+    let value
+    if (e) {
+      const val = Array.isArray(e[2]) ? e[2] : [e[2]]
+      value = {
+        prefix: e[0],
+        expr: val.map(v => ({ type: 'default', value: v }))
+      }
+    }
+    return {
+      type: 'set',
+      parameter: ca,
+      value,
+    }
+  }
+
+create_function_stmt
+  = a:KW_CREATE __
+  or:(KW_OR __ KW_REPLACE)? __
+  t:'FUNCTION'i __
+  c:table_name __ LPAREN __ args:alter_func_args __ RPAREN __
+  r:func_returns? __
+  fo:create_func_opt* __ SEMICOLON? __ {
+    /*
+      export type create_function_stmt = {
+        type: 'create';
+        replace?: string;
+        name: { schema?: string; name: string };
+        args: alter_func_args;
+        returns?: func_returns;
+        keyword: 'function';
+        options?: create_func_opt[];
+      }
+      => AstStatement<create_function_stmt>
+      */
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          args,
+          type: 'create',
+          replace: or && 'or replace',
+          name: { schema: c.db, name: c.table },
+          returns: r,
+          keyword: t && t.toLowerCase(),
+          options: fo,
+        }
+      }
+  }
+
 create_type_stmt
   = a:KW_CREATE __ k:'TYPE'i __ s:table_name __ as:KW_AS __ r:KW_ENUM __ LPAREN __ e:expr_list? __ RPAREN {
       /*
@@ -966,6 +1127,15 @@ storage
       value: s.toLowerCase()
     }
   }
+default_arg_expr
+  = kw:(KW_DEFAULT / KW_ASSIGIN_EQUAL)? __ ce:(literal / expr) {
+    // => { type: 'default'; keyword: string, value: literal | expr; }
+    return {
+      type: 'default',
+      keyword: kw,
+      value: ce
+    }
+  }
 default_expr
   = KW_DEFAULT __ ce: (literal / expr) {
     // => { type: 'default'; value: literal | expr; }
@@ -1100,19 +1270,21 @@ alter_func_argmode
   }
 
 alter_func_arg_item
-  = m:alter_func_argmode? __ ad:data_type {
-    // => { mode?: string; name?: string; type: data_type; }
+  = m:alter_func_argmode? __ ad:data_type __ de:default_arg_expr?  {
+    // => { mode?: string; name?: string; type: data_type;  default: default_arg_expr; }
     return {
       mode: m,
       type: ad,
+      default: de,
     }
   }
-  / m:alter_func_argmode? __ an:ident_name __ ad:data_type {
-    // => { mode?: string; name?: string; type: data_type; }
+  / m:alter_func_argmode? __ an:ident_name __ ad:data_type __ de:default_arg_expr?  {
+    // => { mode?: string; name?: string; type: data_type;  default: default_arg_expr; }
     return {
       mode: m,
       name: an,
       type: ad,
+      default: de,
     }
   }
 alter_func_args

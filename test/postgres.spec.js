@@ -1119,6 +1119,48 @@ describe('Postgres', () => {
         'REVOKE ALL ON SCHEMA "public" FROM PUBLIC'
       ]
     },
+    {
+      title: 'create function case when',
+      sql: [
+        `CREATE FUNCTION public._group_concat(text, text) RETURNS text
+        LANGUAGE sql IMMUTABLE
+        AS $_$
+          SELECT CASE
+            WHEN $2 IS NULL THEN $1
+            WHEN $1 IS NULL THEN $2
+            ELSE $1 || ', ' || $2
+          END
+        $_$;`,
+        `CREATE FUNCTION "public"._group_concat(TEXT, TEXT) RETURNS TEXT LANGUAGE sql IMMUTABLE AS $_$ SELECT CASE WHEN $2 IS NULL THEN $1 WHEN $1 IS NULL THEN $2 ELSE $1 || ', ' || $2 END $_$`
+      ]
+    },
+    {
+      title: 'create function select',
+      sql: [
+        `CREATE FUNCTION public.film_not_in_stock(p_film_id integer, p_store_id integer, OUT p_film_count integer) RETURNS SETOF integer
+        LANGUAGE sql
+        AS $_$
+          SELECT inventory_id
+          FROM inventory
+          WHERE film_id = $1
+          AND store_id = $2
+          AND NOT inventory_in_stock(inventory_id);
+        $_$;`,
+        `CREATE FUNCTION "public".film_not_in_stock(p_film_id INTEGER, p_store_id INTEGER, OUT p_film_count INTEGER) RETURNS SETOF INTEGER LANGUAGE sql AS $_$ SELECT "inventory_id" FROM "inventory" WHERE "film_id" = $1 AND "store_id" = $2 AND NOT inventory_in_stock("inventory_id") $_$`
+      ]
+    },
+    {
+      title: 'create function with set',
+      sql: [
+        `CREATE FUNCTION check_password(uname TEXT, pass TEXT)
+        RETURNS BOOLEAN
+        LANGUAGE plpgsql
+        SECURITY DEFINER
+        SET search_path = admin, pg_temp;
+        `,
+        `CREATE FUNCTION check_password(uname TEXT, pass TEXT) RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = admin, pg_temp`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

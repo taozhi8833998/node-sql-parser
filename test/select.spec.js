@@ -810,8 +810,8 @@ describe('select', () => {
       const opt = {
         database: 'postgresql'
       }
-      const ast = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit all', opt);
-      expect(ast.limit).eql({
+      const ast = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit all', opt)
+      expect(ast[0].limit).to.be.eql({
         seperator: '',
         value: [
           { type: 'origin', value: 'all' },
@@ -820,7 +820,7 @@ describe('select', () => {
       expect(parser.sqlify(ast)).to.be.equal('SELECT DISTINCT `a` FROM `b` WHERE `c` = 0 GROUP BY `d` ORDER BY `e` ASC LIMIT ALL')
 
       const offsetAst = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit all offset 100', opt);
-      expect(offsetAst.limit).eql({
+      expect(offsetAst[0].limit).eql({
         seperator: 'offset',
         value: [
           { type: 'origin', value: 'all' },
