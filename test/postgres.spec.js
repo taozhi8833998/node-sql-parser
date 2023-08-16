@@ -1137,7 +1137,7 @@ describe('Postgres', () => {
     {
       title: 'create function select',
       sql: [
-        `CREATE FUNCTION public.film_not_in_stock(p_film_id integer, p_store_id integer, OUT p_film_count integer) RETURNS SETOF integer
+        `CREATE FUNCTION public.film_not_in_stock(p_film_id integer default 1, p_store_id integer = 1, OUT p_film_count integer) RETURNS SETOF integer
         LANGUAGE sql
         AS $_$
           SELECT inventory_id
@@ -1146,7 +1146,7 @@ describe('Postgres', () => {
           AND store_id = $2
           AND NOT inventory_in_stock(inventory_id);
         $_$;`,
-        `CREATE FUNCTION "public".film_not_in_stock(p_film_id INTEGER, p_store_id INTEGER, OUT p_film_count INTEGER) RETURNS SETOF INTEGER LANGUAGE sql AS $_$ SELECT "inventory_id" FROM "inventory" WHERE "film_id" = $1 AND "store_id" = $2 AND NOT inventory_in_stock("inventory_id") $_$`
+        `CREATE FUNCTION "public".film_not_in_stock(p_film_id INTEGER DEFAULT 1, p_store_id INTEGER = 1, OUT p_film_count INTEGER) RETURNS SETOF INTEGER LANGUAGE sql AS $_$ SELECT "inventory_id" FROM "inventory" WHERE "film_id" = $1 AND "store_id" = $2 AND NOT inventory_in_stock("inventory_id") $_$`
       ]
     },
     {
@@ -1159,6 +1159,15 @@ describe('Postgres', () => {
         SET search_path = admin, pg_temp;
         `,
         `CREATE FUNCTION check_password(uname TEXT, pass TEXT) RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = admin, pg_temp`
+      ]
+    },
+    {
+      title: 'create function returns table',
+      sql: [
+        `CREATE FUNCTION dup(int) RETURNS TABLE(f1 int, f2 text)
+        AS $$ SELECT $1, CAST($1 AS text) || ' is text' $$
+        LANGUAGE SQL;`,
+        `CREATE FUNCTION dup(INT) RETURNS TABLE ("f1" INT, "f2" TEXT) AS $$ SELECT $1, CAST($1 AS TEXT) || ' is text' $$ LANGUAGE SQL`
       ]
     },
   ]

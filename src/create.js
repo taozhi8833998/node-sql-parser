@@ -294,7 +294,7 @@ function createFunctionOptionToSQL(stmt) {
   }
 }
 function createFunctionToSQL(stmt) {
-  const { type, replace, keyword, name, args, returns, options = [], last } = stmt
+  const { type, replace, keyword, name, args, returns, options, last } = stmt
   const sql = [toUpper(type), toUpper(replace), toUpper(keyword)]
   const functionName = [identifierToSql(name.schema), name.name].filter(hasVal).join('.')
   const argsSQL = args.map(alterArgsToSQL).filter(hasVal).join(', ')

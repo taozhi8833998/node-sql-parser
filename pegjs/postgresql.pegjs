@@ -587,7 +587,7 @@ create_function_stmt
           name: { schema: c.db, name: c.table },
           returns: r,
           keyword: t && t.toLowerCase(),
-          options: fo,
+          options: fo || [],
         }
       }
   }
@@ -1132,7 +1132,7 @@ default_arg_expr
     // => { type: 'default'; keyword: string, value: literal | expr; }
     return {
       type: 'default',
-      keyword: kw,
+      keyword: kw && kw[0],
       value: ce
     }
   }
