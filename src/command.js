@@ -135,13 +135,24 @@ function ifToSQL(stmt) {
   const {
     boolean_expr: boolExpr,
     else_expr: elseExpr,
+    elseif_expr: elseifExpr,
     if_expr: ifExpr,
+    prefix,
     go,
     semicolons,
+    suffix,
     type,
   } = stmt
-  const result = [toUpper(type), exprToSQL(boolExpr), `${astToSQL(ifExpr.ast)}${semicolons[0]}`, toUpper(go)]
-  if (elseExpr) result.push('ELSE', `${astToSQL(elseExpr.ast)}${semicolons[1]}`)
+  const result = [toUpper(type), exprToSQL(boolExpr), literalToSQL(prefix), `${astToSQL(ifExpr.ast || ifExpr)}${semicolons[0]}`, toUpper(go)]
+  if (elseifExpr) {
+    result.push(
+      elseifExpr.map(
+        elseif => [toUpper(elseif.type), exprToSQL(elseif.boolean_expr), 'THEN', astToSQL(elseif.then.ast || elseif.then), elseif.semicolon].filter(hasVal).join(' ')
+      ).join(' ')
+    )
+  }
+  if (elseExpr) result.push('ELSE', `${astToSQL(elseExpr.ast || elseExpr)}${semicolons[1]}`)
+  result.push(literalToSQL(suffix))
   return result.filter(hasVal).join(' ')
 }
 

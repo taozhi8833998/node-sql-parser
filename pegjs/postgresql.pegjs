@@ -221,6 +221,7 @@ cmd_stmt
   / show_stmt
   / deallocate_stmt
   / grant_revoke_stmt
+  / if_else_stmt
 
 create_stmt
   = create_table_stmt
@@ -497,7 +498,7 @@ declare_stmt
       ast: {
         type: 'declare',
         declare: vars,
-        symbol: ';\\n',
+        symbol: ';',
       }
     }
   }
@@ -2345,6 +2346,59 @@ grant_revoke_stmt
         to_from: t[0],
         user_or_roles: to,
         with: wo
+      }
+    }
+  }
+elseif_stmt
+  = 'ELSEIF'i __ e:expr __ 'THEN'i __ ia:crud_stmt __ s:SEMICOLON? {
+    // => { type: 'elseif'; boolean_expr: expr; then: curd_stmt; semicolon?: string; }
+    return {
+      type: 'elseif',
+      boolean_expr: e,
+      then: ia,
+      semicolon: s
+    }
+
+  }
+elseif_stmt_list
+  = head:elseif_stmt tail:(__ elseif_stmt)* {
+    // => elseif_stmt[]
+    return createList(head, tail, 1)
+  }
+if_else_stmt
+  = 'IF'i __ ie:expr __ 'THEN'i __ ia:crud_stmt __ s:SEMICOLON? __ ei:elseif_stmt_list? __ el:(KW_ELSE __ crud_stmt)? __ es:SEMICOLON? __ 'END'i __ 'IF'i {
+    /* export interface if_else_stmt {
+        type: 'if';
+        keyword: 'if';
+        boolean_expr: expr;
+        semicolons: string[];
+        if_expr: crud_stmt;
+        elseif_expr: elseif_stmt[];
+        else_expr: curd_stmt;
+        prefix: literal_string;
+        suffix: literal_string;
+      }
+     => AstStatement<if_else_stmt>
+     */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'if',
+        keyword: 'if',
+        boolean_expr: ie,
+        semicolons: [s || '', es || ''],
+        prefix: {
+          type: 'origin',
+          value: 'then'
+        },
+        if_expr: ia,
+        elseif_expr: ei,
+        else_expr: el && el[2],
+        suffix: {
+          type: 'origin',
+          value: 'end if',
+        }
       }
     }
   }

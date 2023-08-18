@@ -1180,6 +1180,44 @@ describe('Postgres', () => {
         `CREATE FUNCTION dup(INT) RETURNS TABLE ("f1" INT, "f2" TEXT) AS $$ SELECT $1, CAST($1 AS TEXT) || ' is text' $$ LANGUAGE SQL`
       ]
     },
+    {
+      title: 'create function with if else stmt',
+      sql: [
+        `CREATE FUNCTION public.inventory_in_stock(p_inventory_id integer) RETURNS boolean
+        LANGUAGE plpgsql
+        AS $$
+          DECLARE
+              v_rentals INTEGER;
+              v_out     INTEGER;
+          BEGIN
+              -- AN ITEM IS IN-STOCK IF THERE ARE EITHER NO ROWS IN THE rental TABLE
+              -- FOR THE ITEM OR ALL ROWS HAVE return_date POPULATED
+
+              SELECT count(*) INTO v_rentals
+              FROM rental
+              WHERE inventory_id = p_inventory_id;
+
+              IF v_rentals = 0 THEN
+                RETURN TRUE;
+              END IF;
+
+              SELECT COUNT(rental_id) INTO v_out
+              FROM inventory LEFT JOIN rental USING(inventory_id)
+              WHERE inventory.inventory_id = p_inventory_id
+              AND rental.return_date IS NULL;
+
+              IF v_out > 0 THEN
+                RETURN FALSE;
+              ELSEIF v_out = 0 THEN
+                RETURN FALSE;
+              ELSE
+                RETURN TRUE;
+              END IF;
+          END
+        $$;`,
+        'CREATE FUNCTION "public".inventory_in_stock(p_inventory_id INTEGER) RETURNS BOOLEAN LANGUAGE plpgsql AS $$ DECLARE v_rentals INTEGER; v_out INTEGER BEGIN SELECT COUNT(*) INTO "v_rentals" FROM "rental" WHERE "inventory_id" = "p_inventory_id" ; IF "v_rentals" = 0 THEN RETURN TRUE; END IF ; SELECT COUNT("rental_id") INTO "v_out" FROM "inventory" LEFT JOIN "rental" USING ("inventory_id") WHERE "inventory"."inventory_id" = "p_inventory_id" AND "rental"."return_date" IS NULL ; IF "v_out" > 0 THEN RETURN FALSE; ELSEIF "v_out" = 0 THEN RETURN FALSE ; ELSE RETURN TRUE; END IF END $$'
+      ]
+    }
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
