@@ -286,7 +286,7 @@ function createFunctionOptionToSQL(stmt) {
   const { type } = stmt
   switch (type) {
     case 'as':
-      return [toUpper(type), stmt.start, multipleToSQL(stmt.expr), stmt.end].join(' ')
+      return [toUpper(type), stmt.symbol, unionToSQL(stmt.declare), toUpper(stmt.begin), multipleToSQL(stmt.expr), toUpper(stmt.end), stmt.symbol].filter(hasVal).join(' ')
     case 'set':
       return [toUpper(type), stmt.parameter, toUpper(stmt.value && stmt.value.prefix), stmt.value && stmt.value.expr.map(exprToSQL).join(', ')].filter(hasVal).join(' ')
     default:

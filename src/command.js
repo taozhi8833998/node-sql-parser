@@ -1,6 +1,6 @@
 import { columnDataType, columnRefToSQL } from './column'
 import { createDefinitionToSQL } from './create'
-import { identifierToSql, hasVal, toUpper, literalToSQL } from './util'
+import { commonTypeValue, identifierToSql, hasVal, toUpper, literalToSQL } from './util'
 import { exprToSQL } from './expr'
 import { tablesToSQL, tableToSQL } from './tables'
 import astToSQL from './sql'
@@ -106,15 +106,15 @@ function deallocateToSQL(stmt) {
 }
 
 function declareToSQL(stmt) {
-  const { type, declare } = stmt
+  const { type, declare, symbol } = stmt
   const result = [toUpper(type)]
   const info = declare.map(dec => {
-    const { at, name, as, prefix, definition, keyword } = dec
-    const declareInfo = [`${at}${name}`, toUpper(as)]
+    const { at, name, as, constant, datatype, not_null, prefix, definition, keyword } = dec
+    const declareInfo = [[at, name].filter(hasVal).join(''), toUpper(as), toUpper(constant)]
     switch (keyword) {
       case 'variable':
-        declareInfo.push(columnDataType(prefix))
-        if (definition) declareInfo.push('=', exprToSQL(definition))
+        declareInfo.push(columnDataType(datatype), ...commonTypeValue(dec.collate), toUpper(not_null))
+        if (definition) declareInfo.push(toUpper(definition.keyword), exprToSQL(definition.value))
         break
       case 'cursor':
         declareInfo.push(toUpper(prefix))
@@ -126,7 +126,7 @@ function declareToSQL(stmt) {
         break
     }
     return declareInfo.filter(hasVal).join(' ')
-  }).join(', ')
+  }).join(`${symbol} `)
   result.push(info)
   return result.join(' ')
 }

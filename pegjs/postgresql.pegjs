@@ -210,6 +210,7 @@ start
 cmd_stmt
   = drop_stmt
   / create_stmt
+  / declare_stmt
   / truncate_stmt
   / rename_stmt
   / call_stmt
@@ -462,6 +463,45 @@ func_returns
     }
   }
 
+declare_variable_item
+  = n:ident_name &{ return n.toLowerCase() !== 'begin' } __ c:'CONSTANT'i? __ d:data_type __  collate:collate_expr? __ nu:(KW_NOT __ KW_NULL)? __ expr:((KW_DEFAULT / ':=')? __ (literal / expr))? __ s:SEMICOLON? {
+    // => { keyword: 'variable'; name: string, constant?: string; datatype: data_type; collate?: collate; not_null?: string; default?: { type: 'default'; keyword: string; value: literal | expr; }; }
+    return {
+      keyword: 'variable',
+      name: n,
+      constant: c,
+      datatype: d,
+      collate,
+      not_null: nu && 'not null',
+      definition: expr && {
+        type: 'default',
+        keyword: expr[0],
+        value: expr[2]
+      },
+    }
+  }
+declare_variables
+  = head:declare_variable_item tail:(__ declare_variable_item)* {
+    // => declare_variable_item[]
+    return createList(head, tail, 1)
+}
+declare_stmt
+  = 'DECLARE'i __ vars:declare_variables {
+    /*
+      export type declare_stmt = { type: 'declare'; declare: declare_variable_item[]; }
+      => AstStatement<declare_stmt>
+    */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'declare',
+        declare: vars,
+        symbol: ';\\n',
+      }
+    }
+  }
+
 create_func_opt
   = 'LANGUAGE' __ ln:ident_name __ {
     // => literal_string
@@ -516,16 +556,18 @@ create_func_opt
       value: ['PARALLEL', i].join(' ')
     }
   }
-  / KW_AS __ c:[^ \s\t\n\r]+ __ s:multiple_stmt __ l:[^ \s\t\n\r;]+ __ {
-    // => { type: 'as'; start: string; end: string; expr: multiple_stmt; }
+  / KW_AS __ c:[^ \s\t\n\r]+ __ de:declare_stmt? __ b:('BEGIN'i)? __ s:multiple_stmt __ e:KW_END? &{ return (b && e) || (!b && !e) } __ SEMICOLON? __ l:[^ \s\t\n\r;]+ __ {
+    // => { type: 'as'; begin?: string; declare?: declare_stmt; expr: multiple_stmt; end?: string; symbol: string; }
     const start = c.join('')
     const end = l.join('')
     if (start !== end) throw new Error(`start symbol '${start}'is not same with end symbol '${end}'`)
     return {
       type: 'as',
-      start,
-      end,
-      expr:s.ast
+      declare: de && de.ast,
+      begin: b,
+      expr: s.ast.flat(),
+      end: e && e[0],
+      symbol: start,
     }
   }
   / p:('COST'i / 'ROWS'i) __ n:literal_numeric __ {
@@ -4713,6 +4755,14 @@ proc_primary
       e.parentheses = true;
       return e;
     }
+  / n:ident_name {
+    // => { type: 'var'; prefix: null; name: number; members: []; quoted: null }
+    return {
+      type: 'var',
+      name: n,
+      prefix: null
+    }
+  }
 
 proc_func_name
   = dt:ident_name tail:(__ DOT __ ident_name)? {
@@ -4737,14 +4787,6 @@ proc_func_call
         }
       };
     }
-  / name:proc_func_name {
-    // => IGNORE
-    return {
-        type: 'function',
-        name: name,
-        args: null
-      };
-  }
 
 proc_primary_list
   = head:proc_primary tail:(__ COMMA __ proc_primary)* {
@@ -4765,7 +4807,7 @@ var_decl_list
   }
 
 var_decl
-  = p: KW_VAR_PRE_DOLLAR_DOUBLE d:[^$]* s:KW_VAR_PRE_DOLLAR_DOUBLE {
+  = p:KW_VAR_PRE_DOLLAR_DOUBLE d:[^$]* s:KW_VAR_PRE_DOLLAR_DOUBLE {
     // => { type: 'var'; name: string; prefix: string; suffix: string; };
     return {
       type: 'var',
@@ -4783,7 +4825,7 @@ var_decl
       suffix: `$${s}$`
     };
   }
-  / p: KW_VAR_PRE d: without_prefix_var_decl {
+  / p:KW_VAR_PRE d: without_prefix_var_decl {
     // => without_prefix_var_decl & { type: 'var'; prefix: string; };
     // push for analysis
     return {
