@@ -1,5 +1,6 @@
 const { expect } = require('chai')
 const { conflictToSQL } = require('../src/insert')
+const { procToSQL } = require('../src/proc')
 const Parser = require('../src/parser').default
 
 describe('Postgres', () => {
@@ -1150,7 +1151,7 @@ describe('Postgres', () => {
       ]
     },
     {
-      title: 'create function with set',
+      title: 'create function with declare',
       sql: [
         `CREATE FUNCTION check_password(uname TEXT, pass TEXT)
         RETURNS BOOLEAN AS $$
@@ -1410,6 +1411,9 @@ describe('Postgres', () => {
 
     it('should support conflict be empty', () => {
       expect(conflictToSQL(null)).to.be.equal('')
+    })
+    it('should proc assign', () => {
+      expect(procToSQL({stmt: {type: 'assign', left: {type: 'default', value: 'abc'}, keyword: '', right: {type: 'number', value: 123}, symbol: '='}})).to.be.equal('abc = 123')
     })
   })
 

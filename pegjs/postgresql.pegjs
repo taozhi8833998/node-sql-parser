@@ -4691,8 +4691,10 @@ proc_stmts
 
 proc_stmt
   = &{ varList = []; return true; } __ s:(assign_stmt / return_stmt) {
-      // => { type: 'proc'; stmt: assign_stmt | return_stmt; vars: any }
-      return { type: 'proc', stmt: s, vars: varList };
+      /* export interface proc_stmt { type: 'proc'; stmt: assign_stmt | return_stmt; vars: any }
+     => AstStatement<proc_stmt>
+     */
+      return { type: 'proc', stmt: s, vars: varList }
     }
 
 assign_stmt
