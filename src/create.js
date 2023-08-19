@@ -277,9 +277,18 @@ function createTypeToSQL(stmt) {
   return sql.filter(hasVal).join(' ')
 }
 
+function createFunctionReturnsOptToSQL(stmt) {
+  if (stmt.dataType) return dataTypeToSQL(stmt)
+  return [identifierToSql(stmt.db), identifierToSql(stmt.schema), identifierToSql(stmt.table)].filter(hasVal).join('.')
+}
+
 function createFunctionReturnsToSQL(stmt) {
   const { type, keyword, expr } = stmt
-  const sql = [toUpper(type), toUpper(keyword), expr.dataType ? dataTypeToSQL(expr) : `(${expr.map(columnDefinitionToSQL).join(', ')})`]
+  const sql = [
+    toUpper(type),
+    toUpper(keyword),
+    Array.isArray(expr) ? `(${expr.map(columnDefinitionToSQL).join(', ')})` : createFunctionReturnsOptToSQL(expr),
+  ]
   return sql.filter(hasVal).join(' ')
 }
 function createFunctionOptionToSQL(stmt) {

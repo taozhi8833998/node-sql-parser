@@ -447,7 +447,7 @@ column_data_type_list
       return createList(head, tail)
     }
 func_returns
-  = 'RETURNS'i __ k:'SETOF'i? __ t:data_type {
+  = 'RETURNS'i __ k:'SETOF'i? __ t:(data_type / table_name) {
     // => { type: "returns"; keyword?: "setof"; expr: data_type; }
     return {
       type: 'returns',
@@ -605,7 +605,7 @@ create_function_stmt
   = a:KW_CREATE __
   or:(KW_OR __ KW_REPLACE)? __
   t:'FUNCTION'i __
-  c:table_name __ LPAREN __ args:alter_func_args __ RPAREN __
+  c:table_name __ LPAREN __ args:alter_func_args? __ RPAREN __
   r:func_returns? __
   fo:create_func_opt* __ SEMICOLON? __ {
     /*
@@ -613,7 +613,7 @@ create_function_stmt
         type: 'create';
         replace?: string;
         name: { schema?: string; name: string };
-        args: alter_func_args;
+        args?: alter_func_args;
         returns?: func_returns;
         keyword: 'function';
         options?: create_func_opt[];
@@ -624,7 +624,7 @@ create_function_stmt
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
-          args,
+          args: args || [],
           type: 'create',
           replace: or && 'or replace',
           name: { schema: c.db, name: c.table },
@@ -2864,30 +2864,18 @@ join_op
   / (KW_INNER __)? KW_JOIN { /* => 'INNER JOIN' */ return 'INNER JOIN'; }
 
 table_name
-  = dt:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
+  = dt:ident schema:(__ DOT __ (ident / STAR))? tail:(__ DOT __ (ident / STAR))? {
       // => { db?: ident; schema?: ident, table: ident | '*'; }
       const obj = { db: null, table: dt };
       if (tail !== null) {
         obj.db = dt;
         obj.schema = schema[3];
         obj.table = tail[3];
+        return obj
       }
-      return obj;
-    }
-  / dt:ident __ DOT __ STAR {
-    // => IGNORE
-      tableList.add(`select::${dt}::(.*)`);
-      return {
-        db: dt,
-        table: '*'
-      }
-    }
-  / dt:ident tail:(__ DOT __ ident)? {
-    // => IGNORE
-      const obj = { db: null, table: dt };
-      if (tail !== null) {
+      if (schema !== null) {
         obj.db = dt;
-        obj.table = tail[3];
+        obj.table = schema[3];
       }
       return obj;
     }

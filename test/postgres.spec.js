@@ -1217,7 +1217,20 @@ describe('Postgres', () => {
         $$;`,
         'CREATE FUNCTION "public".inventory_in_stock(p_inventory_id INTEGER) RETURNS BOOLEAN LANGUAGE plpgsql AS $$ DECLARE v_rentals INTEGER; v_out INTEGER BEGIN SELECT COUNT(*) INTO "v_rentals" FROM "rental" WHERE "inventory_id" = "p_inventory_id" ; IF "v_rentals" = 0 THEN RETURN TRUE; END IF ; SELECT COUNT("rental_id") INTO "v_out" FROM "inventory" LEFT JOIN "rental" USING ("inventory_id") WHERE "inventory"."inventory_id" = "p_inventory_id" AND "rental"."return_date" IS NULL ; IF "v_out" > 0 THEN RETURN FALSE; ELSEIF "v_out" = 0 THEN RETURN FALSE ; ELSE RETURN TRUE; END IF END $$'
       ]
-    }
+    },
+    {
+      title: 'create function without args',
+      sql: [
+        `CREATE FUNCTION public.last_updated() RETURNS trigger
+        LANGUAGE plpgsql
+        AS $$
+          BEGIN
+              NEW.last_update = CURRENT_TIMESTAMP;
+              RETURN NEW;
+          END $$;`,
+        'CREATE FUNCTION "public".last_updated() RETURNS "trigger" LANGUAGE plpgsql AS $$ BEGIN NEW.last_update = CURRENT_TIMESTAMP ; RETURN NEW END $$'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
