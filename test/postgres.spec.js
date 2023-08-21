@@ -1234,13 +1234,13 @@ describe('Postgres', () => {
     {
       title: 'create aggregate',
       sql: [
-        `CREATE AGGREGATE public.group_concat(text) (
+        `CREATE AGGREGATE public.group_concat(text order by integer, id integer) (
           SFUNC = public._group_concat,
           STYPE = text,
           SSPACE = 2,
           FINALFUNC_MODIFY = READ_ONLY
         );`,
-        'CREATE AGGREGATE "public".group_concat(TEXT) (SFUNC = "public"._group_concat, STYPE = TEXT, SSPACE = 2, FINALFUNC_MODIFY = READ_ONLY)'
+        'CREATE AGGREGATE "public".group_concat(TEXT ORDER BY INTEGER, id INTEGER) (SFUNC = "public"._group_concat, STYPE = TEXT, SSPACE = 2, FINALFUNC_MODIFY = READ_ONLY)'
       ]
     },
   ]
