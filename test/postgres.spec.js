@@ -1231,6 +1231,18 @@ describe('Postgres', () => {
         'CREATE FUNCTION "public".last_updated() RETURNS "trigger" LANGUAGE plpgsql AS $$ BEGIN NEW.last_update = CURRENT_TIMESTAMP ; RETURN NEW END $$'
       ]
     },
+    {
+      title: 'create aggregate',
+      sql: [
+        `CREATE AGGREGATE public.group_concat(text) (
+          SFUNC = public._group_concat,
+          STYPE = text,
+          SSPACE = 2,
+          FINALFUNC_MODIFY = READ_ONLY
+        );`,
+        'CREATE AGGREGATE "public".group_concat(TEXT) (SFUNC = "public"._group_concat, STYPE = TEXT, SSPACE = 2, FINALFUNC_MODIFY = READ_ONLY)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

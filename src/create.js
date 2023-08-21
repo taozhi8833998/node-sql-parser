@@ -310,10 +310,39 @@ function createFunctionToSQL(stmt) {
   sql.push(`${functionName}(${argsSQL})`, createFunctionReturnsToSQL(returns), options.map(createFunctionOptionToSQL).join(' '), last)
   return sql.filter(hasVal).join(' ')
 }
+
+function aggregateOptionToSQL(stmt) {
+  const { type, symbol, value } = stmt
+  const sql = [toUpper(type), symbol]
+  switch (toUpper(type)) {
+    case 'SFUNC':
+      sql.push([identifierToSql(value.schema), value.name].filter(hasVal).join('.'))
+      break
+    case 'STYPE':
+    case 'MSTYPE':
+      sql.push(dataTypeToSQL(value))
+      break
+    default:
+      sql.push(exprToSQL(value))
+      break
+  }
+  return sql.filter(hasVal).join(' ')
+}
+function createAggregateToSQL(stmt) {
+  const { type, replace, keyword, name, args, options } = stmt
+  const sql = [toUpper(type), toUpper(replace), toUpper(keyword)]
+  const functionName = [identifierToSql(name.schema), name.name].filter(hasVal).join('.')
+  const argsSQL = `${args.expr.map(alterArgsToSQL).join(', ')}${args.orderby ? [' ORDER', 'BY', args.orderby.map(alterArgsToSQL).join(', ')].join(' ') : ''}`
+  sql.push(`${functionName}(${argsSQL})`, `(${options.map(aggregateOptionToSQL).join(', ')})`)
+  return sql.filter(hasVal).join(' ')
+}
 function createToSQL(stmt) {
   const { keyword } = stmt
   let sql = ''
   switch (keyword.toLowerCase()) {
+    case 'aggregate':
+      sql = createAggregateToSQL(stmt)
+      break
     case 'table':
       sql = createTableToSQL(stmt)
       break

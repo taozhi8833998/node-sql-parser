@@ -121,7 +121,7 @@
   }
 
   function createList(head, tail, po = 3) {
-    const result = [head];
+    const result = Array.isArray(head) ? head : [head];
     for (let i = 0; i < tail.length; i++) {
       delete tail[i][po].tableList
       delete tail[i][po].columnList
@@ -233,6 +233,7 @@ create_stmt
   / create_domain_stmt
   / create_type_stmt
   / create_view_stmt
+  / create_aggregate_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -432,6 +433,68 @@ create_view_stmt
         with: w,
       }
     }
+  }
+create_aggregate_opt_required
+  = 'SFUNC'i __ KW_ASSIGIN_EQUAL __ n:table_name __ COMMA __ 'STYPE'i __ KW_ASSIGIN_EQUAL __ d:data_type {
+    // => { type: string; symbol: '='; value: expr; }[]
+    return [
+      {
+        type: 'sfunc',
+        symbol: '=',
+        value: { schema: n.db, name: n.table },
+      },
+      {
+        type: 'stype',
+        symbol: '=',
+        value: d,
+      }
+    ]
+  }
+
+create_aggregate_opt_optional
+  = n:ident __ KW_ASSIGIN_EQUAL __ e:(ident / expr)  {
+    // => { type: string; symbol: '='; value: ident | expr; }
+    return {
+      type: n,
+      symbol: '=',
+      value: typeof e === 'string' ? { type: 'default', value: e } : e
+    }
+  }
+
+create_aggregate_opts
+  = head:create_aggregate_opt_required tail:(__ COMMA __ create_aggregate_opt_optional)* {
+    // => create_aggregate_opt_optional[]
+    return createList(head, tail)
+  }
+
+create_aggregate_stmt
+  = a:KW_CREATE __ or:(KW_OR __ KW_REPLACE)? __ t:'AGGREGATE'i __ s:table_name __ LPAREN __ as:aggregate_signature __ RPAREN __ LPAREN __ opts:create_aggregate_opts __ RPAREN  {
+    /*
+      export type create_aggregate_stmt = {
+        type: 'create',
+        keyword: 'aggregate',
+        replace?: 'or replace',
+        name: table_name,
+        args?: aggregate_signature,
+        options: create_aggregate_opt_optional[]
+      }
+      => AstStatement<create_aggregate_stmt>
+      */
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'create',
+          keyword: 'aggregate',
+          name: { schema: s.db, name: s.table },
+          args: {
+            parentheses: true,
+            expr: as,
+            orderby: as.orderby
+          },
+          options: opts
+        }
+      };
   }
 column_data_type
   = c:column_ref __ d:data_type {
