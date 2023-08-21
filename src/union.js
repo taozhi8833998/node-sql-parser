@@ -1,4 +1,5 @@
 import { alterToSQL } from './alter'
+import { analyzeToSQL, attachToSQL } from './analyze'
 import { createToSQL } from './create'
 import { selectToSQL } from './select'
 import { deleteToSQL } from './delete'
@@ -20,8 +21,8 @@ import {
 import { execToSQL } from './exec'
 import { orderOrPartitionByToSQL } from './expr'
 import { limitToSQL } from './limit'
+import { procToSQL } from './proc'
 import { showToSQL } from './show'
-import { analyzeToSQL, attachToSQL } from './analyze'
 import { hasVal, toUpper } from './util'
 
 const typeToSQLFn = {
@@ -50,9 +51,11 @@ const typeToSQLFn = {
   show       : showToSQL,
   grant      : grantAndRevokeToSQL,
   revoke     : grantAndRevokeToSQL,
+  proc       : procToSQL,
 }
 
 function unionToSQL(stmt) {
+  if (!stmt) return ''
   const fun = typeToSQLFn[stmt.type]
   const { _parentheses, _orderby, _limit } = stmt
   const res = [_parentheses && '(', fun(stmt)]

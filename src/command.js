@@ -1,6 +1,6 @@
 import { columnDataType, columnRefToSQL } from './column'
 import { createDefinitionToSQL } from './create'
-import { identifierToSql, hasVal, toUpper, literalToSQL } from './util'
+import { commonTypeValue, identifierToSql, hasVal, toUpper, literalToSQL } from './util'
 import { exprToSQL } from './expr'
 import { tablesToSQL, tableToSQL } from './tables'
 import astToSQL from './sql'
@@ -106,15 +106,15 @@ function deallocateToSQL(stmt) {
 }
 
 function declareToSQL(stmt) {
-  const { type, declare } = stmt
+  const { type, declare, symbol } = stmt
   const result = [toUpper(type)]
   const info = declare.map(dec => {
-    const { at, name, as, prefix, definition, keyword } = dec
-    const declareInfo = [`${at}${name}`, toUpper(as)]
+    const { at, name, as, constant, datatype, not_null, prefix, definition, keyword } = dec
+    const declareInfo = [[at, name].filter(hasVal).join(''), toUpper(as), toUpper(constant)]
     switch (keyword) {
       case 'variable':
-        declareInfo.push(columnDataType(prefix))
-        if (definition) declareInfo.push('=', exprToSQL(definition))
+        declareInfo.push(columnDataType(datatype), ...commonTypeValue(dec.collate), toUpper(not_null))
+        if (definition) declareInfo.push(toUpper(definition.keyword), exprToSQL(definition.value))
         break
       case 'cursor':
         declareInfo.push(toUpper(prefix))
@@ -126,7 +126,7 @@ function declareToSQL(stmt) {
         break
     }
     return declareInfo.filter(hasVal).join(' ')
-  }).join(', ')
+  }).join(`${symbol} `)
   result.push(info)
   return result.join(' ')
 }
@@ -135,13 +135,24 @@ function ifToSQL(stmt) {
   const {
     boolean_expr: boolExpr,
     else_expr: elseExpr,
+    elseif_expr: elseifExpr,
     if_expr: ifExpr,
+    prefix,
     go,
     semicolons,
+    suffix,
     type,
   } = stmt
-  const result = [toUpper(type), exprToSQL(boolExpr), `${astToSQL(ifExpr.ast)}${semicolons[0]}`, toUpper(go)]
-  if (elseExpr) result.push('ELSE', `${astToSQL(elseExpr.ast)}${semicolons[1]}`)
+  const result = [toUpper(type), exprToSQL(boolExpr), literalToSQL(prefix), `${astToSQL(ifExpr.ast || ifExpr)}${semicolons[0]}`, toUpper(go)]
+  if (elseifExpr) {
+    result.push(
+      elseifExpr.map(
+        elseif => [toUpper(elseif.type), exprToSQL(elseif.boolean_expr), 'THEN', astToSQL(elseif.then.ast || elseif.then), elseif.semicolon].filter(hasVal).join(' ')
+      ).join(' ')
+    )
+  }
+  if (elseExpr) result.push('ELSE', `${astToSQL(elseExpr.ast || elseExpr)}${semicolons[1]}`)
+  result.push(literalToSQL(suffix))
   return result.filter(hasVal).join(' ')
 }
 

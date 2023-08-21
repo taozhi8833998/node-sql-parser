@@ -579,9 +579,13 @@ declare_var
       at: '@',
       name,
       as: as && as[0].toLowerCase(),
-      prefix: dt,
+      datatype: dt,
       keyword: 'variable',
-      definition: v && v[2]
+      definition: v && {
+        type: 'default',
+        keyword: v[0],
+        value: v[2]
+      }
     }
   }
   / at:KW_VAR__PRE_AT __ name:ident_name __ 'CURSOR'i {
@@ -605,6 +609,7 @@ declare_stmt
       ast: {
         type: 'declare',
         declare: dl,
+        symbol: ',',
       }
     }
   }

@@ -88,7 +88,8 @@ function alterViewToSQL(stmt) {
   return result.filter(hasVal).join(' ')
 }
 function alterArgsToSQL(arg) {
-  return [toUpper(arg.mode), arg.name, dataTypeToSQL(arg.type)].filter(hasVal).join(' ')
+  const defaultSQL = arg.default && [toUpper(arg.default.keyword), exprToSQL(arg.default.value)].join(' ')
+  return [toUpper(arg.mode), arg.name, dataTypeToSQL(arg.type), defaultSQL].filter(hasVal).join(' ')
 }
 
 function alterSchemaToSQL(stmt) {
@@ -157,6 +158,7 @@ function alterToSQL(stmt) {
 }
 
 export {
+  alterArgsToSQL,
   alterToSQL,
   alterExprToSQL,
 }

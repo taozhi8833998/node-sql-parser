@@ -1,4 +1,4 @@
-import { alterExprToSQL } from './alter'
+import { alterArgsToSQL, alterExprToSQL } from './alter'
 import { exprToSQL } from './expr'
 import { indexDefinitionToSQL, indexOptionListToSQL, indexTypeToSQL } from './index-definition'
 import { columnDefinitionToSQL, columnRefToSQL } from './column'
@@ -277,6 +277,39 @@ function createTypeToSQL(stmt) {
   return sql.filter(hasVal).join(' ')
 }
 
+function createFunctionReturnsOptToSQL(stmt) {
+  if (stmt.dataType) return dataTypeToSQL(stmt)
+  return [identifierToSql(stmt.db), identifierToSql(stmt.schema), identifierToSql(stmt.table)].filter(hasVal).join('.')
+}
+
+function createFunctionReturnsToSQL(stmt) {
+  const { type, keyword, expr } = stmt
+  const sql = [
+    toUpper(type),
+    toUpper(keyword),
+    Array.isArray(expr) ? `(${expr.map(columnDefinitionToSQL).join(', ')})` : createFunctionReturnsOptToSQL(expr),
+  ]
+  return sql.filter(hasVal).join(' ')
+}
+function createFunctionOptionToSQL(stmt) {
+  const { type } = stmt
+  switch (type) {
+    case 'as':
+      return [toUpper(type), stmt.symbol, unionToSQL(stmt.declare), toUpper(stmt.begin), multipleToSQL(stmt.expr), toUpper(stmt.end), stmt.symbol].filter(hasVal).join(' ')
+    case 'set':
+      return [toUpper(type), stmt.parameter, toUpper(stmt.value && stmt.value.prefix), stmt.value && stmt.value.expr.map(exprToSQL).join(', ')].filter(hasVal).join(' ')
+    default:
+      return exprToSQL(stmt)
+  }
+}
+function createFunctionToSQL(stmt) {
+  const { type, replace, keyword, name, args, returns, options, last } = stmt
+  const sql = [toUpper(type), toUpper(replace), toUpper(keyword)]
+  const functionName = [identifierToSql(name.schema), name.name].filter(hasVal).join('.')
+  const argsSQL = args.map(alterArgsToSQL).filter(hasVal).join(', ')
+  sql.push(`${functionName}(${argsSQL})`, createFunctionReturnsToSQL(returns), options.map(createFunctionOptionToSQL).join(' '), last)
+  return sql.filter(hasVal).join(' ')
+}
 function createToSQL(stmt) {
   const { keyword } = stmt
   let sql = ''
@@ -289,6 +322,9 @@ function createToSQL(stmt) {
       break
     case 'extension':
       sql = createExtensionToSQL(stmt)
+      break
+    case 'function':
+      sql = createFunctionToSQL(stmt)
       break
     case 'index':
       sql = createIndexToSQL(stmt)

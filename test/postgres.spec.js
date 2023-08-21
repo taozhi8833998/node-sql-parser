@@ -1,5 +1,6 @@
 const { expect } = require('chai')
 const { conflictToSQL } = require('../src/insert')
+const { procToSQL } = require('../src/proc')
 const Parser = require('../src/parser').default
 
 describe('Postgres', () => {
@@ -1119,6 +1120,117 @@ describe('Postgres', () => {
         'REVOKE ALL ON SCHEMA "public" FROM PUBLIC'
       ]
     },
+    {
+      title: 'create function case when',
+      sql: [
+        `CREATE FUNCTION public._group_concat(text, text) RETURNS text
+        LANGUAGE sql IMMUTABLE
+        AS $_$
+          SELECT CASE
+            WHEN $2 IS NULL THEN $1
+            WHEN $1 IS NULL THEN $2
+            ELSE $1 || ', ' || $2
+          END
+        $_$;`,
+        `CREATE FUNCTION "public"._group_concat(TEXT, TEXT) RETURNS TEXT LANGUAGE sql IMMUTABLE AS $_$ SELECT CASE WHEN $2 IS NULL THEN $1 WHEN $1 IS NULL THEN $2 ELSE $1 || ', ' || $2 END $_$`
+      ]
+    },
+    {
+      title: 'create function select',
+      sql: [
+        `CREATE FUNCTION public.film_not_in_stock(p_film_id integer default 1, p_store_id integer = 1, OUT p_film_count integer) RETURNS SETOF integer
+        LANGUAGE sql
+        AS $_$
+          SELECT inventory_id
+          FROM inventory
+          WHERE film_id = $1
+          AND store_id = $2
+          AND NOT inventory_in_stock(inventory_id);
+        $_$;`,
+        `CREATE FUNCTION "public".film_not_in_stock(p_film_id INTEGER DEFAULT 1, p_store_id INTEGER = 1, OUT p_film_count INTEGER) RETURNS SETOF INTEGER LANGUAGE sql AS $_$ SELECT "inventory_id" FROM "inventory" WHERE "film_id" = $1 AND "store_id" = $2 AND NOT inventory_in_stock("inventory_id") $_$`
+      ]
+    },
+    {
+      title: 'create function with declare',
+      sql: [
+        `CREATE FUNCTION check_password(uname TEXT, pass TEXT)
+        RETURNS BOOLEAN AS $$
+        DECLARE passed BOOLEAN;
+        BEGIN
+                SELECT  (pwd = $2) INTO passed
+                FROM    pwds
+                WHERE   username = $1;
+
+                RETURN passed;
+        END;
+        $$  LANGUAGE plpgsql
+            SECURITY DEFINER
+            -- Set a secure search_path: trusted schema(s), then 'pg_temp'.
+            SET search_path = admin, pg_temp;
+        `,
+        `CREATE FUNCTION check_password(uname TEXT, pass TEXT) RETURNS BOOLEAN AS $$ DECLARE passed BOOLEAN BEGIN SELECT ("pwd" = $2) INTO "passed" FROM "pwds" WHERE "username" = $1 ; RETURN passed END $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = admin, pg_temp`
+      ]
+    },
+    {
+      title: 'create function returns table',
+      sql: [
+        `CREATE FUNCTION dup(int) RETURNS TABLE(f1 int, f2 text)
+        AS $$ SELECT $1, CAST($1 AS text) || ' is text' $$
+        LANGUAGE SQL;`,
+        `CREATE FUNCTION dup(INT) RETURNS TABLE ("f1" INT, "f2" TEXT) AS $$ SELECT $1, CAST($1 AS TEXT) || ' is text' $$ LANGUAGE SQL`
+      ]
+    },
+    {
+      title: 'create function with if else stmt',
+      sql: [
+        `CREATE FUNCTION public.inventory_in_stock(p_inventory_id integer) RETURNS boolean
+        LANGUAGE plpgsql
+        AS $$
+          DECLARE
+              v_rentals INTEGER;
+              v_out     INTEGER;
+          BEGIN
+              -- AN ITEM IS IN-STOCK IF THERE ARE EITHER NO ROWS IN THE rental TABLE
+              -- FOR THE ITEM OR ALL ROWS HAVE return_date POPULATED
+
+              SELECT count(*) INTO v_rentals
+              FROM rental
+              WHERE inventory_id = p_inventory_id;
+
+              IF v_rentals = 0 THEN
+                RETURN TRUE;
+              END IF;
+
+              SELECT COUNT(rental_id) INTO v_out
+              FROM inventory LEFT JOIN rental USING(inventory_id)
+              WHERE inventory.inventory_id = p_inventory_id
+              AND rental.return_date IS NULL;
+
+              IF v_out > 0 THEN
+                RETURN FALSE;
+              ELSEIF v_out = 0 THEN
+                RETURN FALSE;
+              ELSE
+                RETURN TRUE;
+              END IF;
+          END
+        $$;`,
+        'CREATE FUNCTION "public".inventory_in_stock(p_inventory_id INTEGER) RETURNS BOOLEAN LANGUAGE plpgsql AS $$ DECLARE v_rentals INTEGER; v_out INTEGER BEGIN SELECT COUNT(*) INTO "v_rentals" FROM "rental" WHERE "inventory_id" = "p_inventory_id" ; IF "v_rentals" = 0 THEN RETURN TRUE; END IF ; SELECT COUNT("rental_id") INTO "v_out" FROM "inventory" LEFT JOIN "rental" USING ("inventory_id") WHERE "inventory"."inventory_id" = "p_inventory_id" AND "rental"."return_date" IS NULL ; IF "v_out" > 0 THEN RETURN FALSE; ELSEIF "v_out" = 0 THEN RETURN FALSE ; ELSE RETURN TRUE; END IF END $$'
+      ]
+    },
+    {
+      title: 'create function without args',
+      sql: [
+        `CREATE FUNCTION public.last_updated() RETURNS trigger
+        LANGUAGE plpgsql
+        AS $$
+          BEGIN
+              NEW.last_update = CURRENT_TIMESTAMP;
+              RETURN NEW;
+          END $$;`,
+        'CREATE FUNCTION "public".last_updated() RETURNS "trigger" LANGUAGE plpgsql AS $$ BEGIN NEW.last_update = CURRENT_TIMESTAMP ; RETURN NEW END $$'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
@@ -1350,6 +1462,9 @@ describe('Postgres', () => {
 
     it('should support conflict be empty', () => {
       expect(conflictToSQL(null)).to.be.equal('')
+    })
+    it('should proc assign', () => {
+      expect(procToSQL({stmt: {type: 'assign', left: {type: 'default', value: 'abc'}, keyword: '', right: {type: 'number', value: 123}, symbol: '='}})).to.be.equal('abc = 123')
     })
   })
 
