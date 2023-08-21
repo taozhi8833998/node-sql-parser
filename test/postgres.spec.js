@@ -1243,6 +1243,17 @@ describe('Postgres', () => {
         'CREATE AGGREGATE "public".group_concat(TEXT ORDER BY INTEGER, id INTEGER) (SFUNC = "public"._group_concat, STYPE = TEXT, SSPACE = 2, FINALFUNC_MODIFY = READ_ONLY)'
       ]
     },
+    {
+      title: 'create aggregate without orderby',
+      sql: [
+        `CREATE AGGREGATE public.group_concat(text, text) (
+          SFUNC = public._group_concat,
+          STYPE = text,
+          MFINALFUNC_MODIFY = SHAREABLE
+        );`,
+        'CREATE AGGREGATE "public".group_concat(TEXT, TEXT) (SFUNC = "public"._group_concat, STYPE = TEXT, MFINALFUNC_MODIFY = SHAREABLE)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
