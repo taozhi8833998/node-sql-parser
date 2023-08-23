@@ -4991,6 +4991,7 @@ data_type
   / serial_interval_type
   / binary_type
   / oid_type
+  / record_type
 
 
 array_type
@@ -5073,3 +5074,6 @@ text_type
 
 uuid_type
   = t:KW_UUID {/* =>  data_type */  return { dataType: t }}
+
+record_type
+  = 'RECORD'i {/* =>  data_type */  return { dataType: 'RECORD' }}
