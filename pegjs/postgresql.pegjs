@@ -222,6 +222,7 @@ cmd_stmt
   / deallocate_stmt
   / grant_revoke_stmt
   / if_else_stmt
+  / raise_stmt
 
 create_stmt
   = create_table_stmt
@@ -2465,6 +2466,66 @@ if_else_stmt
       }
     }
   }
+raise_level
+  // => string
+  = 'DEBUG'i / 'LOG'i / 'INFO'i  / 'NOTICE'i / 'WARNING'i / 'EXCEPTION'i
+raise_opt
+  = KW_USING __ o:('MESSAGE'i / 'DETAIL'i / 'HINT'i / 'ERRCODE'i / 'COLUMN'i / 'CONSTRAINT'i / 'DATATYPE'i / 'TABLE'i / 'SCHEMA'i) __ KW_ASSIGIN_EQUAL __ e:expr es:(__ COMMA __ expr)* {
+    // => { type: 'using'; option: string; symbol: '='; expr: expr[]; }
+    const expr = [e]
+    if (es) es.forEach(ex => expr.push(ex[3]))
+    return {
+      type: 'using',
+      option: o,
+      symbol: '=',
+      expr
+    }
+  }
+raise_item
+  = format:literal_string e:(__ COMMA __ ident)* {
+    // => IGNORE
+    return {
+      type: 'format',
+      keyword: format,
+      expr: e && e.map(ex => ({ type: 'default', value: ex[3] }))
+    }
+  }
+  / 'SQLSTATE'i __ ss:literal_string {
+    // => IGNORE
+    return {
+      type: 'sqlstate',
+      keyword: { type: 'origin', value: 'SQLSTATE' },
+      expr: [ss],
+    }
+  }
+  / n:ident {
+    // => IGNORE
+    return {
+      type: 'condition',
+      expr: [{ type: 'default', value: n }]
+    }
+  }
+raise_stmt
+  = 'RAISE'i __ l:raise_level?  __ r:raise_item? __ using:raise_opt? {
+    /* export interface raise_stmt {
+        type: 'raise';
+        level?: string;
+        raise?: raise_item;
+        using?: raise_opt;
+      }
+      => AstStatement<raise_stmt>
+     */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'raise',
+        level: l,
+        using,
+        raise: r,
+      }
+    }
+  }
 select_stmt
   = KW_SELECT __ ';' {
     // => { type: 'select'; }
@@ -2749,8 +2810,7 @@ table_to_item
     }
 
 index_type
-  = KW_USING __
-  t:("BTREE"i / "HASH"i / "GIST"i / "GIN"i) {
+  = KW_USING __ t:("BTREE"i / "HASH"i / "GIST"i / "GIN"i) {
     // => { keyword: 'using'; type: 'btree' | 'hash' | 'gist' | 'gin' }
     return {
       keyword: 'using',

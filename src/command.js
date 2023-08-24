@@ -192,6 +192,14 @@ function grantAndRevokeToSQL(stmt) {
   return result.filter(hasVal).join(' ')
 }
 
+function raiseToSQL(stmt) {
+  const { type, level, raise, using } = stmt
+  const sql = [toUpper(type), toUpper(level)]
+  if (raise) sql.push(`${literalToSQL(raise.keyword)}${raise.type === 'format' ? ',' : ''}`, raise.expr.map(exprInfo => literalToSQL(exprInfo)).join(', '))
+  if (using) sql.push(toUpper(using.type), toUpper(using.option), using.symbol, using.expr.map(exprInfo => exprToSQL(exprInfo)).join(', '))
+  return sql.filter(hasVal).join(' ')
+}
+
 export {
   callToSQL,
   commonCmdToSQL,
@@ -200,6 +208,7 @@ export {
   descToSQL,
   grantAndRevokeToSQL,
   ifToSQL,
+  raiseToSQL,
   renameToSQL,
   useToSQL,
   setVarToSQL,

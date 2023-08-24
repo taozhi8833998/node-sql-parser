@@ -14,6 +14,7 @@ import {
   grantAndRevokeToSQL,
   ifToSQL,
   useToSQL,
+  raiseToSQL,
   renameToSQL,
   setVarToSQL,
   lockUnlockToSQL,
@@ -52,6 +53,7 @@ const typeToSQLFn = {
   grant      : grantAndRevokeToSQL,
   revoke     : grantAndRevokeToSQL,
   proc       : procToSQL,
+  raise      : raiseToSQL,
 }
 
 function unionToSQL(stmt) {

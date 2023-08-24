@@ -1254,6 +1254,28 @@ describe('Postgres', () => {
         'CREATE AGGREGATE "public".group_concat(TEXT, TEXT) (SFUNC = "public"._group_concat, STYPE = TEXT, MFINALFUNC_MODIFY = SHAREABLE)'
       ]
     },
+    {
+      title: 'raise only',
+      sql: [
+        'raise',
+        'RAISE'
+      ]
+    },
+    {
+      title: 'raise notice',
+      sql: [
+        "RAISE NOTICE 'Calling cs_create_job(%)', v_job_id;",
+        "RAISE NOTICE 'Calling cs_create_job(%)', v_job_id"
+      ]
+    },
+    {
+      title: 'raise expection',
+      sql: [
+        `RAISE EXCEPTION 'Nonexistent ID --> %', user_id
+        USING HINT = 'Please check your user ID';`,
+        "RAISE EXCEPTION 'Nonexistent ID --> %', user_id USING HINT = 'Please check your user ID'"
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
