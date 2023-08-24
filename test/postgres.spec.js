@@ -1276,6 +1276,20 @@ describe('Postgres', () => {
         "RAISE EXCEPTION 'Nonexistent ID --> %', user_id USING HINT = 'Please check your user ID'"
       ]
     },
+    {
+      title: 'raise condition',
+      sql: [
+        'RAISE division_by_zero;',
+        'RAISE division_by_zero'
+      ]
+    },
+    {
+      title: 'raise sqlstate',
+      sql: [
+        "RAISE SQLSTATE '22012';",
+        "RAISE SQLSTATE '22012'"
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

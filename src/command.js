@@ -195,7 +195,7 @@ function grantAndRevokeToSQL(stmt) {
 function raiseToSQL(stmt) {
   const { type, level, raise, using } = stmt
   const sql = [toUpper(type), toUpper(level)]
-  if (raise) sql.push(`${literalToSQL(raise.keyword)}${raise.type === 'format' ? ',' : ''}`, raise.expr.map(exprInfo => literalToSQL(exprInfo)).join(', '))
+  if (raise) sql.push([literalToSQL(raise.keyword), raise.type === 'format' && ','].filter(hasVal).join(''), raise.expr.map(exprInfo => literalToSQL(exprInfo)).join(', '))
   if (using) sql.push(toUpper(using.type), toUpper(using.option), using.symbol, using.expr.map(exprInfo => exprToSQL(exprInfo)).join(', '))
   return sql.filter(hasVal).join(' ')
 }
