@@ -1290,6 +1290,20 @@ describe('Postgres', () => {
         "RAISE SQLSTATE '22012'"
       ]
     },
+    {
+      title: 'execute stmt',
+      sql: [
+        'EXECUTE tmpSQL;',
+        'EXECUTE tmpSQL'
+      ]
+    },
+    {
+      title: 'execute stmt with args',
+      sql: [
+        'EXECUTE test(a, b, c)',
+        'EXECUTE test(a, b, c)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

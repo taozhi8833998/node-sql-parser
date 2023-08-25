@@ -44,6 +44,23 @@ function descToSQL(stmt) {
   return `${action} ${identifierToSql(table)}`
 }
 
+function executeToSQL(stmt) {
+  const { type, name, args } = stmt
+  const sql = [toUpper(type)]
+  const nameWithArgs = [name]
+  if (args) nameWithArgs.push(`(${exprToSQL(args).join(', ')})`)
+  sql.push(nameWithArgs.join(''))
+  return sql.filter(hasVal).join(' ')
+}
+
+function raiseToSQL(stmt) {
+  const { type, level, raise, using } = stmt
+  const sql = [toUpper(type), toUpper(level)]
+  if (raise) sql.push([literalToSQL(raise.keyword), raise.type === 'format' && ','].filter(hasVal).join(''), raise.expr.map(exprInfo => literalToSQL(exprInfo)).join(', '))
+  if (using) sql.push(toUpper(using.type), toUpper(using.option), using.symbol, using.expr.map(exprInfo => exprToSQL(exprInfo)).join(', '))
+  return sql.filter(hasVal).join(' ')
+}
+
 function renameToSQL(stmt) {
   const { type, table } = stmt
   const clauses = []
@@ -192,20 +209,13 @@ function grantAndRevokeToSQL(stmt) {
   return result.filter(hasVal).join(' ')
 }
 
-function raiseToSQL(stmt) {
-  const { type, level, raise, using } = stmt
-  const sql = [toUpper(type), toUpper(level)]
-  if (raise) sql.push([literalToSQL(raise.keyword), raise.type === 'format' && ','].filter(hasVal).join(''), raise.expr.map(exprInfo => literalToSQL(exprInfo)).join(', '))
-  if (using) sql.push(toUpper(using.type), toUpper(using.option), using.symbol, using.expr.map(exprInfo => exprToSQL(exprInfo)).join(', '))
-  return sql.filter(hasVal).join(' ')
-}
-
 export {
   callToSQL,
   commonCmdToSQL,
   deallocateToSQL,
   declareToSQL,
   descToSQL,
+  executeToSQL,
   grantAndRevokeToSQL,
   ifToSQL,
   raiseToSQL,
