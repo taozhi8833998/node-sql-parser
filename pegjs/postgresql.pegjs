@@ -224,6 +224,7 @@ cmd_stmt
   / if_else_stmt
   / raise_stmt
   / execute_stmt
+  / for_loop_stmt
 
 create_stmt
   = create_table_stmt
@@ -2483,12 +2484,12 @@ raise_opt
     }
   }
 raise_item
-  = format:literal_string e:(__ COMMA __ ident)* {
+  = format:literal_string e:(__ COMMA __ proc_primary)* {
     // => IGNORE
     return {
       type: 'format',
       keyword: format,
-      expr: e && e.map(ex => ({ type: 'default', value: ex[3] }))
+      expr: e && e.map(ex => ex[3])
     }
   }
   / 'SQLSTATE'i __ ss:literal_string {
@@ -2543,6 +2544,48 @@ execute_stmt
         type: 'execute',
         name,
         args: a && { type: 'expr_list', value: a[2] }
+      }
+    }
+  }
+for_label
+  = 'FOR'i {
+    // => { label?: string; keyword: 'for'; }
+    return {
+      label: null,
+      keyword: 'for',
+    }
+  }
+  / label:ident __ 'FOR'i {
+  // => IGNORE
+    return {
+      label,
+      keyword: 'for'
+    }
+  }
+for_loop_stmt
+  = f:for_label __ target:ident __ KW_IN __ query:select_stmt __ 'LOOP'i  __ stmts:multiple_stmt __ KW_END __ 'LOOP'i __ label:ident? &{
+    if (f.label && label && f.label === label) return true
+    if (!f.label && !label) return true
+    return false
+  } {
+    /* export interface for_loop_stmt {
+        type: 'for';
+        label?: string
+        target: string;
+        query: select_stmt;
+        stmts: multiple_stmt;
+      }
+      => AstStatement<for_loop_stmt>
+     */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'for',
+        label,
+        target,
+        query,
+        stmts: stmts.ast,
       }
     }
   }
@@ -4942,12 +4985,17 @@ proc_primary
       e.parentheses = true;
       return e;
     }
-  / n:ident_name {
-    // => { type: 'var'; prefix: null; name: number; members: []; quoted: null }
-    return {
+  / n:ident_name s:(DOT __ ident_name)? {
+    // => { type: 'var'; prefix: null; name: number; members: []; quoted: null } | column_ref
+    if (!s) return {
       type: 'var',
       name: n,
       prefix: null
+    }
+    return {
+      type: 'column_ref',
+      table: n,
+      column: s[2]
     }
   }
 

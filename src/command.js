@@ -4,6 +4,7 @@ import { commonTypeValue, identifierToSql, hasVal, toUpper, literalToSQL } from 
 import { exprToSQL } from './expr'
 import { tablesToSQL, tableToSQL } from './tables'
 import astToSQL from './sql'
+import { multipleToSQL } from './union'
 
 function callToSQL(stmt) {
   const type = 'CALL'
@@ -53,10 +54,16 @@ function executeToSQL(stmt) {
   return sql.filter(hasVal).join(' ')
 }
 
+function forLoopToSQL(stmt) {
+  const { type, label, target, query, stmts } = stmt
+  const sql = [label, toUpper(type), target, 'IN', multipleToSQL([query]), 'LOOP', multipleToSQL(stmts), 'END LOOP', label]
+  return sql.filter(hasVal).join(' ')
+}
+
 function raiseToSQL(stmt) {
   const { type, level, raise, using } = stmt
   const sql = [toUpper(type), toUpper(level)]
-  if (raise) sql.push([literalToSQL(raise.keyword), raise.type === 'format' && ','].filter(hasVal).join(''), raise.expr.map(exprInfo => literalToSQL(exprInfo)).join(', '))
+  if (raise) sql.push([literalToSQL(raise.keyword), raise.type === 'format' && raise.expr.length > 0 && ','].filter(hasVal).join(''), raise.expr.map(exprInfo => exprToSQL(exprInfo)).join(', '))
   if (using) sql.push(toUpper(using.type), toUpper(using.option), using.symbol, using.expr.map(exprInfo => exprToSQL(exprInfo)).join(', '))
   return sql.filter(hasVal).join(' ')
 }
@@ -216,6 +223,7 @@ export {
   declareToSQL,
   descToSQL,
   executeToSQL,
+  forLoopToSQL,
   grantAndRevokeToSQL,
   ifToSQL,
   raiseToSQL,
