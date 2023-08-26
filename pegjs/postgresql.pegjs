@@ -223,6 +223,7 @@ cmd_stmt
   / grant_revoke_stmt
   / if_else_stmt
   / raise_stmt
+  / execute_stmt
 
 create_stmt
   = create_table_stmt
@@ -2523,6 +2524,25 @@ raise_stmt
         level: l,
         using,
         raise: r,
+      }
+    }
+  }
+execute_stmt
+  = 'EXECUTE'i __ name:ident __ a:(LPAREN __ proc_primary_list __ RPAREN)?  {
+    /* export interface execute_stmt {
+        type: 'execute';
+        name: string;
+        args?: { type: expr_list; value: proc_primary_list; }
+      }
+      => AstStatement<execute_stmt>
+     */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'execute',
+        name,
+        args: a && { type: 'expr_list', value: a[2] }
       }
     }
   }
