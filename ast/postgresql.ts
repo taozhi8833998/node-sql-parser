@@ -5,11 +5,11 @@
 ⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔
 */
 
-export type start = multiple_stmt | cmd_stmt | crud_stmt;
+export type start = multiple_stmt;
 
-export type cmd_stmt = drop_stmt | create_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt | show_stmt | deallocate_stmt;
+export type cmd_stmt = drop_stmt | create_stmt | declare_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt | show_stmt | deallocate_stmt | grant_revoke_stmt | if_else_stmt | raise_stmt | execute_stmt | for_loop_stmt;
 
-export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence | create_db_stmt | create_domain_stmt | create_type_stmt | create_view_stmt;
+export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence | create_db_stmt | create_domain_stmt | create_type_stmt | create_view_stmt | create_aggregate_stmt;
 
 export type alter_stmt = alter_table_stmt | alter_schema_stmt | alter_domain_type_stmt | alter_function_stmt | alter_aggregate_stmt;
 
@@ -76,6 +76,51 @@ export type create_view_stmt = {
       }
 
 export type create_view_stmt = AstStatement<create_view_stmt>;
+
+export type create_aggregate_opt_required = { type: string; symbol: '='; value: expr; }[];
+
+export type create_aggregate_opt_optional = { type: string; symbol: '='; value: ident | expr; };
+
+export type create_aggregate_opts = create_aggregate_opt_optional[];
+
+export type create_aggregate_stmt = {
+        type: 'create',
+        keyword: 'aggregate',
+        replace?: 'or replace',
+        name: table_name,
+        args?: aggregate_signature,
+        options: create_aggregate_opt_optional[]
+      }
+
+export type create_aggregate_stmt = AstStatement<create_aggregate_stmt>;
+
+export type column_data_type = { column: column_ref; definition: data_type; };
+
+export type column_data_type_list = column_data_type[];
+
+export type func_returns = { type: "returns"; keyword?: "setof"; expr: data_type; } | { type: "returns"; keyword?: "table"; expr: column_data_type_list; };
+
+export type declare_variable_item = { keyword: 'variable'; name: string, constant?: string; datatype: data_type; collate?: collate; not_null?: string; default?: { type: 'default'; keyword: string; value: literal | expr; }; };
+
+export type declare_variables = declare_variable_item[];
+
+export type declare_stmt = { type: 'declare'; declare: declare_variable_item[]; }
+
+export type declare_stmt = AstStatement<declare_stmt>;
+
+export type create_func_opt = literal_string | { type: 'as'; begin?: string; declare?: declare_stmt; expr: multiple_stmt; end?: string; symbol: string; } | literal_numeric | { type: "set"; parameter: ident_name; value?: { prefix: string; expr: expr }};
+
+export type create_function_stmt = {
+        type: 'create';
+        replace?: string;
+        name: { schema?: string; name: string };
+        args?: alter_func_args;
+        returns?: func_returns;
+        keyword: 'function';
+        options?: create_func_opt[];
+      }
+
+export type create_function_stmt = AstStatement<create_function_stmt>;
 
 export type create_type_stmt = {
         type: 'create',
@@ -230,6 +275,8 @@ export type column_format = { type: 'column_format'; value: 'fixed' | 'dynamic' 
 
 export type storage = { type: 'storage'; value: 'disk' | 'memory' };
 
+export type default_arg_expr = { type: 'default'; keyword: string, value: literal | expr; };
+
 export type default_expr = { type: 'default'; value: literal | expr; };
 
 export type drop_index_opt = (ALTER_ALGORITHM | ALTER_LOCK)[];
@@ -269,7 +316,7 @@ export type aggregate_signature = { name: ”*“ } | alter_func_args;
 
 export type alter_func_argmode = ignore;
 
-export type alter_func_arg_item = { mode?: string; name?: string; type: data_type; };
+export type alter_func_arg_item = { mode?: string; name?: string; type: data_type;  default: default_arg_expr; };
 
 export type alter_func_args = alter_func_arg_item[];
 
@@ -463,7 +510,8 @@ export type reference_option = { type: 'function'; name: string; args: expr_list
 
 export type create_constraint_trigger = {
       type: 'create';
-      constraint: string;
+      replace?: string;
+      constraint?: string;
       location: 'before' | 'after' | 'instead of';
       events: trigger_event_list;
       table: table_name;
@@ -472,7 +520,7 @@ export type create_constraint_trigger = {
       for_each?: trigger_for_row;
       when?: trigger_when;
       execute: {
-        keyword: 'execute procedure';
+        keyword: string;
         expr: proc_func_call;
       };
       constraint_type: 'trigger';
@@ -561,6 +609,114 @@ export interface deallocate_stmt_node {
         }
 
 export type deallocate_stmt = AstStatement<deallocate_stmt_node>;
+
+export interface origin_str_stmt {
+        type: 'origin';
+        value: string;
+      }
+
+export type priv_type_table = origin_str_stmt;
+
+export type priv_type_sequence = origin_str_stmt;
+
+export type priv_type_database = origin_str_stmt;
+
+export type prive_type_all = origin_str_stmt;
+
+export type prive_type_usage = origin_str_stmt | prive_type_all;
+
+export type prive_type_execute = origin_str_stmt | prive_type_all;
+
+export type priv_type = priv_type_table | priv_type_sequence | priv_type_database | prive_type_usage | prive_type_execute;
+
+export type priv_item = { priv: priv_type; columns: column_ref_list; };
+
+export type priv_list = priv_item[];
+
+export type object_type = origin_str_stmt;
+
+export type priv_level = { prefix: string; name: string; };
+
+export type priv_level_list = priv_level[];
+
+export type user_or_role = origin_str_stmt;
+
+export type user_or_role_list = user_or_role[];
+
+export type with_grant_option = origin_str_stmt;
+
+export type with_admin_option = origin_str_stmt;
+
+export type grant_revoke_keyword = { type: 'grant' } | { type: 'revoke'; grant_option_for?: origin_str_stmt; };
+
+export interface grant_revoke_stmt {
+        type: string;
+        grant_option_for?: origin_str_stmt;
+        keyword: 'priv';
+        objects: priv_list;
+        on: {
+          object_type?: object_type;
+          priv_level: priv_level_list;
+        };
+        to_from: 'to' | 'from';
+        user_or_roles?: user_or_role_list;
+        with?: with_grant_option;
+      }
+
+export type grant_revoke_stmt = AstStatement<grant_revoke_stmt> | => AstStatement<grant_revoke_stmt>;
+
+export type elseif_stmt = { type: 'elseif'; boolean_expr: expr; then: curd_stmt; semicolon?: string; };
+
+export type elseif_stmt_list = elseif_stmt[];
+
+export interface if_else_stmt {
+        type: 'if';
+        keyword: 'if';
+        boolean_expr: expr;
+        semicolons: string[];
+        if_expr: crud_stmt;
+        elseif_expr: elseif_stmt[];
+        else_expr: curd_stmt;
+        prefix: literal_string;
+        suffix: literal_string;
+      }
+
+export type if_else_stmt = AstStatement<if_else_stmt>;
+
+export type raise_level = "DEBUG" | "LOG" | "INFO" | "NOTICE" | "WARNING" | "EXCEPTION";
+
+export type raise_opt = { type: 'using'; option: string; symbol: '='; expr: expr[]; };
+
+type raise_item = never;
+
+export interface raise_stmt {
+        type: 'raise';
+        level?: string;
+        raise?: raise_item;
+        using?: raise_opt;
+      }
+
+export type raise_stmt = AstStatement<raise_stmt>;
+
+export interface execute_stmt {
+        type: 'execute';
+        name: string;
+        args?: { type: expr_list; value: proc_primary_list; }
+      }
+
+export type execute_stmt = AstStatement<execute_stmt>;
+
+export type for_label = { label?: string; keyword: 'for'; };
+
+export interface for_loop_stmt {
+        type: 'for';
+        label?: string
+        target: string;
+        query: select_stmt;
+        stmts: multiple_stmt;
+      }
+
+export type for_loop_stmt = AstStatement<for_loop_stmt>;
 
 export interface select_stmt_node extends select_stmt_nake  {
        parentheses: true;
@@ -719,7 +875,7 @@ export type order_by_clause = order_by_list;
 
 export type order_by_list = order_by_element[];
 
-export type order_by_element = { expr: expr; type: 'ASC' | 'DESC';  nulls: 'NULLS FIRST' | 'NULLS LAST' | undefined };
+export type order_by_element = { expr: expr; type: 'ASC' | 'DESC' | undefined;  nulls: 'NULLS FIRST' | 'NULLS LAST' | undefined };
 
 export type number_or_param = literal_numeric | var_decl | param;
 
@@ -936,6 +1092,8 @@ export type column_ref = string_constants_escape | {
 export type column_list = column[];
 
 export type ident = string;
+
+export type ident_list = ident[];
 
 export type alias_ident = string;
 
@@ -1396,6 +1554,8 @@ type KW_CURRENT_TIMESTAMP = never;
 
 type KW_CURRENT_USER = never;
 
+type KW_CURRENT_ROLE = never;
+
 type KW_SESSION_USER = never;
 
 type KW_SYSTEM_USER = never;
@@ -1524,7 +1684,9 @@ type EOF = never;
 
 export type proc_stmts = (proc_stmt)[];
 
-export type proc_stmt = { type: 'proc'; stmt: assign_stmt | return_stmt; vars: any };
+export interface proc_stmt { type: 'proc'; stmt: assign_stmt | return_stmt; vars: any }
+
+export type proc_stmt = AstStatement<proc_stmt>;
 
 export type assign_stmt = { type: 'assign'; left: var_decl | without_prefix_var_decl; symbol: ':=' | '='; right: proc_expr; };
 
@@ -1538,7 +1700,7 @@ export type proc_multiplicative_expr = binary_expr;
 
 export type proc_join = { type: 'join'; ltable: var_decl; rtable: var_decl; op: join_op; expr: on_clause; };
 
-export type proc_primary = literal | var_decl | proc_func_call | param | proc_additive_expr & { parentheses: true; };
+export type proc_primary = literal | var_decl | proc_func_call | param | proc_additive_expr & { parentheses: true; } | { type: 'var'; prefix: null; name: number; members: []; quoted: null } | column_ref;
 
 export type proc_func_name = string;
 
@@ -1638,3 +1800,7 @@ export type text_type = data_type;
 
 
 export type uuid_type = data_type;
+
+
+
+export type record_type = data_type;
