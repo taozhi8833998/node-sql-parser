@@ -531,7 +531,7 @@ func_returns
   }
 
 declare_variable_item
-  = n:ident_name &{ return n.toLowerCase() !== 'begin' } __ c:'CONSTANT'i? __ d:data_type __  collate:collate_expr? __ nu:(KW_NOT __ KW_NULL)? __ expr:((KW_DEFAULT / ':=')? __ (literal / expr))? __ s:SEMICOLON? {
+  = n:ident_name &{ return n.toLowerCase() !== 'begin' } __ c:'CONSTANT'i? __ d:data_type __  collate:collate_expr? __ nu:(KW_NOT __ KW_NULL)? __ expr:((KW_DEFAULT / ':=')? __ (&'BEGIN'i / literal / expr))?  __ s:SEMICOLON? {
     // => { keyword: 'variable'; name: string, constant?: string; datatype: data_type; collate?: collate; not_null?: string; default?: { type: 'default'; keyword: string; value: literal | expr; }; }
     return {
       keyword: 'variable',
@@ -540,7 +540,7 @@ declare_variable_item
       datatype: d,
       collate,
       not_null: nu && 'not null',
-      definition: expr && {
+      definition: expr && expr[0] && {
         type: 'default',
         keyword: expr[0],
         value: expr[2]
@@ -2253,6 +2253,12 @@ deallocate_stmt
   }
 priv_type_table
   =  p:(KW_SELECT / KW_INSERT / KW_UPDATE / KW_DELETE / KW_TRUNCATE / KW_REFERENCES / 'TRIGGER'i) {
+    /* export interface origin_str_stmt {
+        type: 'origin';
+        value: string;
+      }
+      => origin_str_stmt
+     */
     return {
       type: 'origin',
       value: Array.isArray(p) ? p[0] : p
@@ -2260,6 +2266,7 @@ priv_type_table
   }
 priv_type_sequence
   = p:('USAGE'i / KW_SELECT / KW_UPDATE) {
+    // => origin_str_stmt
     return {
       type: 'origin',
       value: Array.isArray(p) ? p[0] : p
@@ -2267,6 +2274,7 @@ priv_type_sequence
   }
 priv_type_database
   = p:(KW_CREATE / 'CONNECT'i / KW_TEMPORARY / KW_TEMP) {
+    // => origin_str_stmt
     return {
       type: 'origin',
       value: Array.isArray(p) ? p[0] : p
@@ -2274,6 +2282,7 @@ priv_type_database
   }
 prive_type_all
   = KW_ALL p:(__ 'PRIVILEGES'i)? {
+    // => origin_str_stmt
     return {
       type: 'origin',
       value: p ? 'all privileges' : 'all'
@@ -2281,6 +2290,7 @@ prive_type_all
   }
 prive_type_usage
   = p:'USAGE'i {
+    // => origin_str_stmt
     return {
       type: 'origin',
       value: p
@@ -2289,6 +2299,7 @@ prive_type_usage
   / prive_type_all
 prive_type_execute
   = p:'EXECUTE'i {
+    // => origin_str_stmt
     return {
       type: 'origin',
       value: p
@@ -2299,6 +2310,7 @@ priv_type
   = priv_type_table / priv_type_sequence / priv_type_database / prive_type_usage / prive_type_execute
 priv_item
   = p:priv_type __ c:(LPAREN __ column_ref_list __ RPAREN)? {
+    // => { priv: priv_type; columns: column_ref_list; }
     return {
       priv: p,
       columns: c && c[2],
@@ -2306,16 +2318,19 @@ priv_item
   }
 priv_list
   = head:priv_item tail:(__ COMMA __ priv_item)* {
+    // => priv_item[]
       return createList(head, tail)
     }
 object_type
   = o:(KW_TABLE / 'SEQUENCE'i / 'DATABASE'i / 'DOMAIN' / 'FUNCTION' / 'PROCEDURE'i / 'ROUTINE'i / 'LANGUAGE'i / 'LARGE'i / 'SCHEMA') {
+    // => origin_str_stmt
     return {
       type: 'origin',
       value: o.toUpperCase()
     }
   }
   / KW_ALL __ i:('TABLES'i / 'SEQUENCE'i / 'FUNCTIONS'i / 'PROCEDURES'i / 'ROUTINES'i) __ KW_IN __ KW_SCHEMA {
+    // => origin_str_stmt
     return {
       type: 'origin',
       value: `all ${i} in schema`
@@ -2323,6 +2338,7 @@ object_type
   }
 priv_level
   = prefix:(ident __ DOT)? __ name:(ident / STAR) {
+    // => { prefix: string; name: string; }
       return {
           prefix: prefix && prefix[0],
           name,
@@ -2330,26 +2346,31 @@ priv_level
     }
 priv_level_list
   = head:priv_level tail:(__ COMMA __ priv_level)* {
+    // => priv_level[]
       return createList(head, tail)
     }
 user_or_role
   = g:KW_GROUP? __ i:ident {
+    // => origin_str_stmt
     const name = g ? `${group} ${i}` : i
     return {
       name: { type: 'origin', value: name },
     }
   }
   / i:('PUBLIC'i / KW_CURRENT_ROLE / KW_CURRENT_USER / KW_SESSION_USER) {
+    // => origin_str_stmt
     return {
       name: { type: 'origin', value: i },
     }
   }
 user_or_role_list
   = head:user_or_role tail:(__ COMMA __ user_or_role)* {
+    // => user_or_role[]
       return createList(head, tail)
     }
 with_grant_option
   = KW_WITH __ 'GRANT'i __ 'OPTION'i {
+    // => origin_str_stmt
     return {
       type: 'origin',
       value: 'with grant option',
@@ -2357,6 +2378,7 @@ with_grant_option
   }
 with_admin_option
   = KW_WITH __ 'ADMIN'i __ 'OPTION'i {
+    // => origin_str_stmt
     return {
       type: 'origin',
       value: 'with admin option',
@@ -2364,11 +2386,13 @@ with_admin_option
   }
 grant_revoke_keyword
   = 'GRANT'i {
+    // => { type: 'grant' }
     return {
       type: 'grant'
     }
   }
   / 'REVOKE'i __ i:('GRANT'i __ 'OPTION'i __ 'FOR'i)? {
+    // => { type: 'revoke'; grant_option_for?: origin_str_stmt; }
     return {
       type: 'revoke',
       grant_option_for: i && { type: 'origin', value: 'grant option for' }
@@ -2381,6 +2405,21 @@ grant_revoke_stmt
       const obj = { revoke: 'from', grant: 'to' }
       return obj[g.type].toLowerCase() === t[0].toLowerCase()
     } __ to:user_or_role_list __ wo:with_grant_option? {
+      /* export interface grant_revoke_stmt {
+        type: string;
+        grant_option_for?: origin_str_stmt;
+        keyword: 'priv';
+        objects: priv_list;
+        on: {
+          object_type?: object_type;
+          priv_level: priv_level_list;
+        };
+        to_from: 'to' | 'from';
+        user_or_roles?: user_or_role_list;
+        with?: with_grant_option;
+      }
+      => AstStatement<grant_revoke_stmt>
+     */
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
@@ -2402,6 +2441,7 @@ grant_revoke_stmt
       const obj = { revoke: 'from', grant: 'to' }
       return obj[g.type].toLowerCase() === t[0].toLowerCase()
     } __ to:user_or_role_list __ wo:with_admin_option? {
+      // => => AstStatement<grant_revoke_stmt>
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
@@ -2950,7 +2990,7 @@ table_ref
   / __ t:table_join { /* => table_join */ return t; }
 
 table_join
-  = op:join_op __ t:table_base __ KW_USING __ LPAREN __ head:ident_name tail:(__ COMMA __ ident_name)* __ RPAREN {
+  = op:join_op __ t:table_base __ KW_USING __ LPAREN __ head:ident_without_kw tail:(__ COMMA __ ident_name)* __ RPAREN {
       // => table_base & {join: join_op; using: ident_name[]; }
       t.join = op;
       t.using = createList(head, tail);
@@ -3983,6 +4023,7 @@ ident
     }
 ident_list
   = head:ident tail:(__ COMMA __ ident)* {
+    // => ident[]
       return createList(head, tail)
     }
 alias_ident
