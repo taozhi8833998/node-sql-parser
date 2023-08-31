@@ -2893,18 +2893,21 @@ KW_SUM_MAX_MIN_AVG
   = KW_SUM / KW_MAX / KW_MIN / KW_AVG
 
 on_update_current_timestamp
-  = KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
+  = KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP __ l:(LPAREN __ expr_list? __ RPAREN)? {
+    const parentheses = l ? true : false
+    const expr = l ? l[2] : null
+    return {
+      type: 'on update',
+      keyword: kw,
+      parentheses,
+      expr,
+    }
+  }
+  / KW_ON __ KW_UPDATE __ kw:'NOW'i __ LPAREN __ RPAREN {
     return {
       type: 'on update',
       keyword: kw,
       parentheses: true,
-      expr: l
-    }
-  }
-  / KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP {
-    return {
-      type: 'on update',
-      keyword: kw,
     }
   }
 
