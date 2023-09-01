@@ -90,7 +90,7 @@ describe('Command SQL', () => {
   describe('call', () => {
     it('should support MySQL call', () => {
       expect(getParsedSql('call sp(1, "123")'))
-        .to.equal('CALL sp(1, \'123\')')
+        .to.equal('CALL sp(1, "123")')
     })
 
     it('should support MySQL call with no parameters', () => {
@@ -110,14 +110,14 @@ describe('Command SQL', () => {
 
     it('should support MySQL call with multiple different type parameters', () => {
       expect(getParsedSql('call sp(12, "test", @firstParameter)'))
-        .to.equal('CALL sp(12, \'test\', @firstParameter)')
+        .to.equal('CALL sp(12, "test", @firstParameter)')
     })
 
     it('should support MySQL call cross database', () => {
       expect(getParsedSql('call db.sp(12, "test", @firstParameter)'))
-        .to.equal('CALL db.sp(12, \'test\', @firstParameter)')
+        .to.equal('CALL db.sp(12, "test", @firstParameter)')
       expect(getParsedSql('call `db`.`sp`(12, "test", @firstParameter);'))
-        .to.equal('CALL db.sp(12, \'test\', @firstParameter)')
+        .to.equal('CALL db.sp(12, "test", @firstParameter)')
       expect(getParsedSql('call `db`.`sp`'))
         .to.equal('CALL db.sp')
     })
@@ -155,7 +155,7 @@ describe('Command SQL', () => {
 
     it(`should support cmd and crud multiple use`, () => {
       expect(getParsedSql('select * from tableD;use databaseA;drop table tableA;truncate table tableB; call sp;delete from tableC;insert into tableE values("123");update tableF set id="333"'))
-        .to.equal('SELECT * FROM `tableD` ; USE `databaseA` ; DROP TABLE `tableA` ; TRUNCATE TABLE `tableB` ; CALL sp ; DELETE FROM `tableC` ; INSERT INTO `tableE` VALUES (\'123\') ; UPDATE `tableF` SET `id` = \'333\'');
+        .to.equal('SELECT * FROM `tableD` ; USE `databaseA` ; DROP TABLE `tableA` ; TRUNCATE TABLE `tableB` ; CALL sp ; DELETE FROM `tableC` ; INSERT INTO `tableE` VALUES ("123") ; UPDATE `tableF` SET `id` = "333"');
     });
   })
 
@@ -318,20 +318,20 @@ describe('Command SQL', () => {
       it(`should support MySQL alter add ${kc} index or key`, () => {
         ["index", "key"].forEach(keyword => {
           expect(getParsedSql(`alter table a add ${kc}  ("name", "alias")`))
-          .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ('name', 'alias')`);
+          .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ("name", "alias")`);
           expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias")`))
-            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx ('name', 'alias')`);
+            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx ("name", "alias")`);
           expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias") KEY_BLOCK_SIZE = 324`))
-            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx ('name', 'alias') KEY_BLOCK_SIZE = 324`);
+            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx ("name", "alias") KEY_BLOCK_SIZE = 324`);
           expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias") KEY_BLOCK_SIZE 123`))
-            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx ('name', 'alias') KEY_BLOCK_SIZE 123`);
+            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx ("name", "alias") KEY_BLOCK_SIZE 123`);
           expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias") with parser parser_name`))
-            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx ('name', 'alias') WITH PARSER parser_name`);
+            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx ("name", "alias") WITH PARSER parser_name`);
           expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias") invisible`))
-            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx ('name', 'alias') INVISIBLE`);
-          expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias") visible`))
+            .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx ("name", "alias") INVISIBLE`);
+          expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ('name', 'alias') visible`))
             .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx ('name', 'alias') VISIBLE`);
-          expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ("name", "alias")`))
+          expect(getParsedSql(`alter table a add ${kc} ${keyword} name_idx ('name', 'alias')`))
             .to.equal(`ALTER TABLE \`a\` ADD ${kc.toUpperCase()} ${keyword.toUpperCase()} name_idx ('name', 'alias')`);
         })
       });
@@ -355,18 +355,18 @@ describe('Command SQL', () => {
       expect(getParsedSql(`set @a = 123;`))
         .to.equal(`SET @a = 123`);
       expect(getParsedSql(`set @a = 123; set @b = "mm"`))
-        .to.equal(`SET @a = 123 ; SET @b = 'mm'`);
+        .to.equal(`SET @a = 123 ; SET @b = "mm"`);
       expect(getParsedSql(`set @a.id = 123; set @b.yy.xx = "mm"`))
-        .to.equal(`SET @a.id = 123 ; SET @b.yy.xx = 'mm'`);
+        .to.equal(`SET @a.id = 123 ; SET @b.yy.xx = "mm"`);
     })
 
     it('should support set keyword variable definde', () => {
       const KEYWORDS = ['GLOBAL', 'SESSION', 'LOCAL', 'PERSIST', 'PERSIST_ONLY']
       KEYWORDS.forEach(keyword => {
         expect(getParsedSql(`set ${keyword} xx.yy = 123; set ${keyword} yy = "abc"`))
-        .to.equal(`SET ${keyword} xx.yy = 123 ; SET ${keyword} yy = 'abc'`);
+        .to.equal(`SET ${keyword} xx.yy = 123 ; SET ${keyword} yy = "abc"`);
         expect(getParsedSql(`set @@${keyword}.id = 123; set @@${keyword}.yy.xx = "abcd"`))
-        .to.equal(`SET @@${keyword}.id = 123 ; SET @@${keyword}.yy.xx = 'abcd'`);
+        .to.equal(`SET @@${keyword}.id = 123 ; SET @@${keyword}.yy.xx = "abcd"`);
       })
     })
   })

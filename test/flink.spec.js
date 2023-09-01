@@ -25,28 +25,28 @@ describe('Flink', () => {
       title: "trim function",
       sql: [
         `SELECT TRIM('.' from "....test.....") AS TrimmedString;`,
-        "SELECT TRIM('.' FROM '....test.....') AS `TrimmedString`",
+        'SELECT TRIM(\'.\' FROM "....test.....") AS `TrimmedString`',
       ],
     },
     {
       title: "trim function with position",
       sql: [
         `SELECT TRIM(BOTH '.' from "....test.....") AS TrimmedString;`,
-        "SELECT TRIM(BOTH '.' FROM '....test.....') AS `TrimmedString`",
+        'SELECT TRIM(BOTH \'.\' FROM "....test.....") AS `TrimmedString`',
       ],
     },
     {
       title: "trim function with position",
       sql: [
         `SELECT TRIM(TRAILING  from " test ") AS TrimmedString;`,
-        "SELECT TRIM(TRAILING FROM ' test ') AS `TrimmedString`",
+        'SELECT TRIM(TRAILING FROM " test ") AS `TrimmedString`',
       ],
     },
     {
       title: "trim function without config",
       sql: [
         `SELECT TRIM(" test ") AS TrimmedString;`,
-        "SELECT TRIM(' test ') AS `TrimmedString`",
+        'SELECT TRIM(" test ") AS `TrimmedString`',
       ],
     },
     {

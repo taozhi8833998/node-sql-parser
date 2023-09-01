@@ -140,7 +140,7 @@ describe('select', () => {
     const sql = 'select book_view.code from book_view where book_view.type= "A"'
     const ast = parser.astify(sql)
     const backSQL = parser.sqlify(ast)
-    expect(backSQL).to.be.equal('SELECT `book_view`.`code` FROM `book_view` WHERE `book_view`.`type` = \'A\'')
+    expect(backSQL).to.be.equal('SELECT `book_view`.`code` FROM `book_view` WHERE `book_view`.`type` = "A"')
   })
 
   it('should have appropriate types', () => {
@@ -211,11 +211,11 @@ describe('select', () => {
                 type: 'binary_expr',
                 operator: '||',
                 left: {
-                  type: 'string',
+                  type: 'double_quote_string',
                   value: 'a'
                 },
                 right: {
-                  type: 'string',
+                  type: 'double_quote_string',
                   value: ','
                 }
               },
@@ -237,7 +237,7 @@ describe('select', () => {
                  column: 'cd'
               },
               right: {
-                 type: 'string',
+                 type: 'double_quote_string',
                  value: 'ef'
               }
            },
@@ -307,7 +307,7 @@ describe('select', () => {
         sql = "select group_concat(distinct(asd)) as 'abc';"
         expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT(`asd`)) AS `abc`')
         sql = "select Quantity, group_concat(distinct(IF(Quantity>10, \"MORE\", \"LESS\"))) as 'abc';"
-        expect(getParsedSql(sql)).to.equal('SELECT `Quantity`, GROUP_CONCAT(DISTINCT(IF(`Quantity` > 10, \'MORE\', \'LESS\'))) AS `abc`')
+        expect(getParsedSql(sql)).to.equal('SELECT `Quantity`, GROUP_CONCAT(DISTINCT(IF(`Quantity` > 10, "MORE", "LESS"))) AS `abc`')
         sql = "select group_concat(distinct(organization.name) order by organization.name) as colum1"
         expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT(`organization`.`name`) ORDER BY `organization`.`name` ASC) AS `colum1`')
       })
@@ -580,7 +580,7 @@ describe('select', () => {
     it('should parse or statement with parentheses', () => {
       expect(getParsedSql(`select * from tableName where (a = 1 or b = 2) and c=3;`)).to.equal("SELECT * FROM `tableName` WHERE (`a` = 1 OR `b` = 2) AND `c` = 3")
       expect(getParsedSql(`select * from tableName where (a = 1) or b = 2 and c=3;`)).to.equal("SELECT * FROM `tableName` WHERE (`a` = 1) OR `b` = 2 AND `c` = 3")
-      expect(getParsedSql(`select * from tableName where (name LIKE "dummy" and sku = "dummy") or b = 2 and c=3;`)).to.equal('SELECT * FROM `tableName` WHERE (`name` LIKE \'dummy\' AND `sku` = \'dummy\') OR `b` = 2 AND `c` = 3')
+      expect(getParsedSql(`select * from tableName where (name LIKE "dummy" and sku = "dummy") or b = 2 and c=3;`)).to.equal('SELECT * FROM `tableName` WHERE (`name` LIKE "dummy" AND `sku` = "dummy") OR `b` = 2 AND `c` = 3')
       expect(getParsedSql(`select * from tableName where (a = 1 and b = 2) or c=3;`)).to.equal("SELECT * FROM `tableName` WHERE (`a` = 1 AND `b` = 2) OR `c` = 3")
       expect(getParsedSql(`select * from tableName where a = 1 or (b = 2) and c=3;`)).to.equal("SELECT * FROM `tableName` WHERE `a` = 1 OR (`b` = 2) AND `c` = 3")
       expect(getParsedSql(`select * from tableName where a = 1 or (b = 2 and d=4) and c=3;`)).to.equal("SELECT * FROM `tableName` WHERE `a` = 1 OR (`b` = 2 AND `d` = 4) AND `c` = 3")
@@ -743,11 +743,11 @@ describe('select', () => {
 
     it('should support left and covert fun', () => {
       expect(getParsedSql(`select * from test where LEFT(column,2)="ts";`))
-        .to.equal("SELECT * FROM `test` WHERE LEFT(`column`, 2) = 'ts'")
+        .to.equal('SELECT * FROM `test` WHERE LEFT(`column`, 2) = "ts"')
       expect(getParsedSql(`select * from test where CONVERT(column, DATE)="test";`))
-        .to.equal("SELECT * FROM `test` WHERE CONVERT(`column`, DATE) = 'test'")
+        .to.equal('SELECT * FROM `test` WHERE CONVERT(`column`, DATE) = "test"')
       expect(getParsedSql(`select * from test where CONVERT(column using utf8)="test";`))
-        .to.equal("SELECT * FROM `test` WHERE CONVERT(`column` USING UTF8) = 'test'")
+        .to.equal('SELECT * FROM `test` WHERE CONVERT(`column` USING UTF8) = "test"')
       expect(getParsedSql(`SELECT CONVERT('test', CHAR CHARACTER SET utf8mb4);`))
         .to.equal("SELECT CONVERT('test', CHAR CHARACTER SET UTF8MB4)")
       expect(getParsedSql(`SELECT CONVERT('test', CHAR(10) CHARACTER SET utf8mb4);`))
@@ -755,7 +755,7 @@ describe('select', () => {
       expect(getParsedSql(`SELECT CONVERT('test' USING utf8mb4) COLLATE utf8mb4_bin;`))
         .to.equal("SELECT CONVERT('test' USING UTF8MB4) COLLATE UTF8MB4_BIN")
       expect(getParsedSql(`select TYPE,taxpayer_Type,CONVERT(tax_Amount, DECIMAL(12,2)) AS tax_amount,CAST(tax_currency AS DECIMAL(12,2))  tax_currency from rs_order_tax where billno="{{billno}}" and Business_Type="order";`))
-        .to.equal("SELECT `TYPE`, `taxpayer_Type`, CONVERT(`tax_Amount`, DECIMAL(12, 2)) AS `tax_amount`, CAST(`tax_currency` AS DECIMAL(12, 2)) AS `tax_currency` FROM `rs_order_tax` WHERE `billno` = '{{billno}}' AND `Business_Type` = 'order'")
+        .to.equal('SELECT `TYPE`, `taxpayer_Type`, CONVERT(`tax_Amount`, DECIMAL(12, 2)) AS `tax_amount`, CAST(`tax_currency` AS DECIMAL(12, 2)) AS `tax_currency` FROM `rs_order_tax` WHERE `billno` = "{{billno}}" AND `Business_Type` = "order"')
       expect(getParsedSql(`SELECT CONVERT('test', INT(11) unsigned);`))
         .to.equal("SELECT CONVERT('test', INT(11) UNSIGNED)")
     })
@@ -857,7 +857,7 @@ describe('select', () => {
       const sql = 'SELECT name, gender, date_format(gmt_created,"yyyyMM"), count(*) FROM Test.student GROUP BY date_format(gmt_created,"yyyyMM")'
       const ast = parser.astify(sql)
       const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.equal('SELECT `name`, `gender`, date_format(`gmt_created`, \'yyyyMM\'), COUNT(*) FROM `Test`.`student` GROUP BY date_format(`gmt_created`, \'yyyyMM\')')
+      expect(backSQL).to.equal('SELECT `name`, `gender`, date_format(`gmt_created`, "yyyyMM"), COUNT(*) FROM `Test`.`student` GROUP BY date_format(`gmt_created`, "yyyyMM")')
     })
   });
 
