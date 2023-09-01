@@ -23,7 +23,7 @@ describe('create', () => {
       expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), compeated boolean)`))
         .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT, `name` VARCHAR(128), `compeated` BOOLEAN)');
       expect(getParsedSql(`create temporary table dbname.tableName (id int not null default 1, name varchar(128) null default "xx")`))
-        .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT NOT NULL DEFAULT 1, `name` VARCHAR(128) NULL DEFAULT \'xx\')');
+        .to.equal('CREATE TEMPORARY TABLE `dbname`.`tableName` (`id` INT NOT NULL DEFAULT 1, `name` VARCHAR(128) NULL DEFAULT "xx")');
       expect(getParsedSql(`create table dbname.tableName (id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, date DATETIME not null unique key);`))
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, `date` DATETIME NOT NULL UNIQUE KEY)');
       expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key) ENGINE = MEMORY default character SET = utf8 comment = 'comment test'`))
@@ -33,7 +33,7 @@ describe('create', () => {
       expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key) ENGINE = MEMORY default charset = utf8 comment = 'comment test'`))
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY) ENGINE = MEMORY DEFAULT CHARSET = utf8 COMMENT = \'comment test\'');
       expect(getParsedSql('CREATE TABLE `Person` (`id_Person` int(10) unsigned NOT NULL AUTO_INCREMENT, `id_person_gender` int(11) unsigned zerofill NOT NULL, `id_person_origin` int(11) zerofill NOT NULL, `age` int(11) NOT NULL, `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, updateTime datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT "最新更新时间", `is_alive` tinyint(1) DEFAULT NULL, `updated_by` varchar(48) DEFAULT NULL, PRIMARY KEY (`id_Person`), UNIQUE KEY `pft_ge_or` (`id_person_gender`, `id_person_origin`) );'))
-        .to.equal('CREATE TABLE `Person` (`id_Person` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT, `id_person_gender` INT(11) UNSIGNED ZEROFILL NOT NULL, `id_person_origin` INT(11) ZEROFILL NOT NULL, `age` INT(11) NOT NULL, `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, `updateTime` DATETIME(0) NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT \'最新更新时间\', `is_alive` TINYINT(1) DEFAULT NULL, `updated_by` VARCHAR(48) DEFAULT NULL, PRIMARY KEY (`id_Person`), UNIQUE KEY `pft_ge_or` (`id_person_gender`, `id_person_origin`))');
+        .to.equal('CREATE TABLE `Person` (`id_Person` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT, `id_person_gender` INT(11) UNSIGNED ZEROFILL NOT NULL, `id_person_origin` INT(11) ZEROFILL NOT NULL, `age` INT(11) NOT NULL, `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, `updateTime` DATETIME(0) NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT "最新更新时间", `is_alive` TINYINT(1) DEFAULT NULL, `updated_by` VARCHAR(48) DEFAULT NULL, PRIMARY KEY (`id_Person`), UNIQUE KEY `pft_ge_or` (`id_person_gender`, `id_person_origin`))');
       expect(getParsedSql(`create table dbname.tableName (id INT(11) primary key, name varchar(128) unique) ENGINE = MEMORY compression = 'zlib'`))
         .to.equal('CREATE TABLE `dbname`.`tableName` (`id` INT(11) PRIMARY KEY, `name` VARCHAR(128) UNIQUE) ENGINE = MEMORY COMPRESSION = \'ZLIB\'');
       expect(getParsedSql(`create table dbname.tableName (id INT(11), name varchar(128), primary key(id)) ENGINE = MEMORY compression = 'zlib'`))
@@ -86,32 +86,32 @@ describe('create', () => {
 
       it('should support create table with comment', () => {
         expect(getParsedSql(`create temporary table if not exists dbname.tableName (id INT(11) auto_increment primary key comment "id column", name varchar(128) unique key comment "user name") ENGINE = MEMORY`))
-          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT \'id column\', `name` VARCHAR(128) UNIQUE KEY COMMENT \'user name\') ENGINE = MEMORY');
+          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT "id column", `name` VARCHAR(128) UNIQUE KEY COMMENT "user name") ENGINE = MEMORY');
       })
 
       it('should support create table with collate', () => {
         expect(getParsedSql(`create temporary table if not exists dbname.tableName (id INT(11) auto_increment primary key comment "id column" collate utf8_bin, name varchar(128) unique key comment "user name" collate utf8_bin) ENGINE = MEMORY`))
-          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT \'id column\' COLLATE UTF8_BIN, `name` VARCHAR(128) UNIQUE KEY COMMENT \'user name\' COLLATE UTF8_BIN) ENGINE = MEMORY');
+          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT "id column" COLLATE UTF8_BIN, `name` VARCHAR(128) UNIQUE KEY COMMENT "user name" COLLATE UTF8_BIN) ENGINE = MEMORY');
       })
 
       it('should support create table with collate', () => {
         expect(getParsedSql(`create temporary table if not exists dbname.tableName (id INT(11) auto_increment primary key comment "id column" collate utf8_bin, name varchar(128) unique key comment "user name" collate utf8_bin) ENGINE = MEMORY`))
-          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT \'id column\' COLLATE UTF8_BIN, `name` VARCHAR(128) UNIQUE KEY COMMENT \'user name\' COLLATE UTF8_BIN) ENGINE = MEMORY');
+          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT "id column" COLLATE UTF8_BIN, `name` VARCHAR(128) UNIQUE KEY COMMENT "user name" COLLATE UTF8_BIN) ENGINE = MEMORY');
       })
 
       it('should support create table with column_format', () => {
         expect(getParsedSql(`create temporary table if not exists dbname.tableName (id INT(11) auto_increment primary key comment "id column" collate utf8_bin column_format fixed, name varchar(128) unique key comment "user name" collate utf8_bin column_format dynamic) ENGINE = MEMORY`))
-          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT \'id column\' COLLATE UTF8_BIN COLUMN_FORMAT FIXED, `name` VARCHAR(128) UNIQUE KEY COMMENT \'user name\' COLLATE UTF8_BIN COLUMN_FORMAT DYNAMIC) ENGINE = MEMORY');
+          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT "id column" COLLATE UTF8_BIN COLUMN_FORMAT FIXED, `name` VARCHAR(128) UNIQUE KEY COMMENT "user name" COLLATE UTF8_BIN COLUMN_FORMAT DYNAMIC) ENGINE = MEMORY');
       })
 
       it('should support create table with storage', () => {
         expect(getParsedSql(`create temporary table if not exists dbname.tableName (id INT(11) auto_increment primary key comment "id column" collate utf8_bin column_format fixed storage disk, name varchar(128) unique key comment "user name" collate utf8_bin column_format dynamic storage memory) ENGINE = MEMORY`))
-          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT \'id column\' COLLATE UTF8_BIN COLUMN_FORMAT FIXED STORAGE DISK, `name` VARCHAR(128) UNIQUE KEY COMMENT \'user name\' COLLATE UTF8_BIN COLUMN_FORMAT DYNAMIC STORAGE MEMORY) ENGINE = MEMORY');
+          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT "id column" COLLATE UTF8_BIN COLUMN_FORMAT FIXED STORAGE DISK, `name` VARCHAR(128) UNIQUE KEY COMMENT "user name" COLLATE UTF8_BIN COLUMN_FORMAT DYNAMIC STORAGE MEMORY) ENGINE = MEMORY');
       })
 
       it('should support create table with reference definition', () => {
         expect(getParsedSql(`create temporary table if not exists dbname.tableName (id INT(11) auto_increment primary key comment "id column" collate utf8_bin column_format fixed storage disk references rdb.rta(id) match full on delete cascade on update restrict, name varchar(128) unique key comment "user name" collate utf8_bin column_format dynamic storage memory references rdb.rtb(name) match simple on delete set null on update set default) ENGINE = MEMORY`))
-          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT \'id column\' COLLATE UTF8_BIN COLUMN_FORMAT FIXED STORAGE DISK REFERENCES `rdb`.`rta` (`id`) MATCH FULL ON DELETE CASCADE ON UPDATE RESTRICT, `name` VARCHAR(128) UNIQUE KEY COMMENT \'user name\' COLLATE UTF8_BIN COLUMN_FORMAT DYNAMIC STORAGE MEMORY REFERENCES `rdb`.`rtb` (`name`) MATCH SIMPLE ON DELETE SET NULL ON UPDATE SET DEFAULT) ENGINE = MEMORY');
+          .to.equal('CREATE TEMPORARY TABLE IF NOT EXISTS `dbname`.`tableName` (`id` INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT "id column" COLLATE UTF8_BIN COLUMN_FORMAT FIXED STORAGE DISK REFERENCES `rdb`.`rta` (`id`) MATCH FULL ON DELETE CASCADE ON UPDATE RESTRICT, `name` VARCHAR(128) UNIQUE KEY COMMENT "user name" COLLATE UTF8_BIN COLUMN_FORMAT DYNAMIC STORAGE MEMORY REFERENCES `rdb`.`rtb` (`name`) MATCH SIMPLE ON DELETE SET NULL ON UPDATE SET DEFAULT) ENGINE = MEMORY');
       })
 
       it('should support create table with column check', () => {
@@ -177,13 +177,13 @@ describe('create', () => {
             .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} USING BTREE (\`name\`) KEY_BLOCK_SIZE = 128 VISIBLE WITH PARSER newparser)`);
 
           expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} using btree (name) key_block_size = 128 visible with parser newparser comment "index comment")`))
-            .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} USING BTREE (\`name\`) KEY_BLOCK_SIZE = 128 VISIBLE WITH PARSER newparser COMMENT 'index comment')`);
+            .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} USING BTREE (\`name\`) KEY_BLOCK_SIZE = 128 VISIBLE WITH PARSER newparser COMMENT "index comment")`);
 
           expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} using btree (name) key_block_size = 128 invisible with parser newparser comment "index comment")`))
-            .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} USING BTREE (\`name\`) KEY_BLOCK_SIZE = 128 INVISIBLE WITH PARSER newparser COMMENT 'index comment')`);
+            .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} USING BTREE (\`name\`) KEY_BLOCK_SIZE = 128 INVISIBLE WITH PARSER newparser COMMENT "index comment")`);
 
           expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} using btree (\`id\` asc, \`name\` desc) key_block_size = 128 invisible with parser newparser comment "index comment")`))
-          .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} USING BTREE (\`id\` ASC, \`name\` DESC) KEY_BLOCK_SIZE = 128 INVISIBLE WITH PARSER newparser COMMENT 'index comment')`);
+          .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} USING BTREE (\`id\` ASC, \`name\` DESC) KEY_BLOCK_SIZE = 128 INVISIBLE WITH PARSER newparser COMMENT "index comment")`);
         })
       })
 
@@ -213,10 +213,10 @@ describe('create', () => {
               .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} (\`name\`) KEY_BLOCK_SIZE = 128 VISIBLE WITH PARSER newparser)`);
 
             expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} (name) key_block_size = 128 visible with parser newparser comment "index comment")`))
-              .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} (\`name\`) KEY_BLOCK_SIZE = 128 VISIBLE WITH PARSER newparser COMMENT 'index comment')`);
+              .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} (\`name\`) KEY_BLOCK_SIZE = 128 VISIBLE WITH PARSER newparser COMMENT "index comment")`);
 
             expect(getParsedSql(`create temporary table dbname.tableName (id int, name varchar(128), ${type} (name) key_block_size = 128 invisible with parser newparser comment "index comment")`))
-              .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} (\`name\`) KEY_BLOCK_SIZE = 128 INVISIBLE WITH PARSER newparser COMMENT 'index comment')`);
+              .to.equal(`CREATE TEMPORARY TABLE \`dbname\`.\`tableName\` (\`id\` INT, \`name\` VARCHAR(128), ${type.toUpperCase()} (\`name\`) KEY_BLOCK_SIZE = 128 INVISIBLE WITH PARSER newparser COMMENT "index comment")`);
           })
         })
       })

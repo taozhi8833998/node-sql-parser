@@ -3011,7 +3011,7 @@ literal_string
     }
   / ca:("\"" single_quote_char* "\"") {
       return {
-        type: 'string',
+        type: 'double_quote_string',
         value: ca[1].join('')
       };
     }

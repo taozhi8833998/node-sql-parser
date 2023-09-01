@@ -2045,13 +2045,13 @@ literal_bool
 literal_string
   = ca:("'" single_char* "'") {
       return {
-        type: 'string',
+        type: 'single_quote_string',
         value: ca[1].join('')
       };
     }
   / ca:("\"" single_quote_char* "\"") {
       return {
-        type: 'string',
+        type: 'double_quote_string',
         value: ca[1].join('')
       };
     }

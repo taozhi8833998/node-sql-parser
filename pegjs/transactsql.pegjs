@@ -2600,13 +2600,13 @@ literal_bool
 literal_string
   =  r:'N'i? ca:("'" single_char* "'") {
       return {
-        type: r ? 'var_string' : 'string',
+        type: r ? 'var_string' : 'single_quote_string',
         value: ca[1].join(''),
       };
     }
   / ca:("\"" single_quote_char* "\"") {
       return {
-        type: 'string',
+        type: 'double_quote_string',
         value: ca[1].join('')
       };
     }

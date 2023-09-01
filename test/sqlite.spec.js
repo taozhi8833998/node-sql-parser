@@ -38,7 +38,7 @@ describe('sqlite', () => {
             WHERE user.name = "pepe" || "rone"
         ) u ON pets.owner = u.id
     GROUP BY pets.id;`
-    expect(getParsedSql(sql)).to.be.equal("SELECT * FROM `pets` LEFT JOIN (SELECT * FROM `user` WHERE `user`.`name` = 'pepe' || 'rone') AS `u` ON `pets`.`owner` = `u`.`id` GROUP BY `pets`.`id`")
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM `pets` LEFT JOIN (SELECT * FROM `user` WHERE `user`.`name` = "pepe" || "rone") AS `u` ON `pets`.`owner` = `u`.`id` GROUP BY `pets`.`id`')
   })
 
   it('should support or combine with )', () => {
@@ -50,7 +50,7 @@ describe('sqlite', () => {
             WHERE user.code = UPPER("test")
             OR user.name = "pepe") u ON pets.owner = u.id
     GROUP BY pets.id;`
-    expect(getParsedSql(sql)).to.be.equal("SELECT * FROM `pets` LEFT JOIN (SELECT * FROM `user` WHERE `user`.`code` = UPPER('test') OR `user`.`name` = 'pepe') AS `u` ON `pets`.`owner` = `u`.`id` GROUP BY `pets`.`id`")
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM `pets` LEFT JOIN (SELECT * FROM `user` WHERE `user`.`code` = UPPER("test") OR `user`.`name` = "pepe") AS `u` ON `pets`.`owner` = `u`.`id` GROUP BY `pets`.`id`')
     sql = `SELECT *
     FROM
         pets
@@ -61,7 +61,7 @@ describe('sqlite', () => {
             OR user.code = UPPER("more_test")
         ) u ON pets.owner = u.id
     GROUP BY pets.id;`
-    expect(getParsedSql(sql)).to.be.equal("SELECT * FROM `pets` LEFT JOIN (SELECT * FROM `user` WHERE `user`.`name` = 'pepe' || 'rone' OR `user`.`code` = UPPER('test') OR `user`.`code` = UPPER('more_test')) AS `u` ON `pets`.`owner` = `u`.`id` GROUP BY `pets`.`id`")
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM `pets` LEFT JOIN (SELECT * FROM `user` WHERE `user`.`name` = "pepe" || "rone" OR `user`.`code` = UPPER("test") OR `user`.`code` = UPPER("more_test")) AS `u` ON `pets`.`owner` = `u`.`id` GROUP BY `pets`.`id`')
   })
 
   it('should support json as function name', () => {
