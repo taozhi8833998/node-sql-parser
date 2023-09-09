@@ -1338,7 +1338,14 @@ describe('Postgres', () => {
         $$ LANGUAGE plpgsql;`,
         `CREATE FUNCTION refresh_mviews() RETURNS INTEGER AS $$ DECLARE mviews RECORD BEGIN RAISE NOTICE 'Refreshing all materialized views...' ; FOR mviews IN SELECT "n"."nspname" AS "mv_schema", "c"."relname" AS "mv_name", pg_catalog.pg_get_userbyid("c"."relowner") AS "owner" FROM "pg_catalog"."pg_class" AS "c" LEFT JOIN "pg_catalog"."pg_namespace" AS "n" ON ("n"."oid" = "c"."relnamespace") WHERE "c"."relkind" = 'm' ORDER BY 1 ASC LOOP RAISE NOTICE 'Refreshing materialized view %.% (owner: %)...', quote_ident("mviews"."mv_schema"), quote_ident("mviews"."mv_name"), quote_ident("mviews"."owner") ; EXECUTE format('REFRESH MATERIALIZED VIEW %I.%I', "mviews"."mv_schema", "mviews"."mv_name") END LOOP ; RAISE NOTICE 'Done refreshing materialized views.' ; RETURN 1 END $$ LANGUAGE plpgsql`
       ]
-    }
+    },
+    {
+      title: 'support accentuated characters',
+      sql: [
+        "SELECT 'Molière' AS théâtre",
+        `SELECT 'Molière' AS "théâtre"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
