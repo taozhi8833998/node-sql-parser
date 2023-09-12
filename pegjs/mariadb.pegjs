@@ -1032,7 +1032,7 @@ create_constraint_primary
   = kc:constraint_name? __
   p:('PRIMARY KEY'i) __
   t:index_type? __
-  de:cte_column_definition __
+  de:cte_idx_column_definition __
   id:index_options? {
     return {
         constraint: kc && kc.constraint,
@@ -1051,7 +1051,7 @@ create_constraint_unique
   p:(KW_INDEX / KW_KEY)? __
   i:column? __
   t:index_type? __
-  de:cte_column_definition __
+  de:cte_idx_column_definition __
   id:index_options? {
     return {
         constraint: kc && kc.constraint,
