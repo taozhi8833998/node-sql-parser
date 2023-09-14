@@ -328,9 +328,18 @@ function commonKeywordArgsToSQL(kwArgs) {
   return [toUpper(kwArgs.keyword), toUpper(kwArgs.args)]
 }
 
-function autoIncreatementToSQL(autoIncreatement) {
-  if (!autoIncreatement || typeof autoIncreatement === 'string') return toUpper(autoIncreatement)
-  const { keyword, seed, increment, parentheses } = autoIncreatement
+function autoIncrementToSQL(autoIncrement) {
+  if (!autoIncrement) return
+  if (typeof autoIncrement === 'string') {
+    const { database } = getParserOpt()
+    switch (database && database.toLowerCase()) {
+      case 'sqlite':
+        return 'AUTOINCREMENT'
+      default:
+        return 'AUTO_INCREMENT'
+    }
+  }
+  const { keyword, seed, increment, parentheses } = autoIncrement
   let result = toUpper(keyword)
   if (parentheses) result += `(${literalToSQL(seed)}, ${literalToSQL(increment)})`
   return result
@@ -342,7 +351,7 @@ function columnOrderListToSQL(columnOrderList) {
 }
 
 export {
-  arrayStructTypeToSQL, autoIncreatementToSQL,
+  arrayStructTypeToSQL, autoIncrementToSQL,
   columnOrderListToSQL, commonKeywordArgsToSQL, commonOptionConnector,
   connector, commonTypeValue,commentToSQL, createBinaryExpr,
   createValueExpr, dataTypeToSQL, DEFAULT_OPT, escape, literalToSQL, columnIdentifierToSql,

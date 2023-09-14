@@ -3,8 +3,9 @@ const Parser = require('../src/parser').default
 
 describe('sqlite', () => {
   const parser = new Parser();
+  const DEFAULT_OPT =  { database: 'sqlite' }
 
-  function getParsedSql(sql, opt = { database: 'sqlite' }) {
+  function getParsedSql(sql, opt = DEFAULT_OPT) {
     const ast = parser.astify(sql, opt);
     return parser.sqlify(ast, opt);
   }
@@ -143,5 +144,11 @@ describe('sqlite', () => {
   it('should support keyword as column name in create table sql', () => {
     const sql = 'CREATE TABLE IF NOT EXISTS "Test" (Id INTEGER NOT NULL UNIQUE, like TEXT NOT NULL, Difficulty TEXT, PRIMARY KEY(Id));'
     expect(getParsedSql(sql)).to.be.equal('CREATE TABLE IF NOT EXISTS `Test` (`Id` INTEGER NOT NULL UNIQUE, `like` TEXT NOT NULL, `Difficulty` TEXT, PRIMARY KEY (`Id`))')
+  })
+
+  it('should support sqlify autoincrement to other db', () => {
+    const sql = 'CREATE TABLE IF NOT EXISTS "SampleTable" ( "ID" INTEGER NOT NULL AUTOINCREMENT UNIQUE, "Name" TEXT NOT NULL);'
+    const ast = parser.astify(sql, DEFAULT_OPT)
+    expect(parser.sqlify(ast, { database: 'mariadb'})).to.be.equal('CREATE TABLE IF NOT EXISTS `SampleTable` (`ID` INTEGER NOT NULL AUTO_INCREMENT UNIQUE, `Name` TEXT NOT NULL)')
   })
 })
