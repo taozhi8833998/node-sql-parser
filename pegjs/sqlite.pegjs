@@ -1944,7 +1944,7 @@ column_ref
         column: col
       };
     }
-  / col:column {
+  / col:column_without_kw {
       columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
