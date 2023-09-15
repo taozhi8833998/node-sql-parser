@@ -142,13 +142,13 @@ describe('sqlite', () => {
   })
 
   it('should support keyword as column name in create table sql', () => {
-    const sql = 'CREATE TABLE IF NOT EXISTS "Test" (Id INTEGER NOT NULL UNIQUE, like TEXT NOT NULL, Difficulty TEXT, PRIMARY KEY(Id));'
-    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE IF NOT EXISTS `Test` (`Id` INTEGER NOT NULL UNIQUE, `like` TEXT NOT NULL, `Difficulty` TEXT, PRIMARY KEY (`Id`))')
+    const sql = 'CREATE TABLE IF NOT EXISTS "Test" (Id INTEGER NOT NULL PRIMARY KEY UNIQUE, like TEXT NOT NULL, Difficulty TEXT, PRIMARY KEY(Id));'
+    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE IF NOT EXISTS `Test` (`Id` INTEGER NOT NULL PRIMARY KEY UNIQUE, `like` TEXT NOT NULL, `Difficulty` TEXT, PRIMARY KEY (`Id`))')
   })
 
   it('should support sqlify autoincrement to other db', () => {
-    const sql = 'CREATE TABLE IF NOT EXISTS "SampleTable" ( "ID" INTEGER NOT NULL AUTOINCREMENT UNIQUE, "Name" TEXT NOT NULL);'
+    const sql = 'CREATE TABLE IF NOT EXISTS "SampleTable" ( "ID" INTEGER NOT NULL  PRIMARY KEY AUTOINCREMENT UNIQUE, "Name" TEXT NOT NULL);'
     const ast = parser.astify(sql, DEFAULT_OPT)
-    expect(parser.sqlify(ast, { database: 'mariadb'})).to.be.equal('CREATE TABLE IF NOT EXISTS `SampleTable` (`ID` INTEGER NOT NULL AUTO_INCREMENT UNIQUE, `Name` TEXT NOT NULL)')
+    expect(parser.sqlify(ast, { database: 'mariadb'})).to.be.equal('CREATE TABLE IF NOT EXISTS `SampleTable` (`ID` INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY UNIQUE, `Name` TEXT NOT NULL)')
   })
 })

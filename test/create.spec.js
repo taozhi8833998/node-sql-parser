@@ -317,7 +317,7 @@ describe('create', () => {
           "nullable": null,
           "default_val": null,
           "auto_increment": null,
-          "unique_or_primary": null,
+          "unique": null,
           "comment": null,
           "collate": null,
           "column_format": null,
