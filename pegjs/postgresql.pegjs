@@ -5188,13 +5188,17 @@ boolean_type
 binary_type
   = 'bytea'i { /* => data_type */ return { dataType: 'BYTEA' }; }
 
+character_varying
+  = KW_CHARACTER __ ('varying'i)? {
+    // => string
+    return 'CHARACTER VARYING'
+  }
 character_string_type
-  = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
+  = t:(KW_CHAR / KW_VARCHAR / character_varying) __ LPAREN __ l:[0-9]+ __ RPAREN {
     // => data_type
     return { dataType: t, length: parseInt(l.join(''), 10) };
   }
-  / t:(KW_CHAR / KW_CHARACTER) { /* =>  data_type */ return { dataType: t }; }
-  / t:KW_VARCHAR { /* =>  data_type */  return { dataType: t }; }
+  / t:(KW_CHAR / character_varying / KW_VARCHAR) { /* =>  data_type */ return { dataType: t }; }
 
 numeric_type_suffix
   = un: KW_UNSIGNED? __ ze: KW_ZEROFILL? {
