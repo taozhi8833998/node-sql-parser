@@ -77,7 +77,8 @@ function columnOption(definition) {
     nullable, character_set: characterSet, check, comment, collate, storage,
     default_val: defaultOpt,
     auto_increment: autoIncrement,
-    unique_or_primary: uniquePrimary,
+    unique: uniqueKey,
+    primary_key: primaryKey,
     column_format: columnFormat,
     reference_definition: referenceDefinition,
   } = definition
@@ -88,7 +89,7 @@ function columnOption(definition) {
     columnOpt.push(type.toUpperCase(), exprToSQL(value))
   }
   columnOpt.push(constraintDefinitionToSQL(check))
-  columnOpt.push(autoIncrementToSQL(autoIncrement), toUpper(uniquePrimary), commentToSQL(comment))
+  columnOpt.push(autoIncrementToSQL(autoIncrement), toUpper(primaryKey), toUpper(uniqueKey), commentToSQL(comment))
   columnOpt.push(...commonTypeValue(characterSet))
   columnOpt.push(...commonTypeValue(collate))
   columnOpt.push(...commonTypeValue(columnFormat))

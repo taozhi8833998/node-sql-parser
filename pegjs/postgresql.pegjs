@@ -1111,11 +1111,18 @@ column_definition_opt
     // => { auto_increment: 'auto_increment'; }
     return { auto_increment: a.toLowerCase() }
   }
-  / u:(('UNIQUE'i __ ('KEY'i)?) / (('PRIMARY'i)? __ 'KEY'i)) {
-    // => { unique_or_primary: 'unique' | 'primary key'; }
-    const unique_or_primary = []
-    if (u) unique_or_primary.push(u[0], u[2])
-    return { unique_or_primary: unique_or_primary.filter(v => v).join(' ').toLowerCase('') }
+  / 'UNIQUE'i __ k:('KEY'i)? {
+    // => { unique: 'unique' | 'unique key'; }
+    const sql = ['unique']
+    if (k) sql.push(k)
+    return { unique: sql.join(' ').toLowerCase('') }
+  }
+  / p:('PRIMARY'i)? __ 'KEY'i {
+    // => { unique: 'key' | 'primary key'; }
+    const sql = []
+    if (p) sql.push('primary')
+    sql.push('key')
+    return { primary_key: sql.join(' ').toLowerCase('') }
   }
   / co:keyword_comment {
     // => { comment: keyword_comment; }
@@ -1149,7 +1156,8 @@ column_definition_opt_list
         nullable?: column_constraint['nullable'];
         default_val?: column_constraint['default_val'];
         auto_increment?: 'auto_increment';
-        unique_or_primary?: 'unique' | 'primary key';
+        unique?: 'unique' | 'unique key';
+        primary?: 'key' | 'primary key';
         comment?: keyword_comment;
         collate?: collate_expr;
         column_format?: column_format;
@@ -1175,7 +1183,8 @@ create_column_definition
         nullable: column_constraint['nullable'];
         default_val: column_constraint['default_val'];
         auto_increment?: 'auto_increment';
-        unique_or_primary?: 'unique' | 'primary key';
+        unique?: 'unique' | 'unique key';
+        primary?: 'key' | 'primary key';
         comment?: keyword_comment;
         collate?: collate_expr;
         column_format?: column_format;

@@ -475,10 +475,16 @@ column_definition_opt
   / ch:create_constraint_check {
     return { check: ch }
   }
-  / u:(('UNIQUE'i / ('PRIMARY'i __ 'KEY'i))) {
-    let unique_or_primary = [u]
-    if (Array.isArray(u)) unique_or_primary = [u[0], u[2]]
-    return { unique_or_primary: unique_or_primary.filter(v => v).join(' ').toLowerCase('') }
+  / 'UNIQUE'i __ k:('KEY'i)? {
+    const sql = ['unique']
+    if (k) sql.push(k)
+    return { unique: sql.join(' ').toLowerCase('') }
+  }
+  / p:('PRIMARY'i)? __ 'KEY'i {
+    const sql = []
+    if (p) sql.push('primary')
+    sql.push('key')
+    return { primary_key: sql.join(' ').toLowerCase('') }
   }
   / o:identity_stmt {
     return { auto_increment: o }

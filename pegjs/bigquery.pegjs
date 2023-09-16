@@ -989,33 +989,64 @@ create_definition
   / create_index_definition
   / create_fulltext_spatial_index_definition
 
+column_definition_opt
+  = n:(literal_not_null / literal_null) {
+    if (n && !n.value) n.value = 'null'
+    return { nullable: n }
+  }
+  / d:default_expr {
+    return { default_val: d }
+  }
+  / a:('AUTO_INCREMENT'i) {
+    return { auto_increment: a.toLowerCase() }
+  }
+  / 'UNIQUE'i __ k:('KEY'i)? {
+    const sql = ['unique']
+    if (k) sql.push(k)
+    return { unique: sql.join(' ').toLowerCase('') }
+  }
+  / p:('PRIMARY'i)? __ 'KEY'i {
+    const sql = []
+    if (p) sql.push('primary')
+    sql.push('key')
+    return { primary_key: sql.join(' ').toLowerCase('') }
+  }
+  / co:keyword_comment {
+    return { comment: co }
+  }
+  / ca:collate_expr {
+    return { collate: ca }
+  }
+  / cf:column_format {
+    return { column_format: cf }
+  }
+  / s:storage {
+    return { storage: s }
+  }
+  / re:reference_definition {
+    return { reference_definition: re }
+  }
+
+column_definition_opt_list
+  = head:column_definition_opt __ tail:(__ column_definition_opt)* {
+    let opt = head
+    for (let i = 0; i < tail.length; i++) {
+      opt = { ...opt, ...tail[i][1] }
+    }
+    return opt
+  }
+
 create_column_definition
   = c:column_ref __
     d:data_type __
-    n:(literal_not_null / literal_null)? __
-    df:default_expr? __
-    a:('AUTO_INCREMENT'i)? __
-    u:(('UNIQUE'i / 'PRIMARY'i)? __ 'KEY'i)? __
-    co:keyword_comment? __
-    ca:collate_expr? __
-    cf:column_format? __
-    s:storage? __
-    re:reference_definition? {
+    cdo:column_definition_opt_list? {
       columnList.add(`create::${c.table}::${c.column}`)
       if (n && !n.value) n.value = 'null'
       return {
         column: c,
         definition: d,
-        nullable: n,
-        default_val: df,
-        auto_increment: a && a.toLowerCase(),
-        unique_or_primary: u && `${u[0].toLowerCase()} ${u[2].toLowerCase()}`,
-        comment: co,
-        collate: ca,
-        column_format: cf,
-        storage:s,
-        reference_definition: re,
-        resource: 'column'
+        resource: 'column',
+        ...(cdo || {})
       }
     }
 
