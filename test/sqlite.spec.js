@@ -147,8 +147,11 @@ describe('sqlite', () => {
   })
 
   it('should support sqlify autoincrement to other db', () => {
-    const sql = 'CREATE TABLE IF NOT EXISTS "SampleTable" ( "ID" INTEGER NOT NULL  PRIMARY KEY AUTOINCREMENT UNIQUE, "Name" TEXT NOT NULL);'
-    const ast = parser.astify(sql, DEFAULT_OPT)
+    let sql = 'CREATE TABLE IF NOT EXISTS "SampleTable" ( "ID" INTEGER NOT NULL  PRIMARY KEY AUTOINCREMENT UNIQUE, "Name" TEXT NOT NULL);'
+    let ast = parser.astify(sql, DEFAULT_OPT)
     expect(parser.sqlify(ast, { database: 'mariadb'})).to.be.equal('CREATE TABLE IF NOT EXISTS `SampleTable` (`ID` INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY UNIQUE, `Name` TEXT NOT NULL)')
+    sql = ' CREATE TABLE `Test` (  `id` int(11) NOT NULL,  `name` varchar(255) COLLATE utf8mb4_unicode_520_ci NOT NULL,  PRIMARY KEY (`id`),  UNIQUE KEY `name` (`name`));'
+    ast = parser.astify(sql, { database: 'mariadb' })
+    expect(parser.sqlify(ast, DEFAULT_OPT)).to.be.equal('CREATE TABLE `Test` (`id` INT(11) NOT NULL, `name` VARCHAR(255) NOT NULL, PRIMARY KEY (`id`), UNIQUE (`name`))')
   })
 })
