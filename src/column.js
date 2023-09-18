@@ -8,6 +8,7 @@ import {
   commonOptionConnector,
   commonTypeValue,
   commentToSQL,
+  getParserOpt,
   hasVal,
   identifierToSql,
   literalToSQL,
@@ -88,10 +89,11 @@ function columnOption(definition) {
     const { type, value } = defaultOpt
     columnOpt.push(type.toUpperCase(), exprToSQL(value))
   }
+  const { database } = getParserOpt()
   columnOpt.push(constraintDefinitionToSQL(check))
   columnOpt.push(autoIncrementToSQL(autoIncrement), toUpper(primaryKey), toUpper(uniqueKey), commentToSQL(comment))
   columnOpt.push(...commonTypeValue(characterSet))
-  columnOpt.push(...commonTypeValue(collate))
+  if (database !== 'sqlite') columnOpt.push(...commonTypeValue(collate))
   columnOpt.push(...commonTypeValue(columnFormat))
   columnOpt.push(...commonTypeValue(storage))
   columnOpt.push(...columnReferenceDefinitionToSQL(referenceDefinition))

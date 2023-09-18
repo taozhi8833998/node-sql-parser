@@ -2504,7 +2504,7 @@ primary
 
 column_ref
   = tbl:(ident_name / backticks_quoted_ident) __ DOT __ col:column_without_kw {
-      columnList.add(`select::${tbl}::${col}`);
+      // columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
         table: tbl,
@@ -2512,7 +2512,7 @@ column_ref
       };
   }
   / col:column {
-      columnList.add(`select::null::${col}`);
+      // columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
         table: null,

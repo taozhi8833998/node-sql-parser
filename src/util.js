@@ -355,6 +355,6 @@ export {
   columnOrderListToSQL, commonKeywordArgsToSQL, commonOptionConnector,
   connector, commonTypeValue,commentToSQL, createBinaryExpr,
   createValueExpr, dataTypeToSQL, DEFAULT_OPT, escape, literalToSQL, columnIdentifierToSql,
-  identifierToSql, onPartitionsToSQL, replaceParams, returningToSQL,
+  getParserOpt, identifierToSql, onPartitionsToSQL, replaceParams, returningToSQL,
   hasVal, setParserOpt, toUpper, topToSQL, triggerEventToSQL,
 }

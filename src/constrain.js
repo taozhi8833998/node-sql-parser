@@ -1,7 +1,8 @@
 import {
   identifierToSql,
-  toUpper,
+  getParserOpt,
   hasVal,
+  toUpper,
 } from './util'
 import { indexTypeAndOptionToSQL } from './index-definition'
 import { columnReferenceDefinitionToSQL } from './column'
@@ -17,10 +18,13 @@ function constraintDefinitionToSQL(constraintDefinition) {
     reference_definition: referenceDefinition,
   } = constraintDefinition
   const constraintSQL = []
+  const { database } = getParserOpt()
   constraintSQL.push(toUpper(keyword))
   constraintSQL.push(identifierToSql(constraint))
-  constraintSQL.push(toUpper(constraintType))
-  constraintSQL.push(identifierToSql(index))
+  let constraintTypeStr = toUpper(constraintType)
+  if (database === 'sqlite' && constraintTypeStr === 'UNIQUE KEY') constraintTypeStr = 'UNIQUE'
+  constraintSQL.push(constraintTypeStr)
+  constraintSQL.push(database !== 'sqlite' && identifierToSql(index))
   constraintSQL.push(...indexTypeAndOptionToSQL(constraintDefinition))
   constraintSQL.push(...columnReferenceDefinitionToSQL(referenceDefinition))
   constraintSQL.push(toUpper(enforced))
