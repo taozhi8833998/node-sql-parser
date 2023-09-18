@@ -915,7 +915,7 @@ describe('Postgres', () => {
       title: 'support character data type',
       sql: [
         "SELECT 'x'::character varying;",
-        `SELECT 'x'::CHARACTER AS "varying"`
+        `SELECT 'x'::CHARACTER VARYING`
       ]
     },
     {
@@ -1344,6 +1344,18 @@ describe('Postgres', () => {
       sql: [
         "SELECT 'Molière' AS théâtre",
         `SELECT 'Molière' AS "théâtre"`
+      ]
+    },
+    {
+      title: 'support character varying',
+      sql: [
+        `CREATE TABLE "public"."authors_table" (
+          "author_id" integer NOT NULL,
+          "first_name" character varying NOT NULL,
+          "last_name" character varying NOT NULL,
+          "birth_date" date
+        );`,
+        'CREATE TABLE "public"."authors_table" ("author_id" INTEGER NOT NULL, "first_name" CHARACTER VARYING NOT NULL, "last_name" CHARACTER VARYING NOT NULL, "birth_date" DATE)'
       ]
     },
   ]
