@@ -234,7 +234,7 @@ export type create_table_definition = create_definition[];
 
 export type create_definition = create_column_definition | create_index_definition | create_fulltext_spatial_index_definition | create_constraint_definition;
 
-export type column_definition_opt = column_constraint | { auto_increment: 'auto_increment'; } | { unique_or_primary: 'unique' | 'primary key'; } | { comment: keyword_comment; } | { collate: collate_expr; } | { column_format: column_format; } | { storage: storage } | { reference_definition: reference_definition; } | { character_set: collate_expr };
+export type column_definition_opt = column_constraint | { auto_increment: 'auto_increment'; } | { unique: 'unique' | 'unique key'; } | { unique: 'key' | 'primary key'; } | { comment: keyword_comment; } | { collate: collate_expr; } | { column_format: column_format; } | { storage: storage } | { reference_definition: reference_definition; } | { character_set: collate_expr };
 
 
 
@@ -242,7 +242,8 @@ export type column_definition_opt_list = {
         nullable?: column_constraint['nullable'];
         default_val?: column_constraint['default_val'];
         auto_increment?: 'auto_increment';
-        unique_or_primary?: 'unique' | 'primary key';
+        unique?: 'unique' | 'unique key';
+        primary?: 'key' | 'primary key';
         comment?: keyword_comment;
         collate?: collate_expr;
         column_format?: column_format;
@@ -258,7 +259,8 @@ export type create_column_definition = {
         nullable: column_constraint['nullable'];
         default_val: column_constraint['default_val'];
         auto_increment?: 'auto_increment';
-        unique_or_primary?: 'unique' | 'primary key';
+        unique?: 'unique' | 'unique key';
+        primary?: 'key' | 'primary key';
         comment?: keyword_comment;
         collate?: collate_expr;
         column_format?: column_format;
@@ -1741,7 +1743,7 @@ export type boolean_type = data_type;
 
 export type binary_type = data_type;
 
-
+export type character_varying = string;
 
 
 
