@@ -2756,7 +2756,7 @@ boolean_type
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
-    return { dataType: t, length: parseInt(l.join(''), 10) };
+    return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true };
   }
   / t:KW_CHAR { return { dataType: t }; }
   / t:KW_VARCHAR { return { dataType: t }; }

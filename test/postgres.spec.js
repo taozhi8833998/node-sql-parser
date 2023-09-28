@@ -1550,6 +1550,13 @@ describe('Postgres', () => {
         ]
       },
       {
+        title: 'cast varchar with length',
+        sql: [
+          'SELECT name::VARCHAR(200) FROM raw_hosts',
+          'SELECT "name"::VARCHAR(200) FROM "raw_hosts"'
+        ]
+      },
+      {
         title: 'chinese oridinary identifier',
         sql: [
           'select 中文 from t1;',
