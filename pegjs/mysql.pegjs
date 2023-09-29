@@ -2211,7 +2211,7 @@ table_name
     }
 
 on_clause
-  = KW_ON __ e:or_and_where_expr { return e; }
+  = KW_ON __ e:or_and_expr { return e; }
 
 where_clause
   = KW_WHERE __ e:or_and_where_expr { return e; }
@@ -2597,6 +2597,16 @@ binary_column_expr
     for (let i = len - 1; i >= 0; i--) {
       const left = i === 0 ? head : tail[i - 1][3]
       result = createBinaryExpr(tail[i][1], left, result)
+    }
+    return result
+  }
+
+or_and_expr
+	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
+    const len = tail.length
+    let result = head
+    for (let i = 0; i < len; ++i) {
+      result = createBinaryExpr(tail[i][1], result, tail[i][3])
     }
     return result
   }
