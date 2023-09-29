@@ -5196,7 +5196,7 @@ character_varying
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR / character_varying) __ LPAREN __ l:[0-9]+ __ RPAREN {
     // => data_type
-    return { dataType: t, length: parseInt(l.join(''), 10) };
+    return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true };
   }
   / t:(KW_CHAR / character_varying / KW_VARCHAR) { /* =>  data_type */ return { dataType: t }; }
 

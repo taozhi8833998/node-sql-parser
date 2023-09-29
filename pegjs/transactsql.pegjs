@@ -3134,7 +3134,7 @@ data_type
 
 character_string_type
   = lb:LBRAKE? __ t:(KW_CHAR / KW_VARCHAR / KW_NCHAR / KW_NVARCHAR) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } __ LPAREN __ l:[0-9]+ __ RPAREN {
-    return { dataType: t, length: parseInt(l.join(''), 10) };
+    return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true };
   }
   / lb:LBRAKE? __ t:(KW_CHAR / KW_VARCHAR) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
     return { dataType: t };

@@ -2975,7 +2975,11 @@ data_type
   / bool_byte_geography_type
 
 character_string_type
-  = t:KW_STRING (__ LPAREN __ l:[0-9]+ __ RPAREN)* { return { dataType: t }; }
+  = t:KW_STRING s:(__ LPAREN __ l:[0-9]+ __ RPAREN)* {
+    const result = { dataType: t }
+    if (!s || s.length === 0) return result
+    return { ...result, length: parseInt(s[3].join(''), 10), parentheses: true  };
+  }
 
 numeric_type
   = t:(KW_NUMERIC / KW_INT_64 / KW_FLOAT_64 / KW_INTEGER) { return { dataType: t }; }

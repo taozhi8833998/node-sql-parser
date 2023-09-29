@@ -2562,7 +2562,7 @@ data_type
 
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
-    return { dataType: t, length: parseInt(l.join(''), 10) };
+    return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true };
   }
   / t:(KW_CHAR / KW_VARCHAR / KW_STRING) { return { dataType: t }; }
 
