@@ -801,6 +801,18 @@ describe('mysql', () => {
       })
     })
 
+    it('should join multiple table with comma', () => {
+      const sql = 'SELECT * FROM t1 INNER JOIN t2 ON t1.id = t2.id, t3 AS tbl'
+      let ast = parser.astify(sql)
+      const tbl = { db: null, table: 't3', as: 'tbl' }
+      const backSQL = 'SELECT * FROM `t1` INNER JOIN `t2` ON `t1`.`id` = `t2`.`id`, `t3` AS `tbl`'
+      expect(ast.from[2]).to.be.eql(tbl)
+      expect(parser.sqlify(ast)).to.be.equal(backSQL)
+      ast = parser.astify(sql, mariadb)
+      expect(ast.from[2]).to.be.eql(tbl)
+      expect(parser.sqlify(ast, mariadb)).to.be.equal(backSQL)
+    })
+
     it('should have spaces between keywords', () => {
       const sql = 'CREATE TABLE `foo` (`id` int UNIQUEKEYONUPDATECASCADE)'
       expect(parser.astify.bind(parser, sql)).to.throw('Expected "#", ")", ",", "--", "/*", "AS", "AUTO_INCREMENT", "CHARACTER", "CHECK", "COLLATE", "COLUMN_FORMAT", "COMMENT", "CONSTRAINT", "DEFAULT", "GENERATED", "KEY", "NOT NULL", "NULL", "PRIMARY", "REFERENCES", "STORAGE", "UNIQUE", or [ \\t\\n\\r] but "O" found.')
