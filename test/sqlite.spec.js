@@ -142,8 +142,8 @@ describe('sqlite', () => {
   })
 
   it('should support keyword as column name in create table sql', () => {
-    const sql = 'CREATE TABLE IF NOT EXISTS "Test" (Id INTEGER NOT NULL PRIMARY KEY UNIQUE, like TEXT NOT NULL, Difficulty TEXT, PRIMARY KEY(Id));'
-    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE IF NOT EXISTS `Test` (`Id` INTEGER NOT NULL PRIMARY KEY UNIQUE, `like` TEXT NOT NULL, `Difficulty` TEXT, PRIMARY KEY (`Id`))')
+    const sql = 'CREATE TABLE IF NOT EXISTS "Test" (Id INTEGER NOT NULL PRIMARY KEY UNIQUE, like TEXT NOT NULL, Difficulty TEXT, percent real, PRIMARY KEY(Id));'
+    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE IF NOT EXISTS `Test` (`Id` INTEGER NOT NULL PRIMARY KEY UNIQUE, `like` TEXT NOT NULL, `Difficulty` TEXT, `percent` REAL, PRIMARY KEY (`Id`))')
   })
 
   it('should support sqlify autoincrement to other db', () => {
