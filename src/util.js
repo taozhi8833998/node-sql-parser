@@ -186,7 +186,7 @@ function literalToSQL(literal) {
   if (!literal) return
   let { prefix } = literal
   const { type, parentheses, suffix, value } = literal
-  let str = value
+  let str = typeof literal === 'string' ? literal : value
   switch (type) {
     case 'backticks_quote_string':
       str = `\`${escape(value)}\``
