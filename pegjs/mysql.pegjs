@@ -3075,8 +3075,8 @@ convert_args
       value: [c, { type: 'datatype', ...d, }]
     }
   }
-  / c:(column_ref / literal_string / literal_numeric) __ KW_USING __ d:ident_name {
-    c.suffix = `USING ${d}`
+  / c:or_and_where_expr __ KW_USING __ d:ident_name {
+    c.suffix = `USING ${d.toUpperCase()}`
     return {
       type: 'expr_list',
       value: [c]
@@ -3165,7 +3165,7 @@ func_call
         over: up
     }
   }
-  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+  / name:proc_func_name &{ return name.toLowerCase() !== 'convert' } __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
     if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
     if ((name.toUpperCase() === 'TIMESTAMPDIFF' || name.toUpperCase() === 'TIMESTAMPADD') && l.value && l.value[0]) l.value[0] = { type: 'origin', value: l.value[0].column }
       return {

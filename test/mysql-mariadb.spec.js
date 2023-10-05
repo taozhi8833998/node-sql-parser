@@ -790,6 +790,13 @@ describe('mysql', () => {
           "GRANT ALL ON *.* TO 'someuser'@'somehost' WITH GRANT OPTION"
         ]
       },
+      {
+        title: 'convert using',
+        sql: [
+          `select convert(json_unquote(json_extract('{"thing": "252"}', "$.thing")) using utf8);`,
+          `SELECT CONVERT(json_unquote(json_extract('{"thing": "252"}', "$.thing")) USING UTF8)`
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
@@ -799,6 +806,12 @@ describe('mysql', () => {
       it(`should support ${title} in mariadb`, () => {
         expect(getParsedSql(sql[0], mariadb)).to.equal(sql[1])
       })
+    })
+
+    it('should throw error when covert args is not right', () => {
+      const sql = `select convert(json_unquote(json_extract('{"thing": "252"}', "$.thing")));`
+      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", "~", or [ \\t\\n\\r] but ")" found.')
+      expect(parser.astify.bind(parser, 'select convert("");')).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "OR", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", "~", or [ \\t\\n\\r] but ")" found.')
     })
 
     it('should join multiple table with comma', () => {
