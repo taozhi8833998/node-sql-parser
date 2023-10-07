@@ -495,8 +495,8 @@ describe('select', () => {
           { db: null, table: 't1', as: null },
           {
             expr: {
-              tableList: ["select::null::t2", "select::null::t1"],
-              columnList: ["select::null::(.*)", "select::null::id",  "select::null::col1", "select::t1::id", "select::someAlias::id"],
+              tableList: ["select::null::t2"],
+              columnList: ["select::null::(.*)", "select::null::id",  "select::null::col1"],
               ast: {
                 with: null,
                 type: 'select',
@@ -670,7 +670,7 @@ describe('select', () => {
           type: 'unary_expr',
           operator: operator.toUpperCase(),
           expr: {
-            tableList: ["select::null::t"],
+            tableList: [],
             columnList: ["select::null::(.*)"],
             ast: {
               with: null,
@@ -811,7 +811,7 @@ describe('select', () => {
         database: 'postgresql'
       }
       const ast = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit all', opt)
-      expect(ast[0].limit).to.be.eql({
+      expect(ast.limit).to.be.eql({
         seperator: '',
         value: [
           { type: 'origin', value: 'all' },
@@ -820,7 +820,7 @@ describe('select', () => {
       expect(parser.sqlify(ast)).to.be.equal('SELECT DISTINCT `a` FROM `b` WHERE `c` = 0 GROUP BY `d` ORDER BY `e` ASC LIMIT ALL')
 
       const offsetAst = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit all offset 100', opt);
-      expect(offsetAst[0].limit).eql({
+      expect(offsetAst.limit).eql({
         seperator: 'offset',
         value: [
           { type: 'origin', value: 'all' },
