@@ -797,6 +797,13 @@ describe('mysql', () => {
           `SELECT CONVERT(json_unquote(json_extract('{"thing": "252"}', "$.thing")) USING UTF8)`
         ]
       },
+      {
+        title: 'table option checksum and delay_key_write',
+        sql: [
+          'create table `users` (id int(11) not null) ENGINE=InnoDB AUTO_INCREMENT=10833 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC',
+          'CREATE TABLE `users` (`id` INT(11) NOT NULL) ENGINE = INNODB AUTO_INCREMENT = 10833 DEFAULT CHARSET = utf8 CHECKSUM = 1 DELAY_KEY_WRITE = 1 ROW_FORMAT = DYNAMIC'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

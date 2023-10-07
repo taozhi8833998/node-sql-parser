@@ -1178,6 +1178,13 @@ table_option
     }
   }
   / create_option_character_set
+  / kw:('CHECKSUM' / 'DELAY_KEY_WRITE') __  s:(KW_ASSIGIN_EQUAL) __ v:[01] {
+    return {
+      keyword: kw.toLowerCase(),
+      symbol: s,
+      value: v
+    }
+  }
   / kw:(KW_COMMENT / 'CONNECTION'i) __ s:(KW_ASSIGIN_EQUAL)? __ c:literal_string {
     return {
       keyword: kw.toLowerCase(),
