@@ -2041,7 +2041,7 @@ column_list_item
         as: null
       };
     }
-  / a:assign_stmt {
+  / a:select_assign_stmt {
     return { expr: a, as: null }
   }
   / e:binary_column_expr __ alias:alias_clause? {
@@ -3748,6 +3748,16 @@ proc_stmt
 
 assign_stmt
   = va:(var_decl / without_prefix_var_decl) __ s: (KW_ASSIGN / KW_ASSIGIN_EQUAL) __ e:proc_expr {
+    return {
+      type: 'assign',
+      left: va,
+      symbol: s,
+      right: e
+    };
+  }
+
+select_assign_stmt
+  = va:(var_decl / without_prefix_var_decl) __ s:KW_ASSIGN __ e:proc_expr {
     return {
       type: 'assign',
       left: va,
