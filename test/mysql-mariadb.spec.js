@@ -790,6 +790,20 @@ describe('mysql', () => {
           "GRANT ALL ON *.* TO 'someuser'@'somehost' WITH GRANT OPTION"
         ]
       },
+      {
+        title: 'convert using',
+        sql: [
+          `select convert(json_unquote(json_extract('{"thing": "252"}', "$.thing")) using utf8);`,
+          `SELECT CONVERT(json_unquote(json_extract('{"thing": "252"}', "$.thing")) USING UTF8)`
+        ]
+      },
+      {
+        title: 'table option checksum and delay_key_write',
+        sql: [
+          'create table `users` (id int(11) not null) ENGINE=InnoDB AUTO_INCREMENT=10833 DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC',
+          'CREATE TABLE `users` (`id` INT(11) NOT NULL) ENGINE = INNODB AUTO_INCREMENT = 10833 DEFAULT CHARSET = utf8 CHECKSUM = 1 DELAY_KEY_WRITE = 1 ROW_FORMAT = DYNAMIC'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
@@ -799,6 +813,12 @@ describe('mysql', () => {
       it(`should support ${title} in mariadb`, () => {
         expect(getParsedSql(sql[0], mariadb)).to.equal(sql[1])
       })
+    })
+
+    it('should throw error when covert args is not right', () => {
+      const sql = `select convert(json_unquote(json_extract('{"thing": "252"}', "$.thing")));`
+      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", "~", or [ \\t\\n\\r] but ")" found.')
+      expect(parser.astify.bind(parser, 'select convert("");')).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "OR", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", "~", or [ \\t\\n\\r] but ")" found.')
     })
 
     it('should join multiple table with comma', () => {
