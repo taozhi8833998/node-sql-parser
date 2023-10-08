@@ -1631,7 +1631,7 @@ show_stmt
       }
     }
   }
-  / KW_SHOW __ k:(('CHARACTER'i __ 'SET'i) / 'COLLATION'i) __ e:(like_op_right / where_clause)? {
+  / KW_SHOW __ k:(('CHARACTER'i __ 'SET'i) / 'COLLATION'i / 'DATABASES'i) __ e:(like_op_right / where_clause)? {
     let keyword = Array.isArray(k) && k || [k]
     return {
       tableList: Array.from(tableList),
