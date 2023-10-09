@@ -1631,7 +1631,7 @@ show_stmt
       }
     }
   }
-  / KW_SHOW __ k:(('CHARACTER'i __ 'SET'i) / 'COLLATION'i) __ e:(like_op_right / where_clause)? {
+  / KW_SHOW __ k:(('CHARACTER'i __ 'SET'i) / 'COLLATION'i / 'DATABASES'i) __ e:(like_op_right / where_clause)? {
     let keyword = Array.isArray(k) && k || [k]
     return {
       tableList: Array.from(tableList),
@@ -2017,13 +2017,25 @@ column_list_item
     const { as, ...expr } = fs
     return { expr, as }
   }
-  / tbl:(ident __ DOT)? __ STAR {
-      const table = tbl && tbl[0] || null
+  / db:ident __ DOT __ table:ident __ DOT __ STAR {
+      columnList.add(`select::${db}::${table}::(.*)`);
+      return {
+        expr: {
+          type: 'column_ref',
+          db: db,
+          table: table,
+          column: '*'
+        },
+        as: null
+      };
+    }
+  / table:(ident __ DOT)? __ STAR {
       columnList.add(`select::${table}::(.*)`);
       return {
         expr: {
           type: 'column_ref',
-          table: table,
+          db: null,
+          table: table && table[0] || null,
           column: '*'
         },
         as: null
@@ -2812,10 +2824,20 @@ column_ref
         properties: a.map(item => item[2])
       };
   }
+  / db:(ident_name / backticks_quoted_ident) __ DOT __ tbl:(ident_name / backticks_quoted_ident) __ DOT __ col:column_without_kw {
+      columnList.add(`select::${db}::${tbl}::${col}`);
+      return {
+        type: 'column_ref',
+        db: db,
+        table: tbl,
+        column: col
+      };
+    }
   / tbl:(ident_name / backticks_quoted_ident) __ DOT __ col:column_without_kw {
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
+        db: null,
         table: tbl,
         column: col
       };
@@ -2824,6 +2846,7 @@ column_ref
       columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
+        db: null,
         table: null,
         column: col
       };
