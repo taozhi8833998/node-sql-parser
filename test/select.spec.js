@@ -170,7 +170,7 @@ describe('select', () => {
     it('should parse "table.*" column expressions', () => {
       const ast = parser.astify('SELECT t.* FROM t');
       expect(ast.columns).to.eql([
-        { expr: { type: 'column_ref', 'table': 't', column: '*' }, as: null }
+        { expr: { type: 'column_ref', table: 't', column: '*' }, as: null }
       ]);
     });
     it('should parse json column query expressions', () => {
