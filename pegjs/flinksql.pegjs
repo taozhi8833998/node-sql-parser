@@ -495,8 +495,7 @@
 }
 
 start
-  = __ n:(multiple_stmt / cmd_stmt / crud_stmt) {
-    // => multiple_stmt | cmd_stmt | crud_stmt
+  = __ n:(multiple_stmt) {
     return n
   }
 
@@ -531,12 +530,13 @@ crud_stmt
   / proc_stmts
 
 multiple_stmt
-  = head:crud_stmt tail:(__ SEMICOLON __ crud_stmt)+ {
+  = head:crud_stmt tail:(__ SEMICOLON __ crud_stmt)* {
       /*
       // is in reality: { tableList: any[]; columnList: any[]; ast: T; }
       export type AstStatement<T> = T;
        => AstStatement<crud_stmt[]> */
-      const cur = [head && head.ast || head];
+      const headAst = head && head.ast || head
+      const cur = tail && tail.length && tail[0].length >= 4 ? [headAst] : headAst;
       for (let i = 0; i < tail.length; i++) {
         if(!tail[i][3] || tail[i][3].length === 0) continue;
         cur.push(tail[i][3] && tail[i][3].ast || tail[i][3]);
