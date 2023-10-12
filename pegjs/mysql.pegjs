@@ -3111,7 +3111,10 @@ convert_args
     }
   }
 extract_filed
-  = f:('CENTURY'i / 'DAY'i / 'DATE'i / 'DECADE'i / 'DOW'i / 'DOY'i / 'EPOCH'i / 'HOUR'i / 'ISODOW'i / 'ISOWEEK'i / 'ISOYEAR'i / 'MICROSECONDS'i / 'MILLENNIUM'i / 'MILLISECONDS'i / 'MINUTE'i / 'MONTH'i / 'QUARTER'i / 'SECOND'i / 'TIME'i / 'TIMEZONE'i / 'TIMEZONE_HOUR'i / 'TIMEZONE_MINUTE'i / 'WEEK'i / 'YEAR'i) {
+  = f:(
+    'YEAR_MONTH'i / 'DAY_HOUR'i / 'DAY_MINUTE'i / 'DAY_SECOND'i / 'DAY_MICROSECOND'i / 'HOUR_MINUTE'i / 'HOUR_SECOND'i/ 'HOUR_MICROSECOND'i / 'MINUTE_SECOND'i / 'MINUTE_MICROSECOND'i / 'SECOND_MICROSECOND'i / 'TIMEZONE_HOUR'i / 'TIMEZONE_MINUTE'i
+    / 'CENTURY'i / 'DAY'i / 'DATE'i / 'DECADE'i / 'DOW'i / 'DOY'i / 'EPOCH'i / 'HOUR'i / 'ISODOW'i / 'ISOWEEK'i / 'ISOYEAR'i / 'MICROSECONDS'i / 'MILLENNIUM'i / 'MILLISECONDS'i / 'MINUTE'i / 'MONTH'i / 'QUARTER'i / 'SECOND'i / 'TIME'i / 'TIMEZONE'i / 'WEEK'i / 'YEAR'i
+  ) {
     return f
   }
 extract_func
