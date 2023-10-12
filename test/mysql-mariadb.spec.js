@@ -804,6 +804,13 @@ describe('mysql', () => {
           'CREATE TABLE `users` (`id` INT(11) NOT NULL) ENGINE = INNODB AUTO_INCREMENT = 10833 DEFAULT CHARSET = utf8 CHECKSUM = 1 DELAY_KEY_WRITE = 1 ROW_FORMAT = DYNAMIC'
         ]
       },
+      {
+        title: 'column with db prefix',
+        sql: [
+          'SELECT d.t.* FROM d.t',
+          'SELECT `d`.`t`.* FROM `d`.`t`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

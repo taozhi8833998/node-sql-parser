@@ -1326,7 +1326,7 @@ show_stmt
       }
     }
   }
-  / KW_SHOW __ k:(('CHARACTER'i __ 'SET'i) / 'COLLATION'i) __ e:(like_op_right / where_clause)? {
+  / KW_SHOW __ k:(('CHARACTER'i __ 'SET'i) / 'COLLATION'i / 'DATABASES'i) __ e:(like_op_right / where_clause)? {
     let keyword = Array.isArray(k) && k || [k]
     return {
       tableList: Array.from(tableList),
@@ -1739,19 +1739,30 @@ column_list_item
     const { as, ...expr } = fs
     return { expr, as }
   }
-  / tbl:(ident __ DOT)? __ STAR {
-      const table = tbl && tbl[0] || null
-      columnList.add(`select::${table}::(.*)`);
+  / db:ident __ DOT __ table:ident __ DOT __ STAR {
+      columnList.add(`select::${db}::${table}::(.*)`);
       return {
         expr: {
           type: 'column_ref',
+          db: db,
           table: table,
           column: '*'
         },
         as: null
       };
     }
-  / a:assign_stmt {
+  / table:(ident __ DOT)? __ STAR {
+      columnList.add(`select::${table}::(.*)`);
+      return {
+        expr: {
+          type: 'column_ref',
+          table: table && table[0] || null,
+          column: '*'
+        },
+        as: null
+      };
+    }
+  / a:select_assign_stmt {
     return { expr: a, as: null }
   }
   / e:binary_column_expr __ alias:alias_clause? {
@@ -2521,8 +2532,17 @@ primary
   }
 
 column_ref
-  = tbl:(ident_name / backticks_quoted_ident) __ DOT __ col:column_without_kw {
-      // columnList.add(`select::${tbl}::${col}`);
+  = db:(ident_name / backticks_quoted_ident) __ DOT __ tbl:(ident_name / backticks_quoted_ident) __ DOT __ col:column_without_kw {
+      columnList.add(`select::${db}::${tbl}::${col}`);
+      return {
+        type: 'column_ref',
+        db: db,
+        table: tbl,
+        column: col
+      };
+    }
+  / tbl:(ident_name / backticks_quoted_ident) __ DOT __ col:column_without_kw {
+      columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
         table: tbl,
@@ -2530,7 +2550,7 @@ column_ref
       };
   }
   / col:column {
-      // columnList.add(`select::null::${col}`);
+      columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
         table: null,
@@ -3435,6 +3455,15 @@ assign_stmt
     };
   }
 
+select_assign_stmt
+  = va:(var_decl / without_prefix_var_decl) __ s:KW_ASSIGN __ e:proc_expr {
+    return {
+      type: 'assign',
+      left: va,
+      symbol: s,
+      right: e
+    };
+  }
 
 return_stmt
   = KW_RETURN __ e:proc_expr {

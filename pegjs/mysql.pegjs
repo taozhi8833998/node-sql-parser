@@ -2035,7 +2035,6 @@ column_list_item
       return {
         expr: {
           type: 'column_ref',
-          db: null,
           table: table && table[0] || null,
           column: '*'
         },
@@ -2838,7 +2837,6 @@ column_ref
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
-        db: null,
         table: tbl,
         column: col
       };
@@ -2847,7 +2845,6 @@ column_ref
       columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
-        db: null,
         table: null,
         column: col
       };

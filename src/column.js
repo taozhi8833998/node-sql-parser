@@ -22,12 +22,12 @@ function columnOffsetToSQL(column, isDual) {
 }
 function columnRefToSQL(expr) {
   const {
-    array_index, arrows = [], as, collate, column, isDual, schema, table, parentheses, properties,
+    array_index, arrows = [], as, collate, column, db, isDual, schema, table, parentheses, properties,
     suffix, order_by, subFields = [],
   } = expr
   let str = column === '*' ? '*' : columnOffsetToSQL(column, isDual)
-  if (table) str = `${identifierToSql(table)}.${str}`
-  if (schema) str = `${identifierToSql(schema)}.${str}`
+  const prefix = [schema, db, table].filter(hasVal).map(val => `${identifierToSql(val)}`).join('.')
+  if (prefix) str = `${prefix}.${str}`
   if (array_index) {
     str = `${str}[${literalToSQL(array_index.index)}]`
     if (array_index.property) str = `${str}.${literalToSQL(array_index.property)}`
