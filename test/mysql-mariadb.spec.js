@@ -811,6 +811,13 @@ describe('mysql', () => {
           'SELECT `d`.`t`.* FROM `d`.`t`'
         ]
       },
+      {
+        title: 'extract year-month',
+        sql: [
+          "SELECT EXTRACT(YEAR_MONTH FROM '2023-10-10')",
+          "SELECT EXTRACT(YEAR_MONTH FROM '2023-10-10')"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
