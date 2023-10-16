@@ -771,6 +771,13 @@ describe('BigQuery', () => {
         'SELECT DATE_TRUNC(CURRENT_DATE(), INTERVAL 1 ISOYEAR)'
       ]
     },
+    {
+      title: 'extract field',
+      sql: [
+        'SELECT TIMESTAMP(DATE_SUB(CURRENT_DATETIME(), INTERVAL EXTRACT(DAYOFWEEK FROM CURRENT_DATETIME())-1 DAY))',
+        'SELECT TIMESTAMP(DATE_SUB(CURRENT_DATETIME(), INTERVAL EXTRACT(DAYOFWEEK FROM CURRENT_DATETIME()) - 1 DAY))'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
