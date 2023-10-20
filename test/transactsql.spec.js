@@ -58,6 +58,11 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal("EXEC [msdb].[dbo].[sp_delete_database_backuphistory] @database_name = N'Test' GO")
   })
 
+  it('should support execute stmt without parameters', () => {
+    const sql = `EXECUTE sys.sp_who`
+    expect(getParsedSql(sql)).to.equal("EXECUTE [sys].[sp_who]")
+  })
+
   it('should support over in aggregation function', () => {
     let sql = `select sum(order_rate) over(
       order by quarter_time

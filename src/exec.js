@@ -13,7 +13,7 @@ function execToSQL(stmt) {
   const result = [
     toUpper(keyword),
     tableToSQL(module),
-    parameters.map(execVariablesToSQL).filter(hasVal).join(', '),
+    (parameters || []).map(execVariablesToSQL).filter(hasVal).join(', '),
   ]
   return result.filter(hasVal).join(' ')
 }
