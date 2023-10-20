@@ -639,7 +639,7 @@ declare_stmt
   }
 
 exec_stmt
-  = kw:('EXEC'i / 'EXECUTE'i) __ t:table_name __ v:exec_varibale_list {
+  = kw:('EXECUTE'i / 'EXEC'i) __ t:table_name __ v:exec_varibale_list? {
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
