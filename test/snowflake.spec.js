@@ -86,8 +86,8 @@ describe('snowflake', () => {
     {
       title: 'alias to be identified',
       sql: [
-        'select NAME as "a\b" from schmeaName.tableName',
-        'SELECT "NAME" AS "a\b" FROM "schmeaName"."tableName"'
+        'select Age, "name" as "a\b" from schmeaName.tableName',
+        'SELECT "Age", "name" AS "a\b" FROM "schmeaName"."tableName"'
       ]
     },
   ]
