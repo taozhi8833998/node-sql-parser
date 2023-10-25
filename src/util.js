@@ -129,6 +129,7 @@ function columnIdentifierToSql(ident) {
   switch (database && database.toLowerCase()) {
     case 'postgresql':
     case 'db2':
+    case 'snowflake':
       return `"${ident}"`
     case 'transactsql':
       return `[${ident}]`
