@@ -778,6 +778,13 @@ describe('BigQuery', () => {
         'SELECT TIMESTAMP(DATE_SUB(CURRENT_DATETIME(), INTERVAL EXTRACT(DAYOFWEEK FROM CURRENT_DATETIME()) - 1 DAY))'
       ]
     },
+    {
+      title: 'create table',
+      sql: [
+        'CREATE TABLE mydataset.newtable ( x INT64 );',
+        'CREATE TABLE mydataset.newtable (x INT64)'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
