@@ -1042,7 +1042,6 @@ create_column_definition
     d:data_type __
     cdo:column_definition_opt_list? {
       columnList.add(`create::${c.table}::${c.column}`)
-      if (n && !n.value) n.value = 'null'
       return {
         column: c,
         definition: d,
