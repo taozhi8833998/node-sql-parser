@@ -73,7 +73,7 @@ export interface Select {
   type: "select";
   options: any[] | null;
   distinct: "DISTINCT" | null;
-  columns: any[] | Column[] | "*";
+  columns: any[] | Column[];
   from: Array<From | Dual | any> | null;
   where: any;
   groupby: ColumnRef[] | null;
