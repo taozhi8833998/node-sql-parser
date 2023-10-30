@@ -3603,14 +3603,30 @@ KW_USER     = "USER"i     !ident_start { return 'USER'; }
 
 KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
 KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
+
 KW_INTERVAL         = "INTERVAL"i !ident_start { return 'INTERVAL'; }
 KW_UNIT_YEAR        = "YEAR"i !ident_start { return 'YEAR'; }
+KW_UNIT_QUARTER     = "QUARTER"i !ident_start { return 'QUARTER'; }
 KW_UNIT_MONTH       = "MONTH"i !ident_start { return 'MONTH'; }
 KW_UNIT_WEEK        = "WEEK"i !ident_start { return 'WEEK'; }
 KW_UNIT_DAY         = "DAY"i !ident_start { return 'DAY'; }
 KW_UNIT_HOUR        = "HOUR"i !ident_start { return 'HOUR'; }
 KW_UNIT_MINUTE      = "MINUTE"i !ident_start { return 'MINUTE'; }
 KW_UNIT_SECOND      = "SECOND"i !ident_start { return 'SECOND'; }
+KW_UNIT_MICROSECOND = "MICROSECOND"i !ident_start { return 'MICROSECOND'; }
+
+KW_UNIT_SECOND_MICROSECOND = "SECOND_MICROSECOND"i !ident_start { return 'SECOND_MICROSECOND'; }
+KW_UNIT_MINUTE_MICROSECOND = "MINUTE_MICROSECOND"i !ident_start { return 'MINUTE_MICROSECOND'; }
+KW_UNIT_MINUTE_SECOND      = "MINUTE_SECOND"i !ident_start { return 'MINUTE_SECOND'; }
+KW_UNIT_HOUR_MICROSECOND   = "HOUR_MICROSECOND"i !ident_start { return 'HOUR_MICROSECOND'; }
+KW_UNIT_HOUR_SECOND        = "HOUR_SECOND"i !ident_start { return 'HOUR_SECOND'; }
+KW_UNIT_HOUR_MINUTE        = "HOUR_MINUTE"i !ident_start { return 'HOUR_MINUTE'; }
+KW_UNIT_DAY_MICROSECOND    = "DAY_MICROSECOND"i !ident_start { return 'DAY_MICROSECOND'; }
+KW_UNIT_DAY_SECOND         = "DAY_SECOND"i !ident_start { return 'DAY_SECOND'; }
+KW_UNIT_DAY_MINUTE         = "DAY_MINUTE"i !ident_start { return 'DAY_MINUTE'; }
+KW_UNIT_DAY_HOUR           = "DAY_HOUR"i !ident_start { return 'DAY_HOUR'; }
+KW_UNIT_YEAR_MONTH         = "YEAR_MONTH"i !ident_start { return 'YEAR_MONTH'; }
+
 KW_CURRENT_TIME     = "CURRENT_TIME"i !ident_start { return 'CURRENT_TIME'; }
 KW_CURRENT_TIMESTAMP= "CURRENT_TIMESTAMP"i !ident_start { return 'CURRENT_TIMESTAMP'; }
 KW_CURRENT_USER     = "CURRENT_USER"i !ident_start { return 'CURRENT_USER'; }
@@ -3722,12 +3738,24 @@ char = .
 
 interval_unit
   = KW_UNIT_YEAR
+  / KW_UNIT_QUARTER
   / KW_UNIT_MONTH
   / KW_UNIT_WEEK
   / KW_UNIT_DAY
   / KW_UNIT_HOUR
   / KW_UNIT_MINUTE
   / KW_UNIT_SECOND
+  / KW_UNIT_SECOND_MICROSECOND
+  / KW_UNIT_MINUTE_MICROSECOND
+  / KW_UNIT_MINUTE_SECOND
+  / KW_UNIT_HOUR_MICROSECOND
+  / KW_UNIT_HOUR_SECOND
+  / KW_UNIT_HOUR_MINUTE
+  / KW_UNIT_DAY_MICROSECOND
+  / KW_UNIT_DAY_SECOND
+  / KW_UNIT_DAY_MINUTE
+  / KW_UNIT_DAY_HOUR
+  / KW_UNIT_YEAR_MONTH
 
 whitespace =
   [ \t\n\r]
