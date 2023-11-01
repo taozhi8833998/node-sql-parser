@@ -1938,7 +1938,8 @@ join_op
   / (KW_INNER __)? KW_JOIN { return 'INNER JOIN'; }
 
 table_name
-  = dt:ident tail:(__ DOT __ ident)? {
+    = prefix:[_0-9]* part:ident tail:(__ DOT __ ident)? {
+      const dt = prefix ? `${prefix.join('')}${part}` : part
       const obj = { db: null, table: dt };
       if (tail !== null) {
         obj.db = dt;

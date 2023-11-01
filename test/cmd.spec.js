@@ -360,7 +360,7 @@ describe('Command SQL', () => {
         .to.equal(`SET @a.id = 123 ; SET @b.yy.xx = "mm"`);
     })
 
-    it('should support set keyword variable definde', () => {
+    it('should support set keyword variable defined', () => {
       const KEYWORDS = ['GLOBAL', 'SESSION', 'LOCAL', 'PERSIST', 'PERSIST_ONLY']
       KEYWORDS.forEach(keyword => {
         expect(getParsedSql(`set ${keyword} xx.yy = 123; set ${keyword} yy = "abc"`))

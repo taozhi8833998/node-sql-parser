@@ -818,6 +818,13 @@ describe('mysql', () => {
           "SELECT EXTRACT(YEAR_MONTH FROM '2023-10-10')"
         ]
       },
+      {
+        title: 'table name starts with number or lodash',
+        sql: [
+          'SELECT * FROM 2023t',
+          'SELECT * FROM `2023t`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
