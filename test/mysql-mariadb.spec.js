@@ -343,6 +343,20 @@ describe('mysql', () => {
         ]
       },
       {
+        title: 'show create event',
+        sql: [
+          'SHOW CREATE EVENT `monthly_gc`',
+          'SHOW CREATE EVENT `monthly_gc`'
+        ]
+      },
+      {
+        title: 'show create procedure',
+        sql: [
+          'SHOW CREATE PROCEDURE get_jails',
+          'SHOW CREATE PROCEDURE `get_jails`'
+        ]
+      },
+      {
         title: 'with',
         sql: [
           'WITH cte AS (SELECT id, ROW_NUMBER() OVER (PARTITION BY id, uid ORDER BY time DESC) ranking FROM t) SELECT id FROM cte WHERE ranking = 1',

@@ -1350,7 +1350,7 @@ show_stmt
         }
       };
   }
-  / KW_SHOW __ KW_CREATE __ k:(KW_VIEW / KW_TABLE) __ t:table_name {
+  / KW_SHOW __ KW_CREATE __ k:(KW_VIEW / KW_TABLE / 'EVENT'i / KW_TRIGGER / 'PROCEDURE'i) __ t:table_name {
     const suffix = k.toLowerCase()
     return {
         tableList: Array.from(tableList),
