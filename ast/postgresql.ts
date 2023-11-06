@@ -18,7 +18,7 @@ export type crud_stmt = union_stmt | update_stmt | replace_insert_stmt | insert_
 // is in reality: { tableList: any[]; columnList: any[]; ast: T; }
       export type AstStatement<T> = T;
 
-export type multiple_stmt = AstStatement<crud_stmt[]>;
+export type multiple_stmt = AstStatement<curd_stmt | crud_stmt[]>;
 
 export type set_op = 'union' | 'union all' | 'union distinct';
 

@@ -2471,6 +2471,7 @@ insert_into_set
         columnList.add(`insert::${t.table}::(.*)`);
         t.as = null
       }
+      const prefix = [ig, it].filter(v => v).map(v => v[0] && v[0].toLowerCase()).join(' ')
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -2479,7 +2480,7 @@ insert_into_set
           table: [t],
           columns: null,
           partition: p,
-          prefix: it === null ? '' : it[0],
+          prefix,
           set: l,
           on_duplicate_update: odp,
         }
