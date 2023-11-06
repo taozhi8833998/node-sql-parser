@@ -2459,6 +2459,7 @@ insert_no_columns_stmt
 
 insert_into_set
   = ri:replace_insert __
+    ig:KW_IGNORE?  __
     it:KW_INTO? __
     t:table_name  __
     p:insert_partition? __
