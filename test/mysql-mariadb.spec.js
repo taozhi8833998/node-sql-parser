@@ -846,6 +846,13 @@ describe('mysql', () => {
           'INSERT IGNORE INTO `tableName` SET `id` = 1'
         ]
       },
+      {
+        title: 'expr in column',
+        sql: [
+          'SELECT col_1 = 0 AS is_admin FROM sample_table;',
+          'SELECT `col_1` = 0 AS `is_admin` FROM `sample_table`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
