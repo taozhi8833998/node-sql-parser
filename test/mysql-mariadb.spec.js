@@ -839,6 +839,13 @@ describe('mysql', () => {
           'SELECT * FROM `2023t`'
         ]
       },
+      {
+        title: 'insert ignore into',
+        sql: [
+          'INSERT IGNORE INTO tableName SET id=1',
+          'INSERT IGNORE INTO `tableName` SET `id` = 1'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
