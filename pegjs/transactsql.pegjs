@@ -1707,7 +1707,8 @@ table_base
 
 join_op
   = a:(KW_LEFT / KW_RIGHT / KW_FULL) __ s:KW_OUTER? __ KW_JOIN { return [a[0].toUpperCase(), s && s[0], 'JOIN'].filter(v => v).join(' '); }
-  / a:(KW_INNER / KW_CROSS) __ KW_JOIN { return `${a[0].toUpperCase()} JOIN` }
+  / KW_CROSS __ KW_JOIN { return 'CROSS JOIN' }
+  / a:(KW_INNER)? __ KW_JOIN { return a ? 'INNER JOIN' : 'JOIN' }
 
 table_name
   = server:ident __ DOT __ db:ident __ DOT __ schema:ident __ DOT __ table:ident {

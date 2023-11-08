@@ -107,6 +107,33 @@ describe('transactsql', () => {
     expect(parser.sqlify(ast, tsqlOpt)).to.equal("SELECT [trpriv_seq], [trpriv_titulo], [trpriv_id], [trprivc_data] FROM [termos_privacidade] LEFT JOIN [termos_privacidade_versoes] ON ([trprivv_trpriv_id] = [trpriv_id] AND [trprivv_unidg_id] IS NULL AND [trprivv_inicio] <= '2022-08-16T15:00:04.832Z' AND ([trprivv_fim] >= '2022-08-16T15:00:04.832Z' OR [trprivv_fim] IS NULL)) LEFT JOIN [termos_privacidade_consentimentos] ON ([trprivc_trprivv_id] = [trprivv_id] AND [trpriv_individual] = 0 AND [trprivc_pes_id] = 'null') WHERE 1 = 1 AND [trprivv_id] IS NOT NULL AND 1 = 2 ORDER BY 1 ASC, 2 ASC")
   })
 
+  it('should support inner join without inner', () => {
+    const sql = `WITH t1 AS
+    (SELECT date_sold,
+            amount_sold AS cake_sold
+      FROM desserts
+      WHERE product = 'Cake' ),
+        t2 AS
+      (SELECT date_sold,
+              isnull(amount_sold, 0) AS pie_sold
+      FROM desserts
+      WHERE product = 'Pie' ),
+        t3 AS
+      (SELECT t1.date_sold,
+              t1.cake_sold,
+              t2.pie_sold
+      FROM t1
+      JOIN t2 ON t1.date_sold = t2.date_sold)
+    SELECT date_sold,
+          ABS(CAST(cake_sold AS BIGINT) - CAST(pie_sold AS BIGINT)) AS difference,
+          CASE
+              WHEN cake_sold > pie_sold THEN 'Cake'
+              ELSE 'Pie'
+          END AS sold_more
+    FROM t3`
+    expect(getParsedSql(sql)).to.equal("WITH [t1] AS (SELECT [date_sold], [amount_sold] AS [cake_sold] FROM [desserts] WHERE [product] = 'Cake'), [t2] AS (SELECT [date_sold], isnull([amount_sold], 0) AS [pie_sold] FROM [desserts] WHERE [product] = 'Pie'), [t3] AS (SELECT [t1].[date_sold], [t1].[cake_sold], [t2].[pie_sold] FROM [t1] JOIN [t2] ON [t1].[date_sold] = [t2].[date_sold]) SELECT [date_sold], ABS(CAST([cake_sold] AS BIGINT) - CAST([pie_sold] AS BIGINT)) AS [difference], CASE WHEN [cake_sold] > [pie_sold] THEN 'Cake' ELSE 'Pie' END AS [sold_more] FROM [t3]")
+  })
+
   it('should support table schema', () => {
     let sql = `INSERT INTO source.dbo.movie (genre_id, title, release_date)
     VALUES (@param1, @param2, @param3), (@param1, @param2, @param3);`
