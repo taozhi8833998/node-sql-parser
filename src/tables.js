@@ -143,7 +143,19 @@ function tableOptionToSQL(tableOption) {
   const { keyword, symbol, value } = tableOption
   const sql = [keyword.toUpperCase()]
   if (symbol) sql.push(symbol)
-  sql.push(value)
+  let val = value
+  switch (keyword) {
+    case 'partition by':
+      val = exprToSQL(value)
+      break
+    case 'options':
+      val = `(${value.map(tableOptionItem => [tableOptionItem.keyword, tableOptionItem.symbol, exprToSQL(tableOptionItem.value)].join(' ')).join(', ')})`
+      break
+    case 'cluster by':
+      val = value.map(exprToSQL).join(', ')
+      break
+  }
+  sql.push(val)
   return sql.join(' ')
 }
 

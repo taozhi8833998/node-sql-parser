@@ -45,9 +45,10 @@ function createTableToSQL(stmt) {
     create_definitions: createDefinition,
     table_options: tableOptions,
     ignore_replace: ignoreReplace,
+    or_replace: orReplace,
     query_expr: queryExpr,
   } = stmt
-  const sql = [toUpper(type), toUpper(temporary), toUpper(keyword), toUpper(ifNotExists), tablesToSQL(table)]
+  const sql = [toUpper(type), toUpper(orReplace), toUpper(temporary), toUpper(keyword), toUpper(ifNotExists), tablesToSQL(table)]
   if (like) {
     const { type: likeType, table: likeTable } = like
     const likeTableName = tablesToSQL(likeTable)

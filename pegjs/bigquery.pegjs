@@ -840,16 +840,15 @@ if_not_exists_stmt
 
 create_table_stmt
   = a:KW_CREATE __
-    tp:KW_TEMPORARY? __
+    or:(KW_OR __ KW_REPLACE)? __
+    tp:(KW_TEMP / KW_TEMPORARY)? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
     t:table_ref_list __
-    c:create_table_definition __
-	con:(create_constraint_definition)* __
+    c:create_table_definition? __
     to:table_options? __
-    ir: (KW_IGNORE / KW_REPLACE)? __
-    as: KW_AS? __
-    qe: union_stmt? {
+    as:KW_AS? __
+    qe:union_stmt? {
       if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
@@ -860,11 +859,10 @@ create_table_stmt
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
           table: t,
-          ignore_replace: ir && ir[0].toLowerCase(),
+          or_replace: or && 'or replace',
           as: as && as[0].toLowerCase(),
           query_expr: qe && qe.ast,
           create_definitions: c,
-		      constraint : con,
           table_options: to
         }
       }
@@ -1194,6 +1192,18 @@ reference_definition
     }
   }
 
+table_option_list_item
+  = k:('expiration_timestamp'i / 'partition_expiration_days'i / 'require_partition_filter'i / 'kms_key_name'i / 'friendly_name'i / 'description'i / 'labels'i / 'default_rounding_mode'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:expr {
+    return {
+      keyword: k,
+      symbol: '=',
+      value: v
+    }
+  }
+table_option_list
+  = head:table_option_list_item tail:(__ COMMA __ table_option_list_item)* {
+    return createList(head, tail);
+  }
 table_option
   = kw:('AUTO_INCREMENT'i / 'AVG_ROW_LENGTH'i / 'KEY_BLOCK_SIZE'i / 'MAX_ROWS'i / 'MIN_ROWS'i / 'STATS_SAMPLE_PAGES'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:literal_numeric {
     return {
@@ -1222,6 +1232,25 @@ table_option
       keyword: kw.toLowerCase(),
       symbol: s,
       value: c.toUpperCase()
+    }
+  }
+  / KW_PARTITION __ KW_BY __ v:expr {
+    return {
+      keyword: 'partition by',
+      value: v
+    }
+  }
+  / 'CLUSTER'i __ 'BY'i __ c:column_list {
+    return {
+      keyword: 'cluster by',
+      value: c
+    }
+  }
+  / 'OPTIONS'i __ LPAREN __ v:table_option_list __ RPAREN {
+    return {
+      keyword: 'options',
+      parentheses: true,
+      value: v
     }
   }
 
@@ -1480,6 +1509,7 @@ KW_VAR__PRE_AT_AT = '@@'
 KW_VAR_PRE_DOLLAR = '$'
 KW_VAR_PRE = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR
 KW_TEMPORARY = "TEMPORARY"i !ident_start
+KW_TEMP = "TEMP"i !ident_start
 KW_SCHEMA   = "SCHEMA"i     !ident_start
 KW_ALTER    = "ALTER"i      !ident_start
 KW_SPATIAL  = "SPATIAL"i    !ident_start
