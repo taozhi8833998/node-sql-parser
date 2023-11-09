@@ -146,6 +146,7 @@ function tableOptionToSQL(tableOption) {
   let val = value
   switch (keyword) {
     case 'partition by':
+    case 'default collate':
       val = exprToSQL(value)
       break
     case 'options':

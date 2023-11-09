@@ -844,12 +844,12 @@ create_table_stmt
     tp:(KW_TEMP / KW_TEMPORARY)? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
-    t:table_ref_list __
+    t:table_name __
     c:create_table_definition? __
     to:table_options? __
     as:KW_AS? __
     qe:union_stmt? {
-      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
+      if(t) tableList.add(`create::${t.db}::${t.table}`)
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -858,7 +858,7 @@ create_table_stmt
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
-          table: t,
+          table: [t],
           or_replace: or && 'or replace',
           as: as && as[0].toLowerCase(),
           query_expr: qe && qe.ast,
@@ -1263,7 +1263,7 @@ create_like_table_simple
   }
 
 create_option_character_set
-  = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
+  = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:literal_string {
     return {
       keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
       symbol: s,
