@@ -785,6 +785,29 @@ describe('BigQuery', () => {
         'CREATE TABLE mydataset.newtable (x INT64)'
       ]
     },
+    {
+      title: 'create table with multiple options',
+      sql: [
+        `CREATE OR REPLACE TEMP TABLE
+        table1
+      DEFAULT COLLATE 'und:ci'
+      PARTITION BY
+        DATE(event_time)
+      CLUSTER BY
+        id
+      OPTIONS (
+        require_partition_filter = TRUE
+      )
+      AS
+      SELECT
+        table2.id,
+        table2.value,
+        table2.event_time
+      FROM
+        table2;`,
+        "CREATE OR REPLACE TEMP TABLE table1 DEFAULT COLLATE 'und:ci' PARTITION BY DATE(event_time) CLUSTER BY id OPTIONS (require_partition_filter = TRUE) AS SELECT table2.id, table2.value, table2.event_time FROM table2"
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
