@@ -853,6 +853,13 @@ describe('mysql', () => {
           'SELECT `col_1` = 0 AS `is_admin` FROM `sample_table`'
         ]
       },
+      {
+        title: 'set column name is keyword',
+        sql: [
+          "UPDATE go_draw_type SET go=0, drawType=0, changeTag=(go_draw_type.changeTag + 1), modifiedAt='2023-11-09 20:27:47.735 UTC' WHERE (go_draw_type.id IN (405) AND (go_draw_type.uuid='1EE7DD91-2893-4296-A3C6-F7F5A62A134F' AND 1=1))",
+          "UPDATE `go_draw_type` SET `go` = 0, `drawType` = 0, `changeTag` = (`go_draw_type`.`changeTag` + 1), `modifiedAt` = '2023-11-09 20:27:47.735 UTC' WHERE (`go_draw_type`.`id` IN (405) AND (`go_draw_type`.`uuid` = '1EE7DD91-2893-4296-A3C6-F7F5A62A134F' AND 1 = 1))"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

@@ -3381,11 +3381,11 @@ set_list
  * 'col1 = (col2 > 3)'
  */
 set_item
-  = tbl:(ident __ DOT)? __ c:column __ '=' __ v:additive_expr {
+  = tbl:(ident __ DOT)? __ c:column_without_kw __ '=' __ v:additive_expr {
       // => { column: ident; value: additive_expr; table?: ident;}
       return { column: c, value: v, table: tbl && tbl[0] };
     }
-    / tbl:(ident __ DOT)? __ c:column __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
+    / tbl:(ident __ DOT)? __ c:column_without_kw __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
       // => { column: ident; value: column_ref; table?: ident; keyword: 'values' }
       return { column: c, value: v, table: tbl && tbl[0], keyword: 'values' };
   }
@@ -4063,6 +4063,12 @@ backticks_quoted_ident
 
 ident_without_kw
   = ident_name / quoted_ident
+
+column_without_kw
+  = name:column_name {
+    return name;
+  }
+  / quoted_ident
 
 column
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { /* => string */ return name; }
