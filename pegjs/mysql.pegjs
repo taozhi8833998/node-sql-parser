@@ -2373,8 +2373,11 @@ set_list
  * 'col1 = (col2 > 3)'
  */
 set_item
-  = tbl:(ident __ DOT)? __ c:column __ '=' __ v:additive_expr {
+  = tbl:(ident __ DOT)? __ c:column_without_kw __ '=' __ v:additive_expr {
       return { column: c, value: v, table: tbl && tbl[0] };
+  }
+  / tbl:(ident __ DOT)? __ c:column_without_kw __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
+      return { column: c, value: v, table: tbl && tbl[0], keyword: 'values' };
   }
 
 insert_value_clause
