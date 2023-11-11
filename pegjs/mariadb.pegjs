@@ -2307,7 +2307,6 @@ case_else = KW_ELSE __ result:expr {
 _expr
   = logic_operator_expr // support concatenation operator || and &&
   / or_expr
-  / unary_expr
 
 expr
   = _expr / set_op_stmt
@@ -2392,7 +2391,7 @@ not_expr
     }
 
 comparison_expr
-  = left:additive_expr __ rh:comparison_op_right? {
+  = left:(additive_expr / unary_expr) __ rh:comparison_op_right? {
       if (rh === null) return left;
       else if (rh.type === 'arithmetic') return createBinaryExprChain(left, rh.tail);
       else return createBinaryExpr(rh.op, left, rh.right);
@@ -2497,7 +2496,7 @@ additive_expr
     }
 
 additive_operator
-  = "+" / "-" / "~"
+  = "+" / "-" / "~" / "!"
 
 multiplicative_expr
   = head:primary
