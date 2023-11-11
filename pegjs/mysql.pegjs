@@ -2577,22 +2577,29 @@ case_else = KW_ELSE __ result:expr {
   }
 
 /**
- * Borrowed from PL/SQL ,the priority of below list IS ORDER BY DESC
+ * From MySQL Manual
  * ---------------------------------------------------------------------------------------------------
- * | +, -                                                     | identity, negation                   |
- * | *, /                                                     | multiplication, division             |
- * | +, -                                                     | addition, subtraction, concatenation |
- * | =, <, >, <=, >=, <>, !=, IS, LIKE, BETWEEN, IN           | comparion                            |
- * | !, NOT                                                   | logical negation                     |
- * | AND                                                      | conjunction                          |
- * | OR                                                       | inclusion                            |
+ * !
+ * - (unary minus), ~ (unary bit inversion)
+ * ^
+ * *, /, DIV, %, MOD
+ * -, +
+ * <<, >>
+ * &
+ * |
+ * = (comparison), <=>, >=, >, <=, <, <>, !=, IS, LIKE, REGEXP, IN, MEMBER OF
+ * BETWEEN, CASE, WHEN, THEN, ELSE
+ * NOT
+ * AND, &&
+ * XOR
+ * OR, ||
+ * = (assignment), :=
  * ---------------------------------------------------------------------------------------------------
  */
 
 _expr
   = logic_operator_expr // support concatenation operator || and &&
   / or_expr
-  / unary_expr
 
 expr
   = _expr / set_op_stmt
@@ -2603,11 +2610,6 @@ logic_operator_expr
     if (rh === null) return logicExpr
     else if (rh.type === 'arithmetic') return createBinaryExprChain(logicExpr, rh.tail)
     else return createBinaryExpr(rh.op, logicExpr, rh.right)
-  }
-
-unary_expr
-  = op: additive_operator tail: (__ primary)+ {
-    return createUnaryExpr(op, tail[0][1]);
   }
 
 binary_column_expr
@@ -2671,7 +2673,7 @@ and_expr
 not_expr
   = comparison_expr
   / exists_expr
-  / (KW_NOT / "!" !"=") __ expr:not_expr {
+  / KW_NOT __ expr:not_expr {
       return createUnaryExpr('NOT', expr);
     }
 
@@ -2780,11 +2782,11 @@ additive_expr
     }
 
 additive_operator
-  = "+" / "-" / "~"
+  = "+" / "-"
 
 multiplicative_expr
-  = head:primary
-    tail:(__ multiplicative_operator  __ primary)* {
+  = head:(unary_expr_or_primary)
+    tail:(__ multiplicative_operator  __ (unary_expr_or_primary))* {
       return createBinaryExprChain(head, tail)
     }
 
@@ -2793,7 +2795,19 @@ multiplicative_operator
   / "div"i {
     return 'DIV'
   }
-  / '&' / '>>' / '<<' / '^' / '|' / '~'
+  / '&' / '>>' / '<<' / '^' / '|'
+
+unary_expr_or_primary
+  = primary
+  / op:(unary_operator) tail:(__ unary_expr_or_primary) {
+    if (op === '!') {
+      op = 'NOT';
+    }
+    return createUnaryExpr(op, tail[1]);
+  }
+
+unary_operator
+  = '!' / '-' / '+' / '~'
 
 primary
   = cast_expr
