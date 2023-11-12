@@ -4066,7 +4066,7 @@ ident_without_kw
 
 column_without_kw
   = name:column_name {
-     /* => string */ return name;
+    return name;
   }
   / quoted_ident
 

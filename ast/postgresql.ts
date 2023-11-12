@@ -1117,10 +1117,6 @@ export type ident_without_kw = ident_name | quoted_ident;
 
 
 
-export type column_without_kw = string | quoted_ident;
-
-
-
 export type column = string | quoted_ident;
 
 
