@@ -2759,8 +2759,9 @@ regexp_op_right
   }
 
 like_op_right
-  = op:like_op __ right:(literal / comparison_expr) __ es:escape_op? {
+  = op:like_op __ right:(literal / param / comparison_expr ) __ ca:(__ collate_expr)? __ es:escape_op? {
       if (es) right.escape = es
+      if (ca) right.suffix = { collate: ca[1] }
       return { op: op, right: right };
     }
 
@@ -3678,8 +3679,6 @@ KW_KEY_BLOCK_SIZE = "KEY_BLOCK_SIZE"i !ident_start { return 'KEY_BLOCK_SIZE'; }
 KW_COMMENT     = "COMMENT"i  !ident_start { return 'COMMENT'; }
 KW_CONSTRAINT  = "CONSTRAINT"i  !ident_start { return 'CONSTRAINT'; }
 KW_REFERENCES  = "REFERENCES"i  !ident_start { return 'REFERENCES'; }
-
-
 
 // MySQL extensions to SQL
 OPT_SQL_CALC_FOUND_ROWS = "SQL_CALC_FOUND_ROWS"i

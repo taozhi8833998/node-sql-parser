@@ -867,6 +867,18 @@ describe('mysql', () => {
           'SELECT -`foo` > 0 ; SELECT +`foo` > 0 ; SELECT ~`foo` > 0 ; SELECT !1 > 0'
         ]
       },
+      {
+        title: 'like pattern',
+        sql: [
+          `SELECT
+          *
+        FROM
+          test
+        WHERE
+          name LIKE :pattern COLLATE utf8mb4_general_ci`,
+          'SELECT * FROM `test` WHERE `name` LIKE :pattern COLLATE UTF8MB4_GENERAL_CI'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
