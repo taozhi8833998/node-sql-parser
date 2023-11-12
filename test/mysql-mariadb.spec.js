@@ -860,6 +860,13 @@ describe('mysql', () => {
           "UPDATE `go_draw_type` SET `go` = 0, `drawType` = 0, `changeTag` = (`go_draw_type`.`changeTag` + 1), `modifiedAt` = '2023-11-09 20:27:47.735 UTC' WHERE (`go_draw_type`.`id` IN (405) AND (`go_draw_type`.`uuid` = '1EE7DD91-2893-4296-A3C6-F7F5A62A134F' AND 1 = 1))"
         ]
       },
+      {
+        title: 'unary operator',
+        sql: [
+          'SELECT -foo > 0; SELECT +foo > 0; SELECT ~foo > 0; SELECT !1 > 0',
+          'SELECT -`foo` > 0 ; SELECT +`foo` > 0 ; SELECT ~`foo` > 0 ; SELECT !1 > 0'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
@@ -873,8 +880,8 @@ describe('mysql', () => {
 
     it('should throw error when covert args is not right', () => {
       const sql = `select convert(json_unquote(json_extract('{"thing": "252"}', "$.thing")));`
-      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", "~", or [ \\t\\n\\r] but ")" found.')
-      expect(parser.astify.bind(parser, 'select convert("");')).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "OR", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", "~", or [ \\t\\n\\r] but ")" found.')
+      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!", "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", "~", or [ \\t\\n\\r] but ")" found.')
+      expect(parser.astify.bind(parser, 'select convert("");')).to.throw('Expected "!", "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "OR", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", "~", or [ \\t\\n\\r] but ")" found.')
     })
 
     it('should join multiple table with comma', () => {

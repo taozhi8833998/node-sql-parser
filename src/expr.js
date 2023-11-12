@@ -67,7 +67,7 @@ function exprToSQL(exprOrigin) {
 
 function unaryToSQL(unarExpr) {
   const { operator, parentheses, expr } = unarExpr
-  const space = (operator === '-' || operator === '+') ? '' : ' '
+  const space = (operator === '-' || operator === '+' || operator === '~' || operator === '!') ? '' : ' '
   const str = `${operator}${space}${exprToSQL(expr)}`
   return parentheses ? `(${str})` : str
 }
