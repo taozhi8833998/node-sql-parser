@@ -2471,10 +2471,12 @@ in_op
   / KW_IN
 
 like_op_right
-  = op:like_op __ right:(literal / comparison_expr) __ es:escape_op? {
-      if (es) right.escape = es
-      return { op: op, right: right };
-    }
+  = op:like_op __ right:(literal / param / comparison_expr ) __ ca:(__ collate_expr)? __ es:escape_op? {
+    if (es) right.escape = es
+    if (ca) right.suffix = { collate: ca[1] }
+    return { op: op, right: right };
+  }
+
 
 regexp_op_right
   = op:regexp_op __ b:'BINARY'i? __ e:(func_call / literal_string / column_ref) {
