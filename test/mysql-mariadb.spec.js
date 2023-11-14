@@ -892,8 +892,8 @@ describe('mysql', () => {
 
     it('should throw error when covert args is not right', () => {
       const sql = `select convert(json_unquote(json_extract('{"thing": "252"}', "$.thing")));`
-      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!", "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", "~", or [ \\t\\n\\r] but ")" found.')
-      expect(parser.astify.bind(parser, 'select convert("");')).to.throw('Expected "!", "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "OR", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", "~", or [ \\t\\n\\r] but ")" found.')
+      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", or [ \\t\\n\\r] but ")" found.')
+      expect(parser.astify.bind(parser, 'select convert("");')).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "OR", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", or [ \\t\\n\\r] but ")" found.')
     })
 
     it('should join multiple table with comma', () => {

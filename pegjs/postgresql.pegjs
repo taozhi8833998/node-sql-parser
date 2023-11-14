@@ -4065,10 +4065,7 @@ ident_without_kw
   = ident_name / quoted_ident
 
 column_without_kw
-  = name:column_name {
-    return name;
-  }
-  / quoted_ident
+  = column_name / quoted_ident
 
 column
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { /* => string */ return name; }
