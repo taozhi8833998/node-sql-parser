@@ -833,7 +833,7 @@ export type on_clause = or_and_where_expr;
 
 
 
-export type where_clause = binary_expr;
+export type where_clause = or_and_where_expr;
 
 
 
@@ -1114,6 +1114,8 @@ export type single_quoted_ident = string;
 export type backticks_quoted_ident = string;
 
 export type ident_without_kw = ident_name | quoted_ident;
+
+export type column_without_kw = column_name | quoted_ident;
 
 
 
