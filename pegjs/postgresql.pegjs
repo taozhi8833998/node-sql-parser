@@ -3126,7 +3126,7 @@ on_clause
   = KW_ON __ e:or_and_where_expr { /* => or_and_where_expr */ return e; }
 
 where_clause
-  = KW_WHERE __ e:or_and_where_expr { /* => binary_expr */ return e; }
+  = KW_WHERE __ e:or_and_where_expr { /* => or_and_where_expr */ return e; }
 
 group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list { /* => expr_list['value'] */ return e.value; }
