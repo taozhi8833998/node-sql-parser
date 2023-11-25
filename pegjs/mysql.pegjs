@@ -1194,6 +1194,15 @@ ALTER_DROP_KEY
         type: 'alter',
     }
   }
+  / KW_DROP __ (KW_KEY / KW_INDEX) __ c:ident_name {
+    return {
+        action: 'drop',
+        index: c,
+        keyword: 'index',
+        resource: 'index',
+        type: 'alter',
+    }
+  }
 
 ALTER_DROP_CONSTRAINT
   = KW_DROP __ kc:'CHECK'i __ c:ident_name {
