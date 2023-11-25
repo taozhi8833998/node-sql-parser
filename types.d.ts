@@ -69,6 +69,22 @@ export interface Column {
   as: string;
 }
 
+type Param = { type: 'param'; value: string };
+
+export type Expr =
+  | {
+      type: 'binary_expr';
+      operator: 'AND' | 'OR';
+      left: Expr;
+      right: Expr;
+    }
+  | {
+      type: 'binary_expr';
+      operator: string;
+      left: ColumnRef | Param;
+      right: ColumnRef | Param;
+    };
+
 export interface Select {
   with: With | null;
   type: "select";
@@ -76,7 +92,7 @@ export interface Select {
   distinct: "DISTINCT" | null;
   columns: any[] | Column[];
   from: Array<From | Dual | any> | null;
-  where: any;
+  where: Expr;
   groupby: ColumnRef[] | null;
   having: any[] | null;
   orderby: OrderBy[] | null;
@@ -98,13 +114,13 @@ export interface Update {
   db: string | null;
   table: Array<From | Dual> | null;
   set: SetList[];
-  where: any;
+  where: Expr;
 }
 export interface Delete {
   type: "delete";
   table: any;
   from: Array<From | Dual>;
-  where: any;
+  where: Expr;
 }
 
 export interface Alter {
