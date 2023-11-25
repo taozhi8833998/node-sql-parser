@@ -13,8 +13,9 @@ import { columnToSQL, columnRefToSQL, columnOrderToSQL } from './column'
 // }
 
 const DEFAULT_OPT = {
-  database : PARSER_NAME || 'mysql',
-  type     : 'table',
+  database         : PARSER_NAME || 'mysql',
+  type             : 'table',
+  includeLocations : false,
 }
 
 let parserOpt = DEFAULT_OPT

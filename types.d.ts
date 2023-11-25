@@ -13,6 +13,7 @@ export type WhilteListCheckMode = "table" | "column";
 export interface Option {
   database?: string;
   type?: string;
+  includeLocations?: boolean;
 }
 export interface TableColumnAst {
   tableList: string[];
