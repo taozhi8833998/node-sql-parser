@@ -2186,6 +2186,7 @@ table_base
         db: t.db,
         table: t.table,
         as: alias,
+        ...getLocationObject(),
       };
     }
   / LPAREN __ t:table_name __ r:RPAREN __ alias:alias_clause? {
