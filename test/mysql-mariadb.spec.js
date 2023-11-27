@@ -879,6 +879,13 @@ describe('mysql', () => {
           'SELECT * FROM `test` WHERE `name` LIKE :pattern COLLATE UTF8MB4_GENERAL_CI'
         ]
       },
+      {
+        title: 'alter drop index or key',
+        sql: [
+          'ALTER TABLE table_name DROP INDEX index_name',
+          'ALTER TABLE `table_name` DROP INDEX index_name'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
