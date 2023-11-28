@@ -1011,7 +1011,7 @@ alter_action_list
 alter_action
   = ALTER_ADD_CONSTRAINT
   / ALTER_DROP_CONSTRAINT
-  / ALTER_DROP_KEY
+  / ALTER_DROP_KEY_INDEX
   / ALTER_ENABLE_CONSTRAINT
   / ALTER_DISABLE_CONSTRAINT
   / ALTER_ADD_COLUMN
@@ -1175,7 +1175,7 @@ ALTER_ADD_CONSTRAINT
       }
     }
 
-ALTER_DROP_KEY
+ALTER_DROP_KEY_INDEX
   = KW_DROP __ 'PRIMARY'i __ KW_KEY {
     return {
         action: 'drop',
@@ -1185,21 +1185,13 @@ ALTER_DROP_KEY
         type: 'alter',
     }
   }
-  / KW_DROP __ 'FOREIGN'i __ KW_KEY __ c:ident_name {
+  / KW_DROP __ k:(('FOREIGN'i? __ KW_KEY) / (KW_INDEX)) __ c:ident_name {
+    const resource = Array.isArray(k) ? 'key' : 'index'
     return {
         action: 'drop',
-        key: c,
-        keyword: 'foreign key',
-        resource: 'key',
-        type: 'alter',
-    }
-  }
-  / KW_DROP __ (KW_KEY / KW_INDEX) __ c:ident_name {
-    return {
-        action: 'drop',
-        index: c,
-        keyword: 'index',
-        resource: 'index',
+        [resource]: c,
+        keyword: Array.isArray(k) ? `${[k[0], k[2]].filter(v => v).join(' ').toLowerCase()}` : k.toLowerCase(),
+        resource,
         type: 'alter',
     }
   }
