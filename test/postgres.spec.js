@@ -1570,6 +1570,15 @@ describe('Postgres', () => {
           'SELECT "中文" FROM "t1"'
         ],
       },
+      {
+        title: 'double precision type',
+        sql: [
+          `CREATE TABLE test (
+            amount double precision
+          );`,
+          'CREATE TABLE "test" ("amount" DOUBLE PRECISION)'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
