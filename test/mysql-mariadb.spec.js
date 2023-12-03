@@ -879,6 +879,13 @@ describe('mysql', () => {
           'SELECT * FROM `test` WHERE `name` LIKE :pattern COLLATE UTF8MB4_GENERAL_CI'
         ]
       },
+      {
+        title: 'alter drop index or key',
+        sql: [
+          'ALTER TABLE table_name DROP INDEX index_name',
+          'ALTER TABLE `table_name` DROP INDEX index_name'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
@@ -890,10 +897,12 @@ describe('mysql', () => {
       })
     })
 
-    it('should throw error when covert args is not right', () => {
-      const sql = `select convert(json_unquote(json_extract('{"thing": "252"}', "$.thing")));`
+    it('should throw error when args is not right', () => {
+      let sql = `select convert(json_unquote(json_extract('{"thing": "252"}', "$.thing")));`
       expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", or [ \\t\\n\\r] but ")" found.')
       expect(parser.astify.bind(parser, 'select convert("");')).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "OR", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", or [ \\t\\n\\r] but ")" found.')
+      sql = 'SELECT AVG(Quantity,age) FROM table1;'
+      expect(parser.astify.bind(parser, sql)).to.throw('Expected "#", "%", "&", "(", ")", "*", "+", "-", "--", "->", "->>", ".", "/", "/*", "<<", ">>", "^", "div", "|", "||", [ \\t\\n\\r], [A-Za-z0-9_$\\x80-￿], or [A-Za-z0-9_:] but "," found.')
     })
 
     it('should join multiple table with comma', () => {

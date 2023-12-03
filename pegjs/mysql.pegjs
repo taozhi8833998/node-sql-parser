@@ -280,6 +280,24 @@
     'ZEROFILL': true,
   };
 
+  const reservedFunctionName = {
+    avg: true,
+    sum: true,
+    count: true,
+    max: true,
+    min: true,
+    group_concat: true,
+    std: true,
+    variance: true,
+    current_date: true,
+    current_time: true,
+    current_timestamp: true,
+    current_user: true,
+    user: true,
+    session_user: true,
+    system_user: true
+  }
+
   function createUnaryExpr(op, e) {
     return {
       type: 'unary_expr',
@@ -1011,7 +1029,7 @@ alter_action_list
 alter_action
   = ALTER_ADD_CONSTRAINT
   / ALTER_DROP_CONSTRAINT
-  / ALTER_DROP_KEY
+  / ALTER_DROP_KEY_INDEX
   / ALTER_ENABLE_CONSTRAINT
   / ALTER_DISABLE_CONSTRAINT
   / ALTER_ADD_COLUMN
@@ -1175,7 +1193,7 @@ ALTER_ADD_CONSTRAINT
       }
     }
 
-ALTER_DROP_KEY
+ALTER_DROP_KEY_INDEX
   = KW_DROP __ 'PRIMARY'i __ KW_KEY {
     return {
         action: 'drop',
@@ -1185,21 +1203,13 @@ ALTER_DROP_KEY
         type: 'alter',
     }
   }
-  / KW_DROP __ 'FOREIGN'i __ KW_KEY __ c:ident_name {
+  / KW_DROP __ k:(('FOREIGN'i? __ KW_KEY) / (KW_INDEX)) __ c:ident_name {
+    const resource = Array.isArray(k) ? 'key' : 'index'
     return {
         action: 'drop',
-        key: c,
-        keyword: 'foreign key',
-        resource: 'key',
-        type: 'alter',
-    }
-  }
-  / KW_DROP __ (KW_KEY / KW_INDEX) __ c:ident_name {
-    return {
-        action: 'drop',
-        index: c,
-        keyword: 'index',
-        resource: 'index',
+        [resource]: c,
+        keyword: Array.isArray(k) ? `${[k[0], k[2]].filter(v => v).join(' ').toLowerCase()}` : k.toLowerCase(),
+        resource,
         type: 'alter',
     }
   }
@@ -1579,8 +1589,7 @@ lock_stmt
   }
 
 call_stmt
-  = KW_CALL __
-  e: proc_func_call {
+  = KW_CALL __ e:proc_func_call {
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
@@ -3206,6 +3215,7 @@ trim_func_clause
         args,
     };
   }
+
 func_call
   = extract_func / trim_func_clause
   / 'convert'i __ LPAREN __ l:convert_args __ RPAREN __ ca:collate_expr? {
@@ -3231,7 +3241,7 @@ func_call
         over: up
     }
   }
-  / name:proc_func_name &{ return name.toLowerCase() !== 'convert' } __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+  / name:proc_func_name &{ return name.toLowerCase() !== 'convert' && !reservedFunctionName[name.toLowerCase()] } __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
     if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
     if ((name.toUpperCase() === 'TIMESTAMPDIFF' || name.toUpperCase() === 'TIMESTAMPADD') && l.value && l.value[0]) l.value[0] = { type: 'origin', value: l.value[0].column }
       return {
