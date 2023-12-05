@@ -63,8 +63,14 @@ export interface AggrFunc {
   name: string;
   args: ColumnRef | AggrFunc | Star | null;
 }
+export interface Function {
+  type: 'function';
+  name: string;
+  args: expr_list;
+  suffix?: any;
+}
 export interface Column {
-  expr: ColumnRef | AggrFunc;
+  expr: ColumnRef | AggrFunc | Function;
   as: string;
 }
 
@@ -84,6 +90,10 @@ export type Expr =
       right: ColumnRef | Param;
     };
 
+export type expr_list = {
+  type: 'expr_list';
+  value: Expr[];
+}
 export interface Select {
   with: With | null;
   type: "select";
