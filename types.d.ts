@@ -9,6 +9,10 @@ export interface With {
   stmt: any[];
   columns?: any[];
 }
+import { LocationRange } from "pegjs";
+
+export { LocationRange, Location } from "pegjs";
+
 export type WhilteListCheckMode = "table" | "column";
 export interface Option {
   database?: string;
@@ -19,81 +23,97 @@ export interface TableColumnAst {
   tableList: string[];
   columnList: string[];
   ast: AST[] | AST;
+  loc?: LocationRange;
 }
 export interface From {
   db: string | null;
   table: string;
   as: string | null;
+  loc?: LocationRange;
 }
 export interface Dual {
   type: "dual";
+  loc?: LocationRange;
 }
 export interface LimitValue {
   type: string;
   value: number;
+  loc?: LocationRange;
 }
 export interface Limit {
   seperator: string;
   value: LimitValue[];
+  loc?: LocationRange;
 }
 export interface OrderBy {
   type: "ASC" | "DESC";
   expr: any;
+  loc?: LocationRange;
 }
 export interface ColumnRef {
   type: "column_ref";
   table: string | null;
   column: string;
+  loc?: LocationRange;
 }
 export interface SetList {
   column: string;
   value: any;
   table: string | null;
+  loc?: LocationRange;
 }
 export interface InsertReplaceValue {
   type: "expr_list";
   value: any[];
+  loc?: LocationRange;
 }
 
 export interface Star {
   type: "star";
   value: "*";
+  loc?: LocationRange;
 }
 export interface AggrFunc {
   type: "aggr_func";
   name: string;
   args: ColumnRef | AggrFunc | Star | null;
+  loc?: LocationRange;
 }
 export interface Function {
   type: 'function';
   name: string;
   args: expr_list;
   suffix?: any;
+  loc?: LocationRange;
 }
 export interface Column {
   expr: ColumnRef | AggrFunc | Function;
   as: string;
+  loc?: LocationRange;
 }
 
-type Param = { type: 'param'; value: string };
+type Param = { type: 'param'; value: string, loc?: LocationRange; };
 
 export type Expr =
   | {
-      type: 'binary_expr';
-      operator: 'AND' | 'OR';
-      left: Expr;
-      right: Expr;
-    }
+    type: 'binary_expr';
+    operator: 'AND' | 'OR';
+    left: Expr;
+    right: Expr;
+    loc?: LocationRange;
+  }
   | {
-      type: 'binary_expr';
-      operator: string;
-      left: ColumnRef | Param;
-      right: ColumnRef | Param;
-    };
+    type: 'binary_expr';
+    operator: string;
+    left: ColumnRef | Param;
+    right: ColumnRef | Param;
+    loc?: LocationRange;
+  };
 
 export type expr_list = {
   type: 'expr_list';
   value: Expr[];
+  loc?: LocationRange;
 }
 export interface Select {
   with: With | null;
@@ -111,6 +131,7 @@ export interface Select {
   _limit?: Limit | null;
   parentheses_symbol?: boolean;
   _parentheses?: boolean;
+  loc?: LocationRange;
 }
 export interface Insert_Replace {
   type: "replace" | "insert";
@@ -118,6 +139,7 @@ export interface Insert_Replace {
   table: any;
   columns: string[] | null;
   values: InsertReplaceValue[];
+  loc?: LocationRange;
 }
 export interface Update {
   type: "update";
@@ -125,23 +147,27 @@ export interface Update {
   table: Array<From | Dual> | null;
   set: SetList[];
   where: Expr;
+  loc?: LocationRange;
 }
 export interface Delete {
   type: "delete";
   table: any;
   from: Array<From | Dual>;
   where: Expr;
+  loc?: LocationRange;
 }
 
 export interface Alter {
   type: "alter";
   table: From;
   expr: any;
+  loc?: LocationRange;
 }
 
 export interface Use {
   type: "use";
   db: string;
+  loc?: LocationRange;
 }
 
 export interface Create {
@@ -184,6 +210,7 @@ export interface Create {
     lock: "default" | "none" | "shared" | "exclusive";
   } | null;
   database?: string;
+  loc?: LocationRange;
 }
 
 export type AST =
