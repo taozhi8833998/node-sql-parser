@@ -105,6 +105,24 @@
     'PERSIST_ONLY': true,
   };
 
+  const reservedFunctionName = {
+    avg: true,
+    sum: true,
+    count: true,
+    max: true,
+    min: true,
+    group_concat: true,
+    std: true,
+    variance: true,
+    current_date: true,
+    current_time: true,
+    current_timestamp: true,
+    current_user: true,
+    user: true,
+    session_user: true,
+    system_user: true
+  }
+
   function getLocationObject() {
     return options.includeLocations ? {loc: location()} : {}
   }
@@ -815,6 +833,7 @@ alter_action_list
 
 alter_action
   = ALTER_ADD_COLUMN
+  / ALTER_DROP_KEY_INDEX
   / ALTER_DROP_COLUMN
   / ALTER_MODIFY_COLUMN
   / ALTER_ADD_INDEX_OR_KEY
@@ -870,9 +889,7 @@ ALTER_MODIFY_COLUMN
     }
 
 ALTER_DROP_COLUMN
-  = KW_DROP __
-    kc:KW_COLUMN __
-    c:column_ref {
+  = KW_DROP __ kc:KW_COLUMN __ c:column_ref {
       return {
         action: 'drop',
         column: c,
@@ -881,8 +898,7 @@ ALTER_DROP_COLUMN
         type: 'alter',
       }
     }
-  / KW_DROP __
-    c:column_ref {
+  / KW_DROP __ c:column_ref {
       return {
         action: 'drop',
         column: c,
@@ -891,10 +907,29 @@ ALTER_DROP_COLUMN
       }
     }
 
+ALTER_DROP_KEY_INDEX
+  = KW_DROP __ 'PRIMARY'i __ KW_KEY {
+    return {
+        action: 'drop',
+        key: '',
+        keyword: 'primary key',
+        resource: 'key',
+        type: 'alter',
+    }
+  }
+  / KW_DROP __ k:(('FOREIGN'i? __ KW_KEY) / (KW_INDEX)) __ c:ident_name {
+    const resource = Array.isArray(k) ? 'key' : 'index'
+    return {
+        action: 'drop',
+        [resource]: c,
+        keyword: Array.isArray(k) ? `${[k[0], k[2]].filter(v => v).join(' ').toLowerCase()}` : k.toLowerCase(),
+        resource,
+        type: 'alter',
+    }
+  }
+
 ALTER_ADD_INDEX_OR_KEY
-  = KW_ADD __
-    id:create_index_definition
-     {
+  = KW_ADD __ id:create_index_definition {
       return {
         action: 'add',
         type: 'alter',
@@ -2918,7 +2953,7 @@ func_call
         over: up
     }
   }
-  / name:proc_func_name &{ return name.toLowerCase() !== 'convert' } __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+  / name:proc_func_name &{ return name.toLowerCase() !== 'convert' && !reservedFunctionName[name.toLowerCase()] } __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
     if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
     if ((name.toUpperCase() === 'TIMESTAMPDIFF' || name.toUpperCase() === 'TIMESTAMPADD') && l.value && l.value[0]) l.value[0] = { type: 'origin', value: l.value[0].column }
       return {
