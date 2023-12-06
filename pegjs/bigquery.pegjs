@@ -136,7 +136,8 @@
       type: 'binary_expr',
       operator: op,
       left: left,
-      right: right
+      right: right,
+      ...getLocationObject(),
     };
   }
 
@@ -1624,6 +1625,7 @@ select_stmt_nake
           orderby: o,
           limit: l,
           window:win,
+          ...getLocationObject()
       };
   }
 
@@ -1652,6 +1654,7 @@ column_clause
       parentheses: true,
       star: '*',
       type: k.toLowerCase(),
+      ...getLocationObject()
     }
   }
   / head: (KW_ALL / (STAR !ident_start) / STAR) tail:(__ COMMA __ column_list_item)* __ COMMA? {
@@ -1662,7 +1665,8 @@ column_clause
           table: null,
           column: '*'
         },
-        as: null
+        as: null,
+        ...getLocationObject()
       }
       if (tail && tail.length > 0) return createList(item, tail)
       return [item]
@@ -1693,7 +1697,8 @@ column_list_item
           table: null,
           column: '*'
         },
-        as: null
+        as: null,
+        ...getLocationObject()
       };
     }
   / tbl:column_without_kw __ DOT pro:((column_offset_expr / column_without_kw) __ DOT)? __ STAR {
@@ -1708,7 +1713,8 @@ column_list_item
           table: tbl,
           column,
         },
-        as: null
+        as: null,
+        ...getLocationObject()
       }
     }
   / c:column_offset_expr __ as:alias_clause? {
@@ -1719,7 +1725,8 @@ column_list_item
           table: null,
           column: c
         },
-        as: as
+        as: as,
+        ...getLocationObject()
       }
   }
   / expr_alias
@@ -1832,7 +1839,8 @@ table_base
       }
       return {
         ...t,
-        as: alias
+        as: alias,
+        ...getLocationObject(),
       };
     }
   / LPAREN __ stmt:union_stmt __ RPAREN __ ts:tablesample? __ alias:alias_clause? {
@@ -2318,7 +2326,8 @@ column_ref
         type: 'column_ref',
         table: tbl,
         column: cols[0],
-        subFields: cols.slice(1)
+        subFields: cols.slice(1),
+        ...getLocationObject()
       };
     }
   / col:column {
@@ -2326,7 +2335,8 @@ column_ref
       return {
         type: 'column_ref',
         table: null,
-        column: col
+        column: col,
+        ...getLocationObject()
       };
     }
 
@@ -2416,6 +2426,7 @@ aggr_fun_smma
           expr: e
         },
         over: bc,
+        ...getLocationObject()
       };
     }
 
@@ -2459,14 +2470,15 @@ aggr_fun_count
         type: 'aggr_func',
         name: name,
         args: arg,
-        over: bc
+        over: bc,
+        ...getLocationObject()
       };
     }
 
 count_arg
-  = e:star_expr { return { expr: e }; }
-  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ or:order_by_clause? {  return { distinct: d, expr: c, orderby: or, parentheses: true }; }
-  / d:KW_DISTINCT? __ c:expr __ or:order_by_clause? {  return { distinct: d, expr: c, orderby: or, parentheses: false }; }
+  = e:star_expr { return { expr: e, ...getLocationObject() }; }
+  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ or:order_by_clause? {  return { distinct: d, expr: c, orderby: or, parentheses: true, ...getLocationObject() }; }
+  / d:KW_DISTINCT? __ c:expr __ or:order_by_clause? {  return { distinct: d, expr: c, orderby: or, parentheses: false, ...getLocationObject() }; }
 
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
