@@ -4311,8 +4311,22 @@ trim_func_clause
     };
   }
 
+tablefunc_clause
+  = 'crosstab'i __ LPAREN __ s:literal_list __ RPAREN __ KW_AS __ 'final_result' LPAREN __ cds:column_data_type_list __ RPAREN {
+    return {
+      type: 'tablefunc',
+      name: 'crosstab',
+      args: { type: 'expr_list', value: s },
+      as: {
+        type: 'function',
+        name: 'final_result',
+        args: { type: 'expr_list', value: cds.map(v => ({ ...v, type: 'column_definition' })) },
+      }
+    }
+  }
+
 func_call
-  = trim_func_clause
+  = trim_func_clause / tablefunc_clause
   / name:'now'i __ LPAREN __ l:expr_list? __ RPAREN __ 'at'i __ KW_TIME __ 'zone'i __ z:literal_string {
     // => { type: 'function'; name: string; args: expr_list; suffix: literal_string; }
       z.prefix = 'at time zone'

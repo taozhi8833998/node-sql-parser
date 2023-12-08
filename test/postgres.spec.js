@@ -1579,6 +1579,13 @@ describe('Postgres', () => {
           'CREATE TABLE "test" ("amount" DOUBLE PRECISION)'
         ]
       },
+      {
+        title: 'crosstab tablefunc',
+        sql: [
+          `SELECT * FROM crosstab( 'select student, subject, evaluation_result from evaluations order by 1,2') AS final_result(Student TEXT, Geography NUMERIC,History NUMERIC,Language NUMERIC,Maths NUMERIC,Music NUMERIC);`,
+          `SELECT * FROM crosstab('select student, subject, evaluation_result from evaluations order by 1,2') AS final_result("Student" TEXT, "Geography" NUMERIC, "History" NUMERIC, "Language" NUMERIC, "Maths" NUMERIC, "Music" NUMERIC)`
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
