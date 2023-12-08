@@ -199,7 +199,7 @@ function createDatabaseToSQL(stmt) {
 
 function createViewToSQL(stmt) {
   const {
-    algorithm, columns, definer, keyword,
+    algorithm, columns, definer, if_not_exists: ifNotExists, keyword,
     recursive, replace, select, sql_security: sqlSecurity,
     temporary, type, view, with: withClause, with_options: withOptions,
   } = stmt
@@ -214,6 +214,7 @@ function createViewToSQL(stmt) {
     definer,
     sqlSecurity && `SQL SECURITY ${toUpper(sqlSecurity)}`,
     toUpper(keyword),
+    toUpper(ifNotExists),
     viewName,
     columns && `(${columns.map(columnIdentifierToSql).join(', ')})`,
     withOptions && ['WITH', `(${withOptions.map(withOpt => commonTypeValue(withOpt).join(' ')).join(', ')})`].join(' '),
