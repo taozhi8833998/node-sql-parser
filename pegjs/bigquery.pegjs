@@ -2450,7 +2450,7 @@ over_partition
   / on_update_current_timestamp
 
 aggr_fun_count
-  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
+  = name:(KW_COUNT / 'string_agg'i) __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
       return {
         type: 'aggr_func',
         name: name,
