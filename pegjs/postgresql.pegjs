@@ -4313,6 +4313,7 @@ trim_func_clause
 
 tablefunc_clause
   = 'crosstab'i __ LPAREN __ s:literal_list __ RPAREN __ KW_AS __ 'final_result' LPAREN __ cds:column_data_type_list __ RPAREN {
+    // => { type: 'tablefunc'; name: crosstab; args: expr_list; as: func_call }
     return {
       type: 'tablefunc',
       name: 'crosstab',

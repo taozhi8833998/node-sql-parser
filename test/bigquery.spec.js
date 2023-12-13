@@ -864,6 +864,9 @@ describe('BigQuery', () => {
       value: 'abc'
     }
     expect(arrayStructValueToSQL(expr)).to.equal(`['${expr.expr_list.value}']`)
+    expr.brackets = false
+    expr.parentheses = false
+    expect(arrayStructValueToSQL(expr)).to.equal(`'${expr.expr_list.value}'`)
   })
 
   it('should return undefined and dataType', () => {
