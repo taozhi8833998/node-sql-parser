@@ -1673,7 +1673,13 @@ columns_list
     }
 
 column_offset_expr
-  = n:expr __ LBRAKE __ t:(KW_OFFSET / KW_ORDINAL / KW_SAFE_OFFSET / KW_SAFE_ORDINAL) __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
+  = n:expr __ LBRAKE __ l:literal_numeric __ RBRAKE {
+    return {
+      expr: n,
+      offset: `[${l.value}]`
+    }
+  }
+  / n:expr __ LBRAKE __ t:(KW_OFFSET / KW_ORDINAL / KW_SAFE_OFFSET / KW_SAFE_ORDINAL) __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
     return {
       expr: n,
       offset: `[${t}(${l.value})]`

@@ -370,10 +370,11 @@ describe('BigQuery', () => {
          UNION ALL SELECT [2, 4, 8, 16, 32] AS some_numbers
          UNION ALL SELECT [5, 10] AS some_numbers)
       SELECT some_numbers,
+             some_numbers[0] as index_0,
              some_numbers[OFFSET(1)] AS offset_1,
              some_numbers[ORDINAL(1)] AS ordinal_1
       FROM sequences;`,
-        "WITH sequences AS (SELECT [0, 1, 1, 2, 3, 5] AS some_numbers UNION ALL SELECT [2, 4, 8, 16, 32] AS some_numbers UNION ALL SELECT [5, 10] AS some_numbers) SELECT some_numbers, some_numbers[OFFSET(1)] AS offset_1, some_numbers[ORDINAL(1)] AS ordinal_1 FROM sequences"
+        "WITH sequences AS (SELECT [0, 1, 1, 2, 3, 5] AS some_numbers UNION ALL SELECT [2, 4, 8, 16, 32] AS some_numbers UNION ALL SELECT [5, 10] AS some_numbers) SELECT some_numbers, some_numbers[0] AS index_0, some_numbers[OFFSET(1)] AS offset_1, some_numbers[ORDINAL(1)] AS ordinal_1 FROM sequences"
       ]
     },
     {
@@ -816,7 +817,7 @@ describe('BigQuery', () => {
       ]
     },
     {
-      title: 'if',
+      title: 'if multiple parentheses',
       sql: [
         'select if(((a)), b, null)',
         'SELECT if(((a)), b, NULL)'
