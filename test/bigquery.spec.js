@@ -815,6 +815,13 @@ describe('BigQuery', () => {
         'SELECT string_agg(DISTINCT column1) AS some_column1, string_agg(column2) AS some_column1 FROM table1'
       ]
     },
+    {
+      title: 'if',
+      sql: [
+        'select if(((a)), b, null)',
+        'SELECT if(((a)), b, NULL)'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
@@ -856,7 +863,7 @@ describe('BigQuery', () => {
       type: 'string',
       value: 'abc'
     }
-    expect(arrayStructValueToSQL(expr)).to.equal(`'${expr.expr_list.value}'`)
+    expect(arrayStructValueToSQL(expr)).to.equal(`['${expr.expr_list.value}']`)
   })
 
   it('should return undefined and dataType', () => {
