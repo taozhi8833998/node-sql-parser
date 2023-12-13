@@ -1643,7 +1643,7 @@ struct_value
 
 expr_alias
   = e:binary_column_expr __ alias:alias_clause? {
-      return { expr: e, as: alias };
+      return { expr: e, as: alias, ...getLocationObject() };
     }
 
 column_clause
@@ -1847,7 +1847,8 @@ table_base
       stmt.parentheses = true;
       return {
         expr: stmt,
-        as: alias
+        as: alias,
+        ...getLocationObject(),
       };
     }
 
