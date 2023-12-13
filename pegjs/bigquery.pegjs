@@ -521,9 +521,9 @@ proc_primary_list
       return createList(head, tail);
     }
 
-proc_array =
-  LBRAKE __ l:proc_primary_list __ RBRAKE {
-    return { type: 'array', value: l };
+proc_array
+  = LBRAKE __ l:proc_primary_list __ RBRAKE {
+    return { type: 'array', value: l, brackets: true };
   }
 
 set_list
@@ -2038,8 +2038,8 @@ array_expr
     return {
       array_path: c,
       type: 'array',
+      brackets: true,
       keyword: '',
-      parentheses: true
     }
   }
   / s:(array_type / KW_ARRAY)? LBRAKE __ c:literal_list __ RBRAKE {
@@ -2048,16 +2048,18 @@ array_expr
       array_path: c.map(l => ({ expr: l, as: null })),
       type: 'array',
       keyword: s && 'array',
-      parentheses: true
+      brackets: true,
     }
   }
-  / s:(array_type / KW_ARRAY)? __ (LBRAKE / LPAREN) __ c:(parentheses_list_expr / expr) __ (RBRAKE / RPAREN) {
+  / s:(array_type / KW_ARRAY)? __ l:(LBRAKE / LPAREN) __ c:(parentheses_list_expr / expr) __ r:(RBRAKE / RPAREN) {
+    if (`${l}${r}` !== '[]' && `${l}${r}` !== '()') throw new Error('parentheses or brackets is not in pair')
     return {
       definition: s,
       expr_list: c,
       type: 'array',
       keyword: s && 'array',
-      parentheses: true
+      brackets: l === '[' ? true : false,
+      parentheses: l === '(' ? true: false
     }
   }
 
