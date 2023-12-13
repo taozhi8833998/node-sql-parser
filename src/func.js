@@ -83,10 +83,17 @@ function funcToSQL(expr) {
   return [parentheses ? `(${str})` : str, collateStr, overStr].filter(hasVal).join(' ')
 }
 
+function tablefuncFunToSQL(expr) {
+  const { as, name, args } = expr
+  const result = [`${name}(${exprToSQL(args).join(', ')})`, 'AS', funcToSQL(as)]
+  return result.join(' ')
+}
+
 export {
   anyValueFuncToSQL,
   castToSQL,
   extractFunToSQL,
   flattenFunToSQL,
   funcToSQL,
+  tablefuncFunToSQL,
 }

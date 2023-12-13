@@ -425,7 +425,7 @@ create_view_stmt
         type: a[0].toLowerCase(),
         keyword: 'view',
         replace: or && 'or replace',
-        temporary: tp && tp.toLowerCase(),
+        temporary: tp && tp[0].toLowerCase(),
         recursive: r && r.toLowerCase(),
         columns: c && c[2],
         select: s,
@@ -538,7 +538,7 @@ create_table_stmt
         ast: {
           type: a[0].toLowerCase(),
           keyword: 'table',
-          temporary: tp && tp.toLowerCase(),
+          temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
           table: t,
           ignore_replace: ir && ir[0].toLowerCase(),
@@ -569,7 +569,7 @@ create_table_stmt
         ast: {
           type: a[0].toLowerCase(),
           keyword: 'table',
-          temporary: tp && tp.toLowerCase(),
+          temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
           table: t,
           like: lt
@@ -602,7 +602,7 @@ create_sequence
         ast: {
           type: a[0].toLowerCase(),
           keyword: 'sequence',
-          temporary: tp && tp.toLowerCase(),
+          temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
           sequence: [t],
           create_definitions: c,
@@ -4122,8 +4122,8 @@ KW_ALTER    = "ALTER"i      !ident_start
 KW_SELECT   = "SELECT"i     !ident_start
 KW_UPDATE   = "UPDATE"i     !ident_start
 KW_CREATE   = "CREATE"i     !ident_start
-KW_TEMPORARY = "TEMPORARY"i !ident_start { return 'TEMPORARY'; }
-KW_TEMP     = "TEMP"i !ident_start { return 'TEMP'; }
+KW_TEMPORARY = "TEMPORARY"i !ident_start
+KW_TEMP     = "TEMP"i !ident_start
 KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
 KW_RECURSIVE= "RECURSIVE"   !ident_start { return 'RECURSIVE'; }

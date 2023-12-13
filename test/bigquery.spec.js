@@ -370,10 +370,11 @@ describe('BigQuery', () => {
          UNION ALL SELECT [2, 4, 8, 16, 32] AS some_numbers
          UNION ALL SELECT [5, 10] AS some_numbers)
       SELECT some_numbers,
+             some_numbers[0] as index_0,
              some_numbers[OFFSET(1)] AS offset_1,
              some_numbers[ORDINAL(1)] AS ordinal_1
       FROM sequences;`,
-        "WITH sequences AS (SELECT [0, 1, 1, 2, 3, 5] AS some_numbers UNION ALL SELECT [2, 4, 8, 16, 32] AS some_numbers UNION ALL SELECT [5, 10] AS some_numbers) SELECT some_numbers, some_numbers[OFFSET(1)] AS offset_1, some_numbers[ORDINAL(1)] AS ordinal_1 FROM sequences"
+        "WITH sequences AS (SELECT [0, 1, 1, 2, 3, 5] AS some_numbers UNION ALL SELECT [2, 4, 8, 16, 32] AS some_numbers UNION ALL SELECT [5, 10] AS some_numbers) SELECT some_numbers, some_numbers[0] AS index_0, some_numbers[OFFSET(1)] AS offset_1, some_numbers[ORDINAL(1)] AS ordinal_1 FROM sequences"
       ]
     },
     {
@@ -808,6 +809,20 @@ describe('BigQuery', () => {
         "CREATE OR REPLACE TEMP TABLE table1 DEFAULT COLLATE 'und:ci' PARTITION BY DATE(event_time) CLUSTER BY id OPTIONS (require_partition_filter = TRUE) AS SELECT table2.id, table2.value, table2.event_time FROM table2"
       ]
     },
+    {
+      title: 'string_agg function',
+      sql: [
+        'SELECT string_agg(DISTINCT column1) as some_column1, string_agg(column2) as some_column1 from table1',
+        'SELECT string_agg(DISTINCT column1) AS some_column1, string_agg(column2) AS some_column1 FROM table1'
+      ]
+    },
+    {
+      title: 'if multiple parentheses',
+      sql: [
+        'select if(((a)), b, null)',
+        'SELECT if(((a)), b, NULL)'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
@@ -849,6 +864,9 @@ describe('BigQuery', () => {
       type: 'string',
       value: 'abc'
     }
+    expect(arrayStructValueToSQL(expr)).to.equal(`['${expr.expr_list.value}']`)
+    expr.brackets = false
+    expr.parentheses = false
     expect(arrayStructValueToSQL(expr)).to.equal(`'${expr.expr_list.value}'`)
   })
 

@@ -432,7 +432,7 @@ create_view_stmt
         type: a[0].toLowerCase(),
         keyword: 'view',
         replace: or && 'or replace',
-        temporary: tp && tp.toLowerCase(),
+        temporary: tp && tp[0].toLowerCase(),
         recursive: r && r.toLowerCase(),
         columns: c && c[2],
         select: s,
@@ -809,7 +809,7 @@ create_table_stmt
         ast: {
           type: a[0].toLowerCase(),
           keyword: 'table',
-          temporary: tp && tp.toLowerCase(),
+          temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
           table: t,
           ignore_replace: ir && ir[0].toLowerCase(),
@@ -840,7 +840,7 @@ create_table_stmt
         ast: {
           type: a[0].toLowerCase(),
           keyword: 'table',
-          temporary: tp && tp.toLowerCase(),
+          temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
           table: t,
           like: lt
@@ -873,7 +873,7 @@ create_sequence
         ast: {
           type: a[0].toLowerCase(),
           keyword: 'sequence',
-          temporary: tp && tp.toLowerCase(),
+          temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
           sequence: [t],
           create_definitions: c,
@@ -4315,8 +4315,23 @@ trim_func_clause
     };
   }
 
+tablefunc_clause
+  = 'crosstab'i __ LPAREN __ s:literal_list __ RPAREN __ KW_AS __ 'final_result' LPAREN __ cds:column_data_type_list __ RPAREN {
+    // => { type: 'tablefunc'; name: crosstab; args: expr_list; as: func_call }
+    return {
+      type: 'tablefunc',
+      name: 'crosstab',
+      args: { type: 'expr_list', value: s },
+      as: {
+        type: 'function',
+        name: 'final_result',
+        args: { type: 'expr_list', value: cds.map(v => ({ ...v, type: 'column_definition' })) },
+      }
+    }
+  }
+
 func_call
-  = trim_func_clause
+  = trim_func_clause / tablefunc_clause
   / name:'now'i __ LPAREN __ l:expr_list? __ RPAREN __ 'at'i __ KW_TIME __ 'zone'i __ z:literal_string {
     // => { type: 'function'; name: string; args: expr_list; suffix: literal_string; }
       z.prefix = 'at time zone'
@@ -4706,8 +4721,8 @@ KW_ALTER    = "ALTER"i      !ident_start
 KW_SELECT   = "SELECT"i     !ident_start
 KW_UPDATE   = "UPDATE"i     !ident_start
 KW_CREATE   = "CREATE"i     !ident_start
-KW_TEMPORARY = "TEMPORARY"i !ident_start { return 'TEMPORARY'; }
-KW_TEMP     = "TEMP"i !ident_start { return 'TEMP'; }
+KW_TEMPORARY = "TEMPORARY"i !ident_start
+KW_TEMP     = "TEMP"i !ident_start
 KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
 KW_RECURSIVE= "RECURSIVE"   !ident_start { return 'RECURSIVE'; }

@@ -227,6 +227,7 @@ create_stmt
   = create_table_stmt
   / create_db_stmt
   / create_trigger_stmt
+  / create_view_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -378,6 +379,35 @@ create_db_stmt
         }
       }
     }
+
+view_with
+  = KW_WITH __ c:("CASCADED"i / "LOCAL"i) __ "CHECK"i __ "OPTION" {
+    return `with ${c.toLowerCase()} check option`
+  }
+  / KW_WITH __ "CHECK"i __ "OPTION" {
+    return 'with check option'
+  }
+
+create_view_stmt
+  = a:KW_CREATE __ tp:(KW_TEMP / KW_TEMPORARY)? __
+  KW_VIEW __ ife:if_not_exists_stmt? __ v:table_name __ c:(LPAREN __ column_list __ RPAREN)? __
+  KW_AS __ s:select_stmt_nake {
+    v.view = v.table
+    delete v.table
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: a[0].toLowerCase(),
+        keyword: 'view',
+        if_not_exists: ife,
+        temporary: tp && tp[0].toLowerCase(),
+        columns: c && c[2],
+        select: s,
+        view: v,
+      }
+    }
+  }
 
 create_table_stmt
   = a:KW_CREATE __
@@ -2498,6 +2528,7 @@ KW_SESSION        = "SESSION"i   !ident_start { return 'SESSION'; }
 KW_LOCAL          = "LOCAL"i     !ident_start { return 'LOCAL'; }
 KW_PERSIST        = "PERSIST"i   !ident_start { return 'PERSIST'; }
 KW_PERSIST_ONLY   = "PERSIST_ONLY"i   !ident_start { return 'PERSIST_ONLY'; }
+KW_VIEW           = "VIEW"i    !ident_start { return 'VIEW'; }
 
 KW_VAR__PRE_AT = '@'
 KW_VAR__PRE_AT_AT = '@@'

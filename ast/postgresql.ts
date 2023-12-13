@@ -1189,7 +1189,9 @@ export type trim_rem = expr_list;
 
 export type trim_func_clause = { type: 'function'; name: string; args: expr_list; };
 
-export type func_call = trim_func_clause | { type: 'function'; name: string; args: expr_list; suffix: literal_string; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; } | { type: 'function'; name: string; args: expr_list; };
+export type tablefunc_clause = { type: 'tablefunc'; name: crosstab; args: expr_list; as: func_call };
+
+export type func_call = trim_func_clause | tablefunc_clause | { type: 'function'; name: string; args: expr_list; suffix: literal_string; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; } | { type: 'function'; name: string; args: expr_list; };
 
 export type extract_filed = 'string';
 

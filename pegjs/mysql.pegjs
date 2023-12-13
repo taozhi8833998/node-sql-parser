@@ -1461,9 +1461,16 @@ table_option
     }
   }
   / create_option_character_set
-  / kw:(KW_COMMENT / 'CONNECTION'i) __ s:(KW_ASSIGIN_EQUAL)? __ c:literal_string {
+  / kw:(KW_COMMENT / 'CONNECTION'i / 'ENGINE_ATTRIBUTE'i / 'SECONDARY_ENGINE_ATTRIBUTE'i ) __ s:(KW_ASSIGIN_EQUAL)? __ c:literal_string {
     return {
       keyword: kw.toLowerCase(),
+      symbol: s,
+      value: `'${c.value}'`
+    }
+  }
+  / type:('DATA'i / 'INDEX'i) __ 'DIRECTORY'i __ s:(KW_ASSIGIN_EQUAL)? __ c:literal_string {
+    return {
+      keyword: type.toLowerCase() + " directory",
       symbol: s,
       value: `'${c.value}'`
     }

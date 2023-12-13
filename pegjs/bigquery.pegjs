@@ -526,9 +526,9 @@ proc_primary_list
       return createList(head, tail);
     }
 
-proc_array =
-  LBRAKE __ l:proc_primary_list __ RBRAKE {
-    return { type: 'array', value: l };
+proc_array
+  = LBRAKE __ l:proc_primary_list __ RBRAKE {
+    return { type: 'array', value: l, brackets: true };
   }
 
 set_list
@@ -1681,7 +1681,13 @@ columns_list
     }
 
 column_offset_expr
-  = n:expr __ LBRAKE __ t:(KW_OFFSET / KW_ORDINAL / KW_SAFE_OFFSET / KW_SAFE_ORDINAL) __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
+  = n:expr __ LBRAKE __ l:literal_numeric __ RBRAKE {
+    return {
+      expr: n,
+      offset: `[${l.value}]`
+    }
+  }
+  / n:expr __ LBRAKE __ t:(KW_OFFSET / KW_ORDINAL / KW_SAFE_OFFSET / KW_SAFE_ORDINAL) __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
     return {
       expr: n,
       offset: `[${t}(${l.value})]`
@@ -2051,8 +2057,8 @@ array_expr
     return {
       array_path: c,
       type: 'array',
+      brackets: true,
       keyword: '',
-      parentheses: true
     }
   }
   / s:(array_type / KW_ARRAY)? LBRAKE __ c:literal_list __ RBRAKE {
@@ -2061,16 +2067,18 @@ array_expr
       array_path: c.map(l => ({ expr: l, as: null })),
       type: 'array',
       keyword: s && 'array',
-      parentheses: true
+      brackets: true,
     }
   }
-  / s:(array_type / KW_ARRAY)? __ (LBRAKE / LPAREN) __ c:(parentheses_list_expr / expr) __ (RBRAKE / RPAREN) {
+  / s:(array_type / KW_ARRAY)? __ l:(LBRAKE / LPAREN) __ c:(parentheses_list_expr / expr) __ r:(RBRAKE / RPAREN) {
+    if (`${l}${r}` !== '[]' && `${l}${r}` !== '()') throw new Error('parentheses or brackets is not in pair')
     return {
       definition: s,
       expr_list: c,
       type: 'array',
       keyword: s && 'array',
-      parentheses: true
+      brackets: l === '[' ? true : false,
+      parentheses: l === '(' ? true: false
     }
   }
 
@@ -2466,7 +2474,7 @@ over_partition
   / on_update_current_timestamp
 
 aggr_fun_count
-  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
+  = name:(KW_COUNT / 'string_agg'i) __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
       return {
         type: 'aggr_func',
         name: name,
