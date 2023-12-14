@@ -29,6 +29,7 @@ export interface From {
   db: string | null;
   table: string;
   as: string | null;
+  schema?: string;
   loc?: LocationRange;
 }
 export interface Dual {
