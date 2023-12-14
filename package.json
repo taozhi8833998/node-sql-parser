@@ -77,7 +77,6 @@
     "mocha": "^10.0.0",
     "mochapack": "^2.0.3",
     "nyc": "15.1.0",
-    "pegjs": "^0.10.0",
     "pegjs-loader": "^0.5.6",
     "pre-commit": "^1.2.2",
     "rimraf": "^5.0.1",
@@ -96,6 +95,7 @@
     "sourceMap": false
   },
   "dependencies": {
-    "big-integer": "^1.6.48"
+    "big-integer": "^1.6.48",
+    "pegjs": "^0.10.0"
   }
 }
