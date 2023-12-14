@@ -93,7 +93,7 @@ export interface Column {
   loc?: LocationRange;
 }
 
-type Param = { type: 'param'; value: string, loc?: LocationRange; };
+export type Param = { type: 'param'; value: string, loc?: LocationRange; };
 
 export type Expr =
   | {
