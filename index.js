@@ -14,7 +14,7 @@ if (typeof self === "object" && self) {
   }
 }
 
-if (!global && typeof window === "object" && window) window.global = window
+if (typeof global === "undefined" && typeof window === "object" && window) window.global = window
 
 if (typeof global === "object" && global && global.window) {
   global.window.NodeSQLParser = {

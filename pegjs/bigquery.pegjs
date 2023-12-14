@@ -1647,31 +1647,7 @@ expr_alias
     }
 
 column_clause
-  = STAR __ k:('EXCEPT'i / 'REPLACE'i) __ LPAREN __ c:columns_list __ RPAREN {
-    columnList.add('select::null::(.*)')
-    return {
-      expr_list: c,
-      parentheses: true,
-      star: '*',
-      type: k.toLowerCase(),
-      ...getLocationObject()
-    }
-  }
-  / head: (KW_ALL / (STAR !ident_start) / STAR) tail:(__ COMMA __ column_list_item)* __ COMMA? {
-      columnList.add('select::null::(.*)')
-      const item = {
-        expr: {
-          type: 'column_ref',
-          table: null,
-          column: '*'
-        },
-        as: null,
-        ...getLocationObject()
-      }
-      if (tail && tail.length > 0) return createList(item, tail)
-      return [item]
-    }
-  / c:columns_list __ COMMA? {
+  = c:columns_list __ COMMA? {
     return c
   }
 
@@ -1695,9 +1671,24 @@ column_offset_expr
   }
 
 column_list_item
-  = tbl:STAR {
-      columnList.add('select::null::(.*)');
-      return {
+  = p:(column_without_kw __ DOT)? STAR __ k:('EXCEPT'i / 'REPLACE'i) __ LPAREN __ c:columns_list __ RPAREN {
+    const tbl = p && p[0]
+    columnList.add(`select::${tbl}::(.*)`)
+    return {
+      expr_list: c,
+      parentheses: true,
+      expr: {
+        type: 'column_ref',
+        table: tbl,
+        column: '*'
+      },
+      type: k.toLowerCase(),
+      ...getLocationObject(),
+    }
+  }
+  / head: (KW_ALL / (STAR !ident_start) / STAR) {
+      columnList.add('select::null::(.*)')
+      const item = {
         expr: {
           type: 'column_ref',
           table: null,
@@ -1705,8 +1696,9 @@ column_list_item
         },
         as: null,
         ...getLocationObject()
-      };
-    }
+      }
+      return item
+  }
   / tbl:column_without_kw __ DOT pro:((column_offset_expr / column_without_kw) __ DOT)? __ STAR {
       columnList.add(`select::${tbl}::(.*)`)
       let column = '*'
