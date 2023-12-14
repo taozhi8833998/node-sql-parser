@@ -88,15 +88,15 @@ describe('BigQuery', () => {
       ]
     },
     {
-      title: 'select * expect',
+      title: 'select * except',
       sql: [
         `WITH orders AS
         (SELECT 5 as order_id,
         "sprocket" as item_name,
         200 as quantity)
-      SELECT * EXCEPT (order_id)
+      SELECT * EXCEPT (order_id), orders.* EXCEPT(order_time)
       FROM orders;`,
-        "WITH orders AS (SELECT 5 AS order_id, 'sprocket' AS item_name, 200 AS quantity) SELECT * EXCEPT (order_id) FROM orders"
+        "WITH orders AS (SELECT 5 AS order_id, 'sprocket' AS item_name, 200 AS quantity) SELECT * EXCEPT(order_id), orders.* EXCEPT(order_time) FROM orders"
       ]
     },
     {
@@ -108,7 +108,7 @@ describe('BigQuery', () => {
         200 as quantity)
       SELECT * REPLACE ("widget" AS item_name)
       FROM orders;`,
-        "WITH orders AS (SELECT 5 AS order_id, 'sprocket' AS item_name, 200 AS quantity) SELECT * REPLACE ('widget' AS item_name) FROM orders"
+        "WITH orders AS (SELECT 5 AS order_id, 'sprocket' AS item_name, 200 AS quantity) SELECT * REPLACE('widget' AS item_name) FROM orders"
       ]
     },
     {
@@ -120,7 +120,7 @@ describe('BigQuery', () => {
         200 as quantity)
       SELECT * REPLACE (quantity/2 AS quantity)
       FROM orders;`,
-        "WITH orders AS (SELECT 5 AS order_id, 'sprocket' AS item_name, 200 AS quantity) SELECT * REPLACE (quantity / 2 AS quantity) FROM orders"
+        "WITH orders AS (SELECT 5 AS order_id, 'sprocket' AS item_name, 200 AS quantity) SELECT * REPLACE(quantity / 2 AS quantity) FROM orders"
       ]
     },
     {

@@ -148,6 +148,13 @@ function columnToSQL(column, isDual) {
   if (type === 'cast') return castToSQL(column)
   if (isDual) expr.isDual = isDual
   let str = exprToSQL(expr)
+  const { expr_list: exprList } = column
+  if (exprList) {
+    const result = [str]
+    const columnsStr = exprList.map(col => columnToSQL(col, isDual)).join(', ')
+    result.push([toUpper(type), type && '(', columnsStr, type && ')'].filter(hasVal).join(''))
+    return result.filter(hasVal).join(' ')
+  }
   if (expr.parentheses && Reflect.has(expr, 'array_index')) str = `(${str})`
   if (expr.array_index && expr.type !== 'column_ref') str = `${str}[${literalToSQL(expr.array_index.index)}]`
   return [str, asToSQL(column.as)].filter(hasVal).join(' ')
@@ -167,13 +174,7 @@ function getDual(tables) {
 function columnsToSQL(columns, tables) {
   if (!columns || columns === '*') return columns
   const isDual = getDual(tables)
-  const result = []
-  const { expr_list: exprList, star, type } = columns
-  result.push(star, toUpper(type))
-  const exprListArr = exprList || columns
-  const columnsStr = exprListArr.map(col => columnToSQL(col, isDual)).join(', ')
-  result.push([type && '(', columnsStr, type && ')'].filter(hasVal).join(''))
-  return result.filter(hasVal).join(' ')
+  return columns.map(col => columnToSQL(col, isDual)).join(', ')
 }
 
 export {
