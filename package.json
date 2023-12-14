@@ -96,6 +96,6 @@
   },
   "dependencies": {
     "big-integer": "^1.6.48",
-    "pegjs": "^0.10.0"
+    "@types/pegjs": "^0.10.0"
   }
 }
