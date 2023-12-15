@@ -64,36 +64,39 @@ export interface AggrFunc {
   args: ColumnRef | AggrFunc | Star | null;
 }
 export interface Function {
-  type: 'function';
+  type: "function";
   name: string;
-  args: expr_list;
+  args: ExprList;
   suffix?: any;
 }
 export interface Column {
   expr: ColumnRef | AggrFunc | Function;
-  as: string;
+  as: string | null;
+  type?: string;
 }
 
-type Param = { type: 'param'; value: string };
+type Param = { type: "param"; value: string };
+
+type Value = { type: string; value: any };
 
 export type Expr =
   | {
-      type: 'binary_expr';
-      operator: 'AND' | 'OR';
+      type: "binary_expr";
+      operator: "AND" | "OR";
       left: Expr;
       right: Expr;
     }
   | {
-      type: 'binary_expr';
+      type: "binary_expr";
       operator: string;
-      left: ColumnRef | Param;
-      right: ColumnRef | Param;
+      left: ColumnRef | Param | Value;
+      right: ColumnRef | Param | Value;
     };
 
-export type expr_list = {
-  type: 'expr_list';
+export type ExprList = {
+  type: "expr_list";
   value: Expr[];
-}
+};
 export interface Select {
   with: With | null;
   type: "select";
@@ -101,7 +104,7 @@ export interface Select {
   distinct: "DISTINCT" | null;
   columns: any[] | Column[];
   from: Array<From | Dual | any> | null;
-  where: Expr;
+  where: Expr | Function | null;
   groupby: ColumnRef[] | null;
   having: any[] | null;
   orderby: OrderBy[] | null;
@@ -123,18 +126,18 @@ export interface Update {
   db: string | null;
   table: Array<From | Dual> | null;
   set: SetList[];
-  where: Expr;
+  where: Expr | Function | null;
 }
 export interface Delete {
   type: "delete";
   table: any;
   from: Array<From | Dual>;
-  where: Expr;
+  where: Expr | Function | null;
 }
 
 export interface Alter {
   type: "alter";
-  table: From;
+  table: From[];
   expr: any;
 }
 
@@ -185,6 +188,12 @@ export interface Create {
   database?: string;
 }
 
+export interface Drop {
+  type: "drop";
+  keyword: string;
+  name: any[];
+}
+
 export type AST =
   | Use
   | Select
@@ -192,7 +201,8 @@ export type AST =
   | Update
   | Delete
   | Alter
-  | Create;
+  | Create
+  | Drop;
 
 export class Parser {
   constructor();
