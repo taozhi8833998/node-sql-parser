@@ -880,10 +880,17 @@ describe('mysql', () => {
         ]
       },
       {
-        title: 'alter drop index or key',
+        title: 'alter drop index',
         sql: [
           'ALTER TABLE table_name DROP INDEX index_name',
           'ALTER TABLE `table_name` DROP INDEX index_name'
+        ]
+      },
+      {
+        title: 'alter drop key',
+        sql: [
+          'ALTER TABLE table_name DROP key `key_name`',
+          'ALTER TABLE `table_name` DROP KEY `key_name`'
         ]
       },
     ]
