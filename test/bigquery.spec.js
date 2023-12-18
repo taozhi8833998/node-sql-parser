@@ -829,8 +829,8 @@ describe('BigQuery', () => {
         `WITH your_table AS (
           SELECT [STRUCT(1 AS id, 'John' AS name), STRUCT(2 AS id, 'Jane' AS name)] AS some_array_column
         )
-        SELECT some_array_column[SAFE_OFFSET(0)].id from your_table`,
-        "WITH your_table AS (SELECT [STRUCT(1 AS id, 'John' AS name), STRUCT(2 AS id, 'Jane' AS name)] AS some_array_column) SELECT some_array_column[SAFE_OFFSET(0)].id FROM your_table"
+        SELECT some_array_column[SAFE_OFFSET(0)].id from your_table where 1=1 and check_run.pull_requests[SAFE_OFFSET(0)].number = 6097 and check_run.status = 'completed' and check_run.output.title IS NOT NULL AND check_run.pull_requests[SAFE_OFFSET(0)].id is not null`,
+        "WITH your_table AS (SELECT [STRUCT(1 AS id, 'John' AS name), STRUCT(2 AS id, 'Jane' AS name)] AS some_array_column) SELECT some_array_column[SAFE_OFFSET(0)].id FROM your_table WHERE 1 = 1 AND check_run.pull_requests[SAFE_OFFSET(0)].number = 6097 AND check_run.status = 'completed' AND check_run.output.title IS NOT NULL AND check_run.pull_requests[SAFE_OFFSET(0)].id IS NOT NULL"
       ]
     },
     {

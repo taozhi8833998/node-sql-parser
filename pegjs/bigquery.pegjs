@@ -2320,14 +2320,27 @@ case_else = KW_ELSE __ result:expr {
   }
 
 column_ref
-  =  tbl:column_without_kw col:(__ DOT __ column_without_kw)+  {
+  = tbl:column_without_kw col:(__ DOT __ column_without_kw)+ __ cof:(column_offset_expr_list __ (DOT __ column_without_kw)?)? {
       const cols = col.map(c => c[3])
       columnList.add(`select::${tbl}::${cols[0]}`)
+      const column = cof
+      ? {
+          column: {
+            expr: {
+              type: 'column_ref',
+              table: null,
+              column: cols[0],
+              subFields: cols.slice(1)
+            },
+            offset: cof && cof[0],
+            suffix: cof && cof[2] && `.${cof[2][2]}`,
+          }
+        }
+      : { column: cols[0], subFields: cols.slice(1) }
       return {
         type: 'column_ref',
         table: tbl,
-        column: cols[0],
-        subFields: cols.slice(1)
+        ...column,
       };
     }
   / col:column {
