@@ -18,7 +18,8 @@ import {
 function columnOffsetToSQL(column, isDual) {
   if (typeof column === 'string') return identifierToSql(column, isDual)
   const { expr, offset, suffix } = column
-  return [exprToSQL(expr), offset, suffix].filter(hasVal).join('')
+  const offsetExpr = offset && offset.map(offsetItem => ['[', offsetItem.name, `${offsetItem.name ? '(' : ''}`, literalToSQL(offsetItem.value), `${offsetItem.name ? ')' : ''}`, ']'].filter(hasVal).join('')).join('')
+  return [exprToSQL(expr), offsetExpr, suffix].filter(hasVal).join('')
 }
 function columnRefToSQL(expr) {
   const {
