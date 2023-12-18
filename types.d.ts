@@ -95,9 +95,9 @@ export interface Column {
   loc?: LocationRange;
 }
 
-export type Param = { type: "param"; value: string };
+export type Param = { type: "param"; value: string, loc?: LocationRange; };
 
-export type Value = { type: string; value: any };
+export type Value = { type: string; value: any, loc?: LocationRange; };
 
 export type Expr =
   | {
@@ -105,12 +105,14 @@ export type Expr =
       operator: "AND" | "OR";
       left: Expr;
       right: Expr;
+      loc?: LocationRange;
     }
   | {
       type: "binary_expr";
       operator: string;
       left: ColumnRef | Param | Value;
       right: ColumnRef | Param | Value;
+      loc?: LocationRange;
     };
 
 export type ExprList = {
