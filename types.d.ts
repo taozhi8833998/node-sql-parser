@@ -82,41 +82,42 @@ export interface AggrFunc {
   loc?: LocationRange;
 }
 export interface Function {
-  type: 'function';
+  type: "function";
   name: string;
-  args: expr_list;
+  args: ExprList;
   suffix?: any;
   loc?: LocationRange;
 }
 export interface Column {
   expr: ColumnRef | AggrFunc | Function;
-  as: string;
+  as: string | null;
+  type?: string;
   loc?: LocationRange;
 }
 
-export type Param = { type: 'param'; value: string, loc?: LocationRange; };
+export type Param = { type: "param"; value: string };
+
+export type Value = { type: string; value: any };
 
 export type Expr =
   | {
-    type: 'binary_expr';
-    operator: 'AND' | 'OR';
-    left: Expr;
-    right: Expr;
-    loc?: LocationRange;
-  }
+      type: "binary_expr";
+      operator: "AND" | "OR";
+      left: Expr;
+      right: Expr;
+    }
   | {
-    type: 'binary_expr';
-    operator: string;
-    left: ColumnRef | Param;
-    right: ColumnRef | Param;
-    loc?: LocationRange;
-  };
+      type: "binary_expr";
+      operator: string;
+      left: ColumnRef | Param | Value;
+      right: ColumnRef | Param | Value;
+    };
 
-export type expr_list = {
-  type: 'expr_list';
+export type ExprList = {
+  type: "expr_list";
   value: Expr[];
   loc?: LocationRange;
-}
+};
 export interface Select {
   with: With | null;
   type: "select";
@@ -124,7 +125,7 @@ export interface Select {
   distinct: "DISTINCT" | null;
   columns: any[] | Column[];
   from: Array<From | Dual | any> | null;
-  where: Expr;
+  where: Expr | Function | null;
   groupby: ColumnRef[] | null;
   having: any[] | null;
   orderby: OrderBy[] | null;
@@ -148,20 +149,20 @@ export interface Update {
   db: string | null;
   table: Array<From | Dual> | null;
   set: SetList[];
-  where: Expr;
+  where: Expr | Function | null;
   loc?: LocationRange;
 }
 export interface Delete {
   type: "delete";
   table: any;
   from: Array<From | Dual>;
-  where: Expr;
+  where: Expr | Function | null;
   loc?: LocationRange;
 }
 
 export interface Alter {
   type: "alter";
-  table: From;
+  table: From[];
   expr: any;
   loc?: LocationRange;
 }
@@ -215,6 +216,12 @@ export interface Create {
   loc?: LocationRange;
 }
 
+export interface Drop {
+  type: "drop";
+  keyword: string;
+  name: any[];
+}
+
 export type AST =
   | Use
   | Select
@@ -222,7 +229,8 @@ export type AST =
   | Update
   | Delete
   | Alter
-  | Create;
+  | Create
+  | Drop;
 
 export class Parser {
   constructor();

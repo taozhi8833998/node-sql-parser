@@ -917,7 +917,7 @@ ALTER_DROP_KEY_INDEX
         type: 'alter',
     }
   }
-  / KW_DROP __ k:(('FOREIGN'i? __ KW_KEY) / (KW_INDEX)) __ c:ident_name {
+  / KW_DROP __ k:(('FOREIGN'i? __ KW_KEY) / (KW_INDEX)) __ c:ident {
     const resource = Array.isArray(k) ? 'key' : 'index'
     return {
         action: 'drop',
