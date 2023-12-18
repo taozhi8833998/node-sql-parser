@@ -1650,17 +1650,18 @@ columns_list
       return createList(head, tail);
     }
 
-column_offset_expr
-  = n:expr __ LBRAKE __ l:literal_numeric __ RBRAKE {
-    return {
-      expr: n,
-      offset: `[${l.value}]`
-    }
+column_offset_expr_list
+  = l:(LBRAKE __ (literal_numeric / literal_string) __ RBRAKE)+ {
+    return l.map(item => ({ value: item[2] }))
   }
-  / n:expr __ LBRAKE __ t:(KW_OFFSET / KW_ORDINAL / KW_SAFE_OFFSET / KW_SAFE_ORDINAL) __ LPAREN __ l:literal_numeric __ RPAREN __ RBRAKE {
+  / l:(LBRAKE __ (KW_OFFSET / KW_ORDINAL / KW_SAFE_OFFSET / KW_SAFE_ORDINAL) __ LPAREN __ (literal_numeric / literal_string) __ RPAREN __ RBRAKE)+ {
+    return l.map(item => ({ name: item[2], value: item[6] }))
+  }
+column_offset_expr
+  = n:expr __ l:column_offset_expr_list {
     return {
       expr: n,
-      offset: `[${t}(${l.value})]`
+      offset: l
     }
   }
 
@@ -1706,8 +1707,8 @@ column_list_item
         as: null
       }
     }
-  / c:column_offset_expr __ as:alias_clause? {
-    columnList.add(`select::null::${c}`)
+  / c:column_offset_expr __ s:(DOT __ column_without_kw)? __ as:alias_clause? {
+    if (s) c.suffix = `.${s[2]}`
     return {
         expr: {
           type: 'column_ref',
@@ -2014,6 +2015,7 @@ expr_list
 
 _expr
   = struct_expr
+  / json_expr
   / logic_operator_expr // support concatenation operator || and &&
   / or_expr
   / unary_expr
@@ -2059,6 +2061,15 @@ array_expr
       keyword: s && 'array',
       brackets: l === '[' ? true : false,
       parentheses: l === '(' ? true: false
+    }
+  }
+
+json_expr
+  = KW_JSON __ l:literal_list {
+    return {
+      type: 'json',
+      keyword: 'json',
+      expr_list: l
     }
   }
 
@@ -2240,6 +2251,7 @@ multiplicative_operator
 primary
   = array_expr
   / struct_expr
+  / json_expr
   / cast_expr
   / literal
   / aggr_func
