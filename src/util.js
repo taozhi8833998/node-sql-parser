@@ -16,6 +16,7 @@ const DEFAULT_OPT = {
   database         : PARSER_NAME || 'mysql',
   type             : 'table',
   includeLocations : false,
+  trimQuery        : true,
 }
 
 let parserOpt = DEFAULT_OPT

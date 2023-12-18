@@ -18,6 +18,7 @@ export interface Option {
   database?: string;
   type?: string;
   includeLocations?: boolean;
+  trimQuery?: boolean;
 }
 export interface TableColumnAst {
   tableList: string[];
