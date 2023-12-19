@@ -875,9 +875,11 @@ ALTER_ADD_COLUMN
 
 ALTER_MODIFY_COLUMN
   = KW_MODIFY __
+    kc:KW_COLUMN? __
     cd:create_column_definition {
       return {
         action: 'modify',
+        keyword: kc,
         ...cd,
         resource: 'column',
         type: 'alter',
