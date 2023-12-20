@@ -893,6 +893,13 @@ describe('mysql', () => {
           'ALTER TABLE `table_name` DROP KEY `key_name`'
         ]
       },
+      {
+        title: 'count args',
+        sql: [
+          'SELECT COUNT((A.col_1 = "03" AND A.col_2 ="") OR NULL) FROM sample_table A;',
+          'SELECT COUNT((`A`.`col_1` = "03" AND `A`.`col_2` = "") OR NULL) FROM `sample_table` AS `A`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
