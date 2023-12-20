@@ -716,8 +716,8 @@ describe('mysql', () => {
       {
         title: 'alter table modify column',
         sql: [
-          "ALTER TABLE gifshow.reporter MODIFY update_at BIGINT UNSIGNED NOT NULL COMMENT 'update_at';",
-          "ALTER TABLE `gifshow`.`reporter` MODIFY `update_at` BIGINT UNSIGNED NOT NULL COMMENT 'update_at'"
+          "ALTER TABLE gifshow.reporter MODIFY Column update_at BIGINT UNSIGNED NOT NULL COMMENT 'update_at';",
+          "ALTER TABLE `gifshow`.`reporter` MODIFY COLUMN `update_at` BIGINT UNSIGNED NOT NULL COMMENT 'update_at'"
         ]
       },
       {
