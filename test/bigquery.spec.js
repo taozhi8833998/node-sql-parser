@@ -528,7 +528,7 @@ describe('BigQuery', () => {
           )
         ) as nb_orders
         from retail.orders`,
-        "SELECT COUNT(DISTINCT(CASE WHEN order_purchase_timestamp BETWEEN '2018-01-01' AND '2018-12-31' THEN order_id END)) AS nb_orders FROM retail.orders"
+        "SELECT COUNT(DISTINCT (CASE WHEN order_purchase_timestamp BETWEEN '2018-01-01' AND '2018-12-31' THEN order_id END)) AS nb_orders FROM retail.orders"
       ]
     },
     {

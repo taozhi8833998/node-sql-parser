@@ -3122,6 +3122,16 @@ table_name
       return v;
     }
 
+or_and_expr
+	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
+    const len = tail.length
+    let result = head
+    for (let i = 0; i < len; ++i) {
+      result = createBinaryExpr(tail[i][1], result, tail[i][3])
+    }
+    return result
+  }
+
 on_clause
   = KW_ON __ e:or_and_where_expr { /* => or_and_where_expr */ return e; }
 
@@ -4262,8 +4272,25 @@ concat_separator
   }
 
 distinct_args
-  = d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ or:order_by_clause? __ s:concat_separator? {  /* => { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; parentheses: boolean; separator?: concat_separator; } */ return { distinct: d, expr: c, orderby: or, parentheses: true, separator: s }; }
-  / d:KW_DISTINCT? __ c:expr __ or:order_by_clause? __ s:concat_separator?  {  /* => { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; parentheses: boolean; separator?: concat_separator; } */  return { distinct: d, expr: c, orderby: or, parentheses: false, separator: s }; }
+  = d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ tail:(__ (KW_AND / KW_OR) __ expr)* __ or:order_by_clause? __ s:concat_separator? {
+    /* => { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; separator?: concat_separator; } */
+    const len = tail.length
+    let result = c
+    result.parentheses = true
+    for (let i = 0; i < len; ++i) {
+      result = createBinaryExpr(tail[i][1], result, tail[i][3])
+    }
+    return {
+      distinct: d,
+      expr: result,
+      orderby: or,
+      separator: s
+    };
+  }
+  / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause? __ s:concat_separator?  {
+    /* => { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; separator?: concat_separator; } */
+    return { distinct: d, expr: c, orderby: or, separator: s };
+  }
 
 count_arg
   = e:star_expr { /* => { expr: star_expr } */ return { expr: e }; }
