@@ -1586,6 +1586,13 @@ describe('Postgres', () => {
           `SELECT * FROM crosstab('select student, subject, evaluation_result from evaluations order by 1,2', $$VALUES ('t'::text), ('f'::text)$$) AS final_result("Student" TEXT, "Geography" NUMERIC, "History" NUMERIC, "Language" NUMERIC, "Maths" NUMERIC, "Music" NUMERIC)`
         ]
       },
+      {
+        title: 'accentuated characters in column',
+        sql: [
+          "SELECT * FROM test WHERE théâtre = 'Molière'",
+          `SELECT * FROM "test" WHERE "théâtre" = 'Molière'`
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
