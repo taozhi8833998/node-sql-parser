@@ -1593,6 +1593,17 @@ describe('Postgres', () => {
           `SELECT * FROM "test" WHERE "théâtre" = 'Molière'`
         ]
       },
+      {
+        title: 'cast when expr is additive_ expr',
+        sql: [
+          `SELECT
+            CASE
+                WHEN updated IS NOT NULL THEN (updated - created)::TIME
+            END AS some_time
+          FROM some_table`,
+          'SELECT CASE WHEN "updated" IS NOT NULL THEN ("updated" - "created")::TIME END AS "some_time" FROM "some_table"'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })

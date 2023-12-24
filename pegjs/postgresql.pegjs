@@ -4501,10 +4501,10 @@ cast_expr
       }
     };
   }
-  / LPAREN __ e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref_array_index / param) __ RPAREN __ c:cast_double_colon?  {
+  / LPAREN __ e:(or_expr / column_ref_array_index / param) __ RPAREN __ c:cast_double_colon?  {
     /* => {
         type: 'cast';
-        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
+        expr: or_expr | column_ref | param
           | expr;
         keyword: 'cast';
         ...cast_double_colon;
