@@ -827,6 +827,8 @@ export type join_op = 'LEFT JOIN' | 'RIGHT JOIN' | 'FULL JOIN' | 'CROSS JOIN' | 
 
 export type table_name = { db?: ident; schema?: ident, table: ident | '*'; };
 
+export type or_and_expr = binary_expr;
+
 
 
 export type on_clause = or_and_where_expr;
@@ -1171,7 +1173,7 @@ export type concat_separator = { keyword: string | null; value: literal_string; 
 
 
 
-export type distinct_args = { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; parentheses: boolean; separator?: concat_separator; };
+export type distinct_args = { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; separator?: concat_separator; };
 
 
 
@@ -1216,6 +1218,12 @@ export type cast_double_colon = {
 
 
 export type cast_expr = {
+        type: 'cast';
+        expr: or_expr | column_ref | param
+          | expr;
+        keyword: 'cast';
+        ...cast_double_colon;
+      } | {
         type: 'cast';
         expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
           | expr;
