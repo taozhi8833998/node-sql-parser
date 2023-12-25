@@ -1,6 +1,6 @@
 {
   "name": "@montara-io/node-sql-parser",
-  "version": "4.17.7",
+  "version": "4.17.8",
   "description": "simple node sql parser",
   "main": "index.js",
   "types": "types.d.ts",
