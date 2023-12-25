@@ -1,9 +1,12 @@
 {
-  "name": "node-sql-parser",
-  "version": "4.17.0",
+  "name": "@montara-io/node-sql-parser",
+  "version": "4.17.7",
   "description": "simple node sql parser",
   "main": "index.js",
   "types": "types.d.ts",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/montara-io"
+  },
   "scripts": {
     "start": "webpack --config webpack.config.js",
     "build": "npm run lint && npm run compile && webpack --config webpack.config.js --mode production",
@@ -17,9 +20,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/taozhi8833998/node-sql-parser.git"
+    "url": "git+https://github.com/montara-io/node-sql-parser.git"
   },
-  "pre-commit": "coverLocal",
   "keywords": [
     "sql",
     "sql-parser",

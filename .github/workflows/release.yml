@@ -1,0 +1,38 @@
+name: release github actions
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [created]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.WORKFLOW_ACTION_TOKEN }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: https://npm.pkg.github.com/
+      - name:  'Automated Version Bump'
+        uses:  'phips28/gh-action-bump-version@master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_ACTION_TOKEN }}
+        with:
+          minor-wording:  'MINOR,minor'
+          major-wording:  'MAJOR,cut-major'
+          patch-wording:  'patch,fixes,add,Adds,new,feat,feature'     
+          rc-wording:     'RELEASE,alpha'
+          commit-message: "CI: bumps version to {{version}} [skip actions]"
+      - run: npm i
+      - run: npm run build
+      - run: echo registry=https://npm.pkg.github.com/montara-io >> .npmrc
+      - run: cd output/prod && npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.WORKFLOW_ACTION_TOKEN}}
