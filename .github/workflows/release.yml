@@ -2,7 +2,7 @@ name: release github actions
 on:
   push:
     branches:
-      - main
+      - master
   release:
     types: [created]
 
