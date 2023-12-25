@@ -3124,6 +3124,7 @@ table_name
 
 or_and_expr
 	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
+    // => binary_expr
     const len = tail.length
     let result = head
     for (let i = 0; i < len; ++i) {
