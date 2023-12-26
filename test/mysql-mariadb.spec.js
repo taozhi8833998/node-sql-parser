@@ -900,6 +900,33 @@ describe('mysql', () => {
           'SELECT COUNT((`A`.`col_1` = "03" AND `A`.`col_2` = "") OR NULL) FROM `sample_table` AS `A`'
         ]
       },
+      {
+        title: 'create user',
+        sql: [
+          "CREATE USER 'john'@'localhost' IDENTIFIED BY 'johnDoe1@'",
+          "CREATE USER 'john'@'localhost' IDENTIFIED BY 'johnDoe1@'"
+        ]
+      },
+      {
+        title: 'cc',
+        sql: [
+          "CREATE USER 'joe'@'10.0.0.1' DEFAULT ROLE administrator, developer;",
+          "CREATE USER 'joe'@'10.0.0.1' DEFAULT ROLE 'administrator', 'developer'"
+        ]
+      },
+      {
+        title: 'create user with password option',
+        sql: [
+          `CREATE USER 'jeffrey'@'localhost'
+          IDENTIFIED WITH caching_sha2_password BY 'new_password'
+          default role administrator, developer
+          require ssl and x509
+          with max_queries_per_hour 100
+          PASSWORD EXPIRE INTERVAL 180 DAY
+          FAILED_LOGIN_ATTEMPTS 3 PASSWORD_LOCK_TIME 2 account lock comment 'test comment' attribute '{"fname": "James", "lname": "Scott", "phone": "123-456-7890"}';`,
+          `CREATE USER 'jeffrey'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'new_password' DEFAULT ROLE 'administrator', 'developer' REQUIRE SSL AND X509 WITH MAX_QUERIES_PER_HOUR 100 PASSWORD EXPIRE INTERVAL 180 DAY FAILED_LOGIN_ATTEMPTS 3 PASSWORD_LOCK_TIME 2 ACCOUNT LOCK COMMENT 'test comment' ATTRIBUTE '{"fname": "James", "lname": "Scott", "phone": "123-456-7890"}'`
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
