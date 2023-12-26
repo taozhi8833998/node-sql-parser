@@ -358,7 +358,7 @@ function createUserToSQL(stmt) {
     userAuthOptions,
   ]
   if (defaultRole) sql.push(toUpper(defaultRole.keyword), defaultRole.value.map(grantUserOrRoleToSQL).join(', '))
-  if (requireOption) sql.push(commonOptionConnector(requireOption.keyword, exprToSQL, requireOption.value))
+  sql.push(commonOptionConnector(requireOption && requireOption.keyword, exprToSQL, requireOption && requireOption.value))
   if (resourceOptions) sql.push(toUpper(resourceOptions.keyword), resourceOptions.value.map(resourceOption => exprToSQL(resourceOption)).join(' '))
   if (passwordOptions) passwordOptions.forEach(passwordOption => sql.push(commonOptionConnector(passwordOption.keyword, exprToSQL, passwordOption.value)))
   sql.push(literalToSQL(lockOption), commentToSQL(comment), literalToSQL(attribute))
