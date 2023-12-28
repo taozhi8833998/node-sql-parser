@@ -3025,14 +3025,6 @@ scalar_func
 
 cast_expr
   = e:(literal / aggr_func / func_call / case_expr / interval_expr / column_ref / param) s:KW_DOUBLE_COLON t:data_type {
-    /* => {
-        type: 'cast';
-        expr: expr | literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
-          | expr;
-        symbol: '::' | 'as',
-        target: data_type;
-      }
-      */
     return {
       type: 'cast',
       keyword: 'cast',
@@ -3042,7 +3034,6 @@ cast_expr
     }
   }
   / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
-    // => IGNORE
     return {
       type: 'cast',
       keyword: c.toLowerCase(),
@@ -3052,7 +3043,6 @@ cast_expr
     };
   }
   / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
-    // => IGNORE
     return {
       type: 'cast',
       keyword: c.toLowerCase(),
@@ -3064,7 +3054,6 @@ cast_expr
     };
   }
   / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
-      // => IGNORE
       return {
         type: 'cast',
         keyword: c.toLowerCase(),
@@ -3076,7 +3065,6 @@ cast_expr
       };
     }
   / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
-    // => IGNORE
     return {
       type: 'cast',
       keyword: c.toLowerCase(),

@@ -1594,7 +1594,7 @@ describe('Postgres', () => {
         ]
       },
       {
-        title: 'cast when expr is additive_ expr',
+        title: 'cast when expr is additive expr',
         sql: [
           `SELECT
             CASE

@@ -2,6 +2,7 @@ import { alterArgsToSQL, alterExprToSQL } from './alter'
 import { exprToSQL } from './expr'
 import { indexDefinitionToSQL, indexOptionListToSQL, indexTypeToSQL } from './index-definition'
 import { columnDefinitionToSQL, columnRefToSQL } from './column'
+import { grantUserOrRoleToSQL } from './command'
 import { constraintDefinitionToSQL } from './constrain'
 import { funcToSQL } from './func'
 import { tablesToSQL, tableOptionToSQL, tableToSQL } from './tables'
@@ -12,6 +13,7 @@ import {
   columnOrderListToSQL,
   commonOptionConnector,
   commonKeywordArgsToSQL,
+  commentToSQL,
   commonTypeValue,
   dataTypeToSQL,
   toUpper,
@@ -338,6 +340,30 @@ function createAggregateToSQL(stmt) {
   sql.push(`${functionName}(${argsSQL})`, `(${options.map(aggregateOptionToSQL).join(', ')})`)
   return sql.filter(hasVal).join(' ')
 }
+function createUserToSQL(stmt) {
+  const {
+    attribute, comment, default_role: defaultRole, if_not_exists: ifNotExists, keyword, lock_option: lockOption,
+    password_options: passwordOptions, require: requireOption, resource_options: resourceOptions, type, user,
+  } = stmt
+  const userAuthOptions = user.map(userAuthOption => {
+    const { user: userInfo, auth_option } = userAuthOption
+    const result = [grantUserOrRoleToSQL(userInfo)]
+    if (auth_option) result.push(toUpper(auth_option.keyword), auth_option.auth_plugin, literalToSQL(auth_option.value))
+    return result.filter(hasVal).join(' ')
+  }).join(', ')
+  const sql = [
+    toUpper(type),
+    toUpper(keyword),
+    toUpper(ifNotExists),
+    userAuthOptions,
+  ]
+  if (defaultRole) sql.push(toUpper(defaultRole.keyword), defaultRole.value.map(grantUserOrRoleToSQL).join(', '))
+  sql.push(commonOptionConnector(requireOption && requireOption.keyword, exprToSQL, requireOption && requireOption.value))
+  if (resourceOptions) sql.push(toUpper(resourceOptions.keyword), resourceOptions.value.map(resourceOption => exprToSQL(resourceOption)).join(' '))
+  if (passwordOptions) passwordOptions.forEach(passwordOption => sql.push(commonOptionConnector(passwordOption.keyword, exprToSQL, passwordOption.value)))
+  sql.push(literalToSQL(lockOption), commentToSQL(comment), literalToSQL(attribute))
+  return sql.filter(hasVal).join(' ')
+}
 function createToSQL(stmt) {
   const { keyword } = stmt
   let sql = ''
@@ -374,6 +400,9 @@ function createToSQL(stmt) {
       break
     case 'type':
       sql = createTypeToSQL(stmt)
+      break
+    case 'user':
+      sql = createUserToSQL(stmt)
       break
     default:
       throw new Error(`unknown create resource ${keyword}`)

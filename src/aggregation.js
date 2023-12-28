@@ -8,11 +8,7 @@ function aggrToSQL(expr) {
   let str = exprToSQL(args.expr)
   const fnName = expr.name
   const overStr = overToSQL(over)
-  let separator = ' '
-  if (args.parentheses) {
-    separator = ''
-    str = `(${str})`
-  }
+  const separator = ' '
   if (args.distinct) str = ['DISTINCT', str].join(separator)
   if (args.orderby) str = `${str} ${orderOrPartitionByToSQL(args.orderby, 'order by')}`
   if (args.separator) str = [str, toUpper(args.separator.keyword), literalToSQL(args.separator.value)].filter(hasVal).join(' ')
