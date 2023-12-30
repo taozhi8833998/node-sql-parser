@@ -2834,7 +2834,7 @@ replace_insert_stmt
          type: 'insert' | 'replace';
          table?: [table_name];
          columns: column_list;
-         conflict?: on_clifict;
+         conflict?: on_conflict;
          values: insert_value_clause;
          partition?: insert_partition;
          returning?: returning_stmt;
