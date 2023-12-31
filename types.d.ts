@@ -6,7 +6,12 @@
 
 export interface With {
   name: string;
-  stmt: any[];
+  stmt: {
+    _parentheses?: boolean;
+    tableList: string[];
+    columnList: string[];
+    ast: Select;
+  };
   columns?: any[];
 }
 import { LocationRange } from "pegjs";
@@ -78,7 +83,12 @@ export interface Star {
 export interface AggrFunc {
   type: "aggr_func";
   name: string;
-  args: ColumnRef | AggrFunc | Star | null;
+  args: {
+    expr: ColumnRef | AggrFunc | Star | null;
+    distinct: "DISTINCT" | null;
+    orderby: OrderBy[] | null;
+    parentheses?: boolean;
+  };
   loc?: LocationRange;
 }
 export interface Function {
@@ -101,19 +111,19 @@ export type Value = { type: string; value: any, loc?: LocationRange; };
 
 export type Expr =
   | {
-      type: "binary_expr";
-      operator: "AND" | "OR";
-      left: Expr;
-      right: Expr;
-      loc?: LocationRange;
-    }
+    type: "binary_expr";
+    operator: "AND" | "OR";
+    left: Expr;
+    right: Expr;
+    loc?: LocationRange;
+  }
   | {
-      type: "binary_expr";
-      operator: string;
-      left: ColumnRef | Param | Value;
-      right: ColumnRef | Param | Value;
-      loc?: LocationRange;
-    };
+    type: "binary_expr";
+    operator: string;
+    left: ColumnRef | Param | Value;
+    right: ColumnRef | Param | Value;
+    loc?: LocationRange;
+  };
 
 export type ExprList = {
   type: "expr_list";
@@ -121,7 +131,7 @@ export type ExprList = {
   loc?: LocationRange;
 };
 export interface Select {
-  with: With | null;
+  with: With[] | null;
   type: "select";
   options: any[] | null;
   distinct: "DISTINCT" | null;
