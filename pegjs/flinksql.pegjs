@@ -1972,6 +1972,16 @@ table_name
       return v;
     }
 
+or_and_expr
+	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
+    const len = tail.length
+    let result = head
+    for (let i = 0; i < len; ++i) {
+      result = createBinaryExpr(tail[i][1], result, tail[i][3])
+    }
+    return result
+  }
+
 on_clause
   = KW_ON __ e:or_and_where_expr { /* => expr */ return e; }
 
@@ -2826,8 +2836,20 @@ aggr_fun_count
 
 count_arg
   = e:star_expr { /* => { expr: star_expr } */ return { expr: e }; }
-  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ or:order_by_clause? { return { distinct: d, expr: c, orderby: or, parentheses: true }; }
-  / d:KW_DISTINCT? __ c:expr __ or:order_by_clause? {  return { distinct: d, expr: c, orderby: or, parentheses: false }; }
+  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN tail:(__ (KW_AND / KW_OR) __ expr)* __ or:order_by_clause? {
+    const len = tail.length
+    let result = c
+    result.parentheses = true
+    for (let i = 0; i < len; ++i) {
+      result = createBinaryExpr(tail[i][1], result, tail[i][3])
+    }
+    return {
+      distinct: d,
+      expr: result,
+      orderby: or,
+    };
+  }
+  / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause? { return { distinct: d, expr: c, orderby: or }; }
 
 star_expr
   = "*" { /* => { type: 'star'; value: '*' } */ return { type: 'star', value: '*' }; }
@@ -3007,14 +3029,6 @@ scalar_func
 
 cast_expr
   = e:(literal / aggr_func / func_call / case_expr / interval_expr / column_ref / param) s:KW_DOUBLE_COLON t:data_type {
-    /* => {
-        type: 'cast';
-        expr: expr | literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
-          | expr;
-        symbol: '::' | 'as',
-        target: data_type;
-      }
-      */
     return {
       type: 'cast',
       keyword: 'cast',
@@ -3024,7 +3038,6 @@ cast_expr
     }
   }
   / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
-    // => IGNORE
     return {
       type: 'cast',
       keyword: c.toLowerCase(),
@@ -3034,7 +3047,6 @@ cast_expr
     };
   }
   / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
-    // => IGNORE
     return {
       type: 'cast',
       keyword: c.toLowerCase(),
@@ -3046,7 +3058,6 @@ cast_expr
     };
   }
   / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
-      // => IGNORE
       return {
         type: 'cast',
         keyword: c.toLowerCase(),
@@ -3058,7 +3069,6 @@ cast_expr
       };
     }
   / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
-    // => IGNORE
     return {
       type: 'cast',
       keyword: c.toLowerCase(),

@@ -2,10 +2,8 @@ import { exprToSQL } from './expr'
 
 function caseToSQL(expr) {
   const res = ['CASE']
-  const conditions = expr.args
-
-  if (expr.expr) res.push(exprToSQL(expr.expr))
-
+  const { args: conditions, expr: exprItem, parentheses } = expr
+  if (exprItem) res.push(exprToSQL(exprItem))
   for (let i = 0, len = conditions.length; i < len; ++i) {
     res.push(conditions[i].type.toUpperCase())
     if (conditions[i].cond) {
@@ -14,10 +12,8 @@ function caseToSQL(expr) {
     }
     res.push(exprToSQL(conditions[i].result))
   }
-
   res.push('END')
-
-  return res.join(' ')
+  return parentheses ? `(${res.join(' ')})` : res.join(' ')
 }
 
 export {

@@ -1877,6 +1877,15 @@ table_name
       }
       return obj;
     }
+or_and_expr
+	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
+    const len = tail.length
+    let result = head
+    for (let i = 0; i < len; ++i) {
+      result = createBinaryExpr(tail[i][1], result, tail[i][3])
+    }
+    return result
+  }
 
 on_clause
   = KW_ON __ e:or_and_where_expr { return e; }
@@ -2503,8 +2512,21 @@ aggr_fun_count
 
 count_arg
   = e:star_expr { return { expr: e, ...getLocationObject() }; }
-  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ or:order_by_clause? {  return { distinct: d, expr: c, orderby: or, parentheses: true, ...getLocationObject() }; }
-  / d:KW_DISTINCT? __ c:expr __ or:order_by_clause? {  return { distinct: d, expr: c, orderby: or, parentheses: false, ...getLocationObject() }; }
+  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN tail:(__ (KW_AND / KW_OR) __ expr)* __ or:order_by_clause? {
+    const len = tail.length
+    let result = c
+    result.parentheses = true
+    for (let i = 0; i < len; ++i) {
+      result = createBinaryExpr(tail[i][1], result, tail[i][3])
+    }
+    return {
+      distinct: d,
+      expr: result,
+      orderby: or,
+      ...getLocationObject()
+    };
+  }
+  / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause?  { return { distinct: d, expr: c, orderby: or, ...getLocationObject() }; }
 
 star_expr
   = "*" { return { type: 'star', value: '*' }; }

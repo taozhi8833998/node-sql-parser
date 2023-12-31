@@ -305,11 +305,11 @@ describe('select', () => {
         let sql = "select group_concat(distinct asd) as 'abc';"
         expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT `asd`) AS `abc`')
         sql = "select group_concat(distinct(asd)) as 'abc';"
-        expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT(`asd`)) AS `abc`')
+        expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT (`asd`)) AS `abc`')
         sql = "select Quantity, group_concat(distinct(IF(Quantity>10, \"MORE\", \"LESS\"))) as 'abc';"
-        expect(getParsedSql(sql)).to.equal('SELECT `Quantity`, GROUP_CONCAT(DISTINCT(IF(`Quantity` > 10, "MORE", "LESS"))) AS `abc`')
+        expect(getParsedSql(sql)).to.equal('SELECT `Quantity`, GROUP_CONCAT(DISTINCT (IF(`Quantity` > 10, "MORE", "LESS"))) AS `abc`')
         sql = "select group_concat(distinct(organization.name) order by organization.name) as colum1"
-        expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT(`organization`.`name`) ORDER BY `organization`.`name` ASC) AS `colum1`')
+        expect(getParsedSql(sql)).to.equal('SELECT GROUP_CONCAT(DISTINCT (`organization`.`name`) ORDER BY `organization`.`name` ASC) AS `colum1`')
       })
 
       it('should parse position function',() => {
@@ -1411,7 +1411,7 @@ describe('select', () => {
 
     it('should support array_agg in coalesce', () => {
       const sql = `SELECT COALESCE(array_agg(DISTINCT(a.xx)), Array[]::text[]) AS "distinctName" FROM public."Users" a1`
-      expect(getParsedSql(sql, opt)).to.equal('SELECT COALESCE(ARRAY_AGG(DISTINCT("a"."xx")), ARRAY[]::TEXT[]) AS "distinctName" FROM "public"."Users" AS "a1"')
+      expect(getParsedSql(sql, opt)).to.equal('SELECT COALESCE(ARRAY_AGG(DISTINCT ("a"."xx")), ARRAY[]::TEXT[]) AS "distinctName" FROM "public"."Users" AS "a1"')
     })
 
     it('should support ilike', () => {
