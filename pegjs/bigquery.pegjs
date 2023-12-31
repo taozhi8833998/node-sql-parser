@@ -1978,13 +1978,13 @@ window_frame_preceding
 window_frame_current_row
   = 'CURRENT'i __ 'ROW'i {
     // => { type: 'single_quote_string'; value: string }
-    return { type: 'single_quote_string', value: 'current row' }
+    return { type: 'single_quote_string', value: 'current row', ...getLocationObject() }
   }
 
 window_frame_value
   = s:'UNBOUNDED'i {
     // => literal_string
-    return { type: 'single_quote_string', value: s.toUpperCase() }
+    return { type: 'single_quote_string', value: s.toUpperCase(), ...getLocationObject() }
   }
   / literal_numeric
 
@@ -2017,7 +2017,8 @@ limit_clause
       if (tail) res.push(tail[2]);
       return {
         seperator: tail && tail[0] && tail[0].toLowerCase() || '',
-        value: res
+        value: res,
+        ...getLocationObject(),
       };
     }
 
@@ -2718,13 +2719,15 @@ literal_string
   = r:'R'i? __ ca:("'" single_char* "'") {
       return {
         type: r ? 'regex_string' : 'single_quote_string',
-        value: ca[1].join('')
+        value: ca[1].join(''),
+        ...getLocationObject()
       };
     }
   / r:'R'i? __ ca:("\"" single_quote_char* "\"") {
       return {
         type: r ? 'regex_string' : 'string',
-        value: ca[1].join('')
+        value: ca[1].join(''),
+        ...getLocationObject()
       };
     }
 

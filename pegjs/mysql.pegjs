@@ -2489,7 +2489,8 @@ limit_clause
       if (tail) res.push(tail[2]);
       return {
         seperator: tail && tail[0] && tail[0].toLowerCase() || '',
-        value: res
+        value: res,
+        ...getLocationObject(),
       };
     }
 
@@ -3276,12 +3277,12 @@ window_frame_preceding
 
 window_frame_current_row
   = 'CURRENT'i __ 'ROW'i {
-    return { type: 'single_quote_string', value: 'current row' }
+    return { type: 'single_quote_string', value: 'current row', ...getLocationObject() }
   }
 
 window_frame_value
   = s:'UNBOUNDED'i {
-    return { type: 'single_quote_string', value: s.toUpperCase() }
+    return { type: 'single_quote_string', value: s.toUpperCase(), ...getLocationObject() }
   }
   / literal_numeric
 
