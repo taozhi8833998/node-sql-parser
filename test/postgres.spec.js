@@ -1358,6 +1358,13 @@ describe('Postgres', () => {
         'CREATE TABLE "public"."authors_table" ("author_id" INTEGER NOT NULL, "first_name" CHARACTER VARYING NOT NULL, "last_name" CHARACTER VARYING NOT NULL, "birth_date" DATE)'
       ]
     },
+    {
+      title: 'as double quoted',
+      sql: [
+        'select 1 as "one"',
+        'SELECT 1 AS "one"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
@@ -1634,6 +1641,10 @@ describe('Postgres', () => {
     it('should proc assign', () => {
       expect(procToSQL({stmt: {type: 'assign', left: {type: 'default', value: 'abc'}, keyword: '', right: {type: 'number', value: 123}, symbol: '='}})).to.be.equal('abc = 123')
     })
+    it('should throw error', () => {
+      const sql = "select 1 as 'one'"
+      const fun = parser.astify.bind(parser, sql, opt)
+      expect(fun).to.throw(`Expected "--", "/*", "\\"", [ \\t\\n\\r], or [A-Za-z_一-龥] but "'" found.`)
+    })
   })
-
 })
