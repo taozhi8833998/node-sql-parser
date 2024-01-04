@@ -2027,7 +2027,7 @@ cte_definition
   = name:(literal_string / ident_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:crud_stmt __ RPAREN {
     // => { name: { type: 'default'; value: string; }; stmt: crud_stmt; columns?: cte_column_definition; }
     if (typeof name === 'string') name = { type: 'default', value: name }
-      return { name, stmt: stmt.ast, columns, ...getLocationObject() };
+      return { name, stmt, columns, ...getLocationObject() };
     }
 
 cte_column_definition
