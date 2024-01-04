@@ -2887,7 +2887,7 @@ value_alias_clause
 
 alias_clause
   = KW_AS __ i:alias_ident { /*=>alias_ident*/ return i; }
-  / KW_AS? __ i:ident { /*=>ident*/ return i; }
+  / KW_AS? __ i:alias_ident { /*=>alias_ident*/ return i; }
 
 into_clause
   = KW_INTO __ v:var_decl_list {
@@ -4053,7 +4053,7 @@ alias_ident
       if (!c) return name;
       return `${name}(${c[3].join(', ')})`
     }
-  / name:quoted_ident {
+  / name:double_quoted_ident {
       // => IGNORE
       return name;
     }
