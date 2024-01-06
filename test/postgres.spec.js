@@ -1365,6 +1365,19 @@ describe('Postgres', () => {
         'SELECT 1 AS "one"'
       ]
     },
+    {
+      title: 'intersect op',
+      sql: [
+        `SELECT  item
+        FROM public.orders
+        WHERE ID = 1
+        INTERSECT
+        SELECT "sku"
+        FROM public.inventory
+        WHERE ID = 1`,
+        'SELECT "item" FROM "public"."orders" WHERE "ID" = 1 INTERSECT SELECT "sku" FROM "public"."inventory" WHERE "ID" = 1'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

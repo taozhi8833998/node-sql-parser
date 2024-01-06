@@ -278,6 +278,8 @@ set_op
     // => 'union' | 'union all' | 'union distinct'
     return a ? `union ${a.toLowerCase()}` : 'union'
   }
+  / KW_INTERSECT { return 'intersect' }
+  / KW_EXCEPT { return 'except' }
 
 union_stmt
   = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob:order_by_clause? __ l:limit_clause? {
@@ -4779,6 +4781,8 @@ KW_INNER    = "INNER"i    !ident_start
 KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
 KW_UNION    = "UNION"i    !ident_start
+KW_INTERSECT   = "INTERSECT"i    !ident_start
+KW_EXCEPT    = "EXCEPT"i    !ident_start
 KW_VALUES   = "VALUES"i   !ident_start
 KW_USING    = "USING"i    !ident_start
 
