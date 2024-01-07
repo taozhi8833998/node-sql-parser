@@ -20,7 +20,7 @@ export type crud_stmt = union_stmt | update_stmt | replace_insert_stmt | insert_
 
 export type multiple_stmt = AstStatement<curd_stmt | crud_stmt[]>;
 
-export type set_op = 'union' | 'union all' | 'union distinct';
+export type set_op = 'union' | 'union all' | 'union distinct' | 'intersect | 'except';
 
 export interface union_stmt_node extends select_stmt_node  {
          _next: union_stmt_node;
@@ -774,7 +774,7 @@ export type value_alias_clause = alias_ident;
 
 
 
-export type alias_clause = alias_ident | ident;
+export type alias_clause = alias_ident;
 
 export type into_clause = { keyword: 'var'; type: 'into'; expr: var_decl_list; } | { keyword: 'var'; type: 'into'; expr: literal_string | ident; };
 
@@ -1367,6 +1367,10 @@ type KW_JOIN = never;
 type KW_OUTER = never;
 
 type KW_UNION = never;
+
+type KW_INTERSECT = never;
+
+type KW_EXCEPT = never;
 
 type KW_VALUES = never;
 
