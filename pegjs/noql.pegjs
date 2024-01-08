@@ -278,14 +278,8 @@ set_op
     // => 'union' | 'union all' | 'union distinct'
     return a ? `union ${a.toLowerCase()}` : 'union'
   }
-  / KW_INTERSECT {
-    // => 'intersect
-    return 'intersect'
-  }
-  / KW_EXCEPT {
-    // => 'except'
-    return 'except'
-  }
+  / KW_INTERSECT { return 'intersect' }
+  / KW_EXCEPT { return 'except' }
 
 union_stmt
   = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob:order_by_clause? __ l:limit_clause? {
@@ -3723,9 +3717,6 @@ unary_expr
 binary_column_expr
   = head:expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ expr)* {
     const ast = head.ast
-    if (ast && ast.type === 'select') {
-      if (!(head.parentheses_symbol || head.parentheses || head.ast.parentheses || head.ast.parentheses_symbol) || ast.columns.length !== 1 || ast.columns[0].expr.column === '*') throw new Error('invalid column clause with select statement')
-    }
     if (!tail || tail.length === 0) return head
     // => binary_expr
     const len = tail.length
@@ -4061,7 +4052,7 @@ alias_ident
       if (!c) return name;
       return `${name}(${c[3].join(', ')})`
     }
-  / name:double_quoted_ident {
+  / name:quoted_ident {
       // => IGNORE
       return name;
     }
