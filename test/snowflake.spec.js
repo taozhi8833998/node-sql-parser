@@ -90,6 +90,21 @@ describe('snowflake', () => {
         'SELECT "Age", "name" AS "a\b" FROM "schmeaName"."tableName"'
       ]
     },
+    {
+      title: 'select from db.scheme.table',
+      sql: [
+        'SELECT * FROM my_db.my_schema.my_table',
+        'SELECT * FROM "my_db"."my_schema"."my_table"'
+      ]
+    },
+    {
+      title: 'double slash comment',
+      sql: [
+        `// some comment
+        SELECT * FROM TABLEName`,
+        'SELECT * FROM "TABLEName"'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
