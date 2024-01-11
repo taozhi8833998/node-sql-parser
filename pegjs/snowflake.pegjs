@@ -4369,12 +4369,16 @@ ___
 comment
   = block_comment
   / line_comment
+  / double_slash_comment
 
 block_comment
   = "/*" (!"*/" !"/*" char / block_comment)* "*/"
 
 line_comment
   = "--" (!EOL char)*
+
+double_slash_comment
+  = '//' (!EOL char)*
 
 pound_sign_comment
   = "#" (!EOL char)*
