@@ -23,7 +23,7 @@ function arrayDimensionToSymbol(target) {
 }
 
 function castToSQL(expr) {
-  const { arrows = [], collate, target, expr: expression, keyword, symbol, as: alias, tail, properties = [] } = expr
+  const { arrows = [], collate, target, expr: expression, keyword, symbol, as: alias, properties = [] } = expr
   const { length, dataType, parentheses, quoted, scale, suffix: dataTypeSuffix } = target
   let str = ''
   if (length != null) str = scale ? `${length}, ${scale}` : length
@@ -38,7 +38,6 @@ function castToSQL(expr) {
     symbolChar = ` ${symbol.toUpperCase()} `
   }
   suffix += arrows.map((arrow, index) => commonOptionConnector(arrow, literalToSQL, properties[index])).join(' ')
-  if (tail) suffix += ` ${tail.operator} ${exprToSQL(tail.expr)}`
   if (alias) suffix += ` AS ${identifierToSql(alias)}`
   if (collate) suffix += ` ${commonTypeValue(collate).join(' ')}`
   const arrayDimension = arrayDimensionToSymbol(target)

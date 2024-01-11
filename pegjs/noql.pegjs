@@ -1,391 +1,99 @@
 {
-  // List of reserved keywords: https://calcite.apache.org/docs/reference.html#keywords
   const reservedMap = {
-    'ABS': true,
-    'ALL': true,
-    'ALLOCATE': true,
-    'ALLOW': true,
     'ALTER': true,
+    'ALL': true,
+    'ADD': true,
     'AND': true,
-    'ANY': true,
-    'ARE': true,
-    'ARRAY': true,
-    'ARRAY_MAX_CARDINALITY': true,
     'AS': true,
-    'ASENSITIVE': true,
-    'ASYMMETRIC': true,
-    'AT': true,
-    'ATOMIC': true,
-    'AUTHORIZATION': true,
-    'AVG': true,
+    'ASC': true,
 
-    'BEGIN': true,
-    'BEGIN_FRAME': true,
-    'BEGIN_PARTITION': true,
     'BETWEEN': true,
-    'BIGINT': true,
-    'BINARY': true,
-    'BIT': true,
-    'BLOB': true,
-    'BOOLEAN': true,
-    'BOTH': true,
     'BY': true,
 
     'CALL': true,
-    'CALLED': true,
-    'CARDINALITY': true,
-    'CASCADED': true,
     'CASE': true,
-    'CAST': true,
-    'CEIL': true,
-    'CEILING': true,
-    'CHAR': true,
-    'CHARACTER': true,
-    'CHARACTER_LENGTH': true,
-    'CHAR_LENGTH': true,
-    'CHECK': true,
-    'CLASSIFIER': true,
-    'CLOB': true,
-    'CLOSE': true,
-    'COALESCE': true,
-    'COLLATE': true,
-    'COLLECT': true,
-    'COLUMN': true,
-    'COMMIT': true,
-    'CONDITION': true,
-    'CONNECT': true,
-    'CONSTRAINT': true,
-    'CONTAINS': true,
-    'CONVERT': true,
-    'CORR': true,
-    'CORRESPONDING': true,
-    'COUNT': true,
-    'COVAR_POP': true,
-    'COVAR_SAMP': true,
     'CREATE': true,
-    'CROSS': true,
-    'CUBE': true,
-    'CUME_DIST': true,
-    'CURRENT': true,
-    'CURRENT_CATALOG': true,
+    'CONTAINS': true,
     'CURRENT_DATE': true,
-    'CURRENT_DEFAULT_TRANSFORM_GROUP': true,
-    'CURRENT_PATH': true,
-    'CURRENT_ROLE': true,
-    'CURRENT_ROW': true,
-    'CURRENT_SCHEMA': true,
     'CURRENT_TIME': true,
     'CURRENT_TIMESTAMP': true,
-    'CURRENT_TRANSFORM_GROUP_FOR_TYPE': true,
     'CURRENT_USER': true,
-    'CURSOR': true,
-    'CYCLE': true,
 
-    'DATE': true,
-    'DAY': true,
-    'DEALLOCATE': true,
-    'DEC': true,
-    'DECIMAL': true,
-    'DECLARE': true,
-    'DEFAULT': true,
-    'DEFINE': true,
     'DELETE': true,
-    'DENSE_RANK': true,
-    'DEREF': true,
-    'DESCRIBE': true,
-    'DETERMINISTIC': true,
-    'DISALLOW': true,
-    'DISCONNECT': true,
+    'DESC': true,
     'DISTINCT': true,
-    'DOUBLE': true,
     'DROP': true,
-    'DYNAMIC': true,
 
-    'EACH': true,
-    'ELEMENT': true,
     'ELSE': true,
-    'EMPTY': true,
     'END': true,
-    'END-EXEC': true,
-    'END_FRAME': true,
-    'END_PARTITION': true,
-    'EQUALS': true,
-    'ESCAPE': true,
-    'EVERY': true,
-    'EXCEPT': true,
-    'EXEC': true,
-    'EXECUTE': true,
     'EXISTS': true,
-    'EXP': true,
     'EXPLAIN': true,
-    'EXTEND': true,
-    'EXTERNAL': true,
-    'EXTRACT': true,
 
     'FALSE': true,
-    'FETCH': true,
-    'FILTER': true,
-    'FIRST_VALUE': true,
-    'FLOAT': true,
-    'FLOOR': true,
-    'FOR': true,
-    'FOREIGN': true,
-    'FRAME_ROW': true,
-    'FREE': true,
     'FROM': true,
     'FULL': true,
-    'FUNCTION': true,
-    'FUSION': true,
 
-    'GET': true,
-    'GLOBAL': true,
-    'GRANT': true,
     'GROUP': true,
-    'GROUPING': true,
-    'GROUPS': true,
 
     'HAVING': true,
-    'HOLD': true,
-    'HOUR': true,
 
-    'IDENTITY': true,
-    'IMPORT': true,
     'IN': true,
-    'INDICATOR': true,
-    'INITIAL': true,
     'INNER': true,
-    'INOUT': true,
-    'INSENSITIVE': true,
     'INSERT': true,
-    'INT': true,
-    'INTEGER': true,
-    'INTERSECT': true,
-    'INTERSECTION': true,
-    'INTERVAL': true,
     'INTO': true,
     'IS': true,
 
     'JOIN': true,
-    'JSON_ARRAY': true,
-    'JSON_ARRAYAGG': true,
-    'JSON_EXISTS': true,
-    'JSON_OBJECT': true,
-    'JSON_OBJECTAGG': true,
-    'JSON_QUERY': true,
-    'JSON_VALUE': true,
+    'JSON': true,
 
-    'LAG': true,
-    'LANGUAGE': true,
-    'LARGE': true,
-    'LAST_VALUE': true,
-    'LATERAL': true,
-    'LEAD': true,
-    'LEADING': true,
+    // 'KEY': true,
+
     'LEFT': true,
     'LIKE': true,
-    'LIKE_REGEX': true,
     'LIMIT': true,
-    'LN': true,
-    'LOCAL': true,
-    'LOCALTIME': true,
-    'LOCALTIMESTAMP': true,
-    'LOWER': true,
 
-    'MATCH': true,
-    'MATCHES': true,
-    'MATCH_NUMBER': true,
-    'MATCH_RECOGNIZE': true,
-    'MAX': true,
-    'MEASURES': true,
-    'MEMBER': true,
-    'MERGE': true,
-    'METHOD': true,
-    'MIN': true,
-    'MINUS': true,
-    'MINUTE': true,
-    'MOD': true,
-    'MODIFIES': true,
-    'MODULE': true,
-    'MONTH': true,
-    'MULTISET': true,
-
-    'NATIONAL': true,
-    'NATURAL': true,
-    'NCHAR': true,
-    'NCLOB': true,
-    'NEW': true,
-    'NEXT': true,
-    'NO': true,
-    'NONE': true,
-    'NORMALIZE': true,
     'NOT': true,
-    'NTH_VALUE': true,
-    'NTILE': true,
     'NULL': true,
-    'NULLIF': true,
-    'NUMERIC': true,
+    'NULLS': true,
 
-    'OCCURRENCES_REGEX': true,
-    'OCTET_LENGTH': true,
-    'OF': true,
     'OFFSET': true,
-    'OLD': true,
-    'OMIT': true,
     'ON': true,
-    'ONE': true,
-    'ONLY': true,
-    'OPEN': true,
     'OR': true,
     'ORDER': true,
-    'OUT': true,
     'OUTER': true,
-    'OVER': true,
-    'OVERLAPS': true,
-    'OVERLAY': true,
 
-    'PARAMETER': true,
-    'PARTITION': true,
-    'PATTERN': true,
-    'PER': true,
-    'PERCENT': true,
-    'PERCENTILE_CONT': true,
-    'PERCENTILE_DISC': true,
-    'PERCENT_RANK': true,
-    'PERIOD': true,
-    'PERMUTE': true,
-    'PORTION': true,
-    'POSITION': true,
-    'POSITION_REGEX': true,
-    'POWER': true,
-    'PRECEDES': true,
-    'PRECISION': true,
-    'PREPARE': true,
-    'PREV': true,
-    'PRIMARY': true,
-    'PROCEDURE': true,
-
-    'RANGE': true,
-    'RANK': true,
-    'READS': true,
-    'REAL': true,
     'RECURSIVE': true,
-    'REF': true,
-    'REFERENCES': true,
-    'REFERENCING': true,
-    'REGR_AVGX': true,
-    'REGR_AVGY': true,
-    'REGR_COUNT': true,
-    'REGR_INTERCEPT': true,
-    'REGR_R2': true,
-    'REGR_SLOPE': true,
-    'REGR_SXX': true,
-    'REGR_SXY': true,
-    'REGR_SYY': true,
-    'RELEASE': true,
-    'RESET': true,
-    'RESULT': true,
-    'RETURN': true,
-    'RETURNS': true,
-    'REVOKE': true,
+    'RENAME': true,
+    // 'REPLACE': true,
     'RIGHT': true,
-    'ROLLBACK': true,
-    'ROLLUP': true,
-    'ROW': true,
-    'ROWS': true,
-    'ROW_NUMBER': true,
-    'RUNNING': true,
 
-    'SAVEPOINT': true,
-    'SCOPE': true,
-    'SCROLL': true,
-    'SEARCH': true,
-    'SECOND': true,
-    'SEEK': true,
     'SELECT': true,
-    'SENSITIVE': true,
     'SESSION_USER': true,
     'SET': true,
     'SHOW': true,
-    'SIMILAR': true,
-    'SIMILAR': true,
-    'SKIP': true,
-    'SMALLINT': true,
-    'SOME': true,
-    'SPECIFIC': true,
-    'SPECIFICTYPE': true,
-    'SQL': true,
-    'SQLEXCEPTION': true,
-    'SQLSTATE': true,
-    'SQLWARNING': true,
-    'SQRT': true,
-    'START': true,
-    'STATIC': true,
-    'STDDEV_POP': true,
-    'STDDEV_SAMP': true,
-    'STREAM': true,
-    'SUBMULTISET': true,
-    'SUBSET': true,
-    'SUBSTRING': true,
-    'SUBSTRING_REGEX': true,
-    'SUCCEEDS': true,
-    'SUM': true,
-    'SYMMETRIC': true,
-    'SYSTEM': true,
-    'SYSTEM_TIME': true,
     'SYSTEM_USER': true,
 
     'TABLE': true,
-    'TABLESAMPLE': true,
     'THEN': true,
-    'TO': true,
-    'TIME': true,
-    'TIMESTAMP': true,
-    'TIMEZONE_HOUR': true,
-    'TIMEZONE_MINUTE': true,
-    'TINYINT': true,
-    'TO': true,
-    'TRAILING': true,
-    'TRANSLATE': true,
-    'TRANSLATE_REGEX': true,
-    'TRANSLATION': true,
-    'TREAT': true,
-    'TRIGGER': true,
-    'TRIM': true,
-    'TRIM_ARRAY': true,
     'TRUE': true,
     'TRUNCATE': true,
 
-    'UESCAPE': true,
     'UNION': true,
-    'UNIQUE': true,
-    'UNKNOWN': true,
-    'UNNEST': true,
     'UPDATE': true,
-    'UPPER': true,
-    'UPSERT': true,
-    'USER': true,
     'USING': true,
 
-    'VALUE': true,
-    'VALUES': true,
-    'VALUE_OF': true,
-    'VARBINARY': true,
-    'VARCHAR': true,
-    'VARYING': true,
-    'VAR_POP': true,
-    'VAR_SAMP': true,
-    'VERSIONING': true,
+    // 'VALUES': true,
 
-    'WHEN': true,
-    'WHENEVER': true,
-    'WHERE': true,
-    'WIDTH_BUCKET': true,
-    'WINDOW': true,
     'WITH': true,
-    'WITHIN': true,
-    'WITHOUT': true,
+    'WHEN': true,
+    'WHERE': true,
+    'WINDOW': true,
 
-    'YEAR': true,
+    'GLOBAL': true,
+    'SESSION': true,
+    'LOCAL': true,
+    'PERSIST': true,
+    'PERSIST_ONLY': true,
   };
 
   function createUnaryExpr(op, e) {
@@ -413,7 +121,7 @@
   }
 
   function createList(head, tail, po = 3) {
-    const result = [head];
+    const result = Array.isArray(head) ? head : [head];
     for (let i = 0; i < tail.length; i++) {
       delete tail[i][po].tableList
       delete tail[i][po].columnList
@@ -488,20 +196,21 @@
 
   // used for dependency analysis
   let varList = [];
-
   const tableList = new Set();
   const columnList = new Set();
   const tableAlias = {};
 }
 
 start
-  = __ n:(multiple_stmt) {
+  = __ n:(create_function_stmt / multiple_stmt) {
+    // => multiple_stmt
     return n
   }
 
 cmd_stmt
   = drop_stmt
   / create_stmt
+  / declare_stmt
   / truncate_stmt
   / rename_stmt
   / call_stmt
@@ -509,16 +218,32 @@ cmd_stmt
   / alter_stmt
   / set_stmt
   / lock_stmt
+  / show_stmt
+  / deallocate_stmt
+  / grant_revoke_stmt
+  / if_else_stmt
+  / raise_stmt
+  / execute_stmt
+  / for_loop_stmt
 
 create_stmt
   = create_table_stmt
   / create_constraint_trigger
   / create_extension_stmt
   / create_index_stmt
+  / create_sequence
   / create_db_stmt
+  / create_domain_stmt
+  / create_type_stmt
+  / create_view_stmt
+  / create_aggregate_stmt
 
 alter_stmt
   = alter_table_stmt
+  / alter_schema_stmt
+  / alter_domain_type_stmt
+  / alter_function_stmt
+  / alter_aggregate_stmt
 
 crud_stmt
   = union_stmt
@@ -534,9 +259,9 @@ multiple_stmt
       /*
       // is in reality: { tableList: any[]; columnList: any[]; ast: T; }
       export type AstStatement<T> = T;
-       => AstStatement<crud_stmt[]> */
+       => AstStatement<curd_stmt | crud_stmt[]> */
       const headAst = head && head.ast || head
-      const cur = tail && tail.length && tail[0].length >= 4 ? [headAst] : headAst;
+      const cur = tail && tail.length && tail[0].length >= 4 ? [headAst] : headAst
       for (let i = 0; i < tail.length; i++) {
         if(!tail[i][3] || tail[i][3].length === 0) continue;
         cur.push(tail[i][3] && tail[i][3].ast || tail[i][3]);
@@ -549,15 +274,18 @@ multiple_stmt
     }
 
 set_op
-  = u:(KW_UNION / KW_INTERSECT / KW_EXCEPT) __ s:(KW_ALL / KW_DISTINCT)? {
-    return s ? `${u.toLowerCase()} ${s.toLowerCase()}` : `${u.toLowerCase()}`
+  = KW_UNION __ a:(KW_ALL / KW_DISTINCT)? {
+    // => 'union' | 'union all' | 'union distinct'
+    return a ? `union ${a.toLowerCase()}` : 'union'
   }
+  / KW_INTERSECT { return 'intersect' }
+  / KW_EXCEPT { return 'except' }
 
 union_stmt
-  = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
+  = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob:order_by_clause? __ l:limit_clause? {
      /* export interface union_stmt_node extends select_stmt_node  {
          _next: union_stmt_node;
-         union: 'union' | 'union all' | 'union distinct';
+         set_op: 'union' | 'union all' | 'union distinct';
       }
      => AstStatement<union_stmt_node>
      */
@@ -568,7 +296,7 @@ union_stmt
         cur = cur._next
       }
       if(ob) head._orderby = ob
-      if(l) head._limit = l
+      if(l && l.value && l.value.length > 0) head._limit = l
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -578,6 +306,7 @@ union_stmt
 
 if_not_exists_stmt
   = 'IF'i __ KW_NOT __ KW_EXISTS {
+    // => 'IF NOT EXISTS'
     return 'IF NOT EXISTS'
   }
 
@@ -617,15 +346,26 @@ create_extension_stmt
 
 create_db_definition
   = head:create_option_character_set tail:(__ create_option_character_set)* {
+    // => create_option_character_set[]
     return createList(head, tail, 1)
   }
 
 create_db_stmt
   = a:KW_CREATE __
-    k:(KW_DATABASE / KW_SCHEME) __
+    k:(KW_DATABASE / KW_SCHEMA) __
     ife:if_not_exists_stmt? __
     t:ident_name __
     c:create_db_definition? {
+      /*
+      export type create_db_stmt = {
+        type: 'create',
+        keyword: 'database' | 'schema',
+        if_not_exists?: 'if not exists',
+        database: string,
+        create_definitions?: create_db_definition
+      }
+      => AstStatement<create_db_stmt>
+      */
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -638,8 +378,399 @@ create_db_stmt
         }
       }
     }
+view_with
+  = KW_WITH __ c:("CASCADED"i / "LOCAL"i) __ "CHECK"i __ "OPTION" {
+    // => string
+    return `with ${c.toLowerCase()} check option`
+  }
+  / KW_WITH __ "CHECK"i __ "OPTION" {
+    // => string
+    return 'with check option'
+  }
 
+with_view_option
+  = 'check_option'i __ KW_ASSIGIN_EQUAL __ t:("CASCADED"i / "LOCAL"i) {
+    // => {type: string; value: string; symbol: string; }
+    return  { type: 'check_option', value: t, symbol: '=' }
+  }
+  / k:('security_barrier'i / 'security_invoker'i) __ KW_ASSIGIN_EQUAL __ t:literal_bool {
+    // => {type: string; value: string; symbol: string; }
+    return { type: k.toLowerCase(), value: t.value ? 'true' : 'false', symbol: '=' }
+  }
+with_view_options
+  = head:with_view_option tail:(__ COMMA __ with_view_option)* {
+      // => with_view_option[]
+      return createList(head, tail);
+    }
+create_view_stmt
+  = a:KW_CREATE __ or:(KW_OR __ KW_REPLACE)? __ tp:(KW_TEMP / KW_TEMPORARY)? __ r:KW_RECURSIVE? __
+  KW_VIEW __ v:table_name __ c:(LPAREN __ column_list __ RPAREN)? __ wo:(KW_WITH __ LPAREN __ with_view_options __ RPAREN)? __
+  KW_AS __ s:select_stmt_nake __ w:view_with? {
+    /*
+      export type create_view_stmt = {
+        type: 'create',
+        keyword: 'view',
+        replace?: 'or replace',
+        temporary?: 'temporary' | 'temp',
+        recursive?: 'recursive',
+        view: table_name,
+        columns?: column_list,
+        select: select_stmt_nake,
+        with_options?: with_options,
+        with?: string,
+      }
+      => AstStatement<create_view_stmt>
+      */
+    v.view = v.table
+    delete v.table
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: a[0].toLowerCase(),
+        keyword: 'view',
+        replace: or && 'or replace',
+        temporary: tp && tp[0].toLowerCase(),
+        recursive: r && r.toLowerCase(),
+        columns: c && c[2],
+        select: s,
+        view: v,
+        with_options: wo && wo[4],
+        with: w,
+      }
+    }
+  }
+create_aggregate_opt_required
+  = 'SFUNC'i __ KW_ASSIGIN_EQUAL __ n:table_name __ COMMA __ 'STYPE'i __ KW_ASSIGIN_EQUAL __ d:data_type {
+    // => { type: string; symbol: '='; value: expr; }[]
+    return [
+      {
+        type: 'sfunc',
+        symbol: '=',
+        value: { schema: n.db, name: n.table },
+      },
+      {
+        type: 'stype',
+        symbol: '=',
+        value: d,
+      }
+    ]
+  }
 
+create_aggregate_opt_optional
+  = n:ident __ KW_ASSIGIN_EQUAL __ e:(ident / expr)  {
+    // => { type: string; symbol: '='; value: ident | expr; }
+    return {
+      type: n,
+      symbol: '=',
+      value: typeof e === 'string' ? { type: 'default', value: e } : e
+    }
+  }
+
+create_aggregate_opts
+  = head:create_aggregate_opt_required tail:(__ COMMA __ create_aggregate_opt_optional)* {
+    // => create_aggregate_opt_optional[]
+    return createList(head, tail)
+  }
+
+create_aggregate_stmt
+  = a:KW_CREATE __ or:(KW_OR __ KW_REPLACE)? __ t:'AGGREGATE'i __ s:table_name __ LPAREN __ as:aggregate_signature __ RPAREN __ LPAREN __ opts:create_aggregate_opts __ RPAREN  {
+    /*
+      export type create_aggregate_stmt = {
+        type: 'create',
+        keyword: 'aggregate',
+        replace?: 'or replace',
+        name: table_name,
+        args?: aggregate_signature,
+        options: create_aggregate_opt_optional[]
+      }
+      => AstStatement<create_aggregate_stmt>
+      */
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'create',
+          keyword: 'aggregate',
+          name: { schema: s.db, name: s.table },
+          args: {
+            parentheses: true,
+            expr: as,
+            orderby: as.orderby
+          },
+          options: opts
+        }
+      };
+  }
+column_data_type
+  = c:column_ref __ d:data_type {
+    // => { column: column_ref; definition: data_type; }
+    return {
+      column: c,
+      definition: d,
+    }
+  }
+column_data_type_list
+  = head:column_data_type tail:(__ COMMA __ column_data_type)* {
+    // => column_data_type[]
+      return createList(head, tail)
+    }
+func_returns
+  = 'RETURNS'i __ k:'SETOF'i? __ t:(data_type / table_name) {
+    // => { type: "returns"; keyword?: "setof"; expr: data_type; }
+    return {
+      type: 'returns',
+      keyword: k,
+      expr: t
+    }
+  }
+  / 'RETURNS'i __ KW_TABLE __ LPAREN __ e:column_data_type_list __ RPAREN {
+    // => { type: "returns"; keyword?: "table"; expr: column_data_type_list; }
+    return {
+      type: 'returns',
+      keyword: 'table',
+      expr: e
+    }
+  }
+
+declare_variable_item
+  = n:ident_name &{ return n.toLowerCase() !== 'begin' } __ c:'CONSTANT'i? __ d:data_type __  collate:collate_expr? __ nu:(KW_NOT __ KW_NULL)? __ expr:((KW_DEFAULT / ':=')? __ (&'BEGIN'i / literal / expr))?  __ s:SEMICOLON? {
+    // => { keyword: 'variable'; name: string, constant?: string; datatype: data_type; collate?: collate; not_null?: string; default?: { type: 'default'; keyword: string; value: literal | expr; }; }
+    return {
+      keyword: 'variable',
+      name: n,
+      constant: c,
+      datatype: d,
+      collate,
+      not_null: nu && 'not null',
+      definition: expr && expr[0] && {
+        type: 'default',
+        keyword: expr[0],
+        value: expr[2]
+      },
+    }
+  }
+declare_variables
+  = head:declare_variable_item tail:(__ declare_variable_item)* {
+    // => declare_variable_item[]
+    return createList(head, tail, 1)
+}
+declare_stmt
+  = 'DECLARE'i __ vars:declare_variables {
+    /*
+      export type declare_stmt = { type: 'declare'; declare: declare_variable_item[]; }
+      => AstStatement<declare_stmt>
+    */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'declare',
+        declare: vars,
+        symbol: ';',
+      }
+    }
+  }
+
+create_func_opt
+  = 'LANGUAGE' __ ln:ident_name __ {
+    // => literal_string
+    return {
+      prefix: 'LANGUAGE',
+      type: 'default',
+      value: ln
+    }
+  }
+  / 'TRANSORM'i __ ft:('FOR' __ 'TYPE' __ ident_name)? __ {
+    // => literal_string
+    if (!ft) return { type: 'origin', value: 'TRANSORM' }
+    return {
+      prefix: ['TRANSORM', ft[0].toUpperCase(), ft[2].toUpperCase()].join(' '),
+      type: 'default',
+      value: ft[4]
+    }
+  }
+  / i:('WINDOW'i / 'IMMUTABLE'i / 'STABLE'i / 'VOLATILE'i / 'STRICT'i) __ {
+    // => literal_string
+    return {
+      type: 'origin',
+      value: i
+    }
+  }
+  / n:('NOT'i)? __ 'LEAKPROOF'i __ {
+    // => literal_string
+    return {
+      type: 'origin',
+      value: [n, 'LEAKPROOF'].filter(v => v).join(' ')
+    }
+  }
+  / i:('CALLED'i / ('RETURNS'i __ 'NULL'i))? __ 'ON'i __ 'NULL'i __ 'INPUT'i __ {
+    // => literal_string
+    if (Array.isArray(i)) i = [i[0], i[2]].join(' ')
+    return {
+      type: 'origin',
+      value: `${i} ON NULL INPUT`
+    }
+  }
+  / e:('EXTERNAL'i)? __ 'SECURITY'i __ i:('INVOKER'i / 'DEFINER'i) __ {
+    // => literal_string
+    return {
+      type: 'origin',
+      value: [e, 'SECURITY', i].filter(v => v).join(' ')
+    }
+  }
+  / 'PARALLEL'i __ i:('UNSAFE'i / 'RESTRICTED'i / 'SAFE'i) __ {
+    // => literal_string
+    return {
+      type: 'origin',
+      value: ['PARALLEL', i].join(' ')
+    }
+  }
+  / KW_AS __ c:[^ \s\t\n\r]+ __ de:declare_stmt? __ b:('BEGIN'i)? __ s:multiple_stmt __ e:KW_END? &{ return (b && e) || (!b && !e) } __ SEMICOLON? __ l:[^ \s\t\n\r;]+ __ {
+    // => { type: 'as'; begin?: string; declare?: declare_stmt; expr: multiple_stmt; end?: string; symbol: string; }
+    const start = c.join('')
+    const end = l.join('')
+    if (start !== end) throw new Error(`start symbol '${start}'is not same with end symbol '${end}'`)
+    return {
+      type: 'as',
+      declare: de && de.ast,
+      begin: b,
+      expr: Array.isArray(s.ast) ? s.ast.flat() : [s.ast],
+      end: e && e[0],
+      symbol: start,
+    }
+  }
+  / p:('COST'i / 'ROWS'i) __ n:literal_numeric __ {
+    // => literal_numeric
+    n.prefix = p
+    return n
+  }
+  / 'SUPPORT'i __ n:proc_func_name __ {
+    // => literal_string
+    return {
+      prefix: 'support',
+      type: 'default',
+      value: n
+    }
+  }
+  / KW_SET __ ca:ident_name __ e:((('TO'i / '=') __ ident_list) / (KW_FROM __ 'CURRENT'i))? __ {
+    // => { type: "set"; parameter: ident_name; value?: { prefix: string; expr: expr }}
+    let value
+    if (e) {
+      const val = Array.isArray(e[2]) ? e[2] : [e[2]]
+      value = {
+        prefix: e[0],
+        expr: val.map(v => ({ type: 'default', value: v }))
+      }
+    }
+    return {
+      type: 'set',
+      parameter: ca,
+      value,
+    }
+  }
+
+create_function_stmt
+  = a:KW_CREATE __
+  or:(KW_OR __ KW_REPLACE)? __
+  t:'FUNCTION'i __
+  c:table_name __ LPAREN __ args:alter_func_args? __ RPAREN __
+  r:func_returns? __
+  fo:create_func_opt* __ SEMICOLON? __ {
+    /*
+      export type create_function_stmt = {
+        type: 'create';
+        replace?: string;
+        name: { schema?: string; name: string };
+        args?: alter_func_args;
+        returns?: func_returns;
+        keyword: 'function';
+        options?: create_func_opt[];
+      }
+      => AstStatement<create_function_stmt>
+      */
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          args: args || [],
+          type: 'create',
+          replace: or && 'or replace',
+          name: { schema: c.db, name: c.table },
+          returns: r,
+          keyword: t && t.toLowerCase(),
+          options: fo || [],
+        }
+      }
+  }
+
+create_type_stmt
+  = a:KW_CREATE __ k:'TYPE'i __ s:table_name __ as:KW_AS __ r:KW_ENUM __ LPAREN __ e:expr_list? __ RPAREN {
+      /*
+      export type create_type_stmt = {
+        type: 'create',
+        keyword: 'type',
+        name: { schema: string; name: string },
+        as?: string,
+        resource?: string,
+        create_definitions?: any
+      }
+      => AstStatement<create_type_stmt>
+      */
+      e.parentheses = true
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: k.toLowerCase(),
+          name: { schema: s.db, name: s.table },
+          as: as && as[0] && as[0].toLowerCase(),
+          resource: r.toLowerCase(),
+          create_definitions: e,
+        }
+      }
+    }
+  / a:KW_CREATE __ k:'TYPE'i __ s:table_name {
+    // => AstStatement<create_type_stmt>
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: k.toLowerCase(),
+          name: { schema: s.db, name: s.table },
+        }
+      }
+  }
+create_domain_stmt
+  = a:KW_CREATE __ k:'DOMAIN'i __ s:table_name __ as:KW_AS? __ d:data_type __ ce:collate_expr? __ de:default_expr? __ ccc: create_constraint_check? {
+      /*
+      export type create_domain_stmt = {
+        type: 'create',
+        keyword: 'domain',
+        domain: { schema: string; name: string },
+        as?: string,
+        target: data_type,
+        create_definitions?: any[]
+      }
+      => AstStatement<create_domain_stmt>
+      */
+     if (ccc) ccc.type = 'constraint'
+     const definitions = [ce, de, ccc].filter(v => v)
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: k.toLowerCase(),
+          domain: { schema: s.db, name: s.table },
+          as: as && as[0] && as[0].toLowerCase(),
+          target: d,
+          create_definitions: definitions,
+        }
+      }
+    }
 create_table_stmt
   = a:KW_CREATE __
     tp:KW_TEMPORARY? __
@@ -664,7 +795,7 @@ create_table_stmt
         ignore_replace?: 'ignore' | 'replace';
         as?: 'as';
         query_expr?: union_stmt_node;
-        create_definition?: create_table_definition;
+        create_definitions?: create_table_definition;
         table_options?: table_options;
       }
       => AstStatement<create_table_stmt_node>
@@ -714,6 +845,159 @@ create_table_stmt
         }
       }
     }
+
+create_sequence
+  = a:KW_CREATE __
+    tp:(KW_TEMPORARY / KW_TEMP)? __
+    KW_SEQUENCE __
+    ife:if_not_exists_stmt? __
+    t:table_name __ as:(KW_AS __ alias_ident)?__
+    c:create_sequence_definition_list? {
+      /*
+      export type create_sequence_stmt = {
+        type: 'create',
+        keyword: 'sequence',
+        temporary?: 'temporary' | 'temp',
+        if_not_exists?: 'if not exists',
+        table: table_ref_list,
+        create_definitions?: create_sequence_definition_list
+      }
+      => AstStatement<create_sequence_stmt>
+      */
+      t.as = as && as[2]
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'sequence',
+          temporary: tp && tp[0].toLowerCase(),
+          if_not_exists:ife,
+          sequence: [t],
+          create_definitions: c,
+        }
+      }
+    }
+
+sequence_definition_increment
+  = k:'INCREMENT'i __ b:KW_BY? __ n:literal_numeric {
+    /*
+    export type sequence_definition = { "resource": "sequence", prefix?: string,value: literal | column_ref }
+    => sequence_definition
+    */
+    return {
+      resource: 'sequence',
+      prefix: b ? `${k.toLowerCase()} by` : k.toLowerCase(),
+      value: n
+    }
+  }
+sequence_definition_minval
+  = k:'MINVALUE'i __ n:literal_numeric {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: k.toLowerCase(),
+      value: n
+    }
+  }
+  / 'NO'i __ 'MINVALUE'i {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      value: {
+        type: 'origin',
+        value: 'no minvalue'
+      }
+    }
+  }
+
+sequence_definition_maxval
+  = k:'MAXVALUE'i __ n:literal_numeric {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: k.toLowerCase(),
+      value: n
+    }
+  }
+  / 'NO'i __ 'MAXVALUE'i {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      value: {
+        type: 'origin',
+        value: 'no maxvalue'
+      }
+    }
+  }
+
+sequence_definition_start
+  = k:'START'i __ w:KW_WITH? __ n:literal_numeric {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: w ? `${k.toLowerCase()} with` : k.toLowerCase(),
+      value: n
+    }
+  }
+
+sequence_definition_cache
+  = k:'CACHE'i __ n:literal_numeric {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: k.toLowerCase(),
+      value: n
+    }
+  }
+
+sequence_definition_cycle
+  = n:'NO'i? __ 'CYCLE'i {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      value: {
+        type: 'origin',
+        value: n ? 'no cycle' : 'cycle'
+      }
+    }
+  }
+
+sequence_definition_owned
+  = 'OWNED'i __ KW_BY __ 'NONE'i {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: 'owned by',
+      value: {
+        type: 'origin',
+        value: 'none'
+      }
+    }
+  }
+  / n:'OWNED'i __ KW_BY __ col:column_ref {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: 'owned by',
+      value: col
+    }
+  }
+
+create_sequence_definition
+  = sequence_definition_increment
+  / sequence_definition_minval
+  / sequence_definition_maxval
+  / sequence_definition_start
+  / sequence_definition_cache
+  / sequence_definition_cycle
+  / sequence_definition_owned
+
+create_sequence_definition_list
+  = head: create_sequence_definition tail:(__ create_sequence_definition)* {
+    // => create_sequence_definition[]
+    return createList(head, tail, 1)
+}
 
 create_index_stmt
   = a:KW_CREATE __
@@ -781,7 +1065,6 @@ column_order
   nf:('NULLS'i __ ('FIRST'i / 'LAST'i))? {
     /*
     => {
-      column: expr;
       collate: collate_expr;
       opclass: ident;
       order: 'asc' | 'desc';
@@ -826,45 +1109,65 @@ create_definition
   / create_constraint_definition
 
 column_definition_opt
-  = n:(literal_not_null / literal_null) {
-    if (n && !n.value) n.value = 'null'
-    return { nullable: n }
-  }
-  / d:default_expr {
-    return { default_val: d }
-  }
+  = column_constraint
   / a:('AUTO_INCREMENT'i) {
+    // => { auto_increment: 'auto_increment'; }
     return { auto_increment: a.toLowerCase() }
   }
   / 'UNIQUE'i __ k:('KEY'i)? {
+    // => { unique: 'unique' | 'unique key'; }
     const sql = ['unique']
     if (k) sql.push(k)
     return { unique: sql.join(' ').toLowerCase('') }
   }
   / p:('PRIMARY'i)? __ 'KEY'i {
+    // => { unique: 'key' | 'primary key'; }
     const sql = []
     if (p) sql.push('primary')
     sql.push('key')
     return { primary_key: sql.join(' ').toLowerCase('') }
   }
   / co:keyword_comment {
+    // => { comment: keyword_comment; }
     return { comment: co }
   }
   / ca:collate_expr {
+    // => { collate: collate_expr; }
     return { collate: ca }
   }
   / cf:column_format {
+    // => { column_format: column_format; }
     return { column_format: cf }
   }
   / s:storage {
+    // => { storage: storage }
     return { storage: s }
   }
   / re:reference_definition {
+    // => { reference_definition: reference_definition; }
     return { reference_definition: re }
+  }
+  / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_name {
+    // => { character_set: collate_expr }
+    return { character_set: { type: t, value: v, symbol: s }}
   }
 
 column_definition_opt_list
   = head:column_definition_opt __ tail:(__ column_definition_opt)* {
+    /*
+      => {
+        nullable?: column_constraint['nullable'];
+        default_val?: column_constraint['default_val'];
+        auto_increment?: 'auto_increment';
+        unique?: 'unique' | 'unique key';
+        primary?: 'key' | 'primary key';
+        comment?: keyword_comment;
+        collate?: collate_expr;
+        column_format?: column_format;
+        storage?: storage;
+        reference_definition?: reference_definition;
+      }
+      */
     let opt = head
     for (let i = 0; i < tail.length; i++) {
       opt = { ...opt, ...tail[i][1] }
@@ -876,6 +1179,23 @@ create_column_definition
   = c:column_ref __
     d:data_type __
     cdo:column_definition_opt_list? {
+      /*
+      => {
+        column: column_ref;
+        definition: data_type;
+        nullable: column_constraint['nullable'];
+        default_val: column_constraint['default_val'];
+        auto_increment?: 'auto_increment';
+        unique?: 'unique' | 'unique key';
+        primary?: 'key' | 'primary key';
+        comment?: keyword_comment;
+        collate?: collate_expr;
+        column_format?: column_format;
+        storage?: storage;
+        reference_definition?: reference_definition;
+        resource: 'column';
+      }
+      */
       columnList.add(`create::${c.table}::${c.column}`)
       return {
         column: c,
@@ -885,12 +1205,30 @@ create_column_definition
       }
     }
 
+column_constraint
+  = n:(literal_not_null / literal_null) __ df:default_expr? {
+    // => { nullable: literal_null | literal_not_null; default_val: default_expr; }
+    if (n && !n.value) n.value = 'null'
+    return {
+      default_val: df,
+      nullable: n
+    }
+  }
+  / df:default_expr __ n:(literal_not_null / literal_null)? {
+    // => { nullable: literal_null | literal_not_null; default_val: default_expr; }
+    if (n && !n.value) n.value = 'null'
+    return {
+      default_val: df,
+      nullable: n
+    }
+  }
 
 collate_expr
-  = KW_COLLATE __ ca:ident {
-    // => { type: 'collate'; value: ident; }
+  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
+    // => { type: 'collate'; symbol: '=' | null; value: ident; }
     return {
       type: 'collate',
+      symbol: s,
       value: ca,
     }
   }
@@ -910,6 +1248,15 @@ storage
       value: s.toLowerCase()
     }
   }
+default_arg_expr
+  = kw:(KW_DEFAULT / KW_ASSIGIN_EQUAL)? __ ce:(literal / expr) {
+    // => { type: 'default'; keyword: string, value: literal | expr; }
+    return {
+      type: 'default',
+      keyword: kw && kw[0],
+      value: ce
+    }
+  }
 default_expr
   = KW_DEFAULT __ ce: (literal / expr) {
     // => { type: 'default'; value: literal | expr; }
@@ -920,12 +1267,21 @@ default_expr
   }
 drop_index_opt
   = head:(ALTER_ALGORITHM / ALTER_LOCK) tail:(__ (ALTER_ALGORITHM / ALTER_LOCK))* {
+    // => (ALTER_ALGORITHM | ALTER_LOCK)[]
     return createList(head, tail, 1)
   }
 drop_stmt
   = a:KW_DROP __
     r:KW_TABLE __
     t:table_ref_list {
+      /*
+      export interface drop_stmt_node {
+        type: 'drop';
+        keyword: 'table';
+        name: table_ref_list;
+      }
+      => AstStatement<drop_stmt_node>
+      */
       if(t) t.forEach(tt => tableList.add(`${a}::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
@@ -939,22 +1295,33 @@ drop_stmt
     }
   / a:KW_DROP __
     r:KW_INDEX __
+    cu:KW_CONCURRENTLY? __
+    ie:('IF'i __ KW_EXISTS)? __
     i:column_ref __
-    KW_ON __
-    t:table_name __
-    op:drop_index_opt? __ {
+    op:('CASCADE'i / 'RESTRICT'i)? {
+      /*
+      export interface drop_index_stmt_node {
+        type: 'drop';
+        prefix?: 'CONCURRENTLY';
+        keyword: string;
+        name: column_ref;
+        options?: 'cascade' | 'restrict';
+      }
+      => AstStatement<drop_index_stmt_node>
+      */
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: a.toLowerCase(),
           keyword: r.toLowerCase(),
+          prefix: cu,
           name: i,
-          table: t,
-          options: op
+          options: op && [{ type: 'origin', value: op }]
         }
       };
     }
+
 truncate_stmt
   = a:KW_TRUNCATE  __
     kw:KW_TABLE? __
@@ -1000,6 +1367,144 @@ use_stmt
       };
     }
 
+aggregate_signature
+  = STAR {
+    // => { name: ”*“ }
+    return [
+      {
+        name: '*'
+      }
+    ]
+  }
+  / s:alter_func_args? __ KW_ORDER __ KW_BY __ o:alter_func_args {
+    // => alter_func_args
+    const ans = s || []
+    ans.orderby = o
+    return ans
+  }
+  / alter_func_args
+
+alter_func_argmode
+  = t:(KW_IN / 'OUT'i / 'VARIADIC'i / 'INOUT'i) {
+    // => ignore
+    return t.toUpperCase()
+  }
+
+alter_func_arg_item
+  = m:alter_func_argmode? __ ad:data_type __ de:default_arg_expr?  {
+    // => { mode?: string; name?: string; type: data_type;  default: default_arg_expr; }
+    return {
+      mode: m,
+      type: ad,
+      default: de,
+    }
+  }
+  / m:alter_func_argmode? __ an:ident_name __ ad:data_type __ de:default_arg_expr?  {
+    // => { mode?: string; name?: string; type: data_type;  default: default_arg_expr; }
+    return {
+      mode: m,
+      name: an,
+      type: ad,
+      default: de,
+    }
+  }
+alter_func_args
+  = head:alter_func_arg_item tail:(__ COMMA __ alter_func_arg_item)* {
+      // => alter_func_arg_item[]
+      return createList(head, tail)
+  }
+alter_aggregate_stmt
+  = KW_ALTER __ t:'AGGREGATE'i __ s:table_name __ LPAREN __ as:aggregate_signature __ RPAREN __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
+    // => AstStatement<alter_resource_stmt_node>
+    const keyword = t.toLowerCase()
+    ac.resource = keyword
+    ac[keyword] = ac.table
+    delete ac.table
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword,
+          name: { schema: s.db, name: s.table },
+          args: {
+            parentheses: true,
+            expr: as,
+            orderby: as.orderby
+          },
+          expr: ac
+        }
+      };
+  }
+alter_function_stmt
+  = KW_ALTER __ t:'FUNCTION'i __ s:table_name __ ags:(LPAREN __ alter_func_args? __ RPAREN)? __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
+    // => AstStatement<alter_resource_stmt_node>
+    const keyword = t.toLowerCase()
+    ac.resource = keyword
+    ac[keyword] = ac.table
+    delete ac.table
+    const args = {}
+    if (ags && ags[0]) args.parentheses = true
+    args.expr = ags && ags[2]
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword,
+          name: { schema: s.db, name: s.table },
+          args,
+          expr: ac
+        }
+      };
+  }
+alter_domain_type_stmt
+  = KW_ALTER __ t:('DOMAIN'i / 'TYPE'i) __ s:table_name __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
+    /*
+      export interface alter_resource_stmt_node {
+        type: 'alter';
+        keyword: 'domain' | 'type',
+        name: string | { schema: string, name: string };
+        args?: { parentheses: true; expr?: alter_func_args; orderby?: alter_func_args; };
+        expr: alter_rename_owner;
+      }
+      => AstStatement<alter_resource_stmt_node>
+      */
+    const keyword = t.toLowerCase()
+    ac.resource = keyword
+    ac[keyword] = ac.table
+    delete ac.table
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword,
+          name: { schema: s.db, name: s.table },
+          expr: ac
+        }
+      };
+  }
+
+alter_schema_stmt
+  = KW_ALTER __ t:KW_SCHEMA __ s:ident_name __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
+    // => AstStatement<alter_resource_stmt_node>
+    const keyword = t.toLowerCase()
+    ac.resource = keyword
+    ac[keyword] = ac.table
+    delete ac.table
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword,
+          schema: s,
+          expr: ac
+        }
+      };
+  }
+
 alter_table_stmt
   = KW_ALTER  __
     KW_TABLE __
@@ -1033,10 +1538,11 @@ alter_action_list
 
 alter_action
   = ALTER_ADD_COLUMN
+  / ALTER_ADD_CONSTRAINT
   / ALTER_DROP_COLUMN
   / ALTER_ADD_INDEX_OR_KEY
   / ALTER_ADD_FULLETXT_SPARITAL_INDEX
-  / ALTER_RENAME_TABLE
+  / ALTER_RENAME
   / ALTER_ALGORITHM
   / ALTER_LOCK
 
@@ -1081,6 +1587,22 @@ ALTER_DROP_COLUMN
       }
     }
 
+ALTER_ADD_CONSTRAINT
+  = KW_ADD __ c:create_constraint_definition {
+    /* => {
+        action: 'add';
+        create_definitions: create_db_definition;
+        resource: 'constraint';
+        type: 'alter';
+      } */
+      return {
+        action: 'add',
+        create_definitions: c,
+        resource: 'constraint',
+        type: 'alter',
+      }
+    }
+
 ALTER_ADD_INDEX_OR_KEY
   = KW_ADD __
     id:create_index_definition
@@ -1096,23 +1618,48 @@ ALTER_ADD_INDEX_OR_KEY
       }
     }
 
-ALTER_RENAME_TABLE
-  = KW_RENAME __
-  kw:(KW_TO / KW_AS)? __
-  tn:ident {
-       /* => {
-         action: 'rename';
-         type: 'alter';
-         resource: 'table';
-         keyword?: 'to' | 'as';
-         table: ident;
-         } */
+ALTER_RENAME
+  = KW_RENAME __ kw:(KW_TO / KW_AS)? __ tn:ident {
+    /*
+      export interface alter_rename_owner {
+        action: string;
+        type: 'alter';
+        resource: string;
+        keyword?: 'to' | 'as';
+        [key: string]: ident;
+      }
+      => AstStatement<alter_rename>
+      */
     return {
       action: 'rename',
       type: 'alter',
       resource: 'table',
       keyword: kw && kw[0].toLowerCase(),
       table: tn
+    }
+  }
+
+ALTER_OWNER_TO
+  = 'OWNER'i __ KW_TO __ tn:(ident / 'CURRENT_ROLE'i / 'CURRENT_USER'i / 'SESSION_USER'i) {
+      // => AstStatement<alter_rename_owner>
+    return {
+      action: 'owner',
+      type: 'alter',
+      resource: 'table',
+      keyword: 'to',
+      table: tn
+    }
+  }
+
+ALTER_SET_SCHEMA
+  = KW_SET __ KW_SCHEMA __ s:ident {
+    // => AstStatement<alter_rename_owner>
+    return {
+      action: 'set',
+      type: 'alter',
+      resource: 'table',
+      keyword: 'schema',
+      table: s
     }
   }
 
@@ -1204,15 +1751,32 @@ create_constraint_definition
   = create_constraint_primary
   / create_constraint_unique
   / create_constraint_foreign
+  / create_constraint_check
 
 constraint_name
-  = kc:KW_CONSTRAINT __
-  c:ident? {
+  = kc:KW_CONSTRAINT __ c:ident? {
     // => { keyword: 'constraint'; constraint: ident; }
     return {
       keyword: kc.toLowerCase(),
       constraint: c
     }
+  }
+create_constraint_check
+  = kc:constraint_name? __ p:'CHECK'i __ LPAREN __ e:or_and_where_expr __ RPAREN {
+    /* => {
+      constraint?: constraint_name['constraint'];
+      definition: or_and_where_expr;
+      keyword?: constraint_name['keyword'];
+      constraint_type: 'check';
+      resource: 'constraint';
+    }*/
+    return {
+        constraint: kc && kc.constraint,
+        definition: [e],
+        constraint_type: p.toLowerCase(),
+        keyword: kc && kc.keyword,
+        resource: 'constraint',
+      }
   }
 create_constraint_primary
   = kc:constraint_name? __
@@ -1224,6 +1788,7 @@ create_constraint_primary
       constraint?: constraint_name['constraint'];
       definition: cte_column_definition;
       constraint_type: 'primary key';
+      keyword?: constraint_name['keyword'];
       index_type?: index_type;
       resource: 'constraint';
       index_options?: index_options;
@@ -1251,6 +1816,7 @@ create_constraint_unique
       constraint?: constraint_name['constraint'];
       definition: cte_column_definition;
       constraint_type: 'unique key' | 'unique' | 'unique index';
+      keyword?: constraint_name['keyword'];
       index_type?: index_type;
       resource: 'constraint';
       index_options?: index_options;
@@ -1295,11 +1861,11 @@ create_constraint_foreign
 
 reference_definition
   = kc:KW_REFERENCES __
-  t:table_ref_list __
+  t: table_name __
   de:cte_column_definition __
   m:('MATCH FULL'i / 'MATCH PARTIAL'i / 'MATCH SIMPLE'i)? __
-  od:on_reference? __
-  ou:on_reference? {
+  od: on_reference? __
+  ou: on_reference? {
     /* => {
         definition: cte_column_definition;
         table: table_ref_list;
@@ -1309,11 +1875,20 @@ reference_definition
       }*/
     return {
         definition: de,
-        table: t,
+        table: [t],
         keyword: kc.toLowerCase(),
         match:m && m.toLowerCase(),
         on_action: [od, ou].filter(v => v)
       }
+  }
+  / oa:on_reference {
+    /* => {
+      on_action: [on_reference];
+    }
+    */
+    return {
+      on_action: [oa]
+    }
   }
 
 on_reference
@@ -1327,6 +1902,7 @@ on_reference
 
 reference_option
   = kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
+    // => { type: 'function'; name: string; args: expr_list; }
     return {
       type: 'function',
       name: kw,
@@ -1334,6 +1910,7 @@ reference_option
     }
   }
   / kc:('RESTRICT'i / 'CASCADE'i / 'SET NULL'i / 'NO ACTION'i / 'SET DEFAULT'i / KW_CURRENT_TIMESTAMP) {
+    // => 'restrict' | 'cascade' | 'set null' | 'no action' | 'set default' | 'current_timestamp'
     return {
       type: 'origin',
       value: kc.toLowerCase()
@@ -1356,6 +1933,28 @@ create_constraint_trigger
   tw:trigger_when? __
   fc:'EXECUTE'i __ e:('PROCEDURE'i / 'FUNCTION'i) __
   fct:proc_func_call {
+    /*
+    => {
+      type: 'create';
+      replace?: string;
+      constraint?: string;
+      location: 'before' | 'after' | 'instead of';
+      events: trigger_event_list;
+      table: table_name;
+      from?: table_name;
+      deferrable?: trigger_deferrable;
+      for_each?: trigger_for_row;
+      when?: trigger_when;
+      execute: {
+        keyword: string;
+        expr: proc_func_call;
+      };
+      constraint_type: 'trigger';
+      keyword: 'trigger';
+      constraint_kw: 'constraint';
+      resource: 'constraint';
+    }
+    */
     return {
         type: 'create',
         replace: or && 'or replace',
@@ -1436,10 +2035,17 @@ table_options
 
 create_option_character_set_kw
   = 'CHARACTER'i __ 'SET'i {
+    // => string
     return 'CHARACTER SET'
   }
+
 create_option_character_set
   = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
+    /* => {
+      keyword: 'character set' | 'charset' | 'collate' | 'default character set' | 'default charset' | 'default collate';
+      symbol: '=';
+      value: ident_name;
+      } */
     return {
       keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
       symbol: s,
@@ -1593,8 +2199,8 @@ call_stmt
       type: 'call';
       expr: proc_func_call;
     }
-       => AstStatement<call_stmt_node>
-       */
+    => AstStatement<call_stmt_node>
+    */
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
@@ -1605,8 +2211,444 @@ call_stmt
     }
   }
 
+show_stmt
+  = KW_SHOW __ 'TABLES'i {
+    return {
+      /*
+        export interface show_stmt_node {
+          type: 'show';
+          keyword: 'tables' | 'var';
+          var?: without_prefix_var_decl;
+        }
+        => AstStatement<show_stmt_node>
+       */
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'show',
+        keyword: 'tables'
+      }
+    }
+  }
+  / KW_SHOW __ c:without_prefix_var_decl {
+    return {
+      // => AstStatement<show_stmt_node>
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'show',
+        keyword: 'var',
+        var: c,
+      }
+    }
+  }
+
+deallocate_stmt
+  = KW_DEALLOCATE __ p:('PREPARE'i)? __ i:(ident_name / KW_ALL) {
+    return {
+      /*
+        export interface deallocate_stmt_node {
+          type: 'deallocate';
+          keyword: 'PREPARE' | undefined;
+          expr: { type: 'default', value: string }
+        }
+        => AstStatement<deallocate_stmt_node>
+       */
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'deallocate',
+        keyword: p,
+        expr: { type: 'default', value: i }
+      },
+    }
+  }
+priv_type_table
+  =  p:(KW_SELECT / KW_INSERT / KW_UPDATE / KW_DELETE / KW_TRUNCATE / KW_REFERENCES / 'TRIGGER'i) {
+    /* export interface origin_str_stmt {
+        type: 'origin';
+        value: string;
+      }
+      => origin_str_stmt
+     */
+    return {
+      type: 'origin',
+      value: Array.isArray(p) ? p[0] : p
+    }
+  }
+priv_type_sequence
+  = p:('USAGE'i / KW_SELECT / KW_UPDATE) {
+    // => origin_str_stmt
+    return {
+      type: 'origin',
+      value: Array.isArray(p) ? p[0] : p
+    }
+  }
+priv_type_database
+  = p:(KW_CREATE / 'CONNECT'i / KW_TEMPORARY / KW_TEMP) {
+    // => origin_str_stmt
+    return {
+      type: 'origin',
+      value: Array.isArray(p) ? p[0] : p
+    }
+  }
+prive_type_all
+  = KW_ALL p:(__ 'PRIVILEGES'i)? {
+    // => origin_str_stmt
+    return {
+      type: 'origin',
+      value: p ? 'all privileges' : 'all'
+    }
+  }
+prive_type_usage
+  = p:'USAGE'i {
+    // => origin_str_stmt
+    return {
+      type: 'origin',
+      value: p
+    }
+  }
+  / prive_type_all
+prive_type_execute
+  = p:'EXECUTE'i {
+    // => origin_str_stmt
+    return {
+      type: 'origin',
+      value: p
+    }
+  }
+  / prive_type_all
+priv_type
+  = priv_type_table / priv_type_sequence / priv_type_database / prive_type_usage / prive_type_execute
+priv_item
+  = p:priv_type __ c:(LPAREN __ column_ref_list __ RPAREN)? {
+    // => { priv: priv_type; columns: column_ref_list; }
+    return {
+      priv: p,
+      columns: c && c[2],
+    }
+  }
+priv_list
+  = head:priv_item tail:(__ COMMA __ priv_item)* {
+    // => priv_item[]
+      return createList(head, tail)
+    }
+object_type
+  = o:(KW_TABLE / 'SEQUENCE'i / 'DATABASE'i / 'DOMAIN' / 'FUNCTION' / 'PROCEDURE'i / 'ROUTINE'i / 'LANGUAGE'i / 'LARGE'i / 'SCHEMA') {
+    // => origin_str_stmt
+    return {
+      type: 'origin',
+      value: o.toUpperCase()
+    }
+  }
+  / KW_ALL __ i:('TABLES'i / 'SEQUENCE'i / 'FUNCTIONS'i / 'PROCEDURES'i / 'ROUTINES'i) __ KW_IN __ KW_SCHEMA {
+    // => origin_str_stmt
+    return {
+      type: 'origin',
+      value: `all ${i} in schema`
+    }
+  }
+priv_level
+  = prefix:(ident __ DOT)? __ name:(ident / STAR) {
+    // => { prefix: string; name: string; }
+      return {
+          prefix: prefix && prefix[0],
+          name,
+      }
+    }
+priv_level_list
+  = head:priv_level tail:(__ COMMA __ priv_level)* {
+    // => priv_level[]
+      return createList(head, tail)
+    }
+user_or_role
+  = g:KW_GROUP? __ i:ident {
+    // => origin_str_stmt
+    const name = g ? `${group} ${i}` : i
+    return {
+      name: { type: 'origin', value: name },
+    }
+  }
+  / i:('PUBLIC'i / KW_CURRENT_ROLE / KW_CURRENT_USER / KW_SESSION_USER) {
+    // => origin_str_stmt
+    return {
+      name: { type: 'origin', value: i },
+    }
+  }
+user_or_role_list
+  = head:user_or_role tail:(__ COMMA __ user_or_role)* {
+    // => user_or_role[]
+      return createList(head, tail)
+    }
+with_grant_option
+  = KW_WITH __ 'GRANT'i __ 'OPTION'i {
+    // => origin_str_stmt
+    return {
+      type: 'origin',
+      value: 'with grant option',
+    }
+  }
+with_admin_option
+  = KW_WITH __ 'ADMIN'i __ 'OPTION'i {
+    // => origin_str_stmt
+    return {
+      type: 'origin',
+      value: 'with admin option',
+    }
+  }
+grant_revoke_keyword
+  = 'GRANT'i {
+    // => { type: 'grant' }
+    return {
+      type: 'grant'
+    }
+  }
+  / 'REVOKE'i __ i:('GRANT'i __ 'OPTION'i __ 'FOR'i)? {
+    // => { type: 'revoke'; grant_option_for?: origin_str_stmt; }
+    return {
+      type: 'revoke',
+      grant_option_for: i && { type: 'origin', value: 'grant option for' }
+    }
+  }
+
+
+grant_revoke_stmt
+  = g:grant_revoke_keyword __ pl:priv_list __ KW_ON __ ot:object_type? __ le:priv_level_list __ t:(KW_TO / KW_FROM) &{
+      const obj = { revoke: 'from', grant: 'to' }
+      return obj[g.type].toLowerCase() === t[0].toLowerCase()
+    } __ to:user_or_role_list __ wo:with_grant_option? {
+      /* export interface grant_revoke_stmt {
+        type: string;
+        grant_option_for?: origin_str_stmt;
+        keyword: 'priv';
+        objects: priv_list;
+        on: {
+          object_type?: object_type;
+          priv_level: priv_level_list;
+        };
+        to_from: 'to' | 'from';
+        user_or_roles?: user_or_role_list;
+        with?: with_grant_option;
+      }
+      => AstStatement<grant_revoke_stmt>
+     */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        ...g,
+        keyword: 'priv',
+        objects: pl,
+        on: {
+          object_type: ot,
+          priv_level: le
+        },
+        to_from: t[0],
+        user_or_roles: to,
+        with: wo
+      }
+    }
+  }
+  / g:grant_revoke_keyword __ o:ident_list __ t:(KW_TO / KW_FROM) &{
+      const obj = { revoke: 'from', grant: 'to' }
+      return obj[g.type].toLowerCase() === t[0].toLowerCase()
+    } __ to:user_or_role_list __ wo:with_admin_option? {
+      // => => AstStatement<grant_revoke_stmt>
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        ...g,
+        keyword: 'role',
+        objects: o.map(name => ({ priv: { type: 'string', value: name }})),
+        to_from: t[0],
+        user_or_roles: to,
+        with: wo
+      }
+    }
+  }
+elseif_stmt
+  = 'ELSEIF'i __ e:expr __ 'THEN'i __ ia:crud_stmt __ s:SEMICOLON? {
+    // => { type: 'elseif'; boolean_expr: expr; then: curd_stmt; semicolon?: string; }
+    return {
+      type: 'elseif',
+      boolean_expr: e,
+      then: ia,
+      semicolon: s
+    }
+
+  }
+elseif_stmt_list
+  = head:elseif_stmt tail:(__ elseif_stmt)* {
+    // => elseif_stmt[]
+    return createList(head, tail, 1)
+  }
+if_else_stmt
+  = 'IF'i __ ie:expr __ 'THEN'i __ ia:crud_stmt __ s:SEMICOLON? __ ei:elseif_stmt_list? __ el:(KW_ELSE __ crud_stmt)? __ es:SEMICOLON? __ 'END'i __ 'IF'i {
+    /* export interface if_else_stmt {
+        type: 'if';
+        keyword: 'if';
+        boolean_expr: expr;
+        semicolons: string[];
+        if_expr: crud_stmt;
+        elseif_expr: elseif_stmt[];
+        else_expr: curd_stmt;
+        prefix: literal_string;
+        suffix: literal_string;
+      }
+     => AstStatement<if_else_stmt>
+     */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'if',
+        keyword: 'if',
+        boolean_expr: ie,
+        semicolons: [s || '', es || ''],
+        prefix: {
+          type: 'origin',
+          value: 'then'
+        },
+        if_expr: ia,
+        elseif_expr: ei,
+        else_expr: el && el[2],
+        suffix: {
+          type: 'origin',
+          value: 'end if',
+        }
+      }
+    }
+  }
+raise_level
+  // => string
+  = 'DEBUG'i / 'LOG'i / 'INFO'i  / 'NOTICE'i / 'WARNING'i / 'EXCEPTION'i
+raise_opt
+  = KW_USING __ o:('MESSAGE'i / 'DETAIL'i / 'HINT'i / 'ERRCODE'i / 'COLUMN'i / 'CONSTRAINT'i / 'DATATYPE'i / 'TABLE'i / 'SCHEMA'i) __ KW_ASSIGIN_EQUAL __ e:expr es:(__ COMMA __ expr)* {
+    // => { type: 'using'; option: string; symbol: '='; expr: expr[]; }
+    const expr = [e]
+    if (es) es.forEach(ex => expr.push(ex[3]))
+    return {
+      type: 'using',
+      option: o,
+      symbol: '=',
+      expr
+    }
+  }
+raise_item
+  = format:literal_string e:(__ COMMA __ proc_primary)* {
+    // => IGNORE
+    return {
+      type: 'format',
+      keyword: format,
+      expr: e && e.map(ex => ex[3])
+    }
+  }
+  / 'SQLSTATE'i __ ss:literal_string {
+    // => IGNORE
+    return {
+      type: 'sqlstate',
+      keyword: { type: 'origin', value: 'SQLSTATE' },
+      expr: [ss],
+    }
+  }
+  / n:ident {
+    // => IGNORE
+    return {
+      type: 'condition',
+      expr: [{ type: 'default', value: n }]
+    }
+  }
+raise_stmt
+  = 'RAISE'i __ l:raise_level?  __ r:raise_item? __ using:raise_opt? {
+    /* export interface raise_stmt {
+        type: 'raise';
+        level?: string;
+        raise?: raise_item;
+        using?: raise_opt;
+      }
+      => AstStatement<raise_stmt>
+     */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'raise',
+        level: l,
+        using,
+        raise: r,
+      }
+    }
+  }
+execute_stmt
+  = 'EXECUTE'i __ name:ident __ a:(LPAREN __ proc_primary_list __ RPAREN)?  {
+    /* export interface execute_stmt {
+        type: 'execute';
+        name: string;
+        args?: { type: expr_list; value: proc_primary_list; }
+      }
+      => AstStatement<execute_stmt>
+     */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'execute',
+        name,
+        args: a && { type: 'expr_list', value: a[2] }
+      }
+    }
+  }
+for_label
+  = 'FOR'i {
+    // => { label?: string; keyword: 'for'; }
+    return {
+      label: null,
+      keyword: 'for',
+    }
+  }
+  / label:ident __ 'FOR'i {
+  // => IGNORE
+    return {
+      label,
+      keyword: 'for'
+    }
+  }
+for_loop_stmt
+  = f:for_label __ target:ident __ KW_IN __ query:select_stmt __ 'LOOP'i  __ stmts:multiple_stmt __ KW_END __ 'LOOP'i __ label:ident? &{
+    if (f.label && label && f.label === label) return true
+    if (!f.label && !label) return true
+    return false
+  } {
+    /* export interface for_loop_stmt {
+        type: 'for';
+        label?: string
+        target: string;
+        query: select_stmt;
+        stmts: multiple_stmt;
+      }
+      => AstStatement<for_loop_stmt>
+     */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'for',
+        label,
+        target,
+        query,
+        stmts: stmts.ast,
+      }
+    }
+  }
 select_stmt
-  = select_stmt_nake
+  = KW_SELECT __ ';' {
+    // => { type: 'select'; }
+    return {
+      type: 'select',
+    }
+  }
+  / select_stmt_nake
   / s:('(' __ select_stmt __ ')') {
     /*
     export interface select_stmt_node extends select_stmt_nake  {
@@ -1626,17 +2668,17 @@ with_clause
       return createList(head, tail);
     }
   / __ KW_WITH __ KW_RECURSIVE __ cte:cte_definition {
-      // => [cte_definition & {recursive: true; }]
+      // => [cte_definition & { recursive: true; }]
       cte.recursive = true;
       return [cte]
     }
 
 cte_definition
-  = name:(literal_string / ident_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
-    // => { name: { type: 'default'; value: string; }; stmt: union_stmt; columns?: cte_column_definition; }
+  = name:(literal_string / ident_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:crud_stmt __ RPAREN {
+    // => { name: { type: 'default'; value: string; }; stmt: crud_stmt; columns?: cte_column_definition; }
     if (typeof name === 'string') name = { type: 'default', value: name }
-    return { name, stmt, columns };
-  }
+      return { name, stmt: stmt.ast, columns };
+    }
 
 cte_column_definition
   = LPAREN __ l:column_ref_list __ RPAREN {
@@ -1644,30 +2686,55 @@ cte_column_definition
       return l
     }
 
+distinct_on
+  = d:KW_DISTINCT __ o:KW_ON __ LPAREN __ c:column_ref_list __ RPAREN {
+    // => {type: string; columns: column_ref_list;}
+    console.lo
+    return {
+      type: `${d} ON`,
+      columns: c
+    }
+  }
+  / d:KW_DISTINCT? {
+    // => { type: string | undefined; }
+    return {
+      type: d,
+    }
+  }
+
 select_stmt_nake
   = __ cte:with_clause? __ KW_SELECT ___
     opts:option_clause? __
-    d:KW_DISTINCT?      __
+    d:distinct_on?      __
     c:column_clause     __
+    ci:into_clause?      __
     f:from_clause?      __
+    fi:into_clause?      __
     w:where_clause?     __
     g:group_by_clause?  __
     h:having_clause?    __
     o:order_by_clause?  __
-    l:limit_clause? {
+    l:limit_clause? __
+    win:window_clause? __
+    li:into_clause? {
       /* => {
           with?: with_clause;
           type: 'select';
           options?: option_clause;
-          distinct?: 'DISTINCT';
+          distinct?: {type: string; columns?: column_list; };
           columns: column_clause;
           from?: from_clause;
+          into?: into_clause;
           where?: where_clause;
           groupby?: group_by_clause;
           having?: having_clause;
           orderby?: order_by_clause;
           limit?: limit_clause;
+          window?: window_clause;
         }*/
+      if ((ci && fi) || (ci && li) || (fi && li) || (ci && fi && li)) {
+        throw new Error('A given SQL statement can contain at most one INTO clause')
+      }
       if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
           with: cte,
@@ -1675,12 +2742,17 @@ select_stmt_nake
           options: opts,
           distinct: d,
           columns: c,
+          into: {
+            ...(ci || fi || li || {}),
+            position: ci && 'column' || fi && 'from' || li && 'end'
+          },
           from: f,
           where: w,
           groupby: g,
           having: h,
           orderby: o,
-          limit: l
+          limit: l,
+          window: win,
       };
   }
 
@@ -1727,17 +2799,70 @@ column_clause
       return createList(head, tail);
     }
 
-column_list_item
-  = e:binary_column_expr s:KW_DOUBLE_COLON t:data_type {
-    // => { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; }
+array_index
+  = LBRAKE __ n:(literal_numeric / literal_string) __ RBRAKE {
+    // => { brackets: boolean, number: number }
     return {
+      brackets: true,
+      index: n
+    }
+  }
+
+expr_item
+  = e:binary_column_expr __ a:array_index? {
+    // => binary_expr & { array_index: array_index }
+    if (a) e.array_index = a
+    return e
+  }
+
+cast_data_type
+  = p:'"'? t: data_type s:'"'? {
+    // => data_type & { quoted?: string }
+    if ((p && !s) || (!p && s)) throw new Error('double quoted not match')
+    if (p && s) t.quoted = '"'
+    return t
+  }
+
+column_list_item
+  = c:string_constants_escape {
+    // => { expr: expr; as: null; }
+    return { expr: c, as: null }
+  }
+  / e:expr_item __ s:KW_DOUBLE_COLON __ t:cast_data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
+    // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; arrows?: ('->>' | '->')[]; property?: (literal_string | literal_numeric)[]; }
+    return {
+      as: alias,
       type: 'cast',
       expr: e,
       symbol: '::',
-      target: t
+      target: t,
+      tail: tail && tail[0] && { operator: tail[0][1], expr: tail[0][3] },
+      arrows: a.map(item => item[0]),
+      properties: a.map(item => item[2]),
     }
   }
+  / tbl:ident __ DOT pro:(ident __ DOT)? __ STAR {
+      // => { expr: column_ref; as: null; }
+      const mid = pro && pro[0]
+      let schema
+      if (mid) {
+        schema = tbl
+        tbl = mid
+      }
+      columnList.add(`select::${tbl}::(.*)`)
+      const column = '*'
+      return {
+        expr: {
+          type: 'column_ref',
+          table: tbl,
+          schema,
+          column,
+        },
+        as: null
+      }
+    }
   / tbl:(ident __ DOT)? __ STAR {
+      // => { expr: column_ref; as: null; }
       const table = tbl && tbl[0] || null
       columnList.add(`select::${table}::(.*)`);
       return {
@@ -1749,14 +2874,40 @@ column_list_item
         as: null
       };
     }
-  / e:binary_column_expr __ alias:alias_clause? {
+  / c:double_quoted_ident __ d:DOT? !{ if(d) return true } __  alias: alias_clause? {
+      // => { type: 'expr'; expr: expr; as?: alias_clause; }
+      columnList.add(`select::null::${c}`)
+      return { type: 'expr', expr: { type: 'column_ref', table: null, column: c }, as: alias };
+  }
+  / e:expr_item  __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
       return { type: 'expr', expr: e, as: alias };
     }
 
+value_alias_clause
+  = KW_AS? __ i:alias_ident { /*=>alias_ident*/ return i; }
+
 alias_clause
   = KW_AS __ i:alias_ident { /*=>alias_ident*/ return i; }
-  / KW_AS? __ i:ident { /*=>ident*/ return i; }
+  / KW_AS? __ i:alias_ident { /*=>alias_ident*/ return i; }
+
+into_clause
+  = KW_INTO __ v:var_decl_list {
+    // => { keyword: 'var'; type: 'into'; expr: var_decl_list; }
+    return {
+      keyword: 'var',
+      type: 'into',
+      expr: v
+    }
+  }
+  / KW_INTO __ k:('OUTFILE'i / 'DUMPFILE'i)? __ f:(literal_string / ident) {
+    // => { keyword: 'var'; type: 'into'; expr: literal_string | ident; }
+    return {
+      keyword: k,
+      type: 'into',
+      expr: f
+    }
+  }
 
 from_clause
   = KW_FROM __ l:table_ref_list { /*=>table_ref_list*/return l; }
@@ -1774,8 +2925,7 @@ table_to_item
     }
 
 index_type
-  = KW_USING __
-  t:("BTREE"i / "HASH"i / "GIST"i / "GIN"i) {
+  = KW_USING __ t:("BTREE"i / "HASH"i / "GIST"i / "GIN"i) {
     // => { keyword: 'using'; type: 'btree' | 'hash' | 'gist' | 'gin' }
     return {
       keyword: 'using',
@@ -1851,9 +3001,8 @@ table_ref
   = __ COMMA __ t:table_base { /* => table_base */ return t; }
   / __ t:table_join { /* => table_join */ return t; }
 
-
 table_join
-  = op:join_op __ t:table_base __ KW_USING __ LPAREN __ head:ident_name tail:(__ COMMA __ ident_name)* __ RPAREN {
+  = op:join_op __ t:table_base __ KW_USING __ LPAREN __ head:ident_without_kw tail:(__ COMMA __ ident_name)* __ RPAREN {
       // => table_base & {join: join_op; using: ident_name[]; }
       t.join = op;
       t.using = createList(head, tail);
@@ -1862,16 +3011,17 @@ table_join
   / op:join_op __ t:table_base __ expr:on_clause? {
     // => table_base & {join: join_op; on?: on_clause; }
       t.join = op;
-      t.on   = expr;
+      t.on = expr;
       return t;
     }
-  / op:join_op __ LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
+  / op:join_op __ LPAREN __ stmt:(union_stmt / table_ref_list) __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
     /* => {
-      expr: union_stmt & { parentheses: true; };
+      expr: (union_stmt || table_ref_list) & { parentheses: true; };
       as?: alias_clause;
       join: join_op;
       on?: on_clause;
     }*/
+    if (Array.isArray(stmt)) stmt = { type: 'tables', expr: stmt }
     stmt.parentheses = true;
     return {
       expr: stmt,
@@ -1889,6 +3039,47 @@ table_base
         type: 'dual'
       };
   }
+  / stmt:value_clause __ alias:value_alias_clause? {
+    // => { expr: value_clause; as?: alias_clause; }
+    return {
+      expr: { type: 'values', values: stmt },
+      as: alias
+    };
+  }
+  / l:('LATERAL'i)? __ LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:value_alias_clause? {
+    // => { prefix?: string; expr: union_stmt | value_clause; as?: alias_clause; }
+    if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt }
+    stmt.parentheses = true;
+    return {
+      prefix: l,
+      expr: stmt,
+      as: alias
+    };
+  }
+  / l:('LATERAL'i)? __ LPAREN __ stmt:table_ref_list __ RPAREN __ alias:value_alias_clause? {
+    // => { prefix?: string; expr: table_ref_list; as?: alias_clause; }
+    stmt = { type: 'tables', expr: stmt, parentheses: true }
+    return {
+      prefix: l,
+      expr: stmt,
+      as: alias
+    };
+  }
+  / l:('LATERAL'i)? __ e:func_call __ alias:alias_clause? {
+    // => { prefix?: string; type: 'expr'; expr: expr; as?: alias_clause; }
+      return { prefix: l, type: 'expr', expr: e, as: alias };
+    }
+  / t:table_name __ 'TABLESAMPLE'i __ f:func_call __ re:('REPEATABLE'i __ LPAREN __ literal_numeric __ RPAREN)? __ alias:alias_clause? {
+    // => table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;}
+    return {
+      ...t,
+      as: alias,
+      tablesample: {
+        expr: f,
+        repeatable: re && re[4],
+      }
+    }
+  }
   / t:table_name __ alias:alias_clause? {
     // => table_name & { as?: alias_clause; }
       if (t.type === 'var') {
@@ -1896,68 +3087,33 @@ table_base
         return t;
       } else {
         return {
-          db: t.db,
-          table: t.table,
+          ...t,
           as: alias
         };
       }
     }
-  / LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? {
-    // => { expr: union_stmt; as?: alias_clause; }
-      stmt.parentheses = true;
-      return {
-        expr: stmt,
-        as: alias
-      };
-    }
-  / KW_TABLE __ LPAREN __ KW_TUMBLE __ LPAREN __ KW_TABLE __ d:table_name __ COMMA __ 'DESCRIPTOR'i __ LPAREN __ t:column_ref __ RPAREN __ COMMA __ s:interval_expr __ RPAREN __ RPAREN __ alias:alias_clause? {
-    return {
-      expr: {
-        type: 'tumble',
-        data: d,
-        timecol: t,
-        size: s
-      },
-      as: alias
-    }
-  }
+
 
 join_op
-  = n:KW_NATURAL? __ d:(KW_LEFT / KW_RIGHT / KW_FULL)? __ o:KW_OUTER? __ KW_JOIN {
-      /* => [ NATURAL ] [ { LEFT | RIGHT | FULL } [ OUTER ] ] JOIN */
-      const natural = n ? 'NATURAL ' : '';
-      const direction = d ? `${d} ` : '';
-      const outer = o ? 'OUTER ' : '';
-      return `${natural}${direction}${outer}JOIN`;
-    }
-  / i:(KW_INNER __)? KW_JOIN { /* => 'INNER JOIN' */ return i ? 'INNER JOIN' : 'JOIN'; }
-  / KW_CROSS __ KW_JOIN { /* => 'CROSS JOIN' */ return 'CROSS JOIN'; }
-  / ko:(KW_CROSS / KW_OUTER) __ KW_APPLY { /* => '[ CROSS | OUTER ] APPLY' */ return `${ko[0].toUpperCase()} APPLY`; }
+  = KW_LEFT __ KW_OUTER? __ KW_JOIN { /* => 'LEFT JOIN' */ return 'LEFT JOIN'; }
+  / KW_RIGHT __ KW_OUTER? __ KW_JOIN { /* =>  'RIGHT JOIN' */ return 'RIGHT JOIN'; }
+  / KW_FULL __ KW_OUTER? __ KW_JOIN { /* => 'FULL JOIN' */ return 'FULL JOIN'; }
+  / 'CROSS'i __ KW_JOIN { /* => 'CROSS JOIN' */ return 'CROSS JOIN'; }
+  / (KW_INNER __)? KW_JOIN { /* => 'INNER JOIN' */ return 'INNER JOIN'; }
 
 table_name
-  = dt:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
-      // => { db?: ident; table: ident | '*'; }
-      const obj = { db: null, table: dt };
-      if (tail !== null) {
-        obj.db = `${dt}.${schema[3]}`;
-        obj.table = tail[3];
-      }
-      return obj;
-    }
-  / dt:ident __ DOT __ STAR {
-    // => IGNORE
-      tableList.add(`select::${dt}::(.*)`);
-      return {
-        db: dt,
-        table: '*'
-      }
-    }
-  / dt:ident tail:(__ DOT __ ident)? {
-    // => IGNORE
+  = dt:ident schema:(__ DOT __ (ident / STAR))? tail:(__ DOT __ (ident / STAR))? {
+      // => { db?: ident; schema?: ident, table: ident | '*'; }
       const obj = { db: null, table: dt };
       if (tail !== null) {
         obj.db = dt;
+        obj.schema = schema[3];
         obj.table = tail[3];
+        return obj
+      }
+      if (schema !== null) {
+        obj.db = dt;
+        obj.table = schema[3];
       }
       return obj;
     }
@@ -1970,6 +3126,7 @@ table_name
 
 or_and_expr
 	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
+    // => binary_expr
     const len = tail.length
     let result = head
     for (let i = 0; i < len; ++i) {
@@ -1979,10 +3136,10 @@ or_and_expr
   }
 
 on_clause
-  = KW_ON __ e:or_and_where_expr { /* => expr */ return e; }
+  = KW_ON __ e:or_and_where_expr { /* => or_and_where_expr */ return e; }
 
 where_clause
-  = KW_WHERE __ e:(or_and_where_expr / expr) { /* => expr */ return e; }
+  = KW_WHERE __ e:or_and_where_expr { /* => or_and_where_expr */ return e; }
 
 group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list { /* => expr_list['value'] */ return e.value; }
@@ -1996,6 +3153,108 @@ column_ref_list
 having_clause
   = KW_HAVING __ e:or_and_where_expr { /* => expr */ return e; }
 
+window_clause
+  = KW_WINDOW __ l:named_window_expr_list {
+    // => { keyword: 'window'; type: 'window', expr: named_window_expr_list; }
+    return {
+      keyword: 'window',
+      type: 'window',
+      expr: l,
+    }
+  }
+
+named_window_expr_list
+  = head:named_window_expr tail:(__ COMMA __ named_window_expr)* {
+    // => named_window_expr[]
+      return createList(head, tail);
+    }
+
+named_window_expr
+  = nw:ident_name __ KW_AS __ anw:as_window_specification {
+    // => { name: ident_name;  as_window_specification: as_window_specification; }
+    return {
+      name: nw,
+      as_window_specification: anw,
+    }
+  }
+
+as_window_specification
+  = ident_name
+  / LPAREN __ ws:window_specification? __ RPAREN {
+    // => { window_specification: window_specification; parentheses: boolean }
+    return {
+      window_specification: ws || {},
+      parentheses: true
+    }
+  }
+
+window_specification
+  = bc:partition_by_clause? __
+  l:order_by_clause? __
+  w:window_frame_clause? {
+    // => { name: null; partitionby: partition_by_clause; orderby: order_by_clause; window_frame_clause: string | null; }
+    return {
+      name: null,
+      partitionby: bc,
+      orderby: l,
+      window_frame_clause: w
+    }
+  }
+
+window_specification_frameless
+  = bc:partition_by_clause? __
+  l:order_by_clause? {
+    // => { name: null; partitionby: partition_by_clause; orderby: order_by_clause; window_frame_clause: null }
+    return {
+      name: null,
+      partitionby: bc,
+      orderby: l,
+      window_frame_clause: null
+    }
+  }
+
+window_frame_clause
+  = kw:KW_ROWS __ s:(window_frame_following / window_frame_preceding) {
+    // => string
+    return `rows ${s.value}`
+  }
+  / KW_ROWS __ KW_BETWEEN __ p:window_frame_preceding __ KW_AND __ f:window_frame_following {
+    // => string
+    return `rows between ${p.value} and ${f.value}`
+  }
+
+window_frame_following
+  = s:window_frame_value __ 'FOLLOWING'i  {
+    // => string
+    s.value += ' FOLLOWING'
+    return s
+  }
+  / window_frame_current_row
+
+window_frame_preceding
+  = s:window_frame_value __ 'PRECEDING'i  {
+    // => string
+    s.value += ' PRECEDING'
+    return s
+  }
+  / window_frame_current_row
+
+window_frame_current_row
+  = 'CURRENT'i __ 'ROW'i {
+    // => { type: 'single_quote_string'; value: string }
+    return { type: 'single_quote_string', value: 'current row' }
+  }
+
+window_frame_value
+  = s:'UNBOUNDED'i {
+    // => literal_string
+    return { type: 'single_quote_string', value: s.toUpperCase() }
+  }
+  / literal_numeric
+
+partition_by_clause
+  = KW_PARTITION __ KW_BY __ bc:column_clause { /* => column_clause */ return bc; }
+
 order_by_clause
   = KW_ORDER __ KW_BY __ l:order_by_list { /* => order_by_list */ return l; }
 
@@ -2006,22 +3265,23 @@ order_by_list
     }
 
 order_by_element
-  = e:expr __ d:(KW_DESC / KW_ASC)? {
-    // => { expr: expr; type?: 'ASC' | 'DESC'; }
+  = e:expr __ d:(KW_DESC / KW_ASC)? __ nl:('NULLS'i __ ('FIRST'i / 'LAST'i)?)? {
+    // => { expr: expr; type: 'ASC' | 'DESC' | undefined;  nulls: 'NULLS FIRST' | 'NULLS LAST' | undefined }
     const obj = { expr: e, type: d };
+    obj.nulls = nl && [nl[0], nl[2]].filter(v => v).join(' ')
     return obj;
   }
 
 number_or_param
   = literal_numeric
+  / var_decl
   / param
 
 limit_clause
-  = KW_LIMIT __ i1:(number_or_param / KW_ALL) __ tail:(KW_OFFSET __ number_or_param)? {
+  = l:(KW_LIMIT __ (number_or_param / KW_ALL))? __ tail:(KW_OFFSET __ number_or_param)? {
     // => { separator: 'offset' | ''; value: [number_or_param | { type: 'origin', value: 'all' }, number_or_param?] }
       const res = []
-      if (typeof i1 === 'string') res.push({ type: 'origin', value: 'all' })
-      else res.push(i1)
+      if (l) res.push(typeof l[2] === 'string' ? { type: 'origin', value: 'all' } : l[2])
       if (tail) res.push(tail[2]);
       return {
         seperator: tail && tail[0] && tail[0].toLowerCase() || '',
@@ -2030,16 +3290,19 @@ limit_clause
     }
 
 update_stmt
-  = KW_UPDATE    __
+  = __ cte:with_clause? __ KW_UPDATE    __
     t:table_ref_list __
     KW_SET       __
     l:set_list   __
+    f:from_clause? __
     w:where_clause? __
     r:returning_stmt? {
       /* export interface update_stmt_node {
+        with?: with_clause;
          type: 'update';
          table: table_ref_list;
          set: set_list;
+         from?: from_clause;
          where?: where_clause;
          returning?: returning_stmt;
       }
@@ -2065,9 +3328,11 @@ update_stmt
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
+          with: cte,
           type: 'update',
           table: t,
           set: l,
+          from: f,
           where: w,
           returning: r,
         }
@@ -2076,7 +3341,7 @@ update_stmt
 
 delete_stmt
   = KW_DELETE    __
-    t: table_ref_list? __
+    t:table_ref_list? __
     f:from_clause __
     w:where_clause? {
       /*
@@ -2133,16 +3398,17 @@ set_item
       // => { column: ident; value: additive_expr; table?: ident;}
       return { column: c, value: v, table: tbl && tbl[0] };
     }
-  / tbl:(ident __ DOT)? __ c:column_without_kw __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
+    / tbl:(ident __ DOT)? __ c:column_without_kw __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
+      // => { column: ident; value: column_ref; table?: ident; keyword: 'values' }
       return { column: c, value: v, table: tbl && tbl[0], keyword: 'values' };
   }
 
 returning_stmt
-  = k:KW_RETURNING __ c:(STAR / column_ref_list) {
-    // => { type: 'returning'; columns: column_ref_list | column_ref; }
+  = k:KW_RETURNING __ c:(column_clause / select_stmt) {
+    // => { type: 'returning'; columns: column_clause | select_stmt; }
     return {
       type: k && k.toLowerCase() || 'returning',
-      columns: c === '*' && [{ type: 'columne_ref', table: null, column: '*' }] || c
+      columns: c === '*' && [{ type: 'expr', expr: { type: 'column_ref', table: null, column: '*' }, as: null }] || c
     }
   }
 
@@ -2160,18 +3426,64 @@ insert_partition
     return v
   }
 
+conflict_target
+  = LPAREN __ c:column_ref_list  __ RPAREN {
+    // => { type: 'column'; expr: column_ref_list; parentheses: true; }
+    return {
+      type: 'column',
+      expr: c,
+      parentheses: true,
+    }
+  }
+
+conflict_action
+  = 'DO'i __ 'NOTHING'i {
+    // => { keyword: "do"; expr: {type: 'origin'; value: string; }; }
+    return {
+      keyword: 'do',
+      expr: {
+        type: 'origin',
+        value: 'nothing'
+      }
+    }
+  }
+  / 'DO'i __ KW_UPDATE __ KW_SET __ s:set_list __ w:where_clause? {
+    // => { keyword: "do"; expr: {type: 'update'; set: set_list; where: where_clause; }; }
+    return {
+      keyword: 'do',
+      expr: {
+        type: 'update',
+        set: s,
+        where: w,
+      }
+    }
+  }
+
+on_conflict
+  = KW_ON __ 'CONFLICT'i __ ct:conflict_target? __ ca:conflict_action {
+    // => { type: "conflict"; keyword: "on"; target: conflict_target; action: conflict_action; }
+    return {
+      type: 'conflict',
+      keyword: 'on',
+      target: ct,
+      action: ca,
+    }
+  }
+
 replace_insert_stmt
   = ri:replace_insert       __
     KW_INTO?                 __
     t:table_name  __
     p:insert_partition? __ LPAREN __ c:column_list  __ RPAREN __
     v:insert_value_clause __
+    oc:on_conflict? __
     r:returning_stmt? {
       /*
        export interface replace_insert_stmt_node {
          type: 'insert' | 'replace';
          table?: [table_name];
          columns: column_list;
+         conflict?: on_conflict;
          values: insert_value_clause;
          partition?: insert_partition;
          returning?: returning_stmt;
@@ -2202,6 +3514,7 @@ replace_insert_stmt
           columns: c,
           values: v,
           partition: p,
+          conflict: oc,
           returning: r,
         }
       };
@@ -2267,7 +3580,7 @@ expr_list
 interval_expr
   = KW_INTERVAL __
     e:expr __
-    u:interval_unit {
+    u: interval_unit {
       // => { type: 'interval', expr: expr; unit: interval_unit; }
       return {
         type: 'interval',
@@ -2287,31 +3600,50 @@ interval_expr
 
 case_expr
   = KW_CASE                         __
-    expr:expr?                      __
     condition_list:case_when_then_list  __
     otherwise:case_else?            __
     KW_END __ KW_CASE? {
       /* => {
           type: 'case';
-          expr?: expr;
+          expr:  null;
           // nb: Only the last element is a case_else
           args: (case_when_then | case_else)[];
         } */
       if (otherwise) condition_list.push(otherwise);
       return {
         type: 'case',
-        expr: expr || null,
+        expr: null,
         args: condition_list
       };
     }
+  / KW_CASE                        __
+    expr:expr                      __
+    condition_list:case_when_then_list  __
+    otherwise:case_else?            __
+    KW_END __ KW_CASE? {
+      /* => {
+          type: 'case';
+          expr: expr;
+          // nb: Only the last element is a case_else
+          args: (case_when_then | case_else)[];
+        } */
+      if (otherwise) condition_list.push(otherwise);
+      return {
+        type: 'case',
+        expr: expr,
+        args: condition_list
+      };
+    }
+
 case_when_then_list
   = head:case_when_then __ tail:(__ case_when_then)* {
+    // => case_when_then[]
     return createList(head, tail, 1)
   }
 
 case_when_then
   = KW_WHEN __ condition:or_and_where_expr __ KW_THEN __ result:expr {
-    // => { type: 'when'; cond: expr; result: expr; }
+    // => { type: 'when'; cond: binary_expr; result: expr; }
     return {
       type: 'when',
       cond: condition,
@@ -2346,7 +3678,7 @@ expr
   = _expr / union_stmt
 
 logic_operator_expr
-  = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ __ rh:comparison_op_right?  {
+  = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ __ rh:comparison_op_right? {
     /*
     export type BINARY_OPERATORS = LOGIC_OPERATOR | 'OR' | 'AND' | multiplicative_operator | additive_operator
       | arithmetic_comparison_operator
@@ -2381,13 +3713,12 @@ unary_expr
     } */
     return createUnaryExpr(op, tail[0][1]);
   }
+
 binary_column_expr
   = head:expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ expr)* {
     const ast = head.ast
-    if (ast && ast.type === 'select') {
-      if (!(head.parentheses_symbol || head.parentheses || head.ast.parentheses || head.ast.parentheses_symbol) || ast.columns.length !== 1 || ast.columns[0].expr.column === '*') throw new Error('invalid column clause with select statement')
-    }
     if (!tail || tail.length === 0) return head
+    // => binary_expr
     const len = tail.length
     let result = tail[len - 1][3]
     for (let i = len - 1; i >= 0; i--) {
@@ -2399,6 +3730,7 @@ binary_column_expr
 
 or_and_where_expr
 	= head:expr tail:(__ (KW_AND / KW_OR / COMMA) __ expr)* {
+    // => binary_expr | { type: 'expr_list'; value: expr[] }
     const len = tail.length
     let result = head;
     let seperator = ''
@@ -2464,13 +3796,11 @@ exists_op
 comparison_op_right
   = arithmetic_op_right
   / in_op_right
-  / exists_op_right
   / between_op_right
-  / distinct_from_op_right
   / is_op_right
   / like_op_right
-  / similar_to_op_right
   / jsonb_op_right
+  / regex_op_right
 
 arithmetic_op_right
   = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
@@ -2492,7 +3822,7 @@ is_op_right
     const tableName = table === '*' ? '*' : `"${table}"`
     let tableStr = db ? `"${db}".${tableName}` : tableName
     return { op: 'IS', right: {
-      type: 'origin',
+      type: 'default',
       value: `DISTINCT FROM ${tableStr}`
     }}
   }
@@ -2517,22 +3847,27 @@ between_or_not_between_op
   = nk:(KW_NOT __ KW_BETWEEN) { /* => 'NOT BETWEEN' */ return nk[0] + ' ' + nk[2]; }
   / KW_BETWEEN
 
-distinct_from_op
-  = KW_IS __ KW_NOT __ KW_DISTINCT __ KW_FROM { /* => 'IS NOT DISTINCT FROM' */ return 'IS NOT DISTINCT FROM'; }
-  / KW_IS __ KW_DISTINCT __ KW_FROM { /* => 'IS DISTINCT FROM' */ return 'IS DISTINCT FROM'; }
+like_op
+  = nk:(KW_NOT __ (KW_LIKE / KW_ILIKE)) { /* => 'LIKE' */ return nk[0] + ' ' + nk[2]; }
+  / KW_LIKE
+  / KW_ILIKE
+  / 'SIMILAR'i __ KW_TO {
+    // => 'SIMILAR TO'
+    return 'SIMILAR TO'
+  }
+  / KW_NOT __ 'SIMILAR'i __ KW_TO {
+    // => 'NOT SIMILAR TO'
+    return 'NOT SIMILAR TO'
+  }
 
-distinct_from_op_right
-  = op:distinct_from_op __ right:(expr) {
+regex_op
+  = "!~*" / "~*" / "~" / "!~"
+
+regex_op_right
+= op:regex_op __ right:(literal / comparison_expr) {
+     // => { op: regex_op; right: literal | comparison_expr}
       return { op: op, right: right };
     }
-
-like_op
-  = nk:(KW_NOT __ KW_LIKE) { /* => 'LIKE' */ return nk[0] + ' ' + nk[2]; }
-  / KW_LIKE
-
-similar_to_op
-  = nk:(KW_NOT __ KW_SIMILAR __ KW_TO) { /* => 'NOT SIMILAR TO' */ return 'NOT SIMILAR TO'; }
-  / KW_SIMILAR __ KW_TO { /* => 'SIMILAR TO' */ return 'SIMILAR TO' }
 
 escape_op
   = kw:'ESCAPE'i __ c:literal_string {
@@ -2554,13 +3889,6 @@ like_op_right
       return { op: op, right: right };
     }
 
-similar_to_op_right
-  = op:similar_to_op __ right:(literal / comparison_expr) __ es:escape_op? {
-     // => { op: similar_to_op; right: (literal | comparison_expr) & { escape?: escape_op }; }
-      if (es) right.escape = es
-      return { op: op, right: right };
-    }
-
 in_op_right
   = op:in_op __ LPAREN  __ l:expr_list __ RPAREN {
     // => {op: in_op; right: expr_list | var_decl | literal_string; }
@@ -2569,12 +3897,6 @@ in_op_right
   / op:in_op __ e:(var_decl / literal_string) {
     // => IGNORE
       return { op: op, right: e };
-    }
-
-exists_op_right
-  = op:exists_op __ LPAREN  __ l:expr_list __ RPAREN {
-    // => {op: exists_op; right: expr_list | var_decl | literal_string; }
-      return { op: op, right: l };
     }
 
 jsonb_op_right
@@ -2605,32 +3927,42 @@ multiplicative_expr
     }
 
 multiplicative_operator
-  = "*" / "/" / "%"
+  = "*" / "/" / "%" / "||"
 
+column_ref_array_index
+  = c:column_ref __ a:array_index? {
+    // => column_ref
+    if (a) c.array_index = a
+    return c
+  }
 primary
   = cast_expr
-  / literal
-  / aggr_func
-  / func_call
-  / case_expr
-  / interval_expr
-  / column_ref
-  / param
   / LPAREN __ list:or_and_where_expr __ RPAREN {
+    // => or_and_where_expr
         list.parentheses = true;
         return list;
     }
   / var_decl
-  / __ prepared_symbol:'$'n:literal_numeric {
+  / __ p:'$''<'n:literal_numeric'>' {
     // => { type: 'origin'; value: string; }
     return {
       type: 'origin',
-      value: `$${n.value}`,
+      value: `$<${n.value}>`,
+    }
+  }
+
+string_constants_escape
+  = 'E'i"'" __ n:single_char* __ "'" {
+    // => { type: 'origin'; value: string; }
+    return {
+      type: 'origin',
+      value: `E'${n.join('')}'`
     }
   }
 
 column_ref
-  = tbl:(ident __ DOT)? __ STAR {
+  = string_constants_escape
+  / tbl:(ident __ DOT)? __ STAR {
     // => IGNORE
       const table = tbl && tbl[0] || null
       columnList.add(`select::${table}::(.*)`);
@@ -2643,7 +3975,7 @@ column_ref
   / tbl:(ident __ DOT)? __ col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
     // => IGNORE
       const tableName = tbl && tbl[0] || null
-      columnList.add(`select::${tableName}::${col}`);
+      columnList.add(`select::${tableName}::${col}`)
       return {
         type: 'column_ref',
         table: tableName,
@@ -2652,13 +3984,30 @@ column_ref
         properties: a.map(item => item[2])
       };
   }
+  / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) {
+    /* => {
+        type: 'column_ref';
+        schema: string;
+        table: string;
+        column: column | '*';
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
+      } */
+      columnList.add(`select::${schema}.${tbl[3]}::${col[3]}`);
+      return {
+        type: 'column_ref',
+        schema: schema,
+        table: tbl[3],
+        column: col[3]
+      };
+    }
   / tbl:ident __ DOT __ col:column {
       /* => {
         type: 'column_ref';
         table: ident;
         column: column | '*';
-        arrow?: '->>' | '->';
-        property?: literal_string | literal_numeric;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
       } */
       columnList.add(`select::${tbl}::${col}`);
       return {
@@ -2685,21 +4034,23 @@ column_list
 
 ident
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
-      // => indent_name
+      // => ident_name
       return name;
     }
   / name:quoted_ident {
       // => indent_name
       return name;
     }
-
+ident_list
+  = head:ident tail:(__ COMMA __ ident)* {
+    // => ident[]
+      return createList(head, tail)
+    }
 alias_ident
-  = name:ident_name !{
-      if (reservedMap[name.toUpperCase()] === true) throw new Error("Error: "+ JSON.stringify(name)+" is a reserved word, can not as alias clause");
-      return false
-    } {
+  = name:ident_name !{ return reservedMap[name.toUpperCase()] === true } c:(__ LPAREN __ column_list __ RPAREN)? {
       // => string
-      return name;
+      if (!c) return name;
+      return `${name}(${c[3].join(', ')})`
     }
   / name:quoted_ident {
       // => IGNORE
@@ -2720,11 +4071,11 @@ single_quoted_ident
 backticks_quoted_ident
   = "`" chars:[^`]+ "`" { /* => string */ return chars.join(''); }
 
+ident_without_kw
+  = ident_name / quoted_ident
+
 column_without_kw
-  = name:column_name {
-    return name;
-  }
-  / quoted_ident
+  = column_name / quoted_ident
 
 column
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { /* => string */ return name; }
@@ -2739,12 +4090,12 @@ ident_name
       return start + parts.join('');
     }
 
-ident_start = [A-Za-z_]
+ident_start = [A-Za-z_\u4e00-\u9fa5]
 
-ident_part  = [A-Za-z0-9_\-]
+ident_part  = [A-Za-z0-9_\-$\u4e00-\u9fa5\u00C0-\u017F]
 
 // to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_]
+column_part  = [A-Za-z0-9_\u4e00-\u9fa5\u00C0-\u017F]
 
 param
   = l:(':' ident_name) {
@@ -2752,51 +4103,9 @@ param
       return { type: 'param', value: l[1] };
     }
 
-aggr_func
-  = aggr_fun_count
-  / aggr_fun_expr
-
-
-aggr_fun_expr
-  = name:KW_AGGR_FUNC __ LPAREN __ d:KW_DISTINCT? __ e:additive_expr __ RPAREN {
-    // => { type: 'aggr_func'; name: 'SUM' | 'MAX' | 'MIN' | 'AVG'; args: { expr: additive_expr } }
-      return {
-        type: 'aggr_func',
-        name: name,
-        args: {
-          expr: e,
-          distinct: d
-        }
-      };
-    }
-  / name:KW_AGGR_FUNC_NO_ARG __ LPAREN __ RPAREN {
-      return {
-        type: 'aggr_func',
-        name: name
-      };
-    }
-  / name:KW_AGGR_FUNC_STR_ARG __ LPAREN __ e:additive_expr s:(__ COMMA __ literal_string)? __ RPAREN {
-      return {
-        type: 'aggr_func',
-        name: name,
-        args: {
-          expr: e,
-          separator: s
-        }
-      };
-    }
-
-KW_AGGR_FUNC
-  = KW_SUM / KW_MAX / KW_MIN / KW_AVG / KW_COLLECT
-
-KW_AGGR_FUNC_NO_ARG
-  = KW_RANK / KW_DENSE_RANK / KW_ROW_NUMBER
-
-KW_AGGR_FUNC_STR_ARG
-  = KW_LISTAGG
-
 on_update_current_timestamp
   = KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN{
+    // => { type: 'on update'; keyword: string; parentheses: boolean; expr: expr }
     return {
       type: 'on update',
       keyword: kw,
@@ -2805,6 +4114,7 @@ on_update_current_timestamp
     }
   }
   / KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP {
+    // => { type: 'on update'; keyword: string; }
     return {
       type: 'on update',
       keyword: kw,
@@ -2812,7 +4122,15 @@ on_update_current_timestamp
   }
 
 over_partition
-  = 'OVER'i __ LPAREN __ KW_PARTITION __ KW_BY __ bc:column_clause __ l:order_by_clause? __ RPAREN {
+  = 'OVER'i __ aws:as_window_specification {
+    // => { type: 'windows'; as_window_specification: as_window_specification }
+    return {
+      type: 'window',
+      as_window_specification: aws,
+    }
+  }
+  / 'OVER'i __ LPAREN __ bc:partition_by_clause? __ l:order_by_clause? __ RPAREN {
+    // => { partitionby: partition_by_clause; orderby: order_by_clause }
     return {
       partitionby: bc,
       orderby: l
@@ -2820,19 +4138,142 @@ over_partition
   }
   / on_update_current_timestamp
 
-aggr_fun_count
-  = name:KW_COUNT __ LPAREN __ arg:count_arg __ RPAREN {
-    // => { type: 'aggr_func'; name: 'COUNT'; args:count_arg; }
+aggr_filter
+  = 'FILTER'i __ LPAREN __ wc:where_clause __ RPAREN {
+    // => { keyword: 'filter'; parentheses: true, where: where_clause }
+    return {
+      keyword: 'filter',
+      parentheses: true,
+      where: wc,
+    }
+  }
+
+aggr_func
+  = e:(aggr_fun_count / aggr_fun_smma / aggr_array_agg) __ f:aggr_filter? {
+    // => { type: 'aggr_func'; name: string; args: { expr: additive_expr } | count_arg; over: over_partition; filter?: aggr_filter; }
+    if (f) e.filter = f
+    return e
+  }
+
+window_func
+  = window_fun_rank
+  / window_fun_laglead
+  / window_fun_firstlast
+
+window_fun_rank
+  = name:KW_WIN_FNS_RANK __ LPAREN __ RPAREN __ over:over_partition {
+    // => { type: 'window_func'; name: string; over: over_partition }
+    return {
+      type: 'window_func',
+      name: name,
+      over: over
+    }
+  }
+
+window_fun_laglead
+  = name:KW_LAG_LEAD __ LPAREN __ l:expr_list __ RPAREN __ cn:consider_nulls_clause? __ over:over_partition {
+    // => { type: 'window_func'; name: string; args: expr_list; consider_nulls: null | string; over: over_partition }
+    return {
+      type: 'window_func',
+      name: name,
+      args: l,
+      over: over,
+      consider_nulls: cn
+    };
+  }
+
+window_fun_firstlast
+  = name:KW_FIRST_LAST_VALUE __ LPAREN __ l:expr __ cn:consider_nulls_clause? __ RPAREN __ over:over_partition {
+    // => window_fun_laglead
+    return {
+      type: 'window_func',
+      name: name,
+      args: {
+        type: 'expr_list', value: [l]
+      },
+      over: over,
+      consider_nulls: cn
+    };
+  }
+
+KW_FIRST_LAST_VALUE
+  = 'FIRST_VALUE'i / 'LAST_VALUE'i
+
+KW_WIN_FNS_RANK
+  = 'ROW_NUMBER'i / 'DENSE_RANK'i / 'RANK'i
+  // / 'CUME_DIST'i / 'MEDIAN'i /  'PERCENT_RANK'i
+  // / 'PERCENTILE_CONT'i / 'PERCENTILE_DISC'i / 'RATIO_TO_REPORT'i
+
+KW_LAG_LEAD
+  = 'LAG'i / 'LEAD'i / 'NTH_VALUE'i
+
+consider_nulls_clause
+  = v:('IGNORE'i / 'RESPECT'i) __ 'NULLS'i {
+    // => string
+    return v.toUpperCase() + ' NULLS'
+  }
+
+aggr_fun_smma
+  = name:KW_SUM_MAX_MIN_AVG __ LPAREN __ e:additive_expr __ RPAREN __ bc:over_partition? {
+    // => { type: 'aggr_func'; name: 'SUM' | 'MAX' | 'MIN' | 'AVG'; args: { expr: additive_expr }; over: over_partition }
       return {
         type: 'aggr_func',
         name: name,
-        args: arg
+        args: {
+          expr: e
+        },
+        over: bc
       };
     }
 
-count_arg
-  = e:star_expr { /* => { expr: star_expr } */ return { expr: e }; }
-  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN tail:(__ (KW_AND / KW_OR) __ expr)* __ or:order_by_clause? {
+KW_SUM_MAX_MIN_AVG
+  = KW_SUM / KW_MAX / KW_MIN / KW_AVG
+
+aggr_fun_count
+  = name:(KW_COUNT / KW_GROUP_CONCAT) __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
+    // => { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'; args:count_arg; over: over_partition }
+      return {
+        type: 'aggr_func',
+        name: name,
+        args: arg,
+        over: bc
+      };
+    }
+  / name:('percentile_cont'i / 'percentile_disc'i) __ LPAREN __ arg:(literal_numeric / literal_array) __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
+   // => { type: 'aggr_func'; name: 'PERCENTILE_CONT' | 'PERCENTILE_DISC'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
+    return {
+        type: 'aggr_func',
+        name: name.toUpperCase(),
+        args: {
+          expr: arg
+        },
+        within_group_orderby: or,
+        over: bc
+      };
+  }
+  / name:('mode'i) __ LPAREN __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
+    // => { type: 'aggr_func'; name: 'MODE'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
+    return {
+        type: 'aggr_func',
+        name: name.toUpperCase(),
+        args: { expr: {} },
+        within_group_orderby: or,
+        over: bc
+      };
+  }
+
+concat_separator
+  = kw:'SEPARATOR'i? __ s:literal_string {
+    // => { keyword: string | null; value: literal_string; }
+    return {
+      keyword: kw,
+      value: s
+    }
+  }
+
+distinct_args
+  = d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ tail:(__ (KW_AND / KW_OR) __ expr)* __ or:order_by_clause? __ s:concat_separator? {
+    /* => { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; separator?: concat_separator; } */
     const len = tail.length
     let result = c
     result.parentheses = true
@@ -2843,37 +4284,31 @@ count_arg
       distinct: d,
       expr: result,
       orderby: or,
+      separator: s
     };
   }
-  / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause? { return { distinct: d, expr: c, orderby: or }; }
+  / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause? __ s:concat_separator?  {
+    /* => { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; separator?: concat_separator; } */
+    return { distinct: d, expr: c, orderby: or, separator: s };
+  }
+
+count_arg
+  = e:star_expr { /* => { expr: star_expr } */ return { expr: e }; }
+  / distinct_args
+
+aggr_array_agg
+  = pre:(ident __ DOT)? __ name:KW_ARRAY_AGG __ LPAREN __ arg:distinct_args __ o:order_by_clause? __ RPAREN {
+    // => { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG'; orderby?: order_by_clause  }
+      return {
+        type: 'aggr_func',
+        name: pre ? `${pre[0]}.${name}` : name,
+        args: arg,
+        orderby: o,
+      };
+    }
 
 star_expr
   = "*" { /* => { type: 'star'; value: '*' } */ return { type: 'star', value: '*' }; }
-
-position_func_args
-  = s:literal_string __ KW_IN __ e:expr start:(__ KW_FROM __ literal_numeric)? {
-    // => expr_list
-    let value = [s, { type: 'origin', value: 'in' }, e]
-    if (start) {
-      value.push({ type: 'origin', value: 'from' })
-      value.push(start[3])
-    }
-    return {
-      type: 'expr_list',
-      value,
-    }
-  }
-
-position_func_clause
-  = 'POSITION'i __ LPAREN __ args:position_func_args __ RPAREN {
-    // => { type: 'function'; name: string; args: expr_list; }
-    return {
-        type: 'function',
-        name: 'POSITION',
-        separator: ' ',
-        args,
-    };
-  }
 
 trim_position
   = 'BOTH'i / 'LEADING'i / 'TRAILING'i
@@ -2903,62 +4338,35 @@ trim_func_clause
     };
   }
 
-overlay_func_args
-  = s1:expr __ 'placing'i __ s2:expr __ KW_FROM __ start:literal_numeric length:(__ 'for'i __ literal_numeric)? {
-    // => expr_list
-    let value = [s1, { type: 'origin', value: 'placing' }, s2, { type: 'origin', value: 'from' }, start]
-    if (length) {
-      value.push({ type: 'origin', value: 'for' })
-      value.push(length[3])
-    }
+tablefunc_clause
+  = 'crosstab'i __ LPAREN __ s:expr_list __ RPAREN __ KW_AS __ n:ident_name __ LPAREN __ cds:column_data_type_list __ RPAREN {
+    // => { type: 'tablefunc'; name: crosstab; args: expr_list; as: func_call }
     return {
-      type: 'expr_list',
-      value,
-    }
-  }
-
-overlay_func_clause
-  = 'overlay'i __ LPAREN __ args:overlay_func_args __ RPAREN {
-    // => { type: 'function'; name: string; args: expr_list; }
-    return {
+      type: 'tablefunc',
+      name: 'crosstab',
+      args: s,
+      as: {
         type: 'function',
-        name: 'OVERLAY',
-        separator: ' ',
-        args,
-    };
-  }
-
-substring_func_args
-  = e:expr __ KW_FROM __ start:literal_numeric length:(__ 'for'i __ literal_numeric)? {
-    // => expr_list
-    let value = [e, { type: 'origin', value: 'from' }, start]
-    if (length) {
-      value.push({ type: 'origin', value: 'for' })
-      value.push(length[3])
+        name: n,
+        args: { type: 'expr_list', value: cds.map(v => ({ ...v, type: 'column_definition' })) },
+      }
     }
-    return {
-      type: 'expr_list',
-      value,
-    }
-  }
-
-substring_func_clause
-  = 'SUBSTRING'i __ LPAREN __ args:substring_func_args __ RPAREN {
-    // => { type: 'function'; name: string; args: expr_list; }
-    return {
-        type: 'function',
-        name: 'SUBSTRING',
-        separator: ' ',
-        args,
-    };
   }
 
 func_call
-  = position_func_clause
-  / trim_func_clause
-  / substring_func_clause
-  / overlay_func_clause
+  = trim_func_clause / tablefunc_clause
+  / name:'now'i __ LPAREN __ l:expr_list? __ RPAREN __ 'at'i __ KW_TIME __ 'zone'i __ z:literal_string {
+    // => { type: 'function'; name: string; args: expr_list; suffix: literal_string; }
+      z.prefix = 'at time zone'
+      return {
+        type: 'function',
+        name: name,
+        args: l ? l: { type: 'expr_list', value: [] },
+        suffix: z
+      };
+    }
   / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
+    // => { type: 'function'; name: string; args: expr_list; over?: over_partition; }
       return {
         type: 'function',
         name: name,
@@ -2975,14 +4383,13 @@ func_call
         over: up
     }
   }
-  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
       // => { type: 'function'; name: string; args: expr_list; }
       if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
       return {
         type: 'function',
         name: name,
-        args: l ? l: { type: 'expr_list', value: [] },
-        over: bc,
+        args: l ? l: { type: 'expr_list', value: [] }
       };
     }
 
@@ -2992,7 +4399,7 @@ extract_filed
     return f
   }
 extract_func
-  = kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ t:(KW_TIMESTAMP / KW_INTERVAL / KW_TIME / KW_DATE) __ s:expr __ RPAREN {
+  = kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ t:(KW_TIMESTAMP / KW_INTERVAL / KW_TIME / KW_DATE)? __ s:expr __ RPAREN {
     // => { type: 'extract'; args: { field: extract_filed; cast_type: 'TIMESTAMP' | 'INTERVAL' | 'TIME'; source: expr; }}
     return {
         type: kw.toLowerCase(),
@@ -3004,6 +4411,7 @@ extract_func
     }
   }
   / kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ s:expr __ RPAREN {
+    // => { type: 'extract'; args: { field: extract_filed; source: expr; }}
     return {
         type: kw.toLowerCase(),
         args: {
@@ -3012,37 +4420,53 @@ extract_func
         }
     }
   }
+
 scalar_time_func
   = KW_CURRENT_DATE
   / KW_CURRENT_TIME
   / KW_CURRENT_TIMESTAMP
+
 scalar_func
   = scalar_time_func
   / KW_CURRENT_USER
   / KW_USER
   / KW_SESSION_USER
   / KW_SYSTEM_USER
+  / "NTILE"i
 
-cast_expr
-  = e:(literal / aggr_func / func_call / case_expr / interval_expr / column_ref / param) s:KW_DOUBLE_COLON t:data_type {
+cast_double_colon
+  = s:KW_DOUBLE_COLON __ t:data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ alias:alias_clause? {
+    /* => {
+        as?: alias_clause,
+        symbol: '::' | 'as',
+        target: data_type;
+        arrows?: ('->>' | '->')[];
+        property?: (literal_string | literal_numeric)[];
+      }
+      */
     return {
-      type: 'cast',
-      keyword: 'cast',
-      expr: e,
+      as: alias,
       symbol: '::',
-      target: t
+      target: t,
+      arrows: a.map(item => item[0]),
+      properties: a.map(item => item[2]),
     }
   }
-  / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
+cast_expr
+  = c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))*  {
+    // => IGNORE
     return {
       type: 'cast',
       keyword: c.toLowerCase(),
       expr: e,
       symbol: 'as',
-      target: t
+      target: t,
+      arrows: a.map(item => item[0]),
+      properties: a.map(item => item[2]),
     };
   }
-  / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
+  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
+    // => IGNORE
     return {
       type: 'cast',
       keyword: c.toLowerCase(),
@@ -3053,7 +4477,8 @@ cast_expr
       }
     };
   }
-  / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
+  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
+      // => IGNORE
       return {
         type: 'cast',
         keyword: c.toLowerCase(),
@@ -3064,7 +4489,8 @@ cast_expr
         }
       };
     }
-  / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
+  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
+    // => IGNORE
     return {
       type: 'cast',
       keyword: c.toLowerCase(),
@@ -3075,6 +4501,42 @@ cast_expr
       }
     };
   }
+  / LPAREN __ e:(or_expr / column_ref_array_index / param) __ RPAREN __ c:cast_double_colon?  {
+    /* => {
+        type: 'cast';
+        expr: or_expr | column_ref | param
+          | expr;
+        keyword: 'cast';
+        ...cast_double_colon;
+      }
+      */
+    e.parentheses = true
+    if (!c) return e
+    return {
+      type: 'cast',
+      keyword: 'cast',
+      expr: e,
+      ...c,
+    }
+  }
+  / e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref_array_index / param) __ c:cast_double_colon? {
+    /* => {
+        type: 'cast';
+        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
+          | expr;
+        keyword: 'cast';
+        ...cast_double_colon;
+      }
+      */
+    if (!c) return e
+    return {
+      type: 'cast',
+      keyword: 'cast',
+      expr: e,
+      ...c,
+    }
+  }
+
 
 signedness
   = KW_SIGNED
@@ -3086,6 +4548,25 @@ literal
   / literal_bool
   / literal_null
   / literal_datetime
+  / literal_array
+
+literal_array
+  = s:KW_ARRAY __ LBRAKE __ c:expr_list? __ RBRAKE {
+    /*
+      => {
+        expr_list: expr_list | {type: 'origin', value: ident },
+        type: string,
+        keyword: string,
+        brackets: boolean
+      }
+    */
+    return {
+      expr_list: c || { type: 'origin', value: '' },
+      type: 'array',
+      keyword: 'array',
+      brackets: true
+    }
+  }
 
 literal_list
   = head:literal tail:(__ COMMA __ literal)* {
@@ -3119,7 +4600,14 @@ literal_bool
     }
 
 literal_string
-  = ca:("'" single_char* "'") {
+  = ca:("'" single_char* "'") [\n]+ __ fs:("'" single_char* "'") {
+      // => { type: 'single_quote_string'; value: string; }
+      return {
+        type: 'single_quote_string',
+        value: `${ca[1].join('')}${fs[1].join('')}`
+      };
+    }
+  / ca:("'" single_char* "'") {
       // => { type: 'single_quote_string'; value: string; }
       return {
         type: 'single_quote_string',
@@ -3136,13 +4624,14 @@ literal_string
 
 literal_datetime
   = type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("'" single_char* "'") {
-      //=> { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string }
+      // => { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string }
       return {
         type: type.toLowerCase(),
         value: ca[1].join('')
       };
     }
   / type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("\"" single_quote_char* "\"") {
+    // => { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string }
       return {
         type: type.toLowerCase(),
         value: ca[1].join('')
@@ -3172,8 +4661,6 @@ escape_char
     }
   / "\\" { return "\\"; }
   / "''" { return "''" }
-  / '""' { return '""' }
-  / '``' { return '``' }
 
 line_terminator
   = [\n\r]
@@ -3186,17 +4673,17 @@ literal_numeric
     }
 
 number
-  = int_:int frac:frac exp:exp {
-    const numStr = int_ + frac + exp
+  = int_:int? frac:frac exp:exp {
+    const numStr = (int_ || '') + frac + exp
     return {
       type: 'bigint',
       value: numStr
     }
   }
-  / int_:int frac:frac {
+  / int_:int? frac:frac {
     // => IGNORE
-    const numStr = int_ + frac
-    if (isBigInt(int_)) return {
+    const numStr = (int_ || '') + frac
+    if (int_ && isBigInt(int_)) return {
       type: 'bigint',
       value: numStr
     }
@@ -3258,9 +4745,10 @@ KW_SELECT   = "SELECT"i     !ident_start
 KW_UPDATE   = "UPDATE"i     !ident_start
 KW_CREATE   = "CREATE"i     !ident_start
 KW_TEMPORARY = "TEMPORARY"i !ident_start
+KW_TEMP     = "TEMP"i !ident_start
 KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
-KW_RECURSIVE= "RECURSIVE"   !ident_start
+KW_RECURSIVE= "RECURSIVE"   !ident_start { return 'RECURSIVE'; }
 KW_REPLACE  = "REPLACE"i    !ident_start
 KW_RETURNING  = "RETURNING"i    !ident_start { return 'RETURNING' }
 KW_RENAME   = "RENAME"i     !ident_start
@@ -3275,24 +4763,23 @@ KW_LOCK     = "LOCK"i       !ident_start
 
 KW_AS       = "AS"i         !ident_start
 KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
-KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
 KW_DATABASE = "DATABASE"i      !ident_start { return 'DATABASE'; }
-KW_SCHEME   = "SCHEME"i      !ident_start { return 'SCHEME'; }
+KW_SCHEMA   = "SCHEMA"i      !ident_start { return 'SCHEMA'; }
+KW_SEQUENCE   = "SEQUENCE"i      !ident_start { return 'SEQUENCE'; }
+KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
+KW_DEALLOCATE  = "DEALLOCATE"i    !ident_start { return 'DEALLOCATE'; }
 
 KW_ON       = "ON"i       !ident_start
-KW_NATURAL  = "NATURAL"i  !ident_start { return 'NATURAL'; }
-KW_LEFT     = "LEFT"i     !ident_start { return 'LEFT'; }
-KW_RIGHT    = "RIGHT"i    !ident_start { return 'RIGHT'; }
-KW_FULL     = "FULL"i     !ident_start { return 'FULL'; }
-KW_INNER    = "INNER"i    !ident_start { return 'INNER'; }
+KW_LEFT     = "LEFT"i     !ident_start
+KW_RIGHT    = "RIGHT"i    !ident_start
+KW_FULL     = "FULL"i     !ident_start
+KW_INNER    = "INNER"i    !ident_start
 KW_JOIN     = "JOIN"i     !ident_start
-KW_CROSS    = "CROSS"i    !ident_start
-KW_APPLY    = "APPLY"i    !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
-KW_UNION    = "UNION"i    !ident_start { return 'UNION'; }
-KW_INTERSECT    = "INTERSECT"i    !ident_start { return 'INTERSECT'; }
-KW_EXCEPT   = "EXCEPT"i   !ident_start { return 'EXCEPT'; }
+KW_UNION    = "UNION"i    !ident_start
+KW_INTERSECT   = "INTERSECT"i    !ident_start
+KW_EXCEPT    = "EXCEPT"i    !ident_start
 KW_VALUES   = "VALUES"i   !ident_start
 KW_USING    = "USING"i    !ident_start
 
@@ -3303,9 +4790,10 @@ KW_GROUP    = "GROUP"i      !ident_start
 KW_BY       = "BY"i         !ident_start
 KW_ORDER    = "ORDER"i      !ident_start
 KW_HAVING   = "HAVING"i     !ident_start
+KW_WINDOW   = "WINDOW"i     !ident_start
 
 KW_LIMIT    = "LIMIT"i      !ident_start
-KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET'; }
+KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET' }
 
 KW_ASC      = "ASC"i        !ident_start { return 'ASC'; }
 KW_DESC     = "DESC"i       !ident_start { return 'DESC'; }
@@ -3317,41 +4805,21 @@ KW_BETWEEN  = "BETWEEN"i    !ident_start { return 'BETWEEN'; }
 KW_IN       = "IN"i         !ident_start { return 'IN'; }
 KW_IS       = "IS"i         !ident_start { return 'IS'; }
 KW_LIKE     = "LIKE"i       !ident_start { return 'LIKE'; }
-KW_SIMILAR  = "SIMILAR"i    !ident_start { return 'SIMILAR'; }
+KW_ILIKE    = "ILIKE"i      !ident_start { return 'ILIKE'; }
 KW_EXISTS   = "EXISTS"i     !ident_start { /* => 'EXISTS' */ return 'EXISTS'; }
 
 KW_NOT      = "NOT"i        !ident_start { return 'NOT'; }
 KW_AND      = "AND"i        !ident_start { return 'AND'; }
 KW_OR       = "OR"i         !ident_start { return 'OR'; }
 
-// aggregation functions
+KW_ARRAY    = "ARRAY"i !ident_start { return 'ARRAY'; }
+KW_ARRAY_AGG = "ARRAY_AGG"i !ident_start { return 'ARRAY_AGG'; }
 KW_COUNT    = "COUNT"i      !ident_start { return 'COUNT'; }
+KW_GROUP_CONCAT = "GROUP_CONCAT"i  !ident_start { return 'GROUP_CONCAT'; }
 KW_MAX      = "MAX"i        !ident_start { return 'MAX'; }
 KW_MIN      = "MIN"i        !ident_start { return 'MIN'; }
 KW_SUM      = "SUM"i        !ident_start { return 'SUM'; }
 KW_AVG      = "AVG"i        !ident_start { return 'AVG'; }
-KW_COLLECT  = "COLLECT"i    !ident_start { return 'COLLECT'; }
-KW_RANK     = "RANK"i       !ident_start { return 'RANK'; }
-KW_DENSE_RANK = "DENSE_RANK"i       !ident_start { return 'DENSE_RANK'; }
-KW_LISTAGG  = "LISTAGG"i    !ident_start { return 'LISTAGG'; }
-KW_ROW_NUMBER = "ROW_NUMBER"i !ident_start { return 'ROW_NUMBER'; }
-
-// group window start end functions
-KW_TUMBLE         = "TUMBLE"i  !ident_start { return 'TUMBLE'; }
-KW_TUMBLE_START   = "TUMBLE_START"i  !ident_start { return 'TUMBLE_START'; }
-KW_TUMBLE_END     = "TUMBLE_END"i    !ident_start { return 'TUMEBLE_END'; }
-KW_HOP_START      = "HOP_START"i     !ident_start { return 'HOP_START'; }
-KW_HOP_END        = "HOP_END"i       !ident_start { return 'HOP_END'; }
-KW_SESSION_START  = "SESSION_START"i !ident_start { return 'SESSION_START'; }
-KW_SESSION_END    = "SESSION_END"i   !ident_start { return 'SESSION_END'; }
-
-KW_TUMBLE_ROWTIME = "TUMBLE_ROWTIME"i   !ident_start { return 'TUMBLE_ROWTIME'; }
-KW_HOP_ROWTIME = "HOP_ROWTIME"i         !ident_start { return 'HOP_ROWTIME'; }
-KW_SESSION_ROWTIME = "SESSION_ROWTIME"i !ident_start { return 'SESSION_ROWTIME'; }
-
-KW_TUMBLE_PROCTIME = "TUMBLE_PROCTIME"i   !ident_start { return 'TUMBLE_PROCTIME'; }
-KW_HOP_PROCTIME = "HOP_PROCTIME"i         !ident_start { return 'HOP_PROCTIME'; }
-KW_SESSION_PROCTIME = "SESSION_PROCTIME"i !ident_start { return 'SESSION_PROCTIME'; }
 
 KW_EXTRACT  = "EXTRACT"i    !ident_start { return 'EXTRACT'; }
 KW_CALL     = "CALL"i       !ident_start { return 'CALL'; }
@@ -3363,13 +4831,12 @@ KW_ELSE     = "ELSE"i       !ident_start
 KW_END      = "END"i        !ident_start
 
 KW_CAST     = "CAST"i       !ident_start { return 'CAST' }
-KW_TRY_CAST = "TRY_CAST"i   !ident_start { return 'TRY_CAST' }
 
 KW_BOOL     = "BOOL"i     !ident_start { return 'BOOL'; }
 KW_BOOLEAN  = "BOOLEAN"i  !ident_start { return 'BOOLEAN'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
+KW_CHARACTER = "CHARACTER"i     !ident_start { return 'CHARACTER'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
-KW_STRING   = "STRING"i   !ident_start { return 'STRING';}
 KW_NUMERIC  = "NUMERIC"i  !ident_start { return 'NUMERIC'; }
 KW_DECIMAL  = "DECIMAL"i  !ident_start { return 'DECIMAL'; }
 KW_SIGNED   = "SIGNED"i   !ident_start { return 'SIGNED'; }
@@ -3381,25 +4848,38 @@ KW_JSON     = "JSON"i     !ident_start { return 'JSON'; }
 KW_JSONB    = "JSONB"i    !ident_start { return 'JSONB'; }
 KW_GEOMETRY = "GEOMETRY"i !ident_start { return 'GEOMETRY'; }
 KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
+KW_SERIAL = "SERIAL"i !ident_start { return 'SERIAL'; }
 KW_TINYINT  = "TINYINT"i  !ident_start { return 'TINYINT'; }
 KW_TINYTEXT = "TINYTEXT"i !ident_start { return 'TINYTEXT'; }
 KW_TEXT     = "TEXT"i     !ident_start { return 'TEXT'; }
 KW_MEDIUMTEXT = "MEDIUMTEXT"i  !ident_start { return 'MEDIUMTEXT'; }
 KW_LONGTEXT  = "LONGTEXT"i  !ident_start { return 'LONGTEXT'; }
 KW_BIGINT   = "BIGINT"i   !ident_start { return 'BIGINT'; }
+KW_ENUM     = "ENUM"i   !ident_start { return 'ENUM'; }
 KW_FLOAT   = "FLOAT"i   !ident_start { return 'FLOAT'; }
 KW_DOUBLE   = "DOUBLE"i   !ident_start { return 'DOUBLE'; }
+KW_BIGSERIAL   = "BIGSERIAL"i   !ident_start { return 'BIGSERIAL'; }
+KW_REAL     = "REAL"i   !ident_start { return 'REAL'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
+KW_ROWS     = "ROWS"i     !ident_start { return 'ROWS'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
 KW_USER     = "USER"i     !ident_start { return 'USER'; }
 KW_UUID     = "UUID"i     !ident_start { return 'UUID'; }
-KW_ARRAY    = "ARRAY"i    !ident_start { return 'ARRAY'; }
-KW_MAP      = "MAP"i      !ident_start { return 'MAP'; }
-KW_MULTISET = "MULTISET"i !ident_start { return 'MULTISET'; }
-KW_ROW      = "ROW"i      !ident_start { return 'ROW'; }
+KW_OID      = "OID"i     !ident_start { return 'OID'; }
+KW_REGCLASS = "REGCLASS"i     !ident_start { return 'REGCLASS'; }
+KW_REGCOLLATION  = "REGCOLLATION"i     !ident_start { return 'REGCOLLATION'; }
+KW_REGCONFIG     = "REGCONFIG"i     !ident_start { return 'REGCONFIG'; }
+KW_REGDICTIONARY = "REGDICTIONARY"i     !ident_start { return 'REGDICTIONARY'; }
+KW_REGNAMESPACE  = "REGNAMESPACE"i     !ident_start { return 'REGNAMESPACE'; }
+KW_REGOPER  = "REGOPER"i     !ident_start { return 'REGOPER'; }
+KW_REGOPERATOR   = "REGOPERATOR"i     !ident_start { return 'REGOPERATOR'; }
+KW_REGPROC  = "REGPROC"i     !ident_start { return 'REGPROC'; }
+KW_REGPROCEDURE  = "REGPROCEDURE"i     !ident_start { return 'REGPROCEDURE'; }
+KW_REGROLE  = "REGROLE"i     !ident_start { return 'REGROLE'; }
+KW_REGTYPE  = "REGTYPE"i     !ident_start { return 'REGTYPE'; }
 
 KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
 KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
@@ -3410,10 +4890,10 @@ KW_UNIT_DAY         = "DAY"i !ident_start { return 'DAY'; }
 KW_UNIT_HOUR        = "HOUR"i !ident_start { return 'HOUR'; }
 KW_UNIT_MINUTE      = "MINUTE"i !ident_start { return 'MINUTE'; }
 KW_UNIT_SECOND      = "SECOND"i !ident_start { return 'SECOND'; }
-KW_UNIT_SECONDS      = "SECONDS"i !ident_start { return 'SECONDS'; }
 KW_CURRENT_TIME     = "CURRENT_TIME"i !ident_start { return 'CURRENT_TIME'; }
 KW_CURRENT_TIMESTAMP= "CURRENT_TIMESTAMP"i !ident_start { return 'CURRENT_TIMESTAMP'; }
 KW_CURRENT_USER     = "CURRENT_USER"i !ident_start { return 'CURRENT_USER'; }
+KW_CURRENT_ROLE     = "CURRENT_ROLE"i !ident_start { return 'CURRENT_ROLE'; }
 KW_SESSION_USER     = "SESSION_USER"i !ident_start { return 'SESSION_USER'; }
 KW_SYSTEM_USER      = "SYSTEM_USER"i !ident_start { return 'SYSTEM_USER'; }
 
@@ -3422,12 +4902,14 @@ KW_SESSION        = "SESSION"i   !ident_start { return 'SESSION'; }
 KW_LOCAL          = "LOCAL"i     !ident_start { return 'LOCAL'; }
 KW_PERSIST        = "PERSIST"i   !ident_start { return 'PERSIST'; }
 KW_PERSIST_ONLY   = "PERSIST_ONLY"i   !ident_start { return 'PERSIST_ONLY'; }
+KW_VIEW           = "VIEW"i    !ident_start { return 'VIEW'; }
 
 KW_VAR__PRE_AT = '@'
 KW_VAR__PRE_AT_AT = '@@'
 KW_VAR_PRE_DOLLAR = '$'
+KW_VAR_PRE_DOLLAR_DOUBLE = '$$'
 KW_VAR_PRE
-  = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR
+  = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR / KW_VAR_PRE_DOLLAR
 KW_RETURN = 'return'i
 KW_ASSIGN = ':='
 KW_DOUBLE_COLON = '::'
@@ -3469,9 +4951,6 @@ RPAREN    = ')'
 LBRAKE    = '['
 RBRAKE    = ']'
 
-LANGLEBRAKE = '<'
-RANGLEBRAKE = '>'
-
 SEMICOLON = ';'
 SINGLE_ARROW = '->'
 DOUBLE_ARROW = '->>'
@@ -3494,7 +4973,7 @@ comment
   / line_comment
 
 block_comment
-  = "/*" (!"*/" char)* "*/"
+  = "/*" (!"*/" !"/*" char / block_comment)* "*/"
 
 line_comment
   = "--" (!EOL char)*
@@ -3522,9 +5001,6 @@ interval_unit
   / KW_UNIT_HOUR
   / KW_UNIT_MINUTE
   / KW_UNIT_SECOND
-  / u:('years'i / 'months'i / 'days'i / 'hours'i / 'minutes'i / 'seconds'i) {
-    return u.toUpperCase()
-  }
 
 whitespace =
   [ \t\n\r]
@@ -3541,8 +5017,10 @@ proc_stmts
 
 proc_stmt
   = &{ varList = []; return true; } __ s:(assign_stmt / return_stmt) {
-      // => { type: 'proc'; stmt: assign_stmt | return_stmt; vars: any }
-      return { type: 'proc', stmt: s, vars: varList };
+      /* export interface proc_stmt { type: 'proc'; stmt: assign_stmt | return_stmt; vars: any }
+     => AstStatement<proc_stmt>
+     */
+      return { type: 'proc', stmt: s, vars: varList }
     }
 
 assign_stmt
@@ -3605,6 +5083,19 @@ proc_primary
       e.parentheses = true;
       return e;
     }
+  / n:ident_name s:(DOT __ ident_name)? {
+    // => { type: 'var'; prefix: null; name: number; members: []; quoted: null } | column_ref
+    if (!s) return {
+      type: 'var',
+      name: n,
+      prefix: null
+    }
+    return {
+      type: 'column_ref',
+      table: n,
+      column: s[2]
+    }
+  }
 
 proc_func_name
   = dt:ident_name tail:(__ DOT __ ident_name)? {
@@ -3629,14 +5120,6 @@ proc_func_call
         }
       };
     }
-  / name:proc_func_name {
-    // => IGNORE
-    return {
-        type: 'function',
-        name: name,
-        args: null
-      };
-  }
 
 proc_primary_list
   = head:proc_primary tail:(__ COMMA __ proc_primary)* {
@@ -3644,16 +5127,40 @@ proc_primary_list
       return createList(head, tail);
     }
 
-proc_array =
-  LBRAKE __ l:proc_primary_list __ RBRAKE {
+proc_array
+  = LBRAKE __ l:proc_primary_list __ RBRAKE {
     // => { type: 'array'; value: proc_primary_list }
     return { type: 'array', value: l };
   }
 
+var_decl_list
+  = head:var_decl tail:(__ COMMA __ var_decl)* {
+    // => var_decl[]
+    return createList(head, tail)
+  }
+
 var_decl
-  = p: KW_VAR_PRE d: without_prefix_var_decl {
+  = p:KW_VAR_PRE_DOLLAR_DOUBLE d:[^$]* s:KW_VAR_PRE_DOLLAR_DOUBLE {
+    // => { type: 'var'; name: string; prefix: string; suffix: string; };
+    return {
+      type: 'var',
+      name: d.join(''),
+      prefix: '$$',
+      suffix: '$$'
+    };
+  }
+  / KW_VAR_PRE_DOLLAR f:column KW_VAR_PRE_DOLLAR d:[^$]* KW_VAR_PRE_DOLLAR s:column !{ if (f !== s) return true } KW_VAR_PRE_DOLLAR {
+    // => { type: 'var'; name: string; prefix: string; suffix: string; };
+    return {
+      type: 'var',
+      name: d.join(''),
+      prefix: `$${f}$`,
+      suffix: `$${s}$`
+    };
+  }
+  / p:KW_VAR_PRE d: without_prefix_var_decl {
     // => without_prefix_var_decl & { type: 'var'; prefix: string; };
-    //push for analysis
+    // push for analysis
     return {
       type: 'var',
       ...d,
@@ -3662,18 +5169,21 @@ var_decl
   }
 
 without_prefix_var_decl
-  = name:ident_name m:mem_chain {
-    // => { type: 'var'; prefix: string; name: ident_name; members: mem_chain; }
+  = p:'"'? name:ident_name m:mem_chain s:'"'? {
+    // => { type: 'var'; prefix: string; name: ident_name; members: mem_chain; quoted: string | null }
     //push for analysis
+    if ((p && !s) || (!p && s)) throw new Error('double quoted not match')
     varList.push(name);
     return {
       type: 'var',
       name: name,
       members: m,
+      quoted: p && s ? '"' : null,
       prefix: null,
     };
   }
   / n:literal_numeric {
+    // => { type: 'var'; prefix: null; name: number; members: []; quoted: null }
     return {
       type: 'var',
       name: n.value,
@@ -3694,7 +5204,8 @@ mem_chain
   }
 
 data_type
-  = character_string_type
+  = array_type
+  / character_string_type
   / numeric_type
   / datetime_type
   / json_type
@@ -3702,21 +5213,40 @@ data_type
   / text_type
   / uuid_type
   / boolean_type
-  / collection_type
-  / key_value_type
-  / row_type
+  / enum_type
+  / serial_interval_type
+  / binary_type
+  / oid_type
+  / record_type
+
+
+array_type
+  = t:(numeric_type / character_string_type) __ LBRAKE __ RBRAKE __ LBRAKE __ RBRAKE {
+    /* => data_type */
+    return { ...t, array: 'two' }
+  }
+  / t:(numeric_type / character_string_type) __ LBRAKE __ RBRAKE {
+    /* => data_type */
+    return { ...t, array: 'one' }
+  }
 
 boolean_type
   = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
 
+binary_type
+  = 'bytea'i { /* => data_type */ return { dataType: 'BYTEA' }; }
+
+character_varying
+  = KW_CHARACTER __ ('varying'i)? {
+    // => string
+    return 'CHARACTER VARYING'
+  }
 character_string_type
-  = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
+  = t:(KW_CHAR / KW_VARCHAR / character_varying) __ LPAREN __ l:[0-9]+ __ RPAREN {
     // => data_type
     return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true };
   }
-  / t:KW_CHAR { /* =>  data_type */ return { dataType: t }; }
-  / t:KW_VARCHAR { /* =>  data_type */  return { dataType: t }; }
-  / t:KW_STRING { return {dataType: t }; }
+  / t:(KW_CHAR / character_varying / KW_VARCHAR) { /* =>  data_type */ return { dataType: t }; }
 
 numeric_type_suffix
   = un: KW_UNSIGNED? __ ze: KW_ZEROFILL? {
@@ -3727,13 +5257,37 @@ numeric_type_suffix
     return result
   }
 numeric_type
-  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE)l:[0-9]+ __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ s:numeric_type_suffix? __{ /* =>  data_type */ return { dataType: t, suffix: s }; }
+  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE __ 'PRECISION'i / KW_DOUBLE / KW_SERIAL / KW_BIGSERIAL /  KW_REAL) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: Array.isArray(t) ? `${t[0].toUpperCase()} ${t[2].toUpperCase()}` : t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE __ 'PRECISION'i / KW_DOUBLE / KW_SERIAL / KW_BIGSERIAL /  KW_REAL)l:[0-9]+ __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: Array.isArray(t) ? `${t[0].toUpperCase()} ${t[2].toUpperCase()}` : t, length: parseInt(l.join(''), 10), suffix: s }; }
+  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE __ 'PRECISION'i / KW_DOUBLE / KW_SERIAL / KW_BIGSERIAL /  KW_REAL) __ s:numeric_type_suffix? __{ /* =>  data_type */ return { dataType: Array.isArray(t) ? `${t[0].toUpperCase()} ${t[2].toUpperCase()}` : t, suffix: s }; }
+
+oid_type
+  = t:(KW_OID / KW_REGCLASS / KW_REGCOLLATION / KW_REGCONFIG / KW_REGDICTIONARY / KW_REGNAMESPACE / KW_REGOPER / KW_REGOPERATOR / KW_REGPROC / KW_REGPROCEDURE / KW_REGROLE / KW_REGTYPE) { /* => data_type */ return { dataType: t }}
+
+timezone
+  = w:('WITHOUT'i / 'WITH'i) __ KW_TIME __ 'ZONE'i {
+    // => string[];
+    return [w.toUpperCase(), 'TIME', 'ZONE']
+  }
+
+time_type
+  = t:(KW_TIME / KW_TIMESTAMP) __ LPAREN __ l:[0-9]+ __ RPAREN __ tz:timezone? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true, suffix: tz }; }
+  / t:(KW_TIME / KW_TIMESTAMP) __ tz:timezone? { /* =>  data_type */  return { dataType: t, suffix: tz }; }
 
 datetime_type
-  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
-  / t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP) { /* =>  data_type */  return { dataType: t }; }
+  = t:(KW_DATE / KW_DATETIME) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
+  / t:(KW_DATE / KW_DATETIME) { /* =>  data_type */  return { dataType: t }; }
+  / time_type
+
+enum_type
+  = t:KW_ENUM __ e:value_item {
+    /* =>  data_type */
+    e.parentheses = true
+    return {
+      dataType: t,
+      expr: e
+    }
+  }
 
 json_type
   = t:(KW_JSON / KW_JSONB) { /* =>  data_type */  return { dataType: t }; }
@@ -3741,17 +5295,15 @@ json_type
 geometry_type
   = t:KW_GEOMETRY {/* =>  data_type */  return { dataType: t }; }
 
+serial_interval_type
+  = t:(KW_SERIAL / KW_INTERVAL) { /* =>  data_type */  return { dataType: t }; }
+
 text_type
-  = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) { /* =>  data_type */ return { dataType: t }}
+  = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) LBRAKE __ RBRAKE { /* =>  data_type */ return { dataType: `${t}[]` }}
+  / t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) { /* =>  data_type */ return { dataType: t }}
 
 uuid_type
   = t:KW_UUID {/* =>  data_type */  return { dataType: t }}
 
-collection_type
-  = t:KW_ARRAY LANGLEBRAKE subt:data_type RANGLEBRAKE { return { dataType: t, subType: subt}; }
-
-key_value_type
-  = t:KW_MAP LANGLEBRAKE subk:data_type COMMA subv:data_type RANGLEBRAKE { return {dataType: t, subType: subv}; }
-
-row_type
-  = t:KW_ROW { return {dataType: t} }
+record_type
+  = 'RECORD'i {/* =>  data_type */  return { dataType: 'RECORD' }}

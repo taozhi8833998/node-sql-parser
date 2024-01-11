@@ -251,6 +251,7 @@ create_stmt
   / create_index_stmt
   / create_db_stmt
   / create_view_stmt
+  / create_user_stmt
 
 alter_stmt
   = alter_table_stmt
@@ -353,6 +354,173 @@ create_db_stmt
         }
       }
     }
+
+auth_option
+  = 'IDENTIFIED' __ ap:('WITH'i __ ident)? __ 'BY'i __ 'RANDOM'i __ 'PASSWORD'i {
+    const value = {
+      prefix: 'by',
+      type: 'origin',
+      value: 'random password',
+    }
+    return {
+      keyword: ['identified', ap && ap[0].toLowerCase()].filter(v => v).join(' '),
+      auth_plugin: ap && ap[2],
+      value
+    }
+  }
+  / 'IDENTIFIED' __ ap:('WITH'i __ ident)? __ 'BY'i __ v:literal_string {
+    v.prefix = 'by'
+    return {
+      keyword: ['identified', ap && ap[0].toLowerCase()].filter(v => v).join(' '),
+      auth_plugin: ap && ap[2],
+      value: v
+    }
+  }
+  / 'IDENTIFIED' __ 'WITH'i __ ap:ident __ 'AS'i __ v:literal_string {
+    v.prefix = 'as'
+    return {
+      keyword: 'identified with',
+      auth_plugin: ap && ap[2],
+      value: v
+    }
+  }
+user_auth_option
+  = u:user_or_role __ ap:(auth_option)? {
+    return {
+      user: u,
+      auth_option: ap
+    }
+  }
+user_auth_option_list
+  = head:user_auth_option tail:(__ COMMA __ user_auth_option)* {
+      return createList(head, tail)
+    }
+default_role
+  = KW_DEFAULT __ 'role'i __ r:user_or_role_list {
+    return {
+      keyword: 'default role',
+      value: r
+    }
+  }
+tls_option
+  = v:('NONE'i / 'SSL'i / 'X509'i) {
+    return{
+        type: 'origin',
+        value: v
+    }
+  }
+  / k:('CIPHER'i  / 'ISSUER'i / 'SUBJECT'i) __ v:literal_string {
+    v.prefix = k.toLowerCase()
+    return v
+  }
+tls_option_list
+  = head:tls_option tail:(__ KW_AND __ tls_option)* {
+    return createBinaryExprChain(head, tail)
+  }
+require_options
+  = 'REQUIRE'i __ t:tls_option_list {
+    return {
+      keyword: 'require',
+      value: t
+    }
+  }
+
+resource_option
+  = k:('MAX_QUERIES_PER_HOUR'i / 'MAX_UPDATES_PER_HOUR'i / 'MAX_CONNECTIONS_PER_HOUR'i / 'MAX_USER_CONNECTIONS'i) __ v:literal_numeric {
+    v.prefix = k.toLowerCase()
+    return v
+  }
+with_resource_option
+  = KW_WITH __ r:resource_option t:(__ resource_option)* {
+    const resourceOptions = [r]
+    if (t) {
+      for (const item of t) {
+        resourceOptions.push(item[1])
+      }
+    }
+    return {
+      keyword: 'with',
+      value: resourceOptions
+    }
+  }
+password_option
+  = 'PASSWORD'i __ 'EXPIRE'i __ v:('DEFAULT'i / 'NEVER'i / interval_expr) {
+    return {
+      keyword: 'password expire',
+      value: typeof v === 'string' ? { type: 'origin', value: v } : v
+    }
+  }
+  / 'PASSWORD'i __ 'HISTORY'i __ v:('DEFAULT'i / literal_numeric) {
+    return {
+      keyword: 'password history',
+      value:  typeof v === 'string' ? { type: 'origin', value: v } : v
+    }
+  }
+  / 'PASSWORD'i __ 'REUSE' __ v:interval_expr {
+    return {
+      keyword: 'password reuse',
+      value: v
+    }
+  }
+  / 'PASSWORD'i __ 'REQUIRE'i __ 'CURRENT'i __ v:('DEFAULT'i / 'OPTIONAL'i) {
+    return {
+      keyword: 'password require current',
+      value: { type: 'origin', value: v }
+    }
+  }
+  / 'FAILED_LOGIN_ATTEMPTS'i __ v:literal_numeric {
+    return {
+      keyword: 'failed_login_attempts',
+      value: v
+    }
+  }
+  / 'PASSWORD_LOCK_TIME'i __ v:(literal_numeric / 'UNBOUNDED'i) {
+    return {
+      keyword: 'password_lock_time',
+      value: typeof v === 'string' ? { type: 'origin', value: v } : v
+    }
+  }
+
+password_option_list
+  = head:password_option tail:(__ password_option)* {
+      return createList(head, tail, 1)
+    }
+user_lock_option
+  = 'ACCOUNT'i __ v:('LOCK'i / 'UNLOCK'i) {
+    const value = {
+      type: 'origin',
+      value: v.toLowerCase()
+    }
+    value.prefix = 'account'
+    return value
+  }
+attribute
+  = 'ATTRIBUTE'i __ v:literal_string {
+    v.prefix = 'attribute'
+    return v
+  }
+create_user_stmt
+  = a:KW_CREATE __ k:KW_USER __ ife:if_not_exists_stmt? __ t:user_auth_option_list __
+  d:default_role? __ r:require_options? __ wr:with_resource_option? __ p:password_option_list? __
+  l:user_lock_option? __ c:keyword_comment? __ attr:attribute? {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: a[0].toLowerCase(),
+        keyword: 'user',
+        if_not_exists: ife,
+        user: t,
+        default_role: d,
+        require: r,
+        resource_options: wr,
+        password_options: p,
+        lock_option: l,
+        comment: c,
+        attribute: attr
+      }
+    }
+  }
 
 view_with
   = KW_WITH __ c:("CASCADED"i / "LOCAL"i) __ "CHECK"i __ "OPTION" {
@@ -1223,9 +1391,16 @@ table_option
       value: v
     }
   }
-  / kw:(KW_COMMENT / 'CONNECTION'i) __ s:(KW_ASSIGIN_EQUAL)? __ c:literal_string {
+  / kw:(KW_COMMENT / 'CONNECTION'i / 'ENGINE_ATTRIBUTE'i / 'SECONDARY_ENGINE_ATTRIBUTE'i ) __ s:(KW_ASSIGIN_EQUAL)? __ c:literal_string {
     return {
       keyword: kw.toLowerCase(),
+      symbol: s,
+      value: `'${c.value}'`
+    }
+  }
+  / type:('DATA'i / 'INDEX'i) __ 'DIRECTORY'i __ s:(KW_ASSIGIN_EQUAL)? __ c:literal_string {
+    return {
+      keyword: type.toLowerCase() + " directory",
       symbol: s,
       value: `'${c.value}'`
     }

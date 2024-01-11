@@ -1358,6 +1358,26 @@ describe('Postgres', () => {
         'CREATE TABLE "public"."authors_table" ("author_id" INTEGER NOT NULL, "first_name" CHARACTER VARYING NOT NULL, "last_name" CHARACTER VARYING NOT NULL, "birth_date" DATE)'
       ]
     },
+    {
+      title: 'as double quoted',
+      sql: [
+        'select 1 as "one"',
+        'SELECT 1 AS "one"'
+      ]
+    },
+    {
+      title: 'intersect op',
+      sql: [
+        `SELECT  item
+        FROM public.orders
+        WHERE ID = 1
+        INTERSECT
+        SELECT "sku"
+        FROM public.inventory
+        WHERE ID = 1`,
+        'SELECT "item" FROM "public"."orders" WHERE "ID" = 1 INTERSECT SELECT "sku" FROM "public"."inventory" WHERE "ID" = 1'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
@@ -1594,7 +1614,7 @@ describe('Postgres', () => {
         ]
       },
       {
-        title: 'cast when expr is additive_ expr',
+        title: 'cast when expr is additive expr',
         sql: [
           `SELECT
             CASE
@@ -1634,6 +1654,10 @@ describe('Postgres', () => {
     it('should proc assign', () => {
       expect(procToSQL({stmt: {type: 'assign', left: {type: 'default', value: 'abc'}, keyword: '', right: {type: 'number', value: 123}, symbol: '='}})).to.be.equal('abc = 123')
     })
+    it('should throw error', () => {
+      const sql = "select 1 as 'one'"
+      const fun = parser.astify.bind(parser, sql, opt)
+      expect(fun).to.throw(`Expected "--", "/*", "\\"", [ \\t\\n\\r], or [A-Za-z_一-龥] but "'" found.`)
+    })
   })
-
 })

@@ -2834,7 +2834,7 @@ replace_insert_stmt
          type: 'insert' | 'replace';
          table?: [table_name];
          columns: column_list;
-         conflict?: on_clifict;
+         conflict?: on_conflict;
          values: insert_value_clause;
          partition?: insert_partition;
          returning?: returning_stmt;
@@ -4369,12 +4369,16 @@ ___
 comment
   = block_comment
   / line_comment
+  / double_slash_comment
 
 block_comment
   = "/*" (!"*/" !"/*" char / block_comment)* "*/"
 
 line_comment
   = "--" (!EOL char)*
+
+double_slash_comment
+  = '//' (!EOL char)*
 
 pound_sign_comment
   = "#" (!EOL char)*

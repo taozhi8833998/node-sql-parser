@@ -278,6 +278,14 @@ set_op
     // => 'union' | 'union all' | 'union distinct'
     return a ? `union ${a.toLowerCase()}` : 'union'
   }
+  / KW_INTERSECT {
+    // => 'intersect
+    return 'intersect'
+  }
+  / KW_EXCEPT {
+    // => 'except'
+    return 'except'
+  }
 
 union_stmt
   = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob:order_by_clause? __ l:limit_clause? {
@@ -2887,7 +2895,7 @@ value_alias_clause
 
 alias_clause
   = KW_AS __ i:alias_ident { /*=>alias_ident*/ return i; }
-  / KW_AS? __ i:ident { /*=>ident*/ return i; }
+  / KW_AS? __ i:alias_ident { /*=>alias_ident*/ return i; }
 
 into_clause
   = KW_INTO __ v:var_decl_list {
@@ -3481,7 +3489,7 @@ replace_insert_stmt
          type: 'insert' | 'replace';
          table?: [table_name];
          columns: column_list;
-         conflict?: on_clifict;
+         conflict?: on_conflict;
          values: insert_value_clause;
          partition?: insert_partition;
          returning?: returning_stmt;
@@ -4053,7 +4061,7 @@ alias_ident
       if (!c) return name;
       return `${name}(${c[3].join(', ')})`
     }
-  / name:quoted_ident {
+  / name:double_quoted_ident {
       // => IGNORE
       return name;
     }
@@ -4779,6 +4787,8 @@ KW_INNER    = "INNER"i    !ident_start
 KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
 KW_UNION    = "UNION"i    !ident_start
+KW_INTERSECT   = "INTERSECT"i    !ident_start
+KW_EXCEPT    = "EXCEPT"i    !ident_start
 KW_VALUES   = "VALUES"i   !ident_start
 KW_USING    = "USING"i    !ident_start
 

@@ -225,6 +225,7 @@ export {
   executeToSQL,
   forLoopToSQL,
   grantAndRevokeToSQL,
+  grantUserOrRoleToSQL,
   ifToSQL,
   raiseToSQL,
   renameToSQL,

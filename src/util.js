@@ -13,8 +13,9 @@ import { columnToSQL, columnRefToSQL, columnOrderToSQL } from './column'
 // }
 
 const DEFAULT_OPT = {
-  database : PARSER_NAME || 'mysql',
-  type     : 'table',
+  database     : PARSER_NAME || 'mysql',
+  type         : 'table',
+  parseOptions : {},
 }
 
 let parserOpt = DEFAULT_OPT
@@ -130,6 +131,7 @@ function columnIdentifierToSql(ident) {
     case 'postgresql':
     case 'db2':
     case 'snowflake':
+    case 'noql':
       return `"${ident}"`
     case 'transactsql':
       return `[${ident}]`
@@ -153,6 +155,7 @@ function identifierToSql(ident, isDual) {
       return `\`${ident}\``
     case 'postgresql':
     case 'snowflake':
+    case 'noql':
       return `"${ident}"`
     case 'transactsql':
       return `[${ident}]`

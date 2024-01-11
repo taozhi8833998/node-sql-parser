@@ -226,8 +226,8 @@ describe('mysql', () => {
       {
         title: 'create on update current_timestamp',
         sql: [
-          "CREATE TABLE `t1` (`id` int(11) unsigned NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL DEFAULT 'ttt', `zf` int(10) unsigned zerofill DEFAULT NULL, `created_at` timestamp NULL DEFAULT now() on update now(), `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP, `last_modified_time` timestamp(4) NOT NULL DEFAULT '1970-01-01 00:00:00' ON UPDATE current_timestamp(4), PRIMARY KEY (`id`)) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4",
-          "CREATE TABLE `t1` (`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, `name` VARCHAR(64) NOT NULL DEFAULT 'ttt', `zf` INT(10) UNSIGNED ZEROFILL DEFAULT NULL, `created_at` TIMESTAMP NULL DEFAULT now() ON UPDATE NOW(), `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP, `last_modified_time` TIMESTAMP(4) NOT NULL DEFAULT '1970-01-01 00:00:00' ON UPDATE CURRENT_TIMESTAMP(4), PRIMARY KEY (`id`)) ENGINE = INNODB AUTO_INCREMENT = 5 DEFAULT CHARSET = utf8mb4"
+          "CREATE TABLE `t1` (`id` int(11) unsigned NOT NULL AUTO_INCREMENT, `name` varchar(64) NOT NULL DEFAULT 'ttt', `zf` int(10) unsigned zerofill DEFAULT NULL, `created_at` timestamp NULL DEFAULT now() on update now(), `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP, `last_modified_time` timestamp(4) NOT NULL DEFAULT '1970-01-01 00:00:00' ON UPDATE current_timestamp(4), PRIMARY KEY (`id`)) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 DATA DIRECTORY='/path/to/my/custom/directory';",
+          "CREATE TABLE `t1` (`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, `name` VARCHAR(64) NOT NULL DEFAULT 'ttt', `zf` INT(10) UNSIGNED ZEROFILL DEFAULT NULL, `created_at` TIMESTAMP NULL DEFAULT now() ON UPDATE NOW(), `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP, `last_modified_time` TIMESTAMP(4) NOT NULL DEFAULT '1970-01-01 00:00:00' ON UPDATE CURRENT_TIMESTAMP(4), PRIMARY KEY (`id`)) ENGINE = INNODB AUTO_INCREMENT = 5 DEFAULT CHARSET = utf8mb4 DATA DIRECTORY = '/path/to/my/custom/directory'"
         ],
       },
       {
@@ -898,6 +898,33 @@ describe('mysql', () => {
         sql: [
           'SELECT COUNT((A.col_1 = "03" AND A.col_2 ="") OR NULL) FROM sample_table A;',
           'SELECT COUNT((`A`.`col_1` = "03" AND `A`.`col_2` = "") OR NULL) FROM `sample_table` AS `A`'
+        ]
+      },
+      {
+        title: 'create user',
+        sql: [
+          "CREATE USER 'john'@'localhost' IDENTIFIED BY 'johnDoe1@'",
+          "CREATE USER 'john'@'localhost' IDENTIFIED BY 'johnDoe1@'"
+        ]
+      },
+      {
+        title: 'cc',
+        sql: [
+          "CREATE USER 'joe'@'10.0.0.1' DEFAULT ROLE administrator, developer;",
+          "CREATE USER 'joe'@'10.0.0.1' DEFAULT ROLE 'administrator', 'developer'"
+        ]
+      },
+      {
+        title: 'create user with password option',
+        sql: [
+          `CREATE USER 'jeffrey'@'localhost'
+          IDENTIFIED WITH caching_sha2_password BY 'new_password'
+          default role administrator, developer
+          require ssl and x509
+          with max_queries_per_hour 100
+          PASSWORD EXPIRE INTERVAL 180 DAY
+          FAILED_LOGIN_ATTEMPTS 3 PASSWORD_LOCK_TIME 2 account lock comment 'test comment' attribute '{"fname": "James", "lname": "Scott", "phone": "123-456-7890"}';`,
+          `CREATE USER 'jeffrey'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'new_password' DEFAULT ROLE 'administrator', 'developer' REQUIRE SSL AND X509 WITH MAX_QUERIES_PER_HOUR 100 PASSWORD EXPIRE INTERVAL 180 DAY FAILED_LOGIN_ATTEMPTS 3 PASSWORD_LOCK_TIME 2 ACCOUNT LOCK COMMENT 'test comment' ATTRIBUTE '{"fname": "James", "lname": "Scott", "phone": "123-456-7890"}'`
         ]
       },
     ]
