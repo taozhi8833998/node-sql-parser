@@ -105,6 +105,20 @@ describe('snowflake', () => {
         'SELECT * FROM "TABLEName"'
       ]
     },
+    {
+      title: 'cast to number data type',
+      sql: [
+        `SELECT listing_id,
+        listing_name,
+        room_type,
+        host_id,
+        REPLACE(price_str, '$') :: NUMBER(10, 2) AS price,
+        created_at,
+        updated_at
+        FROM src_listings`,
+        `SELECT "listing_id", "listing_name", "room_type", "host_id", REPLACE("price_str", '$')::NUMBER(10, 2) AS "price", "created_at", "updated_at" FROM "src_listings"`
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
