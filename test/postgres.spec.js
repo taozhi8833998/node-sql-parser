@@ -1378,6 +1378,13 @@ describe('Postgres', () => {
         'SELECT "item" FROM "public"."orders" WHERE "ID" = 1 INTERSECT SELECT "sku" FROM "public"."inventory" WHERE "ID" = 1'
       ]
     },
+    {
+      title: 'set to',
+      sql: [
+        'SET search_path TO ht_hyt',
+        'SET search_path TO ht_hyt'
+      ]
+    }
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
