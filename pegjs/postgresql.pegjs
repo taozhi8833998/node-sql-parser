@@ -202,10 +202,13 @@
 }
 
 start
-  = __ n:(create_function_stmt / multiple_stmt) {
+  = b:('begin'i __ SEMICOLON) __ n:(create_function_stmt / multiple_stmt) __ c:('commit'i __ SEMICOLON) {
     // => multiple_stmt
+    n.ast.transactions = true
     return n
   }
+  / create_function_stmt
+  / multiple_stmt
 
 cmd_stmt
   = drop_stmt
