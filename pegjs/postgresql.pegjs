@@ -202,10 +202,13 @@
 }
 
 start
-  = __ n:(create_function_stmt / multiple_stmt) {
+  = b:('begin'i __ SEMICOLON) __ n:(create_function_stmt / multiple_stmt) __ c:('commit'i __ SEMICOLON) {
     // => multiple_stmt
+    n.ast.transactions = true
     return n
   }
+  / create_function_stmt
+  / multiple_stmt
 
 cmd_stmt
   = drop_stmt
@@ -5033,12 +5036,12 @@ proc_stmt
     }
 
 assign_stmt
-  = va:(var_decl / without_prefix_var_decl) __ s: (KW_ASSIGN / KW_ASSIGIN_EQUAL) __ e:proc_expr {
+  = va:(var_decl / without_prefix_var_decl) __ s:(KW_ASSIGN / KW_ASSIGIN_EQUAL / KW_TO) __ e:proc_expr {
     // => { type: 'assign'; left: var_decl | without_prefix_var_decl; symbol: ':=' | '='; right: proc_expr; }
     return {
       type: 'assign',
       left: va,
-      symbol: s,
+      symbol: Array.isArray(s) ? s[0] : s,
       right: e
     };
   }

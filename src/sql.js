@@ -24,6 +24,7 @@ function goToSQL(stmt) {
 }
 
 export default function astToSQL(ast) {
-  if (ast.go === 'go') return goToSQL(ast)
-  return toSQL(ast)
+  const sql = ast.go === 'go' ? goToSQL(ast) : toSQL(ast)
+  if (ast.transactions) return `BEGIN;\n${sql};\nCOMMIT;`
+  return sql
 }
