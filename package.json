@@ -31,7 +31,7 @@
     "ast",
     "sql-ast"
   ],
-  "author": "taozhi8833998 <taozhi8833998@163.com>",
+  "author": "taozhi8833998 <taozhi8833998@gmail.com>",
   "files": [
     "ast/",
     "build",

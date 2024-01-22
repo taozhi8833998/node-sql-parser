@@ -1530,7 +1530,7 @@ create_constraint_foreign
   }
 
 check_constraint_definition
-  = kc:constraint_name? __ u:'CHECK'i __ LPAREN __ c:expr __ RPAREN __ ne:(KW_NOT? __ 'ENFORCED'i)?  {
+  = kc:constraint_name? __ u:'CHECK'i __ LPAREN __ c:or_and_expr __ RPAREN __ ne:(KW_NOT? __ 'ENFORCED'i)?  {
     const enforced = []
     if (ne) enforced.push(ne[0], ne[2])
     return {
