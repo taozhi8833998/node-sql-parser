@@ -1388,7 +1388,14 @@ describe('Postgres', () => {
 SET search_path TO ht_hyt;
 COMMIT;`,
       ]
-    }
+    },
+    {
+      title: 'double quoted column cast',
+      sql: [
+        'SELECT "created_date"::date FROM src_hosts',
+        'SELECT "created_date"::DATE FROM "src_hosts"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
