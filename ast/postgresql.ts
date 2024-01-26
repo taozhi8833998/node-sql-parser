@@ -5,9 +5,9 @@
 ⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔
 */
 
-export type start = multiple_stmt;
+export type start = multiple_stmt | create_function_stmt;
 
-export type cmd_stmt = drop_stmt | create_stmt | declare_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt | show_stmt | deallocate_stmt | grant_revoke_stmt | if_else_stmt | raise_stmt | execute_stmt | for_loop_stmt;
+export type cmd_stmt = drop_stmt | create_stmt | declare_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt | show_stmt | deallocate_stmt | grant_revoke_stmt | if_else_stmt | raise_stmt | execute_stmt | for_loop_stmt | transaction_stmt;
 
 export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence | create_db_stmt | create_domain_stmt | create_type_stmt | create_view_stmt | create_aggregate_stmt;
 
@@ -719,6 +719,16 @@ export interface for_loop_stmt {
       }
 
 export type for_loop_stmt = AstStatement<for_loop_stmt>;
+
+export interface transaction_stmt {
+        type: 'transaction';
+        expr: {
+          type: 'origin',
+          value: string
+        }
+      }
+
+export type transaction_stmt = AstStatement<transaction_stmt>;
 
 export interface select_stmt_node extends select_stmt_nake  {
        parentheses: true;
