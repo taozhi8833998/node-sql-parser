@@ -202,9 +202,8 @@
 }
 
 start
-  = b:('begin'i __ SEMICOLON) __ n:(create_function_stmt / multiple_stmt) __ c:('commit'i __ SEMICOLON) {
+  = __ n:(create_function_stmt / multiple_stmt) {
     // => multiple_stmt
-    n.ast.transactions = true
     return n
   }
   / create_function_stmt
@@ -228,6 +227,7 @@ cmd_stmt
   / raise_stmt
   / execute_stmt
   / for_loop_stmt
+  / transactions_stmt
 
 create_stmt
   = create_table_stmt
@@ -2647,6 +2647,16 @@ for_loop_stmt
         target,
         query,
         stmts: stmts.ast,
+      }
+    }
+  }
+transactions_stmt
+  = k:('begin'i / 'commit'i / 'rollback'i) {
+    return {
+      type: 'transaction',
+      expr: {
+        type: 'origin',
+        value: k
       }
     }
   }

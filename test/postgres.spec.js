@@ -1384,9 +1384,7 @@ describe('Postgres', () => {
         `BEGIN;
         SET search_path TO ht_hyt;
         COMMIT;`,
-        `BEGIN;
-SET search_path TO ht_hyt;
-COMMIT;`,
+        `BEGIN ; SET search_path TO ht_hyt ; COMMIT ;`,
       ]
     },
     {
