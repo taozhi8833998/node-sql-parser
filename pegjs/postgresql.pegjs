@@ -227,7 +227,7 @@ cmd_stmt
   / raise_stmt
   / execute_stmt
   / for_loop_stmt
-  / transactions_stmt
+  / transaction_stmt
 
 create_stmt
   = create_table_stmt
@@ -2650,8 +2650,17 @@ for_loop_stmt
       }
     }
   }
-transactions_stmt
+transaction_stmt
   = k:('begin'i / 'commit'i / 'rollback'i) {
+    /* export interface transaction_stmt {
+        type: 'transaction';
+        expr: {
+          type: 'origin',
+          value: string
+        }
+      }
+      => AstStatement<transaction_stmt>
+     */
     return {
       type: 'transaction',
       expr: {

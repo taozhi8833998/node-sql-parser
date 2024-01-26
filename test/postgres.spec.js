@@ -1388,6 +1388,13 @@ describe('Postgres', () => {
       ]
     },
     {
+      title: 'transaction stmt',
+      sql: [
+        'begin;',
+        'BEGIN ;'
+      ]
+    },
+    {
       title: 'double quoted column cast',
       sql: [
         'SELECT "created_date"::date FROM src_hosts',
