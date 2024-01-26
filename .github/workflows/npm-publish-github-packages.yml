@@ -16,6 +16,10 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
+
+      - name: Temp disable SSL Verification for registry.npm.taobao.org
+        run: npm config set strict-ssl false
+
       - run: npm install
       - run: npm test
 
@@ -28,6 +32,10 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
+
+      - name: Temp disable SSL Verification for registry.npm.taobao.org
+        run: npm config set strict-ssl false
+
       - run: npm install
       - run: npm run build
       - run: cd output/prod && npm publish
@@ -47,6 +55,10 @@ jobs:
           node-version: 16
           registry-url: https://npm.pkg.github.com/
           scope: '@taozhi8833998'
+
+      - name: Temp disable SSL Verification for registry.npm.taobao.org
+        run: npm config set strict-ssl false
+
       - run: npm install
       - name: Update package.json name
         run: sed -i '2,2s/node-sql-parser/@taozhi8833998\/node-sql-parser/g' package.json
