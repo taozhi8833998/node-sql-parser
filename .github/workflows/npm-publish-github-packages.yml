@@ -37,6 +37,10 @@ jobs:
         run: npm config set strict-ssl false
 
       - run: npm install
+
+      - name: Reenable SSL Verification for registry.npm.taobao.org
+        run: npm config set strict-ssl true
+
       - run: npm run build
       - run: cd output/prod && npm publish
         env:
@@ -60,6 +64,10 @@ jobs:
         run: npm config set strict-ssl false
 
       - run: npm install
+
+      - name: Reenable SSL Verification for registry.npm.taobao.org
+        run: npm config set strict-ssl true
+
       - name: Update package.json name
         run: sed -i '2,2s/node-sql-parser/@taozhi8833998\/node-sql-parser/g' package.json
       - run: echo registry=https://npm.pkg.github.com/taozhi8833998 >> .npmrc
