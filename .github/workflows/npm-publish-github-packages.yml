@@ -42,9 +42,9 @@ jobs:
         run: npm config set strict-ssl true
 
       - run: npm run build
-      - run: cd output/prod && npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.PUBLISH_NPM_TOKEN}}
+      - run: cd output/prod && npm publish
 
   publish-gpr:
     needs: build
@@ -72,6 +72,6 @@ jobs:
         run: sed -i '2,2s/node-sql-parser/@taozhi8833998\/node-sql-parser/g' package.json
       - run: echo registry=https://npm.pkg.github.com/taozhi8833998 >> .npmrc
       - run: npm run build
-      - run: cd output/prod && npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.PUBLISH_GITHUB_TOKEN}}
+      - run: cd output/prod && npm publish
