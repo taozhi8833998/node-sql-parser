@@ -464,13 +464,26 @@ describe('Command SQL', () => {
   })
 
   describe('go', () => {
-    it(`should support go`, () => {
-      expect(getParsedSql('use abc go')).to.equal('USE `abc` GO');
-      expect(getParsedSql('use abc; select * from abc go update abc set id = 1')).to.equal('USE `abc` ; SELECT * FROM `abc` GO UPDATE `abc` SET `id` = 1');
-    });
+    describe('return strings', () => {
+      it(`should support go`, () => {
+        expect(getParsedSql('use abc go')).to.equal('USE `abc` GO');
+        expect(getParsedSql('use abc; select * from abc go update abc set id = 1')).to.equal('USE `abc` ; SELECT * FROM `abc` GO UPDATE `abc` SET `id` = 1');
+      });
 
-    it(`should support multiple go`, () => {
-      expect(getParsedSql('use abc; select * from abc go update abc set id = 1 go select id from abc')).to.equal('USE `abc` ; SELECT * FROM `abc` GO UPDATE `abc` SET `id` = 1 GO SELECT `id` FROM `abc`');
-    });
+      it(`should support multiple go`, () => {
+        expect(getParsedSql('use abc; select * from abc go update abc set id = 1 go select id from abc')).to.equal('USE `abc` ; SELECT * FROM `abc` GO UPDATE `abc` SET `id` = 1 GO SELECT `id` FROM `abc`');
+      });
+    })
+    describe('return arrays', () => {
+      const opt = { asArray: true }
+      it(`should support go`, () => {
+        expect(getParsedSql('use abc go', opt)).deep.to.equal(['USE `abc`', 'GO']);
+        expect(getParsedSql('use abc; select * from abc go update abc set id = 1', opt)).deep.to.equal(['USE `abc`', 'SELECT * FROM `abc`', 'GO', 'UPDATE `abc` SET `id` = 1']);
+      });
+
+      it(`should support multiple go`, () => {
+        expect(getParsedSql('use abc; select * from abc go update abc set id = 1 go select id from abc', opt)).deep.to.equal(['USE `abc`', 'SELECT * FROM `abc`', 'GO', 'UPDATE `abc` SET `id` = 1', 'GO', 'SELECT `id` FROM `abc`']);
+      });
+    })
   })
 })

@@ -77,7 +77,7 @@ function unionToSQL(stmt) {
   return res.filter(hasVal).join(' ')
 }
 
-function multipleToSQL(stmt) {
+function multipleToSQL(stmt, asArray = false) {
   const res = []
   for (let i = 0, len = stmt.length; i < len; ++i) {
     const astInfo = stmt[i] && stmt[i].ast ? stmt[i].ast : stmt[i]
@@ -85,7 +85,7 @@ function multipleToSQL(stmt) {
     if (i === len - 1 && astInfo.type === 'transaction') sql = `${sql} ;`
     res.push(sql)
   }
-  return res.join(' ; ')
+  return asArray ? res : res.join(' ; ')
 }
 
 export {

@@ -7,23 +7,25 @@ function checkSupported(expr) {
   if (!supportedTypes.includes(ast.type)) throw new Error(`${ast.type} statements not supported at the moment`)
 }
 
-function toSQL(ast) {
+function toSQL(ast, asArray) {
   if (Array.isArray(ast)) {
     ast.forEach(checkSupported)
-    return multipleToSQL(ast)
+    return multipleToSQL(ast, asArray)
   }
   checkSupported(ast)
-  return unionToSQL(ast)
+  const sql = unionToSQL(ast)
+  return asArray ? [sql] : sql
 }
 
-function goToSQL(stmt) {
+function goToSQL(stmt, asArray) {
   if (!stmt || stmt.length === 0) return ''
-  const res = [toSQL(stmt.ast)]
-  if (stmt.go_next) res.push(stmt.go.toUpperCase(), goToSQL(stmt.go_next))
-  return res.filter(sqlItem => sqlItem).join(' ')
+  const res = [toSQL(stmt.ast, asArray)]
+  if (stmt.go_next) res.push(stmt.go.toUpperCase(), goToSQL(stmt.go_next, asArray))
+  const filteredRes = res.filter(sqlItem => sqlItem).flat(Infinity)
+  return asArray ? filteredRes : filteredRes.join(' ')
 }
 
-export default function astToSQL(ast) {
-  const sql = ast.go === 'go' ? goToSQL(ast) : toSQL(ast)
+export default function astToSQL(ast, asArray = false) {
+  const sql = ast.go === 'go' ? goToSQL(ast, asArray) : toSQL(ast, asArray)
   return sql
 }
