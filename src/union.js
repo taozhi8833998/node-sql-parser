@@ -77,12 +77,17 @@ function unionToSQL(stmt) {
   return res.filter(hasVal).join(' ')
 }
 
+function processStatement(stmt, atEnd) {
+  const astInfo = stmt && stmt.ast ? stmt.ast : stmt
+  let sql = unionToSQL(astInfo)
+  if (atEnd && astInfo.type === 'transaction') sql = `${sql} ;`
+  return sql
+}
+
 function multipleToSQL(stmt, asArray = false) {
   const res = []
   for (let i = 0, len = stmt.length; i < len; ++i) {
-    const astInfo = stmt[i] && stmt[i].ast ? stmt[i].ast : stmt[i]
-    let sql = unionToSQL(astInfo)
-    if (i === len - 1 && astInfo.type === 'transaction') sql = `${sql} ;`
+    const sql = processStatement(stmt[i], i === len - 1)
     res.push(sql)
   }
   return asArray ? res : res.join(' ; ')
