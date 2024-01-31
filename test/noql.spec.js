@@ -10,7 +10,7 @@ describe('noql', () => {
     return parser.sqlify(ast, opt);
   }
 
-  it('should ', () => {
+  it('should support basic nosql', () => {
     let sql = 'SELECT  id,"First Name","Last Name",(SELECT * FROM Rentals WHERE staffId<10) AS rentalsArr FROM customers'
     expect(getParsedSql(sql)).to.be.equal('SELECT "id", "First Name", "Last Name", (SELECT * FROM "Rentals" WHERE "staffId" < 10) AS "rentalsArr" FROM "customers"')
     sql = "SELECT  Order1.id, unset(_id) FROM orders Order1 INNER JOIN(SELECT * FROM orders) 'Order2|unwind' on Order2.id = Order1.id LIMIT 1"
@@ -27,5 +27,16 @@ describe('noql', () => {
     expect(getParsedSql(sql)).to.be.equal('SELECT convert("Replacement Cost") AS "s" FROM "films"')
     sql = "SELECT *,convert(`Replacement Cost`,'int') AS s FROM `films`"
     expect(getParsedSql(sql)).to.be.equal(`SELECT *, convert("Replacement Cost", 'int') AS "s" FROM "films"`)
+  })
+
+  it('should support intersect', () => {
+    const sql = `SELECT  *
+    FROM "most-popular-films"
+
+    INTERSECT
+
+    SELECT  *
+    FROM "top-rated-films"`
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM "most-popular-films" INTERSECT SELECT * FROM "top-rated-films"')
   })
 })
