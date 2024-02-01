@@ -43,6 +43,7 @@
     'IN': true,
     'INNER': true,
     'INSERT': true,
+    'INTERSECT': true,
     'INTO': true,
     'IS': true,
 
