@@ -846,7 +846,14 @@ describe('BigQuery', () => {
         AS json_value`,
         `SELECT json_value.class.students[0]['name'] AS first_student FROM UNNEST([JSON '{"class" : {"students" : [{"name" : "Jane"}]}}', JSON '{"class" : {"students" : []}}', JSON '{"class" : {"students" : [{"name" : "John"}, {"name": "Jamie"}]}}']) AS json_value`
       ]
-    }
+    },
+    {
+      title: 'interval week unit',
+      sql: [
+        'SELECT * WHERE created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 WEEK)',
+        'SELECT * WHERE created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 WEEK)'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
