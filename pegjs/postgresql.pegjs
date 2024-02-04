@@ -2858,12 +2858,12 @@ column_list_item
     return { expr: c, as: null }
   }
   / e:(double_quoted_ident / expr_item) __ s:KW_DOUBLE_COLON __ t:cast_data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
-    if (typeof e === 'string') columnList.add(`select::null::${e}`)
+    if (e.type === 'double_quoted_string') columnList.add(`select::null::${e.value}`)
     // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; arrows?: ('->>' | '->')[]; property?: (literal_string | literal_numeric)[]; }
     return {
       as: alias,
       type: 'cast',
-      expr: typeof e === 'string' ? { type: 'double_quote_string', value: e } : e,
+      expr: e,
       symbol: '::',
       target: t,
       tail: tail && tail[0] && { operator: tail[0][1], expr: tail[0][3] },
@@ -2871,7 +2871,7 @@ column_list_item
       properties: a.map(item => item[2]),
     }
   }
-  / tbl:ident __ DOT pro:(ident __ DOT)? __ STAR {
+  / tbl:ident_type __ DOT pro:(ident_type __ DOT)? __ STAR {
       // => { expr: column_ref; as: null; }
       const mid = pro && pro[0]
       let schema
@@ -2891,10 +2891,10 @@ column_list_item
         as: null
       }
     }
-  / tbl:(ident __ DOT)? __ STAR {
+  / tbl:(ident_type __ DOT)? __ STAR {
       // => { expr: column_ref; as: null; }
       const table = tbl && tbl[0] || null
-      columnList.add(`select::${table}::(.*)`);
+      columnList.add(`select::${table.value}::(.*)`);
       return {
         expr: {
           type: 'column_ref',
@@ -2906,10 +2906,10 @@ column_list_item
     }
   / c:double_quoted_ident __ d:(DOT / KW_DOUBLE_COLON)? !{ if(d) return true } __  alias: alias_clause? {
       // => { type: 'expr'; expr: expr; as?: alias_clause; }
-      columnList.add(`select::null::${c}`)
-      return { type: 'expr', expr: { type: 'column_ref', table: null, column: c }, as: alias };
+      columnList.add(`select::null::${c.value}`)
+      return { type: 'expr', expr: { type: 'column_ref', table: null, column: { expr: c } }, as: alias };
   }
-  / e:expr_item  __ alias:alias_clause? {
+  / e:(ident_type / expr_item)  __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
       return { type: 'expr', expr: e, as: alias };
     }
@@ -4065,15 +4065,19 @@ column_list
       return createList(head, tail);
     }
 
+ident_type
+  = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
+      // => ident_name
+      return { type: 'default', value: name }
+    }
+  / quoted_ident_type
+
 ident
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
       // => ident_name
       return name;
     }
-  / name:quoted_ident {
-      // => indent_name
-      return name;
-    }
+  / quoted_ident
 ident_list
   = head:ident tail:(__ COMMA __ ident)* {
     // => ident[]
@@ -4087,22 +4091,43 @@ alias_ident
     }
   / name:double_quoted_ident {
       // => IGNORE
-      return name;
+      return name.value;
     }
 
+quoted_ident_type
+  = double_quoted_ident / single_quoted_ident / backticks_quoted_ident
+
 quoted_ident
-  = double_quoted_ident
-  / single_quoted_ident
-  / backticks_quoted_ident
+  = v:(double_quoted_ident / single_quoted_ident / backticks_quoted_ident) {
+    return v.value
+  }
 
 double_quoted_ident
-  = '"' chars:[^"]+ '"' { /* => string */ return chars.join(''); }
+  = '"' chars:[^"]+ '"' {
+    // => { type: 'double_quoted_string'; value: string; }
+    return {
+      type: 'double_quoted_string',
+      value: chars.join('')
+    }
+  }
 
 single_quoted_ident
-  = "'" chars:[^']+ "'" { /* => string */ return chars.join(''); }
+  = "'" chars:[^']+ "'" {
+    // => { type: 'single_quoted_string'; value: string; }
+    return {
+      type: 'single_quoted_string',
+      value: chars.join('')
+    }
+  }
 
 backticks_quoted_ident
-  = "`" chars:[^`]+ "`" { /* => string */ return chars.join(''); }
+  = "`" chars:[^`]+ "`" {
+    // => { type: 'double_quoted_string'; value: string; }
+    return {
+      type: 'backticks_quote_string',
+      value: chars.join('')
+    }
+  }
 
 ident_without_kw
   = ident_name / quoted_ident

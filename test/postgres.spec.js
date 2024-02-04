@@ -3,7 +3,7 @@ const { conflictToSQL } = require('../src/insert')
 const { procToSQL } = require('../src/proc')
 const Parser = require('../src/parser').default
 
-describe('Postgres', () => {
+describe.only('Postgres', () => {
   const parser = new Parser();
   const opt = {
     database: 'postgresql'
@@ -22,8 +22,8 @@ describe('Postgres', () => {
         subQ1 AS (SELECT * FROM Roster WHERE SchoolID = 52),
         subQ2 AS (SELECT SchoolID FROM subQ1)
       SELECT DISTINCT * FROM subQ2;`,
-      `WITH "subQ1" AS (SELECT * FROM "Roster" WHERE "SchoolID" = 52), "subQ2" AS (SELECT "SchoolID" FROM "subQ1") SELECT DISTINCT * FROM "subQ2"`
-     ]
+      `WITH "subQ1" AS (SELECT * FROM "Roster" WHERE "SchoolID" = 52), "subQ2" AS (SELECT SchoolID FROM "subQ1") SELECT DISTINCT * FROM "subQ2"`
+      ]
     },
     {
       title: 'select subquery',
@@ -58,28 +58,28 @@ describe('Postgres', () => {
         `SELECT FirstName
         FROM Roster INNER JOIN PlayerStats
         USING (LastName);`,
-        'SELECT "FirstName" FROM "Roster" INNER JOIN "PlayerStats" USING ("LastName")'
+        'SELECT FirstName FROM "Roster" INNER JOIN "PlayerStats" USING ("LastName")'
       ]
     },
     {
       title: 'set op UNION',
       sql: [
         `(SELECT s FROM t1) UNION (SELECT s FROM t2)`,
-        '(SELECT "s" FROM "t1") UNION (SELECT "s" FROM "t2")',
+        '(SELECT s FROM "t1") UNION (SELECT s FROM "t2")',
       ],
     },
     {
       title: 'set op UNION ALL',
       sql: [
         `(SELECT s FROM t1) UNION ALL (SELECT s FROM t2)`,
-        '(SELECT "s" FROM "t1") UNION ALL (SELECT "s" FROM "t2")',
+        '(SELECT s FROM "t1") UNION ALL (SELECT s FROM "t2")',
       ],
     },
     {
       title: 'set op UNION DISTINCT',
       sql: [
         `(SELECT s FROM t1) UNION DISTINCT (SELECT s FROM t2)`,
-        '(SELECT "s" FROM "t1") UNION DISTINCT (SELECT "s" FROM "t2")',
+        '(SELECT s FROM "t1") UNION DISTINCT (SELECT s FROM "t2")',
       ],
     },
     {
@@ -1399,6 +1399,13 @@ describe('Postgres', () => {
       sql: [
         'SELECT "created_date"::date FROM src_hosts',
         'SELECT "created_date"::DATE FROM "src_hosts"'
+      ]
+    },
+    {
+      title: 'keep column as original',
+      sql: [
+        'select "abc", def from tableName',
+        'SELECT "abc", def FROM tableName'
       ]
     },
   ]
