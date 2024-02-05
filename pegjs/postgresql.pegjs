@@ -2858,7 +2858,7 @@ column_list_item
     return { expr: c, as: null }
   }
   / e:(double_quoted_ident / expr_item) __ s:KW_DOUBLE_COLON __ t:cast_data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
-    if (e.type === 'double_quoted_string') columnList.add(`select::null::${e.value}`)
+    if (e.type === 'double_quote_string') columnList.add(`select::null::${e.value}`)
     // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; arrows?: ('->>' | '->')[]; property?: (literal_string | literal_numeric)[]; }
     return {
       as: alias,
@@ -2909,7 +2909,7 @@ column_list_item
       columnList.add(`select::null::${c.value}`)
       return { type: 'expr', expr: { type: 'column_ref', table: null, column: { expr: c } }, as: alias };
   }
-  / e:(ident_type / expr_item)  __ alias:alias_clause? {
+  / e:expr_item  __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
       return { type: 'expr', expr: e, as: alias };
     }
@@ -3424,13 +3424,13 @@ set_list
  * 'col1 = (col2 > 3)'
  */
 set_item
-  = tbl:(ident __ DOT)? __ c:column_without_kw __ '=' __ v:additive_expr {
+  = tbl:(ident __ DOT)? __ c:column_without_kw_type __ '=' __ v:additive_expr {
       // => { column: ident; value: additive_expr; table?: ident;}
-      return { column: c, value: v, table: tbl && tbl[0] };
+      return { column: { expr: c }, value: v, table: tbl && tbl[0] };
     }
-    / tbl:(ident __ DOT)? __ c:column_without_kw __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
+    / tbl:(ident __ DOT)? __ c:column_without_kw_type __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
       // => { column: ident; value: column_ref; table?: ident; keyword: 'values' }
-      return { column: c, value: v, table: tbl && tbl[0], keyword: 'values' };
+      return { column: { expr: c }, value: v, table: tbl && tbl[0], keyword: 'values' };
   }
 
 returning_stmt
@@ -3533,7 +3533,7 @@ replace_insert_stmt
             }
           })
         }
-        c.forEach(c => columnList.add(`insert::${table}::${c}`));
+        c.forEach(c => columnList.add(`insert::${table}::${c.value}`));
       }
       return {
         tableList: Array.from(tableList),
@@ -4005,19 +4005,19 @@ column_ref
           column: '*'
       }
     }
-  / tbl:(ident __ DOT)? __ col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
+  / tbl:(ident __ DOT)? __ col:column_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
     // => IGNORE
       const tableName = tbl && tbl[0] || null
-      columnList.add(`select::${tableName}::${col}`)
+      columnList.add(`select::${tableName}::${col.value}`)
       return {
         type: 'column_ref',
         table: tableName,
-        column: col,
+        column: { expr: col },
         arrows: a.map(item => item[0]),
         properties: a.map(item => item[2])
       };
   }
-  / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) {
+  / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column_type) {
     /* => {
         type: 'column_ref';
         schema: string;
@@ -4026,15 +4026,15 @@ column_ref
         arrows?: ('->>' | '->')[];
         property?: (literal_string | literal_numeric)[];
       } */
-      columnList.add(`select::${schema}.${tbl[3]}::${col[3]}`);
+      columnList.add(`select::${schema}.${tbl[3]}::${col[3].value}`);
       return {
         type: 'column_ref',
         schema: schema,
         table: tbl[3],
-        column: col[3]
+        column: { expr: col[3] }
       };
     }
-  / tbl:ident __ DOT __ col:column {
+  / tbl:ident __ DOT __ col:column_type {
       /* => {
         type: 'column_ref';
         table: ident;
@@ -4042,25 +4042,25 @@ column_ref
         arrows?: ('->>' | '->')[];
         property?: (literal_string | literal_numeric)[];
       } */
-      columnList.add(`select::${tbl}::${col}`);
+      columnList.add(`select::${tbl}::${col.value}`);
       return {
         type: 'column_ref',
         table: tbl,
-        column: col
+        column: { expr: col }
       };
     }
-  / col:column {
+  / col:column_type {
     // => IGNORE
-      columnList.add(`select::null::${col}`);
+      columnList.add(`select::null::${col.value}`);
       return {
         type: 'column_ref',
         table: null,
-        column: col
+        column: { expr: col }
       };
     }
 
 column_list
-  = head:column tail:(__ COMMA __ column)* {
+  = head:column_type tail:(__ COMMA __ column_type)* {
     // => column[]
       return createList(head, tail);
     }
@@ -4087,7 +4087,7 @@ alias_ident
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true } c:(__ LPAREN __ column_list __ RPAREN)? {
       // => string
       if (!c) return name;
-      return `${name}(${c[3].join(', ')})`
+      return `${name}(${c[3].map(v => v.value).join(', ')})`
     }
   / name:double_quoted_ident {
       // => IGNORE
@@ -4099,30 +4099,31 @@ quoted_ident_type
 
 quoted_ident
   = v:(double_quoted_ident / single_quoted_ident / backticks_quoted_ident) {
+    // => string
     return v.value
   }
 
 double_quoted_ident
   = '"' chars:[^"]+ '"' {
-    // => { type: 'double_quoted_string'; value: string; }
+    // => { type: 'double_quote_string'; value: string; }
     return {
-      type: 'double_quoted_string',
+      type: 'double_quote_string',
       value: chars.join('')
     }
   }
 
 single_quoted_ident
   = "'" chars:[^']+ "'" {
-    // => { type: 'single_quoted_string'; value: string; }
+    // => { type: 'single_quote_string'; value: string; }
     return {
-      type: 'single_quoted_string',
+      type: 'single_quote_string',
       value: chars.join('')
     }
   }
 
 backticks_quoted_ident
   = "`" chars:[^`]+ "`" {
-    // => { type: 'double_quoted_string'; value: string; }
+    // => { type: 'backticks_quote_string'; value: string; }
     return {
       type: 'backticks_quote_string',
       value: chars.join('')
@@ -4135,6 +4136,18 @@ ident_without_kw
 column_without_kw
   = column_name / quoted_ident
 
+column_without_kw_type
+  = n:column_name {
+     // => { type: 'origin', value: string }
+    return { type: 'default', value: n }
+  }
+  / quoted_ident_type
+column_type
+  = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } {
+    // => { type: 'origin', value: string }
+    return { type: 'default', value: name }
+  }
+  / quoted_ident_type
 column
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { /* => string */ return name; }
   / quoted_ident

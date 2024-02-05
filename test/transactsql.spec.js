@@ -137,10 +137,10 @@ describe('transactsql', () => {
   it('should support table schema', () => {
     let sql = `INSERT INTO source.dbo.movie (genre_id, title, release_date)
     VALUES (@param1, @param2, @param3), (@param1, @param2, @param3);`
-    expect(getParsedSql(sql)).to.equal("INSERT INTO [source].[dbo].[movie] ([genre_id], [title], [release_date]) VALUES ([@param1],[@param2],[@param3]), ([@param1],[@param2],[@param3])")
+    expect(getParsedSql(sql)).to.equal("INSERT INTO [source].[dbo].[movie] (genre_id, title, release_date) VALUES ([@param1],[@param2],[@param3]), ([@param1],[@param2],[@param3])")
     sql = `INSERT INTO server.db.owner.movie (genre_id, title, release_date)
     VALUES (@param1, @param2, @param3), (@param1, @param2, @param3);`
-    expect(getParsedSql(sql)).to.equal("INSERT INTO [server].[db].[owner].[movie] ([genre_id], [title], [release_date]) VALUES ([@param1],[@param2],[@param3]), ([@param1],[@param2],[@param3])")
+    expect(getParsedSql(sql)).to.equal("INSERT INTO [server].[db].[owner].[movie] (genre_id, title, release_date) VALUES ([@param1],[@param2],[@param3]), ([@param1],[@param2],[@param3])")
   })
 
   it('should support with clause', () => {
@@ -263,7 +263,7 @@ describe('transactsql', () => {
   })
   it('should support cast datatime2', () => {
     const sql = "INSERT [dbo].[testtable] ([NodeID], [Timestamp], [ResponseTime], [PercentLoss], [Availability], [Weight]) VALUES (2, CAST(N'2023-04-11T22:17:13.0864249' AS DateTime2), 0, 0, 100, 120)"
-    expect(getParsedSql(sql)).to.be.equal("INSERT INTO [dbo].[testtable] ([NodeID], [Timestamp], [ResponseTime], [PercentLoss], [Availability], [Weight]) VALUES (2,CAST(N'2023-04-11T22:17:13.0864249' AS DATETIME2),0,0,100,120)")
+    expect(getParsedSql(sql)).to.be.equal("INSERT INTO [dbo].[testtable] (NodeID, Timestamp, ResponseTime, PercentLoss, Availability, Weight) VALUES (2,CAST(N'2023-04-11T22:17:13.0864249' AS DATETIME2),0,0,100,120)")
   })
   it('should support for xml', () => {
     const base = `SELECT Cust.CustomerID,
