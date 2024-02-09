@@ -354,8 +354,8 @@ describe('create', () => {
 
     describe('create table using pg', () => {
       it ('supports basic things', () => {
-        expect(getParsedSql(`CREATE TABLE foo (id uuid)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" ("id" UUID)')
-        expect(getParsedSql(`CREATE TABLE foo (value text unique)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" ("value" TEXT UNIQUE)')
+        expect(getParsedSql(`CREATE TABLE foo (id uuid)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" (id UUID)')
+        expect(getParsedSql(`CREATE TABLE foo (value text unique)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" (value TEXT UNIQUE)')
         expect(getParsedSql(`CREATE TABLE accounts (
           id UUID DEFAULT uuid_generate_v4() NOT NULL,
           email TEXT NOT NULL,
@@ -365,7 +365,7 @@ describe('create', () => {
           updated_at TIMESTAMP NULL,
 
           PRIMARY KEY (id)
-        );`, { database: 'postgresql' })).to.equal('CREATE TABLE "accounts" ("id" UUID NOT NULL DEFAULT uuid_generate_v4(), "email" TEXT NOT NULL, "password" TEXT NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT NOW(), "updated_at" TIMESTAMP NULL, PRIMARY KEY ("id"))');
+        );`, { database: 'postgresql' })).to.equal('CREATE TABLE "accounts" (id UUID NOT NULL DEFAULT uuid_generate_v4(), email TEXT NOT NULL, password TEXT NOT NULL, created_at TIMESTAMP NOT NULL DEFAULT NOW(), updated_at TIMESTAMP NULL, PRIMARY KEY (id))');
       })
 
       it('should support pg bool/boolean type', () => {
@@ -391,52 +391,52 @@ describe('create', () => {
         {
           origin: 'CREATE UNIQUE INDEX title_idx ON films (title);',
           description: 'should create a B-tree index on the column title in the table films',
-          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title")'
+          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" (title)'
         },
         {
-          origin: 'CREATE INDEX ON films ((lower(title)));',
+          origin: 'CREATE INDEX ON films ((lower("title")));',
           description: 'should create an index on the expression lower(title), allowing efficient case-insensitive searches',
           sqlify: 'CREATE INDEX ON "films" ((lower("title")))'
         },
         {
           origin: 'CREATE INDEX title_idx_german ON films (title COLLATE "de_DE");',
           description: 'should create an index with non-default collation',
-          sqlify: 'CREATE INDEX "title_idx_german" ON "films" ("title" COLLATE "de_DE")'
+          sqlify: 'CREATE INDEX "title_idx_german" ON "films" (title COLLATE "de_DE")'
         },
         {
           origin: 'CREATE INDEX title_idx_nulls_low ON films (title NULLS FIRST);',
           description: 'should create an index with non-default sort ordering of nulls',
-          sqlify: 'CREATE INDEX "title_idx_nulls_low" ON "films" ("title" NULLS FIRST)'
+          sqlify: 'CREATE INDEX "title_idx_nulls_low" ON "films" (title NULLS FIRST)'
         },
         {
           origin: 'CREATE UNIQUE INDEX title_idx ON films (title) WITH (fillfactor = 70);',
           description: 'should create an index with non-default fill factor',
-          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title") WITH (FILLFACTOR = 70)'
+          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" (title) WITH (FILLFACTOR = 70)'
         },
         {
           origin: 'CREATE UNIQUE INDEX title_idx ON films (title) WITH (fillfactor = 70) where id > 100',
           description: 'should create an index with non-default fill factor',
-          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" ("title") WITH (FILLFACTOR = 70) WHERE "id" > 100'
+          sqlify: 'CREATE UNIQUE INDEX "title_idx" ON "films" (title) WITH (FILLFACTOR = 70) WHERE id > 100'
         },
         {
           origin: 'CREATE INDEX gin_idx ON documents_table USING gin (locations) WITH (fastupdate = off);',
           description: 'should create a GIN index with fast updates disabled',
-          sqlify: 'CREATE INDEX "gin_idx" ON "documents_table" USING GIN ("locations") WITH (FASTUPDATE = OFF)'
+          sqlify: 'CREATE INDEX "gin_idx" ON "documents_table" USING GIN (locations) WITH (FASTUPDATE = OFF)'
         },
         {
           origin: 'CREATE INDEX code_idx ON films (code) TABLESPACE indexspace;',
           description: 'should create an index on the column code in the table films and have the index reside in the tablespace indexspace',
-          sqlify: 'CREATE INDEX "code_idx" ON "films" ("code") TABLESPACE INDEXSPACE'
+          sqlify: 'CREATE INDEX "code_idx" ON "films" (code) TABLESPACE INDEXSPACE'
         },
         {
           origin: 'CREATE INDEX pointloc ON points USING gist (box(location,location))',
           description: 'should create a GiST index on a point attribute so that we can efficiently use box operators on the result of the conversion function',
-          sqlify: 'CREATE INDEX "pointloc" ON "points" USING GIST (box("location", "location"))'
+          sqlify: 'CREATE INDEX "pointloc" ON "points" USING GIST (box(location, location))'
         },
         {
           origin: 'CREATE INDEX CONCURRENTLY sales_quantity_index ON sales_table (quantity);',
           description: 'should create an index without locking out writes to the table',
-          sqlify: 'CREATE INDEX CONCURRENTLY "sales_quantity_index" ON "sales_table" ("quantity")'
+          sqlify: 'CREATE INDEX CONCURRENTLY "sales_quantity_index" ON "sales_table" (quantity)'
         },
       ]
       indexSQLList.forEach(indexSQL => {
@@ -460,7 +460,7 @@ describe('create', () => {
         NOT DEFERRABLE INITIALLY DEFERRED
         FOR EACH ROW
         WHEN (OLD.balance IS DISTINCT FROM NEW.balance)
-        EXECUTE PROCEDURE check_account_update();`, PG_OPT)).to.equal('CREATE TRIGGER "check_update" BEFORE DELETE ON "accounts" NOT DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN "OLD"."balance" IS DISTINCT FROM "NEW"."balance" EXECUTE PROCEDURE check_account_update()')
+        EXECUTE PROCEDURE check_account_update();`, PG_OPT)).to.equal('CREATE TRIGGER "check_update" BEFORE DELETE ON "accounts" NOT DEFERRABLE INITIALLY DEFERRED FOR EACH ROW WHEN "OLD".balance IS DISTINCT FROM "NEW"."balance" EXECUTE PROCEDURE check_account_update()')
       })
       it('should support trigger with when expression with * and deferrable', () => {
         expect(getParsedSql(`CREATE TRIGGER log_update
@@ -476,7 +476,7 @@ describe('create', () => {
         AFTER UPDATE OF user, name, salary OR INSERT ON accounts
         DEFERRABLE INITIALLY IMMEDIATE
         WHEN (OLD.* IS DISTINCT FROM NEW.*)
-        EXECUTE PROCEDURE log_account_update();`, PG_OPT)).to.equal('CREATE TRIGGER "log_update" AFTER UPDATE OF "user", "name", "salary" OR INSERT ON "accounts" DEFERRABLE INITIALLY IMMEDIATE WHEN "OLD".* IS DISTINCT FROM "NEW".* EXECUTE PROCEDURE log_account_update()')
+        EXECUTE PROCEDURE log_account_update();`, PG_OPT)).to.equal('CREATE TRIGGER "log_update" AFTER UPDATE OF user, name, salary OR INSERT ON "accounts" DEFERRABLE INITIALLY IMMEDIATE WHEN "OLD".* IS DISTINCT FROM "NEW".* EXECUTE PROCEDURE log_account_update()')
       })
     })
   })

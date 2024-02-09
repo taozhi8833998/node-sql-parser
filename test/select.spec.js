@@ -279,7 +279,7 @@ describe('select', () => {
       SELECT
         EXTRACT(EPOCH FROM ts)
       FROM
-        tss`, opt), opt)).to.eql('WITH "tss" AS (SELECT CURRENT_TIMESTAMP AS "ts") SELECT EXTRACT(EPOCH FROM "ts") FROM "tss"');
+        tss`, opt), opt)).to.eql('WITH "tss" AS (SELECT CURRENT_TIMESTAMP AS "ts") SELECT EXTRACT(EPOCH FROM ts) FROM "tss"');
       });
 
       it('should parse function expression', () => {
@@ -422,7 +422,7 @@ describe('select', () => {
       const opt = { database: 'postgresql' }
       const ast = parser.astify(sql, opt)
       const backSQL = parser.sqlify(ast,opt )
-      expect(backSQL).to.equal('SELECT "id" FROM "db-name"."public"."table-name"')
+      expect(backSQL).to.equal('SELECT id FROM "db-name"."public"."table-name"')
     })
 
     it('should parse subselect', () => {
@@ -817,7 +817,7 @@ describe('select', () => {
           { type: 'origin', value: 'all' },
         ],
       });
-      expect(parser.sqlify(ast)).to.be.equal('SELECT DISTINCT `a` FROM `b` WHERE `c` = 0 GROUP BY `d` ORDER BY `e` ASC LIMIT ALL')
+      expect(parser.sqlify(ast)).to.be.equal('SELECT DISTINCT a FROM `b` WHERE c = 0 GROUP BY d ORDER BY e ASC LIMIT ALL')
 
       const offsetAst = parser.astify('SELECT DISTINCT a FROM b WHERE c = 0 GROUP BY d ORDER BY e limit all offset 100', opt);
       expect(offsetAst.limit).eql({
@@ -827,7 +827,7 @@ describe('select', () => {
           { type: 'number', value: 100 }
         ],
       });
-      expect(parser.sqlify(offsetAst)).to.be.equal('SELECT DISTINCT `a` FROM `b` WHERE `c` = 0 GROUP BY `d` ORDER BY `e` ASC LIMIT ALL OFFSET 100')
+      expect(parser.sqlify(offsetAst)).to.be.equal('SELECT DISTINCT a FROM `b` WHERE c = 0 GROUP BY d ORDER BY e ASC LIMIT ALL OFFSET 100')
     });
   });
 
@@ -1319,7 +1319,7 @@ describe('select', () => {
       `
       const ast = parser.astify(sql, { database: 'postgresql' })
       const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active`, `domain`, `config` ->> 'email' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
+      expect(backSQL).to.equal("SELECT id, config, busy, 'templateId', active, domain, config ->> 'email' FROM `instances` WHERE config ->> 'email' = 'email@provider.com'")
     })
 
     it('should support pg json column query #>', () => {
@@ -1334,7 +1334,7 @@ describe('select', () => {
       `
       const ast = parser.astify(sql, { database: 'postgresql' })
       const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active` #> '{a,b}', `domain` ->> 2, `config` ->> 'email' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
+      expect(backSQL).to.equal("SELECT id, config, busy, 'templateId', active #> '{a,b}', domain ->> 2, config ->> 'email' FROM `instances` WHERE config ->> 'email' = 'email@provider.com'")
     })
 
     it('should support pg json column query #>>', () => {
@@ -1349,7 +1349,7 @@ describe('select', () => {
       `
       const ast = parser.astify(sql, { database: 'postgresql' })
       const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active` #>> '{a,b}', `domain` ->> 2, `config` ->> 'email' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
+      expect(backSQL).to.equal("SELECT id, config, busy, 'templateId', active #>> '{a,b}', domain ->> 2, config ->> 'email' FROM `instances` WHERE config ->> 'email' = 'email@provider.com'")
     })
 
     it('should support pg jsonb column query', () => {
@@ -1364,7 +1364,7 @@ describe('select', () => {
       `
       const ast = parser.astify(sql, { database: 'postgresql' })
       const backSQL = parser.sqlify(ast)
-      expect(backSQL).to.equal("SELECT `id`, `config`, `busy`, 'templateId', `active`::JSONB @> '{\"b\":2}'::JSONB, `domain`::JSONB <@ '{\"a\":1, \"b\":2}'::JSONB, `config`::JSONB - 'a' FROM `instances` WHERE `config` ->> 'email' = 'email@provider.com'")
+      expect(backSQL).to.equal("SELECT id, config, busy, 'templateId', active::JSONB @> '{\"b\":2}'::JSONB, domain::JSONB <@ '{\"a\":1, \"b\":2}'::JSONB, config::JSONB - 'a' FROM `instances` WHERE config ->> 'email' = 'email@provider.com'")
     })
 
     it('should support pg jsonb column query', () => {
@@ -1379,7 +1379,7 @@ describe('select', () => {
     }
     it('should properly escape column aliases that contain special characters', () => {
       const sql = `select column_name as "Column Name" from table_name`
-      expect(getParsedSql(sql, opt)).to.equal('SELECT "column_name" AS "Column Name" FROM "table_name"')
+      expect(getParsedSql(sql, opt)).to.equal('SELECT column_name AS "Column Name" FROM "table_name"')
     })
 
     it('should support union in in_op', () => {
@@ -1389,7 +1389,7 @@ describe('select', () => {
       union
       select 1 from pg_database c where c.oid=2
       )`
-      expect(getParsedSql(sql, opt)).to.be.equal('SELECT 1 FROM "pg_database" AS "a" WHERE "a"."oid" IN (SELECT 1 FROM "pg_database" AS "b" WHERE "b"."oid" = 1 UNION SELECT 1 FROM "pg_database" AS "c" WHERE "c"."oid" = 2)')
+      expect(getParsedSql(sql, opt)).to.be.equal('SELECT 1 FROM "pg_database" AS "a" WHERE "a".oid IN (SELECT 1 FROM "pg_database" AS "b" WHERE "b".oid = 1 UNION SELECT 1 FROM "pg_database" AS "c" WHERE "c".oid = 2)')
     })
 
     it('should support union distinct in in_op', () => {
@@ -1399,24 +1399,24 @@ describe('select', () => {
       union distinct
       select 1 from pg_database c where c.oid=2
       )`
-      expect(getParsedSql(sql, opt)).to.be.equal('SELECT 1 FROM "pg_database" AS "a" WHERE "a"."oid" IN (SELECT 1 FROM "pg_database" AS "b" WHERE "b"."oid" = 1 UNION DISTINCT SELECT 1 FROM "pg_database" AS "c" WHERE "c"."oid" = 2)')
+      expect(getParsedSql(sql, opt)).to.be.equal('SELECT 1 FROM "pg_database" AS "a" WHERE "a".oid IN (SELECT 1 FROM "pg_database" AS "b" WHERE "b".oid = 1 UNION DISTINCT SELECT 1 FROM "pg_database" AS "c" WHERE "c".oid = 2)')
     })
 
     it('should support array_agg', () => {
       let sql = `SELECT shipmentId, ARRAY_AGG(distinct abc order by name) AS shipmentStopIDs, ARRAY_AGG (first_name || ' ' || last_name) actors FROM table_name GROUP BY shipmentId`
-      expect(getParsedSql(sql, opt)).to.equal('SELECT "shipmentId", ARRAY_AGG(DISTINCT "abc" ORDER BY "name" ASC) AS "shipmentStopIDs", ARRAY_AGG("first_name" || \' \' || "last_name") AS "actors" FROM "table_name" GROUP BY "shipmentId"')
+      expect(getParsedSql(sql, opt)).to.equal('SELECT shipmentId, ARRAY_AGG(DISTINCT abc ORDER BY name ASC) AS "shipmentStopIDs", ARRAY_AGG(first_name || \' \' || last_name) AS "actors" FROM "table_name" GROUP BY shipmentId')
       sql = 'select pg_catalog.array_agg(c1 order by c2) from t1'
-      expect(getParsedSql(sql, opt)).to.equal('SELECT pg_catalog.ARRAY_AGG("c1" ORDER BY "c2" ASC) FROM "t1"')
+      expect(getParsedSql(sql, opt)).to.equal('SELECT pg_catalog.ARRAY_AGG(c1 ORDER BY c2 ASC) FROM "t1"')
     })
 
     it('should support array_agg in coalesce', () => {
       const sql = `SELECT COALESCE(array_agg(DISTINCT(a.xx)), Array[]::text[]) AS "distinctName" FROM public."Users" a1`
-      expect(getParsedSql(sql, opt)).to.equal('SELECT COALESCE(ARRAY_AGG(DISTINCT ("a"."xx")), ARRAY[]::TEXT[]) AS "distinctName" FROM "public"."Users" AS "a1"')
+      expect(getParsedSql(sql, opt)).to.equal('SELECT COALESCE(ARRAY_AGG(DISTINCT ("a".xx)), ARRAY[]::TEXT[]) AS "distinctName" FROM "public"."Users" AS "a1"')
     })
 
     it('should support ilike', () => {
       const sql = `select column_name as "Column Name" from table_name where a ilike 'f%' and 'b' not ilike 'B'`
-      expect(getParsedSql(sql, opt)).to.equal('SELECT "column_name" AS "Column Name" FROM "table_name" WHERE "a" ILIKE \'f%\' AND \'b\' NOT ILIKE \'B\'')
+      expect(getParsedSql(sql, opt)).to.equal('SELECT column_name AS "Column Name" FROM "table_name" WHERE a ILIKE \'f%\' AND \'b\' NOT ILIKE \'B\'')
     })
 
     it('should support like and', () => {
@@ -1452,13 +1452,13 @@ describe('select', () => {
     it('should parse pg prepared statements', () => {
       const opt = { database: 'postgresql' }
       expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = $1', opt))
-      .to.be.equal('SELECT "bar", "baz", "foo" FROM "tablename" WHERE "bar" = $1', opt)
+      .to.be.equal('SELECT bar, baz, foo FROM "tablename" WHERE bar = $1', opt)
       expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = $1 and baz = $2', opt))
-      .to.be.equal('SELECT "bar", "baz", "foo" FROM "tablename" WHERE "bar" = $1 AND "baz" = $2', opt)
+      .to.be.equal('SELECT bar, baz, foo FROM "tablename" WHERE bar = $1 AND baz = $2', opt)
       expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = $1 and baz = $2 LIMIT $3', opt))
-      .to.be.equal('SELECT "bar", "baz", "foo" FROM "tablename" WHERE "bar" = $1 AND "baz" = $2 LIMIT $3', opt)
+      .to.be.equal('SELECT bar, baz, foo FROM "tablename" WHERE bar = $1 AND baz = $2 LIMIT $3', opt)
       expect(getParsedSql('SELECT bar, baz, foo FROM tablename WHERE bar = $1 and baz = $2 LIMIT $3 OFFSET $4', opt))
-      .to.be.equal('SELECT "bar", "baz", "foo" FROM "tablename" WHERE "bar" = $1 AND "baz" = $2 LIMIT $3 OFFSET $4', opt)
+      .to.be.equal('SELECT bar, baz, foo FROM "tablename" WHERE bar = $1 AND baz = $2 LIMIT $3 OFFSET $4', opt)
     })
   })
 

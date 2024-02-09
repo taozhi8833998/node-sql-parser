@@ -444,7 +444,7 @@ describe('Command SQL', () => {
       (name, max_attempts, num_questions, passing_score)
       VALUES ('Class Quiz', 3, 10, 70);
       SELECT @QuizID = (SELECT SCOPE_IDENTITY());`, opt))
-          .to.equal("DECLARE @QuizID BIGINT ; INSERT INTO [quiz] ([name], [max_attempts], [num_questions], [passing_score]) VALUES ('Class Quiz',3,10,70) ; SELECT [@QuizID] = (SELECT SCOPE_IDENTITY())");
+          .to.equal("DECLARE @QuizID BIGINT ; INSERT INTO [quiz] (name, max_attempts, num_questions, passing_score) VALUES ('Class Quiz',3,10,70) ; SELECT [@QuizID] = (SELECT SCOPE_IDENTITY())");
     })
   })
 

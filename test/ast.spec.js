@@ -225,7 +225,7 @@ describe('AST', () => {
                 const castQueries = {
                     'colon cast': [
                         'SELECT col::CHAR FROM t',
-                        'SELECT `col`::CHAR FROM `t`'
+                        'SELECT col::CHAR FROM `t`'
                     ],
                     'string cast': [
                         `SELECT CASE
@@ -235,15 +235,15 @@ describe('AST', () => {
                                 ELSE NULL::text
                             END AS category
                         FROM t1 op110`,
-                        "SELECT CASE WHEN `op110`.`nkw` = 1 THEN 'CV'::TEXT WHEN `op110`.`pkw` = 1 AND `op110`.`transporter` = 0 THEN 'PC'::TEXT WHEN `op110`.`pkw` = 1 AND `op110`.`transporter` = 1 THEN 'LCV'::TEXT ELSE NULL::TEXT END AS `category` FROM `t1` AS `op110`"
+                        "SELECT CASE WHEN `op110`.nkw = 1 THEN 'CV'::TEXT WHEN `op110`.pkw = 1 AND `op110`.transporter = 0 THEN 'PC'::TEXT WHEN `op110`.pkw = 1 AND `op110`.transporter = 1 THEN 'LCV'::TEXT ELSE NULL::TEXT END AS `category` FROM `t1` AS `op110`"
                     ],
                     'multiple colon cast': [
                         'SELECT col::CHAR, colb::geometry FROM t',
-                        'SELECT `col`::CHAR, `colb`::GEOMETRY FROM `t`'
+                        'SELECT col::CHAR, colb::GEOMETRY FROM `t`'
                     ],
                     'colon cast with as': [
                         'select (salary + bonus)::bigint as comp from employee',
-                        'SELECT (`salary` + `bonus`)::BIGINT AS `comp` FROM `employee`'
+                        'SELECT (salary + bonus)::BIGINT AS `comp` FROM `employee`'
                     ]
                 }
                 const opt = {
@@ -733,7 +733,7 @@ describe('AST', () => {
 
         it('should support string with escape values', () => {
             sql = `INSERT INTO mytablehere (ID, post_author) VALUES (2564,'I haven\\'t <a href="http://www.someurl.com/somepartofurl\\0">figured</a>');`;
-            expect(getParsedSql(sql)).to.equal('INSERT INTO `mytablehere` (`ID`, `post_author`) VALUES (2564,\'I haven\\\'t <a href="http://www.someurl.com/somepartofurl\\0">figured</a>\')');
+            expect(getParsedSql(sql)).to.equal('INSERT INTO `mytablehere` (ID, post_author) VALUES (2564,\'I haven\\\'t <a href="http://www.someurl.com/somepartofurl\\0">figured</a>\')');
         });
 
         it('should sqlify back with escape', () => {
@@ -1172,7 +1172,7 @@ describe('AST', () => {
 
         it('should support insert', () => {
             expect(getParsedSql('INSERT INTO t (col1, col2) VALUES (1, 2)'))
-            .to.equal('INSERT INTO `t` (`col1`, `col2`) VALUES (1,2)')
+            .to.equal('INSERT INTO `t` (col1, col2) VALUES (1,2)')
         })
 
         it('should support insert with no columns', () => {
