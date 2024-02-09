@@ -935,6 +935,13 @@ describe('mysql', () => {
           ');',
           "CREATE TABLE `table` (`name` VARCHAR(255) CHECK (`name` LIKE 'ABC%' AND LENGTH(`name`) >= 5))"
         ]
+      },
+      {
+        title: 'show index',
+        sql: [
+          'show index from user',
+          'SHOW INDEX FROM `user`'
+        ]
       }
     ]
     SQL_LIST.forEach(sqlInfo => {
