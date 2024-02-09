@@ -1551,7 +1551,7 @@ show_stmt
       }
     }
   }
-  / KW_SHOW __ keyword:('COLUMNS'i / 'INDEXES'i) __ from:from_clause {
+  / KW_SHOW __ keyword:('COLUMNS'i / 'INDEXES'i / "INDEX"i) __ from:from_clause {
     return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
