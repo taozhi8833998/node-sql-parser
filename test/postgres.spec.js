@@ -1408,11 +1408,21 @@ describe('Postgres', () => {
         'SELECT "abc", def FROM "tableName"'
       ]
     },
+    {
+      title: 'quoted function name',
+      sql: [
+        'SELECT * FROM "func"("start_time", "end_time")',
+        'SELECT * FROM "func"("start_time", "end_time")'
+      ]
+    },
+    {
+      title: 'function name prefixed with quoted schema',
+      sql: [
+        'SELECT * FROM "schema"."func"("start_time", "end_time")',
+        'SELECT * FROM "schema"."func"("start_time", "end_time")'
+      ]
+    },
   ]
-  // it.only('ttttt', () => {
-  //   const sql =  'select "abc", def from tableName'
-  //   expect(getParsedSql(sql, opt)).to.equal('SELECT "abc", def FROM "tableName"')
-  // })
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
         const {title, sql} = sqlInfo
