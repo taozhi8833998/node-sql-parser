@@ -660,7 +660,7 @@ create_func_opt
     return {
       prefix: 'support',
       type: 'default',
-      value: n
+      value: [n.schema && n.schema.value, n.name.value].filter(v => v).join('.')
     }
   }
   / KW_SET __ ca:ident_name __ e:((('TO'i / '=') __ ident_list) / (KW_FROM __ 'CURRENT'i))? __ {
@@ -4065,6 +4065,13 @@ column_list
       return createList(head, tail);
     }
 
+ident_without_kw_type
+  = n:ident_name {
+     // => { type: 'default', value: string }
+    return { type: 'default', value: n }
+  }
+  / quoted_ident_type
+
 ident_type
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
       // => ident_name
@@ -4138,13 +4145,13 @@ column_without_kw
 
 column_without_kw_type
   = n:column_name {
-     // => { type: 'origin', value: string }
+     // => { type: 'default', value: string }
     return { type: 'default', value: n }
   }
   / quoted_ident_type
 column_type
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } {
-    // => { type: 'origin', value: string }
+    // => { type: 'default', value: string }
     return { type: 'default', value: name }
   }
   / quoted_ident_type
@@ -4399,22 +4406,22 @@ trim_rem
 
 trim_func_clause
   = 'trim'i __ LPAREN __ tr:trim_rem? __ s:expr __ RPAREN {
-    // => { type: 'function'; name: string; args: expr_list; }
+    // => { type: 'function'; name: proc_func_name; args: expr_list; }
     let args = tr || { type: 'expr_list', value: [] }
     args.value.push(s)
     return {
         type: 'function',
-        name: 'TRIM',
+        name: { name: { type: 'origin', value: 'trim' }},
         args,
     };
   }
 
 tablefunc_clause
   = 'crosstab'i __ LPAREN __ s:expr_list __ RPAREN __ KW_AS __ n:ident_name __ LPAREN __ cds:column_data_type_list __ RPAREN {
-    // => { type: 'tablefunc'; name: crosstab; args: expr_list; as: func_call }
+    // => { type: 'tablefunc'; name: proc_func_name; args: expr_list; as: func_call }
     return {
       type: 'tablefunc',
-      name: 'crosstab',
+      name: { name: { type: 'default', value: 'crosstab' } } ,
       args: s,
       as: {
         type: 'function',
@@ -4427,35 +4434,35 @@ tablefunc_clause
 func_call
   = trim_func_clause / tablefunc_clause
   / name:'now'i __ LPAREN __ l:expr_list? __ RPAREN __ 'at'i __ KW_TIME __ 'zone'i __ z:literal_string {
-    // => { type: 'function'; name: string; args: expr_list; suffix: literal_string; }
+    // => { type: 'function'; name: proc_func_name; args: expr_list; suffix: literal_string; }
       z.prefix = 'at time zone'
       return {
         type: 'function',
-        name: name,
+        name: { name: { type: 'default', value: name } },
         args: l ? l: { type: 'expr_list', value: [] },
         suffix: z
       };
     }
   / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
-    // => { type: 'function'; name: string; args: expr_list; over?: over_partition; }
+    // => { type: 'function'; name: proc_func_name; args: expr_list; over?: over_partition; }
       return {
         type: 'function',
-        name: name,
+        name: { name: { type: 'origin', value: name } },
         args: l ? l: { type: 'expr_list', value: [] },
         over: bc
       };
     }
   / extract_func
   / f:scalar_time_func __ up:on_update_current_timestamp? {
-    // => { type: 'function'; name: string; over?: on_update_current_timestamp; }
+    // => { type: 'function'; name: proc_func_name; over?: on_update_current_timestamp; }
     return {
         type: 'function',
-        name: f,
+        name: { name: { type: 'origin', value: f } },
         over: up
     }
   }
   / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
-      // => { type: 'function'; name: string; args: expr_list; }
+      // => { type: 'function'; name: proc_func_name; args: expr_list; }
       if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
       return {
         type: 'function',
@@ -5169,13 +5176,14 @@ proc_primary
   }
 
 proc_func_name
-  = dt:ident_name tail:(__ DOT __ ident_name)? {
-    // => string
-      let name = dt
+  = dt:ident_without_kw_type tail:(__ DOT __ ident_without_kw_type)? {
+    // => { schema?: ident_without_kw_type, name: ident_without_kw_type }
+      const result = { name: dt }
       if (tail !== null) {
-        name = `${dt}.${tail[3]}`
+        result.schema = dt
+        result.name = tail[3]
       }
-      return name;
+      return result
     }
 
 proc_func_call
