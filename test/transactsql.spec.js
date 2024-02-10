@@ -283,6 +283,13 @@ describe('transactsql', () => {
     sql = [base, 'for xml path(\'\')'].join('\n')
     expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML PATH('')`)
   })
+  it('should support cross and outer apply', () => {
+    const applies = ['cross', 'outer']
+    for (const apply of applies) {
+      const sql = `SELECT SampleParentTable.SampleColumn, SUB.SampleColumn FROM SampleParentTable ${apply} APPLY (SELECT TOP 1 SampleColumn FROM SampleChildTable) SUB`
+      expect(getParsedSql(sql)).to.be.equal(`SELECT [SampleParentTable].[SampleColumn], [SUB].[SampleColumn] FROM [SampleParentTable] ${apply.toUpperCase()} APPLY (SELECT TOP 1 [SampleColumn] FROM [SampleChildTable]) AS [SUB]`)
+    }
+  })
   describe('if else', () => {
     it('should support if only statement', () => {
       const sql = `IF EXISTS(SELECT 1 from sys.views where name='MyView' and type='v')
