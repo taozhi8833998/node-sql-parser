@@ -13,6 +13,7 @@
     'CALL': true,
     'CASE': true,
     'CREATE': true,
+    'CROSS': true,
     'CONTAINS': true,
     'CURRENT_DATE': true,
     'CURRENT_TIME': true,
@@ -1707,7 +1708,8 @@ table_base
 
 join_op
   = a:(KW_LEFT / KW_RIGHT / KW_FULL) __ s:KW_OUTER? __ KW_JOIN { return [a[0].toUpperCase(), s && s[0], 'JOIN'].filter(v => v).join(' '); }
-  / KW_CROSS __ KW_JOIN { return 'CROSS JOIN' }
+  / KW_CROSS __ j:(KW_JOIN / KW_APPLY) { return `CROSS ${j[0].toUpperCase()}` }
+  / a:KW_OUTER __ KW_APPLY { return 'OUTER APPLY' }
   / a:(KW_INNER)? __ KW_JOIN { return a ? 'INNER JOIN' : 'JOIN' }
 
 table_name
@@ -2798,6 +2800,7 @@ KW_FULL     = "FULL"i     !ident_start
 KW_INNER    = "INNER"i    !ident_start
 KW_CROSS    = "CROSS"i    !ident_start
 KW_JOIN     = "JOIN"i     !ident_start
+KW_APPLY    = "APPLY"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
 KW_OVER     = "OVER"i     !ident_start
 KW_UNION    = "UNION"i    !ident_start
