@@ -2857,8 +2857,7 @@ column_list_item
     // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
-  / e:(double_quoted_ident / expr_item) __ s:KW_DOUBLE_COLON __ t:cast_data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
-    if (e.type === 'double_quote_string') columnList.add(`select::null::${e.value}`)
+  / e:(column_ref_quoted / expr_item) __ s:KW_DOUBLE_COLON __ t:cast_data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; arrows?: ('->>' | '->')[]; property?: (literal_string | literal_numeric)[]; }
     return {
       as: alias,
@@ -2904,11 +2903,6 @@ column_list_item
         as: null
       };
     }
-  / c:double_quoted_ident __ d:(DOT / KW_DOUBLE_COLON)? !{ if(d) return true } __  alias: alias_clause? {
-      // => { type: 'expr'; expr: expr; as?: alias_clause; }
-      columnList.add(`select::null::${c.value}`)
-      return { type: 'expr', expr: { type: 'column_ref', table: null, column: { expr: c } }, as: alias };
-  }
   / e:expr_item  __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
       return { type: 'expr', expr: e, as: alias };
@@ -4059,6 +4053,17 @@ column_ref
       };
     }
 
+column_ref_quoted
+  = col:literal_double_quoted_string {
+    // => IGNORE
+      columnList.add(`select::null::${col.value}`);
+      return {
+        type: 'column_ref',
+        table: null,
+        column: { expr: col }
+      };
+    }
+
 column_list
   = head:column_type tail:(__ COMMA __ column_type)* {
     // => column[]
@@ -4597,7 +4602,7 @@ cast_expr
       ...c,
     }
   }
-  / e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref_array_index / param) __ c:cast_double_colon? {
+  / e:(column_ref_quoted / literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref_array_index / param) __ c:cast_double_colon? {
     /* => {
         type: 'cast';
         expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
@@ -4692,7 +4697,10 @@ literal_string
         value: ca[1].join('')
       };
     }
-  / ca:("\"" single_quote_char* "\"") !DOT {
+  / literal_double_quoted_string
+
+literal_double_quoted_string
+  = ca:("\"" single_quote_char* "\"") !DOT {
       // => { type: 'string'; value: string; }
       return {
         type: 'double_quote_string',
