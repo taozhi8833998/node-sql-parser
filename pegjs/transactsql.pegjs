@@ -2256,19 +2256,24 @@ primary
   / var_decl
 
 column_ref
-  = tbl:ident __ DOT __ col:column {
-      columnList.add(`select::${tbl}::${col}`);
+  = db:(ident __ DOT)? __ schema:(ident __ DOT)? __ tbl:(ident __ DOT)? __ col:column {
+      const obj = { table: null, db: null, schema: null }
+      if (db !== null) {
+        obj.table = db[0]
+      }
+      if (schema !== null) {
+        obj.table = schema[0]
+        obj.schema = db[0]
+      }
+      if (tbl !== null) {
+        obj.table = tbl[0]
+        obj.db = db[0]
+        obj.schema = schema[0]
+      }
+      columnList.add(`select::${[obj.db, obj.schema, obj.table].join('.')}::${col}`);
       return {
         type: 'column_ref',
-        table: tbl,
-        column: col
-      };
-    }
-  / col:column {
-      columnList.add(`select::null::${col}`);
-      return {
-        type: 'column_ref',
-        table: null,
+        ...obj,
         column: col
       };
     }

@@ -143,6 +143,15 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal("INSERT INTO [server].[db].[owner].[movie] (genre_id, title, release_date) VALUES ([@param1],[@param2],[@param3]), ([@param1],[@param2],[@param3])")
   })
 
+  it('should support full-qualified form in column', () => {
+    let sql = 'SELECT dbo.movie.id FROM dbo.movie'
+    expect(getParsedSql(sql)).to.equal('SELECT [dbo].[movie].[id] FROM [dbo].[movie]')
+    sql = 'SELECT source.dbo.movie.id FROM source.dbo.movie'
+    expect(getParsedSql(sql)).to.equal('SELECT [source].[dbo].[movie].[id] FROM [source].[dbo].[movie]')
+    sql = 'SELECT * FROM source.dbo.movie WHERE source.dbo.movie.genre_id = 1'
+    expect(getParsedSql(sql)).to.equal('SELECT * FROM [source].[dbo].[movie] WHERE [source].[dbo].[movie].[genre_id] = 1')
+  })
+
   it('should support with clause', () => {
     const sql = `WITH mycte (a, b, c) AS
     (SELECT DISTINCT z.a, z.b, z.c FROM mytable)
