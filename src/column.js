@@ -28,7 +28,7 @@ function columnRefToSQL(expr) {
     suffix, order_by, subFields = [],
   } = expr
   let str = column === '*' ? '*' : columnOffsetToSQL(column, isDual)
-  const prefix = [schema, db, table].filter(hasVal).map(val => `${typeof val === 'string' ? identifierToSql(val) : exprToSQL(val)}`).join('.')
+  const prefix = [db, schema, table].filter(hasVal).map(val => `${typeof val === 'string' ? identifierToSql(val) : exprToSQL(val)}`).join('.')
   if (prefix) str = `${prefix}.${str}`
   if (array_index) {
     str = `${str}[${literalToSQL(array_index.index)}]`
