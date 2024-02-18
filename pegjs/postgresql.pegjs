@@ -199,6 +199,7 @@
   let varList = [];
   const tableList = new Set();
   const columnList = new Set();
+  const customTypes = new Set();
   const tableAlias = {};
 }
 
@@ -728,6 +729,7 @@ create_type_stmt
       => AstStatement<create_type_stmt>
       */
       e.parentheses = true
+      customTypes.add([s.db, s.table].filter(v => v).join('.'))
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -743,6 +745,7 @@ create_type_stmt
     }
   / a:KW_CREATE __ k:'TYPE'i __ s:table_name {
     // => AstStatement<create_type_stmt>
+    customTypes.add([s.db, s.table].filter(v => v).join('.'))
     return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -1206,7 +1209,7 @@ create_column_definition
         resource: 'column';
       }
       */
-      columnList.add(`create::${c.table}::${c.column}`)
+      columnList.add(`create::${c.table}::${c.column.expr.value}`)
       return {
         column: c,
         definition: d,
@@ -5305,6 +5308,7 @@ data_type
   / binary_type
   / oid_type
   / record_type
+  / custom_types
 
 
 array_type
@@ -5394,3 +5398,9 @@ uuid_type
 
 record_type
   = 'RECORD'i {/* =>  data_type */  return { dataType: 'RECORD' }}
+
+custom_types
+  = name:ident_name &{ return customTypes.has(name) } {
+      // => data_type
+      return { dataType: name }
+  }
