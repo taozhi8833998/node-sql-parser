@@ -19,11 +19,14 @@ import { LocationRange } from "pegjs";
 export { LocationRange, Location } from "pegjs";
 
 export type WhilteListCheckMode = "table" | "column";
+export interface ParseOptions {
+  includeLocations?: boolean;
+}
 export interface Option {
   database?: string;
   type?: string;
-  includeLocations?: boolean;
   trimQuery?: boolean;
+  parseOptions?: ParseOptions;
 }
 export interface TableColumnAst {
   tableList: string[];
