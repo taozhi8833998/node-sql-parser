@@ -140,7 +140,7 @@ console.log(ast);
 ```javascript
 const { Parser } = require('node-sql-parser');
 const parser = new Parser();
-const ast = parser.astify('SELECT * FROM t', { includeLocations: true });
+const ast = parser.astify('SELECT * FROM t', { parseOptions: { includeLocations: true } });
 
 console.log(ast);
 ```
