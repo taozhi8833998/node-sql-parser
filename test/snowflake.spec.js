@@ -90,6 +90,35 @@ describe('snowflake', () => {
         'SELECT "Age", "name" AS "a\b" FROM "schmeaName"."tableName"'
       ]
     },
+    {
+      title: 'select from db.scheme.table',
+      sql: [
+        'SELECT * FROM my_db.my_schema.my_table',
+        'SELECT * FROM "my_db"."my_schema"."my_table"'
+      ]
+    },
+    {
+      title: 'double slash comment',
+      sql: [
+        `// some comment
+        SELECT * FROM TABLEName`,
+        'SELECT * FROM "TABLEName"'
+      ]
+    },
+    {
+      title: 'cast to number data type',
+      sql: [
+        `SELECT listing_id,
+        listing_name,
+        room_type,
+        host_id,
+        REPLACE(price_str, '$') :: NUMBER(10, 2) AS price,
+        created_at,
+        updated_at
+        FROM src_listings`,
+        `SELECT "listing_id", "listing_name", "room_type", "host_id", REPLACE("price_str", '$')::NUMBER(10, 2) AS "price", "created_at", "updated_at" FROM "src_listings"`
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo

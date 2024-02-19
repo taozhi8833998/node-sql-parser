@@ -1,5 +1,6 @@
 import { tablesToSQL } from './tables'
 import { exprToSQL, orderOrPartitionByToSQL } from './expr'
+import { columnRefToSQL } from './column'
 import { limitToSQL } from './limit'
 import { hasVal, identifierToSql, commonOptionConnector, returningToSQL } from './util'
 import { withToSQL } from './with'
@@ -13,7 +14,7 @@ function setToSQL(sets) {
   const clauses = []
   for (const set of sets) {
     const { table, column, value } = set
-    const str = [table, column].filter(hasVal).map(info => identifierToSql(info)).join('.')
+    const str = [identifierToSql(table), columnRefToSQL({ column })].filter(hasVal).join('.')
     const setItem = [str]
     let val = ''
     if (value) {

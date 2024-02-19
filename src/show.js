@@ -43,6 +43,7 @@ function showToSQL(showExpr) {
       break
     case 'COLUMNS':
     case 'INDEXES':
+    case 'INDEX':
       str = commonOptionConnector('FROM', tablesToSQL, showExpr.from)
       break
     case 'GRANTS':

@@ -13,6 +13,7 @@
     'CALL': true,
     'CASE': true,
     'CREATE': true,
+    'CROSS': true,
     'CONTAINS': true,
     'CURRENT_DATE': true,
     'CURRENT_TIME': true,
@@ -1711,7 +1712,8 @@ table_base
 
 join_op
   = a:(KW_LEFT / KW_RIGHT / KW_FULL) __ s:KW_OUTER? __ KW_JOIN { return [a[0].toUpperCase(), s && s[0], 'JOIN'].filter(v => v).join(' '); }
-  / KW_CROSS __ KW_JOIN { return 'CROSS JOIN' }
+  / KW_CROSS __ j:(KW_JOIN / KW_APPLY) { return `CROSS ${j[0].toUpperCase()}` }
+  / a:KW_OUTER __ KW_APPLY { return 'OUTER APPLY' }
   / a:(KW_INNER)? __ KW_JOIN { return a ? 'INNER JOIN' : 'JOIN' }
 
 table_name
@@ -2258,19 +2260,24 @@ primary
   / var_decl
 
 column_ref
-  = tbl:ident __ DOT __ col:column {
-      columnList.add(`select::${tbl}::${col}`);
+  = db:(ident __ DOT)? __ schema:(ident __ DOT)? __ tbl:(ident __ DOT)? __ col:column {
+      const obj = { table: null, db: null, schema: null }
+      if (db !== null) {
+        obj.table = db[0]
+      }
+      if (schema !== null) {
+        obj.table = schema[0]
+        obj.schema = db[0]
+      }
+      if (tbl !== null) {
+        obj.table = tbl[0]
+        obj.db = db[0]
+        obj.schema = schema[0]
+      }
+      columnList.add(`select::${[obj.db, obj.schema, obj.table].join('.')}::${col}`);
       return {
         type: 'column_ref',
-        table: tbl,
-        column: col
-      };
-    }
-  / col:column {
-      columnList.add(`select::null::${col}`);
-      return {
-        type: 'column_ref',
-        table: null,
+        ...obj,
         column: col
       };
     }
@@ -2802,6 +2809,7 @@ KW_FULL     = "FULL"i     !ident_start
 KW_INNER    = "INNER"i    !ident_start
 KW_CROSS    = "CROSS"i    !ident_start
 KW_JOIN     = "JOIN"i     !ident_start
+KW_APPLY    = "APPLY"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
 KW_OVER     = "OVER"i     !ident_start
 KW_UNION    = "UNION"i    !ident_start

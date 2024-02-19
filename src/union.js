@@ -25,39 +25,41 @@ import { execToSQL } from './exec'
 import { orderOrPartitionByToSQL } from './expr'
 import { limitToSQL } from './limit'
 import { procToSQL } from './proc'
+import { transactionToSQL } from './transaction'
 import { showToSQL } from './show'
 import { hasVal, toUpper } from './util'
 
 const typeToSQLFn = {
-  alter      : alterToSQL,
-  analyze    : analyzeToSQL,
-  attach     : attachToSQL,
-  create     : createToSQL,
-  select     : selectToSQL,
-  deallocate : deallocateToSQL,
-  delete     : deleteToSQL,
-  exec       : execToSQL,
-  execute    : executeToSQL,
-  for        : forLoopToSQL,
-  update     : updateToSQL,
-  if         : ifToSQL,
-  insert     : insertToSQL,
-  drop       : commonCmdToSQL,
-  truncate   : commonCmdToSQL,
-  replace    : insertToSQL,
-  declare    : declareToSQL,
-  use        : useToSQL,
-  rename     : renameToSQL,
-  call       : callToSQL,
-  desc       : descToSQL,
-  set        : setVarToSQL,
-  lock       : lockUnlockToSQL,
-  unlock     : lockUnlockToSQL,
-  show       : showToSQL,
-  grant      : grantAndRevokeToSQL,
-  revoke     : grantAndRevokeToSQL,
-  proc       : procToSQL,
-  raise      : raiseToSQL,
+  alter       : alterToSQL,
+  analyze     : analyzeToSQL,
+  attach      : attachToSQL,
+  create      : createToSQL,
+  select      : selectToSQL,
+  deallocate  : deallocateToSQL,
+  delete      : deleteToSQL,
+  exec        : execToSQL,
+  execute     : executeToSQL,
+  for         : forLoopToSQL,
+  update      : updateToSQL,
+  if          : ifToSQL,
+  insert      : insertToSQL,
+  drop        : commonCmdToSQL,
+  truncate    : commonCmdToSQL,
+  replace     : insertToSQL,
+  declare     : declareToSQL,
+  use         : useToSQL,
+  rename      : renameToSQL,
+  call        : callToSQL,
+  desc        : descToSQL,
+  set         : setVarToSQL,
+  lock        : lockUnlockToSQL,
+  unlock      : lockUnlockToSQL,
+  show        : showToSQL,
+  grant       : grantAndRevokeToSQL,
+  revoke      : grantAndRevokeToSQL,
+  proc        : procToSQL,
+  raise       : raiseToSQL,
+  transaction : transactionToSQL,
 }
 
 function unionToSQL(stmt) {
@@ -79,7 +81,9 @@ function multipleToSQL(stmt) {
   const res = []
   for (let i = 0, len = stmt.length; i < len; ++i) {
     const astInfo = stmt[i] && stmt[i].ast ? stmt[i].ast : stmt[i]
-    res.push(unionToSQL(astInfo))
+    let sql = unionToSQL(astInfo)
+    if (i === len - 1 && astInfo.type === 'transaction') sql = `${sql} ;`
+    res.push(sql)
   }
   return res.join(' ; ')
 }

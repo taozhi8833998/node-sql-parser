@@ -1534,7 +1534,7 @@ create_constraint_foreign
   }
 
 check_constraint_definition
-  = kc:constraint_name? __ u:'CHECK'i __ LPAREN __ c:expr __ RPAREN __ ne:(KW_NOT? __ 'ENFORCED'i)?  {
+  = kc:constraint_name? __ u:'CHECK'i __ LPAREN __ c:or_and_expr __ RPAREN __ ne:(KW_NOT? __ 'ENFORCED'i)?  {
     const enforced = []
     if (ne) enforced.push(ne[0], ne[2])
     return {
@@ -1844,7 +1844,7 @@ show_stmt
       }
     }
   }
-  / KW_SHOW __ keyword:('COLUMNS'i / 'INDEXES'i) __ from:from_clause {
+  / KW_SHOW __ keyword:('COLUMNS'i / 'INDEXES'i / "INDEX"i) __ from:from_clause {
     return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),

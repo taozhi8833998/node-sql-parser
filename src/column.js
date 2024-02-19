@@ -19,7 +19,8 @@ function columnOffsetToSQL(column, isDual) {
   if (typeof column === 'string') return identifierToSql(column, isDual)
   const { expr, offset, suffix } = column
   const offsetExpr = offset && offset.map(offsetItem => ['[', offsetItem.name, `${offsetItem.name ? '(' : ''}`, literalToSQL(offsetItem.value), `${offsetItem.name ? ')' : ''}`, ']'].filter(hasVal).join('')).join('')
-  return [exprToSQL(expr), offsetExpr, suffix].filter(hasVal).join('')
+  const result = [exprToSQL(expr), offsetExpr, suffix].filter(hasVal).join('')
+  return result
 }
 function columnRefToSQL(expr) {
   const {
@@ -27,7 +28,7 @@ function columnRefToSQL(expr) {
     suffix, order_by, subFields = [],
   } = expr
   let str = column === '*' ? '*' : columnOffsetToSQL(column, isDual)
-  const prefix = [schema, db, table].filter(hasVal).map(val => `${identifierToSql(val)}`).join('.')
+  const prefix = [db, schema, table].filter(hasVal).map(val => `${typeof val === 'string' ? identifierToSql(val) : exprToSQL(val)}`).join('.')
   if (prefix) str = `${prefix}.${str}`
   if (array_index) {
     str = `${str}[${literalToSQL(array_index.index)}]`
@@ -103,8 +104,10 @@ function columnOption(definition) {
 
 function columnOrderToSQL(columnOrder) {
   const { column, collate, nulls, opclass, order_by } = columnOrder
+  const columnExpr = typeof column === 'string' ? { type: 'column_ref', table: columnOrder.table, column } : columnOrder
+  columnExpr.collate = null
   const result = [
-    exprToSQL(typeof column === 'string' ? { type: 'column_ref', table: columnOrder.table, column } : columnOrder),
+    exprToSQL(columnExpr),
     commonOptionConnector(collate && collate.type, identifierToSql, collate && collate.value),
     opclass,
     toUpper(order_by),

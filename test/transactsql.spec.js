@@ -137,10 +137,19 @@ describe('transactsql', () => {
   it('should support table schema', () => {
     let sql = `INSERT INTO source.dbo.movie (genre_id, title, release_date)
     VALUES (@param1, @param2, @param3), (@param1, @param2, @param3);`
-    expect(getParsedSql(sql)).to.equal("INSERT INTO [source].[dbo].[movie] ([genre_id], [title], [release_date]) VALUES ([@param1],[@param2],[@param3]), ([@param1],[@param2],[@param3])")
+    expect(getParsedSql(sql)).to.equal("INSERT INTO [source].[dbo].[movie] (genre_id, title, release_date) VALUES ([@param1],[@param2],[@param3]), ([@param1],[@param2],[@param3])")
     sql = `INSERT INTO server.db.owner.movie (genre_id, title, release_date)
     VALUES (@param1, @param2, @param3), (@param1, @param2, @param3);`
-    expect(getParsedSql(sql)).to.equal("INSERT INTO [server].[db].[owner].[movie] ([genre_id], [title], [release_date]) VALUES ([@param1],[@param2],[@param3]), ([@param1],[@param2],[@param3])")
+    expect(getParsedSql(sql)).to.equal("INSERT INTO [server].[db].[owner].[movie] (genre_id, title, release_date) VALUES ([@param1],[@param2],[@param3]), ([@param1],[@param2],[@param3])")
+  })
+
+  it('should support full-qualified form in column', () => {
+    let sql = 'SELECT dbo.movie.id FROM dbo.movie'
+    expect(getParsedSql(sql)).to.equal('SELECT [dbo].[movie].[id] FROM [dbo].[movie]')
+    sql = 'SELECT source.dbo.movie.id FROM source.dbo.movie'
+    expect(getParsedSql(sql)).to.equal('SELECT [source].[dbo].[movie].[id] FROM [source].[dbo].[movie]')
+    sql = 'SELECT * FROM source.dbo.movie WHERE source.dbo.movie.genre_id = 1'
+    expect(getParsedSql(sql)).to.equal('SELECT * FROM [source].[dbo].[movie] WHERE [source].[dbo].[movie].[genre_id] = 1')
   })
 
   it('should support with clause', () => {
@@ -263,7 +272,7 @@ describe('transactsql', () => {
   })
   it('should support cast datatime2', () => {
     const sql = "INSERT [dbo].[testtable] ([NodeID], [Timestamp], [ResponseTime], [PercentLoss], [Availability], [Weight]) VALUES (2, CAST(N'2023-04-11T22:17:13.0864249' AS DateTime2), 0, 0, 100, 120)"
-    expect(getParsedSql(sql)).to.be.equal("INSERT INTO [dbo].[testtable] ([NodeID], [Timestamp], [ResponseTime], [PercentLoss], [Availability], [Weight]) VALUES (2,CAST(N'2023-04-11T22:17:13.0864249' AS DATETIME2),0,0,100,120)")
+    expect(getParsedSql(sql)).to.be.equal("INSERT INTO [dbo].[testtable] (NodeID, Timestamp, ResponseTime, PercentLoss, Availability, Weight) VALUES (2,CAST(N'2023-04-11T22:17:13.0864249' AS DATETIME2),0,0,100,120)")
   })
   it('should support for xml', () => {
     const base = `SELECT Cust.CustomerID,
@@ -282,6 +291,13 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML PATH([rowName])`)
     sql = [base, 'for xml path(\'\')'].join('\n')
     expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML PATH('')`)
+  })
+  it('should support cross and outer apply', () => {
+    const applies = ['cross', 'outer']
+    for (const apply of applies) {
+      const sql = `SELECT SampleParentTable.SampleColumn, SUB.SampleColumn FROM SampleParentTable ${apply} APPLY (SELECT TOP 1 SampleColumn FROM SampleChildTable) SUB`
+      expect(getParsedSql(sql)).to.be.equal(`SELECT [SampleParentTable].[SampleColumn], [SUB].[SampleColumn] FROM [SampleParentTable] ${apply.toUpperCase()} APPLY (SELECT TOP 1 [SampleColumn] FROM [SampleChildTable]) AS [SUB]`)
+    }
   })
   describe('if else', () => {
     it('should support if only statement', () => {

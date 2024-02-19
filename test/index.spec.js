@@ -31,13 +31,13 @@ describe('MariaDB Command SQL', () => {
   })
 
   describe('different quota based on database', () => {
-    const sql = 'select id from db.abc'
+    const sql = 'select id, "name" from db.abc'
     it('support pg to double quote', () => {
-      expect(getParsedSql(sql, { database: 'PostgresQL'})).to.equal('SELECT "id" FROM "db"."abc"')
+      expect(getParsedSql(sql, { database: 'PostgresQL'})).to.equal('SELECT id, "name" FROM "db"."abc"')
     })
 
     it('support mariadb quote', () => {
-      expect(getParsedSql(sql, { database: 'MariaDB'})).to.equal('SELECT `id` FROM `db`.`abc`')
+      expect(getParsedSql(sql, { database: 'MariaDB'})).to.equal('SELECT `id`, "name" FROM `db`.`abc`')
     })
   })
 })
