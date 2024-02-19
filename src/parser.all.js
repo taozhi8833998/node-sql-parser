@@ -9,6 +9,7 @@ import { parse as transactsql } from '../pegjs/transactsql.pegjs'
 import { parse as flinksql } from '../pegjs/flinksql.pegjs'
 import { parse as snowflake } from '../pegjs/snowflake.pegjs'
 import { parse as noql } from '../pegjs/noql.pegjs'
+import { parse as trino } from '../pegjs/trino.pegjs'
 
 export default {
   bigquery,
@@ -22,4 +23,5 @@ export default {
   transactsql,
   flinksql,
   noql,
+  trino,
 }
