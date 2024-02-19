@@ -1679,8 +1679,8 @@ describe('Postgres', () => {
           account_id text NOT NULL,
           permission_kind access_key_permission_kind NOT NULL,
           CONSTRAINT access_keys_pk PRIMARY KEY (public_key, account_id)
-          )`,
-          `CREATE TYPE "access_key_permission_kind" AS ENUM ('FULL_ACCESS', 'FUNCTION_CALL') ; CREATE TABLE "access_keys" (public_key TEXT NOT NULL, account_id TEXT NOT NULL, permission_kind access_key_permission_kind NOT NULL, CONSTRAINT "access_keys_pk" PRIMARY KEY (public_key, account_id))`
+          ) PARTITION BY HASH (public_key);`,
+          `CREATE TYPE "access_key_permission_kind" AS ENUM ('FULL_ACCESS', 'FUNCTION_CALL') ; CREATE TABLE "access_keys" (public_key TEXT NOT NULL, account_id TEXT NOT NULL, permission_kind access_key_permission_kind NOT NULL, CONSTRAINT "access_keys_pk" PRIMARY KEY (public_key, account_id)) PARTITION BY HASH(public_key)`
         ]
       },
     ]
