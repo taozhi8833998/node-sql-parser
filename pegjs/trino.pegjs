@@ -3360,6 +3360,12 @@ primary
       value: `$<${n.value}>`,
     }
   }
+  / __ prepared_symbol:'?' {
+    return {
+      type: 'origin',
+      value: prepared_symbol
+    }
+  }
 
 string_constants_escape
   = 'E'i"'" __ n:single_char* __ "'" {
