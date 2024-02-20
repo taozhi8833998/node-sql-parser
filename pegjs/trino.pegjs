@@ -2052,8 +2052,8 @@ distinct_on
     }
   }
 
-select_stmt_nake
-  = __ cte:with_clause? __ KW_SELECT ___
+select_stmt_nake_base
+  = __ KW_SELECT ___
     opts:option_clause? __
     d:distinct_on?      __
     c:column_clause     __
@@ -2068,7 +2068,6 @@ select_stmt_nake
     win:window_clause? __
     li:into_clause? {
       /* => {
-          with?: with_clause;
           type: 'select';
           options?: option_clause;
           distinct?: {type: string; columns?: column_list; };
@@ -2087,7 +2086,6 @@ select_stmt_nake
       }
       if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
-          with: cte,
           type: 'select',
           options: opts,
           distinct: d,
@@ -2105,6 +2103,20 @@ select_stmt_nake
           window: win,
           ...getLocationObject()
       };
+  }
+
+select_stmt_nake
+  = __ cte:with_clause? s:select_stmt_nake_base {
+    return {
+      with: cte,
+      ...s
+    }
+  }
+  / __ cte:with_clause? __ '('? s:select_stmt_nake_base __ ')'? {
+    return {
+      with: cte,
+      ...s
+    }
   }
 
 // MySQL extensions to standard SQL
