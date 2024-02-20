@@ -96,6 +96,24 @@
     'PERSIST_ONLY': true,
   };
 
+  const reservedFunctionName = {
+    avg: true,
+    sum: true,
+    count: true,
+    max: true,
+    min: true,
+    group_concat: true,
+    std: true,
+    variance: true,
+    current_date: true,
+    current_time: true,
+    current_timestamp: true,
+    current_user: true,
+    user: true,
+    session_user: true,
+    system_user: true
+  }
+
   function getLocationObject() {
     return options.includeLocations ? {loc: location()} : {}
   }
@@ -3635,6 +3653,15 @@ aggr_fun_count
         over: bc
       };
     }
+   / name:(KW_COUNT) __ LPAREN __ RPAREN __ bc:over_partition? {
+    // => { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'; args:count_arg; over: over_partition }
+      return {
+        type: 'aggr_func',
+        name: name,
+        args: {expr: { type: 'star', value: '' }},
+        over: bc
+      };
+    }
   / name:('percentile_cont'i / 'percentile_disc'i) __ LPAREN __ arg:(literal_numeric / literal_array) __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
    // => { type: 'aggr_func'; name: 'PERCENTILE_CONT' | 'PERCENTILE_DISC'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
     return {
@@ -3828,7 +3855,7 @@ func_call
     }
   }
   / name:proc_func_name &{ return name.toLowerCase() !== 'convert' && !reservedFunctionName[name.toLowerCase()] } __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
-      if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
+    if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
     if ((name.toUpperCase() === 'TIMESTAMPDIFF' || name.toUpperCase() === 'TIMESTAMPADD') && l.value && l.value[0]) l.value[0] = { type: 'origin', value: l.value[0].column }
       return {
         type: 'function',

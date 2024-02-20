@@ -80,7 +80,7 @@ export interface InsertReplaceValue {
 
 export interface Star {
   type: "star";
-  value: "*";
+  value: "*" | "";
   loc?: LocationRange;
 }
 export interface Case {
