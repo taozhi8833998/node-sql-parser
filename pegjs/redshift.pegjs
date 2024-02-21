@@ -97,10 +97,6 @@
     'PERSIST_ONLY': true,
   };
 
-  function getLocationObject() {
-    return options.includeLocations ? {loc: location()} : {}
-  }
-
   function createUnaryExpr(op, e) {
     return {
       type: 'unary_expr',
@@ -114,8 +110,7 @@
       type: 'binary_expr',
       operator: op,
       left: left,
-      right: right,
-      ...getLocationObject(),
+      right: right
     };
   }
 
@@ -2755,6 +2750,7 @@ select_stmt_nake
     w:where_clause?     __
     g:group_by_clause?  __
     h:having_clause?    __
+    q:qualify_clause? __
     o:order_by_clause?  __
     l:limit_clause? __
     win:window_clause? __
@@ -2770,6 +2766,7 @@ select_stmt_nake
           where?: where_clause;
           groupby?: group_by_clause;
           having?: having_clause;
+          qualify?: qualify_cluase;
           orderby?: order_by_clause;
           limit?: limit_clause;
           window?: window_clause;
@@ -2792,6 +2789,7 @@ select_stmt_nake
           where: w,
           groupby: g,
           having: h,
+          qualify: q,
           orderby: o,
           limit: l,
           window: win,
@@ -2891,7 +2889,7 @@ column_list_item
         schema = tbl
         tbl = mid
       }
-      columnList.add(`select::${tbl ? tbl.value : null}::(.*)`)
+      columnList.add(`select::${tbl}::(.*)`)
       const column = '*'
       return {
         expr: {
@@ -2906,7 +2904,7 @@ column_list_item
   / tbl:(ident_type __ DOT)? __ STAR {
       // => { expr: column_ref; as: null; }
       const table = tbl && tbl[0] || null
-      columnList.add(`select::${table ? table.value : null}::(.*)`);
+      columnList.add(`select::${table.value}::(.*)`);
       return {
         expr: {
           type: 'column_ref',
@@ -3189,6 +3187,9 @@ column_ref_list
 
 having_clause
   = KW_HAVING __ e:or_and_where_expr { /* => expr */ return e; }
+
+qualify_clause
+  = KW_QUALIFY __ e:or_and_where_expr { /* => expr */ return e; }
 
 window_clause
   = KW_WINDOW __ l:named_window_expr_list {
@@ -4889,6 +4890,7 @@ KW_GROUP    = "GROUP"i      !ident_start
 KW_BY       = "BY"i         !ident_start
 KW_ORDER    = "ORDER"i      !ident_start
 KW_HAVING   = "HAVING"i     !ident_start
+KW_QUALIFY  = "QUALIFY"i     !ident_start
 KW_WINDOW   = "WINDOW"i     !ident_start
 
 KW_LIMIT    = "LIMIT"i      !ident_start
