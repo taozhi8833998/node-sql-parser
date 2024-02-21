@@ -193,6 +193,17 @@
     return typeof strOrLiteral === 'string' ? { type: 'same', value: strOrLiteral } : strOrLiteral
   }
 
+  function checkLambdaExprType(expr) {
+    const type = expr.type || (expr.ast && expr.ast.type)
+    if (type === 'aggr_func') throw new Error('Aggregations are not supported in lambda expressions')
+    if (type === 'select') throw new Error('Subqueries are not supported in lambda expressions')
+    if (type === 'binary_expr') {
+      checkLambdaExprType(expr.left)
+      checkLambdaExprType(expr.right)
+    }
+    return true
+  }
+
   const cmpPrefixMap = {
     '+': true,
     '-': true,
@@ -2224,7 +2235,7 @@ column_list_item
       ...getLocationObject(),
     }
   }
-  / tbl:ident __ DOT pro:(ident __ DOT)? __ STAR {
+  / tbl:ident_type __ DOT pro:(ident_type __ DOT)? __ STAR {
       // => { expr: column_ref; as: null; }
       const mid = pro && pro[0]
       let schema
@@ -2232,7 +2243,7 @@ column_list_item
         schema = tbl
         tbl = mid
       }
-      columnList.add(`select::${tbl}::(.*)`)
+      columnList.add(`select::${tbl ? tbl.value : null}::(.*)`)
       const column = '*'
       return {
         expr: {
@@ -2245,10 +2256,10 @@ column_list_item
         ...getLocationObject()
       }
     }
-  / tbl:(ident __ DOT)? __ STAR {
+  / tbl:(ident_type __ DOT)? __ STAR {
       // => { expr: column_ref; as: null; }
       const table = tbl && tbl[0] || null
-      columnList.add(`select::${table}::(.*)`);
+      columnList.add(`select::${table ? table.value : null}::(.*)`);
       return {
         expr: {
           type: 'column_ref',
@@ -2801,13 +2812,13 @@ set_list
  * 'col1 = (col2 > 3)'
  */
 set_item
-  = tbl:(ident __ DOT)? __ c:column_without_kw __ '=' __ v:additive_expr {
+  = tbl:(ident __ DOT)? __ c:column_without_kw_type __ '=' __ v:additive_expr {
       // => { column: ident; value: additive_expr; table?: ident;}
-      return { column: c, value: v, table: tbl && tbl[0] };
+      return { column: { expr: c }, value: v, table: tbl && tbl[0] };
     }
-    / tbl:(ident __ DOT)? __ c:column_without_kw __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
+    / tbl:(ident __ DOT)? __ c:column_without_kw_type __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
       // => { column: ident; value: column_ref; table?: ident; keyword: 'values' }
-      return { column: c, value: v, table: tbl && tbl[0], keyword: 'values' };
+      return { column: { expr: c }, value: v, table: tbl && tbl[0], keyword: 'values' };
   }
 
 returning_stmt
@@ -3081,8 +3092,30 @@ _expr
   / or_expr
   / unary_expr
 
+lambda_expr
+  = l:ident_type __ '->' __ r:_expr &{ return checkLambdaExprType(r) } {
+
+    return {
+      type: 'lambda',
+      args: {
+        value: [l]
+      },
+      expr: r
+    }
+  }
+  / LPAREN __ a:ident_without_kw_type_list __ RPAREN __ '->' __ r:_expr &{ return checkLambdaExprType(r) } {
+
+    return {
+      type: 'lambda',
+      args: {
+        value: a,
+        parentheses: true
+      },
+      expr: r
+    }
+  }
 expr
-  = _expr / union_stmt
+  = lambda_expr / _expr / union_stmt
 
 logic_operator_expr
   = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ __ rh:comparison_op_right? {
@@ -3109,7 +3142,7 @@ logic_operator_expr
   }
 
 unary_expr
-  = op: additive_operator tail: (__ primary)+ {
+  = op:additive_operator tail: (__ primary)+ {
     /*
     export type UNARY_OPERATORS = '+' | '-' | 'EXISTS' | 'NOT EXISTS'  | 'NULL'
     => {
@@ -3389,20 +3422,20 @@ column_ref
           ...getLocationObject()
       }
     }
-  / tbl:(ident __ DOT)? __ col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
+  / tbl:(ident __ DOT)? __ col:column_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
     // => IGNORE
       const tableName = tbl && tbl[0] || null
-      columnList.add(`select::${tableName}::${col}`)
+      columnList.add(`select::${tableName}::${col.value}`)
       return {
         type: 'column_ref',
         table: tableName,
-        column: col,
+        column: { expr: col },
         arrows: a.map(item => item[0]),
         properties: a.map(item => item[2]),
         ...getLocationObject()
       };
   }
-  / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) {
+  / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column_type) {
     /* => {
         type: 'column_ref';
         schema: string;
@@ -3411,16 +3444,16 @@ column_ref
         arrows?: ('->>' | '->')[];
         property?: (literal_string | literal_numeric)[];
       } */
-      columnList.add(`select::${schema}.${tbl[3]}::${col[3]}`);
+      columnList.add(`select::${schema}.${tbl[3]}::${col[3].value}`);
       return {
         type: 'column_ref',
         schema: schema,
         table: tbl[3],
-        column: col[3],
+        column: { expr: col[3] },
         ...getLocationObject()
       };
     }
-  / tbl:ident __ DOT __ col:column {
+  / tbl:ident __ DOT __ col:column_type {
       /* => {
         type: 'column_ref';
         table: ident;
@@ -3428,27 +3461,27 @@ column_ref
         arrows?: ('->>' | '->')[];
         property?: (literal_string | literal_numeric)[];
       } */
-      columnList.add(`select::${tbl}::${col}`);
+      columnList.add(`select::${tbl}::${col.value}`);
       return {
         type: 'column_ref',
         table: tbl,
-        column: col,
+        column: { expr: col },
         ...getLocationObject()
       };
     }
-  / col:column {
+  / col:column_type {
     // => IGNORE
-      columnList.add(`select::null::${col}`);
+      columnList.add(`select::null::${col.value}`);
       return {
         type: 'column_ref',
         table: null,
-        column: col,
+        column: { expr: col },
         ...getLocationObject()
       };
     }
 
 column_list
-  = head:column tail:(__ COMMA __ column)* {
+  = head:column_type tail:(__ COMMA __ column_type)* {
     // => column[]
       return createList(head, tail);
     }
@@ -3467,29 +3500,62 @@ alias_ident
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true } c:(__ LPAREN __ column_list __ RPAREN)? {
       // => string
       if (!c) return name;
-      return `${name}(${c[3].join(', ')})`
+      return `${name}(${c[3].map(v => v.value).join(', ')})`
     }
   / name:quoted_ident {
       // => IGNORE
       return name;
     }
 
+quoted_ident_type
+  = double_quoted_ident / single_quoted_ident / backticks_quoted_ident
+
 quoted_ident
-  = double_quoted_ident
-  / single_quoted_ident
-  / backticks_quoted_ident
+  = v:(double_quoted_ident / single_quoted_ident / backticks_quoted_ident) {
+    return v.value
+  }
 
 double_quoted_ident
-  = '"' chars:[^"]+ '"' { /* => string */ return chars.join(''); }
+  = '"' chars:[^"]+ '"' {
+    return {
+      type: 'double_quote_string',
+      value: chars.join('')
+    }
+  }
 
 single_quoted_ident
-  = "'" chars:[^']+ "'" { /* => string */ return chars.join(''); }
+  = "'" chars:[^']+ "'" {
+    return {
+      type: 'single_quote_string',
+      value: chars.join('')
+    }
+  }
 
 backticks_quoted_ident
-  = "`" chars:[^`]+ "`" { /* => string */ return chars.join(''); }
+  = "`" chars:[^`]+ "`" {
+    return {
+      type: 'backticks_quote_string',
+      value: chars.join('')
+    }
+  }
 
-ident_without_kw
-  = ident_name / quoted_ident
+ident_without_kw_type
+  = n:ident_name {
+    return { type: 'default', value: n }
+  }
+  / quoted_ident_type
+
+ident_type
+  = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
+      // => ident_name
+      return { type: 'default', value: name }
+    }
+  / quoted_ident_type
+
+ident_without_kw_type_list
+  = head:ident_without_kw_type tail:(__ COMMA __ ident_without_kw_type)* {
+    return createList(head, tail)
+  }
 
 column_without_kw
   = name:column_name {
@@ -3497,6 +3563,17 @@ column_without_kw
   }
   / quoted_ident
 
+column_without_kw_type
+  = n:column_name {
+    return { type: 'default', value: n }
+  }
+  / quoted_ident_type
+
+column_type
+  = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } {
+    return { type: 'default', value: name }
+  }
+  / quoted_ident_type
 column
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { /* => string */ return name; }
   / quoted_ident
@@ -3860,12 +3937,13 @@ func_call
         over: up
     }
   }
-  / name:proc_func_name &{ return name.toLowerCase() !== 'convert' && !reservedFunctionName[name.toLowerCase()] } __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+  / fn:proc_func_name &{ return fn.name.value.toLowerCase() !== 'convert' && !reservedFunctionName[fn.name.value.toLowerCase()] } __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
     if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
+    const name = fn.name.value
     if ((name.toUpperCase() === 'TIMESTAMPDIFF' || name.toUpperCase() === 'TIMESTAMPADD') && l.value && l.value[0]) l.value[0] = { type: 'origin', value: l.value[0].column }
       return {
         type: 'function',
-        name: name,
+        name: fn,
         args: l ? l: { type: 'expr_list', value: [] },
         over: bc
       };
@@ -4566,13 +4644,13 @@ proc_primary
     }
 
 proc_func_name
-  = dt:ident_name tail:(__ DOT __ ident_name)? {
-    // => string
-      let name = dt
+  = dt:ident_without_kw_type tail:(__ DOT __ ident_without_kw_type)? {
+      const result = { name: dt }
       if (tail !== null) {
-        name = `${dt}.${tail[3]}`
+        result.schema = dt
+        result.name = tail[3]
       }
-      return name;
+      return result
     }
 
 proc_func_call

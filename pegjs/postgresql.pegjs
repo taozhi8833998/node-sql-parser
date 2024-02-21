@@ -2883,7 +2883,7 @@ column_list_item
         schema = tbl
         tbl = mid
       }
-      columnList.add(`select::${tbl}::(.*)`)
+      columnList.add(`select::${tbl ? tbl.value : null}::(.*)`)
       const column = '*'
       return {
         expr: {
@@ -2898,7 +2898,7 @@ column_list_item
   / tbl:(ident_type __ DOT)? __ STAR {
       // => { expr: column_ref; as: null; }
       const table = tbl && tbl[0] || null
-      columnList.add(`select::${table.value}::(.*)`);
+      columnList.add(`select::${table ? table.value : null}::(.*)`);
       return {
         expr: {
           type: 'column_ref',

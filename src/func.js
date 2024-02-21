@@ -90,11 +90,19 @@ function tablefuncFunToSQL(expr) {
   return result.join(' ')
 }
 
+function lambdaToSQL(stmt) {
+  const { args, expr } = stmt
+  const { value, parentheses } = args
+  const argsList = value.map(exprToSQL).join(', ')
+  return [parentheses ? `(${argsList})` : argsList, '->', exprToSQL(expr)].join(' ')
+}
+
 export {
   anyValueFuncToSQL,
   castToSQL,
   extractFunToSQL,
   flattenFunToSQL,
   funcToSQL,
+  lambdaToSQL,
   tablefuncFunToSQL,
 }
