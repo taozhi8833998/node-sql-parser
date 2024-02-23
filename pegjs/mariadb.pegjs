@@ -2150,14 +2150,22 @@ join_op
   / (KW_INNER __)? KW_JOIN { return 'INNER JOIN'; }
 
 table_name
-    = prefix:[_0-9]* part:ident tail:(__ DOT __ ident)? {
-      const dt = prefix ? `${prefix.join('')}${part}` : part
-      const obj = { db: null, table: dt };
+  = prefix:[_0-9]+ part:ident_without_kw tail:(__ DOT __ ident_without_kw)? {
+      const dt = `${prefix.join('')}${part}`
+      const obj = { db: null, table: dt }
       if (tail !== null) {
-        obj.db = dt;
-        obj.table = tail[3];
+        obj.db = dt
+        obj.table = tail[3]
       }
-      return obj;
+      return obj
+    }
+  / part:ident tail:(__ DOT __ ident)? {
+      const obj = { db: null, table: part }
+      if (tail !== null) {
+        obj.db = part
+        obj.table = tail[3]
+      }
+      return obj
     }
   / v:var_decl {
       v.db = null;
@@ -2783,7 +2791,8 @@ column_list
   = head:column tail:(__ COMMA __ column)* {
       return createList(head, tail);
     }
-
+ident_without_kw
+  = ident_name / quoted_ident
 ident
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
       return name;
