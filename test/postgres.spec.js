@@ -1422,6 +1422,20 @@ describe('Postgres', () => {
         'SELECT * FROM "schema"."func"("start_time", "end_time")'
       ]
     },
+    {
+      title: 'truncate table',
+      sql: [
+        'TRUNCATE TABLE employee RESTART IDENTITY cascade',
+        'TRUNCATE TABLE "employee" RESTART IDENTITY CASCADE'
+      ]
+    },
+    {
+      title: 'truncate all table',
+      sql: [
+        'TRUNCATE TABLE ONLY employee * CONTINUE IDENTITY RESTRICT',
+        'TRUNCATE TABLE ONLY "employee" * CONTINUE IDENTITY RESTRICT'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

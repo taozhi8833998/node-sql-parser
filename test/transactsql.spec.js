@@ -150,6 +150,11 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal('SELECT [source].[dbo].[movie].[id] FROM [source].[dbo].[movie]')
     sql = 'SELECT * FROM source.dbo.movie WHERE source.dbo.movie.genre_id = 1'
     expect(getParsedSql(sql)).to.equal('SELECT * FROM [source].[dbo].[movie] WHERE [source].[dbo].[movie].[genre_id] = 1')
+    sql = 'SELECT TOP 1000 [production].[categories].[category_name], COUNT([production].[products].[product_id]) AS [product_count]\n' +
+            'FROM [production].[products]\n' +
+            'INNER JOIN [production].[categories] ON [production].[products].[category_id] = [production].[categories].[category_id]\n' +
+            'GROUP BY [production].[categories].[category_name]'
+    expect(getParsedSql(sql)).to.be.equal("SELECT TOP 1000 [production].[categories].[category_name], COUNT([production].[products].[product_id]) AS [product_count] FROM [production].[products] INNER JOIN [production].[categories] ON [production].[products].[category_id] = [production].[categories].[category_id] GROUP BY [production].[categories].[category_name]")
   })
 
   it('should support with clause', () => {

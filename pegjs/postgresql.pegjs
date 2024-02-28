@@ -1335,28 +1335,46 @@ drop_stmt
       };
     }
 
+truncate_table_name
+  = t:table_name __ s:STAR? {
+    // => table_name & { suffix?: string }
+    tableList.add(`truncate::${t.db}::${t.table}`)
+    if (s) t.suffix = s
+    return t
+  }
+truncate_table_name_list
+  = head:truncate_table_name tail:(__ COMMA __ truncate_table_name)* {
+    // => truncate_table_name[]
+      return createList(head, tail)
+    }
 truncate_stmt
   = a:KW_TRUNCATE  __
     kw:KW_TABLE? __
-    t:table_ref_list {
+    on: 'ONLY'i? __
+    t:truncate_table_name_list __
+    id: (('RESTART'i / 'CONTINUE'i) __ 'IDENTITY'i)? __
+    op:('CASCADE'i / 'RESTRICT'i)? {
       /*
       export interface truncate_stmt_node {
         type: 'trucate';
         keyword: 'table';
+        prefix?: string;
         name: table_ref_list;
+        suffix: string[];
       }
       => AstStatement<truncate_stmt_node>
       */
-      if(t) t.forEach(tt => tableList.add(`${a}::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: a.toLowerCase(),
           keyword: kw && kw.toLowerCase() || 'table',
-          name: t
+          prefix: on,
+          name: t,
+          suffix: [id && [id[0], id[2]].join(' '), op].filter(v => v).map(v => ({ type: 'origin', value: v }))
         }
-      };
+      }
     }
 
 use_stmt
