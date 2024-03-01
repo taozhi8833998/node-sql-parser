@@ -2,7 +2,7 @@ import { tablesToSQL } from './tables'
 import { exprToSQL, orderOrPartitionByToSQL } from './expr'
 import { columnRefToSQL } from './column'
 import { limitToSQL } from './limit'
-import { hasVal, identifierToSql, commonOptionConnector, returningToSQL } from './util'
+import { hasVal, commonOptionConnector, returningToSQL } from './util'
 import { withToSQL } from './with'
 
 /**
@@ -13,8 +13,13 @@ function setToSQL(sets) {
   if (!sets || sets.length === 0) return ''
   const clauses = []
   for (const set of sets) {
-    const { table, column, value } = set
-    const str = [identifierToSql(table), columnRefToSQL({ column })].filter(hasVal).join('.')
+    const column = {}
+    const { value } = set
+    for (const key in set) {
+      if (key === 'value' || key === 'keyword') continue
+      if (Object.prototype.hasOwnProperty.call(set, key)) column[key] = set[key]
+    }
+    const str = columnRefToSQL(column)
     const setItem = [str]
     let val = ''
     if (value) {

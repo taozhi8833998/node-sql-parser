@@ -1037,9 +1037,13 @@ array_index
       property,
     }
   }
+array_index_list
+  = head:array_index tail:(__ array_index)* {
+    return createList(head, tail, 1)
+  }
 
 expr_item
-  = e:binary_column_expr __ a:array_index? {
+  = e:binary_column_expr __ a:array_index_list? {
     if (a) e.array_index = a
     return e
   }
@@ -1774,7 +1778,7 @@ primary
   / func_call
   / case_expr
   / interval_expr
-  / c:column_ref __ a:array_index {
+  / c:column_ref __ a:array_index_list {
     // => column_ref
     c.array_index = a
     return c
