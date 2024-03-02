@@ -31,8 +31,10 @@ function columnRefToSQL(expr) {
   const prefix = [db, schema, table].filter(hasVal).map(val => `${typeof val === 'string' ? identifierToSql(val) : exprToSQL(val)}`).join('.')
   if (prefix) str = `${prefix}.${str}`
   if (array_index) {
-    str = `${str}[${literalToSQL(array_index.index)}]`
-    if (array_index.property) str = `${str}.${literalToSQL(array_index.property)}`
+    for (const arrayIndex of array_index) {
+      str = `${str}[${literalToSQL(arrayIndex.index)}]`
+      if (arrayIndex.property) str = `${str}.${literalToSQL(arrayIndex.property)}`
+    }
   }
   str = [str, ...subFields].join('.')
   const result = [
@@ -160,7 +162,11 @@ function columnToSQL(column, isDual) {
     return result.filter(hasVal).join(' ')
   }
   if (expr.parentheses && Reflect.has(expr, 'array_index')) str = `(${str})`
-  if (expr.array_index && expr.type !== 'column_ref') str = `${str}[${literalToSQL(expr.array_index.index)}]`
+  if (expr.array_index && expr.type !== 'column_ref') {
+    for (const arrayIndex of expr.array_index) {
+      str = `${str}[${literalToSQL(arrayIndex.index)}]`
+    }
+  }
   return [str, asToSQL(column.as)].filter(hasVal).join(' ')
 }
 

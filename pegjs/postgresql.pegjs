@@ -2863,8 +2863,14 @@ array_index
     }
   }
 
+array_index_list
+  = head:array_index tail:(__ array_index)* {
+    // => array_index[]
+    return createList(head, tail, 1)
+  }
+
 expr_item
-  = e:binary_column_expr __ a:array_index? {
+  = e:binary_column_expr __ a:array_index_list? {
     // => binary_expr & { array_index: array_index }
     if (a) e.array_index = a
     return e
@@ -3371,7 +3377,7 @@ update_stmt
             const table = queryTableAlias(col.table)
             tableList.add(`update::${dbObj[table] || null}::${table}`)
           }
-          columnList.add(`update::${col.table}::${col.column}`)
+          columnList.add(`update::${col.table}::${col.column.expr.value}`)
         });
       }
       return {
@@ -3444,13 +3450,13 @@ set_list
  * 'col1 = (col2 > 3)'
  */
 set_item
-  = tbl:(ident __ DOT)? __ c:column_without_kw_type __ '=' __ v:additive_expr {
-      // => { column: ident; value: additive_expr; table?: ident;}
-      return { column: { expr: c }, value: v, table: tbl && tbl[0] };
-    }
-    / tbl:(ident __ DOT)? __ c:column_without_kw_type __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
-      // => { column: ident; value: column_ref; table?: ident; keyword: 'values' }
-      return { column: { expr: c }, value: v, table: tbl && tbl[0], keyword: 'values' };
+  = c:column_ref_array_index __ '=' __ v:additive_expr {
+    // => { column: ident; value: additive_expr; table?: ident;}
+    return {  ...c, value: v };
+  }
+  / column_ref_array_index __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
+    // => { column: ident; value: column_ref; table?: ident; keyword: 'values' }
+    return { ...c, value: v, keyword: 'values' };
   }
 
 returning_stmt
@@ -3983,7 +3989,7 @@ multiplicative_operator
   = "*" / "/" / "%" / "||"
 
 column_ref_array_index
-  = c:column_ref __ a:array_index? {
+  = c:column_ref __ a:array_index_list? {
     // => column_ref
     if (a) c.array_index = a
     return c

@@ -2146,9 +2146,12 @@ array_index
       index: n
     }
   }
-
+array_index_list
+  = head:array_index tail:(__ array_index)* {
+    return createList(head, tail, 1)
+  }
 expr_item
-  = e:binary_column_expr __ a:array_index? {
+  = e:binary_column_expr __ a:array_index_list? {
     // => binary_expr & { array_index: array_index }
     if (a) e.array_index = a
     return e
@@ -3284,7 +3287,7 @@ multiplicative_operator
   = "*" / "/" / "%" / "||"
 
 column_ref_array_index
-  = c:column_ref __ a:array_index? {
+  = c:column_ref __ a:array_index_list? {
     // => column_ref
     if (a) c.array_index = a
     return c
