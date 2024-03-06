@@ -65,6 +65,14 @@ describe('trino', () => {
         ) AS t(xvalues, a, b);`,
         'SELECT xvalues, a, b, transform(xvalues, x -> IF(x > 0, a * x + b, a * (-x) + b)) AS "linear_function_values" FROM (VALUES (ARRAY[1,2],10,5), (ARRAY[3,4],4,2)) AS "t(xvalues, a, b)"'
       ]
+    },
+    {
+      title: 'window function',
+      sql: [
+        'select sum(a) over (partition by b rows between unbounded preceding and current row)',
+        'SELECT SUM(a) OVER (PARTITION BY b ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)'
+
+      ]
     }
   ]
   SQL_LIST.forEach(sqlInfo => {

@@ -66,6 +66,7 @@
     'RENAME': true,
     // 'REPLACE': true,
     'RIGHT': true,
+    'ROWS': true,
 
     'SELECT': true,
     'SESSION_USER': true,
@@ -2669,7 +2670,7 @@ window_frame_value
   / literal_numeric
 
 partition_by_clause
-  = KW_PARTITION __ KW_BY __ bc:column_clause { /* => column_clause */ return bc; }
+  = KW_PARTITION __ KW_BY __ bc:column_ref_list { return bc.map(item => ({ type: 'expr', expr: item })) }
 
 order_by_clause
   = KW_ORDER __ KW_BY __ l:order_by_list { /* => order_by_list */ return l; }
