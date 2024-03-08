@@ -119,6 +119,21 @@ describe('snowflake', () => {
         `SELECT "listing_id", "listing_name", "room_type", "host_id", REPLACE("price_str", '$')::NUMBER(10, 2) AS "price", "created_at", "updated_at" FROM "src_listings"`
       ]
     },
+    {
+      title: 'regexp operator',
+      sql: [
+        `SELECT v
+    FROM strings
+    WHERE v REGEXP 'San* [fF].*'
+
+    UNION ALL
+
+    SELECT v
+    FROM strings
+    WHERE v NOT REGEXP 'San\\w+?o'`,
+        'SELECT "v" FROM "strings" WHERE "v" REGEXP \'San* [fF].*\' UNION ALL SELECT "v" FROM "strings" WHERE "v" NOT REGEXP \'San\\w+?o\''
+      ]
+    }
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
