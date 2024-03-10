@@ -88,6 +88,7 @@ Import the JS file in your page:
 
 ### Supported Database SQL Syntax
 
+- Athena
 - BigQuery
 - DB2
 - Hive
