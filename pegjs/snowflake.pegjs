@@ -3040,6 +3040,7 @@ logic_operator_expr
       | 'BETWEEN' | 'NOT BETWEEN'
       | 'IS' | 'IS NOT'
       | 'LIKE'
+      | 'REGEXP' | 'NOT REGEXP'
       | '@>' | '<@' | OPERATOR_CONCATENATION | DOUBLE_WELL_ARROW | WELL_ARROW | '?' | '?|' | '?&' | '#-'
     export interface binary_expr {
       type: 'binary_expr',
@@ -3218,13 +3219,8 @@ like_op
   }
 
 regex_op
-  = "!~*" / "~*" / "~" / "!~"
-
-regex_op_right
-= op:regex_op __ right:(literal / comparison_expr) {
-     // => { op: regex_op; right: literal | comparison_expr}
-      return { op: op, right: right };
-    }
+  = nk:(KW_NOT __ KW_REGEXP) { /* => 'REGEXP' */ return nk[0] + ' ' + nk[2]; }
+  / KW_REGEXP
 
 escape_op
   = kw:'ESCAPE'i __ c:literal_string {
@@ -3265,6 +3261,14 @@ jsonb_op_right
       right: c && c.expr || c
     }
   }
+
+
+regex_op_right
+  = op:regex_op __ right:(literal / comparison_expr) __ es:escape_op? {
+     // => { op: regex_op; right: (literal | comparison_expr) & { escape?: escape_op }; }
+      if (es) right.escape = es
+      return { op: op, right: right };
+    }
 
 additive_expr
   = head:multiplicative_expr
@@ -4209,6 +4213,7 @@ KW_IS       = "IS"i         !ident_start { return 'IS'; }
 KW_LIKE     = "LIKE"i       !ident_start { return 'LIKE'; }
 KW_ILIKE    = "ILIKE"i      !ident_start { return 'ILIKE'; }
 KW_EXISTS   = "EXISTS"i     !ident_start { /* => 'EXISTS' */ return 'EXISTS'; }
+KW_REGEXP   = "REGEXP"i     !ident_start { return 'REGEXP'; }
 
 KW_NOT      = "NOT"i        !ident_start { return 'NOT'; }
 KW_AND      = "AND"i        !ident_start { return 'AND'; }
