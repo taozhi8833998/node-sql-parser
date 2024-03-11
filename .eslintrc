@@ -11,6 +11,7 @@
   "globals": {
     "PARSER_NAME": true
   },
+  "parser": "@babel/eslint-parser",
   "rules": {
     "comma-dangle": [
       2,

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const peg = require('pegjs');
+const peg = require('peggy');
 
 const syntax = fs.readFileSync(path.resolve(__dirname, './pegjs/postgresql.pegjs'), 'utf-8')
 const ast = peg.parser.parse(syntax);

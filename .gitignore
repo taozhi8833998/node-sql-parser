@@ -8,3 +8,4 @@ bower_components/
 umd/
 output/
 .DS_Store
+src/generated/
