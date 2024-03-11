@@ -2640,7 +2640,7 @@ literal_bool
     }
 
 literal_string
-  =  r:'N'i? ca:("'" single_char* "'") {
+  = r:'N'i? ca:("'" single_char* "'") {
       return {
         type: r ? 'var_string' : 'single_quote_string',
         value: ca[1].join(''),
@@ -2652,6 +2652,13 @@ literal_string
         value: ca[1].join('')
       };
     }
+  / b:('_binary'i / '_latin1'i)? __ r:'0x'i ca:([0-9A-Fa-f]*) {
+    return {
+        type: 'full_hex_string',
+        prefix: b,
+        value: ca.join('')
+      };
+  }
 
 literal_datetime
   = type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("'" single_char* "'") {
