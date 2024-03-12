@@ -279,6 +279,10 @@ describe('transactsql', () => {
     const sql = "INSERT [dbo].[testtable] ([NodeID], [Timestamp], [ResponseTime], [PercentLoss], [Availability], [Weight]) VALUES (2, CAST(N'2023-04-11T22:17:13.0864249' AS DateTime2), 0, 0, 100, 120)"
     expect(getParsedSql(sql)).to.be.equal("INSERT INTO [dbo].[testtable] (NodeID, Timestamp, ResponseTime, PercentLoss, Availability, Weight) VALUES (2,CAST(N'2023-04-11T22:17:13.0864249' AS DATETIME2),0,0,100,120)")
   })
+  it('should support hex string', () => {
+    const sql = 'INSERT INTO [dbo].[mytable]([value]) values( 0x11 );'
+    expect(getParsedSql(sql)).to.be.equal('INSERT INTO [dbo].[mytable] (value) VALUES (0x11)')
+  })
   it('should support for xml', () => {
     const base = `SELECT Cust.CustomerID,
         OrderHeader.CustomerID,
