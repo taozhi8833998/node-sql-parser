@@ -3944,7 +3944,7 @@ func_call
     if ((name.toUpperCase() === 'TIMESTAMPDIFF' || name.toUpperCase() === 'TIMESTAMPADD') && l.value && l.value[0]) l.value[0] = { type: 'origin', value: l.value[0].column }
       return {
         type: 'function',
-        name: name,
+        name: fn,
         args: l ? l: { type: 'expr_list', value: [] },
         over: bc
       };
@@ -4660,7 +4660,7 @@ proc_func_call
       //compatible with original func_call
       return {
         type: 'function',
-        name: name.name.value,
+        name: name,
         args: {
           type: 'expr_list',
           value: l
@@ -4671,7 +4671,7 @@ proc_func_call
     // => IGNORE
     return {
         type: 'function',
-        name: name.name.value,
+        name: name,
         args: null
       };
   }
