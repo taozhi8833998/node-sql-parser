@@ -131,10 +131,12 @@ function columnIdentifierToSql(ident) {
   const { database } = getParserOpt()
   if (!ident) return
   switch (database && database.toLowerCase()) {
-    case 'postgresql':
     case 'db2':
+    case 'postgresql':
+    case 'redshift':
     case 'snowflake':
     case 'noql':
+    case 'trino':
       return `"${ident}"`
     case 'transactsql':
       return `[${ident}]`
@@ -157,7 +159,9 @@ function identifierToSql(ident, isDual) {
     case 'sqlite':
       return `\`${ident}\``
     case 'postgresql':
+    case 'redshift':
     case 'snowflake':
+    case 'trino':
     case 'noql':
       return `"${ident}"`
     case 'transactsql':

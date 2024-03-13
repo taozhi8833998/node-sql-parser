@@ -92,7 +92,7 @@ export interface InsertReplaceValue {
 
 export interface Star {
   type: "star";
-  value: "*";
+  value: "*" | "";
   loc?: LocationRange;
 }
 export interface Case {
@@ -121,7 +121,7 @@ export interface AggrFunc {
 export interface Function {
   type: "function";
   name: string;
-  args: ExprList;
+  args?: ExprList;
   suffix?: any;
   loc?: LocationRange;
 }

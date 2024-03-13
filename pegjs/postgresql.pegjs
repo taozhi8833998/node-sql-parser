@@ -204,6 +204,7 @@
   let varList = [];
   const tableList = new Set();
   const columnList = new Set();
+  const customTypes = new Set();
   const tableAlias = {};
 }
 
@@ -733,6 +734,7 @@ create_type_stmt
       => AstStatement<create_type_stmt>
       */
       e.parentheses = true
+      customTypes.add([s.db, s.table].filter(v => v).join('.'))
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -748,6 +750,7 @@ create_type_stmt
     }
   / a:KW_CREATE __ k:'TYPE'i __ s:table_name {
     // => AstStatement<create_type_stmt>
+    customTypes.add([s.db, s.table].filter(v => v).join('.'))
     return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -795,8 +798,8 @@ create_table_stmt
     c:create_table_definition __
     to:table_options? __
     ir: (KW_IGNORE / KW_REPLACE)? __
-    as: KW_AS? __
-    qe: union_stmt? {
+    as:KW_AS? __
+    qe:union_stmt? {
       /*
       export type create_table_stmt_node = create_table_stmt_node_simple | create_table_stmt_node_like;
       export interface create_table_stmt_node_base {
@@ -1211,7 +1214,7 @@ create_column_definition
         resource: 'column';
       }
       */
-      columnList.add(`create::${c.table}::${c.column}`)
+      columnList.add(`create::${c.table}::${c.column.expr.value}`)
       return {
         column: c,
         definition: d,
@@ -2091,7 +2094,7 @@ table_option
     }
   }
   / kw:'COMPRESSION'i __ s:(KW_ASSIGIN_EQUAL)? __ v:("'"('ZLIB'i / 'LZ4'i / 'NONE'i)"'") {
-    // => { keyword: 'compression'; symbol: '='; value: "'ZLIB'" | "'LZ4'" | "'NONE'" }
+    // => { keyword: 'compression'; symbol?: '='; value: "'ZLIB'" | "'LZ4'" | "'NONE'" }
     return {
       keyword: kw.toLowerCase(),
       symbol: s,
@@ -2099,19 +2102,24 @@ table_option
     }
   }
   / kw:'ENGINE'i __ s:(KW_ASSIGIN_EQUAL)? __ c:ident_name {
-    // => { keyword: 'engine'; symbol: '='; value: string; }
+    // => { keyword: 'engine'; symbol?: '='; value: string; }
     return {
       keyword: kw.toLowerCase(),
       symbol: s,
       value: c.toUpperCase()
     }
   }
+  / KW_PARTITION __ KW_BY __ v:expr {
+    // => { keyword: 'partition by'; value: expr; }
+    return {
+      keyword: 'partition by',
+      value: v
+    }
+  }
 
 
 ALTER_ADD_FULLETXT_SPARITAL_INDEX
-  = KW_ADD __
-    fsid:create_fulltext_spatial_index_definition
-     {
+  = KW_ADD __ fsid:create_fulltext_spatial_index_definition {
        // => create_fulltext_spatial_index_definition & { action: 'add'; type: 'alter' }
       return {
         action: 'add',
@@ -2883,7 +2891,7 @@ column_list_item
         schema = tbl
         tbl = mid
       }
-      columnList.add(`select::${tbl}::(.*)`)
+      columnList.add(`select::${tbl ? tbl.value : null}::(.*)`)
       const column = '*'
       return {
         expr: {
@@ -2898,7 +2906,7 @@ column_list_item
   / tbl:(ident_type __ DOT)? __ STAR {
       // => { expr: column_ref; as: null; }
       const table = tbl && tbl[0] || null
-      columnList.add(`select::${table.value}::(.*)`);
+      columnList.add(`select::${table ? table.value : null}::(.*)`);
       return {
         expr: {
           type: 'column_ref',
@@ -3282,7 +3290,7 @@ window_frame_value
   / literal_numeric
 
 partition_by_clause
-  = KW_PARTITION __ KW_BY __ bc:column_clause { /* => column_clause */ return bc; }
+  = KW_PARTITION __ KW_BY __ bc:column_ref_list { /* => { type: 'expr'; expr: column_ref_list }[] */ return bc.map(item => ({ type: 'expr', expr: item })); }
 
 order_by_clause
   = KW_ORDER __ KW_BY __ l:order_by_list { /* => order_by_list */ return l; }
@@ -5310,6 +5318,7 @@ data_type
   / binary_type
   / oid_type
   / record_type
+  / custom_types
 
 
 array_type
@@ -5399,3 +5408,9 @@ uuid_type
 
 record_type
   = 'RECORD'i {/* =>  data_type */  return { dataType: 'RECORD' }}
+
+custom_types
+  = name:ident_name &{ return customTypes.has(name) } {
+      // => data_type
+      return { dataType: name }
+  }
