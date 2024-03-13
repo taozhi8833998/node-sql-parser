@@ -34,17 +34,29 @@ export interface TableColumnAst {
   ast: AST[] | AST;
   loc?: LocationRange;
 }
-export interface From {
+export interface BaseFrom {
   db: string | null;
   table: string;
   as: string | null;
   schema?: string;
   loc?: LocationRange;
 }
+export interface Join extends BaseFrom {
+	join: "INNER JOIN" | "LEFT JOIN" | "RIGHT JOIN";
+	using?: string[];
+	on?: Expr;
+}
+export interface TableExpr {
+	expr: {
+		ast: Select;
+	},
+	as?: string | null;
+}
 export interface Dual {
   type: "dual";
   loc?: LocationRange;
 }
+export type From = BaseFrom | Join | TableExpr | Dual;
 export interface LimitValue {
   type: string;
   value: number;
@@ -87,16 +99,19 @@ export interface Case {
   type: "case";
   expr: null;
   args: Array<{
-    cond: ColumnRef | AggrFunc | Function;
-    result: ColumnRef | AggrFunc | Function;
+    cond: Expr;
+    result: ExpressionValue;
     type: "when";
+  } | {
+    result: ExpressionValue;
+    type: "else";
   }>;
 }
 export interface AggrFunc {
   type: "aggr_func";
   name: string;
   args: {
-    expr: ColumnRef | AggrFunc | Star | Case | null;
+    expr: ExpressionValue;
     distinct: "DISTINCT" | null;
     orderby: OrderBy[] | null;
     parentheses?: boolean;
@@ -111,7 +126,7 @@ export interface Function {
   loc?: LocationRange;
 }
 export interface Column {
-  expr: ColumnRef | AggrFunc | Function;
+  expr: ExpressionValue;
   as: string | null;
   type?: string;
   loc?: LocationRange;
@@ -121,6 +136,7 @@ export type Param = { type: "param"; value: string, loc?: LocationRange; };
 
 export type Value = { type: string; value: any, loc?: LocationRange; };
 
+export type ExpressionValue = ColumnRef | Param | Function | Case | AggrFunc | Value;
 export type Expr =
   | {
     type: "binary_expr";
@@ -132,14 +148,14 @@ export type Expr =
   | {
     type: "binary_expr";
     operator: string;
-    left: ColumnRef | Param | Function | Case | Value;
-    right: ColumnRef | Param | Function | Case | Value;
+    left: ExpressionValue;
+    right: ExpressionValue | ExprList;
     loc?: LocationRange;
   };
 
 export type ExprList = {
   type: "expr_list";
-  value: Expr[];
+  value: ExpressionValue[];
   loc?: LocationRange;
 };
 export interface Select {
@@ -148,7 +164,7 @@ export interface Select {
   options: any[] | null;
   distinct: "DISTINCT" | null;
   columns: any[] | Column[];
-  from: Array<From | Dual | any> | null;
+  from: From[] | null;
   where: Expr | Function | null;
   groupby: ColumnRef[] | null;
   having: any[] | null;
