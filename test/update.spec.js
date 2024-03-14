@@ -69,7 +69,7 @@ describe('update', () => {
           table: null,
           value: {
             type: "function",
-            name: "concat",
+            name: { name: [{ type: 'default', value: 'concat' }]},
             over: null,
             args: {
               type: "expr_list",

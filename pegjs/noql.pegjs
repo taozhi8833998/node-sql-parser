@@ -1906,7 +1906,7 @@ reference_option
     // => { type: 'function'; name: string; args: expr_list; }
     return {
       type: 'function',
-      name: kw,
+      name: { name: [{ type: 'origin', value: kw }]},
       args: l
     }
   }
@@ -2882,8 +2882,8 @@ column_list_item
     }
   / c:double_quoted_ident __ d:DOT? !{ if(d) return true } __  alias: alias_clause? {
       // => { type: 'expr'; expr: expr; as?: alias_clause; }
-      columnList.add(`select::null::${c}`)
-      return { type: 'expr', expr: { type: 'column_ref', table: null, column: c }, as: alias };
+      columnList.add(`select::null::${c.value}`)
+      return { type: 'expr', expr: { type: 'column_ref', table: null, column: { expr: c } }, as: alias };
   }
   / e:expr_item  __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
@@ -4037,7 +4037,17 @@ column_list
     // => column[]
       return createList(head, tail);
     }
+ident_without_kw_type
+  = n:ident_name {
+    return { type: 'default', value: n }
+  }
+  / quoted_ident_type
 
+ident_type
+  = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
+      return { type: 'default', value: name }
+    }
+  / quoted_ident_type
 ident
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
       // => ident_name
@@ -4063,19 +4073,37 @@ alias_ident
       return name;
     }
 
+quoted_ident_type
+  = double_quoted_ident / single_quoted_ident / backticks_quoted_ident
+
 quoted_ident
-  = double_quoted_ident
-  / single_quoted_ident
-  / backticks_quoted_ident
+  = v:(double_quoted_ident / single_quoted_ident / backticks_quoted_ident) {
+    return v.value
+  }
 
 double_quoted_ident
-  = '"' chars:[^"]+ '"' { /* => string */ return chars.join(''); }
+  = '"' chars:[^"]+ '"' {
+    return {
+      type: 'double_quote_string',
+      value: chars.join('')
+    }
+  }
 
 single_quoted_ident
-  = "'" chars:[^']+ "'" { /* => string */ return chars.join(''); }
+  = "'" chars:[^']+ "'" {
+    return {
+      type: 'single_quote_string',
+      value: chars.join('')
+    }
+  }
 
 backticks_quoted_ident
-  = "`" chars:[^`]+ "`" { /* => string */ return chars.join(''); }
+  = "`" chars:[^`]+ "`" {
+    return {
+      type: 'backticks_quote_string',
+      value: chars.join('')
+    }
+  }
 
 ident_without_kw
   = ident_name / quoted_ident
@@ -4339,7 +4367,7 @@ trim_func_clause
     args.value.push(s)
     return {
         type: 'function',
-        name: 'TRIM',
+        name: { name: [{ type: 'origin', value: 'trim' }]},
         args,
     };
   }
@@ -4349,11 +4377,11 @@ tablefunc_clause
     // => { type: 'tablefunc'; name: crosstab; args: expr_list; as: func_call }
     return {
       type: 'tablefunc',
-      name: 'crosstab',
+      name: { name: [{ type: 'origin', value: 'crosstab' }] },
       args: s,
       as: {
         type: 'function',
-        name: n,
+        name: { name: [{ type: 'default', value: name }] },
         args: { type: 'expr_list', value: cds.map(v => ({ ...v, type: 'column_definition' })) },
       }
     }
@@ -4366,7 +4394,7 @@ func_call
       z.prefix = 'at time zone'
       return {
         type: 'function',
-        name: name,
+        name: { name: [{ type: 'default', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
         suffix: z
       };
@@ -4375,7 +4403,7 @@ func_call
     // => { type: 'function'; name: string; args: expr_list; over?: over_partition; }
       return {
         type: 'function',
-        name: name,
+        name: { name: [{ type: 'default', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
         over: bc
       };
@@ -4385,7 +4413,7 @@ func_call
     // => { type: 'function'; name: string; over?: on_update_current_timestamp; }
     return {
         type: 'function',
-        name: f,
+        name: { name: [{ type: 'origin', value: f }] },
         over: up
     }
   }
@@ -5104,13 +5132,13 @@ proc_primary
   }
 
 proc_func_name
-  = dt:ident_name tail:(__ DOT __ ident_name)? {
-    // => string
-      let name = dt
+  = dt:ident_without_kw_type tail:(__ DOT __ ident_without_kw_type)? {
+      const result = { name: [dt] }
       if (tail !== null) {
-        name = `${dt}.${tail[3]}`
+        result.schema = dt
+        result.name = [tail[3]]
       }
-      return name;
+      return result
     }
 
 proc_func_call
