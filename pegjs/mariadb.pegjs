@@ -1346,7 +1346,7 @@ reference_option
   = kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
     return {
       type: 'function',
-      name: kw,
+      name: { name: [{ type: 'origin', value: kw }]},
       args: l
     }
   }
@@ -2791,6 +2791,17 @@ column_list
   = head:column tail:(__ COMMA __ column)* {
       return createList(head, tail);
     }
+ident_without_kw_type
+  = n:ident_name {
+    return { type: 'default', value: n }
+  }
+  / quoted_ident_type
+
+ident_type
+  = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
+      return { type: 'default', value: name }
+    }
+  / quoted_ident_type
 ident_without_kw
   = ident_name / quoted_ident
 ident
@@ -2811,19 +2822,37 @@ alias_ident
     }
   / quoted_ident
 
+quoted_ident_type
+  = double_quoted_ident / single_quoted_ident / backticks_quoted_ident
+
 quoted_ident
-  = double_quoted_ident
-  / single_quoted_ident
-  / backticks_quoted_ident
+  = v:(double_quoted_ident / single_quoted_ident / backticks_quoted_ident) {
+    return v.value
+  }
 
 double_quoted_ident
-  = '"' chars:[^"]+ '"' { return chars.join(''); }
+  = '"' chars:[^"]+ '"' {
+    return {
+      type: 'double_quote_string',
+      value: chars.join('')
+    }
+  }
 
 single_quoted_ident
-  = "'" chars:[^']+ "'" { return chars.join(''); }
+  = "'" chars:[^']+ "'" {
+    return {
+      type: 'single_quote_string',
+      value: chars.join('')
+    }
+  }
 
 backticks_quoted_ident
-  = "`" chars:([^`\\] / escape_char)+ "`" { return chars.join(''); }
+  = "`" chars:([^`\\] / escape_char)+ "`" {
+    return {
+      type: 'backticks_quote_string',
+      value: chars.join('')
+    }
+  }
 
 column_without_kw
   = name:column_name {
@@ -2833,7 +2862,9 @@ column_without_kw
 
 column
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { return name; }
-  / backticks_quoted_ident
+  / n:backticks_quoted_ident {
+    return n.value
+  }
 
 column_name
   =  start:ident_start parts:column_part* { return start + parts.join(''); }
@@ -3091,7 +3122,7 @@ extract_func
   / 'DATE_TRUNC'i __  LPAREN __ e:expr __ COMMA __ f:extract_filed __ RPAREN {
     return {
         type: 'function',
-        name: 'DATE_TRUNC',
+        name: { name: [{ type: 'origin', value: 'date_trunc' }]},
         args: { type: 'expr_list', value: [e, { type: 'origin', value: f }] },
         over: null,
       };
@@ -3118,7 +3149,7 @@ trim_func_clause
     args.value.push(s)
     return {
         type: 'function',
-        name: 'TRIM',
+        name: { name: [{ type: 'origin', value: 'trim' }]},
         args,
     };
   }
@@ -3128,7 +3159,7 @@ func_call
   / 'convert'i __ LPAREN __ l:convert_args __ RPAREN __ ca:collate_expr? {
     return {
         type: 'function',
-        name: 'CONVERT',
+        name: { name: [{ type: 'origin', value: 'convert' }] },
         args: l,
         collate: ca,
     };
@@ -3136,7 +3167,7 @@ func_call
   / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
-        name: name,
+        name: { name: [{ type: 'default', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
         over: bc
       };
@@ -3144,13 +3175,13 @@ func_call
   / f:scalar_time_func __ up:on_update_current_timestamp? {
     return {
         type: 'function',
-        name: f,
+        name: { name: [{ type: 'origin', value: f }] },
         over: up
     }
   }
-  / name:proc_func_name &{ return name.toLowerCase() !== 'convert' && !reservedFunctionName[name.toLowerCase()] } __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+  / name:proc_func_name &{ return !reservedFunctionName[name.name[0] && name.name[0].value.toLowerCase()] } __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
     if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
-    if ((name.toUpperCase() === 'TIMESTAMPDIFF' || name.toUpperCase() === 'TIMESTAMPADD') && l.value && l.value[0]) l.value[0] = { type: 'origin', value: l.value[0].column }
+    if (((name.name[0] && name.name[0].value.toUpperCase() === 'TIMESTAMPDIFF') || (name.name[0] && name.name[0].value.toUpperCase() === 'TIMESTAMPADD')) && l.value && l.value[0]) l.value[0] = { type: 'origin', value: l.value[0].column }
       return {
         type: 'function',
         name: name,
@@ -3758,12 +3789,13 @@ proc_primary
     }
 
 proc_func_name
-  = dt:(ident_name / quoted_ident) tail:(__ DOT __ (ident_name / quoted_ident))? {
-      let name = dt
+  = dt:ident_without_kw_type tail:(__ DOT __ ident_without_kw_type)? {
+      const result = { name: [dt] }
       if (tail !== null) {
-        name = `${dt}.${tail[3]}`
+        result.schema = dt
+        result.name = [tail[3]]
       }
-      return name;
+      return result
     }
 
 proc_func_call_args

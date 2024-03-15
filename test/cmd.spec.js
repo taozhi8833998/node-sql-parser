@@ -117,9 +117,9 @@ describe('Command SQL', () => {
       expect(getParsedSql('call db.sp(12, "test", @firstParameter)'))
         .to.equal('CALL db.sp(12, "test", @firstParameter)')
       expect(getParsedSql('call `db`.`sp`(12, "test", @firstParameter);'))
-        .to.equal('CALL db.sp(12, "test", @firstParameter)')
+        .to.equal('CALL `db`.`sp`(12, "test", @firstParameter)')
       expect(getParsedSql('call `db`.`sp`'))
-        .to.equal('CALL db.sp')
+        .to.equal('CALL `db`.`sp`')
     })
 
   })

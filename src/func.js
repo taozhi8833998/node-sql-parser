@@ -71,7 +71,7 @@ function funcToSQL(expr) {
   const collateStr = commonTypeValue(collate).join(' ')
   const overStr = overToSQL(over)
   const suffixStr = exprToSQL(suffix)
-  const funcName = typeof name === 'string' ? name : [name.schema, name.name].map(literalToSQL).filter(hasVal).join('.')
+  const funcName = [literalToSQL(name.schema), name.name.map(literalToSQL).join('.')].filter(hasVal).join('.')
   if (!args) return [funcName, overStr].filter(hasVal).join(' ')
   let separator = expr.separator || ', '
   if (toUpper(funcName) === 'TRIM') separator = ' '
@@ -85,7 +85,7 @@ function funcToSQL(expr) {
 
 function tablefuncFunToSQL(expr) {
   const { as, name, args } = expr
-  const funcName = typeof name === 'string' ? name : [name.schema, name.name].map(literalToSQL).filter(hasVal).join('.')
+  const funcName = [literalToSQL(name.schema), name.name.map(literalToSQL).join('.')].filter(hasVal).join('.')
   const result = [`${funcName}(${exprToSQL(args).join(', ')})`, 'AS', funcToSQL(as)]
   return result.join(' ')
 }

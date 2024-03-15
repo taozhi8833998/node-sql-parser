@@ -289,7 +289,7 @@ describe('select', () => {
           {
             expr: {
               type: 'function',
-              name: 'fun',
+              name: { name: [{ type: 'default', value: 'fun' }]},
               over: null,
               args: {
                 type  : 'expr_list',
@@ -319,7 +319,7 @@ describe('select', () => {
           {
             expr: {
               type: 'function',
-              name: 'position',
+              name: { name: [{ type: 'default', value: 'position' }]},
               over: null,
               args: {
                 type: 'expr_list',
@@ -352,7 +352,7 @@ describe('select', () => {
           {
             expr: {
               type: 'function',
-              name: func,
+              name: { name: [{ type: 'default', value: func }]},
               over: null,
               args: {
                 type: 'expr_list',
@@ -741,7 +741,7 @@ describe('select', () => {
       expect(ast.limit).to.be.null;
     })
 
-    it('should support left and covert fun', () => {
+    it('should support left and convert fun', () => {
       expect(getParsedSql(`select * from test where LEFT(column,2)="ts";`))
         .to.equal('SELECT * FROM `test` WHERE LEFT(`column`, 2) = "ts"')
       expect(getParsedSql(`select * from test where CONVERT(column, DATE)="test";`))

@@ -139,6 +139,7 @@ function columnDefinitionToSQL(columnDefinition) {
 
 function asToSQL(asStr) {
   if (!asStr) return ''
+  if (typeof asStr === 'object') return ['AS', exprToSQL(asStr)].join(' ')
   return ['AS', /^(`?)[a-z_][0-9a-z_]*(`?)$/i.test(asStr) ? identifierToSql(asStr) : columnIdentifierToSql(asStr)].join(' ')
 }
 
