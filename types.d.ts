@@ -73,7 +73,7 @@ export interface AggrFunc {
 export type FunctionName = { schema?: string, name: ValueExpr<string>[] }
 export interface Function {
   type: "function";
-  name: { name: FunctionName[] };
+  name: FunctionName;
   args: ExprList;
   suffix?: any;
 }
