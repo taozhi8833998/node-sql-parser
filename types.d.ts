@@ -70,7 +70,7 @@ export interface AggrFunc {
   args: ColumnRef | AggrFunc | Star | null;
 }
 
-export type FunctionName = ValueExpr<string> & { schema?: string }
+export type FunctionName = { schema?: string, name: ValueExpr<string>[] }
 export interface Function {
   type: "function";
   name: { name: FunctionName[] };
