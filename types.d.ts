@@ -72,10 +72,16 @@ export interface OrderBy {
   expr: any;
   loc?: LocationRange;
 }
+
+export interface ValueExpr<T = string | number | boolean> {
+  type: "backticks_quote_string" | "string" | "regex_string" | "hex_string" | "full_hex_string" | "natural_string" | "bit_string" | "double_quote_string" | "single_quote_string" | "boolean" | "bool" | "null" | "star" | "param" | "origin" | "date" | "datetime" | "time" | "timestamp" | "var_string";
+  value: T;
+}
+
 export interface ColumnRef {
   type: "column_ref";
   table: string | null;
-  column: string;
+  column: string | { expr: ValueExpr };
   loc?: LocationRange;
 }
 export interface SetList {
@@ -128,9 +134,11 @@ export interface AggrFunc {
   };
   loc?: LocationRange;
 }
+
+export type FunctionName = { schema?: string, name: ValueExpr<string>[] }
 export interface Function {
   type: "function";
-  name: string;
+  name: FunctionName;
   args?: ExprList;
   suffix?: any;
   loc?: LocationRange;
