@@ -107,6 +107,16 @@ export interface Case {
     type: "else";
   }>;
 }
+export interface Cast {
+	type: "cast";
+	keyword: "cast";
+	expr: Expr;
+	symbol: "as";
+	target: {
+		dataType: string;
+		 suffix: unknown[];
+	}
+}
 export interface AggrFunc {
   type: "aggr_func";
   name: string;
@@ -136,7 +146,7 @@ export type Param = { type: "param"; value: string, loc?: LocationRange; };
 
 export type Value = { type: string; value: any, loc?: LocationRange; };
 
-export type ExpressionValue = ColumnRef | Param | Function | Case | AggrFunc | Value;
+export type ExpressionValue = ColumnRef | Param | Function | Case | AggrFunc | Value | Cast;
 export type Expr =
   | {
     type: "binary_expr";
