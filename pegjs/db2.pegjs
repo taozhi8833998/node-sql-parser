@@ -831,7 +831,7 @@ reference_option
   = kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
     return {
       type: 'function',
-      name: kw,
+      name: { name: [{ type: 'origin', value: kw }]},
       args: l
     }
   }
@@ -1836,6 +1836,17 @@ column_list
   = head:column tail:(__ COMMA __ column)* {
       return createList(head, tail);
     }
+ident_without_kw_type
+  = n:ident_name {
+    return { type: 'default', value: n }
+  }
+  / quoted_ident_type
+
+ident_type
+  = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
+      return { type: 'default', value: name }
+    }
+  / quoted_ident_type
 
 ident
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
@@ -1856,19 +1867,37 @@ alias_ident
       return name;
     }
 
+quoted_ident_type
+  = double_quoted_ident / single_quoted_ident / backticks_quoted_ident
+
 quoted_ident
-  = double_quoted_ident
-  / single_quoted_ident
-  / backticks_quoted_ident
+  = v:(double_quoted_ident / single_quoted_ident / backticks_quoted_ident) {
+    return v.value
+  }
 
 double_quoted_ident
-  = '"' chars:[^"]+ '"' { return chars.join(''); }
+  = '"' chars:[^"]+ '"' {
+    return {
+      type: 'double_quote_string',
+      value: chars.join('')
+    }
+  }
 
 single_quoted_ident
-  = "'" chars:[^']+ "'" { return chars.join(''); }
+  = "'" chars:[^']+ "'" {
+    return {
+      type: 'single_quote_string',
+      value: chars.join('')
+    }
+  }
 
 backticks_quoted_ident
-  = "`" chars:[^`]+ "`" { return chars.join(''); }
+  = "`" chars:[^`]+ "`" {
+    return {
+      type: 'backticks_quote_string',
+      value: chars.join('')
+    }
+  }
 
 column_without_kw
   = name:column_name {
@@ -1974,7 +2003,7 @@ func_call
   = name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
         type: 'function',
-        name: name,
+        name: { name: [{ type: 'default', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
         over: bc
       };
@@ -1982,7 +2011,7 @@ func_call
   / f:scalar_time_func __ up:on_update_current_timestamp? {
     return {
         type: 'function',
-        name: f,
+        name: { name: [{ type: 'origin', value: f }] },
         over: up
     }
   }
@@ -2510,12 +2539,13 @@ proc_primary
     }
 
 proc_func_name
-  = dt:ident_name tail:(__ DOT __ ident_name)? {
-      let name = dt
+  = dt:ident_without_kw_type tail:(__ DOT __ ident_without_kw_type)? {
+      const result = { name: [dt] }
       if (tail !== null) {
-        name = `${dt}.${tail[3]}`
+        result.schema = dt
+        result.name = [tail[3]]
       }
-      return name;
+      return result
     }
 
 proc_func_call

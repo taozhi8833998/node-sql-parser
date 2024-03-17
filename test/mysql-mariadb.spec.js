@@ -833,10 +833,17 @@ describe('mysql', () => {
         ]
       },
       {
-        title: 'table name starts with number or lodash',
+        title: 'table name starts with number',
         sql: [
           'SELECT * FROM 2023t',
           'SELECT * FROM `2023t`'
+        ]
+      },
+      {
+        title: 'table name starts with lodash ignore keywords',
+        sql: [
+          'SELECT * FROM _rows',
+          'SELECT * FROM `_rows`'
         ]
       },
       {

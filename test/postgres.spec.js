@@ -1421,6 +1421,34 @@ describe('Postgres', () => {
         'SELECT * FROM "schema"."func"("start_time", "end_time")'
       ]
     },
+    {
+      title: 'truncate table',
+      sql: [
+        'TRUNCATE TABLE employee RESTART IDENTITY cascade',
+        'TRUNCATE TABLE "employee" RESTART IDENTITY CASCADE'
+      ]
+    },
+    {
+      title: 'truncate all table',
+      sql: [
+        'TRUNCATE TABLE ONLY employee * CONTINUE IDENTITY RESTRICT',
+        'TRUNCATE TABLE ONLY "employee" * CONTINUE IDENTITY RESTRICT'
+      ]
+    },
+    {
+      title: 'jsonb in select column',
+      sql: [
+        "SELECT data['author']['first_name'] as title FROM blogs",
+        `SELECT data['author']['first_name'] AS "title" FROM "blogs"`
+      ]
+    },
+    {
+      title: 'jsonb in update set',
+      sql: [
+        `UPDATE blogs SET data['author']['first_name'] = '"Sarah"'`,
+        `UPDATE "blogs" SET data['author']['first_name'] = '"Sarah"'`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

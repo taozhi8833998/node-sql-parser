@@ -13,7 +13,7 @@ function callToSQL(stmt) {
 }
 
 function commonCmdToSQL(stmt) {
-  const { type, keyword, name, prefix } = stmt
+  const { type, keyword, name, prefix, suffix } = stmt
   const clauses = [toUpper(type), toUpper(keyword), toUpper(prefix)]
   switch (keyword) {
     case 'table':
@@ -36,6 +36,7 @@ function commonCmdToSQL(stmt) {
     default:
       break
   }
+  if (suffix) clauses.push(suffix.map(exprToSQL).filter(hasVal).join(' '))
   return clauses.filter(hasVal).join(' ')
 }
 

@@ -1661,7 +1661,7 @@ reference_option
     // => { type: 'function'; name: string; args: expr_list; }
     return {
       type: 'function',
-      name: kw,
+      name: { name: [{ type: 'origin', value: kw }] },
       args: l
     }
   }
@@ -3840,7 +3840,7 @@ trim_func_clause
     args.value.push(s)
     return {
         type: 'function',
-        name: 'TRIM',
+        name: { name: [{ type: 'origin', value: 'trim' }]},
         args,
     };
   }
@@ -3908,7 +3908,7 @@ func_call
       z.prefix = 'at time zone'
       return {
         type: 'function',
-        name: name,
+        name: { name: [{ type: 'default', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
         suffix: z
       };
@@ -3916,7 +3916,7 @@ func_call
   / name:'FLATTEN'i __ LPAREN __ l:flattern_args __ RPAREN {
     return {
         type: 'flatten',
-        name,
+        name: { name: [{ type: 'default', value: name }] },
         args: l,
       }
   }
@@ -3924,7 +3924,7 @@ func_call
     // => { type: 'function'; name: string; args: expr_list; over?: over_partition; }
       return {
         type: 'function',
-        name: name,
+        name: { name: [{ type: 'default', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
         over: bc
       };
@@ -3934,17 +3934,16 @@ func_call
     // => { type: 'function'; name: string; over?: on_update_current_timestamp; }
     return {
         type: 'function',
-        name: f,
+        name: { name: [{ type: 'origin', value: f }] },
         over: up
     }
   }
-  / fn:proc_func_name &{ return fn.name.value.toLowerCase() !== 'convert' && !reservedFunctionName[fn.name.value.toLowerCase()] } __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+  / name:proc_func_name &{ return !reservedFunctionName[name.name[0] && name.name[0].value.toLowerCase()] } __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
     if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
-    const name = fn.name.value
-    if ((name.toUpperCase() === 'TIMESTAMPDIFF' || name.toUpperCase() === 'TIMESTAMPADD') && l.value && l.value[0]) l.value[0] = { type: 'origin', value: l.value[0].column }
+    if (((name.name[0] && name.name[0].value.toUpperCase() === 'TIMESTAMPDIFF') || (name.name[0] && name.name[0].value.toUpperCase() === 'TIMESTAMPADD')) && l.value && l.value[0]) l.value[0] = { type: 'origin', value: l.value[0].column }
       return {
         type: 'function',
-        name: fn,
+        name: name,
         args: l ? l: { type: 'expr_list', value: [] },
         over: bc
       };
@@ -4646,7 +4645,7 @@ proc_primary
 
 proc_func_name
   = dt:ident_without_kw_type tail:(__ DOT __ ident_without_kw_type)? {
-      const result = { name: dt }
+      const result = { name: [dt] }
       if (tail !== null) {
         result.schema = dt
         result.name = tail[3]

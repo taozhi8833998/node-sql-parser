@@ -1918,7 +1918,7 @@ reference_option
     // => { type: 'function'; name: string; args: expr_list; }
     return {
       type: 'function',
-      name: kw,
+      name: { name: [{ type: 'origin', value: kw }] },
       args: l
     }
   }
@@ -2848,8 +2848,13 @@ array_index
     }
   }
 
+array_index_list
+  = head:array_index tail:(__ array_index)* {
+    return createList(head, tail, 1)
+  }
+
 expr_item
-  = e:binary_column_expr __ a:array_index? {
+  = e:binary_column_expr __ a:array_index_list? {
     // => binary_expr & { array_index: array_index }
     if (a) e.array_index = a
     return e
@@ -3971,7 +3976,7 @@ multiplicative_operator
   = "*" / "/" / "%" / "||"
 
 column_ref_array_index
-  = c:column_ref __ a:array_index? {
+  = c:column_ref __ a:array_index_list? {
     // => column_ref
     if (a) c.array_index = a
     return c
@@ -4430,7 +4435,7 @@ trim_func_clause
     args.value.push(s)
     return {
         type: 'function',
-        name: { name: { type: 'origin', value: 'trim' }},
+        name: { name: [{ type: 'origin', value: 'trim' }]},
         args,
     };
   }
@@ -4440,11 +4445,11 @@ tablefunc_clause
     // => { type: 'tablefunc'; name: proc_func_name; args: expr_list; as: func_call }
     return {
       type: 'tablefunc',
-      name: { name: { type: 'default', value: 'crosstab' } } ,
+      name: { name: [{ type: 'default', value: 'crosstab' }] } ,
       args: s,
       as: {
         type: 'function',
-        name: n,
+        name: { name: [{ type: 'default', value: n }]},
         args: { type: 'expr_list', value: cds.map(v => ({ ...v, type: 'column_definition' })) },
       }
     }
@@ -4457,7 +4462,7 @@ func_call
       z.prefix = 'at time zone'
       return {
         type: 'function',
-        name: { name: { type: 'default', value: name } },
+        name: { name: [{ type: 'default', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
         suffix: z
       };
@@ -4466,7 +4471,7 @@ func_call
     // => { type: 'function'; name: proc_func_name; args: expr_list; over?: over_partition; }
       return {
         type: 'function',
-        name: { name: { type: 'origin', value: name } },
+        name: { name: [{ type: 'origin', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
         over: bc
       };
@@ -4476,7 +4481,7 @@ func_call
     // => { type: 'function'; name: proc_func_name; over?: on_update_current_timestamp; }
     return {
         type: 'function',
-        name: { name: { type: 'origin', value: f } },
+        name: { name: [{ type: 'origin', value: f }] },
         over: up
     }
   }
@@ -5201,10 +5206,10 @@ proc_primary
 proc_func_name
   = dt:ident_without_kw_type tail:(__ DOT __ ident_without_kw_type)? {
     // => { schema?: ident_without_kw_type, name: ident_without_kw_type }
-      const result = { name: dt }
+      const result = { name: [dt] }
       if (tail !== null) {
         result.schema = dt
-        result.name = tail[3]
+        result.name = [tail[3]]
       }
       return result
     }

@@ -1,3 +1,4 @@
+import { parse as athena } from '../pegjs/athena.pegjs'
 import { parse as bigquery } from '../pegjs/bigquery.pegjs'
 import { parse as db2 } from '../pegjs/db2.pegjs'
 import { parse as flinksql } from '../pegjs/flinksql.pegjs'
@@ -13,6 +14,7 @@ import { parse as snowflake } from '../pegjs/snowflake.pegjs'
 import { parse as trino } from '../pegjs/trino.pegjs'
 
 export default {
+  athena,
   bigquery,
   db2,
   flinksql,

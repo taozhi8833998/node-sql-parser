@@ -150,6 +150,11 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal('SELECT [source].[dbo].[movie].[id] FROM [source].[dbo].[movie]')
     sql = 'SELECT * FROM source.dbo.movie WHERE source.dbo.movie.genre_id = 1'
     expect(getParsedSql(sql)).to.equal('SELECT * FROM [source].[dbo].[movie] WHERE [source].[dbo].[movie].[genre_id] = 1')
+    sql = 'SELECT TOP 1000 [production].[categories].[category_name], COUNT([production].[products].[product_id]) AS [product_count]\n' +
+            'FROM [production].[products]\n' +
+            'INNER JOIN [production].[categories] ON [production].[products].[category_id] = [production].[categories].[category_id]\n' +
+            'GROUP BY [production].[categories].[category_name]'
+    expect(getParsedSql(sql)).to.be.equal("SELECT TOP 1000 [production].[categories].[category_name], COUNT([production].[products].[product_id]) AS [product_count] FROM [production].[products] INNER JOIN [production].[categories] ON [production].[products].[category_id] = [production].[categories].[category_id] GROUP BY [production].[categories].[category_name]")
   })
 
   it('should support with clause', () => {
@@ -273,6 +278,10 @@ describe('transactsql', () => {
   it('should support cast datatime2', () => {
     const sql = "INSERT [dbo].[testtable] ([NodeID], [Timestamp], [ResponseTime], [PercentLoss], [Availability], [Weight]) VALUES (2, CAST(N'2023-04-11T22:17:13.0864249' AS DateTime2), 0, 0, 100, 120)"
     expect(getParsedSql(sql)).to.be.equal("INSERT INTO [dbo].[testtable] (NodeID, Timestamp, ResponseTime, PercentLoss, Availability, Weight) VALUES (2,CAST(N'2023-04-11T22:17:13.0864249' AS DATETIME2),0,0,100,120)")
+  })
+  it('should support hex string', () => {
+    const sql = 'INSERT INTO [dbo].[mytable]([value]) values( 0x11 );'
+    expect(getParsedSql(sql)).to.be.equal('INSERT INTO [dbo].[mytable] (value) VALUES (0x11)')
   })
   it('should support for xml', () => {
     const base = `SELECT Cust.CustomerID,

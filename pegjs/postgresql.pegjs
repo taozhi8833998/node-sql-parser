@@ -1340,28 +1340,46 @@ drop_stmt
       };
     }
 
+truncate_table_name
+  = t:table_name __ s:STAR? {
+    // => table_name & { suffix?: string }
+    tableList.add(`truncate::${t.db}::${t.table}`)
+    if (s) t.suffix = s
+    return t
+  }
+truncate_table_name_list
+  = head:truncate_table_name tail:(__ COMMA __ truncate_table_name)* {
+    // => truncate_table_name[]
+      return createList(head, tail)
+    }
 truncate_stmt
   = a:KW_TRUNCATE  __
     kw:KW_TABLE? __
-    t:table_ref_list {
+    on: 'ONLY'i? __
+    t:truncate_table_name_list __
+    id: (('RESTART'i / 'CONTINUE'i) __ 'IDENTITY'i)? __
+    op:('CASCADE'i / 'RESTRICT'i)? {
       /*
       export interface truncate_stmt_node {
         type: 'trucate';
         keyword: 'table';
+        prefix?: string;
         name: table_ref_list;
+        suffix: string[];
       }
       => AstStatement<truncate_stmt_node>
       */
-      if(t) t.forEach(tt => tableList.add(`${a}::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: a.toLowerCase(),
           keyword: kw && kw.toLowerCase() || 'table',
-          name: t
+          prefix: on,
+          name: t,
+          suffix: [id && [id[0], id[2]].join(' '), op].filter(v => v).map(v => ({ type: 'origin', value: v }))
         }
-      };
+      }
     }
 
 use_stmt
@@ -1923,7 +1941,7 @@ reference_option
     // => { type: 'function'; name: string; args: expr_list; }
     return {
       type: 'function',
-      name: kw,
+      name: { name: [{ type: 'origin', value: kw }] },
       args: l
     }
   }
@@ -2850,8 +2868,14 @@ array_index
     }
   }
 
+array_index_list
+  = head:array_index tail:(__ array_index)* {
+    // => array_index[]
+    return createList(head, tail, 1)
+  }
+
 expr_item
-  = e:binary_column_expr __ a:array_index? {
+  = e:binary_column_expr __ a:array_index_list? {
     // => binary_expr & { array_index: array_index }
     if (a) e.array_index = a
     return e
@@ -3358,7 +3382,7 @@ update_stmt
             const table = queryTableAlias(col.table)
             tableList.add(`update::${dbObj[table] || null}::${table}`)
           }
-          columnList.add(`update::${col.table}::${col.column}`)
+          columnList.add(`update::${col.table}::${col.column.expr.value}`)
         });
       }
       return {
@@ -3431,13 +3455,13 @@ set_list
  * 'col1 = (col2 > 3)'
  */
 set_item
-  = tbl:(ident __ DOT)? __ c:column_without_kw_type __ '=' __ v:additive_expr {
-      // => { column: ident; value: additive_expr; table?: ident;}
-      return { column: { expr: c }, value: v, table: tbl && tbl[0] };
-    }
-    / tbl:(ident __ DOT)? __ c:column_without_kw_type __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
-      // => { column: ident; value: column_ref; table?: ident; keyword: 'values' }
-      return { column: { expr: c }, value: v, table: tbl && tbl[0], keyword: 'values' };
+  = c:column_ref_array_index __ '=' __ v:additive_expr {
+    // => { column: ident; value: additive_expr; table?: ident;}
+    return {  ...c, value: v };
+  }
+  / column_ref_array_index __ '=' __ KW_VALUES __ LPAREN __ v:column_ref __ RPAREN {
+    // => { column: ident; value: column_ref; table?: ident; keyword: 'values' }
+    return { ...c, value: v, keyword: 'values' };
   }
 
 returning_stmt
@@ -3970,7 +3994,7 @@ multiplicative_operator
   = "*" / "/" / "%" / "||"
 
 column_ref_array_index
-  = c:column_ref __ a:array_index? {
+  = c:column_ref __ a:array_index_list? {
     // => column_ref
     if (a) c.array_index = a
     return c
@@ -4429,7 +4453,7 @@ trim_func_clause
     args.value.push(s)
     return {
         type: 'function',
-        name: { name: { type: 'origin', value: 'trim' }},
+        name: { name: [{ type: 'origin', value: 'trim' }] },
         args,
     };
   }
@@ -4439,11 +4463,11 @@ tablefunc_clause
     // => { type: 'tablefunc'; name: proc_func_name; args: expr_list; as: func_call }
     return {
       type: 'tablefunc',
-      name: { name: { type: 'default', value: 'crosstab' } } ,
+      name: { name: [{ type: 'default', value: 'crosstab' }] } ,
       args: s,
       as: {
         type: 'function',
-        name: n,
+        name: { name: [{ type: 'default', value: n }]},
         args: { type: 'expr_list', value: cds.map(v => ({ ...v, type: 'column_definition' })) },
       }
     }
@@ -4456,7 +4480,7 @@ func_call
       z.prefix = 'at time zone'
       return {
         type: 'function',
-        name: { name: { type: 'default', value: name } },
+        name: { name: [{ type: 'default', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
         suffix: z
       };
@@ -4465,7 +4489,7 @@ func_call
     // => { type: 'function'; name: proc_func_name; args: expr_list; over?: over_partition; }
       return {
         type: 'function',
-        name: { name: { type: 'origin', value: name } },
+        name: { name: [{ type: 'origin', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
         over: bc
       };
@@ -4475,7 +4499,7 @@ func_call
     // => { type: 'function'; name: proc_func_name; over?: on_update_current_timestamp; }
     return {
         type: 'function',
-        name: { name: { type: 'origin', value: f } },
+        name: { name: [{ type: 'origin', value: f }] },
         over: up
     }
   }
@@ -5199,10 +5223,10 @@ proc_primary
 proc_func_name
   = dt:ident_without_kw_type tail:(__ DOT __ ident_without_kw_type)? {
     // => { schema?: ident_without_kw_type, name: ident_without_kw_type }
-      const result = { name: dt }
+      const result = { name: [dt] }
       if (tail !== null) {
         result.schema = dt
-        result.name = tail[3]
+        result.name = [tail[3]]
       }
       return result
     }
