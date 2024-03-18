@@ -135,7 +135,7 @@ export interface AggrFunc {
   loc?: LocationRange;
 }
 
-export type FunctionName = { schema?: string, name: ValueExpr<string>[] }
+export type FunctionName = { schema?: { value: string, type: string } , name: ValueExpr<string>[] }
 export interface Function {
   type: "function";
   name: FunctionName;
