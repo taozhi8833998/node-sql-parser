@@ -39,10 +39,16 @@ export interface OrderBy {
   type: "ASC" | "DESC";
   expr: any;
 }
+
+export interface ValueExpr<T = string | number | boolean> {
+  type: "backticks_quote_string" | "string" | "regex_string" | "hex_string" | "full_hex_string" | "natural_string" | "bit_string" | "double_quote_string" | "single_quote_string" | "boolean" | "bool" | "null" | "star" | "param" | "origin" | "date" | "datetime" | "time" | "timestamp" | "var_string";
+  value: T;
+}
+
 export interface ColumnRef {
   type: "column_ref";
   table: string | null;
-  column: string;
+  column: string | { expr: ValueExpr };
 }
 export interface SetList {
   column: string;
@@ -63,9 +69,11 @@ export interface AggrFunc {
   name: string;
   args: ColumnRef | AggrFunc | Star | null;
 }
+
+export type FunctionName = { schema?: string, name: ValueExpr<string>[] }
 export interface Function {
   type: "function";
-  name: string;
+  name: FunctionName;
   args: ExprList;
   suffix?: any;
 }
@@ -81,17 +89,17 @@ type Value = { type: string; value: any };
 
 export type Expr =
   | {
-      type: "binary_expr";
-      operator: "AND" | "OR";
-      left: Expr;
-      right: Expr;
-    }
+    type: "binary_expr";
+    operator: "AND" | "OR";
+    left: Expr;
+    right: Expr;
+  }
   | {
-      type: "binary_expr";
-      operator: string;
-      left: ColumnRef | Param | Value;
-      right: ColumnRef | Param | Value;
-    };
+    type: "binary_expr";
+    operator: string;
+    left: ColumnRef | Param | Value;
+    right: ColumnRef | Param | Value;
+  };
 
 export type ExprList = {
   type: "expr_list";
