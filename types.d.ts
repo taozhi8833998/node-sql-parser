@@ -150,6 +150,12 @@ export interface Column {
   loc?: LocationRange;
 }
 
+export interface Interval {
+    type: "interval";
+    unit: string;
+    expr: ValueExpr & { loc?: LocationRange; }
+}
+
 export type Param = { type: "param"; value: string, loc?: LocationRange; };
 
 export type Value = { type: string; value: any, loc?: LocationRange; };
