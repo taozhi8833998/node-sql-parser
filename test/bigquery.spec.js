@@ -820,7 +820,7 @@ describe('BigQuery', () => {
       title: 'if multiple parentheses',
       sql: [
         'select if(((a)), b, null)',
-        'SELECT if(((a)), b, NULL)'
+        'SELECT if((a), b, NULL)'
       ]
     },
     {
