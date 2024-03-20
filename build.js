@@ -1,10 +1,13 @@
-const fs = require('fs')
+/*const fs = require('fs')
 const path = require('path')
-const peg = require('pegjs')
+const peg = require('peggy')
 
 const parserFolder = path.join(__dirname, 'pegjs')
 const PARSER_FILE = /(.*)\.pegjs$/
+*/
 
+// note: we don't actually need it anymore now that we're pre-building
+/*
 fs.readdirSync(parserFolder)
   .filter(file => PARSER_FILE.test(file))
   .forEach(file => {
@@ -19,3 +22,4 @@ fs.readdirSync(parserFolder)
     })
     fs.writeFileSync(path.join(__dirname, `build/${name}.js`), parser)
   })
+*/

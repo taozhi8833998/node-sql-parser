@@ -1,4 +1,4 @@
-import { parse } from '../pegjs/mysql.pegjs'
+import { parse } from './generated/mysql'
 
 export default {
   [PARSER_NAME] : parse,
