@@ -4354,7 +4354,8 @@ KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
 KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
 KW_INTERVAL         = "INTERVAL"i !ident_start { return 'INTERVAL'; }
 KW_UNIT_YEAR        = "YEAR"i !ident_start { return 'YEAR'; }
-KW_UNIT_MONTH       = "MONTH"i !ident_start { return 'MONTH'; }
+KW_UNIT_MONTH       = "MONTH"i / "MM"i / "MON"i / "MONS"i / "MONTHS"i !ident_start { return 'MONTH'; }
+KW_UNIT_WEEK        = "WEEK"i / "W"i / "WK"i / "WEEKOFYEAR"i / "WOY"i / "WY"i / "WEEKS"i !ident_start { return 'WEEK'; }
 KW_UNIT_DAY         = "DAY"i !ident_start { return 'DAY'; }
 KW_UNIT_HOUR        = "HOUR"i !ident_start { return 'HOUR'; }
 KW_UNIT_MINUTE      = "MINUTE"i !ident_start { return 'MINUTE'; }
@@ -4469,6 +4470,7 @@ char = .
 interval_unit
   = KW_UNIT_YEAR
   / KW_UNIT_MONTH
+  / KW_UNIT_WEEK
   / KW_UNIT_DAY
   / KW_UNIT_HOUR
   / KW_UNIT_MINUTE
