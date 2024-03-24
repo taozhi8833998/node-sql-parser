@@ -153,6 +153,19 @@ const sql = parser.sqlify(ast, opt);
 
 console.log(sql); // SELECT * FROM `t`
 ```
+OR you can pass a options object to the parser, and request an array of SQL statements to be returned instead of a string. This can be useful when your SQL might contain a semicolon causing a `split(';')` function to return invalid commands.
+
+```javascript
+const opt = {
+  asArray: true
+}
+const { Parser } = require('node-sql-parser')
+const parser = new Parser()
+// opt only affect sqlify() but it doesn't hurt to pass it to astify() as well
+const ast = parser.astify("SELECT * FROM t; SELECT x AS has_semis FROM y WHERE notes LIKE '%;%'", opt)
+const sql = parser.sqlify(ast, opt)
+console.log(JSON.stringify(sql)); // ["SELECT * FROM `t`","SELECT `x` AS `has_semis` FROM `y` WHERE `notes` LIKE '%;%'"]
+```
 
 ### Parse specified Database
 There two ways to parser the specified database.

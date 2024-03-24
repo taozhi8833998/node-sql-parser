@@ -1461,6 +1461,21 @@ describe('Postgres', () => {
   }
   neatlyNestTestedSQL(SQL_LIST)
 
+  it('transaction arrays', () => {
+    const sql = `SELECT search_path FROM y;
+        BEGIN; SET search_path TO ht_hyt; COMMIT;
+        SELECT search_path FROM y;`
+    const expected = [
+      'SELECT "search_path" FROM "y"',
+      'BEGIN',
+      'SET search_path TO ht_hyt',
+      'COMMIT',
+      'SELECT "search_path" FROM "y"'
+    ]
+    const result = getParsedSql(sql, {asArray: true, ...opt})
+    expect(result).deep.to.equal(expected)
+    })
+
   describe('tables to sql', () => {
     it('should parse object tables', () => {
       const ast = parser.astify(SQL_LIST[100].sql[0], opt)

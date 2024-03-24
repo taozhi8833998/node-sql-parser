@@ -10,8 +10,9 @@ class Parser {
   }
 
   sqlify(ast, opt = DEFAULT_OPT) {
+    const asArray = opt.asArray || false
     setParserOpt(opt)
-    return astToSQL(ast, opt)
+    return astToSQL(ast, asArray)
   }
 
   exprToSQL(expr, opt = DEFAULT_OPT) {

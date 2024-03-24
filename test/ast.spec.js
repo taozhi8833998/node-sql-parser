@@ -888,21 +888,45 @@ describe('AST', () => {
     });
 
     describe('multiple statements', () => {
+      describe('return string', () => {
         it('should parser simple multiple statements', () => {
-            const sql = 'SELECT * FROM a;SELECT id FROM b'
-            const expectSQL = 'SELECT * FROM `a` ; SELECT `id` FROM `b`'
-            expect(getParsedSql(sql)).to.equal(expectSQL);
+          const sql = 'SELECT * FROM a;SELECT id FROM b'
+          const expectSQL = 'SELECT * FROM `a` ; SELECT `id` FROM `b`'
+          expect(getParsedSql(sql)).to.equal(expectSQL);
         })
         it('should parser simple multiple statements with same type', () => {
-            const sql = 'SELECT * FROM a;SELECT id FROM b UNION SELECT id FROM c'
-            const expectSQL = 'SELECT * FROM `a` ; SELECT `id` FROM `b` UNION SELECT `id` FROM `c`'
-            expect(getParsedSql(sql)).to.equal(expectSQL);
+          const sql = 'SELECT * FROM a;SELECT id FROM b UNION SELECT id FROM c'
+          const expectSQL = 'SELECT * FROM `a` ; SELECT `id` FROM `b` UNION SELECT `id` FROM `c`'
+          expect(getParsedSql(sql)).to.equal(expectSQL);
         })
         it('should parser simple multiple statements with different types', () => {
-            const sql = 'SELECT * FROM a;UPDATE b SET id = 1'
-            const expectSQL = 'SELECT * FROM `a` ; UPDATE `b` SET `id` = 1'
-            expect(getParsedSql(sql)).to.equal(expectSQL);
+          const sql = 'SELECT * FROM a;UPDATE b SET id = 1'
+          const expectSQL = 'SELECT * FROM `a` ; UPDATE `b` SET `id` = 1'
+          expect(getParsedSql(sql)).to.equal(expectSQL);
         })
+      })
+      describe('return array', () => {
+        it('should parser simple single statement', () => {
+          const sql = 'SELECT * FROM a'
+          const expectSQL = ['SELECT * FROM `a`']
+          expect(getParsedSql(sql, {asArray: true})).deep.to.equal(expectSQL);
+        })
+        it('should parser simple multiple statements', () => {
+          const sql = 'SELECT * FROM a;SELECT id FROM b'
+          const expectSQL = ['SELECT * FROM `a`', 'SELECT `id` FROM `b`']
+          expect(getParsedSql(sql, {asArray: true})).deep.to.equal(expectSQL);
+        })
+        it('should parser simple multiple statements with same type', () => {
+          const sql = 'SELECT * FROM a;SELECT id FROM b UNION SELECT id FROM c'
+          const expectSQL = ['SELECT * FROM `a`', 'SELECT `id` FROM `b` UNION SELECT `id` FROM `c`']
+          expect(getParsedSql(sql, {asArray: true})).deep.to.equal(expectSQL);
+        })
+        it('should parser simple multiple statements with different types', () => {
+          const sql = 'SELECT * FROM a;UPDATE b SET id = 1'
+          const expectSQL = ['SELECT * FROM `a`', 'UPDATE `b` SET `id` = 1']
+          expect(getParsedSql(sql, {asArray: true})).deep.to.equal(expectSQL);
+        })
+      })
     })
 
     describe('delete statements', () => {
