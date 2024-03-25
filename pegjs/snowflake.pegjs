@@ -96,6 +96,10 @@
     'PERSIST_ONLY': true,
   };
 
+  function getLocationObject() {
+    return options.includeLocations ? {loc: location()} : {}
+  }
+
   function createUnaryExpr(op, e) {
     return {
       type: 'unary_expr',
@@ -109,7 +113,8 @@
       type: 'binary_expr',
       operator: op,
       left: left,
-      right: right
+      right: right,
+      ...getLocationObject()
     };
   }
 
@@ -455,7 +460,8 @@ create_type_stmt
           as: as && as[0] && as[0].toLowerCase(),
           resource: r.toLowerCase(),
           create_definitions: e,
-        }
+        },
+        ...getLocationObject(),
       }
     }
   / a:KW_CREATE __ k:'TYPE'i __ s:table_name {
@@ -495,7 +501,8 @@ create_domain_stmt
           as: as && as[0] && as[0].toLowerCase(),
           target: d,
           create_definitions: definitions,
-        }
+        },
+        ...getLocationObject(),
       }
     }
 create_table_stmt
@@ -542,7 +549,8 @@ create_table_stmt
           query_expr: qe && qe.ast,
           create_definitions: c,
           table_options: to
-        }
+        },
+        ...getLocationObject(),
       }
     }
   / a:KW_CREATE __
@@ -1080,7 +1088,8 @@ use_stmt
         columnList: columnListTableAlias(columnList),
         ast: {
           type: 'use',
-          db: d
+          db: d,
+          ...getLocationObject(),
         }
       };
     }
@@ -1149,7 +1158,8 @@ alter_aggregate_stmt
             orderby: as.orderby
           },
           expr: ac
-        }
+        },
+        ...getLocationObject(),
       };
   }
 alter_function_stmt
@@ -1985,6 +1995,7 @@ select_stmt
     // => { type: 'select'; }
     return {
       type: 'select',
+      ...getLocationObject(),
     }
   }
   / select_stmt_nake
@@ -2016,7 +2027,7 @@ cte_definition
   = name:(literal_string / ident_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:crud_stmt __ RPAREN {
     // => { name: { type: 'default'; value: string; }; stmt: crud_stmt; columns?: cte_column_definition; }
     if (typeof name === 'string') name = { type: 'default', value: name }
-      return { name, stmt: stmt.ast, columns };
+      return { name, stmt, columns, ...getLocationObject() };
     }
 
 cte_column_definition
@@ -2092,6 +2103,7 @@ select_stmt_nake
           orderby: o,
           limit: l,
           window: win,
+          ...getLocationObject()
       };
   }
 
@@ -2128,7 +2140,8 @@ column_clause
           table: null,
           column: '*'
         },
-        as: null
+        as: null,
+        ...getLocationObject()
       }
       if (tail && tail.length > 0) return createList(item, tail)
       return [item]
@@ -2168,7 +2181,7 @@ cast_data_type
 column_list_item
   = c:string_constants_escape {
     // => { expr: expr; as: null; }
-    return { expr: c, as: null }
+    return { expr: c, as: null, ...getLocationObject(), }
   }
   / e:expr_item __ s:KW_DOUBLE_COLON __ t:cast_data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; arrows?: ('->>' | '->')[]; property?: (literal_string | literal_numeric)[]; }
@@ -2181,6 +2194,7 @@ column_list_item
       tail: tail && tail[0] && { operator: tail[0][1], expr: tail[0][3] },
       arrows: a.map(item => item[0]),
       properties: a.map(item => item[2]),
+      ...getLocationObject(),
     }
   }
   / tbl:ident __ DOT pro:(ident __ DOT)? __ STAR {
@@ -2200,7 +2214,8 @@ column_list_item
           schema,
           column,
         },
-        as: null
+        as: null,
+        ...getLocationObject()
       }
     }
   / tbl:(ident __ DOT)? __ STAR {
@@ -2213,17 +2228,18 @@ column_list_item
           table: table,
           column: '*'
         },
-        as: null
+        as: null,
+        ...getLocationObject()
       };
     }
   / c:double_quoted_ident __ d:DOT? !{ if(d) return true } __  alias: alias_clause? {
       // => { type: 'expr'; expr: expr; as?: alias_clause; }
       columnList.add(`select::null::${c.value}`)
-      return { type: 'expr', expr: { type: 'column_ref', table: null, column: { expr: c } }, as: alias };
+      return { type: 'expr', expr: { type: 'column_ref', table: null, column: { expr: c } }, as: alias, ...getLocationObject() };
   }
   / e:expr_item  __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
-      return { type: 'expr', expr: e, as: alias };
+      return { type: 'expr', expr: e, as: alias, ...getLocationObject(), };
     }
 
 value_alias_clause
@@ -2370,7 +2386,8 @@ table_join
       expr: stmt,
       as: alias,
       join: op,
-      on: expr
+      on: expr,
+      ...getLocationObject(),
     };
   }
 
@@ -2386,7 +2403,8 @@ table_base
     // => { expr: value_clause; as?: alias_clause; }
     return {
       expr: { type: 'values', values: stmt },
-      as: alias
+      as: alias,
+      ...getLocationObject(),
     };
   }
   / l:('LATERAL'i)? __ LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:value_alias_clause? {
@@ -2396,7 +2414,8 @@ table_base
     return {
       prefix: l,
       expr: stmt,
-      as: alias
+      as: alias,
+      ...getLocationObject(),
     };
   }
   / l:('LATERAL'i)? __ LPAREN __ stmt:table_ref_list __ RPAREN __ alias:value_alias_clause? {
@@ -2405,7 +2424,8 @@ table_base
     return {
       prefix: l,
       expr: stmt,
-      as: alias
+      as: alias,
+      ...getLocationObject(),
     };
   }
   / l:('LATERAL'i)? __ e:func_call __ alias:alias_clause? {
@@ -2420,18 +2440,21 @@ table_base
       tablesample: {
         expr: f,
         repeatable: re && re[4],
-      }
+      },
+      ...getLocationObject(),
     }
   }
   / t:table_name __ alias:alias_clause? {
     // => table_name & { as?: alias_clause; }
       if (t.type === 'var') {
         t.as = alias;
+        Object.assign(t, {...getLocationObject()})
         return t;
       } else {
         return {
           ...t,
-          as: alias
+          as: alias,
+          ...getLocationObject(),
         };
       }
     }
@@ -2447,7 +2470,7 @@ join_op
 table_name
   = dt:ident schema:(__ DOT __ ident) tail:(__ DOT __ ident) {
       // => { db?: ident; schema?: ident, table: ident | '*'; }
-      const obj = { db: null, table: dt };
+      const obj = { db: null, table: dt, ...getLocationObject(), };
       if (tail !== null) {
         obj.db = dt;
         obj.schema = schema[3];
@@ -2460,12 +2483,13 @@ table_name
       tableList.add(`select::${dt}::(.*)`);
       return {
         db: dt,
-        table: '*'
+        table: '*',
+        ...getLocationObject(),
       }
     }
   / dt:ident tail:(__ DOT __ ident)? {
     // => IGNORE
-      const obj = { db: null, table: dt };
+      const obj = { db: null, table: dt, ...getLocationObject(), };
       if (tail !== null) {
         obj.db = dt;
         obj.table = tail[3];
@@ -2596,13 +2620,13 @@ window_frame_preceding
 window_frame_current_row
   = 'CURRENT'i __ 'ROW'i {
     // => { type: 'single_quote_string'; value: string }
-    return { type: 'single_quote_string', value: 'current row' }
+    return { type: 'single_quote_string', value: 'current row', ...getLocationObject() }
   }
 
 window_frame_value
   = s:'UNBOUNDED'i {
     // => literal_string
-    return { type: 'single_quote_string', value: s.toUpperCase() }
+    return { type: 'single_quote_string', value: s.toUpperCase(), ...getLocationObject() }
   }
   / literal_numeric
 
@@ -2639,7 +2663,8 @@ limit_clause
       if (tail) res.push(tail[2]);
       return {
         seperator: tail && tail[0] && tail[0].toLowerCase() || '',
-        value: res
+        value: res,
+        ...getLocationObject(),
       };
     }
 
@@ -2722,7 +2747,8 @@ delete_stmt
           db: tableInfo.db,
           table: tableInfo.table,
           as: tableInfo.as,
-          addition: true
+          addition: true,
+          ...getLocationObject(),
         }]
       }
       return {
@@ -2762,7 +2788,7 @@ returning_stmt
     // => { type: 'returning'; columns: column_clause | select_stmt; }
     return {
       type: k && k.toLowerCase() || 'returning',
-      columns: c === '*' && [{ type: 'expr', expr: { type: 'column_ref', table: null, column: '*' }, as: null }] || c
+      columns: c === '*' && [{ type: 'expr', expr: { type: 'column_ref', table: null, column: '*' }, as: null, ...getLocationObject() }] || c
     }
   }
 
@@ -3330,7 +3356,8 @@ column_ref
       return {
           type: 'column_ref',
           table: table,
-          column: '*'
+          column: '*',
+          ...getLocationObject()
       }
     }
   / tbl:(ident __ DOT)? __ col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
@@ -3342,7 +3369,8 @@ column_ref
         table: tableName,
         column: col,
         arrows: a.map(item => item[0]),
-        properties: a.map(item => item[2])
+        properties: a.map(item => item[2]),
+        ...getLocationObject()
       };
   }
   / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) {
@@ -3359,7 +3387,8 @@ column_ref
         type: 'column_ref',
         schema: schema,
         table: tbl[3],
-        column: col[3]
+        column: col[3],
+        ...getLocationObject()
       };
     }
   / tbl:ident __ DOT __ col:column {
@@ -3374,7 +3403,8 @@ column_ref
       return {
         type: 'column_ref',
         table: tbl,
-        column: col
+        column: col,
+        ...getLocationObject()
       };
     }
   / col:column {
@@ -3383,7 +3413,8 @@ column_ref
       return {
         type: 'column_ref',
         table: null,
-        column: col
+        column: col,
+        ...getLocationObject()
       };
     }
 
@@ -3886,6 +3917,7 @@ cast_double_colon
       target: t,
       arrows: a.map(item => item[0]),
       properties: a.map(item => item[2]),
+      ...getLocationObject(),
     }
   }
 cast_expr
@@ -4040,14 +4072,16 @@ literal_string
       // => { type: 'single_quote_string'; value: string; }
       return {
         type: 'single_quote_string',
-        value: `${ca[1].join('')}${fs[1].join('')}`
+        value: `${ca[1].join('')}${fs[1].join('')}`,
+        ...getLocationObject()
       };
     }
   / ca:("'" single_char* "'") {
       // => { type: 'single_quote_string'; value: string; }
       return {
         type: 'single_quote_string',
-        value: ca[1].join('')
+        value: ca[1].join(''),
+        ...getLocationObject()
       };
     }
   / ca:("\"" single_quote_char* "\"") !DOT {
@@ -4320,7 +4354,8 @@ KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
 KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
 KW_INTERVAL         = "INTERVAL"i !ident_start { return 'INTERVAL'; }
 KW_UNIT_YEAR        = "YEAR"i !ident_start { return 'YEAR'; }
-KW_UNIT_MONTH       = "MONTH"i !ident_start { return 'MONTH'; }
+KW_UNIT_MONTH       = "MONTH"i / "MM"i / "MON"i / "MONS"i / "MONTHS"i !ident_start { return 'MONTH'; }
+KW_UNIT_WEEK        = "WEEK"i / "W"i / "WK"i / "WEEKOFYEAR"i / "WOY"i / "WY"i / "WEEKS"i !ident_start { return 'WEEK'; }
 KW_UNIT_DAY         = "DAY"i !ident_start { return 'DAY'; }
 KW_UNIT_HOUR        = "HOUR"i !ident_start { return 'HOUR'; }
 KW_UNIT_MINUTE      = "MINUTE"i !ident_start { return 'MINUTE'; }
@@ -4435,6 +4470,7 @@ char = .
 interval_unit
   = KW_UNIT_YEAR
   / KW_UNIT_MONTH
+  / KW_UNIT_WEEK
   / KW_UNIT_DAY
   / KW_UNIT_HOUR
   / KW_UNIT_MINUTE

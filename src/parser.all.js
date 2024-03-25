@@ -11,6 +11,7 @@ import { parse as redshift } from '../pegjs/redshift.pegjs'
 import { parse as sqlite } from '../pegjs/sqlite.pegjs'
 import { parse as transactsql } from '../pegjs/transactsql.pegjs'
 import { parse as snowflake } from '../pegjs/snowflake.pegjs'
+import { parse as trino } from '../pegjs/trino.pegjs'
 
 export default {
   athena,
@@ -26,4 +27,5 @@ export default {
   snowflake,
   sqlite,
   transactsql,
+  trino,
 }

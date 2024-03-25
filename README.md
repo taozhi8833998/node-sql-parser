@@ -138,6 +138,90 @@ console.log(ast);
 }
 ```
 
+#### Get node location in the AST
+```javascript
+const { Parser } = require('node-sql-parser');
+const parser = new Parser();
+const ast = parser.astify('SELECT * FROM t', { parseOptions: { includeLocations: true } });
+
+console.log(ast);
+```
+
+- `ast` for `SELECT * FROM t` with the `loc` property indicating locations and ranges
+
+```json
+{
+  "with": null,
+  "type": "select",
+  "options": null,
+  "distinct": null,
+  "columns": [
+    {
+      "expr": {
+        "type": "column_ref",
+        "table": null,
+        "column": "*"
+      },
+      "as": null,
+      "loc": {
+        "start": {
+          "offset": 7,
+          "line": 1,
+          "column": 8
+        },
+        "end": {
+          "offset": 8,
+          "line": 1,
+          "column": 9
+        }
+      }
+    }
+  ],
+  "into": {
+    "position": null
+  },
+  "from": [
+    {
+      "db": null,
+      "table": "t",
+      "as": null,
+      "loc": {
+        "start": {
+          "offset": 14,
+          "line": 1,
+          "column": 15
+        },
+        "end": {
+          "offset": 15,
+          "line": 1,
+          "column": 16
+        }
+      }
+    }
+  ],
+  "where": null,
+  "groupby": null,
+  "having": null,
+  "orderby": null,
+  "limit": null,
+  "locking_read": null,
+  "window": null,
+  "loc": {
+    "start": {
+      "offset": 0,
+      "line": 1,
+      "column": 1
+    },
+    "end": {
+      "offset": 15,
+      "line": 1,
+      "column": 16
+    }
+  }
+}
+```
+
+
 ### Convert AST back to SQL
 
 ```javascript

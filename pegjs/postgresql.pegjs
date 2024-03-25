@@ -97,6 +97,10 @@
     'PERSIST_ONLY': true,
   };
 
+  function getLocationObject() {
+    return options.includeLocations ? {loc: location()} : {}
+  }
+
   function createUnaryExpr(op, e) {
     return {
       type: 'unary_expr',
@@ -110,7 +114,8 @@
       type: 'binary_expr',
       operator: op,
       left: left,
-      right: right
+      right: right,
+      ...getLocationObject(),
     };
   }
 
@@ -2910,7 +2915,7 @@ column_list_item
         schema = tbl
         tbl = mid
       }
-      columnList.add(`select::${tbl}::(.*)`)
+      columnList.add(`select::${tbl ? tbl.value : null}::(.*)`)
       const column = '*'
       return {
         expr: {
@@ -2925,7 +2930,7 @@ column_list_item
   / tbl:(ident_type __ DOT)? __ STAR {
       // => { expr: column_ref; as: null; }
       const table = tbl && tbl[0] || null
-      columnList.add(`select::${table.value}::(.*)`);
+      columnList.add(`select::${table ? table.value : null}::(.*)`);
       return {
         expr: {
           type: 'column_ref',
@@ -3309,7 +3314,7 @@ window_frame_value
   / literal_numeric
 
 partition_by_clause
-  = KW_PARTITION __ KW_BY __ bc:column_clause { /* => column_clause */ return bc; }
+  = KW_PARTITION __ KW_BY __ bc:column_ref_list { /* => { type: 'expr'; expr: column_ref_list }[] */ return bc.map(item => ({ type: 'expr', expr: item })); }
 
 order_by_clause
   = KW_ORDER __ KW_BY __ l:order_by_list { /* => order_by_list */ return l; }

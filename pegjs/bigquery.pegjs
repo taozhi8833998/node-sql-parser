@@ -120,6 +120,10 @@
     'STRUCT': true,
   }
 
+  function getLocationObject() {
+    return options.includeLocations ? {loc: location()} : {}
+  }
+
   function createUnaryExpr(op, e) {
     return {
       type: 'unary_expr',
@@ -133,7 +137,8 @@
       type: 'binary_expr',
       operator: op,
       left: left,
-      right: right
+      right: right,
+      ...getLocationObject(),
     };
   }
 
@@ -1621,6 +1626,7 @@ select_stmt_nake
           orderby: o,
           limit: l,
           window:win,
+          ...getLocationObject()
       };
   }
 
@@ -1638,7 +1644,7 @@ struct_value
 
 expr_alias
   = e:binary_column_expr __ alias:alias_clause? {
-      return { expr: e, as: alias };
+      return { expr: e, as: alias, ...getLocationObject() };
     }
 
 column_clause
@@ -1679,6 +1685,7 @@ column_list_item
         column: '*'
       },
       type: k.toLowerCase(),
+      ...getLocationObject(),
     }
   }
   / head: (KW_ALL / (STAR !ident_start) / STAR) {
@@ -1689,7 +1696,8 @@ column_list_item
           table: null,
           column: '*'
         },
-        as: null
+        as: null,
+        ...getLocationObject()
       }
       return item
   }
@@ -1705,7 +1713,8 @@ column_list_item
           table: tbl,
           column,
         },
-        as: null
+        as: null,
+        ...getLocationObject()
       }
     }
   / c:column_offset_expr __ s:(DOT __ column_without_kw)? __ as:alias_clause? {
@@ -1716,7 +1725,8 @@ column_list_item
           table: null,
           column: c
         },
-        as: as
+        as: as,
+        ...getLocationObject()
       }
   }
   / expr_alias
@@ -1829,14 +1839,16 @@ table_base
       }
       return {
         ...t,
-        as: alias
+        as: alias,
+        ...getLocationObject(),
       };
     }
   / LPAREN __ stmt:union_stmt __ RPAREN __ ts:tablesample? __ alias:alias_clause? {
       stmt.parentheses = true;
       return {
         expr: stmt,
-        as: alias
+        as: alias,
+        ...getLocationObject(),
       };
     }
 
@@ -1967,13 +1979,13 @@ window_frame_preceding
 window_frame_current_row
   = 'CURRENT'i __ 'ROW'i {
     // => { type: 'single_quote_string'; value: string }
-    return { type: 'single_quote_string', value: 'current row' }
+    return { type: 'single_quote_string', value: 'current row', ...getLocationObject() }
   }
 
 window_frame_value
   = s:'UNBOUNDED'i {
     // => literal_string
-    return { type: 'single_quote_string', value: s.toUpperCase() }
+    return { type: 'single_quote_string', value: s.toUpperCase(), ...getLocationObject() }
   }
   / literal_numeric
 
@@ -2006,7 +2018,8 @@ limit_clause
       if (tail) res.push(tail[2]);
       return {
         seperator: tail && tail[0] && tail[0].toLowerCase() || '',
-        value: res
+        value: res,
+        ...getLocationObject(),
       };
     }
 
@@ -2351,6 +2364,7 @@ column_ref
         type: 'column_ref',
         table: tbl,
         ...column,
+        ...getLocationObject(),
       };
     }
   / col:column {
@@ -2358,7 +2372,8 @@ column_ref
       return {
         type: 'column_ref',
         table: null,
-        column: col
+        column: col,
+        ...getLocationObject()
       };
     }
 
@@ -2478,6 +2493,7 @@ aggr_fun_smma
           expr: e
         },
         over: bc,
+        ...getLocationObject()
       };
     }
 
@@ -2521,12 +2537,13 @@ aggr_fun_count
         type: 'aggr_func',
         name: name,
         args: arg,
-        over: bc
+        over: bc,
+        ...getLocationObject()
       };
     }
 
 count_arg
-  = e:star_expr { return { expr: e }; }
+  = e:star_expr { return { expr: e, ...getLocationObject() }; }
   / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN tail:(__ (KW_AND / KW_OR) __ expr)* __ or:order_by_clause? {
     const len = tail.length
     let result = c
@@ -2538,9 +2555,10 @@ count_arg
       distinct: d,
       expr: result,
       orderby: or,
+      ...getLocationObject()
     };
   }
-  / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause?  { return { distinct: d, expr: c, orderby: or, }; }
+  / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause?  { return { distinct: d, expr: c, orderby: or, ...getLocationObject() }; }
 
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
@@ -2733,13 +2751,15 @@ literal_string
   = r:'R'i? __ ca:("'" single_char* "'") {
       return {
         type: r ? 'regex_string' : 'single_quote_string',
-        value: ca[1].join('')
+        value: ca[1].join(''),
+        ...getLocationObject()
       };
     }
   / r:'R'i? __ ca:("\"" single_quote_char* "\"") {
       return {
         type: r ? 'regex_string' : 'string',
-        value: ca[1].join('')
+        value: ca[1].join(''),
+        ...getLocationObject()
       };
     }
 

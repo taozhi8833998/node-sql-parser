@@ -123,11 +123,10 @@ describe('Postgres', () => {
             first_name,
             SUM(user_age) OVER (
                 PARTITION BY user_city
-                ORDER BY created_at ASC
                 ROWS UNbounded FOLLOWING
             ) AS age_window
           FROM roster`,
-          'SELECT first_name, SUM(user_age) OVER (PARTITION BY user_city ORDER BY created_at ASC ROWS UNBOUNDED FOLLOWING) AS "age_window" FROM "roster"'
+          'SELECT first_name, SUM(user_age) OVER (PARTITION BY user_city ROWS UNBOUNDED FOLLOWING) AS "age_window" FROM "roster"'
         ]
     },
     {

@@ -96,6 +96,10 @@
     'PERSIST_ONLY': true,
   };
 
+  function getLocationObject() {
+    return options.includeLocations ? {loc: location()} : {}
+  }
+
   function createUnaryExpr(op, e) {
     return {
       type: 'unary_expr',
