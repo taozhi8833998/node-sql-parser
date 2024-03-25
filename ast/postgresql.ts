@@ -299,10 +299,16 @@ export interface drop_index_stmt_node {
 
 export type drop_stmt = AstStatement<drop_stmt_node> | AstStatement<drop_index_stmt_node>;
 
+export type truncate_table_name = table_name & { suffix?: string };
+
+export type truncate_table_name_list = truncate_table_name[];
+
 export interface truncate_stmt_node {
         type: 'trucate';
         keyword: 'table';
+        prefix?: string;
         name: table_ref_list;
+        suffix: string[];
       }
 
 export type truncate_stmt = AstStatement<truncate_stmt_node>;
@@ -559,7 +565,7 @@ export type table_option = {
       keyword: 'auto_increment' | 'avg_row_length' | 'key_block_size' | 'max_rows' | 'min_rows' | 'stats_sample_pages';
       symbol: '=';
       value: number; // <== literal_numeric['value']
-      } | create_option_character_set | { keyword: 'connection' | 'comment'; symbol: '='; value: string; } | { keyword: 'compression'; symbol: '='; value: "'ZLIB'" | "'LZ4'" | "'NONE'" } | { keyword: 'engine'; symbol: '='; value: string; };
+      } | create_option_character_set | { keyword: 'connection' | 'comment'; symbol: '='; value: string; } | { keyword: 'compression'; symbol?: '='; value: "'ZLIB'" | "'LZ4'" | "'NONE'" } | { keyword: 'engine'; symbol?: '='; value: string; } | { keyword: 'partition by'; value: expr; };
 
 export type ALTER_ADD_FULLETXT_SPARITAL_INDEX = create_fulltext_spatial_index_definition & { action: 'add'; type: 'alter' };
 
@@ -770,6 +776,8 @@ export type column_clause = 'ALL' | '*' | column_list_item[] | column_list_item[
 
 export type array_index = { brackets: boolean, number: number };
 
+export type array_index_list = array_index[];
+
 export type expr_item = binary_expr & { array_index: array_index };
 
 export type cast_data_type = data_type & { quoted?: string };
@@ -881,7 +889,7 @@ export type window_frame_value = literal_string | literal_numeric;
 
 
 
-export type partition_by_clause = column_clause;
+export type partition_by_clause = { type: 'expr'; expr: column_ref_list }[];
 
 
 
@@ -1103,7 +1111,13 @@ export type column_ref = string_constants_escape | {
         property?: (literal_string | literal_numeric)[];
       };
 
+export type column_ref_quoted = IGNORE;
+
 export type column_list = column[];
+
+export type ident_without_kw_type = { type: 'default', value: string } | quoted_ident_type;
+
+export type ident_type = ident_name | quoted_ident_type;
 
 export type ident = string;
 
@@ -1111,23 +1125,23 @@ export type ident_list = ident[];
 
 export type alias_ident = string;
 
-export type quoted_ident = double_quoted_ident | single_quoted_ident | backticks_quoted_ident;
+export type quoted_ident_type = double_quoted_ident | single_quoted_ident | backticks_quoted_ident;
 
+export type quoted_ident = string;
 
+export type double_quoted_ident = { type: 'double_quote_string'; value: string; };
 
-export type double_quoted_ident = string;
+export type single_quoted_ident = { type: 'single_quote_string'; value: string; };
 
-
-
-export type single_quoted_ident = string;
-
-
-
-export type backticks_quoted_ident = string;
+export type backticks_quoted_ident = { type: 'backticks_quote_string'; value: string; };
 
 export type ident_without_kw = ident_name | quoted_ident;
 
 export type column_without_kw = column_name | quoted_ident;
+
+export type column_without_kw_type = { type: 'default', value: string } | quoted_ident_type;
+
+export type column_type = { type: 'default', value: string } | quoted_ident_type;
 
 
 
@@ -1199,11 +1213,11 @@ export type trim_position = "BOTH" | "LEADING" | "TRAILING";
 
 export type trim_rem = expr_list;
 
-export type trim_func_clause = { type: 'function'; name: string; args: expr_list; };
+export type trim_func_clause = { type: 'function'; name: proc_func_name; args: expr_list; };
 
-export type tablefunc_clause = { type: 'tablefunc'; name: crosstab; args: expr_list; as: func_call };
+export type tablefunc_clause = { type: 'tablefunc'; name: proc_func_name; args: expr_list; as: func_call };
 
-export type func_call = trim_func_clause | tablefunc_clause | { type: 'function'; name: string; args: expr_list; suffix: literal_string; } | { type: 'function'; name: string; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: string; over?: on_update_current_timestamp; } | { type: 'function'; name: string; args: expr_list; };
+export type func_call = trim_func_clause | tablefunc_clause | { type: 'function'; name: proc_func_name; args: expr_list; suffix: literal_string; } | { type: 'function'; name: proc_func_name; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: proc_func_name; over?: on_update_current_timestamp; } | { type: 'function'; name: proc_func_name; args: expr_list; };
 
 export type extract_filed = 'string';
 
@@ -1262,7 +1276,9 @@ export type literal_not_null = { type: 'not null'; value: 'not null' };
 
 export type literal_bool = { type: 'bool', value: true } | { type: 'bool', value: false };
 
-export type literal_string = { type: 'single_quote_string'; value: string; } | { type: 'string'; value: string; };
+export type literal_string = { type: 'single_quote_string'; value: string; } | literal_double_quoted_string;
+
+export type literal_double_quoted_string = { type: 'string'; value: string; };
 
 export type literal_datetime = { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string };
 
@@ -1730,7 +1746,7 @@ export type proc_join = { type: 'join'; ltable: var_decl; rtable: var_decl; op: 
 
 export type proc_primary = literal | var_decl | proc_func_call | param | proc_additive_expr & { parentheses: true; } | { type: 'var'; prefix: null; name: number; members: []; quoted: null } | column_ref;
 
-export type proc_func_name = string;
+export type proc_func_name = { schema?: ident_without_kw_type, name: ident_without_kw_type };
 
 export type proc_func_call = { type: 'function'; name: string; args: null | { type: expr_list; value: proc_primary_list; }};
 
@@ -1832,3 +1848,5 @@ export type uuid_type = data_type;
 
 
 export type record_type = data_type;
+
+export type custom_types = data_type;

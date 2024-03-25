@@ -45,6 +45,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{secrets.PUBLISH_NPM_TOKEN}}
       - run: cd output/prod && npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.PUBLISH_NPM_TOKEN}}
 
   publish-gpr:
     needs: build
@@ -75,3 +77,5 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{secrets.PUBLISH_GITHUB_TOKEN}}
       - run: cd output/prod && npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.PUBLISH_GITHUB_TOKEN}}
