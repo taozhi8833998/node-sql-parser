@@ -133,7 +133,14 @@ describe('snowflake', () => {
     WHERE v NOT REGEXP 'San\\w+?o'`,
         'SELECT "v" FROM "strings" WHERE "v" REGEXP \'San* [fF].*\' UNION ALL SELECT "v" FROM "strings" WHERE "v" NOT REGEXP \'San\\w+?o\''
       ]
-    }
+    },
+    {
+      title: 'create table as',
+      sql: [
+        'CREATE TABLE EMP_SEL_COL as SELECT FNAME,DEPARTMENT,SALARY FROM EMPLOYEE.PUBLIC.EMP',
+        'CREATE TABLE "EMP_SEL_COL" AS SELECT "FNAME", "DEPARTMENT", "SALARY" FROM "EMPLOYEE"."PUBLIC"."EMP"'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo

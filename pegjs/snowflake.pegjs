@@ -511,7 +511,7 @@ create_table_stmt
     KW_TABLE __
     ife:if_not_exists_stmt? __
     t:table_ref_list __
-    c:create_table_definition __
+    c:create_table_definition? __
     to:table_options? __
     ir: (KW_IGNORE / KW_REPLACE)? __
     as: KW_AS? __
