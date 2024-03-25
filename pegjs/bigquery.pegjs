@@ -2075,15 +2075,24 @@ array_expr
       brackets: true,
     }
   }
-  / s:(array_type / KW_ARRAY)? __ l:(LBRAKE / LPAREN) __ c:(parentheses_list_expr / expr) __ r:(RBRAKE / RPAREN) {
-    if (`${l}${r}` !== '[]' && `${l}${r}` !== '()') throw new Error('parentheses or brackets is not in pair')
+   / s:(array_type / KW_ARRAY)? __ l:(LBRAKE) __ c:(parentheses_list_expr / expr) __ r:(RBRAKE) {
     return {
       definition: s,
       expr_list: c,
       type: 'array',
       keyword: s && 'array',
-      brackets: l === '[' ? true : false,
-      parentheses: l === '(' ? true: false
+      brackets: true,
+      parentheses: false
+    }
+  }
+  / s:(array_type / KW_ARRAY) __ l:(LPAREN) __ c:(parentheses_list_expr / expr) __ r:(RPAREN) {
+    return {
+      definition: s,
+      expr_list: c,
+      type: 'array',
+      keyword: s && 'array',
+      brackets: false,
+      parentheses: true
     }
   }
 
