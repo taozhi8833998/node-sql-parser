@@ -42,18 +42,14 @@ jobs:
         run: npm config set strict-ssl true
 
       - run: npm run build
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.PUBLISH_NPM_TOKEN}}
+
       - run: cd output/prod && npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.PUBLISH_NPM_TOKEN}}
+          NODE_AUTH_TOKEN: ${{ secrets.PUBLISH_NPM_TOKEN }}
 
   publish-gpr:
     needs: build
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -72,10 +68,11 @@ jobs:
 
       - name: Update package.json name
         run: sed -i '2,2s/node-sql-parser/@taozhi8833998\/node-sql-parser/g' package.json
+
       - run: echo registry=https://npm.pkg.github.com/taozhi8833998 >> .npmrc
+
       - run: npm run build
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.PUBLISH_GITHUB_TOKEN}}
+
       - run: cd output/prod && npm publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.PUBLISH_GITHUB_TOKEN}}
+          NODE_AUTH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}
