@@ -76,9 +76,8 @@ function selectToSQL(stmt) {
     where,
   } = stmt
   const clauses = [withToSQL(withInfo), 'SELECT', toUpper(asStructVal)]
-  clauses.push(topToSQL(top))
   if (Array.isArray(options)) clauses.push(options.join(' '))
-  clauses.push(distinctToSQL(distinct), columnsToSQL(columns, from))
+  clauses.push(distinctToSQL(distinct), topToSQL(top), columnsToSQL(columns, from))
   const { position } = into
   let intoSQL = ''
   if (position) intoSQL = commonOptionConnector('INTO', selectIntoToSQL, into)
