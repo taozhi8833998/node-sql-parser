@@ -12,8 +12,10 @@ describe('transactsql', () => {
   }
 
   it('should support select top n', () => {
-    const sql = 'select top 3 * from tableA'
+    let sql = 'select top 3 * from tableA'
     expect(getParsedSql(sql)).to.equal('SELECT TOP 3 * FROM [tableA]')
+    sql = `SELECT DISTINCT TOP 2 FirstName, LastName FROM Students WHERE GraduationYear = 2003 ORDER BY GradePointAverage DESC;`
+    expect(getParsedSql(sql)).to.equal('SELECT DISTINCT TOP 2 [FirstName], [LastName] FROM [Students] WHERE [GraduationYear] = 2003 ORDER BY [GradePointAverage] DESC')
   })
 
   it('should support select top n percent', () => {
