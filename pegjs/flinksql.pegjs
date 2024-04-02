@@ -2342,36 +2342,11 @@ case_else = KW_ELSE __ result:expr {
  */
 
 _expr
-  = logic_operator_expr // support concatenation operator || and &&
-  / or_expr
+  = or_expr
   / unary_expr
 
 expr
   = _expr / union_stmt
-
-logic_operator_expr
-  = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ __ rh:comparison_op_right?  {
-    /*
-    export type BINARY_OPERATORS = LOGIC_OPERATOR | 'OR' | 'AND' | multiplicative_operator | additive_operator
-      | arithmetic_comparison_operator
-      | 'IN' | 'NOT IN'
-      | 'BETWEEN' | 'NOT BETWEEN'
-      | 'IS' | 'IS NOT'
-      | 'LIKE'
-      | '@>' | '<@' | OPERATOR_CONCATENATION | DOUBLE_WELL_ARROW | WELL_ARROW | '?' | '?|' | '?&' | '#-'
-    export interface binary_expr {
-      type: 'binary_expr',
-      operator: BINARY_OPERATORS,
-      left: expr,
-      right: expr
-    }
-    => binary_expr
-    */
-    const logicExpr = createBinaryExprChain(head, tail)
-    if (rh === null) return logicExpr
-    else if (rh.type === 'arithmetic') return createBinaryExprChain(logicExpr, rh.tail)
-    else return createBinaryExpr(rh.op, logicExpr, rh.right)
-  }
 
 unary_expr
   = op: additive_operator tail: (__ primary)+ {
@@ -2603,7 +2578,7 @@ additive_operator
 
 multiplicative_expr
   = head:primary
-    tail:(__ multiplicative_operator  __ primary)* {
+    tail:(__  (multiplicative_operator / LOGIC_OPERATOR)  __ primary)* {
       // => binary_expr
       return createBinaryExprChain(head, tail)
     }
