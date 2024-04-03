@@ -2814,20 +2814,9 @@ case_else = KW_ELSE __ result:expr {
  * ---------------------------------------------------------------------------------------------------
  */
 
-_expr
-  = logic_operator_expr // support concatenation operator || and &&
-  / or_expr
 
 expr
-  = _expr / set_op_stmt
-
-logic_operator_expr
-  = head:primary tail:(__ LOGIC_OPERATOR __ primary)+ __ rh:comparison_op_right? {
-    const logicExpr = createBinaryExprChain(head, tail)
-    if (rh === null) return logicExpr
-    else if (rh.type === 'arithmetic') return createBinaryExprChain(logicExpr, rh.tail)
-    else return createBinaryExpr(rh.op, logicExpr, rh.right)
-  }
+  = or_expr / set_op_stmt
 
 binary_column_expr
   = head:expr tail:(__ (KW_AND / KW_OR / LOGIC_OPERATOR) __ expr)* {
@@ -3004,7 +2993,7 @@ additive_operator
 
 multiplicative_expr
   = head:unary_expr_or_primary
-    tail:(__ multiplicative_operator  __ unary_expr_or_primary)* {
+    tail:(__  (multiplicative_operator / LOGIC_OPERATOR)  __ unary_expr_or_primary)* {
       return createBinaryExprChain(head, tail)
     }
 
@@ -3026,13 +3015,13 @@ unary_operator
   = '!' / '-' / '+' / '~'
 
 primary
-  = cast_expr
-  / literal
+  = aggr_func
   / fulltext_search
-  / aggr_func
   / func_call
+  / cast_expr
   / case_expr
   / interval_expr
+  / literal
   / column_ref
   / param
   / LPAREN __ list:or_and_where_expr __ RPAREN {

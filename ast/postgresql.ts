@@ -997,7 +997,7 @@ export type case_when_then = { type: 'when'; cond: binary_expr; result: expr; };
 
 export type case_else = { type: 'else'; condition?: never; result: expr; };
 
-export type _expr = logic_operator_expr | or_expr | unary_expr;
+export type _expr = or_expr | unary_expr;
 
 export type expr = _expr | union_stmt;
 
@@ -1014,8 +1014,6 @@ export type BINARY_OPERATORS = LOGIC_OPERATOR | 'OR' | 'AND' | multiplicative_op
       left: expr,
       right: expr
     }
-
-export type logic_operator_expr = binary_expr;
 
 export type UNARY_OPERATORS = '+' | '-' | 'EXISTS' | 'NOT EXISTS'  | 'NULL'
 
