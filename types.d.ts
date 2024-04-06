@@ -42,15 +42,15 @@ export interface BaseFrom {
   loc?: LocationRange;
 }
 export interface Join extends BaseFrom {
-	join: "INNER JOIN" | "LEFT JOIN" | "RIGHT JOIN";
-	using?: string[];
-	on?: Expr;
+  join: "INNER JOIN" | "LEFT JOIN" | "RIGHT JOIN";
+  using?: string[];
+  on?: Expr;
 }
 export interface TableExpr {
-	expr: {
-		ast: Select;
-	},
-	as?: string | null;
+  expr: {
+    ast: Select;
+  };
+  as?: string | null;
 }
 export interface Dual {
   type: "dual";
@@ -74,7 +74,27 @@ export interface OrderBy {
 }
 
 export interface ValueExpr<T = string | number | boolean> {
-  type: "backticks_quote_string" | "string" | "regex_string" | "hex_string" | "full_hex_string" | "natural_string" | "bit_string" | "double_quote_string" | "single_quote_string" | "boolean" | "bool" | "null" | "star" | "param" | "origin" | "date" | "datetime" | "time" | "timestamp" | "var_string";
+  type:
+    | "backticks_quote_string"
+    | "string"
+    | "regex_string"
+    | "hex_string"
+    | "full_hex_string"
+    | "natural_string"
+    | "bit_string"
+    | "double_quote_string"
+    | "single_quote_string"
+    | "boolean"
+    | "bool"
+    | "null"
+    | "star"
+    | "param"
+    | "origin"
+    | "date"
+    | "datetime"
+    | "time"
+    | "timestamp"
+    | "var_string";
   value: T;
 }
 
@@ -104,14 +124,17 @@ export interface Star {
 export interface Case {
   type: "case";
   expr: null;
-  args: Array<{
-    cond: Expr;
-    result: ExpressionValue;
-    type: "when";
-  } | {
-    result: ExpressionValue;
-    type: "else";
-  }>;
+  args: Array<
+    | {
+        cond: Expr;
+        result: ExpressionValue;
+        type: "when";
+      }
+    | {
+        result: ExpressionValue;
+        type: "else";
+      }
+  >;
 }
 export interface Cast {
   type: "cast";
@@ -121,7 +144,7 @@ export interface Cast {
   target: {
     dataType: string;
     suffix: unknown[];
-  }
+  };
 }
 export interface AggrFunc {
   type: "aggr_func";
@@ -135,7 +158,10 @@ export interface AggrFunc {
   loc?: LocationRange;
 }
 
-export type FunctionName = { schema?: { value: string, type: string } , name: ValueExpr<string>[] }
+export type FunctionName = {
+  schema?: { value: string; type: string };
+  name: ValueExpr<string>[];
+};
 export interface Function {
   type: "function";
   name: FunctionName;
@@ -151,31 +177,39 @@ export interface Column {
 }
 
 export interface Interval {
-    type: "interval";
-    unit: string;
-    expr: ValueExpr & { loc?: LocationRange; }
+  type: "interval";
+  unit: string;
+  expr: ValueExpr & { loc?: LocationRange };
 }
 
-export type Param = { type: "param"; value: string, loc?: LocationRange; };
+export type Param = { type: "param"; value: string; loc?: LocationRange };
 
-export type Value = { type: string; value: any, loc?: LocationRange; };
+export type Value = { type: string; value: any; loc?: LocationRange };
 
-export type ExpressionValue = ColumnRef | Param | Function | Case | AggrFunc | Value | Cast | Interval;
+export type ExpressionValue =
+  | ColumnRef
+  | Param
+  | Function
+  | Case
+  | AggrFunc
+  | Value
+  | Cast
+  | Interval;
 export type Expr =
   | {
-    type: "binary_expr";
-    operator: "AND" | "OR";
-    left: Expr;
-    right: Expr;
-    loc?: LocationRange;
-  }
+      type: "binary_expr";
+      operator: "AND" | "OR";
+      left: Expr;
+      right: Expr;
+      loc?: LocationRange;
+    }
   | {
-    type: "binary_expr";
-    operator: string;
-    left: ExpressionValue;
-    right: ExpressionValue | ExprList;
-    loc?: LocationRange;
-  };
+      type: "binary_expr";
+      operator: string;
+      left: ExpressionValue;
+      right: ExpressionValue | ExprList;
+      loc?: LocationRange;
+    };
 
 export type ExprList = {
   type: "expr_list";
@@ -237,6 +271,156 @@ export interface Use {
   loc?: LocationRange;
 }
 
+type KW_UNSIGNED = "UNSIGNED";
+type KW_ZEROFILL = "ZEROFILL";
+
+type Timezone = ["WITHOUT" | "WITH", "TIME", "ZONE"];
+
+type KeywordComment = {
+  type: "comment";
+  keyword: "comment";
+  symbol?: "=";
+  value: string;
+};
+
+type CollateExpr = {
+  type: "collate";
+  symbol?: "=";
+  value: string;
+};
+
+type DataType = {
+  dataType: string;
+  length?: number;
+  parentheses?: true;
+  suffix?: Timezone | (KW_UNSIGNED | KW_ZEROFILL)[];
+  array?: "one" | "two";
+};
+
+type LiteralNotNull = {
+  type: "not null";
+  value: "not null";
+};
+
+type LiteralNull = { type: "null"; value: null };
+
+type LiteralNumeric = number | { type: "bigint"; value: string };
+
+type ColumnConstraint = {
+  default_val: {
+    type: "default";
+    value: any;
+  };
+  nullable: LiteralNotNull | LiteralNull;
+};
+
+type ColumnDefinitionOptList = {
+  nullable?: ColumnConstraint["nullable"];
+  default_val?: ColumnConstraint["default_val"];
+  auto_increment?: "auto_increment";
+  unique?: "unique" | "unique key";
+  primary?: "key" | "primary key";
+  comment?: KeywordComment;
+  collate?: { collate: CollateExpr };
+  column_format?: { column_format: any };
+  storage?: { storage: any };
+  reference_definition?: { reference_definition: any };
+  character_set?: { type: "CHARACTER SET"; value: string; symbol?: "=" };
+};
+
+type CreateColumnDefinition = {
+  column: ColumnRef;
+  definition: DataType;
+  resource: "column";
+} & ColumnDefinitionOptList;
+
+type IndexType = {
+  keyword: "using";
+  type: "btree" | "hash" | "gist" | "gin";
+};
+
+type IndexOption = {
+  type: "key_block_size";
+  symbol?: "=";
+  expr: LiteralNumeric;
+};
+
+type CreateIndexDefinition = {
+  index?: string;
+  definition: ColumnRef[];
+  keyword: "index" | "key";
+  index_type?: IndexType;
+  resource: "index";
+  index_options?: IndexOption[];
+};
+
+type CreateFulltextSpatialIndexDefinition = {
+  index?: string;
+  definition: ColumnRef[];
+  keyword?:
+    | "fulltext"
+    | "spatial"
+    | "fulltext key"
+    | "spatial key"
+    | "fulltext index"
+    | "spatial index";
+  index_options?: IndexOption[];
+  resource: "index";
+};
+
+type ConstraintName = { keyword: "constraint"; constraint: string };
+
+type CreateConstraintPrimary = {
+  constraint?: ConstraintName["constraint"];
+  definition: ColumnRef[];
+  constraint_type: "primary key";
+  keyword?: ConstraintName["keyword"];
+  index_type?: IndexType;
+  resource: "constraint";
+  index_options?: IndexOption[];
+};
+
+type CreateConstraintUnique = {
+  constraint?: ConstraintName["constraint"];
+  definition: ColumnRef[];
+  constraint_type: "unique key" | "unique" | "unique index";
+  keyword?: ConstraintName["keyword"];
+  index_type?: IndexType;
+  index?: string;
+  resource: "constraint";
+  index_options?: IndexOption[];
+};
+
+type CreateConstraintForeign = {
+  constraint?: ConstraintName["constraint"];
+  definition: ColumnRef[];
+  constraint_type: "FOREIGN KEY";
+  keyword?: ConstraintName["keyword"];
+  index?: string;
+  resource: "constraint";
+  reference_definition?: any;
+};
+
+type CreateConstraintCheck = {
+  constraint?: ConstraintName["constraint"];
+  definition: any[];
+  constraint_type: "check";
+  keyword?: ConstraintName["keyword"];
+  resource: "constraint";
+};
+
+type CreateConstraintDefinition =
+  | CreateConstraintPrimary
+  | CreateConstraintUnique
+  | CreateConstraintForeign
+  | CreateConstraintCheck;
+
+type CreateDefinition =
+  | CreateColumnDefinition
+  | CreateIndexDefinition
+  | CreateFulltextSpatialIndexDefinition
+  | CreateConstraintDefinition;
+
 export interface Create {
   type: "create";
   keyword: "table" | "index" | "database";
@@ -251,7 +435,7 @@ export interface Create {
   ignore_replace?: "ignore" | "replace" | null;
   as?: string | null;
   query_expr?: any | null;
-  create_definitions?: any[] | null;
+  create_definitions?: CreateDefinition[] | null;
   table_options?: any[] | null;
   index_using?: {
     keyword: "using";
