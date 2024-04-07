@@ -22,21 +22,33 @@ function columnOffsetToSQL(column, isDual) {
   const result = [exprToSQL(expr), offsetExpr, suffix].filter(hasVal).join('')
   return result
 }
+
+function arrayIndexToSQL(arrayIndexList) {
+  if (!arrayIndexList || arrayIndexList.length === 0) return ''
+  const result = []
+  for (const arrayIndex of arrayIndexList) {
+    let arrayIndexStr = arrayIndex.brackets ? `[${literalToSQL(arrayIndex.index)}]` : `${arrayIndex.notation}${literalToSQL(arrayIndex.index)}`
+    if (arrayIndex.property) arrayIndexStr = `${arrayIndexStr}.${literalToSQL(arrayIndex.property)}`
+    result.push(arrayIndexStr)
+  }
+  return result.join('')
+}
 function columnRefToSQL(expr) {
   const {
-    array_index, arrows = [], as, collate, column, db, isDual, schema, table, parentheses, properties,
+    array_index, arrows = [], as, collate, column, db, isDual, notations = [], schema, table, parentheses, properties,
     suffix, order_by, subFields = [],
   } = expr
   let str = column === '*' ? '*' : columnOffsetToSQL(column, isDual)
-  const prefix = [db, schema, table].filter(hasVal).map(val => `${typeof val === 'string' ? identifierToSql(val) : exprToSQL(val)}`).join('.')
-  if (prefix) str = `${prefix}.${str}`
-  if (array_index) {
-    for (const arrayIndex of array_index) {
-      str = `${str}[${literalToSQL(arrayIndex.index)}]`
-      if (arrayIndex.property) str = `${str}.${literalToSQL(arrayIndex.property)}`
+  const prefix = [db, schema, table].filter(hasVal).map(val => `${typeof val === 'string' ? identifierToSql(val) : exprToSQL(val)}`)
+  let prefixStr = prefix[0]
+  if (prefixStr) {
+    let i = 1
+    for (; i < prefix.length; ++i) {
+      prefixStr = `${prefixStr}${notations[i] || '.'}${prefix[i]}`
     }
+    str = `${prefixStr}${notations[i] || '.'}${str}`
   }
-  str = [str, ...subFields].join('.')
+  str = [`${str}${arrayIndexToSQL(array_index)}`, ...subFields].join('.')
   const result = [
     str,
     commonOptionConnector('AS', exprToSQL, as),
@@ -164,9 +176,7 @@ function columnToSQL(column, isDual) {
   }
   if (expr.parentheses && Reflect.has(expr, 'array_index')) str = `(${str})`
   if (expr.array_index && expr.type !== 'column_ref') {
-    for (const arrayIndex of expr.array_index) {
-      str = `${str}[${literalToSQL(arrayIndex.index)}]`
-    }
+    str = `${str}${arrayIndexToSQL(expr.array_index)}`
   }
   return [str, asToSQL(column.as)].filter(hasVal).join(' ')
 }
