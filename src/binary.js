@@ -1,5 +1,5 @@
 import { exprToSQL } from './expr'
-import { hasVal, toUpper } from './util'
+import { commonTypeValue, hasVal, toUpper } from './util'
 
 function binaryToSQL(expr) {
   let operator = expr.operator || expr.op
@@ -25,7 +25,18 @@ function binaryToSQL(expr) {
   }
   const escape = expr.right.escape || {}
   const str = [exprToSQL(expr.left), operator, rstr, toUpper(escape.type), exprToSQL(escape.value)].filter(hasVal).join(' ')
-  return expr.parentheses ? `(${str})` : str
+  const result = [expr.parentheses ? `(${str})` : str]
+  const { suffix } = expr
+  if (!suffix) return result.join(' ')
+  for (const suffixItem of suffix) {
+    const { type } = suffixItem
+    switch (type) {
+      case 'collate':
+        result.push(commonTypeValue(suffixItem).join(' '))
+        break
+    }
+  }
+  return result.filter(hasVal).join(' ')
 }
 
 export {

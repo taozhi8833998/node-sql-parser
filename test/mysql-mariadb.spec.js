@@ -949,7 +949,14 @@ describe('mysql', () => {
           'show index from user',
           'SHOW INDEX FROM `user`'
         ]
-      }
+      },
+      {
+        title: 'collate in where clause include parentheses',
+        sql: [
+          "SELECT * FROM product WHERE (id = '1' OR id = '2') COLLATE utf8mb4_general_ci;",
+          "SELECT * FROM `product` WHERE (`id` = '1' OR `id` = '2') COLLATE UTF8MB4_GENERAL_CI"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

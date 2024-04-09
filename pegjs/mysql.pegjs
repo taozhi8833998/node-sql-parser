@@ -2450,7 +2450,10 @@ on_clause
   = KW_ON __ e:or_and_expr { return e; }
 
 where_clause
-  = KW_WHERE __ e:or_and_where_expr { return e; }
+  = KW_WHERE __ e:or_and_where_expr __ ca:collate_expr? {
+    if (ca) e.suffix = [ca]
+    return e;
+  }
 
 group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list { return e.value; }
@@ -3025,9 +3028,9 @@ primary
   / column_ref
   / param
   / LPAREN __ list:or_and_where_expr __ RPAREN {
-        list.parentheses = true;
-        return list;
-    }
+    list.parentheses = true
+    return list
+  }
   / var_decl
   / __ prepared_symbol:'?' {
     return {
