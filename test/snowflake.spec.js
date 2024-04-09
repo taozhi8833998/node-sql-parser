@@ -141,6 +141,20 @@ describe('snowflake', () => {
         'CREATE TABLE "EMP_SEL_COL" AS SELECT "FNAME", "DEPARTMENT", "SALARY" FROM "EMPLOYEE"."PUBLIC"."EMP"'
       ]
     },
+    {
+      title: 'query statement uses a colon in the column name',
+      sql: [
+        'SELECT src:salesperson:name FROM car_sales ORDER BY 1;',
+        'SELECT "src":"salesperson"."name" FROM "car_sales" ORDER BY 1 ASC',
+      ]
+    },
+    {
+      title: 'colon and array indexgd',
+      sql: [
+        'SELECT src:customer[0].name, src:vehicle[0] FROM car_sales ORDER BY 1;',
+        'SELECT "src"."customer"[0].name, "src"."vehicle"[0] FROM "car_sales" ORDER BY 1 ASC',
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
