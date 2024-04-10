@@ -62,6 +62,7 @@
     'ORDER': true,
     'OUTER': true,
 
+    'QUALIFY': true,
     'RECURSIVE': true,
     'RENAME': true,
     // 'REPLACE': true,
@@ -2063,6 +2064,7 @@ select_stmt_nake
     w:where_clause?     __
     g:group_by_clause?  __
     h:having_clause?    __
+    q:qualify_clause? __
     o:order_by_clause?  __
     l:limit_clause? __
     win:window_clause? __
@@ -2100,6 +2102,7 @@ select_stmt_nake
           where: w,
           groupby: g,
           having: h,
+          qualify: q,
           orderby: o,
           limit: l,
           window: win,
@@ -2539,6 +2542,9 @@ column_ref_list
 
 having_clause
   = KW_HAVING __ e:or_and_where_expr { /* => expr */ return e; }
+
+qualify_clause
+  = KW_QUALIFY __ e:or_and_where_expr { /* => or_and_where_expr */ return e; }
 
 window_clause
   = KW_WINDOW __ l:named_window_expr_list {
@@ -3802,6 +3808,21 @@ flattern_args
     }
   }
 
+json_visit
+  = KW_SINGLE_COLON __ k:ident_without_kw_type {
+    return {
+      type: 'json_visitor',
+      symbol: ':',
+      expr: k
+    }
+  }
+json_visit_list
+  = head:json_visit tail:(__ json_visit)* {
+    return {
+      type: 'expr_list',
+      value: createList(head, tail, 1)
+    }
+  }
 func_call
   = trim_func_clause
   / name:'now'i __ LPAREN __ l:expr_list? __ RPAREN __ 'at'i __ KW_TIME __ 'zone'i __ z:literal_string {
@@ -3839,6 +3860,16 @@ func_call
         over: up
     }
   }
+  / name:'parse_json'i __ LPAREN __ l:or_and_where_expr? __ RPAREN __ j:json_visit_list? {
+      // => { type: 'function'; name: string; args: expr_list; }
+      if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
+      return {
+        type: 'function',
+        name: { name: [{ type: 'default', value: name }] },
+        args: l ? l: { type: 'expr_list', value: [] },
+        suffix: j
+      };
+    }
   / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
       // => { type: 'function'; name: string; args: expr_list; }
       if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
@@ -4247,6 +4278,7 @@ KW_GROUP    = "GROUP"i      !ident_start
 KW_BY       = "BY"i         !ident_start
 KW_ORDER    = "ORDER"i      !ident_start
 KW_HAVING   = "HAVING"i     !ident_start
+KW_QUALIFY  = "QUALIFY"i     !ident_start
 KW_WINDOW   = "WINDOW"i     !ident_start
 
 KW_LIMIT    = "LIMIT"i      !ident_start
@@ -4297,6 +4329,7 @@ KW_CHARACTER = "CHARACTER"i     !ident_start { return 'CHARACTER'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
 KW_NUMBER  = "NUMBER"i  !ident_start { return 'NUMBER'; }
 KW_DECIMAL  = "DECIMAL"i  !ident_start { return 'DECIMAL'; }
+KW_STRING   = "STRING"i   !ident_start { return 'STRING'; }
 KW_SIGNED   = "SIGNED"i   !ident_start { return 'SIGNED'; }
 KW_UNSIGNED = "UNSIGNED"i !ident_start { return 'UNSIGNED'; }
 KW_INT      = "INT"i      !ident_start { return 'INT'; }
@@ -4697,8 +4730,7 @@ character_string_type
     // => data_type
     return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true };
   }
-  / t:(KW_CHAR / KW_CHARACTER) { /* =>  data_type */ return { dataType: t }; }
-  / t:KW_VARCHAR { /* =>  data_type */  return { dataType: t }; }
+  / t:(KW_CHAR / KW_CHARACTER / KW_VARCHAR / KW_STRING) { /* =>  data_type */ return { dataType: t }; }
 
 numeric_type_suffix
   = un: KW_UNSIGNED? __ ze: KW_ZEROFILL? {
