@@ -7,6 +7,12 @@ function jsonExprToSQL(expr) {
   return result
 }
 
+function jsonVisitorExprToSQL(stmt) {
+  const { symbol, expr } = stmt
+  return [symbol, exprToSQL(expr)].join('')
+}
+
 export {
   jsonExprToSQL,
+  jsonVisitorExprToSQL,
 }

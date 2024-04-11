@@ -155,6 +155,55 @@ describe('snowflake', () => {
         'SELECT "src"."customer"[0].name, "src"."vehicle"[0] FROM "car_sales" ORDER BY 1 ASC',
       ]
     },
+    {
+      title: 'qualify expr',
+      sql: [
+        `SELECT i, p, o
+        FROM qt
+        QUALIFY ROW_NUMBER() OVER (PARTITION BY p ORDER BY o) = 1;`,
+        'SELECT "i", "p", "o" FROM "qt" QUALIFY ROW_NUMBER() OVER (PARTITION BY "p" ORDER BY "o" ASC) = 1'
+      ]
+    },
+    {
+      title: 'json visitor',
+      sql: [
+        `SELECT
+        '1'||'_'||tj.ID AS JOB_KEY,
+        tj.ID AS PAY_JOB_ID,
+        tj.ID,
+        case when tj.transcription_job_split_id is not null then 1 else 0 end AS TRANSCRIPTION_IS_SPLIT, --chnaged logic for all splits
+        case when tjs.transcription_job_id is not null then tjs.transcription_job_id else tj.id end as PARENT_TRANSCRIPTION_JOB_ID, --New column--
+        case when tjss.transcription_job_id is not null then tjss.transcription_job_id
+          when tjss.transcription_job_id is null and tjs.transcription_job_id  is not null then tjs.transcription_job_id
+          else tj.id end AS TRANSCRIPTION_ORIGINAL_JOB_ID,
+        case when tjss.transcription_job_id is not null then tjss.transcription_job_id
+          when tjss.transcription_job_id is null and tjs.transcription_job_id  is not null then tjs.transcription_job_id
+          else tj.id end AS REV_JOB_ID,
+        tj.catalog_item_id,
+        PARSE_JSON(tj.METADATA) AS METADATA,
+        PARSE_JSON(tj.METADATA):entry_id::STRING AS ENTRY_ID, --relavent for Kaltura only--
+        PARSE_JSON(tj.METADATA):partner_id::NUMBER AS PARTNER_ID,--relavent for Kaltura only--
+        PARSE_JSON(tj.METADATA):original_profile_id::NUMBER AS ORIGINAL_PROFILE_ID,
+        PARSE_JSON(tj.config):external_provider_captioning_provider::STRING AS caption_provider,
+        PARSE_JSON(tj.config):external_provider_transcription_provider::STRING AS transcription_provider,
+        tj.FRAUD_ISSUES,
+        tj.OWNER_ID, --this will be the customer user that uploaded the file--
+        tj.SANDBOX,-- should be excluded in all cases--
+        coalesce(tj.ORDER_ID, tj.ORDER_UUID) ORDER_ID,
+        coalesce(tj.ORDER_ID, tj.ORDER_UUID) IS NOT NULL AS ONE_ORDERING,
+        tj.SOURCE_TABLE,
+        coalesce(tj.job_flow_id,p.job_flow_id) as JOB_FLOW_ID
+        FROM MRR.MRR_VERBIT_TRANSCRIPTION_JOBS tj -- SON --
+        left join MRR.MRR_VERBIT_TRANSCRIPTION_JOB_SPLITS tjs
+        on tj.transcription_job_split_id=tjs.id
+        inner join MRR.MRR_VERBIT_PROFILES p on tj.profile_id=p.id
+        left join MRR.MRR_VERBIT_TRANSCRIPTION_JOBS tjj -- FATHER --
+        on tjs.transcription_job_id=tjj.id
+        left join MRR.MRR_VERBIT_TRANSCRIPTION_JOB_SPLITS tjss  -- GRANDPHA --
+        on tjj.transcription_job_split_id=tjss.id`,
+        `SELECT '1' || '_' || "tj"."ID" AS "JOB_KEY", "tj"."ID" AS "PAY_JOB_ID", "tj"."ID", CASE WHEN "tj"."transcription_job_split_id" IS NOT NULL THEN 1 ELSE 0 END AS "TRANSCRIPTION_IS_SPLIT", CASE WHEN "tjs"."transcription_job_id" IS NOT NULL THEN "tjs"."transcription_job_id" ELSE "tj"."id" END AS "PARENT_TRANSCRIPTION_JOB_ID", CASE WHEN "tjss"."transcription_job_id" IS NOT NULL THEN "tjss"."transcription_job_id" WHEN "tjss"."transcription_job_id" IS NULL AND "tjs"."transcription_job_id" IS NOT NULL THEN "tjs"."transcription_job_id" ELSE "tj"."id" END AS "TRANSCRIPTION_ORIGINAL_JOB_ID", CASE WHEN "tjss"."transcription_job_id" IS NOT NULL THEN "tjss"."transcription_job_id" WHEN "tjss"."transcription_job_id" IS NULL AND "tjs"."transcription_job_id" IS NOT NULL THEN "tjs"."transcription_job_id" ELSE "tj"."id" END AS "REV_JOB_ID", "tj"."catalog_item_id", PARSE_JSON("tj"."METADATA") AS "METADATA", PARSE_JSON("tj"."METADATA") :entry_id::STRING AS "ENTRY_ID", PARSE_JSON("tj"."METADATA") :partner_id::NUMBER AS "PARTNER_ID", PARSE_JSON("tj"."METADATA") :original_profile_id::NUMBER AS "ORIGINAL_PROFILE_ID", PARSE_JSON("tj"."config") :external_provider_captioning_provider::STRING AS "caption_provider", PARSE_JSON("tj"."config") :external_provider_transcription_provider::STRING AS "transcription_provider", "tj"."FRAUD_ISSUES", "tj"."OWNER_ID", "tj"."SANDBOX", coalesce("tj"."ORDER_ID", "tj"."ORDER_UUID") AS "ORDER_ID", coalesce("tj"."ORDER_ID", "tj"."ORDER_UUID") IS NOT NULL AS "ONE_ORDERING", "tj"."SOURCE_TABLE", coalesce("tj"."job_flow_id", "p"."job_flow_id") AS "JOB_FLOW_ID" FROM "MRR"."MRR_VERBIT_TRANSCRIPTION_JOBS" AS "tj" LEFT JOIN "MRR"."MRR_VERBIT_TRANSCRIPTION_JOB_SPLITS" AS "tjs" ON "tj"."transcription_job_split_id" = "tjs"."id" INNER JOIN "MRR"."MRR_VERBIT_PROFILES" AS "p" ON "tj"."profile_id" = "p"."id" LEFT JOIN "MRR"."MRR_VERBIT_TRANSCRIPTION_JOBS" AS "tjj" ON "tjs"."transcription_job_id" = "tjj"."id" LEFT JOIN "MRR"."MRR_VERBIT_TRANSCRIPTION_JOB_SPLITS" AS "tjss" ON "tjj"."transcription_job_split_id" = "tjss"."id"`
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
