@@ -18,9 +18,9 @@ export type crud_stmt = union_stmt | update_stmt | replace_insert_stmt | insert_
 // is in reality: { tableList: any[]; columnList: any[]; ast: T; }
       export type AstStatement<T> = T;
 
-export type multiple_stmt = AstStatement<curd_stmt | crud_stmt[]>;
+export type multiple_stmt = AstStatement<crud_stmt | crud_stmt[]>;
 
-export type set_op = 'union' | 'union all' | 'union distinct' | 'intersect | 'except';
+export type set_op = 'union' | 'union all' | 'union distinct' | 'intersect' | 'except';
 
 export interface union_stmt_node extends select_stmt_node  {
          _next: union_stmt_node;
@@ -46,7 +46,7 @@ export type create_extension_stmt = {
 
 export type create_db_definition = create_option_character_set[];
 
-export type create_db_stmt = {
+export type create_db_stmt_t = {
         type: 'create',
         keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
@@ -54,7 +54,7 @@ export type create_db_stmt = {
         create_definitions?: create_db_definition
       }
 
-export type create_db_stmt = AstStatement<create_db_stmt>;
+export type create_db_stmt = AstStatement<create_db_stmt_t>;
 
 export type view_with = string;
 
@@ -62,7 +62,7 @@ export type with_view_option = {type: string; value: string; symbol: string; };
 
 export type with_view_options = with_view_option[];
 
-export type create_view_stmt = {
+export type create_view_stmt_t = {
         type: 'create',
         keyword: 'view',
         replace?: 'or replace',
@@ -71,11 +71,11 @@ export type create_view_stmt = {
         view: table_name,
         columns?: column_list,
         select: select_stmt_nake,
-        with_options?: with_options,
+        with_options?: with_view_options,
         with?: string,
       }
 
-export type create_view_stmt = AstStatement<create_view_stmt>;
+export type create_view_stmt = AstStatement<create_view_stmt_t>;
 
 export type create_aggregate_opt_required = { type: string; symbol: '='; value: expr; }[];
 
@@ -83,7 +83,7 @@ export type create_aggregate_opt_optional = { type: string; symbol: '='; value: 
 
 export type create_aggregate_opts = create_aggregate_opt_optional[];
 
-export type create_aggregate_stmt = {
+export type create_aggregate_stmt_t = {
         type: 'create',
         keyword: 'aggregate',
         replace?: 'or replace',
@@ -92,7 +92,7 @@ export type create_aggregate_stmt = {
         options: create_aggregate_opt_optional[]
       }
 
-export type create_aggregate_stmt = AstStatement<create_aggregate_stmt>;
+export type create_aggregate_stmt = AstStatement<create_aggregate_stmt_t>;
 
 export type column_data_type = { column: column_ref; definition: data_type; };
 
@@ -100,17 +100,17 @@ export type column_data_type_list = column_data_type[];
 
 export type func_returns = { type: "returns"; keyword?: "setof"; expr: data_type; } | { type: "returns"; keyword?: "table"; expr: column_data_type_list; };
 
-export type declare_variable_item = { keyword: 'variable'; name: string, constant?: string; datatype: data_type; collate?: collate; not_null?: string; default?: { type: 'default'; keyword: string; value: literal | expr; }; };
+export type declare_variable_item = { keyword: 'variable'; name: string, constant?: string; datatype: data_type; collate?: collate_expr; not_null?: string; default?: { type: 'default'; keyword: string; value: literal | expr; }; };
 
 export type declare_variables = declare_variable_item[];
 
-export type declare_stmt = { type: 'declare'; declare: declare_variable_item[]; }
+export type declare_stmt_t = { type: 'declare'; declare: declare_variable_item[]; }
 
-export type declare_stmt = AstStatement<declare_stmt>;
+export type declare_stmt = AstStatement<declare_stmt_t>;
 
 export type create_func_opt = literal_string | { type: 'as'; begin?: string; declare?: declare_stmt; expr: multiple_stmt; end?: string; symbol: string; } | literal_numeric | { type: "set"; parameter: ident_name; value?: { prefix: string; expr: expr }};
 
-export type create_function_stmt = {
+export type create_function_stmt_t = {
         type: 'create';
         replace?: string;
         name: { schema?: string; name: string };
@@ -120,9 +120,9 @@ export type create_function_stmt = {
         options?: create_func_opt[];
       }
 
-export type create_function_stmt = AstStatement<create_function_stmt>;
+export type create_function_stmt = AstStatement<create_function_stmt_t>;
 
-export type create_type_stmt = {
+export type create_type_stmt_t = {
         type: 'create',
         keyword: 'type',
         name: { schema: string; name: string },
@@ -131,9 +131,9 @@ export type create_type_stmt = {
         create_definitions?: any
       }
 
-export type create_type_stmt = AstStatement<create_type_stmt>;
+export type create_type_stmt = AstStatement<create_type_stmt_t>;
 
-export type create_domain_stmt = {
+export type create_domain_stmt_t = {
         type: 'create',
         keyword: 'domain',
         domain: { schema: string; name: string },
@@ -142,7 +142,7 @@ export type create_domain_stmt = {
         create_definitions?: any[]
       }
 
-export type create_domain_stmt = AstStatement<create_domain_stmt>;
+export type create_domain_stmt = AstStatement<create_domain_stmt_t>;
 
 export type create_table_stmt_node = create_table_stmt_node_simple | create_table_stmt_node_like;
       export interface create_table_stmt_node_base {
@@ -320,9 +320,9 @@ export interface use_stmt_node {
 
 export type use_stmt = AstStatement<use_stmt_node>;
 
-export type aggregate_signature = { name: ”*“ } | alter_func_args;
+export type aggregate_signature = { name: "*" } | alter_func_args;
 
-export type alter_func_argmode = ignore;
+export type alter_func_argmode = "IN" | "OUT" | "VARIADIC";
 
 export type alter_func_arg_item = { mode?: string; name?: string; type: data_type;  default: default_arg_expr; };
 
@@ -396,10 +396,10 @@ export interface alter_rename_owner {
         type: 'alter';
         resource: string;
         keyword?: 'to' | 'as';
-        [key: string]: ident;
+        [key: string]: ident | undefined;
       }
 
-export type ALTER_RENAME = AstStatement<alter_rename>;
+export type ALTER_RENAME = AstStatement<alter_rename_owner>;
 
 export type ALTER_OWNER_TO = AstStatement<alter_rename_owner>;
 
@@ -657,7 +657,7 @@ export type with_admin_option = origin_str_stmt;
 
 export type grant_revoke_keyword = { type: 'grant' } | { type: 'revoke'; grant_option_for?: origin_str_stmt; };
 
-export interface grant_revoke_stmt {
+export interface grant_revoke_stmt_t {
         type: string;
         grant_option_for?: origin_str_stmt;
         keyword: 'priv';
@@ -671,25 +671,25 @@ export interface grant_revoke_stmt {
         with?: with_grant_option;
       }
 
-export type grant_revoke_stmt = AstStatement<grant_revoke_stmt> | => AstStatement<grant_revoke_stmt>;
+export type grant_revoke_stmt = AstStatement<grant_revoke_stmt_t>;
 
-export type elseif_stmt = { type: 'elseif'; boolean_expr: expr; then: curd_stmt; semicolon?: string; };
+export type elseif_stmt = { type: 'elseif'; boolean_expr: expr; then: crud_stmt; semicolon?: string; };
 
 export type elseif_stmt_list = elseif_stmt[];
 
-export interface if_else_stmt {
+export interface if_else_stmt_t {
         type: 'if';
         keyword: 'if';
         boolean_expr: expr;
         semicolons: string[];
         if_expr: crud_stmt;
         elseif_expr: elseif_stmt[];
-        else_expr: curd_stmt;
+        else_expr: crud_stmt;
         prefix: literal_string;
         suffix: literal_string;
       }
 
-export type if_else_stmt = AstStatement<if_else_stmt>;
+export type if_else_stmt = AstStatement<if_else_stmt_t>;
 
 export type raise_level = "DEBUG" | "LOG" | "INFO" | "NOTICE" | "WARNING" | "EXCEPTION";
 
@@ -697,26 +697,26 @@ export type raise_opt = { type: 'using'; option: string; symbol: '='; expr: expr
 
 type raise_item = never;
 
-export interface raise_stmt {
+export interface raise_stmt_t {
         type: 'raise';
         level?: string;
         raise?: raise_item;
         using?: raise_opt;
       }
 
-export type raise_stmt = AstStatement<raise_stmt>;
+export type raise_stmt = AstStatement<raise_stmt_t>;
 
-export interface execute_stmt {
+export interface execute_stmt_t {
         type: 'execute';
         name: string;
         args?: { type: expr_list; value: proc_primary_list; }
       }
 
-export type execute_stmt = AstStatement<execute_stmt>;
+export type execute_stmt = AstStatement<execute_stmt_t>;
 
 export type for_label = { label?: string; keyword: 'for'; };
 
-export interface for_loop_stmt {
+export interface for_loop_stmt_t {
         type: 'for';
         label?: string
         target: string;
@@ -724,9 +724,9 @@ export interface for_loop_stmt {
         stmts: multiple_stmt;
       }
 
-export type for_loop_stmt = AstStatement<for_loop_stmt>;
+export type for_loop_stmt = AstStatement<for_loop_stmt_t>;
 
-export interface transaction_stmt {
+export interface transaction_stmt_t {
         type: 'transaction';
         expr: {
           type: 'origin',
@@ -734,7 +734,7 @@ export interface transaction_stmt {
         }
       }
 
-export type transaction_stmt = AstStatement<transaction_stmt>;
+export type transaction_stmt = AstStatement<transaction_stmt_t>;
 
 export interface select_stmt_node extends select_stmt_nake  {
        parentheses: true;
@@ -778,7 +778,7 @@ export type array_index = { brackets: boolean, number: number };
 
 export type array_index_list = array_index[];
 
-export type expr_item = binary_expr & { array_index: array_index };
+export type expr_item = binary_column_expr & { array_index: array_index };
 
 export type cast_data_type = data_type & { quoted?: string };
 
@@ -823,7 +823,7 @@ export type table_ref = table_base | table_join;
 
 
 export type table_join = table_base & {join: join_op; using: ident_name[]; } | table_base & {join: join_op; on?: on_clause; } | {
-      expr: (union_stmt || table_ref_list) & { parentheses: true; };
+      expr: (union_stmt | table_ref_list) & { parentheses: true; };
       as?: alias_clause;
       join: join_op;
       on?: on_clause;
@@ -844,6 +844,13 @@ export type table_base = { type: 'dual' } | { expr: value_clause; as?: alias_cla
 export type join_op = 'LEFT JOIN' | 'RIGHT JOIN' | 'FULL JOIN' | 'CROSS JOIN' | 'INNER JOIN';
 
 export type table_name = { db?: ident; schema?: ident, table: ident | '*'; };
+
+export type binary_expr = {
+      type: 'binary_expr';
+      operator: string;
+      left: string;
+      right: string;
+    }
 
 export type or_and_expr = binary_expr;
 
@@ -993,27 +1000,13 @@ export type case_expr = {
 
 export type case_when_then_list = case_when_then[];
 
-export type case_when_then = { type: 'when'; cond: binary_expr; result: expr; };
+export type case_when_then = { type: 'when'; cond: or_and_where_expr; result: expr; };
 
 export type case_else = { type: 'else'; condition?: never; result: expr; };
 
 export type _expr = or_expr | unary_expr;
 
 export type expr = _expr | union_stmt;
-
-export type BINARY_OPERATORS = LOGIC_OPERATOR | 'OR' | 'AND' | multiplicative_operator | additive_operator
-      | arithmetic_comparison_operator
-      | 'IN' | 'NOT IN'
-      | 'BETWEEN' | 'NOT BETWEEN'
-      | 'IS' | 'IS NOT'
-      | 'LIKE'
-      | '@>' | '<@' | OPERATOR_CONCATENATION | DOUBLE_WELL_ARROW | WELL_ARROW | '?' | '?|' | '?&' | '#-'
-    export interface binary_expr {
-      type: 'binary_expr',
-      operator: BINARY_OPERATORS,
-      left: expr,
-      right: expr
-    }
 
 export type UNARY_OPERATORS = '+' | '-' | 'EXISTS' | 'NOT EXISTS'  | 'NULL'
 
@@ -1109,7 +1102,7 @@ export type column_ref = string_constants_escape | {
         property?: (literal_string | literal_numeric)[];
       };
 
-export type column_ref_quoted = IGNORE;
+export type column_ref_quoted = unknown;
 
 export type column_list = column[];
 
@@ -1187,7 +1180,7 @@ export type aggr_fun_smma = { type: 'aggr_func'; name: 'SUM' | 'MAX' | 'MIN' | '
 
 type KW_SUM_MAX_MIN_AVG = never;
 
-export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'; args:count_arg; over: over_partition } | { type: 'aggr_func'; name: 'PERCENTILE_CONT' | 'PERCENTILE_DISC'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition } | { type: 'aggr_func'; name: 'MODE'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition };
+export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'; args:count_arg; over: over_partition } | { type: 'aggr_func'; name: 'PERCENTILE_CONT' | 'PERCENTILE_DISC'; args: literal_numeric | literal_array; within_group_orderby: order_by_clause; over?: over_partition } | { type: 'aggr_func'; name: 'MODE'; args: literal_numeric | literal_array; within_group_orderby: order_by_clause; over?: over_partition };
 
 export type concat_separator = { keyword: string | null; value: literal_string; };
 
@@ -1244,14 +1237,12 @@ export type cast_expr = {
         expr: or_expr | column_ref | param
           | expr;
         keyword: 'cast';
-        ...cast_double_colon;
-      } | {
+      } & cast_double_colon | ({
         type: 'cast';
         expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
           | expr;
         keyword: 'cast';
-        ...cast_double_colon;
-      };
+      } & cast_double_colon);
 
 export type signedness = KW_SIGNED | KW_UNSIGNED;
 
@@ -1726,9 +1717,9 @@ type EOF = never;
 
 export type proc_stmts = (proc_stmt)[];
 
-export interface proc_stmt { type: 'proc'; stmt: assign_stmt | return_stmt; vars: any }
+export interface proc_stmt_t { type: 'proc'; stmt: assign_stmt | return_stmt; vars: any }
 
-export type proc_stmt = AstStatement<proc_stmt>;
+export type proc_stmt = AstStatement<proc_stmt_t>;
 
 export type assign_stmt = { type: 'assign'; left: var_decl | without_prefix_var_decl; symbol: ':=' | '='; right: proc_expr; };
 
@@ -1754,7 +1745,7 @@ export type proc_array = { type: 'array'; value: proc_primary_list };
 
 export type var_decl_list = var_decl[];
 
-export type var_decl = { type: 'var'; name: string; prefix: string; suffix: string; }; | without_prefix_var_decl & { type: 'var'; prefix: string; };;
+export type var_decl = { type: 'var'; name: string; prefix: string; suffix: string; } | without_prefix_var_decl & { type: 'var'; prefix: string; };
 
 export type without_prefix_var_decl = { type: 'var'; prefix: string; name: ident_name; members: mem_chain; quoted: string | null } | { type: 'var'; prefix: null; name: number; members: []; quoted: null };
 
