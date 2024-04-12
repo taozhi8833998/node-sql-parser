@@ -2863,7 +2863,7 @@ or_and_where_expr
     }
     if (seperator === ',') {
       const el = { type: 'expr_list' }
-      el.value = result
+      el.value = Array.isArray(result) ? result : [result]
       return el
     }
     return result
@@ -3356,7 +3356,14 @@ count_arg
       ...getLocationObject()
     };
   }
-  / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause? __ s:concat_separator? { return { distinct: d, expr: c, orderby: or, separator: s, ...getLocationObject() }; }
+  / d:KW_DISTINCT? __ c:or_and_where_expr __ or:order_by_clause? __ s:concat_separator? {
+    return {
+      distinct: d,
+      expr: c,
+      orderby: or,
+      separator: s
+    };
+  }
 
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
