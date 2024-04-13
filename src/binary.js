@@ -24,7 +24,8 @@ function binaryToSQL(expr) {
     if (!isBetween) rstr = `(${rstr.join(', ')})`
   }
   const escape = expr.right.escape || {}
-  const str = [exprToSQL(expr.left), operator, rstr, toUpper(escape.type), exprToSQL(escape.value)].filter(hasVal).join(' ')
+  const leftPart = Array.isArray(expr.left) ? expr.left.map(exprToSQL).join(', ') : exprToSQL(expr.left)
+  const str = [leftPart, operator, rstr, toUpper(escape.type), exprToSQL(escape.value)].filter(hasVal).join(' ')
   const result = [expr.parentheses ? `(${str})` : str]
   const { suffix } = expr
   if (!suffix) return result.join(' ')
