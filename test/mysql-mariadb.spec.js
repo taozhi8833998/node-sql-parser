@@ -988,6 +988,13 @@ describe('mysql', () => {
           'SELECT DATE(`o`.`date`) AS `date`, COUNT(DISTINCT `o`.`user_id`,`operation_type` = 0 OR NULL) AS `operateOpenCount`, COUNT(DISTINCT `o`.`user_id`, (`operation_type` = 0 AND `jump_status` = 3) OR NULL) AS `realityOpenCount`, COUNT(DISTINCT `o`.`user_id`,`operation_type` = 1 OR NULL) AS `operateCloseCount`, COUNT(DISTINCT `o`.`user_id`, (`operation_type` = 1 AND `jump_status` = 3) OR NULL) AS `realityCloseCount` FROM (SELECT `id`, `user_id`, `operation_type`, `jump_status`, `operation_time`, `rider_type`, IF(EXTRACT(HOUR FROM `operation_time`) >= 16, DATE_ADD(DATE(`operation_time`), INTERVAL 1 DAY), DATE(`operation_time`)) AS `date` FROM `labour_insurance_operation`) AS `o` LEFT JOIN `labour_user` AS `u` ON `o`.`user_id` = `u`.`id` LEFT JOIN `labour_user_group_user` AS `gu` ON `o`.`user_id` = `gu`.`user_id` AND `gu`.`STATUS` = 0 GROUP BY `o`.`date`'
         ]
       },
+      {
+        title: 'alter table with after column',
+        sql: [
+          "ALTER TABLE product MODIFY COLUMN type enum('one','two') NOT NULL AFTER name",
+          "ALTER TABLE `product` MODIFY COLUMN `type` ENUM('one', 'two') NOT NULL AFTER `name`"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
