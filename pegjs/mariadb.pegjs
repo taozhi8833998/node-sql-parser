@@ -994,6 +994,14 @@ alter_table_stmt
       };
     }
 
+alter_column_suffix
+  = k:('after'i / 'first'i) __ i:column_ref {
+    return {
+      keyword: k,
+      expr: i
+    }
+  }
+
 alter_action_list
   = head:alter_action tail:(__ COMMA __ alter_action)* {
       return createList(head, tail);
@@ -1025,10 +1033,11 @@ ALTER_ADD_COLUMN
   = KW_ADD __
     kc:KW_COLUMN? __
     ife:if_not_exists_stmt? __
-    cd:create_column_definition {
+    cd:create_column_definition __ af:alter_column_suffix? {
       return {
         action: 'add',
         ...cd,
+        suffix: af,
         keyword: kc,
         if_not_exists:ife,
         resource: 'column',
@@ -1036,10 +1045,11 @@ ALTER_ADD_COLUMN
       }
     }
   / KW_ADD __
-    cd:create_column_definition {
+    cd:create_column_definition __ af:alter_column_suffix? {
       return {
         action: 'add',
         ...cd,
+        suffix: af,
         resource: 'column',
         type: 'alter',
       }
@@ -1048,11 +1058,12 @@ ALTER_ADD_COLUMN
 ALTER_MODIFY_COLUMN
   = KW_MODIFY __
     kc:KW_COLUMN? __
-    cd:create_column_definition {
+    cd:create_column_definition __ af:alter_column_suffix? {
       return {
         action: 'modify',
         keyword: kc,
         ...cd,
+        suffix: af,
         resource: 'column',
         type: 'alter',
       }
@@ -1158,7 +1169,7 @@ ALTER_LOCK
   }
 
 ALTER_CHANGE_COLUMN
-  = 'CHANGE'i __ kc:KW_COLUMN? __ od:column_ref __ cd:create_column_definition __ fa:(('FIRST'i / 'AFTER'i) __ column_ref)? {
+  = 'CHANGE'i __ kc:KW_COLUMN? __ od:column_ref __ cd:create_column_definition __ af:alter_column_suffix? {
     return {
         action: 'change',
         old_column: od,
@@ -1166,10 +1177,7 @@ ALTER_CHANGE_COLUMN
         keyword: kc,
         resource: 'column',
         type: 'alter',
-        first_after: fa && {
-          keyword: fa[0],
-          column: fa[2]
-        },
+        suffix: af,
       }
   }
 column_idx_ref
