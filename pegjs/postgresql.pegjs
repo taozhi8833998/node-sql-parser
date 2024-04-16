@@ -4434,17 +4434,17 @@ trim_func_clause
   }
 
 tablefunc_clause
-  = 'crosstab'i __ LPAREN __ s:expr_list __ RPAREN __ KW_AS __ n:ident_name __ LPAREN __ cds:column_data_type_list __ RPAREN {
+  = name:('crosstab'i / 'jsonb_to_recordset'i / 'jsonb_to_record'i /  'json_to_recordset'i / 'json_to_record'i) __ LPAREN __ s:expr_list __ RPAREN __ d:(KW_AS __ ident_name __ LPAREN __ column_data_type_list __ RPAREN)? {
     // => { type: 'tablefunc'; name: proc_func_name; args: expr_list; as: func_call }
     return {
       type: 'tablefunc',
-      name: { name: [{ type: 'default', value: 'crosstab' }] } ,
+      name: { name: [{ type: 'default', value: name }] },
       args: s,
-      as: {
-        type: 'function',
-        name: { name: [{ type: 'default', value: n }]},
-        args: { type: 'expr_list', value: cds.map(v => ({ ...v, type: 'column_definition' })) },
-      }
+      as: d && {
+          type: 'function',
+          name: { name: [{ type: 'default', value: d[2] }]},
+          args: { type: 'expr_list', value: d[6].map(v => ({ ...v, type: 'column_definition' })) },
+        }
     }
   }
 

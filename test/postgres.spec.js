@@ -1710,6 +1710,18 @@ describe('Postgres', () => {
           `CREATE TYPE "access_key_permission_kind" AS ENUM ('FULL_ACCESS', 'FUNCTION_CALL') ; CREATE TABLE "access_keys" (public_key TEXT NOT NULL, account_id TEXT NOT NULL, permission_kind access_key_permission_kind NOT NULL, CONSTRAINT "access_keys_pk" PRIMARY KEY (public_key, account_id)) PARTITION BY HASH(public_key)`
         ]
       },
+      {
+        title: 'json to record or recordset table func',
+        sql: [
+          `SELECT
+          *
+        from
+          jsonb_to_recordset(
+            '[{"amount":23, "currency": "INR"}]' :: jsonb
+          ) as l_amount (amount decimal, currency text);`,
+          `SELECT * FROM jsonb_to_recordset('[{"amount":23, "currency": "INR"}]'::JSONB) AS l_amount(amount DECIMAL, currency TEXT)`
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
