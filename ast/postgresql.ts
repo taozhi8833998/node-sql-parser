@@ -845,12 +845,36 @@ export type join_op = 'LEFT JOIN' | 'RIGHT JOIN' | 'FULL JOIN' | 'CROSS JOIN' | 
 
 export type table_name = { db?: ident; schema?: ident, table: ident | '*'; };
 
-export type binary_expr = {
-      type: 'binary_expr';
-      operator: string;
-      left: string;
-      right: string;
-    }
+export type BINARY_OPERATORS =
+      | LOGIC_OPERATOR
+      | "OR"
+      | "AND"
+      | multiplicative_operator
+      | additive_operator
+      | arithmetic_comparison_operator
+      | "IN"
+      | "NOT IN"
+      | "BETWEEN"
+      | "NOT BETWEEN"
+      | "IS"
+      | "IS NOT"
+      | "LIKE"
+      | "@>"
+      | "<@"
+      | OPERATOR_CONCATENATION
+      | DOUBLE_WELL_ARROW
+      | WELL_ARROW
+      | "?"
+      | "?|"
+      | "?&"
+      | "#-";
+
+    export type binary_expr = {
+      type: "binary_expr";
+      operator: BINARY_OPERATORS;
+      left: expr;
+      right: expr;
+    };
 
 export type or_and_expr = binary_expr;
 

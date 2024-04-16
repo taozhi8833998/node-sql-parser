@@ -3188,12 +3188,36 @@ table_name
 or_and_expr
 	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
     /*
+    export type BINARY_OPERATORS =
+      | LOGIC_OPERATOR
+      | "OR"
+      | "AND"
+      | multiplicative_operator
+      | additive_operator
+      | arithmetic_comparison_operator
+      | "IN"
+      | "NOT IN"
+      | "BETWEEN"
+      | "NOT BETWEEN"
+      | "IS"
+      | "IS NOT"
+      | "LIKE"
+      | "@>"
+      | "<@"
+      | OPERATOR_CONCATENATION
+      | DOUBLE_WELL_ARROW
+      | WELL_ARROW
+      | "?"
+      | "?|"
+      | "?&"
+      | "#-";
+
     export type binary_expr = {
-      type: 'binary_expr';
-      operator: string;
-      left: string;
-      right: string;
-    }
+      type: "binary_expr";
+      operator: BINARY_OPERATORS;
+      left: expr;
+      right: expr;
+    };
     => binary_expr
      */
     const len = tail.length
