@@ -72,9 +72,35 @@ function tableTumbleToSQL(tumble) {
   return result.filter(hasVal).join(' ')
 }
 
+function temporalTableOptionToSQL(stmt) {
+  const { keyword } = stmt
+  const result = []
+  switch (keyword) {
+    case 'as':
+      result.push('AS', 'OF', exprToSQL(stmt.of))
+      break
+    case 'from_to':
+      result.push('FROM', exprToSQL(stmt.from), 'TO', exprToSQL(stmt.to))
+      break
+    case 'between_and':
+      result.push('BETWEEN', exprToSQL(stmt.between), 'AND', exprToSQL(stmt.and))
+      break
+    case 'contained':
+      result.push('CONTAINED', 'IN', exprToSQL(stmt.in))
+      break
+  }
+  return result.filter(hasVal).join(' ')
+}
+
+function temporalTableToSQL(stmt) {
+  if (!stmt) return
+  const { keyword, expr } = stmt
+  return [toUpper(keyword), temporalTableOptionToSQL(expr)].filter(hasVal).join(' ')
+}
+
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
-  const { table, db, as, expr, operator, prefix: prefixStr, schema, server, suffix, tablesample, table_hint } = tableInfo
+  const { table, db, as, expr, operator, prefix: prefixStr, schema, server, suffix, tablesample, temporal_table, table_hint } = tableInfo
   const serverName = identifierToSql(server)
   const database = identifierToSql(db)
   const schemaStr = identifierToSql(schema)
@@ -105,7 +131,7 @@ function tableToSQL(tableInfo) {
     const tableSampleSQL = ['TABLESAMPLE', exprToSQL(tablesample.expr), literalToSQL(tablesample.repeatable)].filter(hasVal).join(' ')
     result.push(tableSampleSQL)
   }
-  result.push(commonOptionConnector('AS', identifierToSql, as), operatorToSQL(operator))
+  result.push(temporalTableToSQL(temporal_table), commonOptionConnector('AS', identifierToSql, as), operatorToSQL(operator))
   if (table_hint) result.push(toUpper(table_hint.keyword), `(${table_hint.expr.map(tableHintToSQL).filter(hasVal).join(', ')})`)
   return result.filter(hasVal).join(' ')
 }
