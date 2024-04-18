@@ -1457,6 +1457,46 @@ from_clause
     return l
   }
 
+temporal_table
+  = 'FOR'i __ 'SYSTEM_TIME'i __ t:temporal_table_options {
+    return {
+      keyword: 'for system_time',
+      expr: t
+    }
+  }
+
+temporal_table_options
+  = KW_AS __ 'OF'i __ e:expr {
+    return {
+      type: 'temporal_table_option',
+      keyword: 'as',
+      of: e
+    }
+  }
+  / KW_FROM __ s:expr __ KW_TO __ e:expr {
+    return {
+      type: 'temporal_table_option',
+      keyword: 'from_to',
+      from: s,
+      to: e,
+    }
+  }
+  / KW_BETWEEN __  begin:expr __ KW_AND __ end:expr {
+    return {
+      type: 'temporal_table_option',
+      keyword: 'between_and',
+      between: begin,
+      and: end
+    }
+  }
+  / 'CONTAINED'i __ KW_IN __ LPAREN __ e:expr_list __ RPAREN {
+    e.parentheses = true
+    return {
+      type: 'temporal_table_option',
+      keyword: 'contained',
+      in: e
+    }
+  }
 pivot_unpivot_common_clause
   = 'FOR'i __ c:column_ref __ i:in_op_right {
     return {
@@ -1690,9 +1730,10 @@ table_base
         type: 'dual'
       };
   }
-  / t:table_name __ alias:alias_clause? __ th:table_hint? {
+  / t:table_name __ tt:temporal_table? __ alias:alias_clause? __ th:table_hint? {
       t.as = alias
       t.table_hint = th
+      t.temporal_table = tt
       return t
     }
   / stmt:value_clause __ alias:value_alias_clause? {
