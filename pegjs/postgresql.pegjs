@@ -63,6 +63,8 @@
     'ORDER': true,
     'OUTER': true,
 
+    'PARTITION': true,
+
     'RECURSIVE': true,
     'RENAME': true,
     // 'REPLACE': true,
@@ -795,6 +797,33 @@ create_table_stmt
     KW_TABLE __
     ife:if_not_exists_stmt? __
     t:table_ref_list __
+    po:create_table_partition_of {
+      /*
+
+      export interface create_table_partition_of extends create_table_stmt_node_base {
+        partition_of: create_table_partition_of;
+      }
+      => AstStatement<create_table_partition_of>;
+      */
+      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'table',
+          temporary: tp && tp[0].toLowerCase(),
+          if_not_exists:ife,
+          table: t,
+          partition_of: po
+        }
+      }
+    }
+  /  a:KW_CREATE __
+    tp:KW_TEMPORARY? __
+    KW_TABLE __
+    ife:if_not_exists_stmt? __
+    t:table_ref_list __
     c:create_table_definition __
     to:table_options? __
     ir: (KW_IGNORE / KW_REPLACE)? __
@@ -1112,6 +1141,50 @@ create_like_table
      // => create_like_table_simple & { parentheses?: boolean; }
       e.parentheses = true;
       return e;
+  }
+
+for_values_item
+  = KW_FROM __ LPAREN __ f:literal_string __ RPAREN __ KW_TO __ LPAREN __ t:literal_string __ RPAREN {
+    return {
+      type: 'for_values_item',
+      keyword: 'from',
+      from: f,
+      to: t,
+    }
+  }
+  / KW_IN __ LPAREN __ e:expr_list __ RPAREN {
+    return {
+      type: 'for_values_item',
+      keyword: 'in',
+      in: e,
+    }
+  }
+  / KW_WITH __ LPAREN __ 'MODULUS'i __ m:literal_numeric __ COMMA __ 'REMAINDER'i __ r:literal_numeric __ RPAREN {
+    return {
+      type: 'for_values_item',
+      keyword: 'with',
+      modulus: m,
+      remainder: r,
+    }
+  }
+
+for_values
+  = 'FOR'i __ KW_VALUES __ fvi:for_values_item {
+    return {
+      type: 'for_values',
+      keyword: 'for values',
+      expr: fvi
+    }
+  }
+create_table_partition_of
+  = KW_PARTITION __ 'OF'i __ t:table_name __ fv:for_values __ ts:(KW_TABLESPACE __ ident_without_kw_type)? {
+    return {
+      type: 'partition_of',
+      keyword: 'partition of',
+      table: t,
+      for_values: fv,
+      tablespace: ts && ts[2]
+    }
   }
 
 create_table_definition
