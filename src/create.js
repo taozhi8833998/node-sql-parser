@@ -40,6 +40,30 @@ function createDefinitionToSQL(definition) {
   }
 }
 
+function forValueItemToSQL(stmt) {
+  const { keyword } = stmt
+  const result = []
+  switch (keyword) {
+    case 'from':
+      result.push('FROM', `(${literalToSQL(stmt.from)})`, 'TO', `(${literalToSQL(stmt.to)})`)
+      break
+    case 'in':
+      result.push('IN', `(${exprToSQL(stmt.in)})`)
+      break
+    case 'with':
+      result.push('WITH', `(MODULUS ${literalToSQL(stmt.modulus)}, REMAINDER ${literalToSQL(stmt.remainder)})`)
+      break
+  }
+  return result.filter(hasVal).join(' ')
+}
+
+function createTablePartitionOfToSQL(stmt) {
+  const { keyword, table, for_values: forValues, tablespace } = stmt
+  const result = [toUpper(keyword), tableToSQL(table), toUpper(forValues.keyword), forValueItemToSQL(forValues.expr)]
+  if (tablespace) result.push('TABLESPACE', literalToSQL(tablespace))
+  return result.filter(hasVal).join(' ')
+}
+
 function createTableToSQL(stmt) {
   const {
     type, keyword, table, like, as, temporary,
@@ -48,6 +72,7 @@ function createTableToSQL(stmt) {
     table_options: tableOptions,
     ignore_replace: ignoreReplace,
     or_replace: orReplace,
+    partition_of: partitionOf,
     query_expr: queryExpr,
   } = stmt
   const sql = [toUpper(type), toUpper(orReplace), toUpper(temporary), toUpper(keyword), toUpper(ifNotExists), tablesToSQL(table)]
@@ -57,12 +82,9 @@ function createTableToSQL(stmt) {
     sql.push(toUpper(likeType), likeTableName)
     return sql.filter(hasVal).join(' ')
   }
-  if (createDefinition) {
-    sql.push(`(${createDefinition.map(createDefinitionToSQL).join(', ')})`)
-  }
-  if (tableOptions) {
-    sql.push(tableOptions.map(tableOptionToSQL).join(' '))
-  }
+  if (partitionOf) return sql.concat([createTablePartitionOfToSQL(partitionOf)]).filter(hasVal).join(' ')
+  if (createDefinition) sql.push(`(${createDefinition.map(createDefinitionToSQL).join(', ')})`)
+  if (tableOptions) sql.push(tableOptions.map(tableOptionToSQL).join(' '))
   sql.push(toUpper(ignoreReplace), toUpper(as))
   if (queryExpr) sql.push(unionToSQL(queryExpr))
   return sql.filter(hasVal).join(' ')

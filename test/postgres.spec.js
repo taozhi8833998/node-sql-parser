@@ -1449,6 +1449,29 @@ describe('Postgres', () => {
         `UPDATE "blogs" SET data['author']['first_name'] = '"Sarah"'`
       ]
     },
+    {
+      title: 'table partitioning with',
+      sql: [
+        'CREATE TABLE access_keys_hash_p0 PARTITION OF access_keys FOR VALUES WITH (modulus 10, remainder 0)',
+        'CREATE TABLE "access_keys_hash_p0" PARTITION OF "access_keys" FOR VALUES WITH (MODULUS 10, REMAINDER 0)'
+      ]
+    },
+    {
+      title: 'table partitioning from',
+      sql: [
+        `CREATE TABLE measurement_y2007m12 PARTITION OF measurement
+        FOR VALUES FROM ('2007-12-01') TO ('2008-01-01')
+        TABLESPACE fasttablespace;`,
+        `CREATE TABLE "measurement_y2007m12" PARTITION OF "measurement" FOR VALUES FROM ('2007-12-01') TO ('2008-01-01') TABLESPACE fasttablespace`
+      ]
+    },
+    {
+      title: 'table partitioning in',
+      sql: [
+        "CREATE TABLE electronics PARTITION OF products FOR VALUES IN ('Electronics');",
+        `CREATE TABLE "electronics" PARTITION OF "products" FOR VALUES IN ('Electronics')`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
