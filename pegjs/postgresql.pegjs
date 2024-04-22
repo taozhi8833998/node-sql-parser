@@ -271,7 +271,7 @@ multiple_stmt
       /*
       // is in reality: { tableList: any[]; columnList: any[]; ast: T; }
       export type AstStatement<T> = T;
-       => AstStatement<curd_stmt | crud_stmt[]> */
+       => AstStatement<crud_stmt | crud_stmt[]> */
       const headAst = head && head.ast || head
       const cur = tail && tail.length && tail[0].length >= 4 ? [headAst] : headAst
       for (let i = 0; i < tail.length; i++) {
@@ -291,7 +291,7 @@ set_op
     return a ? `union ${a.toLowerCase()}` : 'union'
   }
   / KW_INTERSECT {
-    // => 'intersect
+    // => 'intersect'
     return 'intersect'
   }
   / KW_EXCEPT {
@@ -375,14 +375,14 @@ create_db_stmt
     t:ident_name __
     c:create_db_definition? {
       /*
-      export type create_db_stmt = {
+      export type create_db_stmt_t = {
         type: 'create',
         keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
         database: string,
         create_definitions?: create_db_definition
       }
-      => AstStatement<create_db_stmt>
+      => AstStatement<create_db_stmt_t>
       */
       return {
         tableList: Array.from(tableList),
@@ -425,7 +425,7 @@ create_view_stmt
   KW_VIEW __ v:table_name __ c:(LPAREN __ column_list __ RPAREN)? __ wo:(KW_WITH __ LPAREN __ with_view_options __ RPAREN)? __
   KW_AS __ s:select_stmt_nake __ w:view_with? {
     /*
-      export type create_view_stmt = {
+      export type create_view_stmt_t = {
         type: 'create',
         keyword: 'view',
         replace?: 'or replace',
@@ -434,10 +434,10 @@ create_view_stmt
         view: table_name,
         columns?: column_list,
         select: select_stmt_nake,
-        with_options?: with_options,
+        with_options?: with_view_options,
         with?: string,
       }
-      => AstStatement<create_view_stmt>
+      => AstStatement<create_view_stmt_t>
       */
     v.view = v.table
     delete v.table
@@ -494,7 +494,7 @@ create_aggregate_opts
 create_aggregate_stmt
   = a:KW_CREATE __ or:(KW_OR __ KW_REPLACE)? __ t:'AGGREGATE'i __ s:table_name __ LPAREN __ as:aggregate_signature __ RPAREN __ LPAREN __ opts:create_aggregate_opts __ RPAREN  {
     /*
-      export type create_aggregate_stmt = {
+      export type create_aggregate_stmt_t = {
         type: 'create',
         keyword: 'aggregate',
         replace?: 'or replace',
@@ -502,7 +502,7 @@ create_aggregate_stmt
         args?: aggregate_signature,
         options: create_aggregate_opt_optional[]
       }
-      => AstStatement<create_aggregate_stmt>
+      => AstStatement<create_aggregate_stmt_t>
       */
     return {
         tableList: Array.from(tableList),
@@ -553,7 +553,7 @@ func_returns
 
 declare_variable_item
   = n:ident_name &{ return n.toLowerCase() !== 'begin' } __ c:'CONSTANT'i? __ d:data_type __  collate:collate_expr? __ nu:(KW_NOT __ KW_NULL)? __ expr:((KW_DEFAULT / ':=')? __ (&'BEGIN'i / literal / expr))?  __ s:SEMICOLON? {
-    // => { keyword: 'variable'; name: string, constant?: string; datatype: data_type; collate?: collate; not_null?: string; default?: { type: 'default'; keyword: string; value: literal | expr; }; }
+    // => { keyword: 'variable'; name: string, constant?: string; datatype: data_type; collate?: collate_expr; not_null?: string; default?: { type: 'default'; keyword: string; value: literal | expr; }; }
     return {
       keyword: 'variable',
       name: n,
@@ -576,8 +576,8 @@ declare_variables
 declare_stmt
   = 'DECLARE'i __ vars:declare_variables {
     /*
-      export type declare_stmt = { type: 'declare'; declare: declare_variable_item[]; }
-      => AstStatement<declare_stmt>
+      export type declare_stmt_t = { type: 'declare'; declare: declare_variable_item[]; }
+      => AstStatement<declare_stmt_t>
     */
     return {
       tableList: Array.from(tableList),
@@ -696,7 +696,7 @@ create_function_stmt
   r:func_returns? __
   fo:create_func_opt* __ SEMICOLON? __ {
     /*
-      export type create_function_stmt = {
+      export type create_function_stmt_t = {
         type: 'create';
         replace?: string;
         name: { schema?: string; name: string };
@@ -705,7 +705,7 @@ create_function_stmt
         keyword: 'function';
         options?: create_func_opt[];
       }
-      => AstStatement<create_function_stmt>
+      => AstStatement<create_function_stmt_t>
       */
     return {
         tableList: Array.from(tableList),
@@ -725,7 +725,7 @@ create_function_stmt
 create_type_stmt
   = a:KW_CREATE __ k:'TYPE'i __ s:table_name __ as:KW_AS __ r:KW_ENUM __ LPAREN __ e:expr_list? __ RPAREN {
       /*
-      export type create_type_stmt = {
+      export type create_type_stmt_t = {
         type: 'create',
         keyword: 'type',
         name: { schema: string; name: string },
@@ -733,7 +733,7 @@ create_type_stmt
         resource?: string,
         create_definitions?: any
       }
-      => AstStatement<create_type_stmt>
+      => AstStatement<create_type_stmt_t>
       */
       e.parentheses = true
       customTypes.add([s.db, s.table].filter(v => v).join('.'))
@@ -751,7 +751,7 @@ create_type_stmt
       }
     }
   / a:KW_CREATE __ k:'TYPE'i __ s:table_name {
-    // => AstStatement<create_type_stmt>
+    // => AstStatement<create_type_stmt_t>
     customTypes.add([s.db, s.table].filter(v => v).join('.'))
     return {
         tableList: Array.from(tableList),
@@ -766,7 +766,7 @@ create_type_stmt
 create_domain_stmt
   = a:KW_CREATE __ k:'DOMAIN'i __ s:table_name __ as:KW_AS? __ d:data_type __ ce:collate_expr? __ de:default_expr? __ ccc: create_constraint_check? {
       /*
-      export type create_domain_stmt = {
+      export type create_domain_stmt_t = {
         type: 'create',
         keyword: 'domain',
         domain: { schema: string; name: string },
@@ -774,7 +774,7 @@ create_domain_stmt
         target: data_type,
         create_definitions?: any[]
       }
-      => AstStatement<create_domain_stmt>
+      => AstStatement<create_domain_stmt_t>
       */
      if (ccc) ccc.type = 'constraint'
      const definitions = [ce, de, ccc].filter(v => v)
@@ -1478,7 +1478,7 @@ use_stmt
 
 aggregate_signature
   = STAR {
-    // => { name: ”*“ }
+    // => { name: "*" }
     return [
       {
         name: '*'
@@ -1494,8 +1494,8 @@ aggregate_signature
   / alter_func_args
 
 alter_func_argmode
-  = t:(KW_IN / 'OUT'i / 'VARIADIC'i / 'INOUT'i) {
-    // => ignore
+  = t:(KW_IN / 'OUT'i / 'VARIADIC'i) {
+    // => "IN" | "OUT" | "VARIADIC"
     return t.toUpperCase()
   }
 
@@ -1735,9 +1735,9 @@ ALTER_RENAME
         type: 'alter';
         resource: string;
         keyword?: 'to' | 'as';
-        [key: string]: ident;
+        [key: string]: ident | undefined;
       }
-      => AstStatement<alter_rename>
+      => AstStatement<alter_rename_owner>
       */
     return {
       action: 'rename',
@@ -2531,7 +2531,7 @@ grant_revoke_stmt
       const obj = { revoke: 'from', grant: 'to' }
       return obj[g.type].toLowerCase() === t[0].toLowerCase()
     } __ to:user_or_role_list __ wo:with_grant_option? {
-      /* export interface grant_revoke_stmt {
+      /* export interface grant_revoke_stmt_t {
         type: string;
         grant_option_for?: origin_str_stmt;
         keyword: 'priv';
@@ -2544,7 +2544,7 @@ grant_revoke_stmt
         user_or_roles?: user_or_role_list;
         with?: with_grant_option;
       }
-      => AstStatement<grant_revoke_stmt>
+      => AstStatement<grant_revoke_stmt_t>
      */
     return {
       tableList: Array.from(tableList),
@@ -2567,7 +2567,7 @@ grant_revoke_stmt
       const obj = { revoke: 'from', grant: 'to' }
       return obj[g.type].toLowerCase() === t[0].toLowerCase()
     } __ to:user_or_role_list __ wo:with_admin_option? {
-      // => => AstStatement<grant_revoke_stmt>
+      // => AstStatement<grant_revoke_stmt_t>
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
@@ -2583,7 +2583,7 @@ grant_revoke_stmt
   }
 elseif_stmt
   = 'ELSEIF'i __ e:expr __ 'THEN'i __ ia:crud_stmt __ s:SEMICOLON? {
-    // => { type: 'elseif'; boolean_expr: expr; then: curd_stmt; semicolon?: string; }
+    // => { type: 'elseif'; boolean_expr: expr; then: crud_stmt; semicolon?: string; }
     return {
       type: 'elseif',
       boolean_expr: e,
@@ -2599,18 +2599,18 @@ elseif_stmt_list
   }
 if_else_stmt
   = 'IF'i __ ie:expr __ 'THEN'i __ ia:crud_stmt __ s:SEMICOLON? __ ei:elseif_stmt_list? __ el:(KW_ELSE __ crud_stmt)? __ es:SEMICOLON? __ 'END'i __ 'IF'i {
-    /* export interface if_else_stmt {
+    /* export interface if_else_stmt_t {
         type: 'if';
         keyword: 'if';
         boolean_expr: expr;
         semicolons: string[];
         if_expr: crud_stmt;
         elseif_expr: elseif_stmt[];
-        else_expr: curd_stmt;
+        else_expr: crud_stmt;
         prefix: literal_string;
         suffix: literal_string;
       }
-     => AstStatement<if_else_stmt>
+     => AstStatement<if_else_stmt_t>
      */
     return {
       tableList: Array.from(tableList),
@@ -2675,13 +2675,13 @@ raise_item
   }
 raise_stmt
   = 'RAISE'i __ l:raise_level?  __ r:raise_item? __ using:raise_opt? {
-    /* export interface raise_stmt {
+    /* export interface raise_stmt_t {
         type: 'raise';
         level?: string;
         raise?: raise_item;
         using?: raise_opt;
       }
-      => AstStatement<raise_stmt>
+      => AstStatement<raise_stmt_t>
      */
     return {
       tableList: Array.from(tableList),
@@ -2696,12 +2696,12 @@ raise_stmt
   }
 execute_stmt
   = 'EXECUTE'i __ name:ident __ a:(LPAREN __ proc_primary_list __ RPAREN)?  {
-    /* export interface execute_stmt {
+    /* export interface execute_stmt_t {
         type: 'execute';
         name: string;
         args?: { type: expr_list; value: proc_primary_list; }
       }
-      => AstStatement<execute_stmt>
+      => AstStatement<execute_stmt_t>
      */
     return {
       tableList: Array.from(tableList),
@@ -2734,14 +2734,14 @@ for_loop_stmt
     if (!f.label && !label) return true
     return false
   } {
-    /* export interface for_loop_stmt {
+    /* export interface for_loop_stmt_t {
         type: 'for';
         label?: string
         target: string;
         query: select_stmt;
         stmts: multiple_stmt;
       }
-      => AstStatement<for_loop_stmt>
+      => AstStatement<for_loop_stmt_t>
      */
     return {
       tableList: Array.from(tableList),
@@ -2757,14 +2757,14 @@ for_loop_stmt
   }
 transaction_stmt
   = k:('begin'i / 'commit'i / 'rollback'i) {
-    /* export interface transaction_stmt {
+    /* export interface transaction_stmt_t {
         type: 'transaction';
         expr: {
           type: 'origin',
           value: string
         }
       }
-      => AstStatement<transaction_stmt>
+      => AstStatement<transaction_stmt_t>
      */
     return {
       type: 'transaction',
@@ -2949,7 +2949,7 @@ array_index_list
 
 expr_item
   = e:binary_column_expr __ a:array_index_list? {
-    // => binary_expr & { array_index: array_index }
+    // => binary_column_expr & { array_index: array_index }
     if (a) e.array_index = a
     return e
   }
@@ -3150,7 +3150,7 @@ table_join
     }
   / op:join_op __ LPAREN __ stmt:(union_stmt / table_ref_list) __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
     /* => {
-      expr: (union_stmt || table_ref_list) & { parentheses: true; };
+      expr: (union_stmt | table_ref_list) & { parentheses: true; };
       as?: alias_clause;
       join: join_op;
       on?: on_clause;
@@ -3260,7 +3260,39 @@ table_name
 
 or_and_expr
 	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
-    // => binary_expr
+    /*
+    export type BINARY_OPERATORS =
+      | LOGIC_OPERATOR
+      | "OR"
+      | "AND"
+      | multiplicative_operator
+      | additive_operator
+      | arithmetic_comparison_operator
+      | "IN"
+      | "NOT IN"
+      | "BETWEEN"
+      | "NOT BETWEEN"
+      | "IS"
+      | "IS NOT"
+      | "LIKE"
+      | "@>"
+      | "<@"
+      | OPERATOR_CONCATENATION
+      | DOUBLE_WELL_ARROW
+      | WELL_ARROW
+      | "?"
+      | "?|"
+      | "?&"
+      | "#-";
+
+    export type binary_expr = {
+      type: "binary_expr";
+      operator: BINARY_OPERATORS;
+      left: expr;
+      right: expr;
+    };
+    => binary_expr
+     */
     const len = tail.length
     let result = head
     for (let i = 0; i < len; ++i) {
@@ -3777,7 +3809,7 @@ case_when_then_list
 
 case_when_then
   = KW_WHEN __ condition:or_and_where_expr __ KW_THEN __ result:expr {
-    // => { type: 'when'; cond: binary_expr; result: expr; }
+    // => { type: 'when'; cond: or_and_where_expr; result: expr; }
     return {
       type: 'when',
       cond: condition,
@@ -4140,7 +4172,7 @@ column_ref
 
 column_ref_quoted
   = col:literal_double_quoted_string {
-    // => IGNORE
+    // => unknown
       columnList.add(`select::null::${col.value}`);
       return {
         type: 'column_ref',
@@ -4408,7 +4440,7 @@ aggr_fun_count
       };
     }
   / name:('percentile_cont'i / 'percentile_disc'i) __ LPAREN __ arg:(literal_numeric / literal_array) __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
-   // => { type: 'aggr_func'; name: 'PERCENTILE_CONT' | 'PERCENTILE_DISC'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
+   // => { type: 'aggr_func'; name: 'PERCENTILE_CONT' | 'PERCENTILE_DISC'; args: literal_numeric | literal_array; within_group_orderby: order_by_clause; over?: over_partition }
     return {
         type: 'aggr_func',
         name: name.toUpperCase(),
@@ -4420,7 +4452,7 @@ aggr_fun_count
       };
   }
   / name:('mode'i) __ LPAREN __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
-    // => { type: 'aggr_func'; name: 'MODE'; args: literal_numeric / literal_array; within_group_orderby: order_by_clause; over?: over_partition }
+    // => { type: 'aggr_func'; name: 'MODE'; args: literal_numeric | literal_array; within_group_orderby: order_by_clause; over?: over_partition }
     return {
         type: 'aggr_func',
         name: name.toUpperCase(),
@@ -4675,8 +4707,7 @@ cast_expr
         expr: or_expr | column_ref | param
           | expr;
         keyword: 'cast';
-        ...cast_double_colon;
-      }
+      } & cast_double_colon
       */
     e.parentheses = true
     if (!c) return e
@@ -4688,13 +4719,12 @@ cast_expr
     }
   }
   / e:(column_ref_quoted / literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref_array_index / param) __ c:cast_double_colon? {
-    /* => {
+    /* => ({
         type: 'cast';
         expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
           | expr;
         keyword: 'cast';
-        ...cast_double_colon;
-      }
+      } & cast_double_colon)
       */
     if (!c) return e
     return {
@@ -5188,8 +5218,8 @@ proc_stmts
 
 proc_stmt
   = &{ varList = []; return true; } __ s:(assign_stmt / return_stmt) {
-      /* export interface proc_stmt { type: 'proc'; stmt: assign_stmt | return_stmt; vars: any }
-     => AstStatement<proc_stmt>
+      /* export interface proc_stmt_t { type: 'proc'; stmt: assign_stmt | return_stmt; vars: any }
+     => AstStatement<proc_stmt_t>
      */
       return { type: 'proc', stmt: s, vars: varList }
     }
@@ -5313,7 +5343,7 @@ var_decl_list
 
 var_decl
   = p:KW_VAR_PRE_DOLLAR_DOUBLE d:[^$]* s:KW_VAR_PRE_DOLLAR_DOUBLE {
-    // => { type: 'var'; name: string; prefix: string; suffix: string; };
+    // => { type: 'var'; name: string; prefix: string; suffix: string; }
     return {
       type: 'var',
       name: d.join(''),
@@ -5322,7 +5352,7 @@ var_decl
     };
   }
   / KW_VAR_PRE_DOLLAR f:column KW_VAR_PRE_DOLLAR d:[^$]* KW_VAR_PRE_DOLLAR s:column !{ if (f !== s) return true } KW_VAR_PRE_DOLLAR {
-    // => { type: 'var'; name: string; prefix: string; suffix: string; };
+    // => { type: 'var'; name: string; prefix: string; suffix: string; }
     return {
       type: 'var',
       name: d.join(''),
@@ -5331,7 +5361,7 @@ var_decl
     };
   }
   / p:KW_VAR_PRE d: without_prefix_var_decl {
-    // => without_prefix_var_decl & { type: 'var'; prefix: string; };
+    // => without_prefix_var_decl & { type: 'var'; prefix: string; }
     // push for analysis
     return {
       type: 'var',
