@@ -329,6 +329,16 @@ describe('transactsql', () => {
       expect(getParsedSql(sql)).to.be.equal(`SELECT [node_1].[cnt] AS [cnt], [node_6].[wua_server_env_raw] AS [wua_server_env_raw] FROM [view_soc_246_node_1] AS [node_1] LEFT JOIN [dimension_soc_246_node_6] FOR SYSTEM_TIME ${opt.toUpperCase()} AS [node_6] ON [node_1].[id] = [node_6].[wua_server_env_raw]`);
     }
   })
+  it('should support set statements', () => {
+    let sql = 'SET NOCOUNT ON;'
+    expect(getParsedSql(sql)).to.be.equal('SET NOCOUNT ON')
+    sql = 'SET DATEFORMAT dmy;'
+    expect(getParsedSql(sql)).to.be.equal('SET DATEFORMAT dmy')
+    sql = 'SET STATISTICS IO OFF'
+    expect(getParsedSql(sql)).to.be.equal('SET STATISTICS IO OFF')
+    sql = 'SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED'
+    expect(getParsedSql(sql)).to.be.equal('SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED')
+  })
   describe('if else', () => {
     it('should support if only statement', () => {
       const sql = `IF EXISTS(SELECT 1 from sys.views where name='MyView' and type='v')

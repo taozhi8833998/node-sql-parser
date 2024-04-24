@@ -1231,18 +1231,81 @@ rename_stmt
         }
       };
     }
+set_stmt_keywords
+  = 'result'i __ KW_SET __ 'caching'i {
+    return {
+      type: 'origin',
+      value: 'result set caching'
+    }
+  }
+  / 'statistics'i __ d:('io'i / 'xml'i / 'profile'i / 'time'i) {
+    return {
+      type: 'origin',
+      value: `statistics ${d.toLowerCase()}`
+    }
+  }
+
+set_stmt_keyword
+  = d:('datefirst'i / 'dateformat'i / 'deadlock_priority'i / 'lock_timeout'i / 'concat_null_yields_null'i / 'cursor_close_on_commit'i
+  / 'fips_flagger'i / 'identity_insert'i / 'language'i / 'offsets'i / 'quoted_identifier'i / 'arithabort'i / 'arithignore'i / 'fmtonly'i
+  /  'nocount'i / 'noexec'i / 'numberic_roundabort'i / 'parseonly'i / 'query_governor_cost_limit'i / 'rowcount'i / 'textsize'i / 'ansi_defaults'i
+  'ansi_null_dflt_off'i / 'ansi_null_dflt_on'i / 'ansi_nulls'i / 'ansi_padding'i / 'ansi_warnings'i / 'forceplan'i / 'showplan_all'i / 'showplan_text'i
+  / 'showplan_xml'i / 'implicit_transactions'i / 'remote_proc_transactions'i / 'xact_abort'i) {
+    return {
+      type: 'origin',
+      value: d.toLowerCase()
+    }
+  }
+
+set_transaction_iso_level
+  = 'read'i __ d:('uncommitted'i / 'committed'i) {
+    return {
+      type: 'origin',
+      value: `read ${d.toLowerCase()}`
+    }
+  }
+  / 'REPEATABLE'i __ 'read'i {
+    return {
+      type: 'origin',
+      value: 'repeatable read'
+    }
+  }
+  / d:('snapshot'i / 'serializable'i) {
+    return {
+      type: 'origin',
+      value: d.toLowerCase()
+    }
+  }
 
 set_stmt
-  = KW_SET __
-  kw: (KW_GLOBAL / KW_SESSION / KW_LOCAL / KW_PERSIST / KW_PERSIST_ONLY)? __
-  a: assign_stmt {
-    a.keyword = kw
+  = KW_SET __ 'transaction'i __ 'isolation'i __ 'level'i __  e:set_transaction_iso_level{
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
       ast: {
         type: 'set',
-        expr: a
+        expr: {
+          type: 'assign',
+          left: {
+            type: 'origin',
+            value: 'transaction isolation level'
+          },
+          right: e
+        }
+      }
+    }
+  }
+  / KW_SET __ va:(set_stmt_keywords / set_stmt_keyword) __ e:proc_expr {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'set',
+        expr: {
+          type: 'assign',
+          left: va,
+          right: e
+        }
       }
     }
   }
@@ -3103,7 +3166,7 @@ proc_stmt
     }
 
 assign_stmt
-  = va:(var_decl / without_prefix_var_decl) __ s: (KW_ASSIGN / KW_ASSIGIN_EQUAL) __ e:proc_expr {
+  = va:(var_decl / without_prefix_var_decl) __ s: (KW_ASSIGN / KW_ASSIGIN_EQUAL)? __ e:proc_expr {
     return {
       type: 'assign',
       left: va,
