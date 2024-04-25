@@ -2608,8 +2608,40 @@ primary
     }
   }
 
+map_expr_item
+  = k:literal_string __ COMMA __ v:ident_without_kw_type {
+    columnList.add(`select::null::${v.value}`);
+    return {
+      key: k,
+      value: v
+    }
+  }
+
+map_expr_item_list
+  = head:map_expr_item tail:(__ COMMA __ map_expr_item)* {
+    return createList(head, tail)
+  }
+
+map_expr
+  = KW_MAP __ LBRAKE __ e:map_expr_item_list __ RBRAKE {
+    return {
+      type: 'map_object',
+      keyword: 'map',
+      expr: e
+    }
+  }
+
 column_ref
-  = tbl:(ident __ DOT)? __ STAR {
+  = m:map_expr {
+    return {
+      type: 'column_ref',
+      table: null,
+      column: {
+        expr: m
+      },
+    }
+  }
+  / tbl:(ident __ DOT)? __ STAR {
     // => IGNORE
       const table = tbl && tbl[0] || null
       columnList.add(`select::${table}::(.*)`);
