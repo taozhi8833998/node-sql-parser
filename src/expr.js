@@ -95,6 +95,14 @@ exprToSQLConvertFn.select = expr => {
 
 exprToSQLConvertFn.unary_expr = unaryToSQL
 
+function mapObjectToSQL(mapExpr) {
+  const { keyword, expr } = mapExpr
+  const exprStr = expr.map(exprItem => [literalToSQL(exprItem.key), literalToSQL(exprItem.value)].join(', ')).join(', ')
+  return [toUpper(keyword), `[${exprStr}]`].join('')
+}
+
+exprToSQLConvertFn.map_object = mapObjectToSQL
+
 function orderOrPartitionByToSQL(expr, prefix) {
   if (!Array.isArray(expr)) return ''
   let expressions = []

@@ -379,6 +379,21 @@ describe('Flink', () => {
         "SELECT `window_start`, `window_end`, `http_status`, COUNT(*) AS `count_http_status` FROM TABLE(TUMBLE(TABLE `parsed_logs` DESCRIPTOR(`_operationTs`) INTERVAL '60' SECONDS))"
       ]
     },
+    {
+      title: 'map object',
+      sql: [
+        `insert into sink_soc_10086_node_11(
+          pk
+          , f1
+          )
+          select
+          CAST(map['uri',uri] as VARCHAR)
+          , uri
+          from view_soc_10086_node_8
+          ;`,
+        "INSERT INTO `sink_soc_10086_node_11` (pk, f1) SELECT CAST(MAP['uri', uri] AS VARCHAR), `uri` FROM `view_soc_10086_node_8`"
+      ]
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
