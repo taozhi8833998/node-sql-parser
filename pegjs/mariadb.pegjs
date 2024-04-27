@@ -1243,6 +1243,7 @@ create_constraint_definition
   = create_constraint_primary
   / create_constraint_unique
   / create_constraint_foreign
+  / create_constraint_check
 
 constraint_name
   = kc:KW_CONSTRAINT __
@@ -1286,6 +1287,18 @@ create_constraint_unique
         index: i,
         resource: 'constraint',
         index_options: id
+      }
+  }
+
+create_constraint_check
+  = kc:constraint_name? __ u:'CHECK'i __ nfr:('NOT'i __ 'FOR'i __ 'REPLICATION'i __)? LPAREN __ c:or_and_expr __ RPAREN {
+    return {
+        constraint_type: u.toLowerCase(),
+        keyword: kc && kc.keyword,
+        constraint: kc && kc.constraint,
+        index_type: nfr && { keyword: 'not for replication' },
+        definition: [c],
+        resource: 'constraint',
       }
   }
 

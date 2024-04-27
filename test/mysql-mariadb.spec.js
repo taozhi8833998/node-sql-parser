@@ -995,6 +995,13 @@ describe('mysql', () => {
           "ALTER TABLE `product` MODIFY COLUMN `type` ENUM('one', 'two') NOT NULL AFTER `name`"
         ]
       },
+      {
+        title: 'create table with check constraint',
+        sql: [
+          'CREATE TABLE `Pattern` (`IsInterpolated` INT NOT NULL, `Value` DOUBLE, CONSTRAINT `CHK_Value_IsInterpolated` CHECK ((`Value` IS NOT NULL) OR (`IsInterpolated` = 0)));',
+          'CREATE TABLE `Pattern` (`IsInterpolated` INT NOT NULL, `Value` DOUBLE, CONSTRAINT `CHK_Value_IsInterpolated` CHECK ((`Value` IS NOT NULL) OR (`IsInterpolated` = 0)))'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
