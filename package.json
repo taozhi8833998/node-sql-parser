@@ -95,7 +95,8 @@
     "sourceMap": false
   },
   "dependencies": {
+    "@types/pegjs": "^0.10.0",
     "big-integer": "^1.6.48",
-    "@types/pegjs": "^0.10.0"
+    "pegjs": "^0.10.0"
   }
 }
