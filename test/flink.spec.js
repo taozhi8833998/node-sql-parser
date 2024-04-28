@@ -394,6 +394,24 @@ describe('Flink', () => {
         "INSERT INTO `sink_soc_10086_node_11` (pk, f1) SELECT CAST(MAP['uri', uri] AS VARCHAR), `uri` FROM `view_soc_10086_node_8`"
       ]
     },
+    {
+      title: 'json_object',
+      sql: [
+        `select name, eventTime, eventDetail
+        from (
+            select
+            concat('AK中文信息') as name,
+            cast(event_time as varchar) as eventTime,
+            json_object(
+                'risk-tag' value risk_tag,
+                'abc' VALUE (10 * 2),
+                'user-agent' value JSON_OBJECT('city' VALUE 'New York', 'postalCode' VALUE '10001')
+            ) as eventDetail
+        from check_risk
+        );`,
+        "SELECT `name`, `eventTime`, `eventDetail` FROM (SELECT concat('AK中文信息') AS `name`, CAST(`event_time` AS VARCHAR) AS `eventTime`, JSON_OBJECT('risk-tag' VALUE `risk_tag`, 'abc' VALUE (10 * 2), 'user-agent' VALUE JSON_OBJECT('city' VALUE 'New York', 'postalCode' VALUE '10001')) AS `eventDetail` FROM `check_risk`)"
+      ]
+    },
   ];
 
   SQL_LIST.forEach(sqlInfo => {
