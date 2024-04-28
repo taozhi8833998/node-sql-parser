@@ -798,13 +798,7 @@ create_table_stmt
     ife:if_not_exists_stmt? __
     t:table_ref_list __
     po:create_table_partition_of {
-      /*
-
-      export interface create_table_partition_of extends create_table_stmt_node_base {
-        partition_of: create_table_partition_of;
-      }
-      => AstStatement<create_table_partition_of>;
-      */
+      // => AstStatement<create_table_stmt_node_base & { partition_of: create_table_partition_of }>
       if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
@@ -876,7 +870,7 @@ create_table_stmt
       export interface create_table_stmt_node_like extends create_table_stmt_node_base{
         like: create_like_table;
       }
-      => AstStatement<create_table_stmt_node>;
+      => AstStatement<create_table_stmt_node>
       */
       if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
       return {
@@ -1145,6 +1139,12 @@ create_like_table
 
 for_values_item
   = KW_FROM __ LPAREN __ f:literal_string __ RPAREN __ KW_TO __ LPAREN __ t:literal_string __ RPAREN {
+    /* => {
+      type: 'for_values_item';
+      keyword: 'from';
+      from: literal_string;
+      to: literal_string;
+    } */
     return {
       type: 'for_values_item',
       keyword: 'from',
@@ -1153,6 +1153,11 @@ for_values_item
     }
   }
   / KW_IN __ LPAREN __ e:expr_list __ RPAREN {
+    /* => {
+      type: 'for_values_item';
+      keyword: 'in';
+      in: expr_list;
+    } */
     return {
       type: 'for_values_item',
       keyword: 'in',
@@ -1160,6 +1165,12 @@ for_values_item
     }
   }
   / KW_WITH __ LPAREN __ 'MODULUS'i __ m:literal_numeric __ COMMA __ 'REMAINDER'i __ r:literal_numeric __ RPAREN {
+    /* => {
+      type: 'for_values_item';
+      keyword: 'with';
+      modulus: literal_numeric;
+      remainder: literal_numeric;
+    } */
     return {
       type: 'for_values_item',
       keyword: 'with',
@@ -1170,6 +1181,11 @@ for_values_item
 
 for_values
   = 'FOR'i __ KW_VALUES __ fvi:for_values_item {
+    /* => {
+      type: 'for_values';
+      keyword: 'for values';
+      expr: for_values_item;
+    } */
     return {
       type: 'for_values',
       keyword: 'for values',
@@ -1178,6 +1194,13 @@ for_values
   }
 create_table_partition_of
   = KW_PARTITION __ 'OF'i __ t:table_name __ fv:for_values __ ts:(KW_TABLESPACE __ ident_without_kw_type)? {
+    /* => {
+      type: 'partition_of';
+      keyword: 'partition of';
+      table: table_name;
+      for_values: for_values;
+      tablespace: ident_without_kw_type | undefined;
+    } */
     return {
       type: 'partition_of',
       keyword: 'partition of',
