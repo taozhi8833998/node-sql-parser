@@ -164,7 +164,7 @@ export interface create_table_stmt_node_like extends create_table_stmt_node_base
         like: create_like_table;
       }
 
-export type create_table_stmt = AstStatement<create_table_stmt_node> | AstStatement<create_table_stmt_node>;;
+export type create_table_stmt = AstStatement<create_table_stmt_node_base & { partition_of: create_table_partition_of }> | AstStatement<create_table_stmt_node>;
 
 export type create_sequence_stmt = {
         type: 'create',
@@ -229,6 +229,46 @@ export type column_order = {
 export type create_like_table_simple = { type: 'like'; table: table_ref_list; };
 
 export type create_like_table = create_like_table_simple | create_like_table_simple & { parentheses?: boolean; };
+
+
+
+
+
+
+
+export type for_values_item = {
+      type: 'for_values_item';
+      keyword: 'from';
+      from: literal_string;
+      to: literal_string;
+    } | {
+      type: 'for_values_item';
+      keyword: 'in';
+      in: expr_list;
+    } | {
+      type: 'for_values_item';
+      keyword: 'with';
+      modulus: literal_numeric;
+      remainder: literal_numeric;
+    };
+
+
+
+export type for_values = {
+      type: 'for_values';
+      keyword: 'for values';
+      expr: for_values_item;
+    };
+
+
+
+export type create_table_partition_of = {
+      type: 'partition_of';
+      keyword: 'partition of';
+      table: table_name;
+      for_values: for_values;
+      tablespace: ident_without_kw_type | undefined;
+    };
 
 export type create_table_definition = create_definition[];
 
