@@ -59,6 +59,14 @@ function flattenArgToSQL(arg) {
   return result.filter(hasVal).join(' ')
 }
 
+function jsonObjectArgToSQL(argExpr) {
+  const { expr } = argExpr
+  const { key, value, on } = expr
+  const result = [exprToSQL(key), 'VALUE', exprToSQL(value)]
+  if (on) result.push('ON', 'NULL', exprToSQL(on))
+  return result.filter(hasVal).join(' ')
+}
+
 function flattenFunToSQL(stmt) {
   const { args, type } = stmt
   const keys = ['input', 'path', 'outer', 'recursive', 'mode']
@@ -103,6 +111,7 @@ export {
   extractFunToSQL,
   flattenFunToSQL,
   funcToSQL,
+  jsonObjectArgToSQL,
   lambdaToSQL,
   tablefuncFunToSQL,
 }

@@ -2914,6 +2914,32 @@ position_func_clause
     };
   }
 
+json_object_func_arg
+  = key:literal_string __ 'VALUE'i __ value:or_and_expr __ on:(KW_ON __ 'NULL'i __ ('NULL'i / 'ABSENT'i))? {
+    return {
+      type: 'json_object_arg',
+      expr: {
+        key,
+        value,
+        on: on && { type: 'origin', value: on[4] }
+      }
+    }
+  }
+
+json_object_func_args
+  = head:json_object_func_arg tail:(__ COMMA __ json_object_func_arg)* {
+    return { type: 'expr_list', value: createList(head, tail) }
+  }
+
+json_object_func_clause
+  = 'json_object'i __ LPAREN __ args:json_object_func_args __ RPAREN {
+    return {
+        type: 'function',
+        name: { name: [{ type: 'origin', value: 'json_object' }]},
+        args,
+    };
+  }
+
 trim_position
   = 'BOTH'i / 'LEADING'i / 'TRAILING'i
 
@@ -2994,6 +3020,7 @@ substring_func_clause
 
 func_call
   = position_func_clause
+  / json_object_func_clause
   / trim_func_clause
   / substring_func_clause
   / overlay_func_clause
