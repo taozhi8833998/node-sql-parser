@@ -29,6 +29,6 @@ jobs:
     steps:
     # Runs a single command using the runners shell
     - name: Send greeting
-      run: echo "Hello $abc"
+      run: echo "Hello $def"
       env: 
-        abc: ${{ secrets.PUBLISH_NPM_TOKEN }}
+        def: ${{ secrets.PUBLISH_NPM_TOKEN }}
