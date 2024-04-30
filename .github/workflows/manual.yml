@@ -31,4 +31,4 @@ jobs:
     - name: Send greeting
       run: echo "Hello $abc"
       env: 
-        abc: ${{ secrets.abc }}
+        abc: ${{ secrets.PUBLISH_NPM_TOKEN }}
