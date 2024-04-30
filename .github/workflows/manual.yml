@@ -31,4 +31,4 @@ jobs:
     - name: Send greeting
       run: echo "Hello $def"
       env: 
-        def: ${{ secrets.PUBLISH_NPM_TOKEN }}
+        def: ${{ secrets.dddd }}
