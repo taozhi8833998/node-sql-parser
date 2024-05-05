@@ -1934,8 +1934,8 @@ additive_operator
   = "+" / "-"
 
 multiplicative_expr
-  = head:primary
-    tail:(__  (multiplicative_operator / LOGIC_OPERATOR)  __ primary)* {
+  = head:unary_expr_or_primary
+    tail:(__  (multiplicative_operator / LOGIC_OPERATOR)  __ unary_expr_or_primary)* {
       return createBinaryExprChain(head, tail)
     }
 
@@ -1962,6 +1962,16 @@ primary
       value: prepared_symbol
     }
   }
+
+unary_expr_or_primary
+  = primary
+  / op:(unary_operator) tail:(__ unary_expr_or_primary) {
+    // if (op === '!') op = 'NOT'
+    return createUnaryExpr(op, tail[1])
+  }
+
+unary_operator
+  = '!' / '-' / '+' / '~'
 
 column_ref
   = tbl:(ident __ DOT __)? col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ __ ca:collate_expr? {
