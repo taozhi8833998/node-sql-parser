@@ -2263,8 +2263,8 @@ additive_operator
   = "+" / "-"
 
 multiplicative_expr
-  = head:primary
-    tail:(__ (multiplicative_operator / LOGIC_OPERATOR)  __ primary)* {
+  = head:unary_expr_or_primary
+    tail:(__ (multiplicative_operator / LOGIC_OPERATOR)  __ unary_expr_or_primary)* {
       return createBinaryExprChain(head, tail)
     }
 
@@ -2287,6 +2287,16 @@ primary
         list.parentheses = true;
         return list;
     }
+
+unary_expr_or_primary
+  = primary
+  / op:(unary_operator) tail:(__ unary_expr_or_primary) {
+    // if (op === '!') op = 'NOT'
+    return createUnaryExpr(op, tail[1])
+  }
+
+unary_operator
+  = '!' / '-' / '+' / '~'
 
 interval_expr
   = KW_INTERVAL __
