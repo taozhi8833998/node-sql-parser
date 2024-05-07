@@ -1472,6 +1472,27 @@ describe('Postgres', () => {
         `CREATE TABLE "electronics" PARTITION OF "products" FOR VALUES IN ('Electronics')`
       ]
     },
+    {
+      title: 'distinct in args',
+      sql: [
+        `SELECT
+        f.title,
+        STRING_AGG (
+      a.first_name || ' ' || a.last_name,
+            ','
+           ORDER BY
+            a.first_name,
+            a.last_name
+        ) actors
+    FROM
+        film f
+    INNER JOIN film_actor fa USING (film_id)
+    INNER JOIN actor a USING (actor_id)
+    GROUP BY
+        f.title;`,
+        `SELECT "f".title, STRING_AGG("a".first_name || ' ' || "a".last_name, ',' ORDER BY "a".first_name ASC, "a".last_name ASC) AS "actors" FROM "film" AS "f" INNER JOIN "film_actor" AS "fa" USING ("film_id") INNER JOIN "actor" AS "a" USING ("actor_id") GROUP BY "f".title`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
