@@ -4121,7 +4121,7 @@ primary
 unary_expr_or_primary
   = primary
   / op:(unary_operator) tail:(__ unary_expr_or_primary) {
-    // if (op === '!') op = 'NOT'
+    // => unary_expr
     return createUnaryExpr(op, tail[1])
   }
 
