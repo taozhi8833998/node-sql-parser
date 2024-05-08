@@ -1145,6 +1145,10 @@ export type column_ref_array_index = column_ref;
 
 export type primary = cast_expr | or_and_where_expr | var_decl | { type: 'origin'; value: string; };
 
+export type unary_expr_or_primary = primary | unary_expr;
+
+export type unary_operator = "!" | "-" | "+" | "~";
+
 export type string_constants_escape = { type: 'origin'; value: string; };
 
 
@@ -1246,7 +1250,7 @@ type KW_SUM_MAX_MIN_AVG = never;
 
 export type aggr_fun_count = { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'; args:count_arg; over: over_partition } | { type: 'aggr_func'; name: 'PERCENTILE_CONT' | 'PERCENTILE_DISC'; args: literal_numeric | literal_array; within_group_orderby: order_by_clause; over?: over_partition } | { type: 'aggr_func'; name: 'MODE'; args: literal_numeric | literal_array; within_group_orderby: order_by_clause; over?: over_partition };
 
-export type concat_separator = { keyword: string | null; value: literal_string; };
+export type concat_separator = { symbol: ','; delimiter: literal_string; };
 
 
 
@@ -1258,7 +1262,7 @@ export type distinct_args = { distinct: 'DISTINCT'; expr: expr; orderby?: order_
 
 export type count_arg = { expr: star_expr } | distinct_args;
 
-export type aggr_array_agg = { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG'; orderby?: order_by_clause  };
+export type aggr_array_agg = { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG' | 'STRING_AGG';  };
 
 
 
@@ -1502,6 +1506,8 @@ type KW_OR = never;
 type KW_ARRAY = never;
 
 type KW_ARRAY_AGG = never;
+
+type KW_STRING_AGG = never;
 
 type KW_COUNT = never;
 
