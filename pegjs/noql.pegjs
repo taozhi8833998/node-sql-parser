@@ -4286,16 +4286,16 @@ aggr_fun_count
   }
 
 concat_separator
-  = kw:'SEPARATOR'i? __ s:literal_string {
-    // => { keyword: string | null; value: literal_string; }
+  = kw:COMMA __ s:literal_string {
+    // => { symbol: ','; delimiter: literal_string; }
     return {
-      keyword: kw,
-      value: s
+      symbol: ke,
+      delimiter: s
     }
   }
 
 distinct_args
-  = d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ tail:(__ (KW_AND / KW_OR) __ expr)* __ or:order_by_clause? __ s:concat_separator? {
+  = d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ tail:(__ (KW_AND / KW_OR) __ expr)* __ s:concat_separator? __ or:order_by_clause? {
     /* => { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; separator?: concat_separator; } */
     const len = tail.length
     let result = c
@@ -4310,7 +4310,7 @@ distinct_args
       separator: s
     };
   }
-  / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause? __ s:concat_separator?  {
+  / d:KW_DISTINCT? __ c:or_and_expr __ s:concat_separator? __ or:order_by_clause? {
     /* => { distinct: 'DISTINCT'; expr: expr; orderby?: order_by_clause; separator?: concat_separator; } */
     return { distinct: d, expr: c, orderby: or, separator: s };
   }
@@ -4320,13 +4320,12 @@ count_arg
   / distinct_args
 
 aggr_array_agg
-  = pre:(ident __ DOT)? __ name:KW_ARRAY_AGG __ LPAREN __ arg:distinct_args __ o:order_by_clause? __ RPAREN {
-    // => { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG'; orderby?: order_by_clause  }
+  = pre:(ident __ DOT)? __ name:(KW_ARRAY_AGG / KW_STRING_AGG) __ LPAREN __ arg:distinct_args __ RPAREN {
+    // => { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG' | 'STRING_AGG';  }
       return {
         type: 'aggr_func',
         name: pre ? `${pre[0]}.${name}` : name,
         args: arg,
-        orderby: o,
       };
     }
 
@@ -4837,6 +4836,7 @@ KW_OR       = "OR"i         !ident_start { return 'OR'; }
 
 KW_ARRAY    = "ARRAY"i !ident_start { return 'ARRAY'; }
 KW_ARRAY_AGG = "ARRAY_AGG"i !ident_start { return 'ARRAY_AGG'; }
+KW_STRING_AGG = "STRING_AGG"i !ident_start { return 'STRING_AGG'; }
 KW_COUNT    = "COUNT"i      !ident_start { return 'COUNT'; }
 KW_GROUP_CONCAT = "GROUP_CONCAT"i  !ident_start { return 'GROUP_CONCAT'; }
 KW_MAX      = "MAX"i        !ident_start { return 'MAX'; }
