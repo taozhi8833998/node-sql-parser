@@ -2906,7 +2906,7 @@ aggr_func
   / aggr_fun_smma
 
 aggr_fun_smma
-  = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN __ bc:over_partition? {
+  = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:expr __ RPAREN __ bc:over_partition? {
       return {
         type: 'aggr_func',
         name: name,
