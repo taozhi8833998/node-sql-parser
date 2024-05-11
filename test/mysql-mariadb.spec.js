@@ -1002,6 +1002,13 @@ describe('mysql', () => {
           'CREATE TABLE `Pattern` (`IsInterpolated` INT NOT NULL, `Value` DOUBLE, CONSTRAINT `CHK_Value_IsInterpolated` CHECK ((`Value` IS NOT NULL) OR (`IsInterpolated` = 0)))'
         ]
       },
+      {
+        title: 'sql',
+        sql: [
+          'select a.*,sum(b.f_hits_number) hits,sum(b.f_helpful=1) helpful from t_xxxx a left join t_bbb b on a.f_id = b.question_name_id group by a.f_id',
+          'SELECT `a`.*, SUM(`b`.`f_hits_number`) AS `hits`, SUM(`b`.`f_helpful` = 1) AS `helpful` FROM `t_xxxx` AS `a` LEFT JOIN `t_bbb` AS `b` ON `a`.`f_id` = `b`.`question_name_id` GROUP BY `a`.`f_id`'
+        ]
+      }
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
@@ -1018,7 +1025,7 @@ describe('mysql', () => {
       expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", or [ \\t\\n\\r] but ")" found.')
       expect(parser.astify.bind(parser, 'select convert("");')).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "OR", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", or [ \\t\\n\\r] but ")" found.')
       sql = 'SELECT AVG(Quantity,age) FROM table1;'
-      expect(parser.astify.bind(parser, sql)).to.throw('Expected "#", "%", "&", "&&", "(", ")", "*", "+", "-", "--", "->", "->>", ".", "/", "/*", "<<", ">>", "XOR", "^", "div", "|", "||", [ \\t\\n\\r], [A-Za-z0-9_$\\x80-￿], or [A-Za-z0-9_:] but "," found.')
+      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "%", "&", "&&", "(", ")", "*", "+", "-", "--", "->", "->>", ".", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "BETWEEN", "IN", "IS", "LIKE", "NOT", "REGEXP", "RLIKE", "XOR", "^", "div", "|", "||", [ \\t\\n\\r], [A-Za-z0-9_$\\x80-￿], or [A-Za-z0-9_:] but "," found.')
     })
 
     it('should join multiple table with comma', () => {
