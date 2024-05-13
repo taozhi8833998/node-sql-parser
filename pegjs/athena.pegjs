@@ -97,6 +97,10 @@
     'PERSIST_ONLY': true,
   };
 
+  function getLocationObject() {
+    return options.includeLocations ? {loc: location()} : {}
+  }
+
   function createUnaryExpr(op, e) {
     return {
       type: 'unary_expr',
@@ -1911,13 +1915,15 @@ aggr_func
   / aggr_fun_smma
 
 aggr_fun_smma
-  = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN {
+  = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN __ bc:over_partition?   {
       return {
         type: 'aggr_func',
         name: name,
         args: {
           expr: e
-        }
+        },
+        over: bc,
+        ...getLocationObject(),
       };
     }
 
@@ -1994,6 +2000,7 @@ func_call
         over: bc
       };
     }
+  / extract_func
   / f:scalar_time_func __ up:on_update_current_timestamp? {
     return {
         type: 'function',
@@ -2020,6 +2027,33 @@ func_call
         over: bc
       };
     }
+extract_filed
+  = f:('CENTURY'i / 'DAY'i / 'DATE'i / 'DECADE'i / 'DOW'i / 'DOY'i / 'EPOCH'i / 'HOUR'i / 'ISODOW'i / 'ISOYEAR'i / 'MICROSECONDS'i / 'MILLENNIUM'i / 'MILLISECONDS'i / 'MINUTE'i / 'MONTH'i / 'QUARTER'i / 'SECOND'i / 'TIMEZONE'i / 'TIMEZONE_HOUR'i / 'TIMEZONE_MINUTE'i / 'WEEK'i / 'YEAR'i) {
+    // => 'string'
+    return f
+  }
+extract_func
+  = kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ t:(KW_TIMESTAMP / KW_INTERVAL / KW_TIME / KW_DATE)? __ s:expr __ RPAREN {
+    // => { type: 'extract'; args: { field: extract_filed; cast_type: 'TIMESTAMP' | 'INTERVAL' | 'TIME'; source: expr; }}
+    return {
+        type: kw.toLowerCase(),
+        args: {
+          field: f,
+          cast_type: t,
+          source: s,
+        }
+    }
+  }
+  / kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ s:expr __ RPAREN {
+    // => { type: 'extract'; args: { field: extract_filed; source: expr; }}
+    return {
+        type: kw.toLowerCase(),
+        args: {
+          field: f,
+          source: s,
+        }
+    }
+  }
 scalar_time_func
   = KW_CURRENT_DATE
   / KW_CURRENT_TIME
@@ -2315,6 +2349,7 @@ KW_MIN      = "MIN"i        !ident_start { return 'MIN'; }
 KW_SUM      = "SUM"i        !ident_start { return 'SUM'; }
 KW_AVG      = "AVG"i        !ident_start { return 'AVG'; }
 
+KW_EXTRACT  = "EXTRACT"i    !ident_start { return 'EXTRACT'; }
 KW_CALL     = "CALL"i       !ident_start { return 'CALL'; }
 
 KW_CASE     = "CASE"i       !ident_start

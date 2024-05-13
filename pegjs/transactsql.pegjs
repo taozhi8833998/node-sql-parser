@@ -2506,7 +2506,8 @@ aggr_fun_smma
         args: {
           expr: e
         },
-        over: bc
+        over: bc,
+        ...getLocationObject(),
       };
     }
 
