@@ -1003,12 +1003,19 @@ describe('mysql', () => {
         ]
       },
       {
-        title: 'sql',
+        title: 'expr in aggr func',
         sql: [
           'select a.*,sum(b.f_hits_number) hits,sum(b.f_helpful=1) helpful from t_xxxx a left join t_bbb b on a.f_id = b.question_name_id group by a.f_id',
           'SELECT `a`.*, SUM(`b`.`f_hits_number`) AS `hits`, SUM(`b`.`f_helpful` = 1) AS `helpful` FROM `t_xxxx` AS `a` LEFT JOIN `t_bbb` AS `b` ON `a`.`f_id` = `b`.`question_name_id` GROUP BY `a`.`f_id`'
         ]
-      }
+      },
+      {
+        title: 'like "\\t" in string',
+        sql: [
+          "SELECT d.Fdrug_hash_id FROM t_xxxx d where  d.Fapproval_number like '\tH20190022%'",
+          "SELECT `d`.`Fdrug_hash_id` FROM `t_xxxx` AS `d` WHERE `d`.`Fapproval_number` LIKE '\tH20190022%'"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
