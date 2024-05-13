@@ -7,7 +7,7 @@
   "scripts": {
     "start": "webpack --config webpack.config.js",
     "build": "npm run lint && npm run compile && webpack --config webpack.config.js --mode production",
-    "test": "npm run lint && mochapack \"test/**/*.spec.js\"",
+    "test": "npm run lint && mochapack --reporter-option maxDiffSize=1000000 \"test/**/*.spec.js\"",
     "lint": "eslint src",
     "compile": "babel src -d lib",
     "coverLocal": "cross-env NODE_ENV=coverage nyc --reporter=lcov --reporter=text npm run test",

@@ -2914,6 +2914,7 @@ aggr_fun_smma
           expr: e
         },
         over: bc,
+        ...getLocationObject(),
       };
     }
 
