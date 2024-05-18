@@ -1284,14 +1284,14 @@ set_stmt
       columnList: columnListTableAlias(columnList),
       ast: {
         type: 'set',
-        expr: {
+        expr: [{
           type: 'assign',
           left: {
             type: 'origin',
             value: 'transaction isolation level'
           },
           right: e
-        }
+        }]
       }
     }
   }
@@ -1301,11 +1301,11 @@ set_stmt
       columnList: columnListTableAlias(columnList),
       ast: {
         type: 'set',
-        expr: {
+        expr: [{
           type: 'assign',
           left: va,
           right: e
-        }
+        }]
       }
     }
   }
@@ -3175,6 +3175,11 @@ proc_stmt
   = &{ varList = []; return true; } __ s:(assign_stmt / return_stmt) {
       return { stmt: s, vars: varList };
     }
+
+assign_stmt_list
+  = head:assign_stmt tail:(__ COMMA __ assign_stmt)* {
+    return createList(head, tail);
+  }
 
 assign_stmt
   = va:(var_decl / without_prefix_var_decl) __ s: (KW_ASSIGN / KW_ASSIGIN_EQUAL)? __ e:proc_expr {
