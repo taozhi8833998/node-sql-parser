@@ -618,7 +618,8 @@ export type rename_stmt = AstStatement<rename_stmt_node>;
 
 export interface set_stmt_node {
         type: 'set';
-        expr: assign_stmt & { keyword?: 'GLOBAL' | 'SESSION' | 'LOCAL' | 'PERSIST' | 'PERSIST_ONLY'; };
+        keyword?: 'GLOBAL' | 'SESSION' | 'LOCAL' | 'PERSIST' | 'PERSIST_ONLY' | undefined;
+        expr: assign_stmt_list;
       }
 
 export type set_stmt = AstStatement<set_stmt_node>;
@@ -1790,6 +1791,8 @@ export type proc_stmts = (proc_stmt)[];
 export interface proc_stmt_t { type: 'proc'; stmt: assign_stmt | return_stmt; vars: any }
 
 export type proc_stmt = AstStatement<proc_stmt_t>;
+
+export type assign_stmt_list = assign_stmt[];
 
 export type assign_stmt = { type: 'assign'; left: var_decl | without_prefix_var_decl; symbol: ':=' | '='; right: proc_expr; };
 

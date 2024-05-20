@@ -2272,7 +2272,7 @@ set_stmt
       export interface set_stmt_node {
         type: 'set';
         keyword?: 'GLOBAL' | 'SESSION' | 'LOCAL' | 'PERSIST' | 'PERSIST_ONLY' | undefined;
-        expr: assign_stmt;
+        expr: assign_stmt_list;
       }
        => AstStatement<set_stmt_node>
        */
@@ -5261,6 +5261,7 @@ proc_stmt
 
 assign_stmt_list
   = head:assign_stmt tail:(__ COMMA __ assign_stmt)* {
+    // => assign_stmt[]
     return createList(head, tail);
   }
 
