@@ -1016,6 +1016,13 @@ describe('mysql', () => {
           "SELECT `d`.`Fdrug_hash_id` FROM `t_xxxx` AS `d` WHERE `d`.`Fapproval_number` LIKE '\tH20190022%'"
         ]
       },
+      {
+        title: 'multiple set',
+        sql: [
+          "SET @_mystoredprocedure_0='1',@_mystoredprocedure_1='2'",
+          "SET @_mystoredprocedure_0 = '1', @_mystoredprocedure_1 = '2'"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

@@ -90,10 +90,10 @@ function useToSQL(stmt) {
 }
 
 function setVarToSQL(stmt) {
-  const { expr } = stmt
-  const action = 'SET'
-  const val = exprToSQL(expr)
-  return `${action} ${val}`
+  const { type, expr, keyword } = stmt
+  const action = toUpper(type)
+  const setItems = expr.map(exprToSQL).join(', ')
+  return [action, toUpper(keyword), setItems].filter(hasVal).join(' ')
 }
 
 function pgLock(stmt) {
