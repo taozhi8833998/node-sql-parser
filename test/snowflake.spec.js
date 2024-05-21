@@ -204,6 +204,23 @@ describe('snowflake', () => {
         `SELECT '1' || '_' || "tj"."ID" AS "JOB_KEY", "tj"."ID" AS "PAY_JOB_ID", "tj"."ID", CASE WHEN "tj"."transcription_job_split_id" IS NOT NULL THEN 1 ELSE 0 END AS "TRANSCRIPTION_IS_SPLIT", CASE WHEN "tjs"."transcription_job_id" IS NOT NULL THEN "tjs"."transcription_job_id" ELSE "tj"."id" END AS "PARENT_TRANSCRIPTION_JOB_ID", CASE WHEN "tjss"."transcription_job_id" IS NOT NULL THEN "tjss"."transcription_job_id" WHEN "tjss"."transcription_job_id" IS NULL AND "tjs"."transcription_job_id" IS NOT NULL THEN "tjs"."transcription_job_id" ELSE "tj"."id" END AS "TRANSCRIPTION_ORIGINAL_JOB_ID", CASE WHEN "tjss"."transcription_job_id" IS NOT NULL THEN "tjss"."transcription_job_id" WHEN "tjss"."transcription_job_id" IS NULL AND "tjs"."transcription_job_id" IS NOT NULL THEN "tjs"."transcription_job_id" ELSE "tj"."id" END AS "REV_JOB_ID", "tj"."catalog_item_id", PARSE_JSON("tj"."METADATA") AS "METADATA", PARSE_JSON("tj"."METADATA") :entry_id::STRING AS "ENTRY_ID", PARSE_JSON("tj"."METADATA") :partner_id::NUMBER AS "PARTNER_ID", PARSE_JSON("tj"."METADATA") :original_profile_id::NUMBER AS "ORIGINAL_PROFILE_ID", PARSE_JSON("tj"."config") :external_provider_captioning_provider::STRING AS "caption_provider", PARSE_JSON("tj"."config") :external_provider_transcription_provider::STRING AS "transcription_provider", "tj"."FRAUD_ISSUES", "tj"."OWNER_ID", "tj"."SANDBOX", coalesce("tj"."ORDER_ID", "tj"."ORDER_UUID") AS "ORDER_ID", coalesce("tj"."ORDER_ID", "tj"."ORDER_UUID") IS NOT NULL AS "ONE_ORDERING", "tj"."SOURCE_TABLE", coalesce("tj"."job_flow_id", "p"."job_flow_id") AS "JOB_FLOW_ID" FROM "MRR"."MRR_VERBIT_TRANSCRIPTION_JOBS" AS "tj" LEFT JOIN "MRR"."MRR_VERBIT_TRANSCRIPTION_JOB_SPLITS" AS "tjs" ON "tj"."transcription_job_split_id" = "tjs"."id" INNER JOIN "MRR"."MRR_VERBIT_PROFILES" AS "p" ON "tj"."profile_id" = "p"."id" LEFT JOIN "MRR"."MRR_VERBIT_TRANSCRIPTION_JOBS" AS "tjj" ON "tjs"."transcription_job_id" = "tjj"."id" LEFT JOIN "MRR"."MRR_VERBIT_TRANSCRIPTION_JOB_SPLITS" AS "tjss" ON "tjj"."transcription_job_split_id" = "tjss"."id"`
       ]
     },
+    {
+      title: 'Support Snowflake types: NUMERIC, BYTEINT, BINARY, VARBINARY, GEOGRAPHY, TIMESTAMP_TZ',
+      sql: [
+        `
+          CREATE TABLE TEST_SNOWFLAKE (
+              "att1" NUMERIC(3,3),
+              "att2" BYTEINT,
+              "att3_SAMPLE_3" BINARY,
+              "att4_SAMPLE_4" VARBINARY,
+              "att5_SAMPLE_5" GEOGRAPHY,
+              "att6_SAMPLE_6" TIMESTAMP_TZ,
+              primary key ("att1")
+          );
+        `,
+        `CREATE TABLE "TEST_SNOWFLAKE" ("att1" NUMERIC(3, 3), "att2" BYTEINT, "att3_SAMPLE_3" BINARY, "att4_SAMPLE_4" VARBINARY, "att5_SAMPLE_5" GEOGRAPHY, "att6_SAMPLE_6" TIMESTAMP_TZ, PRIMARY KEY ("att1"))` 
+      ]
+    }
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
