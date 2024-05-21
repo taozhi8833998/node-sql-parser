@@ -10,6 +10,7 @@ const isProd = process.argv.includes('production')
 const isTest = isCoverage || process.argv.includes('test')
 const subDir = isProd ? 'output/prod' : isTest ? 'output/test' : 'output/dev'
 const outputPath = path.join(__dirname, subDir)
+const rootDirectory = path.join(__dirname)
 const srcPath = path.join(__dirname, 'src')
 require('rimraf').sync(outputPath)
 
@@ -42,9 +43,9 @@ const moduleCfg = {
 
 const getCopyFile = (database) => {
     return [
-        { source: `${outputPath}/${database}.js`, destination: `${outputPath}/build/${database}.js` },
-        { source: `${outputPath}/${database}.js.map`, destination: `${outputPath}/build/${database}.js.map` },
-        { source: `${outputPath}/${database}.d.ts`, destination: `${outputPath}/build/${database}.d.ts` },
+        { source: `${outputPath}/${database}.js`, destination: `${rootDirectory}/build/${database}.js` },
+        { source: `${outputPath}/${database}.js.map`, destination: `${rootDirectory}/build/${database}.js.map` },
+        { source: `${outputPath}/${database}.d.ts`, destination: `${rootDirectory}/build/${database}.d.ts` },
     ]
 }
 
