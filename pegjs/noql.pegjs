@@ -359,14 +359,14 @@ create_db_stmt
   = a:KW_CREATE __
     k:(KW_DATABASE / KW_SCHEMA) __
     ife:if_not_exists_stmt? __
-    t:ident_name __
+    t:ident_without_kw_type __
     c:create_db_definition? {
       /*
       export type create_db_stmt = {
         type: 'create',
         keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
-        database: string,
+        database: ident_without_kw_type,
         create_definitions?: create_db_definition
       }
       => AstStatement<create_db_stmt>
