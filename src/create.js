@@ -215,7 +215,7 @@ function createDatabaseToSQL(stmt) {
     toUpper(type),
     toUpper(keyword),
     toUpper(ifNotExists),
-    columnIdentifierToSql(database),
+    literalToSQL(database),
   ]
   if (createDefinition) sql.push(createDefinition.map(tableOptionToSQL).join(' '))
   return sql.filter(hasVal).join(' ')
