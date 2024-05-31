@@ -1203,7 +1203,8 @@ column_ref_idx_list
     }
 
 cte_idx_column_definition
-  = LPAREN __ l:column_ref_idx_list __ RPAREN {
+  = LPAREN __ l:(column_ref_idx_list / expr_list) __ RPAREN {
+      if (l.type) return l.value
       return l
     }
 
@@ -3247,6 +3248,7 @@ cast_expr
       type: 'cast',
       keyword: c.toLowerCase(),
       expr: e,
+      symbol: 'as',
       target: t
     };
   }
@@ -3255,6 +3257,7 @@ cast_expr
       type: 'cast',
       keyword: c.toLowerCase(),
       expr: e,
+      symbol: 'as',
       target: {
         dataType: 'DECIMAL(' + precision + ')'
       }
@@ -3265,6 +3268,7 @@ cast_expr
         type: 'cast',
         keyword: c.toLowerCase(),
         expr: e,
+        symbol: 'as',
         target: {
           dataType: 'DECIMAL(' + precision + ', ' + scale + ')'
         }
@@ -3275,6 +3279,7 @@ cast_expr
       type: 'cast',
       keyword: c.toLowerCase(),
       expr: e,
+      symbol: 'as',
       target: {
         dataType: s + (t ? ' ' + t: '')
       }
@@ -3933,8 +3938,8 @@ binary_type
 
 
 character_string_type
-  = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
-    return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true };
+  = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN __ s:('ARRAY'i)? {
+    return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true, suffix: s && ['ARRAY']  };
   }
   / t:KW_CHAR { return { dataType: t }; }
   / t:KW_VARCHAR { return { dataType: t }; }
