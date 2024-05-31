@@ -590,10 +590,10 @@ describe('create', () => {
 
   describe('create database', () => {
     it('should support create database', () => {
-      expect(getParsedSql('CREATE DATABASE abc')).to.equal('CREATE DATABASE `abc`')
-      expect(getParsedSql('CREATE DATABASE IF NOT EXISTS abc')).to.equal('CREATE DATABASE IF NOT EXISTS `abc`')
-      expect(getParsedSql('CREATE DATABASE IF NOT EXISTS abc default CHARACTER SET utf8mb4')).to.equal('CREATE DATABASE IF NOT EXISTS `abc` DEFAULT CHARACTER SET utf8mb4')
-      expect(getParsedSql('CREATE DATABASE IF NOT EXISTS abc CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci')).to.equal('CREATE DATABASE IF NOT EXISTS `abc` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci')
+      expect(getParsedSql('CREATE DATABASE abc')).to.equal('CREATE DATABASE abc')
+      expect(getParsedSql('CREATE DATABASE IF NOT EXISTS `abc`')).to.equal('CREATE DATABASE IF NOT EXISTS `abc`')
+      expect(getParsedSql('CREATE DATABASE IF NOT EXISTS abc default CHARACTER SET utf8mb4')).to.equal('CREATE DATABASE IF NOT EXISTS abc DEFAULT CHARACTER SET utf8mb4')
+      expect(getParsedSql('CREATE DATABASE IF NOT EXISTS `abc` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci')).to.equal('CREATE DATABASE IF NOT EXISTS `abc` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci')
     })
   })
 
