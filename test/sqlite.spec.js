@@ -155,10 +155,12 @@ describe('sqlite', () => {
     expect(parser.sqlify(ast, DEFAULT_OPT)).to.be.equal('CREATE TABLE `Test` (`id` INT(11) NOT NULL, `name` VARCHAR(255) NOT NULL, PRIMARY KEY (`id`), UNIQUE (`name`))')
   })
 
-  it('should support create view', () => {
+  it('should support create or drop view', () => {
     let sql = 'create view v1 as select * from t1'
     expect(getParsedSql(sql)).to.be.equal('CREATE VIEW `v1` AS SELECT * FROM `t1`')
     sql = 'create temp view if not exists s.v1(a, b, c) as select * from t1'
     expect(getParsedSql(sql)).to.be.equal('CREATE TEMP VIEW IF NOT EXISTS `s`.`v1` (`a`, `b`, `c`) AS SELECT * FROM `t1`')
+    sql = 'DROP VIEW IF EXISTS view_name;',
+    expect(getParsedSql(sql)).to.be.equal('DROP VIEW IF EXISTS `view_name`')
   })
 })

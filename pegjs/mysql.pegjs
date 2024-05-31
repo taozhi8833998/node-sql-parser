@@ -1092,7 +1092,7 @@ drop_stmt
           keyword: r.toLowerCase(),
           prefix: ife,
           name: t,
-          options: [{ type: 'origin', value: op }],
+          options: op && [{ type: 'origin', value: op }],
         }
       };
     }
