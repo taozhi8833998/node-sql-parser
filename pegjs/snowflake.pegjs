@@ -508,6 +508,7 @@ create_domain_stmt
     }
 create_table_stmt
   = a:KW_CREATE __
+    orre: (KW_OR __ KW_REPLACE __)?
     tp:KW_TEMPORARY? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
@@ -544,6 +545,7 @@ create_table_stmt
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
+          or_replace: orre && (orre[0] + ' ' +  orre[2][0]).toUpperCase(),
           table: t,
           ignore_replace: ir && ir[0].toLowerCase(),
           as: as && as[0].toLowerCase(),
@@ -576,6 +578,7 @@ create_table_stmt
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
+          or_replace: orre && (orre[0] + ' ' +  orre[2][0]).toUpperCase(),
           table: t,
           like: lt
         }
