@@ -4744,8 +4744,8 @@ boolean_type
   = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
 
 binary_type
-  = t:(KW_BINARY / KW_VARBINARY) { /* => data_type */ return { dataType: t }; }
-
+  = t:(KW_BINARY / KW_VARBINARY) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix?  { /* => data_type */ return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s  }; }
+    / t:(KW_BINARY / KW_VARBINARY) { /* => data_type */ return { dataType: t }; }
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
     // => data_type
@@ -4780,7 +4780,7 @@ time_type
   / t:(KW_TIME / KW_TIMESTAMP) __ tz:timezone? { /* =>  data_type */  return { dataType: t, suffix: tz }; }
 
 datetime_type
-  = t:(KW_DATE / KW_DATETIME) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
+  = t:(KW_DATE / KW_DATETIME / KW_TIMESTAMP_TZ) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
   / t:(KW_DATE / KW_DATETIME / KW_TIMESTAMP_TZ) { /* =>  data_type */  return { dataType: t }; }
   / time_type
 
