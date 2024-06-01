@@ -289,6 +289,11 @@ if_not_exists_stmt
     return 'IF NOT EXISTS'
   }
 
+if_exists
+  = 'if'i __ 'exists'i {
+    return 'if exists'
+  }
+
 create_trigger_stmt
   = kw: KW_CREATE __
   tp:(KW_TEMPORARY / KW_TEMP)? __
@@ -619,6 +624,21 @@ drop_stmt
           type: a.toLowerCase(),
           keyword: r.toLowerCase(),
           name: t
+        }
+      };
+    }
+  / a:KW_DROP __
+    r:KW_VIEW __
+    ife:if_exists? __
+    t:table_ref_list {
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: r.toLowerCase(),
+          prefix: ife,
+          name: t,
         }
       };
     }

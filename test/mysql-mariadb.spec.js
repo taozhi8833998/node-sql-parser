@@ -1023,6 +1023,16 @@ describe('mysql', () => {
           "SET @_mystoredprocedure_0 = '1', @_mystoredprocedure_1 = '2'"
         ]
       },
+      {
+        title: 'create table for key',
+        sql: [
+          `CREATE TABLE some_table (
+            col JSON,
+            KEY \`idx_col\` ((CAST(\`col\` AS CHAR(12) ARRAY)))
+          );`,
+          'CREATE TABLE `some_table` (`col` JSON, KEY idx_col ((CAST(`col` AS CHAR(12) ARRAY))))'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

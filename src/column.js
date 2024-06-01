@@ -174,7 +174,7 @@ function columnToSQL(column, isDual) {
     result.push([toUpper(type), type && '(', columnsStr, type && ')'].filter(hasVal).join(''))
     return result.filter(hasVal).join(' ')
   }
-  if (expr.parentheses && Reflect.has(expr, 'array_index')) str = `(${str})`
+  if (expr.parentheses && Reflect.has(expr, 'array_index') && expr.type !== 'cast') str = `(${str})`
   if (expr.array_index && expr.type !== 'column_ref') {
     str = `${str}${arrayIndexToSQL(expr.array_index)}`
   }
