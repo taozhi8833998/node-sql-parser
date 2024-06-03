@@ -50,7 +50,7 @@ export type create_db_stmt_t = {
         type: 'create',
         keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
-        database: string,
+        database: ident_without_kw_type,
         create_definitions?: create_db_definition
       }
 
