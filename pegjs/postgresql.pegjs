@@ -328,6 +328,11 @@ if_not_exists_stmt
     return 'IF NOT EXISTS'
   }
 
+if_exists
+  = 'if'i __ 'exists'i {
+    return 'if exists'
+  }
+
 create_extension_stmt
   = a:KW_CREATE __
     e:'EXTENSION'i __
@@ -1387,11 +1392,13 @@ drop_index_opt
 drop_stmt
   = a:KW_DROP __
     r:KW_TABLE __
+    ife:if_exists? __
     t:table_ref_list {
       /*
       export interface drop_stmt_node {
         type: 'drop';
         keyword: 'table';
+        prefix?: string;
         name: table_ref_list;
       }
       => AstStatement<drop_stmt_node>
@@ -1403,6 +1410,7 @@ drop_stmt
         ast: {
           type: a.toLowerCase(),
           keyword: r.toLowerCase(),
+          prefix: ife,
           name: t
         }
       };
@@ -1410,13 +1418,13 @@ drop_stmt
   / a:KW_DROP __
     r:KW_INDEX __
     cu:KW_CONCURRENTLY? __
-    ie:('IF'i __ KW_EXISTS)? __
+    ife:if_exists? __
     i:column_ref __
     op:('CASCADE'i / 'RESTRICT'i)? {
       /*
       export interface drop_index_stmt_node {
         type: 'drop';
-        prefix?: 'CONCURRENTLY';
+        prefix?: string;
         keyword: string;
         name: column_ref;
         options?: 'cascade' | 'restrict';
@@ -1429,7 +1437,7 @@ drop_stmt
         ast: {
           type: a.toLowerCase(),
           keyword: r.toLowerCase(),
-          prefix: cu,
+          prefix: [cu, ife].filter(v => v).join(' '),
           name: i,
           options: op && [{ type: 'origin', value: op }]
         }
