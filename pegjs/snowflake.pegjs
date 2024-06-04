@@ -233,6 +233,7 @@ create_stmt
   / create_index_stmt
   / create_sequence
   / create_db_stmt
+  / create_schema_stmt
   / create_domain_stmt
   / create_type_stmt
   / create_view_stmt
@@ -357,6 +358,49 @@ create_db_stmt
       export type create_db_stmt = {
         type: 'create',
         keyword: 'database' | 'schema',
+        if_not_exists?: 'if not exists',
+        database: ident_without_kw_type,
+        create_definitions?: create_db_definition
+      }
+      => AstStatement<create_db_stmt>
+      */
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'database',
+          if_not_exists:ife,
+          database: t,
+          create_definitions: c,
+        }
+      }
+    }
+
+db_schema
+  = dt:ident tail:(__ DOT __ ident)? {
+    // => IGNORE
+      const obj = {};
+      if (tail !== null) {
+        obj.db = dt;
+        obj.schema = tail[3];
+      }
+      else {
+        obj.schema = dt
+      }
+      return obj;
+    }
+
+create_schema_stmt
+  = a:KW_CREATE __ or:(KW_OR __ KW_REPLACE __)?
+    k:(KW_SCHEMA) __
+    ife:if_not_exists_stmt? __
+    t:db_schema __
+    c:create_db_definition? {
+      /*
+      export type create_db_stmt = {
+        type: 'create',
+        keyword: 'database',
         if_not_exists?: 'if not exists',
         database: ident_without_kw_type,
         create_definitions?: create_db_definition
