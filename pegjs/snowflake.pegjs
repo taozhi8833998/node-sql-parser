@@ -386,6 +386,7 @@ db_schema
         obj.schema = tail[3];
       }
       else {
+        obj.db = null
         obj.schema = dt
       }
       return obj;
@@ -395,18 +396,7 @@ create_schema_stmt
   = a:KW_CREATE __ or:(KW_OR __ KW_REPLACE __)?
     k:(KW_SCHEMA) __
     ife:if_not_exists_stmt? __
-    t:db_schema __
-    c:create_db_definition? {
-      /*
-      export type create_db_stmt = {
-        type: 'create',
-        keyword: 'database',
-        if_not_exists?: 'if not exists',
-        database: ident_without_kw_type,
-        create_definitions?: create_db_definition
-      }
-      => AstStatement<create_db_stmt>
-      */
+    t:db_schema {
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -414,8 +404,8 @@ create_schema_stmt
           type: a[0].toLowerCase(),
           keyword: 'database',
           if_not_exists:ife,
-          database: t,
-          create_definitions: c,
+          db: t.db,
+          schema: t.schema
         }
       }
     }
