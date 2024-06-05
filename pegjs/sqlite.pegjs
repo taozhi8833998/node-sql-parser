@@ -615,6 +615,7 @@ drop_index_opt
 drop_stmt
   = a:KW_DROP __
     r:KW_TABLE __
+    ife:if_exists? __
     t:table_ref_list {
       if(t) t.forEach(tt => tableList.add(`${a}::${tt.db}::${tt.table}`));
       return {
@@ -623,6 +624,7 @@ drop_stmt
         ast: {
           type: a.toLowerCase(),
           keyword: r.toLowerCase(),
+          prefix: ife,
           name: t
         }
       };

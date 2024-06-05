@@ -1493,6 +1493,13 @@ describe('Postgres', () => {
         `SELECT "f".title, STRING_AGG("a".first_name || ' ' || "a".last_name, ',' ORDER BY "a".first_name ASC, "a".last_name ASC) AS "actors" FROM "film" AS "f" INNER JOIN "film_actor" AS "fa" USING ("film_id") INNER JOIN "actor" AS "a" USING ("actor_id") GROUP BY "f".title`
       ]
     },
+    {
+      title: 'drop if exists',
+      sql: [
+        'DROP TABLE IF EXISTS table_name;',
+        'DROP TABLE IF EXISTS "table_name"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
