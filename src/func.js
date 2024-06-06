@@ -1,3 +1,4 @@
+import { arrayIndexToSQL } from './column'
 import { exprToSQL } from './expr'
 import { commonOptionConnector, commonTypeValue, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
 import { overToSQL } from './over'
@@ -75,7 +76,7 @@ function flattenFunToSQL(stmt) {
 }
 
 function funcToSQL(expr) {
-  const { args, name, args_parentheses, parentheses, over, collate, suffix } = expr
+  const { args, array_index, name, args_parentheses, parentheses, over, collate, suffix } = expr
   const collateStr = commonTypeValue(collate).join(' ')
   const overStr = overToSQL(over)
   const suffixStr = exprToSQL(suffix)
@@ -87,6 +88,7 @@ function funcToSQL(expr) {
   str.push(args_parentheses === false ? ' ' : '(')
   str.push(exprToSQL(args).join(separator))
   if (args_parentheses !== false) str.push(')')
+  str.push(arrayIndexToSQL(array_index))
   str = [str.join(''), suffixStr].filter(hasVal).join(' ')
   return [parentheses ? `(${str})` : str, collateStr, overStr].filter(hasVal).join(' ')
 }
