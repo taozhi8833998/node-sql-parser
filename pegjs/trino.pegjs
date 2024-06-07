@@ -2196,9 +2196,15 @@ array_index
     }
   }
 
+array_index_list
+  = head:array_index tail:(__ array_index)* {
+    // => array_index[]
+    return createList(head, tail, 1)
+  }
+
 expr_item
-  = e:binary_column_expr __ a:array_index? {
-    // => binary_expr & { array_index: array_index }
+  = e:binary_column_expr __ a:array_index_list? {
+    // => binary_column_expr & { array_index: array_index }
     if (a) e.array_index = a
     return e
   }
@@ -3142,7 +3148,7 @@ binary_column_expr
   }
 
 or_and_where_expr
-	= head:expr tail:(__ (KW_AND / KW_OR / COMMA) __ expr)* {
+	= head:expr_item tail:(__ (KW_AND / KW_OR / COMMA) __ expr_item)* {
     // => binary_expr | { type: 'expr_list'; value: expr[] }
     const len = tail.length
     let result = head;
@@ -3326,6 +3332,7 @@ additive_expr
   = head:multiplicative_expr
     tail:(__ additive_operator  __ multiplicative_expr)* {
       // => binary_expr
+      if (tail && tail.length && head.type === 'column_ref' && head.column === '*') throw new Error('args could not be star column in additive expr')
       return createBinaryExprChain(head, tail);
     }
 

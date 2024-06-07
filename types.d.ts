@@ -202,6 +202,7 @@ export type Expr =
       left: Expr;
       right: Expr;
       loc?: LocationRange;
+      parentheses?: boolean;
     }
   | {
       type: "binary_expr";
@@ -209,6 +210,7 @@ export type Expr =
       left: ExpressionValue;
       right: ExpressionValue | ExprList;
       loc?: LocationRange;
+      parentheses?: boolean;
     };
 
 export type ExprList = {

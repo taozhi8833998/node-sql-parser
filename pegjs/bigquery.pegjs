@@ -2262,6 +2262,7 @@ in_op_right
 additive_expr
   = head:multiplicative_expr
     tail:(__ additive_operator  __ multiplicative_expr)* {
+      if (tail && tail.length && head.type === 'column_ref' && head.column === '*') throw new Error('args could not be star column in additive expr')
       return createBinaryExprChain(head, tail);
     }
 
