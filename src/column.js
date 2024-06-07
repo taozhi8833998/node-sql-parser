@@ -199,6 +199,7 @@ function columnsToSQL(columns, tables) {
 }
 
 export {
+  arrayIndexToSQL,
   columnDefinitionToSQL,
   columnRefToSQL,
   columnToSQL,

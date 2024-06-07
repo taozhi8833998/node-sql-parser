@@ -73,7 +73,17 @@ describe('trino', () => {
         'SELECT SUM(a) OVER (PARTITION BY b ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)'
 
       ]
-    }
+    },
+    {
+      title: 'nested array index',
+      sql: [
+        `SELECT ddd(split(name, '_')[1]) as test
+        FROM tableName
+        WHERE u BETWEEN t('today') and t('tomorrow')
+        LIMIT 10`,
+        `SELECT ddd(split(name, '_')[1]) AS "test" FROM "tableName" WHERE u BETWEEN t('today') AND t('tomorrow') LIMIT 10`
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
@@ -81,11 +91,15 @@ describe('trino', () => {
       expect(getParsedSql(sql[0], opt)).to.equal(sql[1])
     })
   })
+  it('should throw error when star column in additive expr', () => {
+    const sql = 'SELECT abc FROM tableA WHERE u BETWEEN * - * - * - * - * and 10 LIMIT 10'
+    expect(parser.astify.bind(parser, sql, opt)).to.throw('args could not be star column in additive expr')
+  })
   it('should throw error when lambda expression is invalid', () => {
     let sql = 'SELECT numbers, transform(numbers, n -> max(n)) as squared_numbers FROM (VALUES (ARRAY[1, 2]),(ARRAY[3, 4]),(ARRAY[5, 6, 7])) AS t(numbers);'
     expect(parser.astify.bind(parser, sql, opt)).to.throw('Aggregations are not supported in lambda expressions')
     sql = 'SELECT numbers, transform(numbers, n -> 2 + (select 3)) as squared_numbers FROM (VALUES (ARRAY[1, 2]),(ARRAY[3, 4]),(ARRAY[5, 6, 7])) AS t(numbers);'
-    expect(parser.astify.bind(parser, sql, opt)).to.throw('Subqueries are not supported in lambda expressions')
+    expect(parser.astify.bind(parser, sql, opt)).to.throw('invalid column clause with select statement')
   })
   it('should support deep nest function call', function () {
     this.timeout(100)
