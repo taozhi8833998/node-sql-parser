@@ -76,7 +76,7 @@
     "istanbul-instrumenter-loader": "^3.0.1",
     "mocha": "^10.0.0",
     "mochapack": "^2.0.3",
-    "nyc": "15.1.0",
+    "nyc": "17.0.0",
     "pegjs": "^0.10.0",
     "pegjs-loader": "^0.5.6",
     "pre-commit": "^1.2.2",
