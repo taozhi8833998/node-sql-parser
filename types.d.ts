@@ -92,6 +92,7 @@ export interface ValueExpr<T = string | number | boolean> {
     | "origin"
     | "date"
     | "datetime"
+    | "default"
     | "time"
     | "timestamp"
     | "var_string";
@@ -215,7 +216,7 @@ export type Expr =
 
 export type ExprList = {
   type: "expr_list";
-  value: ExpressionValue[];
+  value: ExpressionValue[] | Expr;
   loc?: LocationRange;
 };
 export interface Select {
