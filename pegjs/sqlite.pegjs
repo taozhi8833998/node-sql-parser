@@ -898,14 +898,14 @@ create_constraint_foreign
 
 reference_definition
   = kc:KW_REFERENCES __
-  t:table_ref_list __
+  t:table_name __
   de:cte_column_definition __
   m:('MATCH FULL'i / 'MATCH PARTIAL'i / 'MATCH SIMPLE'i)? __
   od:on_reference? __
   ou:on_reference? {
     return {
         definition: de,
-        table: t,
+        table: [t],
         keyword: kc.toLowerCase(),
         match: m && m.toLowerCase(),
         on_action: [od, ou].filter(v => v)
