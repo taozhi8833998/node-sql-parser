@@ -163,4 +163,13 @@ describe('sqlite', () => {
     sql = 'DROP VIEW IF EXISTS view_name;',
     expect(getParsedSql(sql)).to.be.equal('DROP VIEW IF EXISTS `view_name`')
   })
+
+  it('should create table', () => {
+    const sql = `CREATE TABLE IF NOT EXISTS posts (
+      user_id INTEGER NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(user_id)
+    );
+    `
+    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE IF NOT EXISTS `posts` (`user_id` INTEGER NOT NULL, FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`))')
+  })
 })
