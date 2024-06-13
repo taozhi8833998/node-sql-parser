@@ -330,7 +330,8 @@ if_not_exists_stmt
 
 if_exists
   = 'if'i __ 'exists'i {
-    return 'if exists'
+    // => 'IF EXISTS'
+    return 'IF EXISTS'
   }
 
 create_extension_stmt
