@@ -71,7 +71,7 @@ function createTableToSQL(stmt) {
     create_definitions: createDefinition,
     table_options: tableOptions,
     ignore_replace: ignoreReplace,
-    or_replace: orReplace,
+    replace: orReplace,
     partition_of: partitionOf,
     query_expr: queryExpr,
   } = stmt
