@@ -1467,8 +1467,7 @@ create_constraint_definition
   / create_constraint_check
 
 constraint_name
-  = kc:KW_CONSTRAINT __
-  c:ident? {
+  = kc:KW_CONSTRAINT __ c:ident? {
     return {
       keyword: kc.toLowerCase(),
       constraint: c
