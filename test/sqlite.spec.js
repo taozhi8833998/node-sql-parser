@@ -164,7 +164,7 @@ describe('sqlite', () => {
     expect(getParsedSql(sql)).to.be.equal('DROP VIEW IF EXISTS `view_name`')
   })
 
-  it('should create table', () => {
+  it('should create table and alter table', () => {
   let sql = `CREATE TABLE IF NOT EXISTS posts (
       user_id INTEGER NOT NULL,
       FOREIGN KEY (user_id) REFERENCES users(user_id)
@@ -173,5 +173,7 @@ describe('sqlite', () => {
     expect(getParsedSql(sql)).to.be.equal('CREATE TABLE IF NOT EXISTS `posts` (`user_id` INTEGER NOT NULL, FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`))')
     sql = 'CREATE TABLE users (age INTEGER CHECK(age >= 18));'
     expect(getParsedSql(sql)).to.be.equal('CREATE TABLE `users` (`age` INTEGER CHECK (`age` >= 18))')
+    sql = 'ALTER TABLE customers RENAME COLUMN age TO customer_age;'
+    expect(getParsedSql(sql)).to.be.equal('ALTER TABLE `customers` RENAME COLUMN `age` TO `customer_age`')
   })
 })
