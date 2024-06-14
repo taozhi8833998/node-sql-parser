@@ -871,7 +871,7 @@ create_table_stmt
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
           table: [t],
-          or_replace: or && 'or replace',
+          replace: or && 'or replace',
           as: as && as[0].toLowerCase(),
           query_expr: qe && qe.ast,
           create_definitions: c,

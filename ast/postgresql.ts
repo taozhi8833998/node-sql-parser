@@ -31,6 +31,8 @@ export type union_stmt = AstStatement<union_stmt_node>;
 
 export type if_not_exists_stmt = 'IF NOT EXISTS';
 
+export type if_exists = 'IF EXISTS';
+
 export type nameOrLiteral = literal_string | { type: 'same', value: string; };
 
 export type create_extension_stmt = {
@@ -326,12 +328,13 @@ export type drop_index_opt = (ALTER_ALGORITHM | ALTER_LOCK)[];
 export interface drop_stmt_node {
         type: 'drop';
         keyword: 'table';
+        prefix?: string;
         name: table_ref_list;
       }
 
 export interface drop_index_stmt_node {
         type: 'drop';
-        prefix?: 'CONCURRENTLY';
+        prefix?: string;
         keyword: string;
         name: column_ref;
         options?: 'cascade' | 'restrict';
