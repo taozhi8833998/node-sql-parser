@@ -165,11 +165,13 @@ describe('sqlite', () => {
   })
 
   it('should create table', () => {
-    const sql = `CREATE TABLE IF NOT EXISTS posts (
+  let sql = `CREATE TABLE IF NOT EXISTS posts (
       user_id INTEGER NOT NULL,
       FOREIGN KEY (user_id) REFERENCES users(user_id)
     );
     `
     expect(getParsedSql(sql)).to.be.equal('CREATE TABLE IF NOT EXISTS `posts` (`user_id` INTEGER NOT NULL, FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`))')
+    sql = 'CREATE TABLE users (age INTEGER CHECK(age >= 18));'
+    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE `users` (`age` INTEGER CHECK (`age` >= 18))')
   })
 })
