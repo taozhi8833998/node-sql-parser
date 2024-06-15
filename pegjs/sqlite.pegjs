@@ -543,12 +543,16 @@ column_definition_opt_list
   }
 
 create_column_definition
-  = c:column_ref __
+  = c:column_without_kw __
     d:data_type? __
     cdo:column_definition_opt_list? {
-      columnList.add(`create::${c.table}::${c.column}`)
+      columnList.add(`create::${c.table}::${c.value || c}`)
       return {
-        column: c,
+        column: {
+          type: 'column_ref',
+          table: null,
+          column: c
+        },
         definition: d,
         resource: 'column',
         ...(cdo || {})
@@ -1933,7 +1937,7 @@ expr
   = _expr / union_stmt
 
 unary_expr
-  = op: additive_operator tail: (__ primary)+ {
+  = op:additive_operator tail: (__ primary)+ {
     return createUnaryExpr(op, tail[0][1]);
   }
 
@@ -2155,7 +2159,7 @@ column_ref
         column: col
       };
     }
-  / col:column_without_kw {
+  / col:column {
       columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
