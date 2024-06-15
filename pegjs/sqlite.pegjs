@@ -713,15 +713,83 @@ alter_table_stmt
       };
     }
 
+alter_column_suffix
+  = k:('after'i / 'first'i) __ i:column_ref {
+    return {
+      keyword: k,
+      expr: i
+    }
+  }
+
 alter_action_list
   = head:alter_action tail:(__ COMMA __ alter_action)* {
       return createList(head, tail);
     }
 
 alter_action
-  = ALTER_ADD_COLUMN
+  = ALTER_ADD_CONSTRAINT
+  / ALTER_DROP_CONSTRAINT
+  / ALTER_DROP_KEY_INDEX
+  / ALTER_ADD_COLUMN
   / ALTER_DROP_COLUMN
+  / ALTER_MODIFY_COLUMN
+  / ALTER_ADD_INDEX_OR_KEY
+  / ALTER_RENAME_COLUMN
   / ALTER_RENAME_TABLE
+  / ALTER_ALGORITHM
+  / ALTER_LOCK
+  / ALTER_CHANGE_COLUMN
+  / t:table_option {
+    t.resource = t.keyword
+    t[t.keyword] = t.value
+    delete t.value
+    return {
+      type: 'alter',
+      ...t,
+    }
+  }
+
+ALTER_ADD_CONSTRAINT
+  = KW_ADD __ c:create_constraint_definition {
+      return {
+        action: 'add',
+        create_definitions: c,
+        resource: 'constraint',
+        type: 'alter',
+      }
+    }
+
+ALTER_DROP_CONSTRAINT
+  = KW_DROP __ kc:'CHECK'i __ c:ident_name {
+      return {
+        action: 'drop',
+        constraint: c,
+        keyword: kc.toLowerCase(),
+        resource: 'constraint',
+        type: 'alter',
+      }
+    }
+
+ALTER_DROP_KEY_INDEX
+  = KW_DROP __ 'PRIMARY'i __ KW_KEY {
+    return {
+        action: 'drop',
+        key: '',
+        keyword: 'primary key',
+        resource: 'key',
+        type: 'alter',
+    }
+  }
+  / KW_DROP __ k:(('FOREIGN'i? __ KW_KEY) / (KW_INDEX)) __ c:ident {
+    const resource = Array.isArray(k) ? 'key' : 'index'
+    return {
+        action: 'drop',
+        [resource]: c,
+        keyword: Array.isArray(k) ? `${[k[0], k[2]].filter(v => v).join(' ').toLowerCase()}` : k.toLowerCase(),
+        resource,
+        type: 'alter',
+    }
+  }
 
 ALTER_ADD_COLUMN
   = KW_ADD __
@@ -749,6 +817,45 @@ ALTER_DROP_COLUMN
       }
     }
 
+ALTER_MODIFY_COLUMN
+  = KW_MODIFY __
+    kc:KW_COLUMN? __
+    cd:create_column_definition __ af:alter_column_suffix? {
+      return {
+        action: 'modify',
+        keyword: kc,
+        ...cd,
+        suffix: af,
+        resource: 'column',
+        type: 'alter',
+      }
+    }
+
+ALTER_ADD_INDEX_OR_KEY
+  = KW_ADD __
+    id:create_index_definition {
+      return {
+        action: 'add',
+        type: 'alter',
+        ...id,
+      }
+    }
+
+ALTER_RENAME_COLUMN
+  = KW_RENAME __ KW_COLUMN __ c:column_ref __
+  kw:(KW_TO / KW_AS)? __
+  tn:column_ref {
+    return {
+      action: 'rename',
+      type: 'alter',
+      resource: 'column',
+      keyword: 'column',
+      old_column: c,
+      prefix: kw && kw[0].toLowerCase(),
+      column: tn
+    }
+  }
+
 ALTER_RENAME_TABLE
   = KW_RENAME __
   kw:(KW_TO / KW_AS)? __
@@ -760,6 +867,19 @@ ALTER_RENAME_TABLE
       keyword: kw && kw[0].toLowerCase(),
       table: tn
     }
+  }
+
+ALTER_CHANGE_COLUMN
+  = 'CHANGE'i __ kc:KW_COLUMN? __ od:column_ref __ cd:create_column_definition __ af:alter_column_suffix? {
+    return {
+        action: 'change',
+        old_column: od,
+        ...cd,
+        keyword: kc,
+        resource: 'column',
+        type: 'alter',
+        suffix: af,
+      }
   }
 
 ALTER_ALGORITHM
@@ -2637,6 +2757,7 @@ KW_DUAL = "DUAL"i
 KW_ADD     = "ADD"i     !ident_start { return 'ADD'; }
 KW_COLUMN  = "COLUMN"i  !ident_start { return 'COLUMN'; }
 KW_INDEX   = "INDEX"i  !ident_start { return 'INDEX'; }
+KW_MODIFY   = "MODIFY"i  !ident_start { return 'MODIFY'; }
 KW_KEY     = "KEY"i  !ident_start { return 'KEY'; }
 KW_FULLTEXT = "FULLTEXT"i  !ident_start { return 'FULLTEXT'; }
 KW_SPATIAL  = "SPATIAL"i  !ident_start { return 'SPATIAL'; }
