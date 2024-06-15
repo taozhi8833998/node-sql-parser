@@ -43,6 +43,7 @@
     'INTERSECT': true,
     'INTO': true,
     'IS': true,
+    'ILIKE': true,
 
     'JOIN': true,
     'JSON': true,
@@ -3307,6 +3308,7 @@ or_and_expr
       | "NOT BETWEEN"
       | "IS"
       | "IS NOT"
+      | "ILIKE"
       | "LIKE"
       | "@>"
       | "<@"
