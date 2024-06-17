@@ -1500,6 +1500,13 @@ describe('Postgres', () => {
         'DROP TABLE IF EXISTS "table_name"'
       ]
     },
+    {
+      title: 'ilike binary operator',
+      sql: [
+        "SELECT a FROM b WHERE a::TEXT ILIKE '%x%'",
+        `SELECT a FROM "b" WHERE a::TEXT ILIKE '%x%'`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
