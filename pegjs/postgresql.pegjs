@@ -3344,7 +3344,7 @@ where_clause
 
 group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list {
-    // => { columns: expr_list['value']  }
+    // => { columns: expr_list['value']; modifiers: literal_string[]; }
     return {
       columns: e.value
     }
