@@ -2209,8 +2209,21 @@ where_clause
     return e;
   }
 
+with_rollup
+  = KW_WITH __ 'ROLLUP'i {
+    return {
+      type: 'origin',
+      value: 'with rollup'
+    }
+  }
+
 group_by_clause
-  = KW_GROUP __ KW_BY __ e:expr_list { return e.value; }
+  = KW_GROUP __ KW_BY __ e:expr_list __ wr:with_rollup? {
+    return {
+      columns: e.value,
+      modifiers: [wr],
+    }
+  }
 
 column_ref_index
   = column_ref_list / literal_list

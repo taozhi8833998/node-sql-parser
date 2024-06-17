@@ -227,7 +227,7 @@ export interface Select {
   columns: any[] | Column[];
   from: From[] | null;
   where: Expr | Function | null;
-  groupby: ColumnRef[] | null;
+  groupby: { columns: ColumnRef[] | null, modifiers: ValueExpr<string>[] };
   having: any[] | null;
   orderby: OrderBy[] | null;
   limit: Limit | null;

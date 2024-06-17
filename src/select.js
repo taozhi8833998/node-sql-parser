@@ -88,7 +88,10 @@ function selectToSQL(stmt) {
   const { keyword, expr } = forSystem || {}
   clauses.push(commonOptionConnector(keyword, exprToSQL, expr))
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
-  clauses.push(connector('GROUP BY', getExprListSQL(groupby).join(', ')))
+  if (groupby) {
+    clauses.push(connector('GROUP BY', getExprListSQL(groupby.columns).join(', ')))
+    clauses.push(getExprListSQL(groupby.modifiers).join(', '))
+  }
   clauses.push(commonOptionConnector('HAVING', exprToSQL, having))
   clauses.push(commonOptionConnector('QUALIFY', exprToSQL, qualify))
   clauses.push(commonOptionConnector('WINDOW', exprToSQL, windowInfo))
