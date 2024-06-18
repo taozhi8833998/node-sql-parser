@@ -172,7 +172,7 @@ export interface Function {
 }
 export interface Column {
   expr: ExpressionValue;
-  as: string | null;
+  as: ValueExpr<string> | string | null;
   type?: string;
   loc?: LocationRange;
 }
