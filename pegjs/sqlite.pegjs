@@ -500,7 +500,7 @@ column_definition_opt
   / a:('AUTO_INCREMENT'i / 'AUTOINCREMENT'i) {
     return { auto_increment: a.toLowerCase() }
   }
-   / 'UNIQUE'i __ k:('KEY'i)? {
+  / 'UNIQUE'i __ k:('KEY'i)? {
     const sql = ['unique']
     if (k) sql.push(k)
     return { unique: sql.join(' ').toLowerCase('') }

@@ -1507,6 +1507,13 @@ describe('Postgres', () => {
         `SELECT a FROM "b" WHERE a::TEXT ILIKE '%x%'`
       ]
     },
+    {
+      title: 'check constraint',
+      sql: [
+        'CREATE TABLE Books (price DECIMAL(10, 2) CHECK (Price > 0));',
+        'CREATE TABLE "Books" (price DECIMAL(10, 2) CHECK (Price > 0))'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
