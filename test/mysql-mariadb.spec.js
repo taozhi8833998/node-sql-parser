@@ -1033,6 +1033,13 @@ describe('mysql', () => {
           'CREATE TABLE `some_table` (`col` JSON, KEY idx_col ((CAST(`col` AS CHAR(12) ARRAY))))'
         ]
       },
+      {
+        title: 'with rollup',
+        sql: [
+          'SELECT year, country, product, SUM(profit) AS profit FROM sales GROUP BY year, country, product WITH ROLLUP;',
+          'SELECT `year`, `country`, `product`, SUM(`profit`) AS `profit` FROM `sales` GROUP BY `year`, `country`, `product` WITH ROLLUP'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

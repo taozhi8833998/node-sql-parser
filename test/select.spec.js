@@ -149,7 +149,8 @@ describe('select', () => {
     expect(ast.distinct).to.equal('DISTINCT');
     expect(ast.from).to.be.an('array');
     expect(ast.where).to.be.an('object');
-    expect(ast.groupby).to.be.an('array');
+    expect(ast.groupby).to.be.an('object');
+    expect(ast.groupby.columns).to.be.an('array');
     expect(ast.orderby).to.be.an('array');
     expect(ast.limit).to.be.an('object');
   });
@@ -834,16 +835,19 @@ describe('select', () => {
   describe('group by clause', () => {
     it('should parse single columns', () => {
       const ast = parser.astify('SELECT a FROM b WHERE c = 0 GROUP BY d');
-      expect(ast.groupby).to.eql([{ type:'column_ref', table: null, column: 'd' }])
+      expect(ast.groupby.columns).to.eql([{ type:'column_ref', table: null, column: 'd' }])
     });
 
     it('should parse multiple columns', () => {
-      const ast = parser.astify('SELECT a FROM b WHERE c = 0 GROUP BY d, t.b, t.c');
-      expect(ast.groupby).to.eql([
+      const ast = parser.astify('SELECT a FROM b WHERE c = 0 GROUP BY d, t.b, t.c WITH ROLLUP');
+      expect(ast.groupby.columns).to.eql([
         { type: 'column_ref', table: null, column: 'd' },
         { type: 'column_ref', table: 't', column: 'b' },
         { type: 'column_ref', table: 't', column: 'c' }
       ]);
+      expect(ast.groupby.modifiers).to.eql([
+        { type: 'origin', value: 'with rollup' }
+      ])
     });
 
     it('should parse column index', () => {

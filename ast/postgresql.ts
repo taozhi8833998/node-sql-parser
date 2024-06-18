@@ -902,6 +902,7 @@ export type BINARY_OPERATORS =
       | "NOT BETWEEN"
       | "IS"
       | "IS NOT"
+      | "ILIKE"
       | "LIKE"
       | "@>"
       | "<@"
@@ -930,9 +931,7 @@ export type on_clause = or_and_where_expr;
 
 export type where_clause = or_and_where_expr;
 
-
-
-export type group_by_clause = expr_list['value'];
+export type group_by_clause = { columns: expr_list['value']; modifiers: literal_string[]; };
 
 export type column_ref_list = column_ref[];
 
