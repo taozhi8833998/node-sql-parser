@@ -235,6 +235,13 @@ describe('snowflake', () => {
         'CREATE OR REPLACE SCHEMA DELETETHISDB.PUBLIC'
       ]
     },
+    {
+      title: 'table name start with digit',
+      sql: [
+        'CREATE TABLE 1dog (id INT);',
+        'CREATE TABLE "1dog" ("id" INT)'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
