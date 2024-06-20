@@ -386,19 +386,22 @@ create_db_stmt
         type: 'create',
         keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
-        database: ident_without_kw_type,
+        database?: { db: string, schema: string };
+        schema?: { db: string, schema: string };
         create_definitions?: create_db_definition
       }
       => AstStatement<create_db_stmt_t>
       */
+      const keyword = k.toLowerCase()
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: a[0].toLowerCase(),
-          keyword: 'database',
+          keyword,
           if_not_exists:ife,
-          database: t,
+          replace: or && 'or replace',
+          [keyword]: { db: t.schema, schema: t.name },
           create_definitions: c,
         }
       }

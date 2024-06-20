@@ -205,17 +205,20 @@ function createSequenceToSQL(stmt) {
   return sql.filter(hasVal).join(' ')
 }
 
-function createDatabaseToSQL(stmt) {
+function createDatabaseOrSchemaToSQL(stmt) {
   const {
-    type, keyword, database,
+    type, keyword, replace,
     if_not_exists: ifNotExists,
     create_definitions: createDefinition,
   } = stmt
+  const { db, schema } = stmt[keyword]
+  const name = [literalToSQL(db), schema.map(literalToSQL).join('.')].filter(hasVal).join('.')
   const sql = [
     toUpper(type),
+    toUpper(replace),
     toUpper(keyword),
     toUpper(ifNotExists),
-    literalToSQL(database),
+    name,
   ]
   if (createDefinition) sql.push(createDefinition.map(tableOptionToSQL).join(' '))
   return sql.filter(hasVal).join(' ')
@@ -412,7 +415,8 @@ function createToSQL(stmt) {
       sql = createSequenceToSQL(stmt)
       break
     case 'database':
-      sql = createDatabaseToSQL(stmt)
+    case 'schema':
+      sql = createDatabaseOrSchemaToSQL(stmt)
       break
     case 'view':
       sql = createViewToSQL(stmt)
