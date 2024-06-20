@@ -1268,6 +1268,10 @@ column_definition_opt
     // => { reference_definition: reference_definition; }
     return { reference_definition: re }
   }
+  / ck:check_constraint_definition {
+    // => { check: check_constraint_definition; }
+    return { check: ck }
+  }
   / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_name {
     // => { character_set: collate_expr }
     return { character_set: { type: t, value: v, symbol: s }}
@@ -1907,7 +1911,7 @@ create_constraint_check
   = kc:constraint_name? __ p:'CHECK'i __ LPAREN __ e:or_and_where_expr __ RPAREN {
     /* => {
       constraint?: constraint_name['constraint'];
-      definition: or_and_where_expr;
+      definition: [or_and_where_expr];
       keyword?: constraint_name['keyword'];
       constraint_type: 'check';
       resource: 'constraint';
@@ -1998,6 +2002,28 @@ create_constraint_foreign
         index: i,
         resource: 'constraint',
         reference_definition: id
+      }
+  }
+
+check_constraint_definition
+  = kc:constraint_name? __ u:'CHECK'i __ LPAREN __ c:or_and_expr __ RPAREN __ ne:(KW_NOT? __ 'ENFORCED'i)?  {
+    /* => {
+      constraint_type: 'check';
+      keyword: constraint_name['keyword'];
+      constraint?: constraint_name['constraint'];
+      definition: [or_and_expr];
+      enforced?: 'enforced' | 'not enforced';
+      resource: 'constraint';
+    }*/
+    const enforced = []
+    if (ne) enforced.push(ne[0], ne[2])
+    return {
+        constraint_type: u.toLowerCase(),
+        keyword: kc && kc.keyword,
+        constraint: kc && kc.constraint,
+        definition: [c],
+        enforced: enforced.filter(v => v).join(' ').toLowerCase(),
+        resource: 'constraint',
       }
   }
 
