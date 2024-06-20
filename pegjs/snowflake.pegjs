@@ -2536,9 +2536,10 @@ where_clause
   = KW_WHERE __ e:or_and_where_expr { /* => binary_expr */ return e; }
 
 group_by_clause
-  = KW_GROUP __ KW_BY __ e:expr_list {
+  = KW_GROUP __ KW_BY __ e:(KW_ALL / expr_list) {
+    const columns = e === 'ALL' ? [{ type: 'origin', value: 'all'}] : e.value
     return {
-      columns: e.value
+      columns
     }
   }
 

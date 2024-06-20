@@ -242,6 +242,13 @@ describe('snowflake', () => {
         'CREATE TABLE "1dog" ("id" INT)'
       ]
     },
+    {
+      title: 'group by all',
+      sql: [
+        'SELECT A, B, COUNT(*) FROM T GROUP BY All',
+        'SELECT "A", "B", COUNT(*) FROM "T" GROUP BY ALL'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
