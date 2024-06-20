@@ -218,9 +218,23 @@ describe('snowflake', () => {
               primary key ("att1")
           );
         `,
-        `CREATE TABLE "TEST_SNOWFLAKE" ("att1" NUMERIC(3, 3), "att2" BYTEINT, "att3_SAMPLE_3" BINARY, "att4_SAMPLE_4" VARBINARY, "att5_SAMPLE_5" GEOGRAPHY, "att6_SAMPLE_6" TIMESTAMP_TZ, PRIMARY KEY ("att1"))` 
+        `CREATE TABLE "TEST_SNOWFLAKE" ("att1" NUMERIC(3, 3), "att2" BYTEINT, "att3_SAMPLE_3" BINARY, "att4_SAMPLE_4" VARBINARY, "att5_SAMPLE_5" GEOGRAPHY, "att6_SAMPLE_6" TIMESTAMP_TZ, PRIMARY KEY ("att1"))`
       ]
-    }
+    },
+    {
+      title: 'create or replace table',
+      sql: [
+        'create or replace TABLE HOSPITAL.PUBLIC.BILLING (BILL_ID VARCHAR(16777216) NOT NULL, DATE TIMESTAMP_NTZ(9), B_ID VARBINARY(333), primary key (BILL_ID));',
+        'CREATE OR REPLACE TABLE "HOSPITAL"."PUBLIC"."BILLING" ("BILL_ID" VARCHAR(16777216) NOT NULL, "DATE" TIMESTAMP_NTZ(9), "B_ID" VARBINARY(333), PRIMARY KEY ("BILL_ID"))'
+      ]
+    },
+    {
+      title: 'create or replace schema',
+      sql: [
+        'create or replace schema DELETETHISDB.PUBLIC;',
+        'CREATE OR REPLACE SCHEMA DELETETHISDB.PUBLIC'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo

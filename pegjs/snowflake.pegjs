@@ -233,7 +233,6 @@ create_stmt
   / create_index_stmt
   / create_sequence
   / create_db_stmt
-  / create_schema_stmt
   / create_domain_stmt
   / create_type_stmt
   / create_view_stmt
@@ -350,65 +349,37 @@ create_db_definition
 
 create_db_stmt
   = a:KW_CREATE __
+    or:(KW_OR __ KW_REPLACE)? __
     k:(KW_DATABASE / KW_SCHEMA) __
     ife:if_not_exists_stmt? __
-    t:ident_without_kw_type __
+    t:proc_func_name __
     c:create_db_definition? {
       /*
       export type create_db_stmt = {
         type: 'create',
         keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
-        database: ident_without_kw_type,
+        database?: { db: string, schema: string };
+        schema?: { db: string, schema: string };
         create_definitions?: create_db_definition
       }
       => AstStatement<create_db_stmt>
       */
+      const keyword = k.toLowerCase()
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
           type: a[0].toLowerCase(),
-          keyword: 'database',
+          keyword,
           if_not_exists:ife,
-          database: t,
+          replace: or && 'or replace',
+          [keyword]: { db: t.schema, schema: t.name },
           create_definitions: c,
         }
       }
     }
 
-db_schema
-  = dt:ident tail:(__ DOT __ ident)? {
-    // => IGNORE
-      const obj = {};
-      if (tail !== null) {
-        obj.db = dt;
-        obj.schema = tail[3];
-      }
-      else {
-        obj.db = null
-        obj.schema = dt
-      }
-      return obj;
-    }
-
-create_schema_stmt
-  = a:KW_CREATE __ or:(KW_OR __ KW_REPLACE __)?
-    k:(KW_SCHEMA) __
-    ife:if_not_exists_stmt? __
-    t:db_schema {
-      return {
-        tableList: Array.from(tableList),
-        columnList: columnListTableAlias(columnList),
-        ast: {
-          type: a[0].toLowerCase(),
-          keyword: 'database',
-          if_not_exists:ife,
-          db: t.db,
-          schema: t.schema
-        }
-      }
-    }
 view_with
   = KW_WITH __ c:("CASCADED"i / "LOCAL"i) __ "CHECK"i __ "OPTION" {
     // => string
@@ -542,7 +513,7 @@ create_domain_stmt
     }
 create_table_stmt
   = a:KW_CREATE __
-    or: (KW_OR __ KW_REPLACE __)?
+    or:(KW_OR __ KW_REPLACE)? __
     tp:KW_TEMPORARY? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
@@ -558,6 +529,7 @@ create_table_stmt
         type: 'create';
         keyword: 'table';
         temporary?: 'temporary';
+        replace?: string;
         if_not_exists?: 'if not exists';
         table: table_ref_list;
       }
@@ -579,8 +551,8 @@ create_table_stmt
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
-          or_replace: or && (or[0] + ' ' +  or[2][0]).toUpperCase(),
           table: t,
+          replace: or && 'or replace',
           ignore_replace: ir && ir[0].toLowerCase(),
           as: as && as[0].toLowerCase(),
           query_expr: qe && qe.ast,
@@ -591,6 +563,7 @@ create_table_stmt
       }
     }
   / a:KW_CREATE __
+    or:(KW_OR __ KW_REPLACE)? __
     tp:KW_TEMPORARY? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
@@ -612,7 +585,7 @@ create_table_stmt
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
-          or_replace: or && (or[0] + ' ' +  or[2][0]).toUpperCase(),
+          replace: or && (or[0] + ' ' +  or[2][0]).toUpperCase(),
           table: t,
           like: lt
         }
