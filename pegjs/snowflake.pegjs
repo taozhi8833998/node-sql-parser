@@ -233,6 +233,7 @@ create_stmt
   / create_index_stmt
   / create_sequence
   / create_db_stmt
+  / create_schema_stmt
   / create_domain_stmt
   / create_type_stmt
   / create_view_stmt
@@ -375,6 +376,39 @@ create_db_stmt
         }
       }
     }
+
+db_schema
+  = dt:ident tail:(__ DOT __ ident)? {
+    // => IGNORE
+      const obj = {};
+      if (tail !== null) {
+        obj.db = dt;
+        obj.schema = tail[3];
+      }
+      else {
+        obj.db = null
+        obj.schema = dt
+      }
+      return obj;
+    }
+
+create_schema_stmt
+  = a:KW_CREATE __ or:(KW_OR __ KW_REPLACE __)?
+    k:(KW_SCHEMA) __
+    ife:if_not_exists_stmt? __
+    t:db_schema {
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          keyword: 'database',
+          if_not_exists:ife,
+          db: t.db,
+          schema: t.schema
+        }
+      }
+    }
 view_with
   = KW_WITH __ c:("CASCADED"i / "LOCAL"i) __ "CHECK"i __ "OPTION" {
     // => string
@@ -508,6 +542,7 @@ create_domain_stmt
     }
 create_table_stmt
   = a:KW_CREATE __
+    or: (KW_OR __ KW_REPLACE __)?
     tp:KW_TEMPORARY? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
@@ -544,6 +579,7 @@ create_table_stmt
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
+          or_replace: or && (or[0] + ' ' +  or[2][0]).toUpperCase(),
           table: t,
           ignore_replace: ir && ir[0].toLowerCase(),
           as: as && as[0].toLowerCase(),
@@ -576,6 +612,7 @@ create_table_stmt
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
+          or_replace: or && (or[0] + ' ' +  or[2][0]).toUpperCase(),
           table: t,
           like: lt
         }
@@ -3513,7 +3550,7 @@ ident_name
       return start + parts.join('');
     }
 
-ident_start = [A-Za-z_\u4e00-\u9fa5]
+ident_start = [A-Za-z0-9_\u4e00-\u9fa5]
 
 ident_part  = [A-Za-z0-9_\-$\u4e00-\u9fa5]
 
@@ -4373,6 +4410,7 @@ KW_ROWS     = "ROWS"i     !ident_start { return 'ROWS'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TIMESTAMP_TZ = "TIMESTAMP_TZ"i !ident_start { return 'TIMESTAMP_TZ'; }
+KW_TIMESTAMP_NTZ = "TIMESTAMP_NTZ"i !ident_start { return 'TIMESTAMP_NTZ'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
 KW_USER     = "USER"i     !ident_start { return 'USER'; }
 KW_UUID     = "UUID"i     !ident_start { return 'UUID'; }
@@ -4746,8 +4784,8 @@ boolean_type
   = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
 
 binary_type
-  = t:(KW_BINARY / KW_VARBINARY) { /* => data_type */ return { dataType: t }; }
-
+  = t:(KW_BINARY / KW_VARBINARY) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix?  { /* => data_type */ return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s  }; }
+    / t:(KW_BINARY / KW_VARBINARY) { /* => data_type */ return { dataType: t }; }
 character_string_type
   = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
     // => data_type
@@ -4782,8 +4820,8 @@ time_type
   / t:(KW_TIME / KW_TIMESTAMP) __ tz:timezone? { /* =>  data_type */  return { dataType: t, suffix: tz }; }
 
 datetime_type
-  = t:(KW_DATE / KW_DATETIME) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
-  / t:(KW_DATE / KW_DATETIME / KW_TIMESTAMP_TZ) { /* =>  data_type */  return { dataType: t }; }
+  = t:(KW_DATE / KW_DATETIME / KW_TIMESTAMP_TZ / KW_TIMESTAMP_NTZ) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
+  / t:(KW_DATE / KW_DATETIME / KW_TIMESTAMP_TZ / KW_TIMESTAMP_NTZ) { /* =>  data_type */  return { dataType: t }; }
   / time_type
 
 enum_type
