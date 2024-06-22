@@ -52,7 +52,8 @@ export type create_db_stmt_t = {
         type: 'create',
         keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
-        database: ident_without_kw_type,
+        database?: { db: string, schema: string };
+        schema?: { db: string, schema: string };
         create_definitions?: create_db_definition
       }
 
@@ -276,7 +277,7 @@ export type create_table_definition = create_definition[];
 
 export type create_definition = create_column_definition | create_index_definition | create_fulltext_spatial_index_definition | create_constraint_definition;
 
-export type column_definition_opt = column_constraint | { auto_increment: 'auto_increment'; } | { unique: 'unique' | 'unique key'; } | { unique: 'key' | 'primary key'; } | { comment: keyword_comment; } | { collate: collate_expr; } | { column_format: column_format; } | { storage: storage } | { reference_definition: reference_definition; } | { character_set: collate_expr };
+export type column_definition_opt = column_constraint | { auto_increment: 'auto_increment'; } | { unique: 'unique' | 'unique key'; } | { unique: 'key' | 'primary key'; } | { comment: keyword_comment; } | { collate: collate_expr; } | { column_format: column_format; } | { storage: storage } | { reference_definition: reference_definition; } | { check: check_constraint_definition; } | { character_set: collate_expr };
 
 
 
@@ -497,7 +498,7 @@ export type constraint_name = { keyword: 'constraint'; constraint: ident; };
 
 export type create_constraint_check = {
       constraint?: constraint_name['constraint'];
-      definition: or_and_where_expr;
+      definition: [or_and_where_expr];
       keyword?: constraint_name['keyword'];
       constraint_type: 'check';
       resource: 'constraint';
@@ -537,6 +538,17 @@ export type create_constraint_foreign = {
       index?: column;
       resource: 'constraint';
       reference_definition?: reference_definition;
+    };
+
+
+
+export type check_constraint_definition = {
+      constraint_type: 'check';
+      keyword: constraint_name['keyword'];
+      constraint?: constraint_name['constraint'];
+      definition: [or_and_expr];
+      enforced?: 'enforced' | 'not enforced';
+      resource: 'constraint';
     };
 
 
