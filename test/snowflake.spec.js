@@ -256,6 +256,13 @@ describe('snowflake', () => {
         'SELECT TOP 10 * FROM "cleansed_hosts"'
       ]
     },
+    {
+      title: 'pa',
+      sql: [
+        'select * from ( ( ( select * from some_table ) union all ( select * from some_table ) )  union all ( select * from some_table )  )',
+        'SELECT * FROM (((SELECT * FROM "some_table") UNION ALL (SELECT * FROM "some_table")) UNION ALL (SELECT * FROM "some_table"))'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
