@@ -1410,7 +1410,7 @@ select_stmt_nake
   = __ cte:with_clause? __ KW_SELECT ___
     opts:option_clause? __
     d:KW_DISTINCT?      __
-    top: top_clause? __
+    top:top_clause? __
     c:column_clause     __
     f:from_clause?      __
     w:where_clause?     __

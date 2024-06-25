@@ -2061,6 +2061,7 @@ select_stmt_nake
   = __ cte:with_clause? __ KW_SELECT ___
     opts:option_clause? __
     d:distinct_on?      __
+    top:top_clause? __
     c:column_clause     __
     ci:into_clause?      __
     f:from_clause?      __
@@ -2085,6 +2086,7 @@ select_stmt_nake
           groupby?: group_by_clause;
           having?: having_clause;
           orderby?: order_by_clause;
+          top?: top_clause;
           limit?: limit_clause;
           window?: window_clause;
         }*/
@@ -2108,12 +2110,27 @@ select_stmt_nake
           having: h,
           qualify: q,
           orderby: o,
+          top,
           limit: l,
           window: win,
           ...getLocationObject()
       };
   }
 
+top_clause
+  = KW_TOP __ LPAREN __ n:number __ RPAREN __ p:('PERCENT'i)? {
+    return {
+      value: n,
+      percent: p && p.toLowerCase(),
+      parentheses: true,
+    }
+  }
+  / KW_TOP __ n:number __ p:('PERCENT'i)? {
+    return {
+      value: n,
+      percent: p && p.toLowerCase()
+    }
+  }
 // MySQL extensions to standard SQL
 option_clause
   = head:query_option tail:(__ query_option)* {
@@ -4245,6 +4262,7 @@ KW_DEFAULT  = "DEFAULT"i    !ident_start
 KW_NOT_NULL = "NOT NULL"i   !ident_start
 KW_TRUE     = "TRUE"i       !ident_start
 KW_TO       = "TO"i         !ident_start
+KW_TOP      = "TOP"i        !ident_start
 KW_FALSE    = "FALSE"i      !ident_start
 
 KW_SHOW     = "SHOW"i       !ident_start

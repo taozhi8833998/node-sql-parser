@@ -249,6 +249,13 @@ describe('snowflake', () => {
         'SELECT "A", "B", COUNT(*) FROM "T" GROUP BY ALL'
       ]
     },
+    {
+      title: 'top clause in select',
+      sql: [
+        'select top 10 * from cleansed_hosts',
+        'SELECT TOP 10 * FROM "cleansed_hosts"'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
