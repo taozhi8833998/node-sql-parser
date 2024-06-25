@@ -3010,7 +3010,7 @@ table_join
       t.on = expr;
       return t;
     }
-  / op:join_op __ LPAREN __ stmt:(union_stmt / table_ref_list) __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
+  / op:(join_op / set_op) __ LPAREN __ stmt:(union_stmt / table_ref_list) __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
     /* => {
       expr: (union_stmt || table_ref_list) & { parentheses: true; };
       as?: alias_clause;

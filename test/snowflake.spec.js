@@ -257,7 +257,7 @@ describe('snowflake', () => {
       ]
     },
     {
-      title: 'pa',
+      title: 'multiple union all',
       sql: [
         'select * from ( ( ( select * from some_table ) union all ( select * from some_table ) )  union all ( select * from some_table )  )',
         'SELECT * FROM (((SELECT * FROM "some_table") UNION ALL (SELECT * FROM "some_table")) UNION ALL (SELECT * FROM "some_table"))'

@@ -2410,7 +2410,7 @@ table_join
     /* => {
       expr: (union_stmt || table_ref_list) & { parentheses: true; };
       as?: alias_clause;
-      join: join_op || set_op;
+      join: join_op | set_op;
       on?: on_clause;
     }*/
     if (Array.isArray(stmt)) stmt = { type: 'tables', expr: stmt }
