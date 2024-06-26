@@ -2061,6 +2061,7 @@ select_stmt_nake
   = __ cte:with_clause? __ KW_SELECT ___
     opts:option_clause? __
     d:distinct_on?      __
+    top:top_clause? __
     c:column_clause     __
     ci:into_clause?      __
     f:from_clause?      __
@@ -2085,6 +2086,7 @@ select_stmt_nake
           groupby?: group_by_clause;
           having?: having_clause;
           orderby?: order_by_clause;
+          top?: top_clause;
           limit?: limit_clause;
           window?: window_clause;
         }*/
@@ -2108,12 +2110,27 @@ select_stmt_nake
           having: h,
           qualify: q,
           orderby: o,
+          top,
           limit: l,
           window: win,
           ...getLocationObject()
       };
   }
 
+top_clause
+  = KW_TOP __ LPAREN __ n:number __ RPAREN __ p:('PERCENT'i)? {
+    return {
+      value: n,
+      percent: p && p.toLowerCase(),
+      parentheses: true,
+    }
+  }
+  / KW_TOP __ n:number __ p:('PERCENT'i)? {
+    return {
+      value: n,
+      percent: p && p.toLowerCase()
+    }
+  }
 // MySQL extensions to standard SQL
 option_clause
   = head:query_option tail:(__ query_option)* {
@@ -2389,11 +2406,11 @@ table_join
       t.on = expr;
       return t;
     }
-  / op:join_op __ LPAREN __ stmt:(union_stmt / table_ref_list) __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
+  / op:(join_op / set_op) __ LPAREN __ stmt:(union_stmt / table_ref_list) __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
     /* => {
       expr: (union_stmt || table_ref_list) & { parentheses: true; };
       as?: alias_clause;
-      join: join_op;
+      join: join_op | set_op;
       on?: on_clause;
     }*/
     if (Array.isArray(stmt)) stmt = { type: 'tables', expr: stmt }
@@ -2406,6 +2423,7 @@ table_join
       ...getLocationObject(),
     };
   }
+
 
 //NOTE that, the table assigned to `var` shouldn't write in `table_join`
 table_base
@@ -4245,6 +4263,7 @@ KW_DEFAULT  = "DEFAULT"i    !ident_start
 KW_NOT_NULL = "NOT NULL"i   !ident_start
 KW_TRUE     = "TRUE"i       !ident_start
 KW_TO       = "TO"i         !ident_start
+KW_TOP      = "TOP"i        !ident_start
 KW_FALSE    = "FALSE"i      !ident_start
 
 KW_SHOW     = "SHOW"i       !ident_start
