@@ -169,7 +169,7 @@ function tableOptionToSQL(tableOption) {
   const { keyword, symbol, value } = tableOption
   const sql = [keyword.toUpperCase()]
   if (symbol) sql.push(symbol)
-  let val = value
+  let val = literalToSQL(value)
   switch (keyword) {
     case 'partition by':
     case 'default collate':

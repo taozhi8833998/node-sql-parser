@@ -1275,8 +1275,8 @@ column_definition_opt
     // => { check: check_constraint_definition; }
     return { check: ck }
   }
-  / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_name {
-    // => { character_set: collate_expr }
+  / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_without_kw_type {
+    // => { character_set: { type: 'CHARACTER SET'; symbol: '=' | null; value: ident_without_kw_type; } }
     return { character_set: { type: t, value: v, symbol: s }}
   }
 
@@ -2211,11 +2211,11 @@ create_option_character_set_kw
   }
 
 create_option_character_set
-  = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
+  = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_without_kw_type {
     /* => {
       keyword: 'character set' | 'charset' | 'collate' | 'default character set' | 'default charset' | 'default collate';
       symbol: '=';
-      value: ident_name;
+      value: ident_without_kw_type;
       } */
     return {
       keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
