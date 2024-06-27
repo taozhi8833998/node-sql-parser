@@ -893,7 +893,7 @@ column_definition_opt
     // => { reference_definition: reference_definition; }
     return { reference_definition: re }
   }
-  / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_name {
+  / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_without_kw_type {
     // => { character_set: collate_expr }
     return { character_set: { type: t, value: v, symbol: s }}
   }
@@ -1777,7 +1777,7 @@ create_option_character_set_kw
   }
 
 create_option_character_set
-  = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
+  = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_without_kw_type {
     /* => {
       keyword: 'character set' | 'charset' | 'collate' | 'default character set' | 'default charset' | 'default collate';
       symbol: '=';

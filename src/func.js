@@ -29,7 +29,7 @@ function castToSQL(expr) {
   let str = targetExpr ? exprToSQL(targetExpr) : ''
   if (length != null) str = scale ? `${length}, ${scale}` : length
   if (parentheses) str = `(${str})`
-  if (dataTypeSuffix && dataTypeSuffix.length) str += ` ${dataTypeSuffix.join(' ')}`
+  if (dataTypeSuffix && dataTypeSuffix.length) str += ` ${dataTypeSuffix.map(literalToSQL).join(' ')}`
   let prefix = exprToSQL(expression)
   let symbolChar = '::'
   let suffix = ''

@@ -55,7 +55,7 @@ describe('create', () => {
         compCode varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '我是comment',
         compCode2 varchar(255) CHARACTER SET = utf8 COLLATE = utf8_general_ci NOT NULL COMMENT '我是comment'
       ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '我是comment' ROW_FORMAT = Dynamic`))
-        .to.equal("CREATE TABLE `comp` (`id` INT(11) NOT NULL AUTO_INCREMENT, `compCode` VARCHAR(255) NOT NULL COMMENT '我是comment' CHARACTER SET UTF8 COLLATE UTF8_GENERAL_CI, `compCode2` VARCHAR(255) NOT NULL COMMENT '我是comment' CHARACTER SET = UTF8 COLLATE = UTF8_GENERAL_CI) ENGINE = INNODB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '我是comment' ROW_FORMAT = DYNAMIC");
+        .to.equal("CREATE TABLE `comp` (`id` INT(11) NOT NULL AUTO_INCREMENT, `compCode` VARCHAR(255) NOT NULL COMMENT '我是comment' CHARACTER SET utf8 COLLATE UTF8_GENERAL_CI, `compCode2` VARCHAR(255) NOT NULL COMMENT '我是comment' CHARACTER SET = utf8 COLLATE = UTF8_GENERAL_CI) ENGINE = INNODB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '我是comment' ROW_FORMAT = DYNAMIC");
     })
 
     it('should support create temporary table', () => {
@@ -133,7 +133,7 @@ describe('create', () => {
 
       it('should support generated columns', () =>{
         expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) CHARACTER SET latin1 COLLATE latin1_general_cs AS (CONCAT(first_name,' ',last_name)) STORED NOT NULL);`))
-          .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) NOT NULL CHARACTER SET LATIN1 COLLATE LATIN1_GENERAL_CS AS (CONCAT(`first_name`, ' ', `last_name`)) STORED)");
+          .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) NOT NULL CHARACTER SET latin1 COLLATE LATIN1_GENERAL_CS AS (CONCAT(`first_name`, ' ', `last_name`)) STORED)");
 
         expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) AS (CONCAT(first_name,' ',last_name)) STORED);`))
         .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) AS (CONCAT(`first_name`, ' ', `last_name`)) STORED)");
@@ -144,7 +144,7 @@ describe('create', () => {
 
       it('should support generated columns with generated always', () =>{
         expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) CHARACTER SET latin1 COLLATE latin1_general_cs GENERATED ALWAYS AS (CONCAT(first_name,' ',last_name)) STORED NOT NULL);`))
-          .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) NOT NULL CHARACTER SET LATIN1 COLLATE LATIN1_GENERAL_CS GENERATED ALWAYS AS (CONCAT(`first_name`, ' ', `last_name`)) STORED)");
+          .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) NOT NULL CHARACTER SET latin1 COLLATE LATIN1_GENERAL_CS GENERATED ALWAYS AS (CONCAT(`first_name`, ' ', `last_name`)) STORED)");
 
         expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) GENERATED ALWAYS AS (CONCAT(first_name,' ',last_name)) VIRTUAL);`))
           .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) GENERATED ALWAYS AS (CONCAT(`first_name`, ' ', `last_name`)) VIRTUAL)");

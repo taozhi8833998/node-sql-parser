@@ -174,16 +174,6 @@ function identifierToSql(ident, isDual) {
   }
 }
 
-function commonTypeValue(opt) {
-  const result = []
-  if (!opt) return result
-  const { type, symbol, value } = opt
-  result.push(type.toUpperCase())
-  if (symbol) result.push(symbol)
-  result.push(value.toUpperCase())
-  return result
-}
-
 function toUpper(val) {
   if (!val) return
   return val.toUpperCase()
@@ -197,7 +187,7 @@ function literalToSQL(literal) {
   if (!literal) return
   let { prefix } = literal
   const { type, parentheses, suffix, value } = literal
-  let str = typeof literal === 'string' ? literal : value
+  let str = typeof literal === 'object' ? value : literal
   switch (type) {
     case 'backticks_quote_string':
       str = `\`${escape(value)}\``
@@ -258,9 +248,21 @@ function literalToSQL(literal) {
   const result = []
   if (prefix) result.push(toUpper(prefix))
   result.push(str)
-  if (suffix) result.push(typeof suffix === 'object' && suffix.collate ? commonTypeValue(suffix.collate).join(' ') : toUpper(suffix))
+  if (suffix) {
+    if (typeof suffix === 'string') result.push(suffix)
+    if (typeof suffix === 'object') {
+      if (suffix.collate) result.push([toUpper(suffix.collate.type), suffix.collate.symbol, toUpper(suffix.collate.value)].filter(hasVal).join(' '))
+      else result.push(literalToSQL(suffix))
+    }
+  }
   str = result.join(' ')
   return parentheses ? `(${str})` : str
+}
+
+function commonTypeValue(opt) {
+  if (!opt) return []
+  const { type, symbol, value } = opt
+  return [type.toUpperCase(), symbol, typeof value === 'string' ? value.toUpperCase() : literalToSQL(value)].filter(hasVal)
 }
 
 function replaceParams(ast, params) {

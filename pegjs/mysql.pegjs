@@ -908,7 +908,7 @@ column_definition_opt
   / ck:check_constraint_definition {
     return { check: ck }
   }
-  / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_name {
+  / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_without_kw_type {
     return { character_set: { type: t, value: v, symbol: s }}
   }
   / g:generated {
@@ -1615,7 +1615,7 @@ create_option_character_set_kw
     return 'CHARACTER SET'
   }
 create_option_character_set
-  = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_name {
+  = kw:KW_DEFAULT? __ t:(create_option_character_set_kw / 'CHARSET'i / 'COLLATE'i) __ s:(KW_ASSIGIN_EQUAL)? __ v:ident_without_kw_type {
     return {
       keyword: kw && `${kw[0].toLowerCase()} ${t.toLowerCase()}` || t.toLowerCase(),
       symbol: s,
@@ -3391,7 +3391,7 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 convert_args
-  = c:proc_primary __ COMMA __ ch:(character_string_type / datetime_type)  __ cs:create_option_character_set_kw __ v:ident_name {
+  = c:proc_primary __ COMMA __ ch:(character_string_type / datetime_type)  __ cs:create_option_character_set_kw __ v:ident_without_kw_type {
     const { dataType, length } = ch
     let dataTypeStr = dataType
     if (length !== undefined) dataTypeStr = `${dataTypeStr}(${length})`
@@ -3401,8 +3401,12 @@ convert_args
         c,
         {
           type: 'origin',
-          value: `${dataTypeStr} ${cs} ${v}`
-        }
+          value: dataTypeStr,
+          suffix: {
+            prefix: cs,
+            ...v,
+          }
+        },
       ]
     }
   }
@@ -3528,7 +3532,7 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_name __ RPAREN __ ca:collate_expr? {
+  = c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_without_kw_type __ RPAREN __ ca:collate_expr? {
     const { dataType, length } = ch
     let dataTypeStr = dataType
     if (length !== undefined) dataTypeStr = `${dataTypeStr}(${length})`
@@ -3538,7 +3542,8 @@ cast_expr
       expr: e,
       symbol: 'as',
       target: {
-        dataType: `${dataTypeStr} ${cs} ${v.toUpperCase()}`
+        dataType: dataTypeStr,
+        suffix: [{ type: 'origin', value: cs }, v],
       },
       collate: ca,
     };
