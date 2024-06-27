@@ -360,4 +360,26 @@ describe('transactsql', () => {
       expect(getParsedSql(sql)).to.be.equal("SELECT * FROM (VALUES (0,0), (1,NULL), (NULL,2), (3,4)) AS [t(a, b)]")
     })
   })
+  const SQL_LIST = [
+    {
+      title: 'select from temp table',
+      sql: [
+        'SELECT * FROM #TempLocationCol',
+        'SELECT * FROM [#TempLocationCol]'
+      ]
+    },
+    {
+      title: 'select into clause',
+      sql: [
+        'SELECT * INTO #temp_table FROM tableName',
+        'SELECT * INTO [#temp_table] FROM [tableName]'
+      ]
+    }
+  ]
+  SQL_LIST.forEach(sqlInfo => {
+    const { title, sql } = sqlInfo
+    it(`should support ${title}`, () => {
+      expect(getParsedSql(sql[0], tsqlOpt)).to.equal(sql[1])
+    })
+  })
 })

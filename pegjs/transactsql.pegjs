@@ -1412,6 +1412,7 @@ select_stmt_nake
     d:KW_DISTINCT?      __
     top:top_clause? __
     c:column_clause     __
+    ci:into_clause?      __
     f:from_clause?      __
     w:where_clause?     __
     g:group_by_clause?  __
@@ -1426,6 +1427,10 @@ select_stmt_nake
           options: opts,
           distinct: d,
           columns: c,
+          into: {
+            ...(ci || {}),
+            position: ci && 'column',
+          },
           from: f,
           for: fx,
           where: w,
@@ -1514,6 +1519,14 @@ value_alias_clause
 alias_clause
   = KW_AS __ i:alias_ident { return i; }
   / KW_AS? __ i:ident { return i; }
+
+into_clause
+  = KW_INTO __ f:ident {
+    return {
+      type: 'into',
+      expr: f
+    }
+  }
 
 from_clause
   = KW_FROM __ l:table_ref_list __ op:pivot_operator? {
@@ -1850,6 +1863,10 @@ table_name
       v.table = v.name;
       return v;
     }
+  / p:('##' / '#') n:ident {
+      return { db: null, table: `${p}${n}` }
+  }
+
 or_and_expr
 	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
     const len = tail.length
@@ -3133,7 +3150,6 @@ ___
 comment
   = block_comment
   / line_comment
-  / pound_sign_comment
 
 block_comment
   = "/*" (!"*/" !"/*" char / block_comment)* "*/"
