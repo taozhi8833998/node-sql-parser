@@ -140,7 +140,7 @@ export interface Case {
 export interface Cast {
   type: "cast";
   keyword: "cast";
-  expr: Expr;
+  expr: ExpressionValue;
   symbol: "as";
   target: {
     dataType: string;
