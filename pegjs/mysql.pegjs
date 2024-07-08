@@ -1010,13 +1010,28 @@ create_trigger_stmt
     }
 
 collate_expr
-  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident_name {
+  = KW_COLLATE __ ca:ident_name __ s:KW_ASSIGIN_EQUAL __ t:ident {
     return {
       type: 'collate',
-      symbol: s,
-      value: ca,
+      keyword: 'collate',
+      collate: {
+        name: ca,
+        symbol: s,
+        value: t
+      }
     }
   }
+  / KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident_name {
+    return {
+      type: 'collate',
+      keyword: 'collate',
+      collate: {
+        name: ca,
+        symbol: s,
+      }
+    }
+  }
+
 column_format
   = k:'COLUMN_FORMAT'i __ f:('FIXED'i / 'DYNAMIC'i / 'DEFAULT'i) {
     return {
@@ -2131,7 +2146,7 @@ select_stmt_nake
     h:having_clause?    __
     o:order_by_clause?  __
     l:limit_clause? __
-    lr: locking_read? __
+    lr:locking_read? __
     win:window_clause? __
     li:into_clause? {
       if ((ci && fi) || (ci && li) || (fi && li) || (ci && fi && li)) {
@@ -2459,7 +2474,7 @@ on_clause
 
 where_clause
   = KW_WHERE __ e:or_and_where_expr __ ca:collate_expr? {
-    if (ca) e.suffix = [ca]
+    if (ca) e.collate = ca
     return e;
   }
 
@@ -2502,8 +2517,9 @@ order_by_list
     }
 
 order_by_element
-  = e:expr __ d:(KW_DESC / KW_ASC)? {
+  = e:expr __ d:(KW_DESC / KW_ASC)? __ c:collate_expr? {
     const obj = { expr: e, type: d };
+    if (c) obj.collate = c
     return obj;
   }
 
