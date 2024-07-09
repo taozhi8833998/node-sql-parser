@@ -1048,7 +1048,7 @@ describe('Postgres', () => {
       title: 'create domain with full definition',
       sql: [
         'CREATE DOMAIN public.year AS integer collate utf8mb4_bin default 0 CONSTRAINT year_check CHECK (((VALUE >= 1901) AND (VALUE <= 2155)));',
-        'CREATE DOMAIN "public"."year" AS INTEGER COLLATE UTF8MB4_BIN DEFAULT 0 CONSTRAINT "year_check" CHECK (((VALUE >= 1901) AND (VALUE <= 2155)))',
+        'CREATE DOMAIN "public"."year" AS INTEGER COLLATE utf8mb4_bin DEFAULT 0 CONSTRAINT "year_check" CHECK (((VALUE >= 1901) AND (VALUE <= 2155)))',
       ]
     },
     {

@@ -1,6 +1,6 @@
 import { columnDataType, columnRefToSQL } from './column'
 import { createDefinitionToSQL } from './create'
-import { commonTypeValue, identifierToSql, hasVal, toUpper, literalToSQL } from './util'
+import { identifierToSql, hasVal, toUpper, literalToSQL } from './util'
 import { exprToSQL } from './expr'
 import { tablesToSQL, tableToSQL } from './tables'
 import astToSQL from './sql'
@@ -138,7 +138,7 @@ function declareToSQL(stmt) {
     const declareInfo = [[at, name].filter(hasVal).join(''), toUpper(as), toUpper(constant)]
     switch (keyword) {
       case 'variable':
-        declareInfo.push(columnDataType(datatype), ...commonTypeValue(dec.collate), toUpper(not_null))
+        declareInfo.push(columnDataType(datatype), exprToSQL(dec.collate), toUpper(not_null))
         if (definition) declareInfo.push(toUpper(definition.keyword), exprToSQL(definition.value))
         break
       case 'cursor':

@@ -439,10 +439,25 @@ create_column_definition
     }
 
 collate_expr
-  = KW_COLLATE __ ca:ident_name {
+  = KW_COLLATE __ ca:ident_name __ s:KW_ASSIGIN_EQUAL __ t:ident {
     return {
       type: 'collate',
-      value: ca,
+      keyword: 'collate',
+      collate: {
+        name: ca,
+        symbol: s,
+        value: t
+      }
+    }
+  }
+  / KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
+    return {
+      type: 'collate',
+      keyword: 'collate',
+      collate: {
+        name: ca,
+        symbol: s,
+      }
     }
   }
 column_format

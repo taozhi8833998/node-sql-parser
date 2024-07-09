@@ -1352,12 +1352,27 @@ column_constraint
   }
 
 collate_expr
-  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
-    // => { type: 'collate'; symbol: '=' | null; value: ident; }
+  = KW_COLLATE __ ca:ident_type __ s:KW_ASSIGIN_EQUAL __ t:ident_type {
+    // => { type: 'collate'; keyword: 'collate'; collate: { symbol: '=' ; name: ident_type; value: ident_type; }}
     return {
       type: 'collate',
-      symbol: s,
-      value: ca,
+      keyword: 'collate',
+      collate: {
+        name: ca,
+        symbol: s,
+        value: t
+      }
+    }
+  }
+  / KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident_type {
+    // => { type: 'collate'; keyword: 'collate'; collate: { symbol: '=' | null ; name: ident_type; }}
+    return {
+      type: 'collate',
+      keyword: 'collate',
+      collate: {
+        name: ca,
+        symbol: s,
+      }
     }
   }
 column_format

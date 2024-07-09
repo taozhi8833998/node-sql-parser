@@ -811,11 +811,25 @@ create_trigger_stmt
     }
 
 collate_expr
-  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident_name {
+  = KW_COLLATE __ ca:ident_name __ s:KW_ASSIGIN_EQUAL __ t:ident {
     return {
       type: 'collate',
-      symbol: s,
-      value: ca,
+      keyword: 'collate',
+      collate: {
+        name: ca,
+        symbol: s,
+        value: t
+      }
+    }
+  }
+  / KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
+    return {
+      type: 'collate',
+      keyword: 'collate',
+      collate: {
+        name: ca,
+        symbol: s,
+      }
     }
   }
 
@@ -1880,6 +1894,7 @@ select_stmt_nake
     g:group_by_clause?  __
     h:having_clause?    __
     o:order_by_clause?  __
+    ce:collate_expr? __
     l:limit_clause? __
     lr: locking_read? __
     win:window_clause? __
@@ -1903,6 +1918,7 @@ select_stmt_nake
           groupby: g,
           having: h,
           orderby: o,
+          collate: ce,
           limit: l,
           locking_read: lr && lr,
           window: win,
@@ -2205,8 +2221,7 @@ on_clause
   = KW_ON __ e:or_and_expr { return e; }
 
 where_clause
-  = KW_WHERE __ e:or_and_where_expr __ ca:collate_expr? {
-    if (ca) e.suffix = [ca]
+  = KW_WHERE __ e:or_and_where_expr {
     return e;
   }
 
@@ -2719,9 +2734,8 @@ in_op
   / KW_IN
 
 like_op_right
-  = op:like_op __ right:(literal / param / comparison_expr ) __ ca:(__ collate_expr)? __ es:escape_op? {
+  = op:like_op __ right:(literal / param / comparison_expr ) __ es:escape_op? {
     if (es) right.escape = es
-    if (ca) right.suffix = { collate: ca[1] }
     return { op: op, right: right };
   }
 
@@ -3202,12 +3216,11 @@ trim_func_clause
 
 func_call
   = extract_func / trim_func_clause
-  / 'convert'i __ LPAREN __ l:convert_args __ RPAREN __ ca:collate_expr? {
+  / 'convert'i __ LPAREN __ l:convert_args __ RPAREN {
     return {
         type: 'function',
         name: { name: [{ type: 'origin', value: 'convert' }] },
         args: l,
-        collate: ca,
     };
   }
   / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
@@ -3247,7 +3260,7 @@ scalar_func
   / KW_SYSTEM_USER
 
 cast_expr
-  = c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_without_kw_type __ RPAREN __ ca:collate_expr? {
+  = c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ ch:character_string_type  __ cs:create_option_character_set_kw __ v:ident_without_kw_type __ RPAREN {
     const { dataType, length } = ch
     let dataTypeStr = dataType
     if (length !== undefined) dataTypeStr = `${dataTypeStr}(${length})`
@@ -3260,7 +3273,6 @@ cast_expr
         dataType: dataTypeStr,
         suffix: [{ type: 'origin', value: cs }, v],
       },
-      collate: ca,
     };
   }
   / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {

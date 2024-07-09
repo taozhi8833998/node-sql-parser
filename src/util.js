@@ -1,4 +1,5 @@
 import { columnToSQL, columnRefToSQL, columnOrderToSQL } from './column'
+import { collateToSQL } from './collate'
 
 // const escapeMap = {
 //   '\0'   : '\\0',
@@ -251,7 +252,7 @@ function literalToSQL(literal) {
   if (suffix) {
     if (typeof suffix === 'string') result.push(suffix)
     if (typeof suffix === 'object') {
-      if (suffix.collate) result.push([toUpper(suffix.collate.type), suffix.collate.symbol, toUpper(suffix.collate.value)].filter(hasVal).join(' '))
+      if (suffix.collate) result.push(collateToSQL(suffix.collate))
       else result.push(literalToSQL(suffix))
     }
   }

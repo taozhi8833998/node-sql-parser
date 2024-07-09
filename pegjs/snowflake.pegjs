@@ -894,7 +894,6 @@ column_definition_opt
     return { reference_definition: re }
   }
   / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_without_kw_type {
-    // => { character_set: collate_expr }
     return { character_set: { type: t, value: v, symbol: s }}
   }
 
@@ -970,12 +969,25 @@ column_constraint
   }
 
 collate_expr
-  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
-    // => { type: 'collate'; symbol: '=' | null; value: ident; }
+  = KW_COLLATE __ ca:ident_name __ s:KW_ASSIGIN_EQUAL __ t:ident {
     return {
       type: 'collate',
-      symbol: s,
-      value: ca,
+      keyword: 'collate',
+      collate: {
+        name: ca,
+        symbol: s,
+        value: t
+      }
+    }
+  }
+  / KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
+    return {
+      type: 'collate',
+      keyword: 'collate',
+      collate: {
+        name: ca,
+        symbol: s,
+      }
     }
   }
 column_format

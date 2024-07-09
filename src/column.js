@@ -35,7 +35,7 @@ function arrayIndexToSQL(arrayIndexList) {
 }
 function columnRefToSQL(expr) {
   const {
-    array_index, arrows = [], as, collate, column, db, isDual, notations = [], schema, table, parentheses, properties,
+    array_index, arrows = [], as, column, db, isDual, notations = [], schema, table, parentheses, properties,
     suffix, order_by, subFields = [],
   } = expr
   let str = column === '*' ? '*' : columnOffsetToSQL(column, isDual)
@@ -54,7 +54,6 @@ function columnRefToSQL(expr) {
     commonOptionConnector('AS', exprToSQL, as),
     arrows.map((arrow, index) => commonOptionConnector(arrow, literalToSQL, properties[index])).join(' '),
   ]
-  if (collate) result.push(commonTypeValue(collate).join(' '))
   result.push(toUpper(suffix))
   result.push(toUpper(order_by))
   const sql = result.filter(hasVal).join(' ')
@@ -109,7 +108,7 @@ function columnOption(definition) {
   columnOpt.push(constraintDefinitionToSQL(check))
   columnOpt.push(autoIncrementToSQL(autoIncrement), toUpper(primaryKey), toUpper(uniqueKey), commentToSQL(comment))
   columnOpt.push(...commonTypeValue(characterSet))
-  if (database !== 'sqlite') columnOpt.push(...commonTypeValue(collate))
+  if (database !== 'sqlite') columnOpt.push(exprToSQL(collate))
   columnOpt.push(...commonTypeValue(columnFormat))
   columnOpt.push(...commonTypeValue(storage))
   columnOpt.push(...columnReferenceDefinitionToSQL(referenceDefinition))
@@ -122,7 +121,7 @@ function columnOrderToSQL(columnOrder) {
   columnExpr.collate = null
   const result = [
     exprToSQL(columnExpr),
-    commonOptionConnector(collate && collate.type, identifierToSql, collate && collate.value),
+    exprToSQL(collate),
     opclass,
     toUpper(order_by),
     toUpper(nulls),

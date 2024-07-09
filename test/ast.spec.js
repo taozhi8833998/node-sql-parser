@@ -202,7 +202,7 @@ describe('AST', () => {
                 ],
                 'char casts':  [
                     `SELECT CAST(test AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_bin;`,
-                    'SELECT CAST(`test` AS CHAR CHARACTER SET utf8mb4) COLLATE UTF8MB4_BIN'
+                    'SELECT CAST(`test` AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_bin'
                 ],
                 'time casts': [
                     "SELECT CAST('12:31:41.8418443' AS TIME(6)) AS `time`;",

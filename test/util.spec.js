@@ -1,4 +1,5 @@
 const { expect } = require('chai')
+const Parser = require('../src/parser').default
 const {
   columnIdentifierToSql,
   createValueExpr,
@@ -11,6 +12,8 @@ const {
 const { overToSQL } = require('../src/over')
 
 describe('util function test', () => {
+  const parser = new Parser()
+
   it('should throw error when type is unkonwn', () => {
     expect(createValueExpr.bind(null, {})).to.throw('Cannot convert value "object" to SQL')
   })
@@ -45,6 +48,21 @@ describe('util function test', () => {
 
   it('should support columnIdentifierToSql without ident', () => {
     expect(columnIdentifierToSql()).to.be.undefined
+    setParserOpt({"database": "db2"})
+    expect(columnIdentifierToSql("id")).to.be.equal('"id"')
+  })
+
+  it.only('should support trim query option', () => {
+    const opt = {
+      "database": "mysql",
+      "parseOptions": {
+        "includeLocations": false
+      },
+      "trimQuery": false
+    }
+    const sql = "select id from tableName "
+    const ast = parser.astify(sql, opt)
+    expect(parser.sqlify(ast, opt)).to.be.equal('SELECT `id` FROM `tableName`')
   })
 
   it('should sqlify backticks_quote_string', () => {
