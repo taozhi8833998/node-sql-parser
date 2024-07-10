@@ -82,6 +82,7 @@
     'UNION': true,
     'UPDATE': true,
     'USING': true,
+    'UNNEST': true,
 
     'VALUES': true,
 
@@ -1088,8 +1089,27 @@ column_list_item
     }
 
 alias_clause
-  = KW_AS __ i:alias_ident { return i; }
+  = KW_AS __ i:(func_call / alias_ident) { return i; }
   / KW_AS? __ i:ident { return i; }
+
+with_offset
+  = KW_WITH __ KW_OFFSET __ alias:alias_clause? {
+    return {
+      keyword: 'with offset as',
+      as: alias
+    }
+  }
+
+from_unnest_item
+  = 'UNNEST'i __ LPAREN __ a:expr? __ RPAREN __ alias:alias_clause? __ wf:with_offset? {
+    return {
+      type: 'unnest',
+      expr: a,
+      parentheses: true,
+      as: alias,
+      with_offset: wf,
+    }
+  }
 
 from_clause
   = KW_FROM __ l:table_ref_list { return l; }
@@ -1186,7 +1206,8 @@ table_join
 
 //NOTE that, the table assigned to `var` shouldn't write in `table_join`
 table_base
-  = KW_DUAL {
+  = from_unnest_item
+  / KW_DUAL {
       return {
         type: 'dual'
       };
@@ -2142,6 +2163,17 @@ literal
   / literal_bool
   / literal_null
   / literal_datetime
+  / literal_array
+
+literal_array
+  = s:KW_ARRAY __ LBRAKE __ c:expr_list? __ RBRAKE {
+    return {
+      expr_list: c || { type: 'origin', value: '' },
+      type: 'array',
+      keyword: 'array',
+      brackets: true
+    }
+  }
 
 literal_list
   = head:literal tail:(__ COMMA __ literal)* {

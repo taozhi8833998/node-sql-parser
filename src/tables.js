@@ -9,7 +9,7 @@ function unnestToSQL(unnestExpr) {
   const { type, as, expr, with_offset: withOffset } = unnestExpr
   const result = [
     `${toUpper(type)}(${expr && exprToSQL(expr) || ''})`,
-    commonOptionConnector('AS', identifierToSql, as),
+    commonOptionConnector('AS', typeof as === 'string' ? identifierToSql : exprToSQL, as),
     commonOptionConnector(
       toUpper(withOffset && withOffset.keyword),
       identifierToSql,
