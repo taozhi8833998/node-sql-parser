@@ -1,6 +1,6 @@
 import { arrayIndexToSQL } from './column'
 import { exprToSQL } from './expr'
-import { commonOptionConnector, commonTypeValue, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
+import { commonOptionConnector, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
 import { overToSQL } from './over'
 
 function anyValueFuncToSQL(stmt) {
@@ -24,7 +24,7 @@ function arrayDimensionToSymbol(target) {
 }
 
 function castToSQL(expr) {
-  const { arrows = [], collate, target, expr: expression, keyword, symbol, as: alias, parentheses: outParentheses, properties = [] } = expr
+  const { arrows = [], target, expr: expression, keyword, symbol, as: alias, parentheses: outParentheses, properties = [] } = expr
   const { length, dataType, parentheses, quoted, scale, suffix: dataTypeSuffix, expr: targetExpr } = target
   let str = targetExpr ? exprToSQL(targetExpr) : ''
   if (length != null) str = scale ? `${length}, ${scale}` : length
@@ -40,7 +40,6 @@ function castToSQL(expr) {
   }
   suffix += arrows.map((arrow, index) => commonOptionConnector(arrow, literalToSQL, properties[index])).join(' ')
   if (alias) suffix += ` AS ${identifierToSql(alias)}`
-  if (collate) suffix += ` ${commonTypeValue(collate).join(' ')}`
   const arrayDimension = arrayDimensionToSymbol(target)
   const result = [prefix, symbolChar, quoted, dataType, quoted, arrayDimension, str, suffix].filter(hasVal).join('')
   return outParentheses ? `(${result})` : result
@@ -76,8 +75,7 @@ function flattenFunToSQL(stmt) {
 }
 
 function funcToSQL(expr) {
-  const { args, array_index, name, args_parentheses, parentheses, over, collate, suffix } = expr
-  const collateStr = commonTypeValue(collate).join(' ')
+  const { args, array_index, name, args_parentheses, parentheses, over, suffix } = expr
   const overStr = overToSQL(over)
   const suffixStr = exprToSQL(suffix)
   const funcName = [literalToSQL(name.schema), name.name.map(literalToSQL).join('.')].filter(hasVal).join('.')
@@ -90,7 +88,7 @@ function funcToSQL(expr) {
   if (args_parentheses !== false) str.push(')')
   str.push(arrayIndexToSQL(array_index))
   str = [str.join(''), suffixStr].filter(hasVal).join(' ')
-  return [parentheses ? `(${str})` : str, collateStr, overStr].filter(hasVal).join(' ')
+  return [parentheses ? `(${str})` : str, overStr].filter(hasVal).join(' ')
 }
 
 function tablefuncFunToSQL(expr) {

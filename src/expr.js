@@ -4,6 +4,7 @@ import { aggrToSQL } from './aggregation'
 import { assignToSQL } from './assign'
 import { binaryToSQL } from './binary'
 import { caseToSQL } from './case'
+import { collateToSQL } from './collate'
 import { columnDefinitionToSQL, columnRefToSQL, fullTextSearchToSQL } from './column'
 import { anyValueFuncToSQL, castToSQL, extractFunToSQL, flattenFunToSQL, funcToSQL, jsonObjectArgToSQL, lambdaToSQL, tablefuncFunToSQL } from './func'
 import { intervalToSQL } from './interval'
@@ -25,6 +26,7 @@ const exprToSQLConvertFn = {
   binary_expr       : binaryToSQL,
   case              : caseToSQL,
   cast              : castToSQL,
+  collate           : collateToSQL,
   column_ref        : columnRefToSQL,
   column_definition : columnDefinitionToSQL,
   datatype          : dataTypeToSQL,
@@ -47,9 +49,8 @@ const exprToSQLConvertFn = {
 }
 
 function varToSQL(expr) {
-  const { prefix = '@', name, members, keyword, quoted, suffix } = expr
+  const { prefix = '@', name, members, quoted, suffix } = expr
   const val = []
-  if (keyword) val.push(keyword)
   const varName = members && members.length > 0 ? `${name}.${members.join('.')}` : name
   let result = `${prefix || ''}${varName}`
   if (suffix) result += suffix

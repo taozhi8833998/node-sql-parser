@@ -405,11 +405,11 @@ describe('Flink', () => {
             json_object(
                 'risk-tag' value risk_tag,
                 'abc' VALUE (10 * 2),
-                'user-agent' value JSON_OBJECT('city' VALUE 'New York', 'postalCode' VALUE '10001')
+                'user-agent' value JSON_OBJECT('city' VALUE 'New York' on null null, 'postalCode' VALUE '10001' on null absent)
             ) as eventDetail
         from check_risk
         );`,
-        "SELECT `name`, `eventTime`, `eventDetail` FROM (SELECT concat('AK中文信息') AS `name`, CAST(`event_time` AS VARCHAR) AS `eventTime`, JSON_OBJECT('risk-tag' VALUE `risk_tag`, 'abc' VALUE (10 * 2), 'user-agent' VALUE JSON_OBJECT('city' VALUE 'New York', 'postalCode' VALUE '10001')) AS `eventDetail` FROM `check_risk`)"
+        "SELECT `name`, `eventTime`, `eventDetail` FROM (SELECT concat('AK中文信息') AS `name`, CAST(`event_time` AS VARCHAR) AS `eventTime`, JSON_OBJECT('risk-tag' VALUE `risk_tag`, 'abc' VALUE (10 * 2), 'user-agent' VALUE JSON_OBJECT('city' VALUE 'New York' ON NULL NULL, 'postalCode' VALUE '10001' ON NULL ABSENT)) AS `eventDetail` FROM `check_risk`)"
       ]
     },
   ];

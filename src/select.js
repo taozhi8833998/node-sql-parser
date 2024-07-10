@@ -4,6 +4,7 @@ import { limitToSQL } from './limit'
 import { withToSQL } from './with'
 import { tablesToSQL } from './tables'
 import { hasVal, commonOptionConnector, connector, identifierToSql, topToSQL, toUpper } from './util'
+import { collateToSQL } from './collate'
 
 function distinctToSQL(distinct) {
   if (!distinct) return
@@ -57,6 +58,7 @@ function selectToSQL(stmt) {
   const {
     as_struct_val: asStructVal,
     columns,
+    collate,
     distinct,
     for: forXml,
     from,
@@ -96,6 +98,7 @@ function selectToSQL(stmt) {
   clauses.push(commonOptionConnector('QUALIFY', exprToSQL, qualify))
   clauses.push(commonOptionConnector('WINDOW', exprToSQL, windowInfo))
   clauses.push(orderOrPartitionByToSQL(orderby, 'order by'))
+  clauses.push(collateToSQL(collate))
   clauses.push(limitToSQL(limit))
   clauses.push(toUpper(lockingRead))
   if (position === 'end') clauses.push(intoSQL)

@@ -270,7 +270,7 @@ function createDomainToSQL(stmt) {
       const definitionType = definition.type
       switch (definitionType) {
         case 'collate':
-          definitionSQL.push(commonTypeValue(definition).join(' '))
+          definitionSQL.push(exprToSQL(definition))
           break
         case 'default':
           definitionSQL.push(toUpper(definitionType), exprToSQL(definition.value))

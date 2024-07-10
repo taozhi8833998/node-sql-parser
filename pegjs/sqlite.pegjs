@@ -561,11 +561,25 @@ create_column_definition
     }
 
 collate_expr
-  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident_name {
+  = KW_COLLATE __ ca:ident_name __ s:KW_ASSIGIN_EQUAL __ t:ident {
     return {
       type: 'collate',
-      symbol: s,
-      value: ca,
+      keyword: 'collate',
+      collate: {
+        name: ca,
+        symbol: s,
+        value: t
+      }
+    }
+  }
+  / KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
+    return {
+      type: 'collate',
+      keyword: 'collate',
+      collate: {
+        name: ca,
+        symbol: s,
+      }
     }
   }
 column_format
@@ -2144,14 +2158,13 @@ unary_operator
   = '!' / '-' / '+' / '~'
 
 column_ref
-  = tbl:(ident __ DOT __)? col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ __ ca:collate_expr? {
+  = tbl:(ident __ DOT __)? col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
       const tableName = tbl && tbl[0] || null
       columnList.add(`select::${tableName}::${col}`);
       return {
         type: 'column_ref',
         table: tableName,
         column: col,
-        collate: ca,
         arrows: a.map(item => item[0]),
         properties: a.map(item => item[2])
       };

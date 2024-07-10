@@ -65,7 +65,7 @@ describe('mysql', () => {
         title: 'regexp_like with collate',
         sql: [
           "SELECT REGEXP_LIKE('CamelCase', 'CAMELCASE' COLLATE utf8mb4_0900_as_cs);",
-          "SELECT REGEXP_LIKE('CamelCase', 'CAMELCASE' COLLATE UTF8MB4_0900_AS_CS)"
+          "SELECT REGEXP_LIKE('CamelCase', 'CAMELCASE' COLLATE utf8mb4_0900_as_cs)"
         ]
       },
       {
@@ -551,7 +551,7 @@ describe('mysql', () => {
         title: 'index column length',
         sql: [
           'CREATE TABLE `Translation` (`id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,`en-GB` text,PRIMARY KEY (`id`),KEY `Translation_en-GB_btree_idx` (`en-GB`(768))) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci',
-          'CREATE TABLE `Translation` (`id` CHAR(36) NOT NULL CHARACTER SET ascii COLLATE ASCII_BIN, `en-GB` TEXT, PRIMARY KEY (`id`), KEY Translation_en-GB_btree_idx (`en-GB` (768))) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci',
+          'CREATE TABLE `Translation` (`id` CHAR(36) NOT NULL CHARACTER SET ascii COLLATE ascii_bin, `en-GB` TEXT, PRIMARY KEY (`id`), KEY Translation_en-GB_btree_idx (`en-GB` (768))) ENGINE = INNODB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci',
         ]
       },
       {
@@ -883,7 +883,7 @@ describe('mysql', () => {
           test
         WHERE
           name LIKE :pattern COLLATE utf8mb4_general_ci`,
-          'SELECT * FROM `test` WHERE `name` LIKE :pattern COLLATE UTF8MB4_GENERAL_CI'
+          'SELECT * FROM `test` WHERE `name` LIKE :pattern COLLATE utf8mb4_general_ci'
         ]
       },
       {
@@ -954,7 +954,7 @@ describe('mysql', () => {
         title: 'collate in where clause include parentheses',
         sql: [
           "SELECT * FROM product WHERE (id = '1' OR id = '2') COLLATE utf8mb4_general_ci;",
-          "SELECT * FROM `product` WHERE (`id` = '1' OR `id` = '2') COLLATE UTF8MB4_GENERAL_CI"
+          "SELECT * FROM `product` WHERE (`id` = '1' OR `id` = '2') COLLATE utf8mb4_general_ci"
         ]
       },
       {
@@ -1054,6 +1054,20 @@ describe('mysql', () => {
               RowGUID VARCHAR(16)
           ) CHARACTER SET 'UTF8';`,
           'CREATE TABLE `Table` (`TableID` INTEGER PRIMARY KEY, `IsAbstract` BOOLEAN, `HasOpenColumns` BOOLEAN, `HasOpenRows` BOOLEAN, `HasOpenSheets` BOOLEAN, `IsNormalised` BOOLEAN, `IsFlat` BOOLEAN, `RowGUID` VARCHAR(16)) CHARACTER SET \'UTF8\''
+        ]
+      },
+      {
+        title: 'collate',
+        sql: [
+          'select * from test order by id COLLATE utf8mb4_unicode_ci',
+          'SELECT * FROM `test` ORDER BY `id` ASC COLLATE utf8mb4_unicode_ci'
+        ]
+      },
+      {
+        title: 'collate2',
+        sql: [
+          'select * from test where id COLLATE utf8mb4_unicode_ci = abc',
+          'SELECT * FROM `test` WHERE `id` COLLATE utf8mb4_unicode_ci = abc'
         ]
       },
     ]

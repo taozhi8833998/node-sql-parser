@@ -180,7 +180,7 @@ describe('select', () => {
     });
     it('should parse json column query expressions with collate', () => {
       const ast = parser.astify("SELECT item.jsonCol->>'$.test.path' collate utf8mb4_unicode_ci from 'items'");
-      expect(parser.sqlify(ast)).to.be.equal("SELECT `item`.`jsonCol` ->> '$.test.path' COLLATE UTF8MB4_UNICODE_CI FROM `items`")
+      expect(parser.sqlify(ast)).to.be.equal("SELECT `item`.`jsonCol` ->> '$.test.path' COLLATE utf8mb4_unicode_ci FROM `items`")
     });
 
 
@@ -445,6 +445,7 @@ describe('select', () => {
               groupby: null,
               having: null,
               orderby: null,
+              collate: null,
               limit: null,
               window: null,
           },
@@ -514,6 +515,7 @@ describe('select', () => {
                 groupby: null,
                 having: null,
                 orderby: null,
+                collate: null,
                 limit: null,
                 window: null,
               },
@@ -686,6 +688,7 @@ describe('select', () => {
               groupby: null,
               having: null,
               orderby: null,
+              collate: null,
               limit: null,
               window: null,
             },
@@ -754,7 +757,7 @@ describe('select', () => {
       expect(getParsedSql(`SELECT CONVERT('test', CHAR(10) CHARACTER SET utf8mb4);`))
         .to.equal("SELECT CONVERT('test', CHAR(10) CHARACTER SET utf8mb4)")
       expect(getParsedSql(`SELECT CONVERT('test' USING utf8mb4) COLLATE utf8mb4_bin;`))
-        .to.equal("SELECT CONVERT('test' USING UTF8MB4) COLLATE UTF8MB4_BIN")
+        .to.equal("SELECT CONVERT('test' USING UTF8MB4) COLLATE utf8mb4_bin")
       expect(getParsedSql(`select TYPE,taxpayer_Type,CONVERT(tax_Amount, DECIMAL(12,2)) AS tax_amount,CAST(tax_currency AS DECIMAL(12,2))  tax_currency from rs_order_tax where billno="{{billno}}" and Business_Type="order";`))
         .to.equal('SELECT `TYPE`, `taxpayer_Type`, CONVERT(`tax_Amount`, DECIMAL(12, 2)) AS `tax_amount`, CAST(`tax_currency` AS DECIMAL(12, 2)) AS `tax_currency` FROM `rs_order_tax` WHERE `billno` = "{{billno}}" AND `Business_Type` = "order"')
       expect(getParsedSql(`SELECT CONVERT('test', INT(11) unsigned);`))

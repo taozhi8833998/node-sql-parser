@@ -17,7 +17,7 @@ function setToSQL(sets) {
     const { value } = set
     for (const key in set) {
       if (key === 'value' || key === 'keyword') continue
-      if (Object.prototype.hasOwnProperty.call(set, key)) column[key] = set[key]
+      column[key] = set[key]
     }
     const str = columnRefToSQL(column)
     const setItem = [str]
