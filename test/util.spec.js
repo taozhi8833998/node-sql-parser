@@ -52,7 +52,7 @@ describe('util function test', () => {
     expect(columnIdentifierToSql("id")).to.be.equal('"id"')
   })
 
-  it.only('should support trim query option', () => {
+  it('should support trim query option', () => {
     const opt = {
       "database": "mysql",
       "parseOptions": {
