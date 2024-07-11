@@ -445,6 +445,7 @@ cmd_stmt
   / show_stmt
   / desc_stmt
   / grant_stmt
+  / explain_stmt
 
 create_stmt
   = create_table_stmt
@@ -1936,6 +1937,18 @@ desc_stmt
         table: t
       }
     };
+  }
+
+explain_stmt
+  = KW_EXPLAIN __ t:select_stmt_nake {
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'explain',
+        expr: t
+      }
+    }
   }
 
 priv_type_table
