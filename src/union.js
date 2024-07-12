@@ -1,6 +1,7 @@
 import { alterToSQL } from './alter'
 import { analyzeToSQL, attachToSQL } from './analyze'
 import { createToSQL } from './create'
+import { explainToSQL } from './explain'
 import { selectToSQL } from './select'
 import { deleteToSQL } from './delete'
 import { updateToSQL } from './update'
@@ -39,6 +40,7 @@ const typeToSQLFn = {
   delete      : deleteToSQL,
   exec        : execToSQL,
   execute     : executeToSQL,
+  explain     : explainToSQL,
   for         : forLoopToSQL,
   update      : updateToSQL,
   if          : ifToSQL,

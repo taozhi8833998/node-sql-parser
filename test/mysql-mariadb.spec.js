@@ -1064,10 +1064,17 @@ describe('mysql', () => {
         ]
       },
       {
-        title: 'collate2',
+        title: 'collate with symbol and value',
         sql: [
           'select * from test where id COLLATE utf8mb4_unicode_ci = abc',
           'SELECT * FROM `test` WHERE `id` COLLATE utf8mb4_unicode_ci = abc'
+        ]
+      },
+      {
+        title: 'explain stmt',
+        sql: [
+          'EXPLAIN SELECT * FROM incidents where id > 10 and is_delete = 0',
+          'EXPLAIN SELECT * FROM `incidents` WHERE `id` > 10 AND `is_delete` = 0'
         ]
       },
     ]
