@@ -4779,11 +4779,15 @@ data_type
 array_type
   = t:(numeric_type / character_string_type) __ LBRAKE __ RBRAKE __ LBRAKE __ RBRAKE {
     /* => data_type */
-    return { ...t, array: 'two' }
+    return { ...t, array: { dimension: 2 } }
   }
-  / t:(numeric_type / character_string_type) __ LBRAKE __ RBRAKE {
+  / t:(numeric_type / character_string_type) __ LBRAKE __ l:literal_numeric? __ RBRAKE {
     /* => data_type */
-    return { ...t, array: 'one' }
+    return { ...t, array: { dimension: 1,  length: [l] } }
+  }
+  / t:(numeric_type / character_string_type) __ KW_ARRAY {
+    /* => data_type */
+    return { ...t, array: { keyword: 'array' } }
   }
 
 boolean_type
