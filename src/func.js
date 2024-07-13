@@ -15,12 +15,16 @@ function anyValueFuncToSQL(stmt) {
 
 function arrayDimensionToSymbol(target) {
   if (!target || !target.array) return ''
-  switch (target.array) {
-    case 'one':
-      return '[]'
-    case 'two':
-      return '[][]'
+  const { keyword } = target.array
+  if (keyword) return toUpper(keyword)
+  const { dimension, length } = target.array
+  const result = []
+  for (let i = 0; i < dimension; i++) {
+    result.push('[')
+    if (length && length[i]) result.push(literalToSQL(length[i]))
+    result.push(']')
   }
+  return result.join('')
 }
 
 function castToSQL(expr) {
@@ -107,6 +111,7 @@ function lambdaToSQL(stmt) {
 
 export {
   anyValueFuncToSQL,
+  arrayDimensionToSymbol,
   castToSQL,
   extractFunToSQL,
   flattenFunToSQL,

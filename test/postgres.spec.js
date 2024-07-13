@@ -1514,6 +1514,13 @@ describe('Postgres', () => {
         'CREATE TABLE "Books" (price DECIMAL(10, 2) CHECK (Price > 0))'
       ]
     },
+    {
+      title: 'array data type',
+      sql: [
+        `CREATE TABLE "table_0" ("hi" INTEGER ARRAY); CREATE TABLE "table_1" ("hi" INTEGER[3]);`,
+        `CREATE TABLE "table_0" ("hi" INTEGER ARRAY) ; CREATE TABLE "table_1" ("hi" INTEGER[3])`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

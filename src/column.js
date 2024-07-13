@@ -1,6 +1,6 @@
 import { constraintDefinitionToSQL } from './constrain'
 import { exprToSQL } from './expr'
-import { castToSQL } from './func'
+import { arrayDimensionToSymbol, castToSQL } from './func'
 import { tablesToSQL } from './tables'
 import {
   autoIncrementToSQL,
@@ -61,11 +61,17 @@ function columnRefToSQL(expr) {
 }
 
 function columnDataType(definition) {
+  if (!definition) return
   const { dataType, length, suffix, scale, expr } = definition || {}
   let result = dataType
   if (length != null) result += `(${[length, scale].filter(val => val != null).join(', ')})`
   if (suffix && suffix.length) result += ` ${suffix.join(' ')}`
   if (expr) result += exprToSQL(expr)
+  if (definition.array) {
+    const arrayExpr = arrayDimensionToSymbol(definition)
+    const space = /^\[.*\]$/.test(arrayExpr) ? '' : ' '
+    result += [space, arrayExpr].join('')
+  }
   return result
 }
 
