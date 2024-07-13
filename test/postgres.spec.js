@@ -1521,6 +1521,26 @@ describe('Postgres', () => {
         `CREATE TABLE "table_0" ("hi" INTEGER ARRAY) ; CREATE TABLE "table_1" ("hi" INTEGER[3])`
       ]
     },
+    {
+      title: 'binary expr as fun args',
+      sql: [
+        `SELECT
+	somefunc(
+        engineering_networks.realizaciya,
+        engineering_networks.company = 'blah-blah'
+        AND
+        engineering_networks.obem_realizacii_tip = 'uslugi'
+      ) AS var0,
+      If(var0 > 0, '2', '1') AS fontColor
+     FROM engineering_networks AS engineering_networks
+     WHERE
+     	engineering_networks.company = 'blah-blah' AND
+        engineering_networks.month IN ('April') AND
+        engineering_networks.year IN ('2024')
+     LIMIT 1;`,
+     `SELECT somefunc("engineering_networks".realizaciya, "engineering_networks".company = 'blah-blah' AND "engineering_networks".obem_realizacii_tip = 'uslugi') AS "var0", If(var0 > 0, '2', '1') AS "fontColor" FROM "engineering_networks" AS "engineering_networks" WHERE "engineering_networks".company = 'blah-blah' AND "engineering_networks".month IN ('April') AND "engineering_networks".year IN ('2024') LIMIT 1`
+      ],
+    }
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

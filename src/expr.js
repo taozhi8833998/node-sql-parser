@@ -82,6 +82,7 @@ function unaryToSQL(unarExpr) {
 
 function getExprListSQL(exprList) {
   if (!exprList) return []
+  if (!Array.isArray(exprList)) exprList = [exprList]
   return exprList.map(exprToSQL)
 }
 
