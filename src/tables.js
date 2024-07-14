@@ -3,7 +3,7 @@ import { columnRefToSQL } from './column'
 import { exprToSQL } from './expr'
 import { valuesToSQL } from './insert'
 import { intervalToSQL } from './interval'
-import { commonOptionConnector, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
+import { commonOptionConnector, commonTypeValue, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
 
 function unnestToSQL(unnestExpr) {
   const { type, as, expr, with_offset: withOffset } = unnestExpr
@@ -98,6 +98,12 @@ function temporalTableToSQL(stmt) {
   return [toUpper(keyword), temporalTableOptionToSQL(expr)].filter(hasVal).join(' ')
 }
 
+function generateVirtualTable(stmt) {
+  const { keyword, type, generators } = stmt
+  const generatorSQL = generators.map(generator => commonTypeValue(generator).join(' ')).join(', ')
+  return `${toUpper(keyword)}(${toUpper(type)}(${generatorSQL}))`
+}
+
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
   const { table, db, as, expr, operator, prefix: prefixStr, schema, server, suffix, tablesample, temporal_table, table_hint } = tableInfo
@@ -118,6 +124,9 @@ function tableToSQL(tableInfo) {
         break
       case 'tumble':
         tableName = tableTumbleToSQL(expr)
+        break
+      case 'generator':
+        tableName = generateVirtualTable(expr)
         break
       default:
         tableName = exprToSQL(expr)
