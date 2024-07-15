@@ -263,6 +263,26 @@ describe('snowflake', () => {
         'SELECT * FROM (((SELECT * FROM "some_table") UNION ALL (SELECT * FROM "some_table")) UNION ALL (SELECT * FROM "some_table"))'
       ]
     },
+    {
+      title: 'generate virtual table rows',
+      sql: [
+        `select *, date(concat(left(date,7),'-01')) as date_start_month, left(date,7) as month from
+          ((select
+            dateadd(day, '-' || seq4(), current_date()) as date
+          from
+            table(generator(rowcount => 1095))
+          where date>='2022-10-01') as dates
+          left join
+          (select id, name, category, start_date, end_date, days, cost, cost/days as cost_per_day
+          from
+          (select id, name, category, start_date, end_date, cost, datediff('day',start_date, end_date)+1 as days
+          from ui_other_costs
+          group by 1,2,3,4,5,6)
+          group by 1,2,3,4,5,6,7) as cost)
+          where dates.date between cost.start_date and cost.end_date`,
+          `SELECT *, date(concat(left("date", 7), '-01')) AS "date_start_month", left("date", 7) AS "month" FROM ((SELECT dateadd("day", '-' || seq4(), CURRENT_DATE()) AS "date" FROM TABLE(GENERATOR(ROWCOUNT => 1095)) WHERE "date" >= '2022-10-01') AS "dates" LEFT JOIN (SELECT "id", "name", "category", "start_date", "end_date", "days", "cost", "cost" / "days" AS "cost_per_day" FROM (SELECT "id", "name", "category", "start_date", "end_date", "cost", datediff('day', "start_date", "end_date") + 1 AS "days" FROM "ui_other_costs" GROUP BY 1, 2, 3, 4, 5, 6) GROUP BY 1, 2, 3, 4, 5, 6, 7) AS "cost") WHERE "dates"."date" BETWEEN "cost"."start_date" AND "cost"."end_date"`
+      ]
+    }
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo

@@ -2436,6 +2436,14 @@ table_join
     };
   }
 
+table_generator_option
+  = t:('ROWCOUNT'i / 'TIMELIMIT'i) __ '=>' __ v:literal_numeric {
+    return {
+      type: t.toLowerCase(),
+      symbol: '=>',
+      value: v
+    }
+  }
 
 //NOTE that, the table assigned to `var` shouldn't write in `table_join`
 table_base
@@ -2449,6 +2457,17 @@ table_base
     // => { expr: value_clause; as?: alias_clause; }
     return {
       expr: { type: 'values', values: stmt },
+      as: alias,
+      ...getLocationObject(),
+    };
+  }
+  / KW_TABLE __ LPAREN __ 'GENERATOR'i __ LPAREN __ g:(table_generator_option)* __ RPAREN __ RPAREN __ alias:value_alias_clause? {
+    return {
+      expr: {
+        keyword: 'table',
+        type: 'generator',
+        generators: g,
+      },
       as: alias,
       ...getLocationObject(),
     };
