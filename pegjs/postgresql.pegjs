@@ -1672,12 +1672,17 @@ alter_schema_stmt
 alter_table_stmt
   = KW_ALTER  __
     KW_TABLE __
+    ife:if_exists? __
+    o:'only'i? __
     t:table_ref_list __
     e:alter_action_list {
       /*
       export interface alter_table_stmt_node {
         type: 'alter';
         table: table_ref_list;
+        keyword: 'table';
+        if_exists: if_exists;
+        prefix?: literal_string;
         expr: alter_action_list;
       }
       => AstStatement<alter_table_stmt_node>
@@ -1688,6 +1693,9 @@ alter_table_stmt
         columnList: columnListTableAlias(columnList),
         ast: {
           type: 'alter',
+          keyword: 'table',
+          if_exists: ife,
+          prefix: o && { type: 'origin', value: o },
           table: t,
           expr: e
         }
