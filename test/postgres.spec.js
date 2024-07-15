@@ -1540,7 +1540,14 @@ describe('Postgres', () => {
      LIMIT 1;`,
      `SELECT somefunc("engineering_networks".realizaciya, "engineering_networks".company = 'blah-blah' AND "engineering_networks".obem_realizacii_tip = 'uslugi') AS "var0", If(var0 > 0, '2', '1') AS "fontColor" FROM "engineering_networks" AS "engineering_networks" WHERE "engineering_networks".company = 'blah-blah' AND "engineering_networks".month IN ('April') AND "engineering_networks".year IN ('2024') LIMIT 1`
       ],
-    }
+    },
+    {
+      title: 'alter column data type',
+      sql: [
+        `ALTER TABLE employees ALTER COLUMN first_name SET DATA TYPE TEXT COLLATE "C" using upper(first_name);`,
+        'ALTER TABLE "employees" ALTER COLUMN first_name SET DATA TYPE TEXT COLLATE "C" USING upper(first_name)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

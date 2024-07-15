@@ -817,7 +817,7 @@ create_table_stmt
           type: a[0].toLowerCase(),
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
-          if_not_exists:ife,
+          if_not_exists: ife,
           table: t,
           partition_of: po
         }
@@ -1717,21 +1717,25 @@ alter_action
   / ALTER_RENAME
   / ALTER_ALGORITHM
   / ALTER_LOCK
+  / ALTER_COLUMN_DATA_TYPE
 
 ALTER_ADD_COLUMN
   = KW_ADD __
     kc:KW_COLUMN? __
+    ife:if_not_exists_stmt? __
     cd:create_column_definition {
       /*
       => {
         action: 'add';
         keyword: KW_COLUMN;
         resource: 'column';
+        if_not_exists: ife;
         type: 'alter';
       } & create_column_definition;
       */
       return {
         action: 'add',
+        if_not_exists: ife,
         ...cd,
         keyword: kc,
         resource: 'column',
@@ -1742,17 +1746,20 @@ ALTER_ADD_COLUMN
 ALTER_DROP_COLUMN
   = KW_DROP __
     kc:KW_COLUMN? __
+    ife:if_exists? __
     c:column_ref {
       /* => {
         action: 'drop';
         collumn: column_ref;
         keyword: KW_COLUMN;
+        if_exists: if_exists;
         resource: 'column';
         type: 'alter';
       } */
       return {
         action: 'drop',
         column: c,
+        if_exists: ife,
         keyword: kc,
         resource: 'column',
         type: 'alter',
@@ -1869,6 +1876,32 @@ ALTER_LOCK
       symbol: s,
       lock: val
     }
+  }
+
+ALTER_COLUMN_DATA_TYPE
+  = KW_ALTER __ kc:KW_COLUMN? __ c:column_ref __ sd:(KW_SET __ 'data'i)? __ 'type'i __ t:data_type __ co:collate_expr? __ us:(KW_USING __ expr)? {
+    /*
+      => {
+        action: 'alter';
+        keyword?: KW_COLUMN;
+        resource: 'column';
+        collate?: collate_expr;
+        using?: expr;
+        prefix:
+        type: 'alter';
+      } & create_column_definition;
+      */
+      c.suffix = sd ? 'set data type' : 'type'
+      return {
+        action: 'alter',
+        column: c,
+        keyword: kc,
+        resource: 'column',
+        definition: t,
+        collate: co,
+        using: us && us[2],
+        type: 'alter',
+      }
   }
 
 create_index_definition

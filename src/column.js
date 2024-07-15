@@ -96,7 +96,7 @@ function columnReferenceDefinitionToSQL(referenceDefinition) {
 function columnOption(definition) {
   const columnOpt = []
   const {
-    nullable, character_set: characterSet, check, comment, collate, storage,
+    nullable, character_set: characterSet, check, comment, collate, storage, using,
     default_val: defaultOpt,
     auto_increment: autoIncrement,
     unique: uniqueKey,
@@ -118,6 +118,7 @@ function columnOption(definition) {
   columnOpt.push(...commonTypeValue(columnFormat))
   columnOpt.push(...commonTypeValue(storage))
   columnOpt.push(...columnReferenceDefinitionToSQL(referenceDefinition))
+  columnOpt.push(commonOptionConnector('USING', exprToSQL, using))
   return columnOpt.filter(hasVal).join(' ')
 }
 
