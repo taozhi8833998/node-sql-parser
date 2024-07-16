@@ -282,6 +282,99 @@ describe('snowflake', () => {
           where dates.date between cost.start_date and cost.end_date`,
           `SELECT *, date(concat(left("date", 7), '-01')) AS "date_start_month", left("date", 7) AS "month" FROM ((SELECT dateadd("day", '-' || seq4(), CURRENT_DATE()) AS "date" FROM TABLE(GENERATOR(ROWCOUNT => 1095)) WHERE "date" >= '2022-10-01') AS "dates" LEFT JOIN (SELECT "id", "name", "category", "start_date", "end_date", "days", "cost", "cost" / "days" AS "cost_per_day" FROM (SELECT "id", "name", "category", "start_date", "end_date", "cost", datediff('day', "start_date", "end_date") + 1 AS "days" FROM "ui_other_costs" GROUP BY 1, 2, 3, 4, 5, 6) GROUP BY 1, 2, 3, 4, 5, 6, 7) AS "cost") WHERE "dates"."date" BETWEEN "cost"."start_date" AND "cost"."end_date"`
       ]
+    },
+    {
+      title: 'unpivot function',
+      sql: [
+        `select transaction_date,
+          platform,
+          date_granularity,
+          transaction_type,
+          buyer_country,
+          sku,
+          transaction_currency,
+          exchange_rate,
+          transaction_amount_usd,
+          transaction_amount_local_currency,
+          transaction_amount_ils
+        from
+        ((select 'android' as platform,
+          'Daily' as date_granularity,
+          transaction_date,
+          transaction_type,
+          buyer_country,
+          sku,
+          transaction_currency,
+          exchange_rate,
+          sum(transaction_amount_usd) as transaction_amount_usd,
+          sum(transaction_amount_local_currency) as transaction_amount_local_currency,
+          sum(amount_merchant_currency) as transaction_amount_ils
+        from
+        (select
+          to_date(ge.transaction_date, 'Mon DD, YYYY') as transaction_date
+          ,ge.transaction_type as transaction_type
+          ,ge.product_title as product
+          ,ge.sku_id as sku
+          ,ge.buyer_country as buyer_country
+          ,ge.buyer_currency as transaction_currency
+          ,er.rate as exchange_rate
+          ,ge.amount_buyer_currency as transaction_amount_local_currency
+          ,ge.amount_buyer_currency / er.rate as transaction_amount_usd
+          ,ge.amount_merchant_currency as amount_merchant_currency
+          from (select distinct * from staging.raw.google_play_store_earnings) as ge
+          join F_EXCHANGE_RATES as er
+          on date(er.time)=  to_date(ge.transaction_date, 'Mon DD, YYYY') and er.currency = ge.buyer_currency)
+        group by all)
+        UNION ALL
+        (select platform,
+          date_granularity,
+          transaction_date,
+          transaction_type,
+          buyer_country,
+          sku,
+          transaction_currency,
+          exchange_rate,
+          transaction_amount_usd,
+          case when transaction_type='CHARGE' then transaction_amount_local_currency when transaction_type='TAXES_AND_FEES' then Taxes_and_Fees_local_currency end as transaction_amount_local_currency,
+          transaction_amount_usd*ils_exchange_rate as transaction_amount_ils
+        from
+        (select distinct *
+        from
+        (select 'ios' as platform,
+          date_granularity,
+          date as transaction_date,
+          buyer_country,
+          sku,
+          transaction_currency,
+          exchange_rate,
+          ils.exchange_rate as ils_exchange_rate,
+          sum(transaction_amount_usd) as Charge,
+          sum(developer_proceeds_usd) as Taxes_and_Fees,
+          sum(transaction_amount_local_currency) as transaction_amount_local_currency,
+          sum(developer_proceeds) as Taxes_and_Fees_local_currency
+        from
+        (select
+          date(ge1.begin_date) as date
+          ,ge1.date_granularity as date_granularity --if granulity is grater than Daily will convert based on begin_date exchange rate
+          ,ge1.title as sku
+          ,ge1.country_code as buyer_country
+          ,ge1.currency_of_proceeds as transaction_currency
+          ,er1.rate as exchange_rate
+          ,ge1.units as units
+          ,(ge1.customer_price-ge1.developer_proceeds) * ge1.units * (-1) as developer_proceeds
+          ,ge1.customer_price*ge1.units as transaction_amount_local_currency
+          ,ge1.customer_price*ge1.units / er1.rate as transaction_amount_usd
+          ,(ge1.customer_price-ge1.developer_proceeds) * ge1.units / er1.rate * (-1) as developer_proceeds_usd
+          from (select distinct * from staging.raw.apps_store_connect_sales) as ge1
+          join (select distinct * from F_EXCHANGE_RATES) as er1
+          on date(er1.time) =  date(ge1.begin_date) and er1.currency = ge1.currency_of_proceeds)
+          left join
+          (select date(time) as date, currency, rate as exchange_rate from (select distinct * from F_EXCHANGE_RATES) where currency='ILS') as ils
+          using(date)
+        group by all)
+        unpivot(transaction_amount_usd FOR transaction_type IN (Charge, Taxes_and_Fees)))))`,
+        `SELECT "transaction_date", "platform", "date_granularity", "transaction_type", "buyer_country", "sku", "transaction_currency", "exchange_rate", "transaction_amount_usd", "transaction_amount_local_currency", "transaction_amount_ils" FROM ((SELECT 'android' AS "platform", 'Daily' AS "date_granularity", "transaction_date", "transaction_type", "buyer_country", "sku", "transaction_currency", "exchange_rate", SUM("transaction_amount_usd") AS "transaction_amount_usd", SUM("transaction_amount_local_currency") AS "transaction_amount_local_currency", SUM("amount_merchant_currency") AS "transaction_amount_ils" FROM (SELECT to_date("ge"."transaction_date", 'Mon DD, YYYY') AS "transaction_date", "ge"."transaction_type" AS "transaction_type", "ge"."product_title" AS "product", "ge"."sku_id" AS "sku", "ge"."buyer_country" AS "buyer_country", "ge"."buyer_currency" AS "transaction_currency", "er"."rate" AS "exchange_rate", "ge"."amount_buyer_currency" AS "transaction_amount_local_currency", "ge"."amount_buyer_currency" / "er"."rate" AS "transaction_amount_usd", "ge"."amount_merchant_currency" AS "amount_merchant_currency" FROM (SELECT DISTINCT * FROM "staging"."raw"."google_play_store_earnings") AS "ge" INNER JOIN "F_EXCHANGE_RATES" AS "er" ON date("er"."time") = to_date("ge"."transaction_date", 'Mon DD, YYYY') AND "er"."currency" = "ge"."buyer_currency") GROUP BY ALL) UNION ALL (SELECT "platform", "date_granularity", "transaction_date", "transaction_type", "buyer_country", "sku", "transaction_currency", "exchange_rate", "transaction_amount_usd", CASE WHEN "transaction_type" = 'CHARGE' THEN "transaction_amount_local_currency" WHEN "transaction_type" = 'TAXES_AND_FEES' THEN "Taxes_and_Fees_local_currency" END AS "transaction_amount_local_currency", "transaction_amount_usd" * "ils_exchange_rate" AS "transaction_amount_ils" FROM (SELECT DISTINCT * FROM (SELECT 'ios' AS "platform", "date_granularity", "date" AS "transaction_date", "buyer_country", "sku", "transaction_currency", "exchange_rate", "ils"."exchange_rate" AS "ils_exchange_rate", SUM("transaction_amount_usd") AS "Charge", SUM("developer_proceeds_usd") AS "Taxes_and_Fees", SUM("transaction_amount_local_currency") AS "transaction_amount_local_currency", SUM("developer_proceeds") AS "Taxes_and_Fees_local_currency" FROM (SELECT date("ge1"."begin_date") AS "date", "ge1"."date_granularity" AS "date_granularity", "ge1"."title" AS "sku", "ge1"."country_code" AS "buyer_country", "ge1"."currency_of_proceeds" AS "transaction_currency", "er1"."rate" AS "exchange_rate", "ge1"."units" AS "units", ("ge1"."customer_price-ge1"."developer_proceeds") * "ge1"."units" * (-1) AS "developer_proceeds", "ge1"."customer_price" * "ge1"."units" AS "transaction_amount_local_currency", "ge1"."customer_price" * "ge1"."units" / "er1"."rate" AS "transaction_amount_usd", ("ge1"."customer_price-ge1"."developer_proceeds") * "ge1"."units" / "er1"."rate" * (-1) AS "developer_proceeds_usd" FROM (SELECT DISTINCT * FROM "staging"."raw"."apps_store_connect_sales") AS "ge1" INNER JOIN (SELECT DISTINCT * FROM "F_EXCHANGE_RATES") AS "er1" ON date("er1"."time") = date("ge1"."begin_date") AND "er1"."currency" = "ge1"."currency_of_proceeds") LEFT JOIN (SELECT date("time") AS "date", "currency", "rate" AS "exchange_rate" FROM (SELECT DISTINCT * FROM "F_EXCHANGE_RATES") WHERE "currency" = 'ILS') AS "ils" USING ("date") GROUP BY ALL) UNPIVOT("transaction_amount_usd" FOR "transaction_type" IN ("Charge", "Taxes_and_Fees")))))`,
+      ]
     }
   ]
   SQL_LIST.forEach(sqlInfo => {

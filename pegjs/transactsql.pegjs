@@ -98,6 +98,8 @@
     'LOCAL': true,
     'PERSIST': true,
     'PERSIST_ONLY': true,
+    'PIVOT': true,
+    'UNPIVOT': true,
   };
 
   function getLocationObject() {

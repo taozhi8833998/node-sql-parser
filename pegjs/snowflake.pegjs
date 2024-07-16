@@ -95,6 +95,8 @@
     'LOCAL': true,
     'PERSIST': true,
     'PERSIST_ONLY': true,
+    'PIVOT': true,
+    'UNPIVOT': true,
   };
 
   function getLocationObject() {
@@ -2313,7 +2315,36 @@ into_clause
   }
 
 from_clause
-  = KW_FROM __ l:table_ref_list { /*=>table_ref_list*/return l; }
+  = KW_FROM __ l:table_ref_list __ op:pivot_operator? {
+    if (l[0]) l[0].operator = op
+    return l;
+  }
+
+pivot_unpivot_common_clause
+  = 'FOR'i __ c:column_ref __ i:in_op_right {
+    return {
+      column: c,
+      in_expr: i
+    }
+  }
+
+pivot_operator
+  = KW_PIVOT __ LPAREN __ e:aggr_func __ p:pivot_unpivot_common_clause __ RPAREN __ as:alias_clause? {
+    return {
+      'type': 'pivot',
+      'expr': e,
+      ...p,
+      as,
+    }
+  }
+  / KW_UNPIVOT __ LPAREN __ e:column_ref __ p:pivot_unpivot_common_clause __  RPAREN __ as:alias_clause? {
+    return {
+      'type': 'unpivot',
+      'expr': e,
+      ...p,
+      as,
+    }
+  }
 
 table_to_list
   = head:table_to_item tail:(__ COMMA __ table_to_item)* {
@@ -4472,6 +4503,8 @@ KW_SESSION        = "SESSION"i   !ident_start { return 'SESSION'; }
 KW_LOCAL          = "LOCAL"i     !ident_start { return 'LOCAL'; }
 KW_PERSIST        = "PERSIST"i   !ident_start { return 'PERSIST'; }
 KW_PERSIST_ONLY   = "PERSIST_ONLY"i   !ident_start { return 'PERSIST_ONLY'; }
+KW_PIVOT          = "PIVOT"i   !ident_start { return 'PIVOT'; }
+KW_UNPIVOT        = "UNPIVOT"i   !ident_start { return 'UNPIVOT'; }
 KW_VIEW           = "VIEW"i    !ident_start { return 'VIEW'; }
 
 KW_VAR__PRE_AT = '@'
