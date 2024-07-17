@@ -1718,6 +1718,7 @@ alter_action
   / ALTER_ALGORITHM
   / ALTER_LOCK
   / ALTER_COLUMN_DATA_TYPE
+  / ALTER_COLUMN_DEFAULT
 
 ALTER_ADD_COLUMN
   = KW_ADD __
@@ -1884,10 +1885,7 @@ ALTER_COLUMN_DATA_TYPE
       => {
         action: 'alter';
         keyword?: KW_COLUMN;
-        resource: 'column';
-        collate?: collate_expr;
         using?: expr;
-        prefix:
         type: 'alter';
       } & create_column_definition;
       */
@@ -1904,6 +1902,46 @@ ALTER_COLUMN_DATA_TYPE
       }
   }
 
+ALTER_COLUMN_DEFAULT
+  = KW_ALTER __ kc:KW_COLUMN? __ c:column_ref __ KW_SET __ KW_DEFAULT __ e:expr {
+    /* => {
+        action: 'alter';
+        keyword?: KW_COLUMN;
+        default_val?: { type: 'set default', value: expr };
+        type: 'alter';
+      } & create_column_definition;
+      */
+      return {
+        action: 'alter',
+        column: c,
+        keyword: kc,
+        resource: 'column',
+        default_val: {
+          type: 'set default',
+          value: e,
+        },
+        type: 'alter',
+      }
+  }
+  / KW_ALTER __ kc:KW_COLUMN? __ c:column_ref __ KW_DROP __ KW_DEFAULT {
+    /* => {
+        action: 'alter';
+        keyword?: KW_COLUMN;
+        default_val?: { type: 'set default', value: expr };
+        type: 'alter';
+      } & create_column_definition;
+      */
+      return {
+        action: 'alter',
+        column: c,
+        keyword: kc,
+        resource: 'column',
+        default_val: {
+          type: 'drop default',
+        },
+        type: 'alter',
+      }
+  }
 create_index_definition
   = kc:(KW_INDEX / KW_KEY) __
     c:column? __

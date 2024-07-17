@@ -1548,6 +1548,13 @@ describe('Postgres', () => {
         'ALTER TABLE "employees" ALTER COLUMN first_name SET DATA TYPE TEXT COLLATE "C" USING upper(first_name)'
       ]
     },
+    {
+      title: 'alter column set and drop default',
+      sql: [
+        "ALTER TABLE transactions ADD COLUMN status varchar(30) DEFAULT 'old', ALTER COLUMN status SET default 'current', ALTER COLUMN name drop default;",
+        `ALTER TABLE "transactions" ADD COLUMN status VARCHAR(30) DEFAULT 'old', ALTER COLUMN status SET DEFAULT 'current', ALTER COLUMN name DROP DEFAULT`,
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
