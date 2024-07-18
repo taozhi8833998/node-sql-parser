@@ -105,7 +105,7 @@ function columnOption(definition) {
     reference_definition: referenceDefinition,
   } = definition
 
-  columnOpt.push(toUpper(nullable && nullable.value))
+  columnOpt.push(toUpper(nullable && nullable.action), toUpper(nullable && nullable.value))
   if (defaultOpt) {
     const { type, value } = defaultOpt
     columnOpt.push(type.toUpperCase(), exprToSQL(value))

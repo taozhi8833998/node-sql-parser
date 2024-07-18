@@ -1719,6 +1719,7 @@ alter_action
   / ALTER_LOCK
   / ALTER_COLUMN_DATA_TYPE
   / ALTER_COLUMN_DEFAULT
+  / ALTER_COLUMN_NOT_NULL
 
 ALTER_ADD_COLUMN
   = KW_ADD __
@@ -1939,6 +1940,26 @@ ALTER_COLUMN_DEFAULT
         default_val: {
           type: 'drop default',
         },
+        type: 'alter',
+      }
+  }
+
+ALTER_COLUMN_NOT_NULL
+  = KW_ALTER __ kc:KW_COLUMN? __ c:column_ref __ ac:(KW_SET / KW_DROP) __ n:literal_not_null {
+    /* => {
+        action: 'alter';
+        keyword?: KW_COLUMN;
+        nullable: literal_not_null;
+        type: 'alter';
+      } & create_column_definition;
+      */
+      n.action = ac.toLowerCase();
+      return {
+        action: 'alter',
+        column: c,
+        keyword: kc,
+        resource: 'column',
+        nullable: n,
         type: 'alter',
       }
   }

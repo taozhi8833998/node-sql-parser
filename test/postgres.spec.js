@@ -1555,6 +1555,13 @@ describe('Postgres', () => {
         `ALTER TABLE "transactions" ADD COLUMN status VARCHAR(30) DEFAULT 'old', ALTER COLUMN status SET DEFAULT 'current', ALTER COLUMN name DROP DEFAULT`,
       ]
     },
+    {
+      title: 'alter column set not null',
+      sql: [
+        'ALTER TABLE transactions ALTER COLUMN status SET NOT NULL',
+        'ALTER TABLE "transactions" ALTER COLUMN status SET NOT NULL',
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
