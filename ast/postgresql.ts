@@ -277,7 +277,7 @@ export type create_table_definition = create_definition[];
 
 export type create_definition = create_column_definition | create_index_definition | create_fulltext_spatial_index_definition | create_constraint_definition;
 
-export type column_definition_opt = column_constraint | { auto_increment: 'auto_increment'; } | { unique: 'unique' | 'unique key'; } | { unique: 'key' | 'primary key'; } | { comment: keyword_comment; } | { collate: collate_expr; } | { column_format: column_format; } | { storage: storage } | { reference_definition: reference_definition; } | { check: check_constraint_definition; } | { character_set: collate_expr };
+export type column_definition_opt = column_constraint | { auto_increment: 'auto_increment'; } | { unique: 'unique' | 'unique key'; } | { unique: 'key' | 'primary key'; } | { comment: keyword_comment; } | { collate: collate_expr; } | { column_format: column_format; } | { storage: storage } | { reference_definition: reference_definition; } | { check: check_constraint_definition; } | { character_set: { type: 'CHARACTER SET'; symbol: '=' | null; value: ident_without_kw_type; } };
 
 
 
@@ -314,7 +314,7 @@ export type create_column_definition = {
 
 export type column_constraint = { nullable: literal_null | literal_not_null; default_val: default_expr; };
 
-export type collate_expr = { type: 'collate'; symbol: '=' | null; value: ident; };
+export type collate_expr = { type: 'collate'; keyword: 'collate'; collate: { symbol: '=' ; name: ident_type; value: ident_type; }} | { type: 'collate'; keyword: 'collate'; collate: { symbol: '=' | null ; name: ident_type; }};
 
 export type column_format = { type: 'column_format'; value: 'fixed' | 'dynamic' | 'default'; };
 
@@ -391,6 +391,9 @@ export type alter_schema_stmt = AstStatement<alter_resource_stmt_node>;
 export interface alter_table_stmt_node {
         type: 'alter';
         table: table_ref_list;
+        keyword: 'table';
+        if_exists: if_exists;
+        prefix?: literal_string;
         expr: alter_action_list;
       }
 
@@ -398,7 +401,7 @@ export type alter_table_stmt = AstStatement<alter_table_stmt_node>;
 
 export type alter_action_list = alter_action[];
 
-export type alter_action = ALTER_ADD_COLUMN | ALTER_ADD_CONSTRAINT | ALTER_DROP_COLUMN | ALTER_ADD_INDEX_OR_KEY | ALTER_ADD_FULLETXT_SPARITAL_INDEX | ALTER_RENAME | ALTER_ALGORITHM | ALTER_LOCK;
+export type alter_action = ALTER_ADD_COLUMN | ALTER_ADD_CONSTRAINT | ALTER_DROP_COLUMN | ALTER_ADD_INDEX_OR_KEY | ALTER_ADD_FULLETXT_SPARITAL_INDEX | ALTER_RENAME | ALTER_ALGORITHM | ALTER_LOCK | ALTER_COLUMN_DATA_TYPE | ALTER_COLUMN_DEFAULT | ALTER_COLUMN_NOT_NULL;
 
 
 
@@ -406,6 +409,7 @@ export type ALTER_ADD_COLUMN = {
         action: 'add';
         keyword: KW_COLUMN;
         resource: 'column';
+        if_not_exists: ife;
         type: 'alter';
       } & create_column_definition;;
 
@@ -415,6 +419,7 @@ export type ALTER_DROP_COLUMN = {
         action: 'drop';
         collumn: column_ref;
         keyword: KW_COLUMN;
+        if_exists: if_exists;
         resource: 'column';
         type: 'alter';
       };
@@ -468,6 +473,35 @@ export type ALTER_LOCK = {
       symbol?: '=';
       lock: 'DEFAULT' | 'NONE' | 'SHARED' | 'EXCLUSIVE';
     };
+
+
+
+export type ALTER_COLUMN_DATA_TYPE = {
+        action: 'alter';
+        keyword?: KW_COLUMN;
+        using?: expr;
+        type: 'alter';
+      } & create_column_definition;;
+
+
+
+
+
+export type ALTER_COLUMN_DEFAULT = {
+        action: 'alter';
+        keyword?: KW_COLUMN;
+        default_val?: { type: 'set default', value: expr };
+        type: 'alter';
+      } & create_column_definition;;
+
+
+
+export type ALTER_COLUMN_NOT_NULL = {
+        action: 'alter';
+        keyword?: KW_COLUMN;
+        nullable: literal_not_null;
+        type: 'alter';
+      } & create_column_definition;;
 
 
 
@@ -611,7 +645,7 @@ export type create_option_character_set_kw = string;
 export type create_option_character_set = {
       keyword: 'character set' | 'charset' | 'collate' | 'default character set' | 'default charset' | 'default collate';
       symbol: '=';
-      value: ident_name;
+      value: ident_without_kw_type;
       };
 
 
@@ -838,7 +872,7 @@ export type expr_item = binary_column_expr & { array_index: array_index };
 
 export type cast_data_type = data_type & { quoted?: string };
 
-export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; arrows?: ('->>' | '->')[]; property?: (literal_string | literal_numeric)[]; } | { expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
+export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; jsonb?: jsonb_or_json_op_right[]; } | { expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
 
 
 
@@ -881,7 +915,7 @@ export type table_ref = table_base | table_join;
 export type table_join = table_base & {join: join_op; using: ident_name[]; } | table_base & {join: join_op; on?: on_clause; } | {
       expr: (union_stmt | table_ref_list) & { parentheses: true; };
       as?: alias_clause;
-      join: join_op;
+      join: join_op | set_op;
       on?: on_clause;
     };
 
@@ -1114,7 +1148,7 @@ export type exists_expr = unary_expr;
 
 export type exists_op = 'NOT EXISTS' | KW_EXISTS;
 
-export type comparison_op_right = arithmetic_op_right | in_op_right | between_op_right | is_op_right | like_op_right | jsonb_op_right | regex_op_right;
+export type comparison_op_right = arithmetic_op_right | in_op_right | between_op_right | is_op_right | like_op_right | jsonb_or_json_op_right | regex_op_right;
 
 export type arithmetic_op_right = { type: 'arithmetic'; tail: any };
 
@@ -1146,7 +1180,7 @@ export type like_op_right = { op: like_op; right: (literal | comparison_expr) & 
 
 export type in_op_right = {op: in_op; right: expr_list | var_decl | literal_string; };
 
-export type jsonb_op_right = { op: string; right: expr };
+export type jsonb_or_json_op_right = { op: string; right: { type: 'expr'; expr: expr_item } };
 
 export type additive_expr = binary_expr;
 
@@ -1175,14 +1209,11 @@ export type column_ref = string_constants_escape | {
         schema: string;
         table: string;
         column: column | '*';
-        arrows?: ('->>' | '->')[];
-        property?: (literal_string | literal_numeric)[];
+        jsonb?: jsonb_or_json_op_right[];
       } | {
         type: 'column_ref';
         table: ident;
         column: column | '*';
-        arrows?: ('->>' | '->')[];
-        property?: (literal_string | literal_numeric)[];
       };
 
 export type column_ref_quoted = unknown;
@@ -1307,8 +1338,7 @@ export type cast_double_colon = {
         as?: alias_clause,
         symbol: '::' | 'as',
         target: data_type;
-        arrows?: ('->>' | '->')[];
-        property?: (literal_string | literal_numeric)[];
+        jsonb?: jsonb_or_json_op_right[];
       };
 
 
@@ -1846,6 +1876,8 @@ export type data_type = {
                     parentheses?: boolean;
                     expr?: expr_list;
                 };
+
+
 
 
 

@@ -4228,7 +4228,7 @@ in_op_right
 
 jsonb_or_json_op_right
   = s: ('@>' / '<@' / '?|' / '?&' / '?' / '#-') __  e:expr_item {
-    // => { op: string; right: expr }
+    // => { op: string; right: { type: 'expr'; expr: expr_item } }
     return {
       type: 'jsonb',
       op: s,
@@ -4236,7 +4236,7 @@ jsonb_or_json_op_right
     }
   }
   / s: ('#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __ e:expr_item {
-    // => { op: string; right: expr }
+    // => { op: string; right: { type: 'expr'; expr: expr_item } }
     return {
       type: 'json',
       op: s,
