@@ -3034,6 +3034,24 @@ in_op_right
       return { op: op, right: e };
     }
 
+jsonb_or_json_op_right
+  = s: ('@>' / '<@' / '?|' / '?&' / '?' / '#-') __  e:expr {
+    // => { op: string; right: expr }
+    return {
+      type: 'jsonb',
+      op: s,
+      right: { type: 'expr', expr: e }
+    }
+  }
+  / s: ('#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __ e:expr {
+    // => { op: string; right: expr }
+    return {
+      type: 'json',
+      op: s,
+      right: { type: 'expr', expr: e }
+    }
+  }
+
 additive_expr
   = head: multiplicative_expr
     tail:(__ additive_operator  __ multiplicative_expr)* {
@@ -3090,15 +3108,14 @@ primary
   }
 
 column_ref
-  = tbl:(ident __ DOT __)? col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ literal)+ {
+  = tbl:(ident __ DOT __)? col:column __ jo:jsonb_or_json_op_right+ {
       const tableName = tbl && tbl[0] || null
       columnList.add(`select::${tableName}::${col}`);
       return {
         type: 'column_ref',
         table: tableName,
         column: col,
-        arrows: a.map(item => item[0]),
-        properties: a.map(item => item[2]),
+        jsonb: jo,
         ...getLocationObject(),
       };
   }

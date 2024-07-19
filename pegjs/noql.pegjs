@@ -2836,8 +2836,7 @@ column_list_item
     // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
-  / e:expr_item __ s:KW_DOUBLE_COLON __ t:cast_data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
-    // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; arrows?: ('->>' | '->')[]; property?: (literal_string | literal_numeric)[]; }
+  / e:expr_item __ s:KW_DOUBLE_COLON __ t:cast_data_type __ jo:jsonb_or_json_op_right* __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
     return {
       as: alias,
       type: 'cast',
@@ -2845,8 +2844,7 @@ column_list_item
       symbol: '::',
       target: t,
       tail: tail && tail[0] && { operator: tail[0][1], expr: tail[0][3] },
-      arrows: a.map(item => item[0]),
-      properties: a.map(item => item[2]),
+      jsonb: jo,
     }
   }
   / tbl:ident __ DOT pro:(ident __ DOT)? __ STAR {
@@ -3786,7 +3784,7 @@ comparison_op_right
   / between_op_right
   / is_op_right
   / like_op_right
-  / jsonb_op_right
+  / jsonb_or_json_op_right
   / regex_op_right
 
 arithmetic_op_right
@@ -3886,13 +3884,21 @@ in_op_right
       return { op: op, right: e };
     }
 
-jsonb_op_right
-  = s: ('@>' / '<@' / OPERATOR_CONCATENATION / DOUBLE_WELL_ARROW / WELL_ARROW / '?' / '?|' / '?&' / '#-') __
-  c:column_list_item {
+jsonb_or_json_op_right
+  = s: ('@>' / '<@' / '?|' / '?&' / '?' / '#-') __  e:expr_item {
     // => { op: string; right: expr }
     return {
+      type: 'jsonb',
       op: s,
-      right: c && c.expr || c
+      right: { type: 'expr', expr: e }
+    }
+  }
+  / s: ('#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __ e:expr_item {
+    // => { op: string; right: expr }
+    return {
+      type: 'json',
+      op: s,
+      right: { type: 'expr', expr: e }
     }
   }
 
@@ -3970,7 +3976,7 @@ column_ref
           column: '*'
       }
     }
-  / tbl:(ident __ DOT)? __ col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
+  / tbl:(ident __ DOT)? __ col:column __ jo:jsonb_or_json_op_right+ {
     // => IGNORE
       const tableName = tbl && tbl[0] || null
       columnList.add(`select::${tableName}::${col}`)
@@ -3978,19 +3984,10 @@ column_ref
         type: 'column_ref',
         table: tableName,
         column: col,
-        arrows: a.map(item => item[0]),
-        properties: a.map(item => item[2])
+        jsonb: jo,
       };
   }
   / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) {
-    /* => {
-        type: 'column_ref';
-        schema: string;
-        table: string;
-        column: column | '*';
-        arrows?: ('->>' | '->')[];
-        property?: (literal_string | literal_numeric)[];
-      } */
       columnList.add(`select::${schema}.${tbl[3]}::${col[3]}`);
       return {
         type: 'column_ref',
@@ -4000,13 +3997,6 @@ column_ref
       };
     }
   / tbl:ident __ DOT __ col:column {
-      /* => {
-        type: 'column_ref';
-        table: ident;
-        column: column | '*';
-        arrows?: ('->>' | '->')[];
-        property?: (literal_string | literal_numeric)[];
-      } */
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
@@ -4461,25 +4451,16 @@ scalar_func
   / "NTILE"i
 
 cast_double_colon
-  = s:KW_DOUBLE_COLON __ t:data_type __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))* __ alias:alias_clause? {
-    /* => {
-        as?: alias_clause,
-        symbol: '::' | 'as',
-        target: data_type;
-        arrows?: ('->>' | '->')[];
-        property?: (literal_string | literal_numeric)[];
-      }
-      */
+  = s:KW_DOUBLE_COLON __ t:data_type __ jo:jsonb_or_json_op_right* __ alias:alias_clause? {
     return {
       as: alias,
       symbol: '::',
       target: t,
-      arrows: a.map(item => item[0]),
-      properties: a.map(item => item[2]),
+      jsonb: jo,
     }
   }
 cast_expr
-  = c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))*  {
+  = c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN __ jo:jsonb_or_json_op_right*  {
     // => IGNORE
     return {
       type: 'cast',
@@ -4487,8 +4468,7 @@ cast_expr
       expr: e,
       symbol: 'as',
       target: t,
-      arrows: a.map(item => item[0]),
-      properties: a.map(item => item[2]),
+      jsonb: jo,
     };
   }
   / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {

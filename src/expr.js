@@ -70,7 +70,9 @@ function exprToSQL(exprOrigin) {
       expr[key] = ast[key]
     }
   }
-  return exprToSQLConvertFn[expr.type] ? exprToSQLConvertFn[expr.type](expr) : literalToSQL(expr)
+  const { type } = expr
+  if (type === 'expr') return exprToSQL(expr.expr)
+  return exprToSQLConvertFn[type] ? exprToSQLConvertFn[type](expr) : literalToSQL(expr)
 }
 
 function unaryToSQL(unarExpr) {

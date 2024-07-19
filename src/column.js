@@ -1,6 +1,6 @@
 import { constraintDefinitionToSQL } from './constrain'
 import { exprToSQL } from './expr'
-import { arrayDimensionToSymbol, castToSQL } from './func'
+import { arrayDimensionToSymbol, castToSQL, jsonOrJsonbToSQL } from './func'
 import { tablesToSQL } from './tables'
 import {
   autoIncrementToSQL,
@@ -35,7 +35,7 @@ function arrayIndexToSQL(arrayIndexList) {
 }
 function columnRefToSQL(expr) {
   const {
-    array_index, arrows = [], as, column, db, isDual, notations = [], schema, table, parentheses, properties,
+    array_index, as, column, db, isDual, notations = [], schema, table, parentheses, jsonb,
     suffix, order_by, subFields = [],
   } = expr
   let str = column === '*' ? '*' : columnOffsetToSQL(column, isDual)
@@ -52,7 +52,7 @@ function columnRefToSQL(expr) {
   const result = [
     str,
     commonOptionConnector('AS', exprToSQL, as),
-    arrows.map((arrow, index) => commonOptionConnector(arrow, literalToSQL, properties[index])).join(' '),
+    jsonOrJsonbToSQL(jsonb),
   ]
   result.push(toUpper(suffix))
   result.push(toUpper(order_by))
@@ -206,6 +206,7 @@ function columnsToSQL(columns, tables) {
 
 export {
   arrayIndexToSQL,
+  asToSQL,
   columnDefinitionToSQL,
   columnRefToSQL,
   columnToSQL,
