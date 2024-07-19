@@ -4,14 +4,15 @@ import { indexTypeAndOptionToSQL } from './index-definition'
 import { tablesToSQL, tableToSQL } from './tables'
 import { exprToSQL } from './expr'
 import { selectToSQL } from './select'
-import { dataTypeToSQL, hasVal, toUpper, identifierToSql } from './util'
+import { dataTypeToSQL, hasVal, toUpper, identifierToSql, literalToSQL } from './util'
 
 function alterExprToSQL(expr) {
   if (!expr) return ''
   const {
     action,
     create_definitions: createDefinition,
-    if_not_exists: ifNotExists,keyword,
+    if_not_exists: ifNotExists, keyword,
+    if_exists: ifExists,
     old_column: oldColumn,
     prefix,
     resource,
@@ -58,6 +59,7 @@ function alterExprToSQL(expr) {
     toUpper(action),
     toUpper(keyword),
     toUpper(ifNotExists),
+    toUpper(ifExists),
     oldColumn && columnRefToSQL(oldColumn),
     toUpper(prefix),
     name && name.trim(),
@@ -68,11 +70,11 @@ function alterExprToSQL(expr) {
 }
 
 function alterTableToSQL(stmt) {
-  const { type, table, expr = [] } = stmt
+  const { type, table, if_exists, prefix, expr = [] } = stmt
   const action = toUpper(type)
   const tableName = tablesToSQL(table)
   const exprList = expr.map(exprToSQL)
-  const result = [action, 'TABLE', tableName, exprList.join(', ')]
+  const result = [action, 'TABLE', toUpper(if_exists), literalToSQL(prefix), tableName, exprList.join(', ')]
   return result.filter(hasVal).join(' ')
 }
 

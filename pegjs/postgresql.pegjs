@@ -817,7 +817,7 @@ create_table_stmt
           type: a[0].toLowerCase(),
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
-          if_not_exists:ife,
+          if_not_exists: ife,
           table: t,
           partition_of: po
         }
@@ -1672,12 +1672,17 @@ alter_schema_stmt
 alter_table_stmt
   = KW_ALTER  __
     KW_TABLE __
+    ife:if_exists? __
+    o:'only'i? __
     t:table_ref_list __
     e:alter_action_list {
       /*
       export interface alter_table_stmt_node {
         type: 'alter';
         table: table_ref_list;
+        keyword: 'table';
+        if_exists: if_exists;
+        prefix?: literal_string;
         expr: alter_action_list;
       }
       => AstStatement<alter_table_stmt_node>
@@ -1688,6 +1693,9 @@ alter_table_stmt
         columnList: columnListTableAlias(columnList),
         ast: {
           type: 'alter',
+          keyword: 'table',
+          if_exists: ife,
+          prefix: o && { type: 'origin', value: o },
           table: t,
           expr: e
         }
@@ -1709,21 +1717,27 @@ alter_action
   / ALTER_RENAME
   / ALTER_ALGORITHM
   / ALTER_LOCK
+  / ALTER_COLUMN_DATA_TYPE
+  / ALTER_COLUMN_DEFAULT
+  / ALTER_COLUMN_NOT_NULL
 
 ALTER_ADD_COLUMN
   = KW_ADD __
     kc:KW_COLUMN? __
+    ife:if_not_exists_stmt? __
     cd:create_column_definition {
       /*
       => {
         action: 'add';
         keyword: KW_COLUMN;
         resource: 'column';
+        if_not_exists: ife;
         type: 'alter';
       } & create_column_definition;
       */
       return {
         action: 'add',
+        if_not_exists: ife,
         ...cd,
         keyword: kc,
         resource: 'column',
@@ -1734,17 +1748,20 @@ ALTER_ADD_COLUMN
 ALTER_DROP_COLUMN
   = KW_DROP __
     kc:KW_COLUMN? __
+    ife:if_exists? __
     c:column_ref {
       /* => {
         action: 'drop';
         collumn: column_ref;
         keyword: KW_COLUMN;
+        if_exists: if_exists;
         resource: 'column';
         type: 'alter';
       } */
       return {
         action: 'drop',
         column: c,
+        if_exists: ife,
         keyword: kc,
         resource: 'column',
         type: 'alter',
@@ -1863,6 +1880,89 @@ ALTER_LOCK
     }
   }
 
+ALTER_COLUMN_DATA_TYPE
+  = KW_ALTER __ kc:KW_COLUMN? __ c:column_ref __ sd:(KW_SET __ 'data'i)? __ 'type'i __ t:data_type __ co:collate_expr? __ us:(KW_USING __ expr)? {
+    /*
+      => {
+        action: 'alter';
+        keyword?: KW_COLUMN;
+        using?: expr;
+        type: 'alter';
+      } & create_column_definition;
+      */
+      c.suffix = sd ? 'set data type' : 'type'
+      return {
+        action: 'alter',
+        column: c,
+        keyword: kc,
+        resource: 'column',
+        definition: t,
+        collate: co,
+        using: us && us[2],
+        type: 'alter',
+      }
+  }
+
+ALTER_COLUMN_DEFAULT
+  = KW_ALTER __ kc:KW_COLUMN? __ c:column_ref __ KW_SET __ KW_DEFAULT __ e:expr {
+    /* => {
+        action: 'alter';
+        keyword?: KW_COLUMN;
+        default_val?: { type: 'set default', value: expr };
+        type: 'alter';
+      } & create_column_definition;
+      */
+      return {
+        action: 'alter',
+        column: c,
+        keyword: kc,
+        resource: 'column',
+        default_val: {
+          type: 'set default',
+          value: e,
+        },
+        type: 'alter',
+      }
+  }
+  / KW_ALTER __ kc:KW_COLUMN? __ c:column_ref __ KW_DROP __ KW_DEFAULT {
+    /* => {
+        action: 'alter';
+        keyword?: KW_COLUMN;
+        default_val?: { type: 'set default', value: expr };
+        type: 'alter';
+      } & create_column_definition;
+      */
+      return {
+        action: 'alter',
+        column: c,
+        keyword: kc,
+        resource: 'column',
+        default_val: {
+          type: 'drop default',
+        },
+        type: 'alter',
+      }
+  }
+
+ALTER_COLUMN_NOT_NULL
+  = KW_ALTER __ kc:KW_COLUMN? __ c:column_ref __ ac:(KW_SET / KW_DROP) __ n:literal_not_null {
+    /* => {
+        action: 'alter';
+        keyword?: KW_COLUMN;
+        nullable: literal_not_null;
+        type: 'alter';
+      } & create_column_definition;
+      */
+      n.action = ac.toLowerCase();
+      return {
+        action: 'alter',
+        column: c,
+        keyword: kc,
+        resource: 'column',
+        nullable: n,
+        type: 'alter',
+      }
+  }
 create_index_definition
   = kc:(KW_INDEX / KW_KEY) __
     c:column? __

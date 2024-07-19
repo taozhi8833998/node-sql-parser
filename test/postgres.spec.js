@@ -865,8 +865,8 @@ describe('Postgres', () => {
     {
       title: 'alter table add constraint',
       sql: [
-        'ALTER TABLE address ADD CONSTRAINT user_id_address_fk FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE ON UPDATE RESTRICT;',
-        'ALTER TABLE "address" ADD CONSTRAINT "user_id_address_fk" FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE ON UPDATE RESTRICT'
+        'ALTER TABLE if exists only address ADD CONSTRAINT user_id_address_fk FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE ON UPDATE RESTRICT;',
+        'ALTER TABLE IF EXISTS ONLY "address" ADD CONSTRAINT "user_id_address_fk" FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE ON UPDATE RESTRICT'
       ]
     },
     {
@@ -1540,7 +1540,28 @@ describe('Postgres', () => {
      LIMIT 1;`,
      `SELECT somefunc("engineering_networks".realizaciya, "engineering_networks".company = 'blah-blah' AND "engineering_networks".obem_realizacii_tip = 'uslugi') AS "var0", If(var0 > 0, '2', '1') AS "fontColor" FROM "engineering_networks" AS "engineering_networks" WHERE "engineering_networks".company = 'blah-blah' AND "engineering_networks".month IN ('April') AND "engineering_networks".year IN ('2024') LIMIT 1`
       ],
-    }
+    },
+    {
+      title: 'alter column data type',
+      sql: [
+        `ALTER TABLE employees ALTER COLUMN first_name SET DATA TYPE TEXT COLLATE "C" using upper(first_name);`,
+        'ALTER TABLE "employees" ALTER COLUMN first_name SET DATA TYPE TEXT COLLATE "C" USING upper(first_name)'
+      ]
+    },
+    {
+      title: 'alter column set and drop default',
+      sql: [
+        "ALTER TABLE transactions ADD COLUMN status varchar(30) DEFAULT 'old', ALTER COLUMN status SET default 'current', ALTER COLUMN name drop default;",
+        `ALTER TABLE "transactions" ADD COLUMN status VARCHAR(30) DEFAULT 'old', ALTER COLUMN status SET DEFAULT 'current', ALTER COLUMN name DROP DEFAULT`,
+      ]
+    },
+    {
+      title: 'alter column set not null',
+      sql: [
+        'ALTER TABLE transactions ALTER COLUMN status SET NOT NULL',
+        'ALTER TABLE "transactions" ALTER COLUMN status SET NOT NULL',
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
