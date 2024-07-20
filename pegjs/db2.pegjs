@@ -1728,6 +1728,7 @@ comparison_op_right
   / between_op_right
   / is_op_right
   / like_op_right
+  / jsonb_or_json_op_right
 
 arithmetic_op_right
   = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
@@ -1781,6 +1782,24 @@ in_op_right
       return { op: op, right: e };
     }
 
+jsonb_or_json_op_right
+  = s: ('@>' / '<@' / '?|' / '?&' / '?' / '#-') __  e:expr {
+    // => { op: string; right: expr }
+    return {
+      type: 'jsonb',
+      op: s,
+      right: { type: 'expr', expr: e }
+    }
+  }
+  / s: ('#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __ e:expr {
+    // => { op: string; right: expr }
+    return {
+      type: 'json',
+      op: s,
+      right: { type: 'expr', expr: e }
+    }
+  }
+
 additive_expr
   = head:multiplicative_expr
     tail:(__ additive_operator  __ multiplicative_expr)* {
@@ -1826,15 +1845,14 @@ unary_operator
   = '!' / '-' / '+' / '~'
 
 column_ref
-  = tbl:(ident __ DOT __)? col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
+  = tbl:(ident __ DOT __)? col:column __ jo:jsonb_or_json_op_right+ {
       const tableName = tbl && tbl[0] || null
       columnList.add(`select::${tableName}::${col}`);
       return {
         type: 'column_ref',
         table: tableName,
         column: col,
-        arrows: a.map(item => item[0]),
-        properties: a.map(item => item[2])
+        jsonb: jo,
       };
   }
   / tbl:ident __ DOT __ col:column_without_kw {

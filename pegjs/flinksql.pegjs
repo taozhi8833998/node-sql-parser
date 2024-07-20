@@ -2469,7 +2469,7 @@ comparison_op_right
   / is_op_right
   / like_op_right
   / similar_to_op_right
-  / jsonb_op_right
+  / jsonb_or_json_op_right
 
 arithmetic_op_right
   = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
@@ -2576,13 +2576,21 @@ exists_op_right
       return { op: op, right: l };
     }
 
-jsonb_op_right
-  = s: ('@>' / '<@' / OPERATOR_CONCATENATION / DOUBLE_WELL_ARROW / WELL_ARROW / '?' / '?|' / '?&' / '#-') __
-  c:column_list_item {
+jsonb_or_json_op_right
+  = s: ('@>' / '<@' / '?|' / '?&' / '?' / '#-') __  e:expr {
     // => { op: string; right: expr }
     return {
+      type: 'jsonb',
       op: s,
-      right: c && c.expr || c
+      right: { type: 'expr', expr: e }
+    }
+  }
+  / s: ('#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __ e:expr {
+    // => { op: string; right: expr }
+    return {
+      type: 'json',
+      op: s,
+      right: { type: 'expr', expr: e }
     }
   }
 
@@ -2682,7 +2690,7 @@ column_ref
           column: '*'
       }
     }
-  / tbl:(ident __ DOT)? __ col:column __ a:((DOUBLE_ARROW / SINGLE_ARROW) __ (literal_string / literal_numeric))+ {
+  / tbl:(ident __ DOT)? __ col:column __ jo:jsonb_or_json_op_right+ {
     // => IGNORE
       const tableName = tbl && tbl[0] || null
       columnList.add(`select::${tableName}::${col}`);
@@ -2690,8 +2698,7 @@ column_ref
         type: 'column_ref',
         table: tableName,
         column: col,
-        arrows: a.map(item => item[0]),
-        properties: a.map(item => item[2])
+        jsonb: jo,
       };
   }
   / tbl:ident __ DOT __ col:column {

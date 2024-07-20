@@ -921,14 +921,14 @@ describe('Postgres', () => {
       title: 'cast to jsonb and select key',
       sql: [
         "SELECT TextColumn::JSONB->>'name' FROM table1",
-        `SELECT TextColumn::JSONB->> 'name' FROM "table1"`
+        `SELECT TextColumn::JSONB ->> 'name' FROM "table1"`
       ]
     },
     {
       title: 'cast to jsonb and select key in function',
       sql: [
         "SELECT CAST(properties AS JSONB)->>'name' FROM table1",
-        `SELECT CAST(properties AS JSONB)->> 'name' FROM "table1"`
+        `SELECT CAST(properties AS JSONB) ->> 'name' FROM "table1"`
       ]
     },
     {
@@ -1562,6 +1562,13 @@ describe('Postgres', () => {
         'ALTER TABLE "transactions" ALTER COLUMN status SET NOT NULL',
       ]
     },
+    {
+      title: 'jsonb operator',
+      sql: [
+        "SELECT id,  collection::jsonb ?| array['val1', 'val2'] FROM instances",
+        `SELECT id, collection::JSONB ?| ARRAY['val1','val2'] FROM "instances"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
@@ -1571,6 +1578,7 @@ describe('Postgres', () => {
         })
     })
   }
+
   neatlyNestTestedSQL(SQL_LIST)
 
   describe('tables to sql', () => {
