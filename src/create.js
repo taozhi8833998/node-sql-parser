@@ -298,7 +298,11 @@ function createTypeToSQL(stmt) {
     const definitionSQL = []
     switch (resource) {
       case 'enum':
+      case 'range':
         definitionSQL.push(exprToSQL(createDefinition))
+        break
+      default:
+        definitionSQL.push(`(${createDefinition.map(createDefinitionToSQL).join(', ')})`)
         break
     }
     sql.push(definitionSQL.filter(hasVal).join(' '))
