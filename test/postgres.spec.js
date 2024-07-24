@@ -1569,6 +1569,25 @@ describe('Postgres', () => {
         `SELECT id, collection::JSONB ?| ARRAY['val1','val2'] FROM "instances"`
       ]
     },
+    {
+      title: 'create type',
+      sql: [
+        `CREATE TYPE address AS (
+            street VARCHAR(255),
+            city VARCHAR(100),
+            state VARCHAR(100),
+            zip_code VARCHAR(10)
+        );`,
+        'CREATE TYPE "address" AS (street VARCHAR(255), city VARCHAR(100), state VARCHAR(100), zip_code VARCHAR(10))'
+      ]
+    },
+    {
+      title: 'create type as range',
+      sql: [
+        'CREATE TYPE float8_range AS RANGE (subtype = float8, subtype_diff = float8mi);',
+        'CREATE TYPE "float8_range" AS RANGE (subtype = float8, subtype_diff = float8mi)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

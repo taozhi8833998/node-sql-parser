@@ -732,8 +732,24 @@ create_function_stmt
       }
   }
 
+create_type_stmt_option
+  = KW_AS __ r:(KW_ENUM / 'RANGE'i) __ LPAREN __ e:expr_list? __ RPAREN {
+    e.parentheses = true
+    return {
+      as: 'as',
+      resource: r.toLowerCase(),
+      create_definitions: e,
+    }
+  }
+  / KW_AS __ LPAREN __ e:create_column_definition_list? __ RPAREN {
+    return {
+      as: 'as',
+      create_definitions: e,
+    }
+  }
+
 create_type_stmt
-  = a:KW_CREATE __ k:'TYPE'i __ s:table_name __ as:KW_AS __ r:KW_ENUM __ LPAREN __ e:expr_list? __ RPAREN {
+  = a:KW_CREATE __ k:'TYPE'i __ s:table_name __ e:create_type_stmt_option? {
       /*
       export type create_type_stmt_t = {
         type: 'create',
@@ -741,11 +757,11 @@ create_type_stmt
         name: { schema: string; name: string },
         as?: string,
         resource?: string,
-        create_definitions?: any
+        create_definitions?: expr_list | create_column_definition_list;
       }
       => AstStatement<create_type_stmt_t>
       */
-      e.parentheses = true
+
       customTypes.add([s.db, s.table].filter(v => v).join('.'))
       return {
         tableList: Array.from(tableList),
@@ -754,25 +770,11 @@ create_type_stmt
           type: a[0].toLowerCase(),
           keyword: k.toLowerCase(),
           name: { schema: s.db, name: s.table },
-          as: as && as[0] && as[0].toLowerCase(),
-          resource: r.toLowerCase(),
-          create_definitions: e,
+          ...e,
         }
       }
     }
-  / a:KW_CREATE __ k:'TYPE'i __ s:table_name {
-    // => AstStatement<create_type_stmt_t>
-    customTypes.add([s.db, s.table].filter(v => v).join('.'))
-    return {
-        tableList: Array.from(tableList),
-        columnList: columnListTableAlias(columnList),
-        ast: {
-          type: a[0].toLowerCase(),
-          keyword: k.toLowerCase(),
-          name: { schema: s.db, name: s.table },
-        }
-      }
-  }
+
 create_domain_stmt
   = a:KW_CREATE __ k:'DOMAIN'i __ s:table_name __ as:KW_AS? __ d:data_type __ ce:collate_expr? __ de:default_expr? __ ccc: create_constraint_check? {
       /*
@@ -1302,6 +1304,12 @@ column_definition_opt_list
     }
     return opt
   }
+
+create_column_definition_list
+  = head:create_column_definition tail:(__ COMMA __ create_column_definition)* {
+      // => create_column_definition[]
+      return createList(head, tail)
+    }
 
 create_column_definition
   = c:column_ref __
