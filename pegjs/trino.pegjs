@@ -1019,7 +1019,7 @@ storage
     }
   }
 default_expr
-  = KW_DEFAULT __ ce: (literal / expr) {
+  = KW_DEFAULT __ ce:expr {
     // => { type: 'default'; value: literal | expr; }
     return {
       type: 'default',

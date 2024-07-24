@@ -1141,7 +1141,7 @@ create_fulltext_spatial_index_definition
     }
 
 default_expr
-  = KW_DEFAULT __ ce: (literal / expr) {
+  = KW_DEFAULT __ ce:expr {
     return {
       type: 'default',
       value: ce
