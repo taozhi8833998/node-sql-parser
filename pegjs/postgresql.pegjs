@@ -1400,8 +1400,8 @@ storage
     }
   }
 default_arg_expr
-  = kw:(KW_DEFAULT / KW_ASSIGIN_EQUAL)? __ ce:(literal / expr) {
-    // => { type: 'default'; keyword: string, value: literal | expr; }
+  = kw:(KW_DEFAULT / KW_ASSIGIN_EQUAL)? __ ce:expr {
+    // => { type: 'default'; keyword: string, value: expr; }
     return {
       type: 'default',
       keyword: kw && kw[0],
@@ -1409,8 +1409,8 @@ default_arg_expr
     }
   }
 default_expr
-  = KW_DEFAULT __ ce: (literal / expr) {
-    // => { type: 'default'; value: literal | expr; }
+  = KW_DEFAULT __ ce:expr {
+    // => { type: 'default'; value: expr; }
     return {
       type: 'default',
       value: ce

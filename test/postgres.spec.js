@@ -1588,6 +1588,13 @@ describe('Postgres', () => {
         'CREATE TYPE "float8_range" AS RANGE (subtype = float8, subtype_diff = float8mi)'
       ]
     },
+    {
+      title: '',
+      sql: [
+        "CREATE TABLE public.tnotok (description text DEFAULT ''::text NOT NULL);",
+        `CREATE TABLE "public"."tnotok" (description TEXT NOT NULL DEFAULT ''::TEXT)`,
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
