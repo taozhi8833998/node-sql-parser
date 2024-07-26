@@ -375,7 +375,21 @@ describe('snowflake', () => {
         unpivot(transaction_amount_usd FOR transaction_type IN (Charge, Taxes_and_Fees)))))`,
         `SELECT "transaction_date", "platform", "date_granularity", "transaction_type", "buyer_country", "sku", "transaction_currency", "exchange_rate", "transaction_amount_usd", "transaction_amount_local_currency", "transaction_amount_ils" FROM ((SELECT 'android' AS "platform", 'Daily' AS "date_granularity", "transaction_date", "transaction_type", "buyer_country", "sku", "transaction_currency", "exchange_rate", SUM("transaction_amount_usd") AS "transaction_amount_usd", SUM("transaction_amount_local_currency") AS "transaction_amount_local_currency", SUM("amount_merchant_currency") AS "transaction_amount_ils" FROM (SELECT to_date("ge"."transaction_date", 'Mon DD, YYYY') AS "transaction_date", "ge"."transaction_type" AS "transaction_type", "ge"."product_title" AS "product", "ge"."sku_id" AS "sku", "ge"."buyer_country" AS "buyer_country", "ge"."buyer_currency" AS "transaction_currency", "er"."rate" AS "exchange_rate", "ge"."amount_buyer_currency" AS "transaction_amount_local_currency", "ge"."amount_buyer_currency" / "er"."rate" AS "transaction_amount_usd", "ge"."amount_merchant_currency" AS "amount_merchant_currency" FROM (SELECT DISTINCT * FROM "staging"."raw"."google_play_store_earnings") AS "ge" INNER JOIN "F_EXCHANGE_RATES" AS "er" ON date("er"."time") = to_date("ge"."transaction_date", 'Mon DD, YYYY') AND "er"."currency" = "ge"."buyer_currency") GROUP BY ALL) UNION ALL (SELECT "platform", "date_granularity", "transaction_date", "transaction_type", "buyer_country", "sku", "transaction_currency", "exchange_rate", "transaction_amount_usd", CASE WHEN "transaction_type" = 'CHARGE' THEN "transaction_amount_local_currency" WHEN "transaction_type" = 'TAXES_AND_FEES' THEN "Taxes_and_Fees_local_currency" END AS "transaction_amount_local_currency", "transaction_amount_usd" * "ils_exchange_rate" AS "transaction_amount_ils" FROM (SELECT DISTINCT * FROM (SELECT 'ios' AS "platform", "date_granularity", "date" AS "transaction_date", "buyer_country", "sku", "transaction_currency", "exchange_rate", "ils"."exchange_rate" AS "ils_exchange_rate", SUM("transaction_amount_usd") AS "Charge", SUM("developer_proceeds_usd") AS "Taxes_and_Fees", SUM("transaction_amount_local_currency") AS "transaction_amount_local_currency", SUM("developer_proceeds") AS "Taxes_and_Fees_local_currency" FROM (SELECT date("ge1"."begin_date") AS "date", "ge1"."date_granularity" AS "date_granularity", "ge1"."title" AS "sku", "ge1"."country_code" AS "buyer_country", "ge1"."currency_of_proceeds" AS "transaction_currency", "er1"."rate" AS "exchange_rate", "ge1"."units" AS "units", ("ge1"."customer_price-ge1"."developer_proceeds") * "ge1"."units" * (-1) AS "developer_proceeds", "ge1"."customer_price" * "ge1"."units" AS "transaction_amount_local_currency", "ge1"."customer_price" * "ge1"."units" / "er1"."rate" AS "transaction_amount_usd", ("ge1"."customer_price-ge1"."developer_proceeds") * "ge1"."units" / "er1"."rate" * (-1) AS "developer_proceeds_usd" FROM (SELECT DISTINCT * FROM "staging"."raw"."apps_store_connect_sales") AS "ge1" INNER JOIN (SELECT DISTINCT * FROM "F_EXCHANGE_RATES") AS "er1" ON date("er1"."time") = date("ge1"."begin_date") AND "er1"."currency" = "ge1"."currency_of_proceeds") LEFT JOIN (SELECT date("time") AS "date", "currency", "rate" AS "exchange_rate" FROM (SELECT DISTINCT * FROM "F_EXCHANGE_RATES") WHERE "currency" = 'ILS') AS "ils" USING ("date") GROUP BY ALL) UNPIVOT("transaction_amount_usd" FOR "transaction_type" IN ("Charge", "Taxes_and_Fees")))))`,
       ]
-    }
+    },
+    {
+      title: '* with exclude single column',
+      sql: [
+        'SELECT table_a.* EXCLUDE column_in_table_a from tableName',
+        'SELECT "table_a".* EXCLUDE "column_in_table_a" FROM "tableName"'
+      ]
+    },
+    {
+      title: '* with exclude multiple columns',
+      sql: [
+        'select * exclude (user_id,daily_iap,iap_7d,iap_30d,purchases_cnt), count(distinct user_id)DAU from tableName',
+        'SELECT * EXCLUDE("user_id", "daily_iap", "iap_7d", "iap_30d", "purchases_cnt"), COUNT(DISTINCT "user_id") AS "DAU" FROM "tableName"'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo

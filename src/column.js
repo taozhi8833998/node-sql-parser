@@ -54,7 +54,7 @@ function columnRefToSQL(expr) {
     commonOptionConnector('AS', exprToSQL, as),
     jsonOrJsonbToSQL(jsonb),
   ]
-  result.push(toUpper(suffix))
+  result.push(typeof suffix === 'string' ? toUpper(suffix) : exprToSQL(suffix))
   result.push(toUpper(order_by))
   const sql = result.filter(hasVal).join(' ')
   return parentheses ? `(${sql})` : sql
