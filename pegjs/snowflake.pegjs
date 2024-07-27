@@ -2168,23 +2168,25 @@ query_option
       return option;
     }
 
+column_star_option
+  = 'exclude'i __ LPAREN __  l:expr_list __ RPAREN {
+    return {
+        type: 'function',
+        name: { name: [{ type: 'origin', value: 'exclude' }] },
+        args: l,
+      };
+  }
+  / 'exclude'i __ c:column_ref {
+    return {
+        type: 'function',
+        name: { name: [{ type: 'origin', value: 'exclude' }] },
+        args:{ type: 'expr_list', value: [c] },
+        args_parentheses: false,
+      };
+  }
+
 column_clause
-  = head: (KW_ALL / (STAR !ident_start) / STAR) tail:(__ COMMA __ column_list_item)* {
-      // => 'ALL' | '*' | column_list_item[]
-      columnList.add('select::null::(.*)')
-      const item = {
-        expr: {
-          type: 'column_ref',
-          table: null,
-          column: '*'
-        },
-        as: null,
-        ...getLocationObject()
-      }
-      if (tail && tail.length > 0) return createList(item, tail)
-      return [item]
-    }
-  / head:column_list_item tail:(__ COMMA __ column_list_item)* {
+  = head:column_list_item tail:(__ COMMA __ column_list_item)* {
     // => column_list_item[]
       return createList(head, tail);
     }
@@ -2226,7 +2228,21 @@ cast_data_type
   }
 
 column_list_item
-  = c:string_constants_escape {
+  = head: (KW_ALL / STAR) __ c:column_star_option? {
+    // => 'ALL' | '*' | column_list_item[]
+    columnList.add('select::null::(.*)')
+    return {
+      expr: {
+        type: 'column_ref',
+        table: null,
+        column: '*',
+        suffix: c,
+      },
+      as: null,
+      ...getLocationObject()
+    }
+  }
+  / c:string_constants_escape {
     // => { expr: expr; as: null; }
     return { expr: c, as: null, ...getLocationObject(), }
   }
@@ -2242,40 +2258,30 @@ column_list_item
       ...getLocationObject(),
     }
   }
-  / tbl:ident __ DOT pro:(ident __ DOT)? __ STAR {
+  / tbl:(ident __ DOT)? pro:(ident __ DOT)? __ (KW_ALL/STAR)  __ c:column_star_option? {
       // => { expr: column_ref; as: null; }
-      const mid = pro && pro[0]
-      let schema
-      if (mid) {
-        schema = tbl
-        tbl = mid
+      let schema, table
+      if (tbl) {
+        schema = null
+        table = tbl[0]
       }
-      columnList.add(`select::${tbl}::(.*)`)
+      if (pro) {
+        schema = tbl[0]
+        table = pro[0]
+      }
+      columnList.add(`select::${table}::(.*)`)
       const column = '*'
       return {
         expr: {
           type: 'column_ref',
-          table: tbl,
+          table,
           schema,
           column,
+          suffix: c,
         },
         as: null,
         ...getLocationObject()
       }
-    }
-  / tbl:(ident __ DOT)? __ STAR {
-      // => { expr: column_ref; as: null; }
-      const table = tbl && tbl[0] || null
-      columnList.add(`select::${table}::(.*)`);
-      return {
-        expr: {
-          type: 'column_ref',
-          table: table,
-          column: '*'
-        },
-        as: null,
-        ...getLocationObject()
-      };
     }
   / c:double_quoted_ident __ d:DOT? !{ if(d) return true } __  alias: alias_clause? {
       // => { type: 'expr'; expr: expr; as?: alias_clause; }
