@@ -125,13 +125,15 @@ export type create_function_stmt_t = {
 
 export type create_function_stmt = AstStatement<create_function_stmt_t>;
 
+export type create_type_stmt_option = { as: 'as'; resource: string; create_definitions: expr_list | create_column_definition_list; } | ignore;
+
 export type create_type_stmt_t = {
         type: 'create',
         keyword: 'type',
         name: { schema: string; name: string },
         as?: string,
         resource?: string,
-        create_definitions?: any
+        create_definitions?: expr_list | create_column_definition_list;
       }
 
 export type create_type_stmt = AstStatement<create_type_stmt_t>;
@@ -293,6 +295,8 @@ export type column_definition_opt_list = {
         storage?: storage;
         reference_definition?: reference_definition;
       };
+
+export type create_column_definition_list = create_column_definition[];
 
 
 

@@ -734,6 +734,7 @@ create_function_stmt
 
 create_type_stmt_option
   = KW_AS __ r:(KW_ENUM / 'RANGE'i) __ LPAREN __ e:expr_list? __ RPAREN {
+    // => { as: 'as'; resource: string; create_definitions: expr_list | create_column_definition_list; }
     e.parentheses = true
     return {
       as: 'as',
@@ -742,6 +743,7 @@ create_type_stmt_option
     }
   }
   / KW_AS __ LPAREN __ e:create_column_definition_list? __ RPAREN {
+    // => ignore
     return {
       as: 'as',
       create_definitions: e,
