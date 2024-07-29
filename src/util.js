@@ -138,6 +138,7 @@ function columnIdentifierToSql(ident) {
     case 'snowflake':
     case 'noql':
     case 'trino':
+    case 'sqlite':
       return `"${ident}"`
     case 'transactsql':
       return `[${ident}]`
@@ -157,13 +158,13 @@ function identifierToSql(ident, isDual) {
   switch (database && database.toLowerCase()) {
     case 'mysql':
     case 'mariadb':
-    case 'sqlite':
       return `\`${ident}\``
     case 'postgresql':
     case 'redshift':
     case 'snowflake':
     case 'trino':
     case 'noql':
+    case 'sqlite':
       return `"${ident}"`
     case 'transactsql':
       return `[${ident}]`
