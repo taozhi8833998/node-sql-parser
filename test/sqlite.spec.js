@@ -183,4 +183,15 @@ describe('sqlite', () => {
     const sql = "SELECT * FROM sqlite_master WHERE name == 'test'"
     expect(getParsedSql(sql)).to.be.equal(`SELECT * FROM "sqlite_master" WHERE "name" == 'test'`)
   })
+
+  it('should support subquery', () => {
+    const sql = `SELECT SUM("Hours Spent") AS "Total Hours"
+      FROM "Work_Records"
+      WHERE "Partner ID" =
+        (SELECT "Partner ID"
+        FROM "Employees"
+        WHERE "Firstname" = 'John' AND "Lastname" = 'Smith')
+    `
+    expect(getParsedSql(sql)).to.be.equal(`SELECT SUM("Hours Spent") AS "Total Hours" FROM "Work_Records" WHERE "Partner ID" = (SELECT "Partner ID" FROM "Employees" WHERE "Firstname" = 'John' AND "Lastname" = 'Smith')`)
+  })
 })
