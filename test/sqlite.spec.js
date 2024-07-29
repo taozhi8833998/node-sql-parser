@@ -178,4 +178,9 @@ describe('sqlite', () => {
     sql = 'ALTER TABLE customers RENAME COLUMN age TO customer_age;'
     expect(getParsedSql(sql)).to.be.equal('ALTER TABLE "customers" RENAME COLUMN "age" TO "customer_age"')
   })
+
+  it('should support double equal', () => {
+    const sql = "SELECT * FROM sqlite_master WHERE name == 'test'"
+    expect(getParsedSql(sql)).to.be.equal(`SELECT * FROM "sqlite_master" WHERE "name" == 'test'`)
+  })
 })
