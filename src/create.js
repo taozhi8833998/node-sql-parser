@@ -230,8 +230,8 @@ function createViewToSQL(stmt) {
     recursive, replace, select, sql_security: sqlSecurity,
     temporary, type, view, with: withClause, with_options: withOptions,
   } = stmt
-  const { db, view: name } = view
-  const viewName = [identifierToSql(db), identifierToSql(name)].filter(hasVal).join('.')
+  const { db, schema, view: name } = view
+  const viewName = [identifierToSql(db), identifierToSql(schema), identifierToSql(name)].filter(hasVal).join('.')
   const sql = [
     toUpper(type),
     toUpper(replace),
