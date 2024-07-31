@@ -12,6 +12,6 @@
         "**/.DS_Store": true,
         "node_modules": true,
         "output": true,
-        "package-lock.json": true
+        "package-lock.json": false
     }
 }
