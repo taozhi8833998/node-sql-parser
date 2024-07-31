@@ -390,6 +390,17 @@ describe('snowflake', () => {
         'SELECT * EXCLUDE("user_id", "daily_iap", "iap_7d", "iap_30d", "purchases_cnt"), COUNT(DISTINCT "user_id") AS "DAU" FROM "tableName"'
       ]
     },
+    {
+      title: 'create or replace view',
+      sql: [
+        `create or replace view JACEK_DB.PUBLIC.VALIDATION_DATA_VIEW(
+          ID,
+          DATA,
+          LOLZ
+        ) as (SELECT *, DATA AS LOLZ FROM VALIDATION_DATA);`,
+        'CREATE OR REPLACE VIEW "JACEK_DB"."PUBLIC"."VALIDATION_DATA_VIEW" ("ID", "DATA", "LOLZ") AS (SELECT *, "DATA" AS "LOLZ" FROM "VALIDATION_DATA")'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
