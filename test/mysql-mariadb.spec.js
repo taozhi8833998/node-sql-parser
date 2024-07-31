@@ -1077,6 +1077,13 @@ describe('mysql', () => {
           'EXPLAIN SELECT * FROM `incidents` WHERE `id` > 10 AND `is_delete` = 0'
         ]
       },
+      {
+        title: 'column options order',
+        sql: [
+          "alter table a modify column b VARCHAR(200) GENERATED ALWAYS AS (json_unquote(json_extract(`json`, '$.b'))) STORED COMMENT 'some comment'",
+          "ALTER TABLE `a` MODIFY COLUMN `b` VARCHAR(200) GENERATED ALWAYS AS (json_unquote(json_extract(`json`, '$.b'))) STORED COMMENT 'some comment'"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

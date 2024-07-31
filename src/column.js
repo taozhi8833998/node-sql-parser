@@ -93,11 +93,17 @@ function columnReferenceDefinitionToSQL(referenceDefinition) {
   return reference.filter(hasVal)
 }
 
+function generatedExpressionToSQL(generated) {
+  if (!generated) return
+  const result = [toUpper(generated.value), `(${exprToSQL(generated.expr)})`, toUpper(generated.storage_type)]
+  return result.filter(hasVal).join(' ')
+}
+
 function columnOption(definition) {
   const columnOpt = []
   const {
     nullable, character_set: characterSet, check, comment, collate, storage, using,
-    default_val: defaultOpt,
+    default_val: defaultOpt, generated,
     auto_increment: autoIncrement,
     unique: uniqueKey,
     primary_key: primaryKey,
@@ -112,6 +118,7 @@ function columnOption(definition) {
   }
   const { database } = getParserOpt()
   columnOpt.push(constraintDefinitionToSQL(check))
+  columnOpt.push(generatedExpressionToSQL(generated))
   columnOpt.push(autoIncrementToSQL(autoIncrement), toUpper(primaryKey), toUpper(uniqueKey), commentToSQL(comment))
   columnOpt.push(...commonTypeValue(characterSet))
   if (database !== 'sqlite') columnOpt.push(exprToSQL(collate))
@@ -136,22 +143,13 @@ function columnOrderToSQL(columnOrder) {
   return result.filter(hasVal).join(' ')
 }
 
-function generatedExpressionToSQL(generated) {
-  if (!generated) return
-  const result = [toUpper(generated.value), `(${exprToSQL(generated.expr)})`, toUpper(generated.storage_type)]
-  return result.filter(hasVal).join(' ')
-}
-
 function columnDefinitionToSQL(columnDefinition) {
   const column = []
   const name = columnRefToSQL(columnDefinition.column)
   const dataType = columnDataType(columnDefinition.definition)
   column.push(name)
   column.push(dataType)
-  const columnOpt = columnOption(columnDefinition)
-  column.push(columnOpt)
-  const generated = generatedExpressionToSQL(columnDefinition.generated)
-  column.push(generated)
+  column.push(columnOption(columnDefinition))
   return column.filter(hasVal).join(' ')
 }
 
