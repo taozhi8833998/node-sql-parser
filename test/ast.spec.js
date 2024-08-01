@@ -1276,7 +1276,9 @@ describe('AST', () => {
           FROM company
           WHERE company.categories ->> 'items' ILIKE '%Health Care%'
           OR company.categories ->> 'items' ILIKE '%Health & Wellness%'`
-        const ast = parser.astify(sql, { database: 'postgresql' })
+        const option = { database: 'postgresql' }
+        const ast = parser.astify(sql, option)
+        expect(parser.sqlify(ast, option)).to.be.equal(`SELECT "company".name FROM "company" WHERE "company".categories ->> 'items' ILIKE '%Health Care%' OR "company".categories ->> 'items' ILIKE '%Health & Wellness%'`)
         expect(ast.where).to.be.eql({
           "type": "binary_expr",
           "operator": "OR",
