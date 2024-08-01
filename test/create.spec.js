@@ -133,7 +133,7 @@ describe('create', () => {
 
       it('should support generated columns', () =>{
         expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) CHARACTER SET latin1 COLLATE latin1_general_cs AS (CONCAT(first_name,' ',last_name)) STORED NOT NULL);`))
-          .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) NOT NULL CHARACTER SET latin1 COLLATE latin1_general_cs AS (CONCAT(`first_name`, ' ', `last_name`)) STORED)");
+          .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) NOT NULL AS (CONCAT(`first_name`, ' ', `last_name`)) STORED CHARACTER SET latin1 COLLATE latin1_general_cs)");
 
         expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) AS (CONCAT(first_name,' ',last_name)) STORED);`))
         .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) AS (CONCAT(`first_name`, ' ', `last_name`)) STORED)");
@@ -144,7 +144,7 @@ describe('create', () => {
 
       it('should support generated columns with generated always', () =>{
         expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) CHARACTER SET latin1 COLLATE latin1_general_cs GENERATED ALWAYS AS (CONCAT(first_name,' ',last_name)) STORED NOT NULL);`))
-          .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) NOT NULL CHARACTER SET latin1 COLLATE latin1_general_cs GENERATED ALWAYS AS (CONCAT(`first_name`, ' ', `last_name`)) STORED)");
+          .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) NOT NULL GENERATED ALWAYS AS (CONCAT(`first_name`, ' ', `last_name`)) STORED CHARACTER SET latin1 COLLATE latin1_general_cs)");
 
         expect(getParsedSql(`CREATE TABLE contacts (id INT KEY, first_name VARCHAR(50) NOT NULL, last_name VARCHAR(50) NOT NULL, fullname varchar(101) GENERATED ALWAYS AS (CONCAT(first_name,' ',last_name)) VIRTUAL);`))
           .to.equal("CREATE TABLE `contacts` (`id` INT KEY, `first_name` VARCHAR(50) NOT NULL, `last_name` VARCHAR(50) NOT NULL, `fullname` VARCHAR(101) GENERATED ALWAYS AS (CONCAT(`first_name`, ' ', `last_name`)) VIRTUAL)");
