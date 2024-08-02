@@ -854,6 +854,22 @@ describe('BigQuery', () => {
         'SELECT * WHERE created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 WEEK)'
       ]
     },
+    {
+      title: 'create view',
+      sql: [
+        `CREATE OR REPLACE VIEW \`project\`.\`database\`.\`schema\` AS (SELECT
+            employee_id,
+            first_name,
+            last_name,
+            salary,
+            hire_date,
+            modified
+        FROM
+            database.table
+        WHERE salary > 50000.00)`,
+        'CREATE OR REPLACE VIEW project.database.schema AS (SELECT employee_id, first_name, last_name, salary, hire_date, modified FROM database.table WHERE salary > 50000)'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {

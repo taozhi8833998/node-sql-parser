@@ -645,6 +645,7 @@ drop_stmt
 create_stmt
   = create_table_stmt
   / create_db_stmt
+  / create_view_stmt
 
 truncate_stmt
   = a:KW_TRUNCATE  __
@@ -919,6 +920,51 @@ create_db_stmt
         }
       }
     }
+
+view_with
+  = KW_WITH __ c:("CASCADED"i / "LOCAL"i) __ "CHECK"i __ "OPTION" {
+    // => string
+    return `with ${c.toLowerCase()} check option`
+  }
+  / KW_WITH __ "CHECK"i __ "OPTION" {
+    // => string
+    return 'with check option'
+  }
+
+with_view_option
+  = 'check_option'i __ KW_ASSIGIN_EQUAL __ t:("CASCADED"i / "LOCAL"i) {
+    return  { type: 'check_option', value: t, symbol: '=' }
+  }
+  / k:('security_barrier'i / 'security_invoker'i) __ KW_ASSIGIN_EQUAL __ t:literal_bool {
+    return { type: k.toLowerCase(), value: t.value ? 'true' : 'false', symbol: '=' }
+  }
+with_view_options
+  = head:with_view_option tail:(__ COMMA __ with_view_option)* {
+      return createList(head, tail);
+    }
+create_view_stmt
+  = a:KW_CREATE __ or:(KW_OR __ KW_REPLACE)? __ tp:(KW_TEMP / KW_TEMPORARY)? __ r:KW_RECURSIVE? __
+  KW_VIEW __ v:table_name __ c:(LPAREN __ column_list __ RPAREN)? __ wo:(KW_WITH __ LPAREN __ with_view_options __ RPAREN)? __
+  KW_AS __ s:select_stmt __ w:view_with? {
+    v.view = v.table
+    delete v.table
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: a[0].toLowerCase(),
+        keyword: 'view',
+        replace: or && 'or replace',
+        temporary: tp && tp[0].toLowerCase(),
+        recursive: r && r.toLowerCase(),
+        columns: c && c[2],
+        select: s,
+        view: v,
+        with_options: wo && wo[4],
+        with: w,
+      }
+    }
+  }
 
 alter_table_stmt
   = KW_ALTER  __
@@ -3050,6 +3096,7 @@ KW_LOCAL          = "LOCAL"i     !ident_start { return 'LOCAL'; }
 KW_PIVOT          = "PIVOT"i   !ident_start { return 'PIVOT'; }
 KW_PERSIST        = "PERSIST"i   !ident_start { return 'PERSIST'; }
 KW_PERSIST_ONLY   = "PERSIST_ONLY"i   !ident_start { return 'PERSIST_ONLY'; }
+KW_VIEW           = "VIEW"i    !ident_start { return 'VIEW'; }
 
 // MySQL Alter
 KW_ADD     = "ADD"i     !ident_start { return 'ADD'; }
