@@ -1269,4 +1269,76 @@ describe('AST', () => {
             expect(sql).to.equal('`id` = 1');
         });
     })
+
+    describe('jsonb operator ast order', () => {
+      it('should parse jsonb operator ast order correct', () => {
+        const sql = `SELECT company.name
+          FROM company
+          WHERE company.categories ->> 'items' ILIKE '%Health Care%'
+          OR company.categories ->> 'items' ILIKE '%Health & Wellness%'`
+        const option = { database: 'postgresql' }
+        const ast = parser.astify(sql, option)
+        expect(parser.sqlify(ast, option)).to.be.equal(`SELECT "company".name FROM "company" WHERE "company".categories ->> 'items' ILIKE '%Health Care%' OR "company".categories ->> 'items' ILIKE '%Health & Wellness%'`)
+        expect(ast.where).to.be.eql({
+          "type": "binary_expr",
+          "operator": "OR",
+          "left": {
+            "type": "binary_expr",
+            "operator": "ILIKE",
+            "left": {
+              "type": "column_ref",
+              "table": "company",
+              "column": {
+                "expr": {
+                  "type": "default",
+                  "value": "categories"
+                }
+              },
+              "jsonb": [
+                {
+                  "type": "json",
+                  "op": "->>",
+                  "right": {
+                    "type": "single_quote_string",
+                    "value": "items"
+                  }
+                }
+              ]
+            },
+            "right": {
+              "type": "single_quote_string",
+              "value": "%Health Care%"
+            }
+          },
+          "right": {
+            "type": "binary_expr",
+            "operator": "ILIKE",
+            "left": {
+              "type": "column_ref",
+              "table": "company",
+              "column": {
+                "expr": {
+                  "type": "default",
+                  "value": "categories"
+                }
+              },
+              "jsonb": [
+                {
+                  "type": "json",
+                  "op": "->>",
+                  "right": {
+                    "type": "single_quote_string",
+                    "value": "items"
+                  }
+                }
+              ]
+            },
+            "right": {
+              "type": "single_quote_string",
+              "value": "%Health & Wellness%"
+            }
+          }
+        })
+      })
+    })
 });

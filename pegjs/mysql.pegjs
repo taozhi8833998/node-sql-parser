@@ -3035,20 +3035,25 @@ in_op_right
     }
 
 jsonb_or_json_op_right
-  = s: ('@>' / '<@' / '?|' / '?&' / '?' / '#-') __  e:expr {
-    // => { op: string; right: expr }
+  = s: ('@>' / '<@') __ e:column_list_item {
     return {
       type: 'jsonb',
       op: s,
-      right: { type: 'expr', expr: e }
+      right: e
     }
   }
-  / s: ('#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __ e:expr {
-    // => { op: string; right: expr }
+  / s: ('?|' / '?&' / '?' / '#-') __  e:literal {
+    return {
+      type: 'jsonb',
+      op: s,
+      right: e
+    }
+  }
+  / s: ('#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __ e:literal {
     return {
       type: 'json',
       op: s,
-      right: { type: 'expr', expr: e }
+      right: e
     }
   }
 

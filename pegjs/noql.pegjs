@@ -3883,20 +3883,28 @@ in_op_right
     }
 
 jsonb_or_json_op_right
-  = s: ('@>' / '<@' / '?|' / '?&' / '?' / '#-') __  e:expr_item {
-    // => { op: string; right: expr }
+  = s: ('@>' / '<@') __ e:column_list_item {
+    // => { type: 'jsonb'; op: string; right: column_list_item }
     return {
       type: 'jsonb',
       op: s,
-      right: { type: 'expr', expr: e }
+      right: e
     }
   }
-  / s: ('#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __ e:expr_item {
-    // => { op: string; right: expr }
+  / s: ('?|' / '?&' / '?' / '#-') __  e:literal {
+    // => { type: 'jsonb'; op: string; right: literal }
+    return {
+      type: 'jsonb',
+      op: s,
+      right: e
+    }
+  }
+  / s: ('#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __ e:literal {
+    // => { type: 'json'; op: string; right: literal }
     return {
       type: 'json',
       op: s,
-      right: { type: 'expr', expr: e }
+      right: e
     }
   }
 

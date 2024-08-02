@@ -31,7 +31,7 @@ function jsonOrJsonbToSQL(jsonb) {
   if (!jsonb || jsonb.length === 0) return ''
   return jsonb.map(operator => {
     const { op, right } = operator
-    return [commonOptionConnector(op, exprToSQL, right.expr), asToSQL(right.as)].filter(hasVal).join(' ')
+    return [commonOptionConnector(op, exprToSQL, right), asToSQL(right.as)].filter(hasVal).join(' ')
   }).join(' ')
 }
 
