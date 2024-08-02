@@ -1595,6 +1595,13 @@ describe('Postgres', () => {
         `CREATE TABLE "public"."tnotok" ("id" SERIAL CONSTRAINT users_PK PRIMARY KEY, description TEXT NOT NULL DEFAULT ''::TEXT)`,
       ]
     },
+    {
+      title: 'create table with quoted data type',
+      sql: [
+        'CREATE TABLE "User" ("gender" "Gender" NOT NULL);',
+        'CREATE TABLE "User" ("gender" "Gender" NOT NULL)',
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
