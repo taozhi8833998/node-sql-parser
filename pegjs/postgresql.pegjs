@@ -1344,7 +1344,10 @@ create_column_definition
     }
 
 column_constraint
-  = n:(literal_not_null / literal_null) __ df:default_expr? {
+  = n:constraint_name {
+    return { constraint: n }
+  }
+  / n:(literal_not_null / literal_null) __ df:default_expr? {
     // => { nullable: literal_null | literal_not_null; default_val: default_expr; }
     if (n && !n.value) n.value = 'null'
     return {

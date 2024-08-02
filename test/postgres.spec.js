@@ -1589,10 +1589,10 @@ describe('Postgres', () => {
       ]
     },
     {
-      title: '',
+      title: 'create table with column_constraint',
       sql: [
-        "CREATE TABLE public.tnotok (description text DEFAULT ''::text NOT NULL);",
-        `CREATE TABLE "public"."tnotok" (description TEXT NOT NULL DEFAULT ''::TEXT)`,
+        `CREATE TABLE public.tnotok ("id" SERIAL CONSTRAINT users_PK PRIMARY KEY, description text DEFAULT ''::text NOT NULL);`,
+        `CREATE TABLE "public"."tnotok" ("id" SERIAL CONSTRAINT users_PK PRIMARY KEY, description TEXT NOT NULL DEFAULT ''::TEXT)`,
       ]
     },
   ]
