@@ -433,7 +433,7 @@ with_view_options
 create_view_stmt
   = a:KW_CREATE __ or:(KW_OR __ KW_REPLACE)? __ tp:(KW_TEMP / KW_TEMPORARY)? __ r:KW_RECURSIVE? __
   KW_VIEW __ v:table_name __ c:(LPAREN __ column_list __ RPAREN)? __ wo:(KW_WITH __ LPAREN __ with_view_options __ RPAREN)? __
-  KW_AS __ s:select_stmt_nake __ w:view_with? {
+  KW_AS __ s:select_stmt __ w:view_with? {
     /*
       export type create_view_stmt_t = {
         type: 'create',
@@ -443,7 +443,7 @@ create_view_stmt
         recursive?: 'recursive',
         view: table_name,
         columns?: column_list,
-        select: select_stmt_nake,
+        select: select_stmt,
         with_options?: with_view_options,
         with?: string,
       }
