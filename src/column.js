@@ -102,7 +102,7 @@ function generatedExpressionToSQL(generated) {
 function columnOption(definition) {
   const columnOpt = []
   const {
-    nullable, character_set: characterSet, check, comment, collate, storage, using,
+    nullable, character_set: characterSet, check, comment, constraint, collate, storage, using,
     default_val: defaultOpt, generated,
     auto_increment: autoIncrement,
     unique: uniqueKey,
@@ -117,6 +117,7 @@ function columnOption(definition) {
     columnOpt.push(type.toUpperCase(), exprToSQL(value))
   }
   const { database } = getParserOpt()
+  if (constraint) columnOpt.push(toUpper(constraint.keyword), literalToSQL(constraint.constraint))
   columnOpt.push(constraintDefinitionToSQL(check))
   columnOpt.push(generatedExpressionToSQL(generated))
   columnOpt.push(autoIncrementToSQL(autoIncrement), toUpper(primaryKey), toUpper(uniqueKey), commentToSQL(comment))
