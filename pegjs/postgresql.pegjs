@@ -1315,7 +1315,7 @@ create_column_definition_list
 
 create_column_definition
   = c:column_ref __
-    d:data_type __
+    d:(data_type / double_quoted_ident) __
     cdo:column_definition_opt_list? {
       /*
       => {
@@ -1335,6 +1335,7 @@ create_column_definition
       }
       */
       columnList.add(`create::${c.table}::${c.column.expr.value}`)
+      if (d.type === 'double_quote_string') d = { dataType: `"${d.value}"` }
       return {
         column: c,
         definition: d,
