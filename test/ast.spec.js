@@ -1286,24 +1286,22 @@ describe('AST', () => {
             "type": "binary_expr",
             "operator": "ILIKE",
             "left": {
-              "type": "column_ref",
-              "table": "company",
-              "column": {
-                "expr": {
-                  "type": "default",
-                  "value": "categories"
-                }
-              },
-              "jsonb": [
-                {
-                  "type": "json",
-                  "op": "->>",
-                  "right": {
-                    "type": "single_quote_string",
-                    "value": "items"
+              "type": "binary_expr",
+              "operator": "->>",
+              "left": {
+                "type": "column_ref",
+                "table": "company",
+                "column": {
+                  "expr": {
+                    "type": "default",
+                    "value": "categories"
                   }
                 }
-              ]
+              },
+              "right": {
+                "type": "single_quote_string",
+                "value": "items"
+              }
             },
             "right": {
               "type": "single_quote_string",
@@ -1314,24 +1312,22 @@ describe('AST', () => {
             "type": "binary_expr",
             "operator": "ILIKE",
             "left": {
-              "type": "column_ref",
-              "table": "company",
-              "column": {
-                "expr": {
-                  "type": "default",
-                  "value": "categories"
-                }
-              },
-              "jsonb": [
-                {
-                  "type": "json",
-                  "op": "->>",
-                  "right": {
-                    "type": "single_quote_string",
-                    "value": "items"
+              "type": "binary_expr",
+              "operator": "->>",
+              "left": {
+                "type": "column_ref",
+                "table": "company",
+                "column": {
+                  "expr": {
+                    "type": "default",
+                    "value": "categories"
                   }
                 }
-              ]
+              },
+              "right": {
+                "type": "single_quote_string",
+                "value": "items"
+              }
             },
             "right": {
               "type": "single_quote_string",

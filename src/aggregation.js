@@ -6,6 +6,7 @@ function aggrToSQL(expr) {
   /** @type {Object} */
   const { args, filter, over, within_group_orderby } = expr
   let str = exprToSQL(args.expr)
+  str = Array.isArray(str) ? str.join(', ') : str
   const fnName = expr.name
   const overStr = overToSQL(over)
   const separator = ' '
