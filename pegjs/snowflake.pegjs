@@ -519,32 +519,13 @@ create_table_stmt
     tp:KW_TEMPORARY? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
-    t:table_ref_list __
+    t:table_name __
     c:create_table_definition? __
     to:table_options? __
-    ir: (KW_IGNORE / KW_REPLACE)? __
-    as: KW_AS? __
-    qe: union_stmt? {
-      /*
-      export type create_table_stmt_node = create_table_stmt_node_simple | create_table_stmt_node_like;
-      export interface create_table_stmt_node_base {
-        type: 'create';
-        keyword: 'table';
-        temporary?: 'temporary';
-        replace?: string;
-        if_not_exists?: 'if not exists';
-        table: table_ref_list;
-      }
-      export interface create_table_stmt_node_simple extends create_table_stmt_node_base{
-        ignore_replace?: 'ignore' | 'replace';
-        as?: 'as';
-        query_expr?: union_stmt_node;
-        create_definitions?: create_table_definition;
-        table_options?: table_options;
-      }
-      => AstStatement<create_table_stmt_node>
-      */
-      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
+    ir:(KW_IGNORE / KW_REPLACE)? __
+    as:KW_AS? __
+    qe:union_stmt? {
+      tableList.add(`create::${t.db}::${t.table}`)
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -553,7 +534,7 @@ create_table_stmt
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
-          table: t,
+          table: [t],
           replace: or && 'or replace',
           ignore_replace: ir && ir[0].toLowerCase(),
           as: as && as[0].toLowerCase(),
@@ -2296,7 +2277,7 @@ value_alias_clause
   = KW_AS? __ i:alias_ident { /*=>alias_ident*/ return i; }
 
 alias_clause
-  = KW_AS __ i:alias_ident { /*=>alias_ident*/ return i; }
+  = KW_AS __ i:ident_without_kw { /*=>alias_ident*/ return i; }
   / KW_AS? __ i:ident { /*=>ident*/ return i; }
 
 into_clause

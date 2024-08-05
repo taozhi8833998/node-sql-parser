@@ -401,6 +401,13 @@ describe('snowflake', () => {
         'CREATE OR REPLACE VIEW "JACEK_DB"."PUBLIC"."VALIDATION_DATA_VIEW" ("ID", "DATA", "LOLZ") AS (SELECT *, "DATA" AS "LOLZ" FROM "VALIDATION_DATA")'
       ]
     },
+    {
+      title: 'keyword in alias clause',
+      sql: [
+        'select user_id, Limits as Limit from tableName',
+        'SELECT "user_id", "Limits" AS "Limit" FROM "tableName"',
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
