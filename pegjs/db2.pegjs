@@ -1728,7 +1728,6 @@ comparison_op_right
   / between_op_right
   / is_op_right
   / like_op_right
-  / jsonb_or_json_op_right
 
 arithmetic_op_right
   = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
@@ -1782,32 +1781,6 @@ in_op_right
       return { op: op, right: e };
     }
 
-jsonb_or_json_op_right
-  = s: ('@>' / '<@') __ e:column_list_item {
-    // => { type: 'jsonb'; op: string; right: column_list_item }
-    return {
-      type: 'jsonb',
-      op: s,
-      right: e
-    }
-  }
-  / s: ('?|' / '?&' / '?' / '#-') __  e:literal {
-    // => { type: 'jsonb'; op: string; right: literal }
-    return {
-      type: 'jsonb',
-      op: s,
-      right: e
-    }
-  }
-  / s: ('#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __ e:literal {
-    // => { type: 'json'; op: string; right: literal }
-    return {
-      type: 'json',
-      op: s,
-      right: e
-    }
-  }
-
 additive_expr
   = head:multiplicative_expr
     tail:(__ additive_operator  __ multiplicative_expr)* {
@@ -1843,7 +1816,7 @@ primary
   / var_decl
 
 unary_expr_or_primary
-  = primary
+  = jsonb_expr
   / op:(unary_operator) tail:(__ unary_expr_or_primary) {
     // if (op === '!') op = 'NOT'
     return createUnaryExpr(op, tail[1])
@@ -1852,18 +1825,18 @@ unary_expr_or_primary
 unary_operator
   = '!' / '-' / '+' / '~'
 
-column_ref
-  = tbl:(ident __ DOT __)? col:column __ jo:jsonb_or_json_op_right+ {
-      const tableName = tbl && tbl[0] || null
-      columnList.add(`select::${tableName}::${col}`);
-      return {
-        type: 'column_ref',
-        table: tableName,
-        column: col,
-        jsonb: jo,
-      };
+jsonb_expr
+  = head:primary tail:(__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __  literal)* {
+    if (!tail || tail.length === 0) return head
+    return createBinaryExprChain(head, tail)
   }
-  / tbl:ident __ DOT __ col:column_without_kw {
+  / head:primary tail:(__ ('@>' / '<@') __ column_list_item)* {
+    if (!tail || tail.length === 0) return head
+    return createBinaryExprChain(head, tail)
+  }
+
+column_ref
+  = tbl:ident __ DOT __ col:column_without_kw {
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',

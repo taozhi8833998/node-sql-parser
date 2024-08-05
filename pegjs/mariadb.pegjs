@@ -3106,27 +3106,14 @@ concat_separator
   }
 
 count_arg
-  = e:star_expr { return { expr: e }; }
-  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN tail:(__ (KW_AND / KW_OR) __ expr)* __ or:order_by_clause? __ s:concat_separator? {
-    const len = tail.length
-    let result = c
-    result.parentheses = true
-    for (let i = 0; i < len; ++i) {
-      result = createBinaryExpr(tail[i][1], result, tail[i][3])
-    }
-    return {
-      distinct: d,
-      expr: result,
-      orderby: or,
-      separator: s
-    };
-  }
+  = e:star_expr { return { expr: e, ...getLocationObject() }; }
   / d:KW_DISTINCT? __ c:or_and_where_expr __ or:order_by_clause? __ s:concat_separator? {
     return {
       distinct: d,
       expr: c,
       orderby: or,
-      separator: s
+      separator: s,
+      ...getLocationObject()
     };
   }
 

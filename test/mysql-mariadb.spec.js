@@ -985,7 +985,7 @@ describe('mysql', () => {
           AND gu.STATUS = 0
         GROUP BY
           o.date`,
-          'SELECT DATE(`o`.`date`) AS `date`, COUNT(DISTINCT `o`.`user_id`,`operation_type` = 0 OR NULL) AS `operateOpenCount`, COUNT(DISTINCT `o`.`user_id`, (`operation_type` = 0 AND `jump_status` = 3) OR NULL) AS `realityOpenCount`, COUNT(DISTINCT `o`.`user_id`,`operation_type` = 1 OR NULL) AS `operateCloseCount`, COUNT(DISTINCT `o`.`user_id`, (`operation_type` = 1 AND `jump_status` = 3) OR NULL) AS `realityCloseCount` FROM (SELECT `id`, `user_id`, `operation_type`, `jump_status`, `operation_time`, `rider_type`, IF(EXTRACT(HOUR FROM `operation_time`) >= 16, DATE_ADD(DATE(`operation_time`), INTERVAL 1 DAY), DATE(`operation_time`)) AS `date` FROM `labour_insurance_operation`) AS `o` LEFT JOIN `labour_user` AS `u` ON `o`.`user_id` = `u`.`id` LEFT JOIN `labour_user_group_user` AS `gu` ON `o`.`user_id` = `gu`.`user_id` AND `gu`.`STATUS` = 0 GROUP BY `o`.`date`'
+          'SELECT DATE(`o`.`date`) AS `date`, COUNT(DISTINCT `o`.`user_id`, `operation_type` = 0 OR NULL) AS `operateOpenCount`, COUNT(DISTINCT `o`.`user_id`, (`operation_type` = 0 AND `jump_status` = 3) OR NULL) AS `realityOpenCount`, COUNT(DISTINCT `o`.`user_id`, `operation_type` = 1 OR NULL) AS `operateCloseCount`, COUNT(DISTINCT `o`.`user_id`, (`operation_type` = 1 AND `jump_status` = 3) OR NULL) AS `realityCloseCount` FROM (SELECT `id`, `user_id`, `operation_type`, `jump_status`, `operation_time`, `rider_type`, IF(EXTRACT(HOUR FROM `operation_time`) >= 16, DATE_ADD(DATE(`operation_time`), INTERVAL 1 DAY), DATE(`operation_time`)) AS `date` FROM `labour_insurance_operation`) AS `o` LEFT JOIN `labour_user` AS `u` ON `o`.`user_id` = `u`.`id` LEFT JOIN `labour_user_group_user` AS `gu` ON `o`.`user_id` = `gu`.`user_id` AND `gu`.`STATUS` = 0 GROUP BY `o`.`date`'
         ]
       },
       {
@@ -1097,10 +1097,10 @@ describe('mysql', () => {
 
     it('should throw error when args is not right', () => {
       let sql = `select convert(json_unquote(json_extract('{"thing": "252"}', "$.thing")));`
-      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", or [ \\t\\n\\r] but ")" found.')
-      expect(parser.astify.bind(parser, 'select convert("");')).to.throw('Expected "!=", "#", "%", "&", "&&", "*", "+", ",", "-", "--", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "OR", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", or [ \\t\\n\\r] but ")" found.')
+      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "*", "+", ",", "-", "--", "->", "->>", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "?", "?&", "?|", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", or [ \\t\\n\\r] but ")" found.')
+      expect(parser.astify.bind(parser, 'select convert("");')).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "*", "+", ",", "-", "--", "->", "->>", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "?", "?&", "?|", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "OR", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "|", "||", or [ \\t\\n\\r] but ")" found.')
       sql = 'SELECT AVG(Quantity,age) FROM table1;'
-      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "(", ")", "*", "+", "-", "--", "->", "->>", ".", "/", "/*", "<", "<<", "<=", "<>", "<@", "=", ">", ">=", ">>", "?", "?&", "?|", "@>", "BETWEEN", "IN", "IS", "LIKE", "NOT", "REGEXP", "RLIKE", "XOR", "^", "div", "|", "||", [ \\t\\n\\r], [A-Za-z0-9_$\\x80-￿], or [A-Za-z0-9_:] but "," found.')
+      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "(", ")", "*", "+", "-", "--", "->", "->>", ".", "/", "/*", "<", "<<", "<=", "<>", "=", ">", ">=", ">>", "?", "?&", "?|", "BETWEEN", "IN", "IS", "LIKE", "NOT", "REGEXP", "RLIKE", "XOR", "^", "div", "|", "||", [ \\t\\n\\r], [A-Za-z0-9_$\\x80-￿], or [A-Za-z0-9_:] but "," found.')
     })
 
     it('should join multiple table with comma', () => {

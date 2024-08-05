@@ -1,6 +1,6 @@
-import { arrayIndexToSQL, asToSQL } from './column'
+import { arrayIndexToSQL } from './column'
 import { exprToSQL } from './expr'
-import { commonOptionConnector, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
+import { hasVal, identifierToSql, literalToSQL, toUpper } from './util'
 import { overToSQL } from './over'
 
 function anyValueFuncToSQL(stmt) {
@@ -27,16 +27,8 @@ function arrayDimensionToSymbol(target) {
   return result.join('')
 }
 
-function jsonOrJsonbToSQL(jsonb) {
-  if (!jsonb || jsonb.length === 0) return ''
-  return jsonb.map(operator => {
-    const { op, right } = operator
-    return [commonOptionConnector(op, exprToSQL, right), asToSQL(right.as)].filter(hasVal).join(' ')
-  }).join(' ')
-}
-
 function castToSQL(expr) {
-  const { target, expr: expression, keyword, symbol, as: alias, parentheses: outParentheses, jsonb } = expr
+  const { target, expr: expression, keyword, symbol, as: alias, parentheses: outParentheses } = expr
   const { length, dataType, parentheses, quoted, scale, suffix: dataTypeSuffix, expr: targetExpr } = target
   let str = targetExpr ? exprToSQL(targetExpr) : ''
   if (length != null) str = scale ? `${length}, ${scale}` : length
@@ -50,9 +42,6 @@ function castToSQL(expr) {
     suffix = ')'
     symbolChar = ` ${symbol.toUpperCase()} `
   }
-  const jsonbOperatorStr = jsonOrJsonbToSQL(jsonb)
-  const whitespace = jsonbOperatorStr ? ' ' : ''
-  suffix += `${whitespace}${jsonbOperatorStr}`
   if (alias) suffix += ` AS ${identifierToSql(alias)}`
   const arrayDimension = arrayDimensionToSymbol(target)
   const result = [prefix, symbolChar, quoted, dataType, quoted, arrayDimension, str, suffix].filter(hasVal).join('')
@@ -127,7 +116,6 @@ export {
   flattenFunToSQL,
   funcToSQL,
   jsonObjectArgToSQL,
-  jsonOrJsonbToSQL,
   lambdaToSQL,
   tablefuncFunToSQL,
 }
