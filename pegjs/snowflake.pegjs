@@ -2277,8 +2277,8 @@ value_alias_clause
   = KW_AS? __ i:alias_ident { /*=>alias_ident*/ return i; }
 
 alias_clause
-  = KW_AS __ i:ident_without_kw { /*=>alias_ident*/ return i; }
-  / KW_AS? __ i:ident { /*=>ident*/ return i; }
+  = KW_AS __ i:column_without_kw { /*=>alias_ident*/ return i; }
+  / KW_AS? __ i:column { /*=>ident*/ return i; }
 
 into_clause
   = KW_INTO __ v:var_decl_list {

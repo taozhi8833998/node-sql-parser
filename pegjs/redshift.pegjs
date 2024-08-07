@@ -4074,7 +4074,7 @@ ident_list
       return createList(head, tail)
     }
 alias_ident
-  = name:ident_name !{ return reservedMap[name.toUpperCase()] === true } c:(__ LPAREN __ column_list __ RPAREN)? {
+  = name:column_name !{ return reservedMap[name.toUpperCase()] === true } c:(__ LPAREN __ column_list __ RPAREN)? {
       // => string
       if (!c) return name;
       return `${name}(${c[3].map(v => v.value).join(', ')})`

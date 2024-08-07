@@ -1602,6 +1602,13 @@ describe('Postgres', () => {
         'CREATE TABLE "User" ("gender" "Gender" NOT NULL)',
       ]
     },
+    {
+      title: 'no space before line comment',
+      sql: [
+        'select * from model_a a-- comment',
+        'SELECT * FROM "model_a" AS "a"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
