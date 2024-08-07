@@ -1346,6 +1346,7 @@ create_column_definition
 
 column_constraint
   = n:constraint_name {
+    // => { constraint: constraint_name; }
     return { constraint: n }
   }
   / n:(literal_not_null / literal_null) __ df:default_expr? {

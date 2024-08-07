@@ -73,7 +73,7 @@ export type create_view_stmt_t = {
         recursive?: 'recursive',
         view: table_name,
         columns?: column_list,
-        select: select_stmt_nake,
+        select: select_stmt,
         with_options?: with_view_options,
         with?: string,
       }
@@ -316,7 +316,7 @@ export type create_column_definition = {
         resource: 'column';
       };
 
-export type column_constraint = { nullable: literal_null | literal_not_null; default_val: default_expr; };
+export type column_constraint = { constraint: constraint_name; } | { nullable: literal_null | literal_not_null; default_val: default_expr; };
 
 export type collate_expr = { type: 'collate'; keyword: 'collate'; collate: { symbol: '=' ; name: ident_type; value: ident_type; }} | { type: 'collate'; keyword: 'collate'; collate: { symbol: '=' | null ; name: ident_type; }};
 
@@ -324,9 +324,9 @@ export type column_format = { type: 'column_format'; value: 'fixed' | 'dynamic' 
 
 export type storage = { type: 'storage'; value: 'disk' | 'memory' };
 
-export type default_arg_expr = { type: 'default'; keyword: string, value: literal | expr; };
+export type default_arg_expr = { type: 'default'; keyword: string, value: expr; };
 
-export type default_expr = { type: 'default'; value: literal | expr; };
+export type default_expr = { type: 'default'; value: expr; };
 
 export type drop_index_opt = (ALTER_ALGORITHM | ALTER_LOCK)[];
 
@@ -876,7 +876,7 @@ export type expr_item = binary_column_expr & { array_index: array_index };
 
 export type cast_data_type = data_type & { quoted?: string };
 
-export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; jsonb?: jsonb_or_json_op_right[]; } | { expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
+export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; } | { expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
 
 
 
@@ -1152,7 +1152,7 @@ export type exists_expr = unary_expr;
 
 export type exists_op = 'NOT EXISTS' | KW_EXISTS;
 
-export type comparison_op_right = arithmetic_op_right | in_op_right | between_op_right | is_op_right | like_op_right | jsonb_or_json_op_right | regex_op_right;
+export type comparison_op_right = arithmetic_op_right | in_op_right | between_op_right | is_op_right | like_op_right | regex_op_right;
 
 export type arithmetic_op_right = { type: 'arithmetic'; tail: any };
 
@@ -1184,8 +1184,6 @@ export type like_op_right = { op: like_op; right: (literal | comparison_expr) & 
 
 export type in_op_right = {op: in_op; right: expr_list | var_decl | literal_string; };
 
-export type jsonb_or_json_op_right = { op: string; right: { type: 'expr'; expr: expr_item } };
-
 export type additive_expr = binary_expr;
 
 export type additive_operator = "+" | "-";
@@ -1198,9 +1196,11 @@ export type column_ref_array_index = column_ref;
 
 export type primary = cast_expr | or_and_where_expr | var_decl | { type: 'origin'; value: string; };
 
-export type unary_expr_or_primary = primary | unary_expr;
+export type unary_expr_or_primary = jsonb_expr | unary_expr;
 
 export type unary_operator = "!" | "-" | "+" | "~";
+
+export type jsonb_expr = binary_expr | primary | binary_expr;
 
 export type string_constants_escape = { type: 'origin'; value: string; };
 
@@ -1213,7 +1213,6 @@ export type column_ref = string_constants_escape | {
         schema: string;
         table: string;
         column: column | '*';
-        jsonb?: jsonb_or_json_op_right[];
       } | {
         type: 'column_ref';
         table: ident;
@@ -1342,7 +1341,6 @@ export type cast_double_colon = {
         as?: alias_clause,
         symbol: '::' | 'as',
         target: data_type;
-        jsonb?: jsonb_or_json_op_right[];
       };
 
 
