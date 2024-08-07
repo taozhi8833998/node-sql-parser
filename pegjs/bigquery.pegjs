@@ -1800,7 +1800,7 @@ column_list_item
 
 alias_clause
   = KW_AS __ i:alias_ident { return i; }
-  / KW_AS? __ i:ident { return i; }
+  / KW_AS? __ i:column { return i; }
 
 from_unnest_item
   = 'UNNEST'i __ LPAREN __ a:expr? __ RPAREN __ alias:alias_clause? __ wf:with_offset? {
@@ -2485,7 +2485,7 @@ ident
     }
 
 alias_ident
-  = name:ident_name !{
+  = name:column_name !{
       if (reservedMap[name.toUpperCase()] === true) throw new Error("Error: "+ JSON.stringify(name)+" is a reserved word, can not as alias clause");
       return false
     } {
@@ -2548,7 +2548,7 @@ ident_start = [A-Za-z_]
 ident_part  = [A-Za-z0-9_-]
 
 // to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_:-]
+column_part  = [A-Za-z0-9_:]
 
 param
   = s:(':'/'@') n:ident_name {

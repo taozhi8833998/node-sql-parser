@@ -37,4 +37,9 @@ describe('redshift', () => {
     expect(getParsedSql(sql)).to.be.equal('SELECT * FROM "montara_raw"."raw_listings" WHERE price = -minimum_nights')
   })
 
+  it('should support no space before line comment', () => {
+    const sql = 'select * from model_a a-- comment'
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM "model_a" AS "a"')
+  })
+
 })
