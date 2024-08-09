@@ -1609,6 +1609,21 @@ describe('Postgres', () => {
         'SELECT * FROM "model_a" AS "a"'
       ]
     },
+    {
+      title: 'mixed jsonb and cast',
+      sql: [
+        "SELECT person.name FROM person WHERE person.email_addresses::json -> 'items'::text ILIKE '%sam%'",
+        `SELECT "person".name FROM "person" WHERE "person".email_addresses::JSON -> 'items'::TEXT ILIKE '%sam%'`
+      ]
+    },
+    {
+      title: 'multiple jsonb operator expr',
+      sql: [
+        `select '{"a": {"b":{"c": "foo"}}}'::json#>'{a,b}', '{"a":1, "b":2}'::jsonb @> '{"b":2}'::jsonb, '{"a":1, "b":2}'::jsonb ? 'b', '{"a":1, "b":2, "c":3}'::jsonb ?| array['b', 'c']
+, '["a", "b"]'::jsonb ?& array['a', 'b'], '["a", "b"]'::jsonb || '["c", "d"]'::jsonb, '{"a": "b"}'::jsonb - 'a', '["a", "b"]'::jsonb - 1, '["a", {"b":1}]'::jsonb #- '{1,b}'`,
+        `SELECT '{"a": {"b":{"c": "foo"}}}'::JSON #> '{a,b}', '{"a":1, "b":2}'::JSONB @> '{"b":2}'::JSONB, '{"a":1, "b":2}'::JSONB ? 'b', '{"a":1, "b":2, "c":3}'::JSONB ?| ARRAY['b','c'], '["a", "b"]'::JSONB ?& ARRAY['a','b'], '["a", "b"]'::JSONB || '["c", "d"]'::JSONB, '{"a": "b"}'::JSONB - 'a', '["a", "b"]'::JSONB - 1, '["a", {"b":1}]'::JSONB #- '{1,b}'`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
