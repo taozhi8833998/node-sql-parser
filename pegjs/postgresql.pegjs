@@ -4294,11 +4294,11 @@ unary_operator
   = '!' / '-' / '+' / '~'
 
 jsonb_expr
-  = head:primary __ tail: (__ ('@>' / '<@') __ column_list_item)+ {
+  = head:primary __ tail: (__ ('@>' / '<@') __ primary)+ {
     // => binary_expr
     return createBinaryExprChain(head, tail)
   }
-  / head:primary __ tail: (__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __  literal)* {
+  / head:primary __ tail: (__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __  primary)* {
     // => primary | binary_expr
     if (!tail || tail.length === 0) return head
     return createBinaryExprChain(head, tail)
@@ -4908,7 +4908,7 @@ cast_expr
   / e:(column_ref_quoted / literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref_array_index / param) __ c:cast_double_colon? {
     /* => ({
         type: 'cast';
-        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
+        expr: literal | jsonb_expr | aggr_func | func_call | case_expr | interval_expr | column_ref | param
           | expr;
         keyword: 'cast';
       } & cast_double_colon)
