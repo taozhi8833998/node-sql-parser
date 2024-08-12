@@ -1624,6 +1624,13 @@ describe('Postgres', () => {
         `SELECT '{"a": {"b":{"c": "foo"}}}'::JSON #> '{a,b}', '{"a":1, "b":2}'::JSONB @> '{"b":2}'::JSONB, '{"a":1, "b":2}'::JSONB ? 'b', '{"a":1, "b":2, "c":3}'::JSONB ?| ARRAY['b','c'], '["a", "b"]'::JSONB ?& ARRAY['a','b'], '["a", "b"]'::JSONB || '["c", "d"]'::JSONB, '{"a": "b"}'::JSONB - 'a', '["a", "b"]'::JSONB - 1, '["a", {"b":1}]'::JSONB #- '{1,b}'`
       ]
     },
+    {
+      title: 'timestamptz data type',
+      sql: [
+        'CREATE TABLE "Users" (created_at timestamptz);',
+        'CREATE TABLE "Users" (created_at TIMESTAMPTZ)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
