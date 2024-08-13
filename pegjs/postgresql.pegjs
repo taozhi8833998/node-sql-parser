@@ -5253,7 +5253,8 @@ KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
 KW_ROWS     = "ROWS"i     !ident_start { return 'ROWS'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
-KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
+KW_TIMESTAMP = "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
+KW_TIMESTAMPTZ = "TIMESTAMPTZ"i!ident_start { return 'TIMESTAMPTZ'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
 KW_USER     = "USER"i     !ident_start { return 'USER'; }
 KW_UUID     = "UUID"i     !ident_start { return 'UUID'; }
@@ -5673,8 +5674,9 @@ timezone
   }
 
 time_type
-  = t:(KW_TIME / KW_TIMESTAMP) __ LPAREN __ l:[0-9]+ __ RPAREN __ tz:timezone? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true, suffix: tz }; }
+  = t:(KW_TIME / KW_TIMESTAMP / KW_TIMESTAMPTZ) __ LPAREN __ l:[0-9]+ __ RPAREN __ tz:timezone? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true, suffix: tz }; }
   / t:(KW_TIME / KW_TIMESTAMP) __ tz:timezone? { /* =>  data_type */  return { dataType: t, suffix: tz }; }
+  / t:KW_TIMESTAMPTZ { /* =>  data_type */  return { dataType: t }; }
 
 datetime_type
   = t:(KW_DATE / KW_DATETIME) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
