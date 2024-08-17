@@ -3133,11 +3133,12 @@ column_list
   = head:column tail:(__ COMMA __ column)* {
       return createList(head, tail);
     }
-ident_without_kw_type
+ident_name_type
   = n:ident_name {
     return { type: 'default', value: n }
   }
-  / quoted_ident_type
+ident_without_kw_type
+  = ident_name_type / quoted_ident_type
 
 ident_type
   = name:ident_name !{ return reservedMap[name.toUpperCase()] === true; } {
@@ -4171,7 +4172,7 @@ proc_primary
     }
 
 proc_func_name
-  = dt:ident_without_kw_type tail:(__ DOT __ ident_without_kw_type)? {
+  = dt:(ident_name_type / backticks_quoted_ident) tail:(__ DOT __ ((ident_name_type / backticks_quoted_ident)))? {
       const result = { name: [dt] }
       if (tail !== null) {
         result.schema = dt

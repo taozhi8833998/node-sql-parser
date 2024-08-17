@@ -2852,6 +2852,10 @@ column_list
   = head:column tail:(__ COMMA __ column)* {
       return createList(head, tail);
     }
+ident_name_type
+  = n:ident_name {
+    return { type: 'default', value: n }
+  }
 ident_without_kw_type
   = n:ident_name {
     return { type: 'default', value: n }
@@ -3857,7 +3861,7 @@ proc_primary
     }
 
 proc_func_name
-  = dt:ident_without_kw_type tail:(__ DOT __ ident_without_kw_type)? {
+  = dt:(ident_name_type / backticks_quoted_ident) tail:(__ DOT __ ((ident_name_type / backticks_quoted_ident)))? {
       const result = { name: [dt] }
       if (tail !== null) {
         result.schema = dt

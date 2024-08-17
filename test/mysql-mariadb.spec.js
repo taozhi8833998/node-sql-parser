@@ -1084,6 +1084,16 @@ describe('mysql', () => {
           "ALTER TABLE `a` MODIFY COLUMN `b` VARCHAR(200) GENERATED ALWAYS AS (json_unquote(json_extract(`json`, '$.b'))) STORED COMMENT 'some comment'"
         ]
       },
+      {
+        title: 'function name can be wrapped with brackets only',
+        sql: [
+          `insert into \`test\` (\`t1\`,\`t2\`,\`t3\`,\`t4\`,\`t5\`) values
+            (0,1,334,'21.42','   '),
+            (0,1,335,'23.lua',' select(\\'#\\', ...)'),
+            (0,1,334,'21.42','   ');`,
+          "INSERT INTO `test` (t1, t2, t3, t4, t5) VALUES (0,1,334,'21.42','   '), (0,1,335,'23.lua',' select(\\'#\\', ...)'), (0,1,334,'21.42','   ')"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
