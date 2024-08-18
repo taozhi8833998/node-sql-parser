@@ -141,11 +141,13 @@ describe('sqlite', () => {
     expect(getParsedSql(sql)).to.be.equal('SELECT * FROM "a" UNION DISTINCT SELECT * FROM "b"')
   })
 
-  it('should support keyword as column name in create table sql', () => {
+  it('should support keyword as column name in sql', () => {
     let sql = 'CREATE TABLE IF NOT EXISTS "Test" (Id INTEGER NOT NULL PRIMARY KEY UNIQUE, like TEXT NOT NULL, Difficulty TEXT, percent real, PRIMARY KEY(Id));'
     expect(getParsedSql(sql)).to.be.equal('CREATE TABLE IF NOT EXISTS "Test" ("Id" INTEGER NOT NULL PRIMARY KEY UNIQUE, "like" TEXT NOT NULL, "Difficulty" TEXT, "percent" REAL, PRIMARY KEY ("Id"))')
     sql = "SELECT * from tb WHERE NOT EXISTS (SELECT * FROM tb WHERE field1 = 'c' AND field2 = d)"
     expect(getParsedSql(sql)).to.be.equal(`SELECT * FROM "tb" WHERE NOT EXISTS (SELECT * FROM "tb" WHERE "field1" = 'c' AND "field2" = "d")`)
+    sql = 'SELECT * FROM tb WHERE key="foo"'
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM "tb" WHERE "key" = "foo"')
   })
 
   it('should support sqlify autoincrement to other db', () => {
