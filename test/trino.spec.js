@@ -93,7 +93,21 @@ describe('trino', () => {
   })
   it('should throw error when star column in additive expr', () => {
     const sql = 'SELECT abc FROM tableA WHERE u BETWEEN * - * - * - * - * and 10 LIMIT 10'
-    expect(parser.astify.bind(parser, sql, opt)).to.throw('args could not be star column in additive expr')
+    expect(parser.astify.bind(parser, sql, { ...opt, parseOptions: { includeLocations: true }})).to.throw(JSON.stringify({
+      message: 'args could not be star column in additive expr',
+      loc: {
+        start: {
+          offset: 39,
+          line: 1,
+          column: 40,
+        },
+        end: {
+          offset: 57,
+          line: 1,
+          column: 58,
+        },
+      },
+    }))
   })
   it('should throw error when lambda expression is invalid', () => {
     let sql = 'SELECT numbers, transform(numbers, n -> max(n)) as squared_numbers FROM (VALUES (ARRAY[1, 2]),(ARRAY[3, 4]),(ARRAY[5, 6, 7])) AS t(numbers);'
