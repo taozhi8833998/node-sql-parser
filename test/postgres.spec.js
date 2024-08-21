@@ -1974,4 +1974,68 @@ describe('Postgres', () => {
       expect(fun).to.throw(`Expected "--", "/*", "\\"", [ \\t\\n\\r], or [A-Za-z_一-龥] but "'" found.`)
     })
   })
+  describe('pg parse speed', function () {
+    this.timeout(30)
+    const sql = `SELECT
+      "pr"."destination_currency" AS "currency",
+      "pr"."idempotency_key" AS "unqiueRequestId",
+      "pr"."status" AS "paymentRequestStatus",
+      "pr"."payment_date" AS "paymentDate",
+      "pr"."provider_system_reference_number" AS "providerSystemReferenceNumber",
+      "pr"."destination_amount" AS "destinationAmount",
+      "pr"."error" AS "error",
+      "pr"."source_id" AS "sourceId",
+      "pr"."source_type" AS "sourceType",
+      "pr"."client_legal_entity_id" AS "clientLegalEntityId",
+      "pr"."beneficiary_legal_entity_id" AS "beneficiaryLegalEntityId",
+      "pr"."provider" AS "provider",
+      "txn"."created_at" AS "transactionCreatedAt",
+      "txn"."updated_at" AS "transactionUpdatedAt",
+      "txn"."provider_metadata" AS "providerMetadata",
+      "txn"."currency" AS "currency",
+      "txn"."amount" AS "amount",
+      "txn"."status" AS "status",
+      "txn"."type" AS "txnType",
+      "txn"."purpose_of_payment" AS "purposeOfPayment",
+      "txn"."client_reference" AS "clientReference",
+      "txn"."description" AS "transactionDescription",
+      pr.meta -> 'invoiceIds' AS "invoiceIds"
+  FROM
+      "public"."payment_request" "pr"
+      LEFT JOIN "public"."transaction" "txn" ON "txn"."payment_request_id" = "pr"."id"
+  WHERE
+      "pr"."source_id" IN ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50)
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+      OR pr.meta::jsonb -> 'invoiceIds' @> '["c937cd8c-65bc-4006-9413-dde7b43c61b6"]'
+  ORDER BY
+      "pr"."created_at" DESC`
+    const ast = parser.astify(sql, opt)
+    expect(ast).to.be.an('object')
+  })
 })

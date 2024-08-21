@@ -3934,11 +3934,8 @@ unary_operator
   = '!' / '-' / '+' / '~'
 
 jsonb_expr
-  = head:primary tail:(__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW) __  primary)* {
-    if (!tail || tail.length === 0) return head
-    return createBinaryExprChain(head, tail)
-  }
-  / head:primary tail:(__ ('@>' / '<@') __ primary)* {
+  = head:primary __ tail: (__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW / '@>' / '<@') __  primary)* {
+    // => primary | binary_expr
     if (!tail || tail.length === 0) return head
     return createBinaryExprChain(head, tail)
   }
