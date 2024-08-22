@@ -408,6 +408,13 @@ describe('snowflake', () => {
         'SELECT "user_id", "Limits" AS "Limit" FROM "tableName"',
       ]
     },
+    {
+      title: 'in op right expr',
+      sql: [
+        'SELECT POSITION("3" IN split_part("W3Schools|com", "|", 11)) AS MatchPosition;',
+        'SELECT POSITION("3" IN split_part("W3Schools|com", "|", 11)) AS "MatchPosition"'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo

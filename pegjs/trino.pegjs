@@ -3318,7 +3318,7 @@ in_op_right
     // => {op: in_op; right: expr_list | var_decl | literal_string; }
       return { op: op, right: l };
     }
-  / op:in_op __ e:(var_decl / literal_string) {
+ / op:in_op __ e:(var_decl / literal_string / expr) {
     // => IGNORE
       return { op: op, right: e };
     }

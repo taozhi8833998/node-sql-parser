@@ -3110,7 +3110,7 @@ case_when_then_list
   }
 
 case_when_then
-  = KW_WHEN __ condition:or_and_where_expr __ KW_THEN __ result:expr {
+  = KW_WHEN __ condition:or_and_where_expr __ KW_THEN __ result:or_and_where_expr {
     // => { type: 'when'; cond: binary_expr; result: expr; }
     return {
       type: 'when',
@@ -3334,7 +3334,7 @@ in_op_right
     // => {op: in_op; right: expr_list | var_decl | literal_string; }
       return { op: op, right: l };
     }
-  / op:in_op __ e:(var_decl / literal_string) {
+  / op:in_op __ e:(var_decl / literal_string / expr) {
     // => IGNORE
       return { op: op, right: e };
     }
