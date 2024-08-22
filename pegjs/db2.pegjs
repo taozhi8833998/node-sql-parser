@@ -1777,7 +1777,7 @@ in_op_right
   = op:in_op __ LPAREN  __ l:expr_list __ RPAREN {
       return { op: op, right: l };
     }
- / op:in_op __ e:(var_decl / literal_string / expr) {
+/ op:in_op __ e:(var_decl / literal_string / func_call) {
       return { op: op, right: e };
     }
 
