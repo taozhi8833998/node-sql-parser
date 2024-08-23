@@ -2424,7 +2424,7 @@ table_base
         ...getLocationObject(),
       };
     }
-  / LPAREN __ t:table_name __ r:RPAREN __ alias:alias_clause? {
+  / LPAREN __ t:table_name __ alias:alias_clause? __ r:RPAREN {
     const parentheses =  true
       if (t.type === 'var') {
         t.as = alias;
