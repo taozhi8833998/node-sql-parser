@@ -1905,6 +1905,13 @@ describe('Postgres', () => {
           `SELECT * FROM jsonb_to_recordset('[{"amount":23, "currency": "INR"}]'::JSONB) AS l_amount(amount DECIMAL, currency TEXT)`
         ]
       },
+      {
+        title: 'create scheme',
+        sql: [
+          'CREATE SCHEMA public;',
+          'CREATE SCHEMA public'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
