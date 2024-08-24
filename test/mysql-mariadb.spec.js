@@ -1094,6 +1094,13 @@ describe('mysql', () => {
           "INSERT INTO `test` (t1, t2, t3, t4, t5) VALUES (0,1,334,'21.42','   '), (0,1,335,'23.lua',' select(\\'#\\', ...)'), (0,1,334,'21.42','   ')"
         ]
       },
+      {
+        title: 'from table alias in parentheses',
+        sql: [
+          "SELECT DISTINCT `pv`.`text` as product_page_text, `pv`.`lp_url`, `pp`.`short_label` as product_item_text, `pp`.`id` as promoid, `pv`.`id` as visibility_id, `pp`.`tnc` FROM (`product_promotion` pp) JOIN `promotion_visibility` pv ON `pv`.`promotion_id`=`pp`.`id` WHERE `pv`.`property` = 'app_product_page_text' AND `pp`.`start_date` < 1724305037 AND `pp`.`end_date` > 1724305037 AND `pv`.`is_active` = 1 AND `pp`.`is_active` = 1 AND `pp`.`id` IN ('5725,8560') ORDER BY `pp`.`priority` DESC",
+          "SELECT DISTINCT `pv`.`text` AS `product_page_text`, `pv`.`lp_url`, `pp`.`short_label` AS `product_item_text`, `pp`.`id` AS `promoid`, `pv`.`id` AS `visibility_id`, `pp`.`tnc` FROM (`product_promotion` AS `pp`) INNER JOIN `promotion_visibility` AS `pv` ON `pv`.`promotion_id` = `pp`.`id` WHERE `pv`.`property` = 'app_product_page_text' AND `pp`.`start_date` < 1724305037 AND `pp`.`end_date` > 1724305037 AND `pv`.`is_active` = 1 AND `pp`.`is_active` = 1 AND `pp`.`id` IN ('5725,8560') ORDER BY `pp`.`priority` DESC",
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

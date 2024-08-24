@@ -133,8 +133,7 @@ function tableToSQL(tableInfo) {
     }
   }
   tableName = [toUpper(prefixStr), tableName, toUpper(suffix)].filter(hasVal).join(' ')
-  let str = [serverName, database, schemaStr, tableName].filter(hasVal).join('.')
-  if (tableInfo.parentheses) str = `(${str})`
+  const str = [serverName, database, schemaStr, tableName].filter(hasVal).join('.')
   const result = [str]
   if (tablesample) {
     const tableSampleSQL = ['TABLESAMPLE', exprToSQL(tablesample.expr), literalToSQL(tablesample.repeatable)].filter(hasVal).join(' ')
@@ -142,7 +141,8 @@ function tableToSQL(tableInfo) {
   }
   result.push(temporalTableToSQL(temporal_table), commonOptionConnector('AS', identifierToSql, as), operatorToSQL(operator))
   if (table_hint) result.push(toUpper(table_hint.keyword), `(${table_hint.expr.map(tableHintToSQL).filter(hasVal).join(', ')})`)
-  return result.filter(hasVal).join(' ')
+  const tableSQL = result.filter(hasVal).join(' ')
+  return tableInfo.parentheses ? `(${tableSQL})` : tableSQL
 }
 
 /**
