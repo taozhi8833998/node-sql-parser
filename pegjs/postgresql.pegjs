@@ -379,15 +379,15 @@ create_db_stmt
   = a:KW_CREATE __
     k:(KW_DATABASE / KW_SCHEMA) __
     ife:if_not_exists_stmt? __
-    t:ident_without_kw_type __
+    t:proc_func_name __
     c:create_db_definition? {
       /*
       export type create_db_stmt_t = {
         type: 'create',
         keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
-        database?: { db: string, schema: string };
-        schema?: { db: string, schema: string };
+        database?: { db: ident_without_kw_type, schema: [ident_without_kw_type] };
+        schema?: { db: ident_without_kw_type, schema: [ident_without_kw_type] };
         create_definitions?: create_db_definition
       }
       => AstStatement<create_db_stmt_t>
@@ -400,7 +400,6 @@ create_db_stmt
           type: a[0].toLowerCase(),
           keyword,
           if_not_exists:ife,
-          replace: or && 'or replace',
           [keyword]: { db: t.schema, schema: t.name },
           create_definitions: c,
         }

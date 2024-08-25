@@ -489,6 +489,7 @@ create_aggregate_stmt
         ast: {
           type: 'create',
           keyword: 'aggregate',
+          replace: or && 'or replace',
           name: { schema: s.db, name: s.table },
           args: {
             parentheses: true,
