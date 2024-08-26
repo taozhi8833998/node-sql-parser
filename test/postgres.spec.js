@@ -1912,6 +1912,16 @@ describe('Postgres', () => {
           'CREATE SCHEMA public'
         ]
       },
+      {
+        title: 'create constraint with quoted name',
+        sql: [
+          `CREATE TABLE "User" (
+              "id" SERIAL NOT NULL,
+              CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+          );`,
+          'CREATE TABLE "User" ("id" SERIAL NOT NULL, CONSTRAINT "User_pkey" PRIMARY KEY ("id"))'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
