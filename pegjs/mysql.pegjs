@@ -2274,12 +2274,13 @@ column_list_item
         ...getLocationObject(),
       };
     }
-  / table:(ident __ DOT)? __ STAR {
+  / tbl:(ident __ DOT)? __ STAR {
+      const table = tbl && tbl[0] || null
       columnList.add(`select::${table}::(.*)`);
       return {
         expr: {
           type: 'column_ref',
-          table: table && table[0] || null,
+          table,
           column: '*'
         },
         as: null,
@@ -3116,6 +3117,19 @@ column_ref
         type: 'column_ref',
         table: tbl,
         column: col,
+        ...getLocationObject(),
+      };
+    }
+  / tbl:(ident __ DOT)? __ STAR {
+    const table =  tbl && tbl[0] || null
+      columnList.add(`select::${table}::(.*)`);
+      return {
+        expr: {
+          type: 'column_ref',
+          table,
+          column: '*'
+        },
+        as: null,
         ...getLocationObject(),
       };
     }
