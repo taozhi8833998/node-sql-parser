@@ -14,6 +14,7 @@
     'CASE': true,
     'CREATE': true,
     'CONTAINS': true,
+    'CONSTRAINT': true,
     'CURRENT_DATE': true,
     'CURRENT_TIME': true,
     'CURRENT_TIMESTAMP': true,
