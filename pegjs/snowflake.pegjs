@@ -50,7 +50,7 @@
 
     'LEFT': true,
     'LIKE': true,
-    'LIMIT': true,
+    'LIMIT': false,
 
     'NOT': true,
     'NULL': true,

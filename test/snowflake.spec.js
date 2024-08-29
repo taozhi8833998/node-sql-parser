@@ -415,6 +415,13 @@ describe('snowflake', () => {
         'SELECT POSITION("3" IN split_part("W3Schools|com", "|", 11)) AS "MatchPosition"'
       ]
     },
+    {
+      title: 'limit is not reserved keyword',
+      sql: [
+        'select * from tb where wins>=limit',
+        'SELECT * FROM "tb" WHERE "wins" >= "limit"',
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
