@@ -2508,7 +2508,8 @@ COMMA     = ','
 STAR      = '*'
 LPAREN    = '('
 RPAREN    = ')'
-
+LANGLE_BRACKET = '<'
+RANGLE_BRACKET = '>'
 LBRAKE    = '['
 RBRAKE    = ']'
 
@@ -2738,6 +2739,16 @@ array_type
     return {
       dataType: t,
       parentheses: true,
+      expr: {
+        type: 'expr_list',
+        value: a.map(d => ({ type: 'datatype', ...d }))
+      },
+    }
+  }
+  / t:KW_ARRAY __ LANGLE_BRACKET __ a:data_type_list __ RANGLE_BRACKET {
+    return {
+      dataType: t,
+      angle_brackets: true,
       expr: {
         type: 'expr_list',
         value: a.map(d => ({ type: 'datatype', ...d }))

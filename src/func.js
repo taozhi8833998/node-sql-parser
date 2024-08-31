@@ -29,10 +29,11 @@ function arrayDimensionToSymbol(target) {
 
 function castToSQL(expr) {
   const { target, expr: expression, keyword, symbol, as: alias, parentheses: outParentheses } = expr
-  const { length, dataType, parentheses, quoted, scale, suffix: dataTypeSuffix, expr: targetExpr } = target
+  const { angle_brackets: angleBrackets, length, dataType, parentheses, quoted, scale, suffix: dataTypeSuffix, expr: targetExpr } = target
   let str = targetExpr ? exprToSQL(targetExpr) : ''
   if (length != null) str = scale ? `${length}, ${scale}` : length
   if (parentheses) str = `(${str})`
+  if (angleBrackets) str = `<${str}>`
   if (dataTypeSuffix && dataTypeSuffix.length) str += ` ${dataTypeSuffix.map(literalToSQL).join(' ')}`
   let prefix = exprToSQL(expression)
   let symbolChar = '::'
