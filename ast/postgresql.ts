@@ -52,8 +52,8 @@ export type create_db_stmt_t = {
         type: 'create',
         keyword: 'database' | 'schema',
         if_not_exists?: 'if not exists',
-        database?: { db: string, schema: string };
-        schema?: { db: string, schema: string };
+        database?: { db: ident_without_kw_type, schema: [ident_without_kw_type] };
+        schema?: { db: ident_without_kw_type, schema: [ident_without_kw_type] };
         create_definitions?: create_db_definition
       }
 
@@ -1200,7 +1200,7 @@ export type unary_expr_or_primary = jsonb_expr | unary_expr;
 
 export type unary_operator = "!" | "-" | "+" | "~";
 
-export type jsonb_expr = binary_expr | primary | binary_expr;
+export type jsonb_expr = primary | binary_expr;
 
 export type string_constants_escape = { type: 'origin'; value: string; };
 
@@ -1354,7 +1354,7 @@ export type cast_expr = {
         keyword: 'cast';
       } & cast_double_colon | ({
         type: 'cast';
-        expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
+        expr: literal | jsonb_expr | aggr_func | func_call | case_expr | interval_expr | column_ref | param
           | expr;
         keyword: 'cast';
       } & cast_double_colon);
@@ -1650,6 +1650,8 @@ type KW_TIME = never;
 
 type KW_TIMESTAMP = never;
 
+type KW_TIMESTAMPTZ = never;
+
 type KW_TRUNCATE = never;
 
 type KW_USER = never;
@@ -1916,6 +1918,8 @@ export type numeric_type = data_type;
 export type oid_type = data_type;
 
 export type timezone = string[];;
+
+
 
 
 
