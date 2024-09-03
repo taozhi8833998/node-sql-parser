@@ -50,7 +50,7 @@
 
     'LEFT': true,
     'LIKE': true,
-    'LIMIT': false,
+    'LIMIT': true,
 
     'NOT': true,
     'NULL': true,
@@ -3248,7 +3248,7 @@ comparison_op_right
   / regex_op_right
 
 arithmetic_op_right
-  = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
+  = l:(__ arithmetic_comparison_operator __ (additive_expr / column_without_kw_type))+ {
     // => { type: 'arithmetic'; tail: any }
       return { type: 'arithmetic', tail: l };
     }
@@ -3542,6 +3542,12 @@ column_without_kw
   }
   / quoted_ident
 
+column_without_kw_type
+  = n:column_name {
+    return { type: 'default', value: n }
+  }
+  / quoted_ident_type
+  
 column
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { /* => string */ return name; }
   / quoted_ident

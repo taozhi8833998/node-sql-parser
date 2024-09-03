@@ -419,9 +419,16 @@ describe('snowflake', () => {
       title: 'limit is not reserved keyword',
       sql: [
         'select * from tb where wins>=limit',
-        'SELECT * FROM "tb" WHERE "wins" >= "limit"',
+        'SELECT * FROM "tb" WHERE "wins" >= limit',
       ]
     },
+    {
+      title: 'basic limit clause',
+      sql: [
+        'select * from tb limit 10',
+        'SELECT * FROM "tb" LIMIT 10',
+      ]
+    }
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
