@@ -1631,6 +1631,13 @@ describe('Postgres', () => {
         'CREATE TABLE "Users" (created_at TIMESTAMPTZ)'
       ]
     },
+    {
+      title: 'start transaction',
+      sql: [
+        'start transaction isolation level repeatable read, read only, not deferrable',
+        'START TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY, NOT DEFERRABLE'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

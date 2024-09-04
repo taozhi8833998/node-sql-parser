@@ -2661,20 +2661,13 @@ for_loop_stmt
   }
 transaction_stmt
   = k:('begin'i / 'commit'i / 'rollback'i) {
-    /* export interface transaction_stmt {
-        type: 'transaction';
-        expr: {
-          type: 'origin',
-          value: string
-        }
-      }
-      => AstStatement<transaction_stmt>
-     */
     return {
       type: 'transaction',
       expr: {
-        type: 'origin',
-        value: k
+        action: {
+          type: 'origin',
+          value: k
+        }
       }
     }
   }
