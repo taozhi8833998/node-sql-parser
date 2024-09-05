@@ -1101,6 +1101,13 @@ describe('mysql', () => {
           "SELECT DISTINCT `pv`.`text` AS `product_page_text`, `pv`.`lp_url`, `pp`.`short_label` AS `product_item_text`, `pp`.`id` AS `promoid`, `pv`.`id` AS `visibility_id`, `pp`.`tnc` FROM (`product_promotion` AS `pp`) INNER JOIN `promotion_visibility` AS `pv` ON `pv`.`promotion_id` = `pp`.`id` WHERE `pv`.`property` = 'app_product_page_text' AND `pp`.`start_date` < 1724305037 AND `pp`.`end_date` > 1724305037 AND `pv`.`is_active` = 1 AND `pp`.`is_active` = 1 AND `pp`.`id` IN ('5725,8560') ORDER BY `pp`.`priority` DESC",
         ]
       },
+      {
+        title: 'text data type with length',
+        sql: [
+          'CREATE TABLE `ys_map_info` (`detail` TEXT(65535));',
+          'CREATE TABLE `ys_map_info` (`detail` TEXT(65535))'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

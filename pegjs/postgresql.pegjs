@@ -5729,11 +5729,15 @@ character_varying
     return 'CHARACTER VARYING'
   }
 character_string_type
-  = t:(KW_CHAR / KW_VARCHAR / character_varying) __ LPAREN __ l:[0-9]+ __ RPAREN {
+  = t:(KW_CHAR / KW_VARCHAR / character_varying) num:(__ LPAREN __ [0-9]+ __ RPAREN)? {
     // => data_type
-    return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true };
+    const result = { dataType: t }
+    if (num) {
+      result.length = parseInt(num[3].join(''), 10)
+      result.parentheses = true
+    }
+    return result
   }
-  / t:(KW_CHAR / character_varying / KW_VARCHAR) { /* =>  data_type */ return { dataType: t }; }
 
 numeric_type_suffix
   = un: KW_UNSIGNED? __ ze: KW_ZEROFILL? {
@@ -5758,13 +5762,27 @@ timezone
   }
 
 time_type
-  = t:(KW_TIME / KW_TIMESTAMP / KW_TIMESTAMPTZ) __ LPAREN __ l:[0-9]+ __ RPAREN __ tz:timezone? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true, suffix: tz }; }
-  / t:(KW_TIME / KW_TIMESTAMP) __ tz:timezone? { /* =>  data_type */  return { dataType: t, suffix: tz }; }
-  / t:KW_TIMESTAMPTZ { /* =>  data_type */  return { dataType: t }; }
+  = t:(KW_TIME / KW_TIMESTAMP / KW_TIMESTAMPTZ) num:(__ LPAREN __ [0-9]+ __ RPAREN )? __ tz:timezone? {
+    /* =>  data_type */
+    const result = { dataType: t }
+    if (num) {
+      result.length = parseInt(num[3].join(''), 10)
+      result.parentheses = true
+    }
+    if (tz) result.suffix = tz
+    return result
+  }
 
 datetime_type
-  = t:(KW_DATE / KW_DATETIME) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
-  / t:(KW_DATE / KW_DATETIME) { /* =>  data_type */  return { dataType: t }; }
+  = t:(KW_DATE / KW_DATETIME) num:(__ LPAREN __ [0-9]+ __ RPAREN)? {
+    /* =>  data_type */
+    const result = { dataType: t }
+    if (num) {
+      result.length = parseInt(num[3].join(''), 10)
+      result.parentheses = true
+    }
+    return result
+  }
   / time_type
 
 enum_type
@@ -5787,8 +5805,10 @@ serial_interval_type
   = t:(KW_SERIAL / KW_INTERVAL) { /* =>  data_type */  return { dataType: t }; }
 
 text_type
-  = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) LBRAKE __ RBRAKE { /* =>  data_type */ return { dataType: `${t}[]` }}
-  / t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) { /* =>  data_type */ return { dataType: t }}
+  = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) s:(LBRAKE __ RBRAKE)? {
+    /* =>  data_type */
+    return { dataType: `${t}${s ? '[]' : ''}` }
+  }
 
 uuid_type
   = t:KW_UUID {/* =>  data_type */  return { dataType: t }}
