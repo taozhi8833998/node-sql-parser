@@ -428,7 +428,19 @@ describe('snowflake', () => {
         'select * from tb limit 10',
         'SELECT * FROM "tb" LIMIT 10',
       ]
-    }
+    },
+    {
+      title: 'over partition after function',
+      sql: [
+        `select
+          mode(name) OVER (
+            partition by
+              id
+          ) most_frequent_name
+          from airbnb.staging_test1_montara1_com.raw_hosts h`,
+        'SELECT mode("name") OVER (PARTITION BY "id") AS "most_frequent_name" FROM "airbnb"."staging_test1_montara1_com"."raw_hosts" AS "h"'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
