@@ -3963,6 +3963,14 @@ data_type
   / blob_type
   / geometry_type
 
+data_type_size
+  = LPAREN __ l:[0-9]+ __ RPAREN __ s:numeric_type_suffix? {
+    return {
+      length: parseInt(l.join(''), 10),
+      parentheses: true,
+      suffix: s,
+    };
+  }
 boolean_type
   = 'boolean'i { return { dataType: 'BOOLEAN' }; }
 
@@ -3970,18 +3978,20 @@ blob_type
   = b:('blob'i / 'tinyblob'i / 'mediumblob'i / 'longblob'i) { return { dataType: b.toUpperCase() }; }
 
 binary_type
-  = t:(KW_BINARY / KW_VARBINARY) __ LPAREN __ l:[0-9]+ __ RPAREN {
-    return { dataType: t, length: parseInt(l.join(''), 10) };
+  = t:(KW_BINARY / KW_VARBINARY) __ num:data_type_size? {
+    return { dataType: t, ...(num || {}) }
   }
-  / t:KW_BINARY { return { dataType: t }; }
-
 
 character_string_type
-  = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN __ s:('ARRAY'i)? {
-    return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true, suffix: s && ['ARRAY']  };
+  = t:(KW_CHAR / KW_VARCHAR) num:(__ LPAREN __ [0-9]+ __ RPAREN __ ('ARRAY'i)?)? {
+    const result = { dataType: t }
+    if (num) {
+      result.length = parseInt(num[3].join(''), 10)
+      result.parentheses = true
+      result.suffix = num[7] && ['ARRAY']
+    }
+    return result
   }
-  / t:KW_CHAR { return { dataType: t }; }
-  / t:KW_VARCHAR { return { dataType: t }; }
 
 numeric_type_suffix
   = un: KW_UNSIGNED? __ ze: KW_ZEROFILL? {
@@ -3996,8 +4006,15 @@ numeric_type
   / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_MEDIUMINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE) __ s:numeric_type_suffix? __{ return { dataType: t, suffix: s }; }
 
 datetime_type
-  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP / KW_YEAR) __ LPAREN __ l:[0-6] __ RPAREN __ s:numeric_type_suffix? { return { dataType: t, length: parseInt(l, 10), parentheses: true }; }
-  / t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP / KW_YEAR) { return { dataType: t }; }
+  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP / KW_YEAR) num:(__ LPAREN __ [0-6] __ RPAREN __ numeric_type_suffix?)? {
+    const result = { dataType: t }
+    if (num) {
+      result.length = parseInt(num[3], 10)
+      result.parentheses = true
+      result.suffix = num[7]
+    }
+    return result
+  }
 
 enum_type
   = t:(KW_ENUM / KW_SET) __ e:value_item {
@@ -4007,11 +4024,14 @@ enum_type
       expr: e
     }
   }
+
 json_type
   = t:KW_JSON { return { dataType: t }; }
 
 text_type
-  = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) { return { dataType: t }}
+  = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) num:data_type_size? {
+    return { dataType: t, ...(num || {}) }
+  }
 
 geometry_type
   = t:(KW_GEOMETRY / KW_POINT / KW_LINESTRING / KW_POLYGON / KW_MULTIPOINT / KW_MULTILINESTRING / KW_MULTIPOLYGON / KW_GEOMETRYCOLLECTION ) { return { dataType: t }}
