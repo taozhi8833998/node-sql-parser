@@ -2948,13 +2948,68 @@ for_loop_stmt
       }
     }
   }
+transaction_mode_isolation_level
+  = 'SERIALIZABLE'i {
+    // => { type: 'origin'; value: string; }
+    return {
+      type: 'origin',
+      value: 'serializable'
+    }
+  }
+  / 'REPEATABLE'i __ 'READ'i {
+    // => ignore
+    return {
+      type: 'origin',
+      value: 'repeatable read'
+    }
+  }
+  / 'READ'i __ e:('COMMITTED'i / 'UNCOMMITTED'i) {
+    // => ignore
+    return {
+      type: 'origin',
+      value: `read ${e.toLowerCase()}`
+    }
+  }
+  
+transaction_mode
+  = 'ISOLATION'i __ 'LEVEL'i __ l:transaction_mode_isolation_level {
+    // => { type: 'origin'; value: string; }
+    return {
+      type: 'origin',
+      value: `isolation level ${l.value}`
+    }
+  }
+  / 'READ'i __ e:('WRITE'i / 'ONLY'i) {
+    // => ignore
+    return {
+      type: 'origin',
+      value: `read ${e.toLowerCase()}`
+    }
+  }
+  / n:KW_NOT? __ 'DEFERRABLE'i {
+    // => ignore
+    return {
+      type: 'origin',
+      value: n ? 'not deferrable' : 'deferrable'
+    }
+  }
+
+transaction_mode_list
+  = head: transaction_mode tail:(__ COMMA __ transaction_mode)* {
+    // => transaction_mode[]
+    return createList(head, tail)
+  }
 transaction_stmt
-  = k:('begin'i / 'commit'i / 'rollback'i) {
+  = k:('commit'i / 'rollback'i) {
     /* export interface transaction_stmt_t {
         type: 'transaction';
         expr: {
-          type: 'origin',
-          value: string
+          action: {
+            type: 'origin',
+            value: string
+          };
+          keyword?: string;
+          modes?: transaction_mode[];
         }
       }
       => AstStatement<transaction_stmt_t>
@@ -2962,8 +3017,38 @@ transaction_stmt
     return {
       type: 'transaction',
       expr: {
-        type: 'origin',
-        value: k
+        action: {
+          type: 'origin',
+          value: k
+        },
+      }
+    }
+  }
+  / 'begin'i __ k:('WORK'i / 'TRANSACTION'i)? __ m:transaction_mode_list? {
+    // => ignore
+    return {
+      type: 'transaction',
+      expr: {
+        action: {
+          type: 'origin',
+          value: 'begin'
+        },
+        keyword: k,
+        modes: m
+      }
+    }
+  }
+  / 'start'i __ k:'transaction'i __ m:transaction_mode_list? {
+    // => ignore
+    return {
+      type: 'transaction',
+      expr: {
+        action: {
+          type: 'origin',
+          value: 'start'
+        },
+        keyword: k,
+        modes: m
       }
     }
   }
