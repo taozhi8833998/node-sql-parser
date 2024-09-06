@@ -3146,10 +3146,11 @@ convert_args
       ]
     }
   }
-  / c:proc_primary __ COMMA __ d:data_type {
+  / c:proc_primary __ COMMA __ d:(signedness / data_type) {
+    const dataType = typeof d === 'string' ? { dataType: d } : d
     return {
       type: 'expr_list',
-      value: [c, { type: 'datatype', ...d, }]
+      value: [c, { type: 'datatype', ...dataType, }]
     }
   }
   / c:or_and_where_expr __ KW_USING __ d:ident_name {
@@ -3320,7 +3321,7 @@ cast_expr
       expr: e,
       symbol: 'as',
       target: {
-        dataType: s + (t ? ' ' + t: '')
+        dataType: [s, t].filter(Boolean).join(' ')
       }
     };
   }
@@ -3491,7 +3492,7 @@ int
   = digits
   / digit:digit
   / op:("-" / "+" ) digits:digits { return op + digits; }
-   / op:("-" / "+" ) digit:digit { return op + digit; }
+  / op:("-" / "+" ) digit:digit { return op + digit; }
 
 frac
   = "." digits:digits? {
@@ -3994,7 +3995,7 @@ character_string_type
   }
 
 numeric_type_suffix
-  = un: KW_UNSIGNED? __ ze: KW_ZEROFILL? {
+  = un:signedness? __ ze: KW_ZEROFILL? {
     const result = []
     if (un) result.push(un)
     if (ze) result.push(ze)
