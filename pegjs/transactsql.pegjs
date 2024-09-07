@@ -2421,7 +2421,8 @@ column_ref
         obj.db = db[0]
         obj.schema = schema[0]
       }
-      columnList.add(`select::${[obj.db, obj.schema, obj.table].join('.')}::${col}`);
+      const fullTableName = [obj.db, obj.schema, obj.table].filter(Boolean).join('.') || 'null'
+      columnList.add(`select::${fullTableName}::${col}`);
       return {
         type: 'column_ref',
         ...obj,
@@ -2524,9 +2525,9 @@ ident_name_list
     return createList(head, tail)
   }
 
-ident_start = [A-Za-z_@#]
+ident_start = [A-Za-z_@#\u4e00-\u9fa5]
 
-ident_part  = [A-Za-z0-9_\-@$]
+ident_part  = [A-Za-z0-9_\-@$$\u4e00-\u9fa5\u00C0-\u017F]
 
 // to support column name like `cf1:name` in hbase
 column_part  = [A-Za-z0-9_:]
