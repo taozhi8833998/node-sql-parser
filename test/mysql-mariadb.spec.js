@@ -1108,6 +1108,13 @@ describe('mysql', () => {
           'CREATE TABLE `ys_map_info` (`detail` TEXT(65535))'
         ]
       },
+      {
+        title: 'covert to signed or unsigned',
+        sql: [
+          "SELECT * FROM `foo` WHERE CONVERT(REPLACE(id, '123', ''), SIGNED) > 0",
+          "SELECT * FROM `foo` WHERE CONVERT(REPLACE(`id`, '123', ''), SIGNED) > 0",
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
