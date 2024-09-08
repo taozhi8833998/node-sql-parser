@@ -3551,7 +3551,7 @@ ident_name
       return start + parts.join('');
     }
 
-ident_start = [A-Za-z_]
+ident_start = [A-Za-z_\u4e00-\u9fa5]
 
 ident_part  = [A-Za-z0-9_$\u0080-\uffff]
 

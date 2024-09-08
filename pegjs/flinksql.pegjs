@@ -2796,9 +2796,9 @@ ident_name
       return start + parts.join('');
     }
 
-ident_start = [A-Za-z_]
+ident_start = [A-Za-z_\u4e00-\u9fa5]
 
-ident_part  = [A-Za-z0-9_\-]
+ident_part  = [A-Za-z0-9_\-$\u4e00-\u9fa5\u00C0-\u017F]
 
 // to support column name like `cf1:name` in hbase
 column_part  = [A-Za-z0-9_]

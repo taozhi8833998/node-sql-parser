@@ -374,7 +374,21 @@ describe('transactsql', () => {
         'SELECT * INTO #temp_table FROM tableName',
         'SELECT * INTO [#temp_table] FROM [tableName]'
       ]
-    }
+    },
+    {
+      title: 'convert function',
+      sql: [
+        'SELECT	a.username FROM	users a WHERE	a.end_time = CONVERT(VARCHAR,getdate(),23)',
+        'SELECT [a].[username] FROM [users] AS [a] WHERE [a].[end_time] = CONVERT([VARCHAR], getdate(), 23)',
+      ]
+    },
+    {
+      title: 'column as chinese name',
+      sql: [
+        'SELECT	a.username 姓名 FROM	users a',
+        'SELECT [a].[username] AS [姓名] FROM [users] AS [a]'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
