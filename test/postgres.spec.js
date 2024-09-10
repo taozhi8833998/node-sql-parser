@@ -1638,6 +1638,13 @@ describe('Postgres', () => {
         'START TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY, NOT DEFERRABLE'
       ]
     },
+    {
+      title: 'create table as',
+      sql: [
+        'create table test as select 1',
+        'CREATE TABLE "test" AS SELECT 1'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
