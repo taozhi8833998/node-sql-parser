@@ -1999,6 +1999,35 @@ describe('Postgres', () => {
     it('should proc assign', () => {
       expect(procToSQL({stmt: {type: 'assign', left: {type: 'default', value: 'abc'}, keyword: '', right: {type: 'number', value: 123}, symbol: '='}})).to.be.equal('abc = 123')
     })
+    it('should has loc property', () => {
+      const sql = 'SELECT * FROM "company" WHERE NOT(company._id IS NULL)'
+      const opt = { database: 'postgresql', parseOptions: { includeLocations: true } }
+      const ast = parser.astify(sql, opt)
+      expect(ast.where.loc).to.be.eql({
+        "start": {
+          "offset": 30,
+          "line": 1,
+          "column": 31
+        },
+        "end": {
+          "offset": 54,
+          "line": 1,
+          "column": 55
+        }
+      })
+      expect(ast.where.args.value[0].loc).to.be.eql({
+        "start": {
+          "offset": 34,
+          "line": 1,
+          "column": 35
+        },
+        "end": {
+          "offset": 53,
+          "line": 1,
+          "column": 54
+        }
+      })
+    })
     it('should throw error', () => {
       const sql = "select 1 as 'one'"
       const fun = parser.astify.bind(parser, sql, opt)
