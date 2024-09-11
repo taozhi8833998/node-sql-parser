@@ -1936,6 +1936,13 @@ describe('Postgres', () => {
           'CREATE TABLE "User" ("id" SERIAL NOT NULL, CONSTRAINT "User_pkey" PRIMARY KEY ("id"))'
         ]
       },
+      {
+        title: 'reserved keyword as column name',
+        sql: [
+          'select meeting.end from meeting',
+          'SELECT "meeting".end FROM "meeting"'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
