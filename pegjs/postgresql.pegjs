@@ -4812,6 +4812,7 @@ trim_func_clause
         type: 'function',
         name: { name: [{ type: 'origin', value: 'trim' }] },
         args,
+        ...getLocationObject(),
     };
   }
 
@@ -4826,7 +4827,9 @@ tablefunc_clause
           type: 'function',
           name: { name: [{ type: 'default', value: d[2] }]},
           args: { type: 'expr_list', value: d[6].map(v => ({ ...v, type: 'column_definition' })) },
-        }
+          ...getLocationObject(),
+      },
+      ...getLocationObject(),
     }
   }
 
@@ -4839,7 +4842,8 @@ func_call
         type: 'function',
         name: { name: [{ type: 'default', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
-        suffix: z
+        suffix: z,
+        ...getLocationObject(),
       };
     }
   / name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
@@ -4848,7 +4852,8 @@ func_call
         type: 'function',
         name: { name: [{ type: 'origin', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
-        over: bc
+        over: bc,
+        ...getLocationObject(),
       };
     }
   / extract_func
@@ -4857,7 +4862,8 @@ func_call
     return {
         type: 'function',
         name: { name: [{ type: 'origin', value: f }] },
-        over: up
+        over: up,
+        ...getLocationObject(),
     }
   }
   / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
@@ -4866,7 +4872,8 @@ func_call
       return {
         type: 'function',
         name: name,
-        args: l ? l: { type: 'expr_list', value: [] }
+        args: l ? l: { type: 'expr_list', value: [] },
+        ...getLocationObject(),
       };
     }
 
@@ -4884,7 +4891,8 @@ extract_func
           field: f,
           cast_type: t,
           source: s,
-        }
+        },
+        ...getLocationObject(),
     }
   }
   / kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ s:expr __ RPAREN {
@@ -4894,7 +4902,8 @@ extract_func
         args: {
           field: f,
           source: s,
-        }
+        },
+        ...getLocationObject(),
     }
   }
 
@@ -5598,7 +5607,8 @@ proc_func_call
         args: {
           type: 'expr_list',
           value: l
-        }
+        },
+        ...getLocationObject(),
       };
     }
 

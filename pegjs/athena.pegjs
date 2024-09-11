@@ -953,7 +953,8 @@ call_stmt
       ast: {
         type: 'call',
         expr: e
-      }
+      },
+      ...getLocationObject(),
     }
   }
 
@@ -2044,7 +2045,8 @@ func_call
         type: 'function',
         name: { name: [{ type: 'origin', value: name }] },
         args: l ? l: { type: 'expr_list', value: [] },
-        over: bc
+        over: bc,
+        ...getLocationObject(),
       };
     }
   / extract_func
@@ -2052,7 +2054,8 @@ func_call
     return {
         type: 'function',
         name: { name: [{ type: 'origin', value: f }] },
-        over: up
+        over: up,
+        ...getLocationObject(),
     }
   }
   / name:(KW_DATE / KW_TIME / KW_TIMESTAMP / 'AT TIME ZONE'i) __ l:or_and_where_expr? __ bc:over_partition? {
@@ -2063,6 +2066,7 @@ func_call
         args: l ? l: { type: 'expr_list', value: [] },
         over: bc,
         args_parentheses: false,
+        ...getLocationObject(),
       };
   }
   / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
@@ -2071,7 +2075,8 @@ func_call
         type: 'function',
         name: name,
         args: l ? l: { type: 'expr_list', value: [] },
-        over: bc
+        over: bc,
+        ...getLocationObject(),
       };
     }
 extract_filed
@@ -2088,7 +2093,8 @@ extract_func
           field: f,
           cast_type: t,
           source: s,
-        }
+        },
+        ...getLocationObject(),
     }
   }
   / kw:KW_EXTRACT __ LPAREN __ f:extract_filed __ KW_FROM __ s:expr __ RPAREN {
@@ -2098,7 +2104,8 @@ extract_func
         args: {
           field: f,
           source: s,
-        }
+        },
+        ...getLocationObject(),
     }
   }
 scalar_time_func
@@ -2657,14 +2664,16 @@ proc_func_call
         args: {
           type: 'expr_list',
           value: l
-        }
+        },
+        ...getLocationObject(),
       };
     }
   / name:proc_func_name {
     return {
         type: 'function',
         name: name,
-        args: null
+        args: null,
+        ...getLocationObject(),
       };
   }
 
