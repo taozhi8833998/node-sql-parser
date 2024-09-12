@@ -3881,8 +3881,33 @@ json_visit_list
       value: createList(head, tail, 1)
     }
   }
+position_func_args
+  = s:literal_string __ KW_IN __ e:expr start:(__ KW_FROM __ literal_numeric)? {
+    // => expr_list
+    let value = [s, { type: 'origin', value: 'in' }, e]
+    if (start) {
+      value.push({ type: 'origin', value: 'from' })
+      value.push(start[3])
+    }
+    return {
+      type: 'expr_list',
+      value,
+    }
+  }
+
+position_func_clause
+  = 'POSITION'i __ LPAREN __ args:position_func_args __ RPAREN {
+    // => { type: 'function'; name: string; args: expr_list; }
+    return {
+        type: 'function',
+        name: { name: [{ type: 'origin', value: 'position' }]},
+        separator: ' ',
+        args,
+        ...getLocationObject(),
+    };
+  }
 func_call
-  = trim_func_clause
+  = trim_func_clause / position_func_clause
   / name:'now'i __ LPAREN __ l:expr_list? __ RPAREN __ 'at'i __ KW_TIME __ 'zone'i __ z:literal_string {
     // => { type: 'function'; name: string; args: expr_list; suffix: literal_string; }
       z.prefix = 'at time zone'

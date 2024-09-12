@@ -41,5 +41,19 @@ describe('redshift', () => {
     const sql = 'select * from model_a a-- comment'
     expect(getParsedSql(sql)).to.be.equal('SELECT * FROM "model_a" AS "a"')
   })
-
+  
+  it('should support position function', () => {
+    const sql = `SELECT pv.email,
+            pv.action_date_id,
+            SUM(CASE
+                    WHEN event_category_name = 'Download'
+                      AND POSITION('PNG' IN event_full_name) > 0
+                    THEN 1
+                    ELSE 0
+                END) AS download_png
+    FROM dwh.dwh_fact_pageviews pv
+    WHERE action_date_id >= '2022-01-01'
+    GROUP BY 1, 2`
+    expect(getParsedSql(sql)).to.be.equal(`SELECT "pv".email, "pv".action_date_id, SUM(CASE WHEN event_category_name = 'Download' AND POSITION('PNG' IN event_full_name) > 0 THEN 1 ELSE 0 END) AS "download_png" FROM "dwh"."dwh_fact_pageviews" AS "pv" WHERE action_date_id >= '2022-01-01' GROUP BY 1, 2`)
+  })
 })
