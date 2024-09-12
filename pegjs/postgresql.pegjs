@@ -3256,7 +3256,7 @@ column_list_item
       tail: tail && tail[0] && { operator: tail[0][1], expr: tail[0][3] },
     }
   }
-  / tbl:ident_type __ DOT pro:(ident_type __ DOT)? __ STAR {
+  / tbl:ident_type __ DOT pro:(ident_without_kw_type __ DOT)? __ STAR {
       // => { expr: column_ref; as: null; }
       const mid = pro && pro[0]
       let schema
@@ -4409,7 +4409,7 @@ column_ref
           column: '*'
       }
     }
-  / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column_type) {
+  / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column_without_kw_type) {
     /* => {
         type: 'column_ref';
         schema: string;
@@ -4424,7 +4424,7 @@ column_ref
         column: { expr: col[3] }
       };
     }
-  / tbl:ident __ DOT __ col:column_type {
+  / tbl:ident __ DOT __ col:column_without_kw_type {
       /* => {
         type: 'column_ref';
         table: ident;
