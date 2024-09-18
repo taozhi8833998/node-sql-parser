@@ -74,6 +74,7 @@ function createTableToSQL(stmt) {
     replace: orReplace,
     partition_of: partitionOf,
     query_expr: queryExpr,
+    with: withExpr,
   } = stmt
   const sql = [toUpper(type), toUpper(orReplace), toUpper(temporary), toUpper(keyword), toUpper(ifNotExists), tablesToSQL(table)]
   if (like) {
@@ -85,6 +86,10 @@ function createTableToSQL(stmt) {
   if (partitionOf) return sql.concat([createTablePartitionOfToSQL(partitionOf)]).filter(hasVal).join(' ')
   if (createDefinition) sql.push(`(${createDefinition.map(createDefinitionToSQL).join(', ')})`)
   if (tableOptions) sql.push(tableOptions.map(tableOptionToSQL).join(' '))
+  if (withExpr) {
+    const withSQL = withExpr.map(withExprItem => [literalToSQL(withExprItem.keyword), toUpper(withExprItem.symbol), literalToSQL(withExprItem.value)].join(' ')).join(', ')
+    sql.push(`WITH (${withSQL})`)
+  }
   sql.push(toUpper(ignoreReplace), toUpper(as))
   if (queryExpr) sql.push(unionToSQL(queryExpr))
   return sql.filter(hasVal).join(' ')

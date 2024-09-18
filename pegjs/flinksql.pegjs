@@ -643,8 +643,18 @@ create_db_stmt
         }
       }
     }
-
-
+with_table_option
+  = k:ident_without_kw_type __ KW_ASSIGIN_EQUAL __ v:ident_without_kw_type {
+    return {
+      keyword: k,
+      symbol: '=',
+      value: v
+    }
+  }
+with_table_options
+  = head:with_table_option tail:(__ COMMA __ with_table_option)* {
+      return createList(head, tail);
+    }
 create_table_stmt
   = a:KW_CREATE __
     tp:KW_TEMPORARY? __
@@ -653,27 +663,10 @@ create_table_stmt
     t:table_ref_list __
     c:create_table_definition __
     to:table_options? __
+    wr:(KW_WITH __ LPAREN __ with_table_options __ RPAREN)? __
     ir: (KW_IGNORE / KW_REPLACE)? __
     as: KW_AS? __
     qe: union_stmt? {
-      /*
-      export type create_table_stmt_node = create_table_stmt_node_simple | create_table_stmt_node_like;
-      export interface create_table_stmt_node_base {
-        type: 'create';
-        keyword: 'table';
-        temporary?: 'temporary';
-        if_not_exists?: 'if not exists';
-        table: table_ref_list;
-      }
-      export interface create_table_stmt_node_simple extends create_table_stmt_node_base{
-        ignore_replace?: 'ignore' | 'replace';
-        as?: 'as';
-        query_expr?: union_stmt_node;
-        create_definition?: create_table_definition;
-        table_options?: table_options;
-      }
-      => AstStatement<create_table_stmt_node>
-      */
       if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
@@ -688,7 +681,8 @@ create_table_stmt
           as: as && as[0].toLowerCase(),
           query_expr: qe && qe.ast,
           create_definitions: c,
-          table_options: to
+          table_options: to,
+          with: wr && wr[4],
         }
       }
     }
@@ -697,14 +691,8 @@ create_table_stmt
     KW_TABLE __
     ife:if_not_exists_stmt? __
     t:table_ref_list __
+    wr:(KW_WITH __ LPAREN __ with_table_options __ RPAREN)? __
     lt:create_like_table {
-      /*
-
-      export interface create_table_stmt_node_like extends create_table_stmt_node_base{
-        like: create_like_table;
-      }
-      => AstStatement<create_table_stmt_node>;
-      */
       if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
@@ -715,7 +703,8 @@ create_table_stmt
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
           table: t,
-          like: lt
+          like: lt,
+          with: wr && wr[4],
         }
       }
     }
