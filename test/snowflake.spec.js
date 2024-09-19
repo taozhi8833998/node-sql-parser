@@ -441,6 +441,13 @@ describe('snowflake', () => {
         'SELECT mode("name") OVER (PARTITION BY "id") AS "most_frequent_name" FROM "airbnb"."staging_test1_montara1_com"."raw_hosts" AS "h"'
       ]
     },
+    {
+      title: 'keyword in column name',
+      sql: [
+        'SELECT  bi_json:limit AS limit FROM modelc',
+        'SELECT "bi_json"."limit" AS "limit" FROM "modelc"'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
