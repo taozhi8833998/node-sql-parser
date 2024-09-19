@@ -412,6 +412,20 @@ describe('Flink', () => {
         "SELECT `name`, `eventTime`, `eventDetail` FROM (SELECT concat('AK中文信息') AS `name`, CAST(`event_time` AS VARCHAR) AS `eventTime`, JSON_OBJECT('risk-tag' VALUE `risk_tag`, 'abc' VALUE (10 * 2), 'user-agent' VALUE JSON_OBJECT('city' VALUE 'New York' ON NULL NULL, 'postalCode' VALUE '10001' ON NULL ABSENT)) AS `eventDetail` FROM `check_risk`)"
       ]
     },
+    {
+      title: "create table",
+      sql: [
+        "CREATE TABLE Orders (`user` BIGINT)",
+        "CREATE TABLE `Orders` (`user` BIGINT)",
+      ],
+    },
+    {
+      title: "create table with options",
+      sql: [
+        "CREATE TABLE Orders (`user` BIGINT) WITH ('connector' = 'kafka')",
+        "CREATE TABLE `Orders` (`user` BIGINT) WITH ('connector' = 'kafka')",
+      ],
+    }
   ];
 
   SQL_LIST.forEach(sqlInfo => {
