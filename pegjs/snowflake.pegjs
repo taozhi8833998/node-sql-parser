@@ -3432,7 +3432,7 @@ column_ref
           ...getLocationObject()
       }
     }
-  / schema:ident tbl:(__ column_symbol __ ident) col:(__ column_symbol __ column) {
+  / schema:ident tbl:(__ column_symbol __ ident_without_kw) col:(__ column_symbol __ column_without_kw) {
       columnList.add(`select::${schema}.${tbl[3]}::${col[3]}`);
       return {
         type: 'column_ref',
@@ -3443,7 +3443,7 @@ column_ref
         ...getLocationObject()
       };
     }
-  / tbl:ident __ s:column_symbol __ col:column {
+  / tbl:ident __ s:column_symbol __ col:column_without_kw {
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
