@@ -3417,7 +3417,7 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 convert_args
-  = c:proc_primary __ COMMA __ ch:(character_string_type / datetime_type)  __ cs:create_option_character_set_kw __ v:ident_without_kw_type {
+  = c:proc_additive_expr __ COMMA __ ch:(character_string_type / datetime_type)  __ cs:create_option_character_set_kw __ v:ident_without_kw_type {
     const { dataType, length } = ch
     let dataTypeStr = dataType
     if (length !== undefined) dataTypeStr = `${dataTypeStr}(${length})`
@@ -3436,7 +3436,7 @@ convert_args
       ]
     }
   }
-  / c:proc_primary __ COMMA __ d:(signedness / data_type) {
+  / c:proc_additive_expr __ COMMA __ d:(signedness / data_type) {
     const dataType = typeof d === 'string' ? { dataType: d } : d
     return {
       type: 'expr_list',

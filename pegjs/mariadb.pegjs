@@ -3127,7 +3127,7 @@ count_arg
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
 convert_args
-  = c:proc_primary __ COMMA __ ch:(character_string_type / datetime_type)  __ cs:create_option_character_set_kw __ v:ident_without_kw_type {
+  = c:proc_additive_expr __ COMMA __ ch:(character_string_type / datetime_type)  __ cs:create_option_character_set_kw __ v:ident_without_kw_type {
     const { dataType, length } = ch
     let dataTypeStr = dataType
     if (length !== undefined) dataTypeStr = `${dataTypeStr}(${length})`
@@ -3146,7 +3146,7 @@ convert_args
       ]
     }
   }
-  / c:proc_primary __ COMMA __ d:(signedness / data_type) {
+  / c:proc_additive_expr __ COMMA __ d:(signedness / data_type) {
     const dataType = typeof d === 'string' ? { dataType: d } : d
     return {
       type: 'expr_list',
@@ -3871,7 +3871,6 @@ proc_primary
       e.parentheses = true;
       return e;
     }
-
 proc_func_name
   = dt:(ident_name_type / backticks_quoted_ident) tail:(__ DOT __ ((ident_name_type / backticks_quoted_ident)))? {
       const result = { name: [dt] }

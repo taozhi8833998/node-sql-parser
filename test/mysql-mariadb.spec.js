@@ -1109,10 +1109,17 @@ describe('mysql', () => {
         ]
       },
       {
-        title: 'covert to signed or unsigned',
+        title: 'convert to signed or unsigned',
         sql: [
           "SELECT * FROM `foo` WHERE CONVERT(REPLACE(id, '123', ''), SIGNED) > 0",
           "SELECT * FROM `foo` WHERE CONVERT(REPLACE(`id`, '123', ''), SIGNED) > 0",
+        ]
+      },
+      {
+        title: 'convert additive expr',
+        sql: [
+          'select convert(a-b,DECIMAL(10,2)) as a from test',
+          'SELECT CONVERT(`a` - `b`, DECIMAL(10, 2)) AS `a` FROM `test`'
         ]
       },
     ]
