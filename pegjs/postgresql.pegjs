@@ -239,6 +239,7 @@ cmd_stmt
   / execute_stmt
   / for_loop_stmt
   / transaction_stmt
+  / comment_on_stmt
 
 create_stmt
   = create_table_stmt
@@ -3050,6 +3051,46 @@ transaction_stmt
         keyword: k,
         modes: m
       }
+    }
+  }
+comment_on_option
+  = t:(KW_TABLE / KW_VIEW) __ name:table_name {
+    // => { type: string; name: table_name; }
+    return {
+      type: t.toLowerCase(),
+      name: name,
+    }
+  }
+  / t:(KW_COLUMN) __ name:column_ref {
+    // => { type: string; name: column_ref; }
+    return {
+      type: t.toLowerCase(),
+      name: name,
+    }
+  }
+
+comment_on_is
+  = 'IS'i __ e:(literal_string / literal_null) {
+    // => { keyword: 'is'; expr: literal_string | literal_null; }
+    return {
+      keyword: 'is',
+      expr: e,
+    }
+  }
+comment_on_stmt
+  = 'COMMENT'i __ 'ON'i __ co:comment_on_option __ is:comment_on_is {
+    /* export interface comment_on_stmt_t {
+        type: 'comment';
+        target: comment_on_option;
+        expr: comment_on_is;
+      }
+      => AstStatement<comment_on_stmt_t>
+     */
+    return {
+      type: 'comment',
+      keyword: 'on',
+      target: co,
+      expr: is,
     }
   }
 select_stmt

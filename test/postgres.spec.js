@@ -1943,6 +1943,20 @@ describe('Postgres', () => {
           'SELECT "meeting".end FROM "meeting"'
         ]
       },
+      {
+        title: 'comment on table',
+        sql: [
+          "COMMENT ON TABLE users IS 'users table';",
+          `COMMENT ON TABLE "users" IS 'users table'`
+        ]
+      },
+      {
+        title: 'comment on column',
+        sql: [
+          `COMMENT ON COLUMN "users"."name" IS 'first name and last name';`,
+          `COMMENT ON COLUMN "users"."name" IS 'first name and last name'`
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
