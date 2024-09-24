@@ -3054,18 +3054,25 @@ transaction_stmt
     }
   }
 comment_on_option
-  = t:(KW_TABLE / KW_VIEW) __ name:table_name {
+  = t:(KW_TABLE / KW_VIEW / KW_TABLESPACE) __ name:table_name {
     // => { type: string; name: table_name; }
     return {
       type: t.toLowerCase(),
-      name: name,
+      name,
     }
   }
   / t:(KW_COLUMN) __ name:column_ref {
     // => { type: string; name: column_ref; }
     return {
       type: t.toLowerCase(),
-      name: name,
+      name,
+    }
+  }
+  / t:(KW_INDEX / KW_COLLATION / KW_TABLESPACE / KW_SCHEMA / 'DOMAIN'i / KW_DATABASE / 'ROLE'i / 'SEQUENCE'i / 'SERVER'i / 'SUBSCRIPTION'i ) __ name:ident_type {
+    // => { type: string; name: ident; }
+    return {
+      type: t.toLowerCase(),
+      name,
     }
   }
 
@@ -5290,6 +5297,7 @@ KW_SCHEMA   = "SCHEMA"i      !ident_start { return 'SCHEMA'; }
 KW_SEQUENCE   = "SEQUENCE"i      !ident_start { return 'SEQUENCE'; }
 KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
+KW_COLLATION = "COLLATION"i    !ident_start { return 'COLLATION'; }
 KW_DEALLOCATE  = "DEALLOCATE"i    !ident_start { return 'DEALLOCATE'; }
 
 KW_ON       = "ON"i       !ident_start

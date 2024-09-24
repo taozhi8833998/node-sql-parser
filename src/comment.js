@@ -10,6 +10,8 @@ function commentOptionToSQL(stmt) {
       return `${toUpper(type)} ${fullTableName}`
     case 'column':
       return `COLUMN ${columnRefToSQL(name)}`
+    default:
+      return `${toUpper(type)} ${literalToSQL(name)}`
   }
 }
 
