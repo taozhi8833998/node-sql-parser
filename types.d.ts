@@ -233,6 +233,7 @@ export interface Select {
   limit: Limit | null;
   _orderby?: OrderBy[] | null;
   _limit?: Limit | null;
+  _next?: Select | null;
   parentheses_symbol?: boolean;
   _parentheses?: boolean;
   loc?: LocationRange;
