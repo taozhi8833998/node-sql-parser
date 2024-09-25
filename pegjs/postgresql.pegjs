@@ -239,6 +239,7 @@ cmd_stmt
   / execute_stmt
   / for_loop_stmt
   / transaction_stmt
+  / comment_on_stmt
 
 create_stmt
   = create_table_stmt
@@ -3052,6 +3053,53 @@ transaction_stmt
       }
     }
   }
+comment_on_option
+  = t:(KW_TABLE / KW_VIEW / KW_TABLESPACE) __ name:table_name {
+    // => { type: string; name: table_name; }
+    return {
+      type: t.toLowerCase(),
+      name,
+    }
+  }
+  / t:(KW_COLUMN) __ name:column_ref {
+    // => { type: string; name: column_ref; }
+    return {
+      type: t.toLowerCase(),
+      name,
+    }
+  }
+  / t:(KW_INDEX / KW_COLLATION / KW_TABLESPACE / KW_SCHEMA / 'DOMAIN'i / KW_DATABASE / 'ROLE'i / 'SEQUENCE'i / 'SERVER'i / 'SUBSCRIPTION'i ) __ name:ident_type {
+    // => { type: string; name: ident; }
+    return {
+      type: t.toLowerCase(),
+      name,
+    }
+  }
+
+comment_on_is
+  = 'IS'i __ e:(literal_string / literal_null) {
+    // => { keyword: 'is'; expr: literal_string | literal_null; }
+    return {
+      keyword: 'is',
+      expr: e,
+    }
+  }
+comment_on_stmt
+  = 'COMMENT'i __ 'ON'i __ co:comment_on_option __ is:comment_on_is {
+    /* export interface comment_on_stmt_t {
+        type: 'comment';
+        target: comment_on_option;
+        expr: comment_on_is;
+      }
+      => AstStatement<comment_on_stmt_t>
+     */
+    return {
+      type: 'comment',
+      keyword: 'on',
+      target: co,
+      expr: is,
+    }
+  }
 select_stmt
   = KW_SELECT __ ';' {
     // => { type: 'select'; }
@@ -5249,6 +5297,7 @@ KW_SCHEMA   = "SCHEMA"i      !ident_start { return 'SCHEMA'; }
 KW_SEQUENCE   = "SEQUENCE"i      !ident_start { return 'SEQUENCE'; }
 KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
 KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
+KW_COLLATION = "COLLATION"i    !ident_start { return 'COLLATION'; }
 KW_DEALLOCATE  = "DEALLOCATE"i    !ident_start { return 'DEALLOCATE'; }
 
 KW_ON       = "ON"i       !ident_start

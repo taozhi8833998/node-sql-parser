@@ -1,6 +1,7 @@
 import { alterToSQL } from './alter'
 import { analyzeToSQL, attachToSQL } from './analyze'
 import { createToSQL } from './create'
+import { commentOnToSQL } from './comment'
 import { explainToSQL } from './explain'
 import { selectToSQL } from './select'
 import { deleteToSQL } from './delete'
@@ -35,6 +36,7 @@ const typeToSQLFn = {
   analyze     : analyzeToSQL,
   attach      : attachToSQL,
   create      : createToSQL,
+  comment     : commentOnToSQL,
   select      : selectToSQL,
   deallocate  : deallocateToSQL,
   delete      : deleteToSQL,

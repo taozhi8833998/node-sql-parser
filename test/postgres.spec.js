@@ -1943,10 +1943,31 @@ describe('Postgres', () => {
           'SELECT "meeting".end FROM "meeting"'
         ]
       },
+      {
+        title: 'comment on table',
+        sql: [
+          "COMMENT ON TABLE users IS 'users table';",
+          `COMMENT ON TABLE "users" IS 'users table'`
+        ]
+      },
+      {
+        title: 'comment on column',
+        sql: [
+          `COMMENT ON COLUMN "users"."name" IS 'first name and last name';`,
+          `COMMENT ON COLUMN "users"."name" IS 'first name and last name'`
+        ]
+      },
+      {
+        title: 'comment on database',
+        sql: [
+          `COMMENT ON DATABASE my_database IS 'Development Database';`,
+          `COMMENT ON DATABASE my_database IS 'Development Database'`,
+        ],
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
-
+  
   describe('pg ast', () => {
     it('should get correct columns and tables', () => {
       let sql = 'SELECT "Id" FROM "Test";'
