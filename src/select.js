@@ -1,5 +1,5 @@
 import { exprToSQL, getExprListSQL, orderOrPartitionByToSQL, varToSQL } from './expr'
-import { columnRefToSQL, columnsToSQL } from './column'
+import { columnsToSQL } from './column'
 import { limitToSQL } from './limit'
 import { withToSQL } from './with'
 import { tablesToSQL } from './tables'
@@ -11,7 +11,7 @@ function distinctToSQL(distinct) {
   if (typeof distinct === 'string') return distinct
   const { type, columns } = distinct
   const result = [toUpper(type)]
-  if (columns) result.push(`(${columns.map(columnRefToSQL).join(', ')})`)
+  if (columns) result.push(`(${columns.map(exprToSQL).join(', ')})`)
   return result.filter(hasVal).join(' ')
 }
 

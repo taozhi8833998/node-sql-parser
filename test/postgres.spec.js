@@ -521,8 +521,8 @@ describe('Postgres', () => {
     {
       title: 'distinct on',
       sql: [
-        'SELECT DISTINCT ON (a, b) a, b, c FROM tbl',
-        'SELECT DISTINCT ON (a, b) a, b, c FROM "tbl"'
+        "SELECT DISTINCT ON (a->>'someJsonAttribute', b, c) a->>'someJsonAttribute', b, c FROM tbl",
+        `SELECT DISTINCT ON (a ->> 'someJsonAttribute', b, c) a ->> 'someJsonAttribute', b, c FROM "tbl"`
       ]
     },
     {

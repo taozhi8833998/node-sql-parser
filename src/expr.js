@@ -71,6 +71,7 @@ function exprToSQL(exprOrigin) {
     }
   }
   const { type } = expr
+  if (type === 'expr') return exprToSQL(expr.expr)
   return exprToSQLConvertFn[type] ? exprToSQLConvertFn[type](expr) : literalToSQL(expr)
 }
 

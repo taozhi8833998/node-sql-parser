@@ -3146,8 +3146,8 @@ cte_column_definition
     }
 
 distinct_on
-  = d:KW_DISTINCT __ o:KW_ON __ LPAREN __ c:column_ref_list __ RPAREN {
-    // => {type: string; columns: column_ref_list;}
+  = d:KW_DISTINCT __ o:KW_ON __ LPAREN __ c:column_list_items __ RPAREN {
+    // => {type: string; columns: column_list_items;}
     console.lo
     return {
       type: `${d} ON`,
@@ -3238,6 +3238,11 @@ query_option
       return option;
     }
 
+column_list_items
+  = head:column_list_item tail:(__ COMMA __ column_list_item)* {
+    // => column_list_item[]
+      return createList(head, tail);
+    }
 column_clause
   = head: (KW_ALL / (STAR !ident_start) / STAR) tail:(__ COMMA __ column_list_item)* {
       // => 'ALL' | '*' | column_list_item[]
@@ -3253,10 +3258,7 @@ column_clause
       if (tail && tail.length > 0) return createList(item, tail)
       return [item]
     }
-  / head:column_list_item tail:(__ COMMA __ column_list_item)* {
-    // => column_list_item[]
-      return createList(head, tail);
-    }
+  / column_list_items
 
 array_index
   = LBRAKE __ n:(literal_numeric / literal_string) __ RBRAKE {
