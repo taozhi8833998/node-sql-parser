@@ -336,6 +336,8 @@ function createFunctionOptionToSQL(stmt) {
       return [toUpper(type), stmt.symbol, unionToSQL(stmt.declare), toUpper(stmt.begin), multipleToSQL(stmt.expr), toUpper(stmt.end), stmt.symbol].filter(hasVal).join(' ')
     case 'set':
       return [toUpper(type), stmt.parameter, toUpper(stmt.value && stmt.value.prefix), stmt.value && stmt.value.expr.map(exprToSQL).join(', ')].filter(hasVal).join(' ')
+    case 'return':
+      return [toUpper(type), exprToSQL(stmt.expr)].filter(hasVal).join(' ')
     default:
       return exprToSQL(stmt)
   }
@@ -343,7 +345,7 @@ function createFunctionOptionToSQL(stmt) {
 function createFunctionToSQL(stmt) {
   const { type, replace, keyword, name, args, returns, options, last } = stmt
   const sql = [toUpper(type), toUpper(replace), toUpper(keyword)]
-  const functionName = [identifierToSql(name.schema), name.name].filter(hasVal).join('.')
+  const functionName = [literalToSQL(name.schema), name.name.map(literalToSQL).join('.')].filter(hasVal).join('.')
   const argsSQL = args.map(alterArgsToSQL).filter(hasVal).join(', ')
   sql.push(`${functionName}(${argsSQL})`, createFunctionReturnsToSQL(returns), options.map(createFunctionOptionToSQL).join(' '), last)
   return sql.filter(hasVal).join(' ')

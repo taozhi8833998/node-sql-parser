@@ -1131,7 +1131,7 @@ describe('Postgres', () => {
             ELSE $1 || ', ' || $2
           END
         $_$;`,
-        `CREATE FUNCTION "public"._group_concat(TEXT, TEXT) RETURNS TEXT LANGUAGE sql IMMUTABLE AS $_$ SELECT CASE WHEN $2 IS NULL THEN $1 WHEN $1 IS NULL THEN $2 ELSE $1 || ', ' || $2 END $_$`
+        `CREATE FUNCTION public._group_concat(TEXT, TEXT) RETURNS TEXT LANGUAGE sql IMMUTABLE AS $_$ SELECT CASE WHEN $2 IS NULL THEN $1 WHEN $1 IS NULL THEN $2 ELSE $1 || ', ' || $2 END $_$`
       ]
     },
     {
@@ -1146,7 +1146,7 @@ describe('Postgres', () => {
           AND store_id = $2
           AND NOT inventory_in_stock(inventory_id);
         $_$;`,
-        `CREATE FUNCTION "public".film_not_in_stock(p_film_id INTEGER DEFAULT 1, p_store_id INTEGER = 1, OUT p_film_count INTEGER) RETURNS SETOF INTEGER LANGUAGE sql AS $_$ SELECT inventory_id FROM "inventory" WHERE film_id = $1 AND store_id = $2 AND NOT inventory_in_stock(inventory_id) $_$`
+        `CREATE FUNCTION public.film_not_in_stock(p_film_id INTEGER DEFAULT 1, p_store_id INTEGER = 1, OUT p_film_count INTEGER) RETURNS SETOF INTEGER LANGUAGE sql AS $_$ SELECT inventory_id FROM "inventory" WHERE film_id = $1 AND store_id = $2 AND NOT inventory_in_stock(inventory_id) $_$`
       ]
     },
     {
@@ -1182,7 +1182,7 @@ describe('Postgres', () => {
     {
       title: 'create function with if else stmt',
       sql: [
-        `CREATE FUNCTION public.inventory_in_stock(p_inventory_id integer) RETURNS boolean
+        `CREATE FUNCTION "public".inventory_in_stock(p_inventory_id integer) RETURNS boolean
         LANGUAGE plpgsql
         AS $$
           DECLARE
@@ -1220,7 +1220,7 @@ describe('Postgres', () => {
     {
       title: 'create function without args',
       sql: [
-        `CREATE FUNCTION public.last_updated() RETURNS trigger
+        `CREATE FUNCTION "public".last_updated() RETURNS trigger
         LANGUAGE plpgsql
         AS $$
           BEGIN
@@ -1228,6 +1228,17 @@ describe('Postgres', () => {
               RETURN NEW;
           END $$;`,
         'CREATE FUNCTION "public".last_updated() RETURNS "trigger" LANGUAGE plpgsql AS $$ BEGIN NEW.last_update = CURRENT_TIMESTAMP ; RETURN NEW END $$'
+      ]
+    },
+    {
+      title: 'create function with sql body',
+      sql: [
+        `CREATE FUNCTION add(a integer, b integer) RETURNS integer
+          LANGUAGE SQL
+          IMMUTABLE
+          RETURNS NULL ON NULL INPUT
+          RETURN a + b;`,
+        'CREATE FUNCTION add(a INTEGER, b INTEGER) RETURNS INTEGER LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT RETURN a + b'
       ]
     },
     {

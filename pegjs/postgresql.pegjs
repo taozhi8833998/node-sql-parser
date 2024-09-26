@@ -698,19 +698,20 @@ create_func_opt
       value,
     }
   }
-
+  / return_stmt
+  
 create_function_stmt
   = a:KW_CREATE __
   or:(KW_OR __ KW_REPLACE)? __
   t:'FUNCTION'i __
-  c:table_name __ LPAREN __ args:alter_func_args? __ RPAREN __
+  c:proc_func_name __ LPAREN __ args:alter_func_args? __ RPAREN __
   r:func_returns? __
   fo:create_func_opt* __ SEMICOLON? __ {
     /*
       export type create_function_stmt_t = {
         type: 'create';
         replace?: string;
-        name: { schema?: string; name: string };
+        name: proc_func_name;
         args?: alter_func_args;
         returns?: func_returns;
         keyword: 'function';
@@ -725,7 +726,7 @@ create_function_stmt
           args: args || [],
           type: 'create',
           replace: or && 'or replace',
-          name: { schema: c.db, name: c.table },
+          name: c,
           returns: r,
           keyword: t && t.toLowerCase(),
           options: fo || [],
@@ -5281,6 +5282,7 @@ KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
 KW_RECURSIVE= "RECURSIVE"   !ident_start { return 'RECURSIVE'; }
 KW_REPLACE  = "REPLACE"i    !ident_start
+KW_RETURN = 'RETURN'i  !ident_start { return 'RETURN' }
 KW_RETURNING  = "RETURNING"i    !ident_start { return 'RETURNING' }
 KW_RENAME   = "RENAME"i     !ident_start
 KW_IGNORE   = "IGNORE"i     !ident_start
@@ -5445,7 +5447,6 @@ KW_VAR_PRE_DOLLAR = '$'
 KW_VAR_PRE_DOLLAR_DOUBLE = '$$'
 KW_VAR_PRE
   = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR / KW_VAR_PRE_DOLLAR
-KW_RETURN = 'return'i
 KW_ASSIGN = ':='
 KW_DOUBLE_COLON = '::'
 KW_ASSIGIN_EQUAL = '='
@@ -5574,7 +5575,6 @@ assign_stmt
       right: e
     };
   }
-
 
 return_stmt
   = KW_RETURN __ e:proc_expr {
