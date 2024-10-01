@@ -2787,7 +2787,7 @@ multiplicative_expr
 
 multiplicative_operator
   = "*" / "/" / "%" / "||"
-  / "div"i {
+  / "div"i / "mod"i {
     return 'DIV'
   }
   / '&' / '>>' / '<<' / '^' / '|'
