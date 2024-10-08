@@ -937,10 +937,11 @@ describe('mysql', () => {
       {
         title: 'check constraint',
         sql: [
-          'CREATE TABLE `table` (\n' +
-          '`name` VARCHAR(255) CHECK(`name` LIKE \'ABC%\' AND LENGTH(`name`) >= 5)\n' +
-          ');',
-          "CREATE TABLE `table` (`name` VARCHAR(255) CHECK (`name` LIKE 'ABC%' AND LENGTH(`name`) >= 5))"
+          `CREATE TABLE \`table\`(
+            \`name\` VARCHAR(255) CHECK(\`name\` LIKE 'ABC%' AND LENGTH(\`name\`) >= 5),
+            \`Int11\` int(11) DEFAULT NULL CHECK (\`Int11\` MOD 5 = 0)
+          );`,
+          "CREATE TABLE `table` (`name` VARCHAR(255) CHECK (`name` LIKE 'ABC%' AND LENGTH(`name`) >= 5), `Int11` INT(11) DEFAULT NULL CHECK (`Int11` MOD 5 = 0))"
         ]
       },
       {

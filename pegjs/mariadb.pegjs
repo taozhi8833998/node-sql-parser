@@ -2787,8 +2787,8 @@ multiplicative_expr
 
 multiplicative_operator
   = "*" / "/" / "%" / "||"
-  / "div"i / "mod"i {
-    return 'DIV'
+  / k:("div"i / "mod"i) {
+    return k.toUpperCase()
   }
   / '&' / '>>' / '<<' / '^' / '|'
 
