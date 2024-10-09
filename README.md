@@ -294,6 +294,9 @@ const tableList = parser.tableList('SELECT * FROM t', opt);
 
 console.log(tableList); // ["select::null::t"]
 ```
+- if the table name is prefixed with database name, the table name will be parsed as **dbName::tableName**
+- if the table name is prefixed with database and schema name, the table name will be parsed as **dbName.schemaName::tableName**
+- if the table name is prefixed with server name in TransactSQL, the table name will be parsed as **serverName.dbName.schemaName::tableName**
 
 ### Get the SQL visited columns
 
