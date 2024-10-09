@@ -44,7 +44,7 @@ export interface BaseFrom {
 export interface Join extends BaseFrom {
   join: "INNER JOIN" | "LEFT JOIN" | "RIGHT JOIN";
   using?: string[];
-  on?: Expr;
+  on?: Binary;
 }
 export interface TableExpr {
   expr: {
@@ -127,7 +127,7 @@ export interface Case {
   expr: null;
   args: Array<
     | {
-        cond: Expr;
+        cond: Binary;
         result: ExpressionValue;
         type: "when";
       }
@@ -187,6 +187,15 @@ export type Param = { type: "param"; value: string; loc?: LocationRange };
 
 export type Value = { type: string; value: any; loc?: LocationRange };
 
+export type Binary = {
+  type: "binary_expr";
+  operator: string;
+  left: ExpressionValue | ExprList;
+  right: ExpressionValue | ExprList;
+  loc?: LocationRange;
+  parentheses?: boolean;
+};
+
 export type ExpressionValue =
   | ColumnRef
   | Param
@@ -194,29 +203,13 @@ export type ExpressionValue =
   | Case
   | AggrFunc
   | Value
+  | Binary
   | Cast
   | Interval;
-export type Expr =
-  | {
-      type: "binary_expr";
-      operator: "AND" | "OR";
-      left: Expr;
-      right: Expr;
-      loc?: LocationRange;
-      parentheses?: boolean;
-    }
-  | {
-      type: "binary_expr";
-      operator: string;
-      left: ExpressionValue;
-      right: ExpressionValue | ExprList;
-      loc?: LocationRange;
-      parentheses?: boolean;
-    };
 
 export type ExprList = {
   type: "expr_list";
-  value: ExpressionValue[] | Expr;
+  value: ExpressionValue[];
   loc?: LocationRange;
 };
 export interface Select {
@@ -226,14 +219,13 @@ export interface Select {
   distinct: "DISTINCT" | null;
   columns: any[] | Column[];
   from: From[] | null;
-  where: Expr | Function | null;
+  where: Binary | Function | null;
   groupby: { columns: ColumnRef[] | null, modifiers: ValueExpr<string>[] };
   having: any[] | null;
   orderby: OrderBy[] | null;
   limit: Limit | null;
   _orderby?: OrderBy[] | null;
   _limit?: Limit | null;
-  _next?: Select | null;
   parentheses_symbol?: boolean;
   _parentheses?: boolean;
   loc?: LocationRange;
@@ -251,14 +243,14 @@ export interface Update {
   db: string | null;
   table: Array<From | Dual> | null;
   set: SetList[];
-  where: Expr | Function | null;
+  where: Binary | Function | null;
   loc?: LocationRange;
 }
 export interface Delete {
   type: "delete";
   table: any;
   from: Array<From | Dual>;
-  where: Expr | Function | null;
+  where: Binary | Function | null;
   loc?: LocationRange;
 }
 
