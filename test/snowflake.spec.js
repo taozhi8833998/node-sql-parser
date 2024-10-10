@@ -455,4 +455,25 @@ describe('snowflake', () => {
       expect(getParsedSql(sql[0], opt)).to.equal(sql[1])
     })
   })
+  
+  describe('white list check db.schema::table', () => {
+    it('should check pass db.schema.table', () => {
+      let sql = 'SELECT * from foo.bar.baz'
+      let tableList = parser.tableList(sql, opt)
+      expect(tableList).to.be.eql([
+        'select::foo.bar::baz'
+      ])
+      expect(parser.whiteListCheck(sql, ['select::foo.bar::baz'], opt)).to.be.undefined
+      sql = 'SELECT * from foo.baz'
+      tableList = parser.tableList(sql, opt)
+      expect(tableList).to.be.eql([
+        'select::foo::baz'
+      ])
+      expect(parser.whiteListCheck(sql, ['select::foo::baz'], opt)).to.be.undefined
+    })
+    it('should throw error when db.schema.table not match', () => {
+      const sql = 'SELECT * from foo.bar.baz'
+      expect(() => parser.whiteListCheck(sql, ['select::foo:baz'], opt)).to.throw("authority = 'select::foo.bar::baz' is required in table whiteList to execute SQL = 'SELECT * from foo.bar.baz'")
+    })
+  })
 })

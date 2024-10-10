@@ -409,7 +409,7 @@ create_table_stmt
     ir: (KW_IGNORE / KW_REPLACE)? __
     as: KW_AS? __
     qe: union_stmt? {
-      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
+      if(t) t.forEach(tt => tableList.add(`create::${[tt.server, tt.db, tt.schema].filter(Boolean).join('.') || null}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -433,7 +433,7 @@ create_table_stmt
     ife:if_not_exists_stmt? __
     t:table_ref_list __
     lt:create_like_table {
-      if(t) t.forEach(tt => tableList.add(`create::${tt.db}::${tt.table}`));
+      if(t) t.forEach(tt => tableList.add(`create::${[tt.server, tt.db, tt.schema].filter(Boolean).join('.') || null}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -718,7 +718,7 @@ drop_stmt
     r:KW_TABLE __
     ife: if_exists? __
     t:table_ref_list {
-      if(t) t.forEach(tt => tableList.add(`${a}::${tt.db}::${tt.table}`));
+      if(t) t.forEach(tt => tableList.add(`${a}::${[tt.server, tt.db, tt.schema].filter(Boolean).join('.') || null}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -782,7 +782,7 @@ truncate_stmt
   = a:KW_TRUNCATE  __
     kw:KW_TABLE? __
     t:table_ref_list {
-      if(t) t.forEach(tt => tableList.add(`${a}::${tt.db}::${tt.table}`));
+      if(t) t.forEach(tt => tableList.add(`${a}::${[tt.server, tt.db, tt.schema].filter(Boolean).join('.') || null}::${tt.table}`));
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -828,7 +828,7 @@ alter_view_stmt
     w:(KW_WITH __ view_attribute_list)? __
     KW_AS __ s:select_stmt_nake __
     e:view_with? {
-      if (t && t.length > 0) t.forEach(table => tableList.add(`alter::${table.db}::${table.table}`));
+      if (t && t.length > 0) t.forEach(table => tableList.add(`alter::${[table.server, table.db, table.schema].filter(Boolean).join('.') || null}::${table.table}`));
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -849,7 +849,7 @@ alter_table_stmt
     KW_TABLE __
     t:table_ref_list __
     e:alter_action_list {
-      if (t && t.length > 0) t.forEach(table => tableList.add(`alter::${table.db}::${table.table}`));
+      if (t && t.length > 0) t.forEach(table => tableList.add(`alter::${[table.server, table.db, table.schema].filter(Boolean).join('.') || null}::${table.table}`));
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -1238,7 +1238,7 @@ rename_stmt
   = KW_RENAME  __
     KW_TABLE __
     t:table_to_list {
-      t.forEach(tg => tg.forEach(dt => dt.table && tableList.add(`rename::${dt.db}::${dt.table}`)))
+      t.forEach(tg => tg.forEach(dt => dt.table && tableList.add(`rename::${[dt.server, dt.db, dt.schema].filter(Boolean).join('.') || null}::${dt.table}`)))
       return {
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
@@ -1355,7 +1355,7 @@ lock_type
 
 lock_table
   = t:table_base __ lt:lock_type {
-    tableList.add(`lock::${t.db}::${t.table}`)
+    tableList.add(`lock::${[t.server, t.db, t.schema].filter(Boolean).join('.') || null}::${t.table}`)
     return {
       table: t,
       lock_type: lt
@@ -1436,7 +1436,7 @@ select_stmt_nake
     o:order_by_clause?  __
     l:limit_clause? __
     fx:for_xml? {
-      if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
+      if(f) f.forEach(info => info.table && tableList.add(`select::${[info.server, info.db, info.schema].filter(Boolean).join('.') || null}::${info.table}`));
       return {
           with: cte,
           type: 'select',
@@ -1974,10 +1974,11 @@ update_stmt
     w:where_clause? {
       const dbObj = {}
       if (t) t.forEach(tableInfo => {
-        const { db, as, table, join } = tableInfo
+        const { server, db, schema, as, table, join } = tableInfo
         const action = join ? 'select' : 'update'
-        if (db) dbObj[table] = db
-        if (table) tableList.add(`${action}::${db}::${table}`)
+        const fullName = [server, db, schema].filter(Boolean).join('.') || null
+        if (db) dbObj[table] = fullName
+        if (table) tableList.add(`${action}::${fullName}::${table}`)
       });
       if(l) {
         l.forEach(col => {
@@ -2007,15 +2008,17 @@ delete_stmt
     f:from_clause __
     w:where_clause? {
      if(f) f.forEach(tableInfo => {
-        const { db, as, table, join } = tableInfo
+        const { server, db, schema, as, table, join } = tableInfo
         const action = join ? 'select' : 'delete'
-        if (table) tableList.add(`${action}::${db}::${table}`)
+        const fullName = [server, db, schema].filter(Boolean).join('.') || null
+        if (table) tableList.add(`${action}::${fullName}::${table}`)
         if (!join) columnList.add(`delete::${table}::(.*)`);
       });
       if (t === null && f.length === 1) {
         const tableInfo = f[0]
         t = [{
           db: tableInfo.db,
+          schema: tableInfo.schema,
           table: tableInfo.table,
           as: tableInfo.as,
           addition: true
@@ -2068,7 +2071,7 @@ replace_insert_stmt
     p:insert_partition? __ LPAREN __ c:column_list  __ RPAREN __
     v:insert_value_clause {
       if (t) {
-        tableList.add(`insert::${t.db}::${t.table}`)
+        tableList.add(`insert::${[t.server, t.db, t.schema].filter(Boolean).join('.') || null}::${t.table}`)
         t.as = null
       }
       if (c) {
@@ -2103,7 +2106,7 @@ insert_no_columns_stmt
     p:insert_partition? __
     v:insert_value_clause {
       if (t) {
-        tableList.add(`insert::${t.db}::${t.table}`)
+        tableList.add(`insert::${[t.server, t.db, t.schema].filter(Boolean).join('.') || null}::${t.table}`)
         columnList.add(`insert::${t.table}::(.*)`);
         t.as = null
       }
@@ -2421,7 +2424,7 @@ column_ref
         obj.db = db[0]
         obj.schema = schema[0]
       }
-      const fullTableName = [obj.db, obj.schema, obj.table].filter(Boolean).join('.') || 'null'
+      const fullTableName = [obj.db, obj.schema, obj.table].filter(Boolean).join('.') || null || 'null'
       columnList.add(`select::${fullTableName}::${col}`);
       return {
         type: 'column_ref',
