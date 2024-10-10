@@ -64,12 +64,20 @@ function tableHintToSQL(tableHintExpr) {
   return result.filter(hasVal).join(' ')
 }
 
+function tableTumbleArgsToSQL(param, expr) {
+  const { name, symbol } = param
+  return [toUpper(name), symbol, expr].filter(hasVal).join(' ')
+}
 function tableTumbleToSQL(tumble) {
   if (!tumble) return ''
-  const { data: tableInfo, timecol, size } = tumble
-  const fullTableName = [identifierToSql(tableInfo.db), identifierToSql(tableInfo.table)].filter(hasVal).join('.')
-  const result = ['TABLE(TUMBLE(TABLE', fullTableName, `DESCRIPTOR(${columnRefToSQL(timecol)})`, `${intervalToSQL(size)}))`]
-  return result.filter(hasVal).join(' ')
+  const { data: tableInfo, timecol, offset, size } = tumble
+  const fullTableName = [identifierToSql(tableInfo.expr.db), identifierToSql(tableInfo.expr.schema), identifierToSql(tableInfo.expr.table)].filter(hasVal).join('.')
+  const timeColSQL = `DESCRIPTOR(${columnRefToSQL(timecol.expr)})`
+  const result = [`TABLE(TUMBLE(TABLE ${tableTumbleArgsToSQL(tableInfo, fullTableName)}`, tableTumbleArgsToSQL(timecol, timeColSQL)]
+  const sizeSQL = tableTumbleArgsToSQL(size, intervalToSQL(size.expr))
+  if (offset && offset.expr) result.push(sizeSQL, `${tableTumbleArgsToSQL(offset, intervalToSQL(offset.expr))}))`)
+  else result.push(`${sizeSQL}))`)
+  return result.filter(hasVal).join(', ')
 }
 
 function temporalTableOptionToSQL(stmt) {
