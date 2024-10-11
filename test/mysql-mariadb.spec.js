@@ -1123,6 +1123,13 @@ describe('mysql', () => {
           'SELECT CONVERT(`a` - `b`, DECIMAL(10, 2)) AS `a` FROM `test`'
         ]
       },
+      {
+        title: 'bit data type',
+        sql: [
+          'CREATE TABLE visits (done bit);',
+          'CREATE TABLE `visits` (`done` BIT)'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
