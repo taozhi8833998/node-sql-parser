@@ -235,7 +235,7 @@ export interface Insert_Replace {
   db: string | null;
   table: any;
   columns: string[] | null;
-  values: InsertReplaceValue[];
+  values: InsertReplaceValue[] | Select;
   loc?: LocationRange;
 }
 export interface Update {
