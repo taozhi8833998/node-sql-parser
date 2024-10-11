@@ -1890,6 +1890,8 @@ table_join
     };
   }
 
+tumble_args
+  = n:('DATA'i __ IMPLIES_ARROW) __ KW_TABLE __ d:table_name
 //NOTE that, the table assigned to `var` shouldn't write in `table_join`
 table_base
   = KW_DUAL {
@@ -1919,16 +1921,36 @@ table_base
         as: alias
       };
     }
-  / KW_TABLE __ LPAREN __ KW_TUMBLE __ LPAREN __ KW_TABLE __ d:table_name __ COMMA __ 'DESCRIPTOR'i __ LPAREN __ t:column_ref __ RPAREN __ COMMA __ s:interval_expr __ RPAREN __ RPAREN __ alias:alias_clause? {
-    return {
+  / KW_TABLE __ LPAREN __ KW_TUMBLE __ LPAREN __ dn:('DATA'i __ IMPLIES_ARROW)? __ KW_TABLE __ d:table_name __ COMMA __ tn:('TIMECOL'i __ IMPLIES_ARROW)? __ 'DESCRIPTOR'i __ LPAREN __ t:column_ref __ RPAREN __ COMMA __ sn:('SIZE'i __ IMPLIES_ARROW)? __ s:interval_expr o:(__ COMMA __ ('OFFSET'i __ IMPLIES_ARROW)? __ interval_expr)? __ RPAREN __ RPAREN __ alias:alias_clause? {
+    const result = {
       expr: {
         type: 'tumble',
-        data: d,
-        timecol: t,
-        size: s
+        data: {
+          name: dn && dn[0],
+          symbol: dn && dn[2],
+          expr: d
+        },
+        timecol: {
+          name: tn && tn[0],
+          symbol: tn && tn[2],
+          expr: t,
+        },
+        size: {
+          name: sn && sn[0],
+          symbol: sn && sn[2],
+          expr: s,
+        },
       },
       as: alias
     }
+    if (o) {
+      result.expr.offset = {
+        name: o[3] && o[3][0],
+        symbol: o[3] && o[3][2],
+        expr: o[5],
+      }
+    }
+    return result
   }
 
 join_op
@@ -3562,6 +3584,7 @@ SINGLE_ARROW = '->'
 DOUBLE_ARROW = '->>'
 WELL_ARROW = '#>'
 DOUBLE_WELL_ARROW = '#>>'
+IMPLIES_ARROW = '=>'
 
 OPERATOR_CONCATENATION = '||'
 OPERATOR_AND = '&&'

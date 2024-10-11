@@ -376,7 +376,38 @@ describe('Flink', () => {
             INTERVAL '60' SECONDS
           )
         )`,
-        "SELECT `window_start`, `window_end`, `http_status`, COUNT(*) AS `count_http_status` FROM TABLE(TUMBLE(TABLE `parsed_logs` DESCRIPTOR(`_operationTs`) INTERVAL '60' SECONDS))"
+        "SELECT `window_start`, `window_end`, `http_status`, COUNT(*) AS `count_http_status` FROM TABLE(TUMBLE(TABLE `parsed_logs`, DESCRIPTOR(`_operationTs`), INTERVAL '60' SECONDS))"
+      ]
+    },
+    {
+      title: 'tumble table with offset',
+      sql: [
+        `SELECT
+          window_start,
+          window_end,
+          http_status,
+          count(*) as count_http_status
+        FROM
+        TABLE (
+          TUMBLE (
+            TABLE parsed_logs,
+            DESCRIPTOR (_operationTs),
+            INTERVAL '60' SECONDS,
+            INTERVAL '10' MINUTES
+          )
+        )`,
+        "SELECT `window_start`, `window_end`, `http_status`, COUNT(*) AS `count_http_status` FROM TABLE(TUMBLE(TABLE `parsed_logs`, DESCRIPTOR(`_operationTs`), INTERVAL '60' SECONDS, INTERVAL '10' MINUTES))"
+      ]
+    },
+    {
+      title: 'tumble table with named params',
+      sql: [
+        `SELECT * FROM TABLE(
+        TUMBLE(
+          DATA => TABLE Bid,
+          TIMECOL => DESCRIPTOR(bidtime),
+          SIZE => INTERVAL '10' MINUTES))`,
+        "SELECT * FROM TABLE(TUMBLE(TABLE DATA => `Bid`, TIMECOL => DESCRIPTOR(`bidtime`), SIZE => INTERVAL '10' MINUTES))"
       ]
     },
     {
