@@ -2659,7 +2659,7 @@ insert_partition
   = KW_PARTITION __ LPAREN __ head:ident_name tail:(__ COMMA __ ident_name)* __ RPAREN {
       return createList(head, tail)
     }
-  / KW_PARTITION __ v: value_item {
+  / KW_PARTITION __ v:value_item {
     return v
   }
 
