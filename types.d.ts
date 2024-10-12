@@ -232,10 +232,15 @@ export interface Select {
 }
 export interface Insert_Replace {
   type: "replace" | "insert";
-  db: string | null;
   table: any;
   columns: string[] | null;
   values: InsertReplaceValue[] | Select;
+  partition: any[];
+  prefix: string;
+  on_duplicate_update: {
+    keyword: "on duplicate key update",
+    set: SetList[];
+  };
   loc?: LocationRange;
 }
 export interface Update {
