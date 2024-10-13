@@ -148,6 +148,10 @@ describe('sqlite', () => {
     expect(getParsedSql(sql)).to.be.equal(`SELECT * FROM "tb" WHERE NOT EXISTS (SELECT * FROM "tb" WHERE "field1" = 'c' AND "field2" = "d")`)
     sql = 'SELECT * FROM tb WHERE key="foo"'
     expect(getParsedSql(sql)).to.be.equal('SELECT * FROM "tb" WHERE "key" = "foo"')
+    sql = 'SELECT column_name from table_name where type= "abc"'
+    expect(getParsedSql(sql)).to.be.equal('SELECT "column_name" FROM "table_name" WHERE "type" = "abc"')
+    sql = "SELECT partition from table_name where partition like '%'"
+    expect(getParsedSql(sql)).to.be.equal(`SELECT "partition" FROM "table_name" WHERE "partition" LIKE '%'`)
   })
 
   it('should support sqlify autoincrement to other db', () => {
