@@ -417,15 +417,12 @@ create_view_stmt
 
 create_table_stmt
   = a:KW_CREATE __
-    tp:KW_TEMPORARY? __
+    tp:(KW_TEMPORARY / KW_TEMP)? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
     t:table_name __
-    c:create_table_definition? __
-    to:table_options? __
-    ir: (KW_IGNORE / KW_REPLACE)? __
-    as: KW_AS? __
-    qe: union_stmt? {
+    c:create_table_definition __
+    to:table_options? {
       if(t) tableList.add(`create::${t.db}::${t.table}`)
       return {
         tableList: Array.from(tableList),
@@ -436,20 +433,18 @@ create_table_stmt
           temporary: tp && tp[0].toLowerCase(),
           if_not_exists:ife,
           table: [t],
-          ignore_replace: ir && ir[0].toLowerCase(),
-          as: as && as[0].toLowerCase(),
-          query_expr: qe && qe.ast,
           create_definitions: c,
           table_options: to
         }
       }
     }
   / a:KW_CREATE __
-    tp:KW_TEMPORARY? __
+    tp:(KW_TEMPORARY / KW_TEMP)? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
     t:table_name __
-    lt:create_like_table {
+    as:KW_AS __
+    qe:select_stmt {
       if(t) tableList.add(`create::${t.db}::${t.table}`)
       return {
         tableList: Array.from(tableList),
@@ -458,9 +453,10 @@ create_table_stmt
           type: a[0].toLowerCase(),
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
-          if_not_exists:ife,
+          if_not_exists: ife,
           table: [t],
-          like: lt
+          as: 'as',
+          query_expr: qe,
         }
       }
     }
@@ -1142,6 +1138,16 @@ table_option
       keyword: kw.toLowerCase(),
       symbol: s,
       value: c.toUpperCase()
+    }
+  }
+  / 'WITHOUT'i __ 'ROWID'i {
+    return {
+      keyword: 'without rowid'
+    }
+  }
+  / 'STRICT'i {
+    return {
+      keyword: 'strict'
     }
   }
 

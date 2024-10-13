@@ -16,6 +16,7 @@ import {
   commentToSQL,
   commonTypeValue,
   dataTypeToSQL,
+  getParserOpt,
   toUpper,
   hasVal,
   identifierToSql,
@@ -85,7 +86,11 @@ function createTableToSQL(stmt) {
   }
   if (partitionOf) return sql.concat([createTablePartitionOfToSQL(partitionOf)]).filter(hasVal).join(' ')
   if (createDefinition) sql.push(`(${createDefinition.map(createDefinitionToSQL).join(', ')})`)
-  if (tableOptions) sql.push(tableOptions.map(tableOptionToSQL).join(' '))
+  if (tableOptions) {
+    const { database } = getParserOpt()
+    const symbol = database && database.toLowerCase() === 'sqlite' ? ', ' : ' '
+    sql.push(tableOptions.map(tableOptionToSQL).join(symbol))
+  }
   if (withExpr) {
     const withSQL = withExpr.map(withExprItem => [literalToSQL(withExprItem.keyword), toUpper(withExprItem.symbol), literalToSQL(withExprItem.value)].join(' ')).join(', ')
     sql.push(`WITH (${withSQL})`)
