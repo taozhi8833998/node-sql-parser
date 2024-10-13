@@ -29,12 +29,17 @@ describe('noql', () => {
     expect(getParsedSql(sql)).to.be.equal(`SELECT *, convert("Replacement Cost", 'int') AS "s" FROM "films"`)
   })
 
-  it('should support intersect', () => {
-    const sql = `SELECT  *
+  it('should support except and intersect', () => {
+    let sql = `SELECT *
+      FROM "top-rated-films" 
+      EXCEPT
+      SELECT *
+      FROM "most-popular-films"
+      ORDER BY name`
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM "top-rated-films" EXCEPT SELECT * FROM "most-popular-films" ORDER BY "name" ASC')
+    sql = `SELECT  *
     FROM "most-popular-films"
-
     INTERSECT
-
     SELECT  *
     FROM "top-rated-films"`
     expect(getParsedSql(sql)).to.be.equal('SELECT * FROM "most-popular-films" INTERSECT SELECT * FROM "top-rated-films"')

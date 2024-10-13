@@ -30,6 +30,7 @@
     'END': true,
     'EXISTS': true,
     'EXPLAIN': true,
+    'EXCEPT': true,
 
     'FALSE': true,
     'FROM': true,
