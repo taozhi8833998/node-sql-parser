@@ -7,7 +7,7 @@
 
 export type start = multiple_stmt | create_function_stmt;
 
-export type cmd_stmt = drop_stmt | create_stmt | declare_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt | show_stmt | deallocate_stmt | grant_revoke_stmt | if_else_stmt | raise_stmt | execute_stmt | for_loop_stmt | transaction_stmt;
+export type cmd_stmt = drop_stmt | create_stmt | declare_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt | show_stmt | deallocate_stmt | grant_revoke_stmt | if_else_stmt | raise_stmt | execute_stmt | for_loop_stmt | transaction_stmt | comment_on_stmt;
 
 export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence | create_db_stmt | create_domain_stmt | create_type_stmt | create_view_stmt | create_aggregate_stmt;
 
@@ -111,12 +111,12 @@ export type declare_stmt_t = { type: 'declare'; declare: declare_variable_item[]
 
 export type declare_stmt = AstStatement<declare_stmt_t>;
 
-export type create_func_opt = literal_string | { type: 'as'; begin?: string; declare?: declare_stmt; expr: multiple_stmt; end?: string; symbol: string; } | literal_numeric | { type: "set"; parameter: ident_name; value?: { prefix: string; expr: expr }};
+export type create_func_opt = literal_string | { type: 'as'; begin?: string; declare?: declare_stmt; expr: multiple_stmt; end?: string; symbol: string; } | literal_numeric | { type: "set"; parameter: ident_name; value?: { prefix: string; expr: expr }} | return_stmt;
 
 export type create_function_stmt_t = {
         type: 'create';
         replace?: string;
-        name: { schema?: string; name: string };
+        name: proc_func_name;
         args?: alter_func_args;
         returns?: func_returns;
         keyword: 'function';
@@ -820,15 +820,37 @@ export interface for_loop_stmt_t {
 
 export type for_loop_stmt = AstStatement<for_loop_stmt_t>;
 
+export type transaction_mode_isolation_level = { type: 'origin'; value: string; } | ignore;
+
+export type transaction_mode = { type: 'origin'; value: string; } | ignore;
+
+export type transaction_mode_list = transaction_mode[];
+
 export interface transaction_stmt_t {
         type: 'transaction';
         expr: {
-          type: 'origin',
-          value: string
+          action: {
+            type: 'origin',
+            value: string
+          };
+          keyword?: string;
+          modes?: transaction_mode[];
         }
       }
 
-export type transaction_stmt = AstStatement<transaction_stmt_t>;
+export type transaction_stmt = AstStatement<transaction_stmt_t> | ignore;
+
+export type comment_on_option = { type: string; name: table_name; } | { type: string; name: column_ref; } | { type: string; name: ident; };
+
+export type comment_on_is = { keyword: 'is'; expr: literal_string | literal_null; };
+
+export interface comment_on_stmt_t {
+        type: 'comment';
+        target: comment_on_option;
+        expr: comment_on_is;
+      }
+
+export type comment_on_stmt = AstStatement<comment_on_stmt_t>;
 
 export interface select_stmt_node extends select_stmt_nake  {
        parentheses: true;
@@ -842,7 +864,7 @@ export type cte_definition = { name: { type: 'default'; value: string; }; stmt: 
 
 export type cte_column_definition = column_ref_list;
 
-export type distinct_on = {type: string; columns: column_ref_list;} | { type: string | undefined; };
+export type distinct_on = {type: string; columns: column_list_items;} | { type: string | undefined; };
 
 
 
@@ -866,7 +888,9 @@ export type option_clause = query_option[];
 
 export type query_option = 'SQL_CALC_FOUND_ROWS'| 'SQL_CACHE'| 'SQL_NO_CACHE'| 'SQL_BIG_RESULT'| 'SQL_SMALL_RESULT'| 'SQL_BUFFER_RESULT';
 
-export type column_clause = 'ALL' | '*' | column_list_item[] | column_list_item[];
+export type column_list_items = column_list_item[];
+
+export type column_clause = 'ALL' | '*' | column_list_item[] | column_list_items;
 
 export type array_index = { brackets: boolean, number: number };
 
@@ -1448,6 +1472,8 @@ type KW_RECURSIVE = never;
 
 type KW_REPLACE = never;
 
+type KW_RETURN = never;
+
 type KW_RETURNING = never;
 
 type KW_RENAME = never;
@@ -1479,6 +1505,8 @@ type KW_SEQUENCE = never;
 type KW_TABLESPACE = never;
 
 type KW_COLLATE = never;
+
+type KW_COLLATION = never;
 
 type KW_DEALLOCATE = never;
 
@@ -1628,6 +1656,8 @@ type KW_MEDIUMTEXT = never;
 
 type KW_LONGTEXT = never;
 
+type KW_MEDIUMINT = never;
+
 type KW_BIGINT = never;
 
 type KW_ENUM = never;
@@ -1733,8 +1763,6 @@ type KW_VAR_PRE_DOLLAR = never;
 type KW_VAR_PRE_DOLLAR_DOUBLE = never;
 
 type KW_VAR_PRE = never;
-
-type KW_RETURN = never;
 
 type KW_ASSIGN = never;
 
@@ -1899,8 +1927,6 @@ export type binary_type = data_type;
 
 export type character_varying = string;
 
-
-
 export type character_string_type = data_type;
 
 export type numeric_type_suffix = any[];;
@@ -1921,13 +1947,7 @@ export type timezone = string[];;
 
 
 
-
-
-
-
 export type time_type = data_type;
-
-
 
 
 
@@ -1948,8 +1968,6 @@ export type geometry_type = data_type;
 
 
 export type serial_interval_type = data_type;
-
-
 
 
 
