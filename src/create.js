@@ -177,15 +177,19 @@ function createExtensionToSQL(stmt) {
 
 function createIndexToSQL(stmt) {
   const {
-    concurrently, filestream_on: fileStream, keyword, include, index_columns: indexColumns,
+    concurrently, filestream_on: fileStream, keyword, if_not_exists: ifNotExists, include, index_columns: indexColumns,
     index_type: indexType, index_using: indexUsing, index, on, index_options: indexOpt, algorithm_option: algorithmOpt, lock_option: lockOpt, on_kw: onKw, table, tablespace, type, where,
     with: withExpr, with_before_where: withBeforeWhere,
   } = stmt
   const withIndexOpt = withExpr && `WITH (${indexOptionListToSQL(withExpr).join(', ')})`
   const includeColumns = include && `${toUpper(include.keyword)} (${include.columns.map(col => identifierToSql(col)).join(', ')})`
+  let indexName = index
+  if (index) {
+    indexName = typeof index === 'string' ? identifierToSql(index) : [identifierToSql(index.schema), identifierToSql(index.name)].filter(hasVal).join('.')
+  }
   const sql = [
-    toUpper(type), toUpper(indexType), toUpper(keyword), toUpper(concurrently),
-    identifierToSql(index), toUpper(onKw), tableToSQL(table), ...indexTypeToSQL(indexUsing),
+    toUpper(type), toUpper(indexType), toUpper(keyword), toUpper(ifNotExists), toUpper(concurrently),
+    indexName, toUpper(onKw), tableToSQL(table), ...indexTypeToSQL(indexUsing),
     `(${columnOrderListToSQL(indexColumns)})`, includeColumns, indexOptionListToSQL(indexOpt).join(' '), alterExprToSQL(algorithmOpt), alterExprToSQL(lockOpt),
     commonOptionConnector('TABLESPACE', literalToSQL, tablespace),
   ]

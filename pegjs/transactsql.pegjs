@@ -309,7 +309,8 @@ column_order_list
   }
 
 column_order_item
-  = LBRAKE __ c:column_ref __ RBRAKE __ o:(KW_ASC / KW_DESC) { return {
+  = LBRAKE __ c:column_ref __ RBRAKE __ o:(KW_ASC / KW_DESC) {
+    return {
       ...c,
       order_by: o.toLowerCase()
     }

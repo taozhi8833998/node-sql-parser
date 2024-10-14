@@ -226,6 +226,7 @@ cmd_stmt
 create_stmt
   = create_table_stmt
   / create_db_stmt
+  / create_index_stmt
   / create_trigger_stmt
   / create_view_stmt
 
@@ -386,6 +387,57 @@ create_db_stmt
       }
     }
 
+column_order_list
+  = head:column_order_item tail:(__ COMMA __ column_order_item)* {
+    return createList(head, tail)
+  }
+
+column_order_item
+  = c:expr __ ce:collate_expr? __ o:(KW_ASC / KW_DESC)? {
+    return {
+      ...c,
+      collate: ce,
+      order_by: o && o.toLowerCase(),
+    }
+  }
+  / column_order
+
+column_order
+  = c:column_ref __ ce:collate_expr? __ o:(KW_ASC / KW_DESC)? {
+    return {
+      ...c,
+      collate: ce,
+      order_by: o && o.toLowerCase(),
+    }
+  }
+  
+create_index_stmt
+  = a:KW_CREATE __
+  kw:(KW_UNIQUE)? __
+  t:KW_INDEX __
+  ife:if_not_exists_stmt? __
+  n:table_name __
+  um:index_type? __
+  on:KW_ON __
+  ta:table_name __ LPAREN __ cols:column_order_list __ RPAREN __
+  where:where_clause? {
+    return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a[0].toLowerCase(),
+          index_type: kw && kw.toLowerCase(),
+          keyword: t.toLowerCase(),
+          if_not_exists: ife,
+          index: { schema: n.db, name: n.table },
+          on_kw: on[0].toLowerCase(),
+          table: ta,
+          index_columns: cols,
+          where,
+        }
+    }
+  }
+  
 view_with
   = KW_WITH __ c:("CASCADED"i / "LOCAL"i) __ "CHECK"i __ "OPTION" {
     return `with ${c.toLowerCase()} check option`
