@@ -176,11 +176,11 @@ describe('sqlite', () => {
   let sql = `CREATE TABLE IF NOT EXISTS posts (
       user_id INTEGER NOT NULL,
       FOREIGN KEY (user_id) REFERENCES users(user_id)
-    );
+    ) WITHOUT ROWID;
     `
-    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE IF NOT EXISTS "posts" ("user_id" INTEGER NOT NULL, FOREIGN KEY ("user_id") REFERENCES "users" ("user_id"))')
-    sql = 'CREATE TABLE users (age INTEGER CHECK(age >= 18));'
-    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE "users" ("age" INTEGER CHECK ("age" >= 18))')
+    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE IF NOT EXISTS "posts" ("user_id" INTEGER NOT NULL, FOREIGN KEY ("user_id") REFERENCES "users" ("user_id")) WITHOUT ROWID')
+    sql = 'CREATE TABLE users (age INTEGER CHECK(age >= 18)) STRICT, WITHOUT ROWID;'
+    expect(getParsedSql(sql)).to.be.equal('CREATE TABLE "users" ("age" INTEGER CHECK ("age" >= 18)) STRICT, WITHOUT ROWID')
     sql = 'ALTER TABLE customers RENAME COLUMN age TO customer_age;'
     expect(getParsedSql(sql)).to.be.equal('ALTER TABLE "customers" RENAME COLUMN "age" TO "customer_age"')
   })

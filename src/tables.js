@@ -200,7 +200,7 @@ function tableOptionToSQL(tableOption) {
       break
   }
   sql.push(val)
-  return sql.join(' ')
+  return sql.filter(hasVal).join(' ')
 }
 
 export {
