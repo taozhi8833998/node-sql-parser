@@ -513,7 +513,8 @@ column_order_list
   }
 
 column_order_item
-  = c:expr o:(KW_ASC / KW_DESC)? { return {
+  = c:expr __ o:(KW_ASC / KW_DESC)? {
+    return {
       ...c,
       order_by: o && o.toLowerCase(),
     }

@@ -200,4 +200,10 @@ describe('sqlite', () => {
     `
     expect(getParsedSql(sql)).to.be.equal(`SELECT SUM("Hours Spent") AS "Total Hours" FROM "Work_Records" WHERE "Partner ID" = (SELECT "Partner ID" FROM "Employees" WHERE "Firstname" = 'John' AND "Lastname" = 'Smith')`)
   })
+  it('should support create index', () => {
+    let sql = 'CREATE INDEX visits_url_index ON visits (url);'
+    expect(getParsedSql(sql)).to.be.equal('CREATE INDEX "visits_url_index" ON "visits" ("url")')
+    sql = 'CREATE INDEX if not exists schema_name.visits_url_index ON visits (url collate cn asc) where id > 10;'
+    expect(getParsedSql(sql)).to.be.equal('CREATE INDEX IF NOT EXISTS "schema_name"."visits_url_index" ON "visits" ("url" COLLATE cn ASC) WHERE "id" > 10')
+  })
 })
