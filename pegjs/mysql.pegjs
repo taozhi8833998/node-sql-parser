@@ -3086,8 +3086,9 @@ primary
   / cast_expr
   / case_expr
   / interval_expr
-  / literal
+  / literal_basic
   / column_ref
+  / literal_numeric
   / param
   / LPAREN __ list:or_and_where_expr __ RPAREN {
     list.parentheses = true
@@ -3228,6 +3229,7 @@ column
 
 column_name
   =  start:ident_start parts:column_part* { return start + parts.join(''); }
+  / start:digits parts:column_part+ { return start + parts.join(''); }
 
 ident_name
   =  start:ident_start parts:ident_part* { return start + parts.join(''); }
@@ -3629,16 +3631,19 @@ signedness
   = KW_SIGNED
   / KW_UNSIGNED
 
-literal
+literal_basic
   = b:('binary'i / '_binary'i)? __ s:literal_string ca:(__ collate_expr)? {
     if (b) s.prefix = b.toLowerCase()
     if (ca) s.suffix = { collate: ca[1] }
     return s
   }
-  / literal_numeric
   / literal_bool
   / literal_null
   / literal_datetime
+  
+literal
+  = literal_basic / literal_numeric
+  
 
 literal_list
   = head:literal tail:(__ COMMA __ literal)* {
