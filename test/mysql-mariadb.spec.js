@@ -1130,6 +1130,13 @@ describe('mysql', () => {
           'CREATE TABLE `visits` (`done` BIT)'
         ]
       },
+      {
+        title: 'column name start with digit',
+        sql: [
+          'select 4k_pic from table1',
+          'SELECT `4k_pic` FROM `table1`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
