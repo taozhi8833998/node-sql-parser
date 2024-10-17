@@ -196,6 +196,8 @@ export type Binary = {
   parentheses?: boolean;
 };
 
+export type Expr = Binary;
+
 export type ExpressionValue =
   | ColumnRef
   | Param
