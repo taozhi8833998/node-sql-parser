@@ -99,12 +99,19 @@ export interface ValueExpr<T = string | number | boolean> {
   value: T;
 }
 
-export interface ColumnRef {
+export interface ColumnRefItem {
   type: "column_ref";
   table: string | null;
   column: string | { expr: ValueExpr };
   loc?: LocationRange;
 }
+export interface ColumnRefExpr {
+  type: "expr";
+  expr: ColumnRefItem;
+  as: string | null;
+}
+
+export type ColumnRef = ColumnRefItem | ColumnRefExpr;
 export interface SetList {
   column: string;
   value: any;
@@ -214,6 +221,31 @@ export type ExprList = {
   value: ExpressionValue[];
   loc?: LocationRange;
 };
+
+export type PartitionBy = {
+  type: 'expr';
+  expr: ColumnRef[];
+}[];
+
+export type WindowSpec = {
+  name: null;
+  partitionby: PartitionBy;
+  orderby: OrderBy[] | null;
+  window_frame_clause: string | null; };
+
+export type AsWindowSpec = string | { window_specification: WindowSpec; parentheses: boolean };
+
+export type NamedWindowExpr = {
+  name: string;
+  as_window_specification: AsWindowSpec;
+};
+
+export type WindowExpr = {
+  keyword: 'window';
+  type: 'window',
+  expr: NamedWindowExpr[];
+};
+
 export interface Select {
   with: With[] | null;
   type: "select";
@@ -226,11 +258,15 @@ export interface Select {
   having: any[] | null;
   orderby: OrderBy[] | null;
   limit: Limit | null;
+  window?: WindowExpr;
+  qualify?: any[] | null;
   _orderby?: OrderBy[] | null;
   _limit?: Limit | null;
   parentheses_symbol?: boolean;
   _parentheses?: boolean;
   loc?: LocationRange;
+  _next?: Select;
+  set_op?: string;
 }
 export interface Insert_Replace {
   type: "replace" | "insert";
