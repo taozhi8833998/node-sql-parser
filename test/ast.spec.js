@@ -1268,8 +1268,30 @@ describe('AST', () => {
             const sql = parser.exprToSQL(ast.where);
             expect(sql).to.equal('`id` = 1');
         });
+        
+        it('should be able to get columns from ast', () => {
+            const ast = parser.astify(`SELECT
+                campaign.id,
+                ad_group.id,
+                'http://' + ad_group_ad.ad.final_urls + '?tm=123' as url,
+                ad_group_ad.resource_name,
+                ad_group_ad.policy_summary.policy_topic_entries as policy_topic_entries,
+                ad_group_ad.policy_summary.policy_topic_entries:topic as topic,
+                ad_group_ad.policy_summary.policy_topic_entries:topic + '!' as topic2
+                FROM ad_group_ad`);
+            const columns = parser.columnsToSQL(ast.columns, ast.from);
+            expect(columns).to.be.eql([
+                '`campaign`.`id`',
+                '`ad_group`.`id`',
+                "'http://' + `ad_group_ad`.`ad`.`final_urls` + '?tm=123' AS `url`",
+                '`ad_group_ad`.`resource_name`',
+                '`ad_group_ad`.`policy_summary`.`policy_topic_entries` AS `policy_topic_entries`',
+                '`ad_group_ad`.`policy_summary`.`policy_topic_entries:topic` AS `topic`',
+                "`ad_group_ad`.`policy_summary`.`policy_topic_entries:topic` + '!' AS `topic2`"
+            ])
+        });
     })
-
+    
     describe('jsonb operator ast order', () => {
       it('should parse jsonb operator ast order correct', () => {
         const sql = `SELECT company.name

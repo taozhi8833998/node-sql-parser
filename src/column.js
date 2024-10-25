@@ -213,4 +213,5 @@ export {
   columnOrderToSQL,
   columnReferenceDefinitionToSQL,
   fullTextSearchToSQL,
+  getDual,
 }
