@@ -1,3 +1,4 @@
+import { columnToSQL, getDual } from './column'
 import { exprToSQL } from './expr'
 import parsers from './parser.all'
 import astToSQL from './sql'
@@ -17,6 +18,13 @@ class Parser {
   exprToSQL(expr, opt = DEFAULT_OPT) {
     setParserOpt(opt)
     return exprToSQL(expr)
+  }
+
+  columnsToSQL(columns, tables, opt = DEFAULT_OPT) {
+    setParserOpt(opt)
+    if (!columns || columns === '*') return []
+    const isDual = getDual(tables)
+    return columns.map(col => columnToSQL(col, isDual))
   }
 
   parse(sql, opt = DEFAULT_OPT) {
