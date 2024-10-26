@@ -740,16 +740,31 @@ create_column_definition
     }
 
 trigger_definer
-  = 'DEFINER'i __ KW_ASSIGIN_EQUAL __ u:literal_string __ '@' __ h:literal_string {
-    const userNameSymbol = u.type === 'single_quote_string' ? '\'' : '"'
-    const hostSymbol = h.type === 'single_quote_string' ? '\'' : '"'
-    return `DEFINER = ${userNameSymbol}${u.value}${userNameSymbol}@${hostSymbol}${h.value}${hostSymbol}`
+  =  'DEFINER'i __ KW_ASSIGIN_EQUAL __ u:(backticks_quoted_ident / literal_string) __ '@' __ h:(backticks_quoted_ident / literal_string) {
+    const left = { type: 'origin', value: 'definer' }
+    const operator = '='
+    const right = createBinaryExpr(u, '@', h)
+    return createBinaryExpr(operator, left, right)
   }
   / 'DEFINER'i __ KW_ASSIGIN_EQUAL __ KW_CURRENT_USER __ LPAREN __ RPAREN {
-    return `DEFINER = CURRENT_USER()`
+    const left = { type: 'origin', value: 'definer' }
+    const operator = '='
+    const right = {
+      type: 'function',
+      name: { name: [{ type: 'default', value: 'current_user' }] },
+      args:{ type: 'expr_list', value: [] },
+    }
+    return createBinaryExpr(operator, left, right)
   }
   / 'DEFINER'i __ KW_ASSIGIN_EQUAL __ KW_CURRENT_USER  {
-    return `DEFINER = CURRENT_USER`
+    const left = { type: 'origin', value: 'definer' }
+    const operator = '='
+    const right = {
+      type: 'function',
+      name: { name: [{ type: 'default', value: 'current_user' }] },
+      args:{ type: 'expr_list', value: [] },
+    }
+    return createBinaryExpr(operator, left, right)
   }
 trigger_time
   = 'BEFORE'i /  'AFTER'i
