@@ -1289,6 +1289,8 @@ describe('AST', () => {
                 '`ad_group_ad`.`policy_summary`.`policy_topic_entries:topic` AS `topic`',
                 "`ad_group_ad`.`policy_summary`.`policy_topic_entries:topic` + '!' AS `topic2`"
             ])
+            expect(parser.columnsToSQL('*', ast.from)).to.be.eql([])
+            expect(parser.columnsToSQL('', ast.from)).to.be.eql([])
         });
     })
     

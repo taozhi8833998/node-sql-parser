@@ -1656,6 +1656,22 @@ describe('Postgres', () => {
         'CREATE TABLE "test" AS SELECT 1'
       ]
     },
+    {
+      title: 'substring',
+      sql: [
+        `SELECT AVG(
+            CASE
+                WHEN "duration" LIKE '%min%' THEN CAST(SUBSTRING("duration" FROM '([0-9]+)') AS INTEGER)
+                WHEN "duration" LIKE '%hr%' THEN CAST(SUBSTRING("duration" FROM '([0-9]+)') AS INTEGER) * 60
+                ELSE NULL
+            END
+        ) AS average_duration
+        FROM "netflix_shows"
+        WHERE "listed_in" ILIKE '%Thriller%'
+        LIMIT 100;`,
+        `SELECT AVG(CASE WHEN "duration" LIKE '%min%' THEN CAST(SUBSTRING("duration" FROM '([0-9]+)') AS INTEGER) WHEN "duration" LIKE '%hr%' THEN CAST(SUBSTRING("duration" FROM '([0-9]+)') AS INTEGER) * 60 ELSE NULL END) AS "average_duration" FROM "netflix_shows" WHERE "listed_in" ILIKE '%Thriller%' LIMIT 100`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
