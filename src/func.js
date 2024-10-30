@@ -88,7 +88,16 @@ function funcToSQL(expr) {
   if (toUpper(funcName) === 'TRIM') separator = ' '
   let str = [funcName]
   str.push(args_parentheses === false ? ' ' : '(')
-  str.push(exprToSQL(args).join(separator))
+  const argsList = exprToSQL(args)
+  if (Array.isArray(separator)) {
+    let argsSQL = argsList[0]
+    for (let i = 1, len = argsList.length; i < len; ++i) {
+      argsSQL = [argsSQL, argsList[i]].join(` ${exprToSQL(separator[i - 1])} `)
+    }
+    str.push(argsSQL)
+  } else {
+    str.push(argsList.join(separator))
+  }
   if (args_parentheses !== false) str.push(')')
   str.push(arrayIndexToSQL(array_index))
   str = [str.join(''), suffixStr].filter(hasVal).join(' ')
