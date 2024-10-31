@@ -4888,8 +4888,51 @@ tablefunc_clause
     }
   }
 
+substring_funcs_clause
+  = 'substring'i __ LPAREN __ s:quoted_ident_type __ COMMA __ start:literal_numeric __ COMMA __ len:literal_numeric __ RPAREN {
+    // => { type: 'function'; name: 'substring'; args: expr_list; }
+      return {
+        type: 'function',
+        name: { name: [{ type: 'origin', value: 'substring' }] },
+        args: { type: 'expr_list', value: [s, start, len] },
+      }
+  }
+  / 'substring'i __ LPAREN __ s:quoted_ident_type __ KW_FROM __ start:quoted_ident_type __ len:('FOR'i __ quoted_ident_type)? __ RPAREN {
+    // => { type: 'function'; name: 'substring'; args: expr_list; }
+      const separator = [{ type: 'origin', value: 'from' }]
+      const args = { type: 'expr_list', value: [s, start] }
+      if (len) {
+        separator.push({ type: 'origin', value: 'for' })
+        args.value.push(len[2])
+      }
+      return {
+        type: 'function',
+        name: { name: [{ type: 'origin', value: 'substring' }] },
+        args,
+        separator
+      }
+  }
+  / 'substring'i __ LPAREN __ s:quoted_ident_type __ start:(KW_FROM __ literal_numeric)? __ len:('FOR'i __ literal_numeric)? __ RPAREN {
+    // => { type: 'function'; name: 'substring'; args: expr_list; }
+      const separator = []
+      const args = { type: 'expr_list', value: [s] }
+      if (start) {
+        separator.push({ type: 'origin', value: 'from' })
+        args.value.push(start[2])
+      }
+      if (len) {
+        separator.push({ type: 'origin', value: 'for' })
+        args.value.push(len[2])
+      }
+      return {
+        type: 'function',
+        name: { name: [{ type: 'origin', value: 'substring' }] },
+        args,
+        separator
+      }
+  }
 func_call
-  = trim_func_clause / tablefunc_clause
+  = trim_func_clause / tablefunc_clause / substring_funcs_clause
   / name:'now'i __ LPAREN __ l:expr_list? __ RPAREN __ 'at'i __ KW_TIME __ 'zone'i __ z:literal_string {
     // => { type: 'function'; name: proc_func_name; args: expr_list; suffix: literal_string; }
       z.prefix = 'at time zone'
