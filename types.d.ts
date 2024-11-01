@@ -103,6 +103,7 @@ export interface ColumnRefItem {
   type: "column_ref";
   table: string | null;
   column: string | { expr: ValueExpr };
+  options?: ExprList;
   loc?: LocationRange;
 }
 export interface ColumnRefExpr {
@@ -220,6 +221,8 @@ export type ExprList = {
   type: "expr_list";
   value: ExpressionValue[];
   loc?: LocationRange;
+  parentheses?: boolean;
+  separator?: string;
 };
 
 export type PartitionBy = {

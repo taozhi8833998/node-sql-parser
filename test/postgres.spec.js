@@ -1657,7 +1657,7 @@ describe('Postgres', () => {
       ]
     },
     {
-      title: 'substring',
+      title: 'substring function',
       sql: [
         `SELECT AVG(
             CASE
@@ -1670,6 +1670,20 @@ describe('Postgres', () => {
         WHERE "listed_in" ILIKE '%Thriller%'
         LIMIT 100;`,
         `SELECT AVG(CASE WHEN "duration" LIKE '%min%' THEN CAST(SUBSTRING("duration" FROM '([0-9]+)') AS INTEGER) WHEN "duration" LIKE '%hr%' THEN CAST(SUBSTRING("duration" FROM '([0-9]+)') AS INTEGER) * 60 ELSE NULL END) AS "average_duration" FROM "netflix_shows" WHERE "listed_in" ILIKE '%Thriller%' LIMIT 100`
+      ]
+    },
+    {
+      title: 'column at time zone',
+      sql: [
+        "SELECT start_time AT TIME ZONE 'UTC' AS start_time FROM my_table",
+        `SELECT start_time AT TIME ZONE 'UTC' AS "start_time" FROM "my_table"`
+      ]
+    },
+    {
+      title: 'column cast with at time zone',
+      sql: [
+        "SELECT start_time::timestamp AT TIME ZONE 'UTC' AS start_time FROM my_table",
+        `SELECT start_time::TIMESTAMP AT TIME ZONE 'UTC' AS "start_time" FROM "my_table"`
       ]
     },
   ]

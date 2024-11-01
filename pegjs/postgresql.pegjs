@@ -3292,13 +3292,39 @@ cast_data_type
     return t
   }
 
+column_item_suffix
+  = 'AT' __ KW_TIME __ 'ZONE'i __ t:quoted_ident_type {
+    // => [{ type: 'origin'; value: string; }, quoted_ident_type]
+    return [
+      {
+        type: 'origin',
+        value: 'at time zone'
+      },
+      t
+    ]
+  }
 column_list_item
   = c:string_constants_escape {
     // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
-  / e:(column_ref_quoted / expr_item) __ s:KW_DOUBLE_COLON __ t:cast_data_type __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
+  / e:column_ref __ s:KW_DOUBLE_COLON __ t:cast_data_type __ cs:column_item_suffix+ __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; }
+    t.suffix = cs.flat()
+    return {
+      as: alias,
+      type: 'cast',
+      expr: e,
+      symbol: '::',
+      target: t,
+      suffix: cs.flat(),
+    }
+  }
+  / e:(column_ref_quoted / expr_item) __ s:KW_DOUBLE_COLON __ t:cast_data_type __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ cs:column_item_suffix* __ alias:alias_clause? {
+    // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; }
+    if (e.type === 'column_ref' && cs.length) {
+      e.column.options = { type: 'expr_list', value: cs.flat(), separator: ' ' }
+    }
     return {
       as: alias,
       type: 'cast',
@@ -3341,7 +3367,7 @@ column_list_item
         as: null
       };
     }
-  / e:expr_item  __ alias:alias_clause? {
+  / e:expr_item __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
       return { type: 'expr', expr: e, as: alias };
     }
@@ -4074,7 +4100,7 @@ value_item
 
 expr_list
   = head:expr tail:(__ COMMA __ expr)* {
-    // => { type: 'expr_list'; value: expr[] }
+    // => { type: 'expr_list'; value: expr[]; parentheses?: boolean; separator?: string; }
       const el = { type: 'expr_list' };
       el.value = createList(head, tail);
       return el;
@@ -4404,9 +4430,10 @@ multiplicative_operator
   = "*" / "/" / "%" / "||"
 
 column_ref_array_index
-  = c:column_ref __ a:array_index_list? {
+  = c:column_ref __ a:array_index_list? __ cs:column_item_suffix* {
     // => column_ref
     if (a) c.array_index = a
+    if (cs.length) c.options = { type: 'expr_list', value: cs.flat(), separator: ' ' }
     return c
   }
 

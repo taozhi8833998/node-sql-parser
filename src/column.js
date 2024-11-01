@@ -35,7 +35,7 @@ function arrayIndexToSQL(arrayIndexList) {
 }
 function columnRefToSQL(expr) {
   const {
-    array_index, as, column, db, isDual, notations = [], schema, table, parentheses,
+    array_index, as, column, db, isDual, notations = [], options, schema, table, parentheses,
     suffix, order_by, subFields = [],
   } = expr
   let str = column === '*' ? '*' : columnOffsetToSQL(column, isDual)
@@ -51,6 +51,7 @@ function columnRefToSQL(expr) {
   str = [`${str}${arrayIndexToSQL(array_index)}`, ...subFields].join('.')
   const result = [
     str,
+    exprToSQL(options),
     commonOptionConnector('AS', exprToSQL, as),
   ]
   result.push(typeof suffix === 'string' ? toUpper(suffix) : exprToSQL(suffix))
