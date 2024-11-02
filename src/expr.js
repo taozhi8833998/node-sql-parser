@@ -89,8 +89,12 @@ function getExprListSQL(exprList) {
 }
 
 exprToSQLConvertFn.expr_list = expr => {
-  const str = getExprListSQL(expr.value)
-  return expr.parentheses ? `(${str.join(', ')})` : str
+  const result = getExprListSQL(expr.value)
+  const { parentheses, separator } = expr
+  if (!parentheses && !separator) return result
+  const joinSymbol = separator || ', '
+  const str = result.join(joinSymbol)
+  return parentheses ? `(${str})` : str
 }
 
 exprToSQLConvertFn.select = expr => {
