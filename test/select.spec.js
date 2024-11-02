@@ -1118,7 +1118,7 @@ describe('select', () => {
     });
 
     it('should parse recursive CTE', () => {
-      const sql = `WITH RECURSIVE cte(n) AS
+      const sql = `WITH recursive cte(n) AS
             (
               SELECT 1
               UNION
