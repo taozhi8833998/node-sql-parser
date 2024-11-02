@@ -1137,6 +1137,17 @@ describe('mysql', () => {
           'SELECT `4k_pic` FROM `table1`'
         ]
       },
+      {
+        title: 'create table not null position',
+        sql: [
+          `create table \`d\` (
+              \`id\` int (11) primary key auto_increment not null,
+              \`d_name\` varchar(15) not null,
+              \`d_id\` int(11) generated always as (cast(trim(d_name) as signed) ) virtual not null
+          );`,
+          'CREATE TABLE `d` (`id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `d_name` VARCHAR(15) NOT NULL, `d_id` INT(11) GENERATED ALWAYS AS (CAST(TRIM(`d_name`) AS SIGNED)) VIRTUAL NOT NULL)'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

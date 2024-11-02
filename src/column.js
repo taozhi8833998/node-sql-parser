@@ -110,8 +110,8 @@ function columnOption(definition) {
     column_format: columnFormat,
     reference_definition: referenceDefinition,
   } = definition
-
-  columnOpt.push(toUpper(nullable && nullable.action), toUpper(nullable && nullable.value))
+  const nullSQL = [toUpper(nullable && nullable.action), toUpper(nullable && nullable.value)].filter(hasVal).join(' ')
+  if (!generated) columnOpt.push(nullSQL)
   if (defaultOpt) {
     const { type, value } = defaultOpt
     columnOpt.push(type.toUpperCase(), exprToSQL(value))
@@ -120,6 +120,7 @@ function columnOption(definition) {
   if (constraint) columnOpt.push(toUpper(constraint.keyword), literalToSQL(constraint.constraint))
   columnOpt.push(constraintDefinitionToSQL(check))
   columnOpt.push(generatedExpressionToSQL(generated))
+  if (generated) columnOpt.push(nullSQL)
   columnOpt.push(autoIncrementToSQL(autoIncrement), toUpper(primaryKey), toUpper(uniqueKey), commentToSQL(comment))
   columnOpt.push(...commonTypeValue(characterSet))
   if (database !== 'sqlite') columnOpt.push(exprToSQL(collate))
