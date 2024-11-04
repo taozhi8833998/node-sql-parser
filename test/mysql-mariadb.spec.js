@@ -364,12 +364,25 @@ describe('mysql', () => {
         ]
       },
       {
-        title: 'parentheses in from clause',
+        title: 'parentheses in from table clause',
         sql: [
           'SELECT * FROM (user), (`name`)',
           'SELECT * FROM (`user`), (`name`)'
         ]
       },
+      {
+        title: 'parentheses in from table join clause',
+        sql: [
+          `select *
+            from (\`t1\` \`eti\` join bagel on bagel.id = eti.id)
+            ;
+            select *
+            from ((\`t1\`))
+          `,
+          'SELECT * FROM (`t1` AS `eti` INNER JOIN `bagel` ON `bagel`.`id` = `eti`.`id`) ; SELECT * FROM ((`t1`))'
+        ]
+      },
+      
       {
         title: 'blob data type',
         sql: [

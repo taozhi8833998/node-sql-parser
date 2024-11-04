@@ -162,7 +162,17 @@ function tablesToSQL(tables) {
   if (!Array.isArray(tables)) {
     const { expr, parentheses } = tables
     const sql = tablesToSQL(expr)
-    if (parentheses) return `(${sql})`
+    if (parentheses) {
+      const leftParentheses = []
+      const rightParentheses = []
+      const parenthesesNumber = parentheses === true ? 1 : parentheses.length
+      let i = 0
+      while (i++ < parenthesesNumber) {
+        leftParentheses.push('(')
+        rightParentheses.push(')')
+      }
+      return leftParentheses.join('') + sql + rightParentheses.join('')
+    }
     return sql
   }
   const baseTable = tables[0]
