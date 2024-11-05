@@ -2182,7 +2182,10 @@ select_stmt_nake
       if ((ci && fi) || (ci && li) || (fi && li) || (ci && fi && li)) {
         throw new Error('A given SQL statement can contain at most one INTO clause')
       }
-      if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
+      if(f) {
+        const tables = Array.isArray(f) ? f : f.expr
+        tables.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`))
+      }
       return {
           with: cte,
           type: 'select',
@@ -2385,8 +2388,7 @@ index_option
   / keyword_comment
 
 table_ref_list
-  = head:table_base
-    tail:table_ref* {
+  = head:table_base tail:table_ref* {
       tail.unshift(head);
       tail.forEach(tableInfo => {
         const { table, as } = tableInfo
@@ -2395,6 +2397,22 @@ table_ref_list
         refreshColumnList(columnList)
       })
       return tail;
+    }
+  / lp:LPAREN+ __ head:table_base tail:table_ref* __ rp:RPAREN+ {
+      if (lp.length !== rp.length) throw new Error('parentheses not match in from clause')
+      tail.unshift(head);
+      tail.forEach(tableInfo => {
+        const { table, as } = tableInfo
+        tableAlias[table] = table
+        if (as) tableAlias[as] = table
+        refreshColumnList(columnList)
+      })
+      return {
+        expr: tail,
+        parentheses: {
+          length: rp.length
+        } 
+      }
     }
 
 table_ref
@@ -2620,12 +2638,15 @@ delete_stmt
     w:where_clause? __
     or:order_by_clause? __
     l:limit_clause? {
-      if(f) f.forEach(tableInfo => {
-        const { db, as, table, join } = tableInfo
-        const action = join ? 'select' : 'delete'
-        if (table) tableList.add(`${action}::${db}::${table}`)
-        if (!join) columnList.add(`delete::${table}::(.*)`);
-      });
+      if(f) {
+        const tables = Array.isArray(f) ? f : f.expr
+        tables.forEach(tableInfo => {
+          const { db, as, table, join } = tableInfo
+          const action = join ? 'select' : 'delete'
+          if (table) tableList.add(`${action}::${db}::${table}`)
+          if (!join) columnList.add(`delete::${table}::(.*)`);
+        })
+      }
       if (t === null && f.length === 1) {
         const tableInfo = f[0]
         t = [{
