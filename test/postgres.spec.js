@@ -1698,6 +1698,20 @@ describe('Postgres', () => {
 
   neatlyNestTestedSQL(SQL_LIST)
 
+  describe('set time zone', () => {
+    it('should support set time zone', () => {
+      let sql = "SET TIME ZONE INTERVAL '00:00' HOUR TO MINUTE;"
+      expect(getParsedSql(sql, opt)).to.equal(sql.slice(0, -1))
+      sql = "SET TIME ZONE 'America/Los_Angeles';"
+      expect(getParsedSql(sql, opt)).to.equal(sql.slice(0, -1))
+      sql = 'SET TIME ZONE -8;'
+      expect(getParsedSql(sql, opt)).to.equal(sql.slice(0, -1))
+      sql = 'SET TIME ZONE LOCAL;'
+      expect(getParsedSql(sql, opt)).to.equal(sql.slice(0, -1))
+      sql = 'SET TIME ZONE DEFAULT;'
+      expect(getParsedSql(sql, opt)).to.equal(sql.slice(0, -1))
+    })
+  })
   describe('tables to sql', () => {
     it('should parse object tables', () => {
       const ast = parser.astify(SQL_LIST[100].sql[0], opt)
