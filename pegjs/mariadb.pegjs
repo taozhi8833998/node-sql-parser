@@ -53,6 +53,7 @@
 
     'KEY': true,
 
+    'LATERAL': true,
     'LEFT': true,
     'LIKE': true,
     'LIMIT': true,
@@ -2223,13 +2224,15 @@ table_base
       as: alias
     };
   }
-  / LPAREN __ stmt:(set_op_stmt / value_clause) __ RPAREN __ alias:alias_clause? {
+  / l:('LATERAL'i)? __ LPAREN __ stmt:(set_op_stmt / value_clause) __ RPAREN __ alias:alias_clause? {
       if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt, prefix: 'row' }
       stmt.parentheses = true;
-      return {
+      const result = {
         expr: stmt,
         as: alias
-      };
+      }
+      if (l) result.prefix = l;
+      return result
     }
 
 join_op

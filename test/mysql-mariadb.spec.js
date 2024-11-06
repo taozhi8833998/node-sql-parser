@@ -1161,6 +1161,13 @@ describe('mysql', () => {
           'CREATE TABLE `d` (`id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `d_name` VARCHAR(15) NOT NULL, `d_id` INT(11) GENERATED ALWAYS AS (CAST(TRIM(`d_name`) AS SIGNED)) VIRTUAL NOT NULL)'
         ]
       },
+      {
+        title: 'lateral derived tables',
+        sql: [
+          'SELECT * FROM table1, LATERAL (SELECT * FROM table2 WHERE table2.id = table1.id) AS subquery',
+          'SELECT * FROM `table1`, LATERAL (SELECT * FROM `table2` WHERE `table2`.`id` = `table1`.`id`) AS `subquery`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
