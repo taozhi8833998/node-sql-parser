@@ -5639,8 +5639,28 @@ assign_stmt_list
     return createList(head, tail);
   }
 
+assign_stmt_timezone
+  = KW_TIME __ 'ZONE'i __ e:interval_expr __ KW_TO __ r:interval_unit {
+    // => { type: 'assign';  left: expr_list; symbol: 'to'; right: interval_unit; }
+    return {
+      type: 'assign',
+      left: { type: 'expr_list', value: [{ type: 'origin', value: 'time zone' }, e], separator: ' ' },
+      symbol: 'to',
+      right: { type: 'origin', value: r }
+    };
+  }
+  / KW_TIME __ 'ZONE'i __ s:KW_TO? __ e:(literal_numeric / literal_string / KW_LOCAL / 'default'i) {
+    // => { type: 'assign'; left: literal_string; symbol?: 'to'; right: literal; }
+    return {
+      type: 'assign',
+      left: { type: 'origin', value: 'time zone' },
+      symbol: s ? 'to' : null,
+      right: typeof e === 'string' ? { type: 'origin', value: e } : e
+    };
+  }
 assign_stmt
-  = va:(var_decl / without_prefix_var_decl) __ s:(KW_ASSIGN / KW_ASSIGIN_EQUAL / KW_TO) __ e:proc_expr {
+  = assign_stmt_timezone
+  / va:(var_decl / without_prefix_var_decl) __ s:(KW_ASSIGN / KW_ASSIGIN_EQUAL / KW_TO) __ e:proc_expr {
     // => { type: 'assign'; left: var_decl | without_prefix_var_decl; symbol: ':=' | '='; right: proc_expr; }
     return {
       type: 'assign',
