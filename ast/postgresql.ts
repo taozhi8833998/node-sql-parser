@@ -900,6 +900,8 @@ export type expr_item = binary_column_expr & { array_index: array_index };
 
 export type cast_data_type = data_type & { quoted?: string };
 
+export type column_item_suffix = [{ type: 'origin'; value: string; }, quoted_ident_type];
+
 export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; } | { expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
 
 
@@ -1119,7 +1121,7 @@ export type value_list = value_item[];
 
 export type value_item = expr_list;
 
-export type expr_list = { type: 'expr_list'; value: expr[] };
+export type expr_list = { type: 'expr_list'; value: expr[]; parentheses?: boolean; separator?: string; };
 
 export type interval_expr = { type: 'interval', expr: expr; unit: interval_unit; };
 
@@ -1349,7 +1351,9 @@ export type trim_func_clause = { type: 'function'; name: proc_func_name; args: e
 
 export type tablefunc_clause = { type: 'tablefunc'; name: proc_func_name; args: expr_list; as: func_call };
 
-export type func_call = trim_func_clause | tablefunc_clause | { type: 'function'; name: proc_func_name; args: expr_list; suffix: literal_string; } | { type: 'function'; name: proc_func_name; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: proc_func_name; over?: on_update_current_timestamp; } | { type: 'function'; name: proc_func_name; args: expr_list; };
+export type substring_funcs_clause = { type: 'function'; name: 'substring'; args: expr_list; };
+
+export type func_call = trim_func_clause | tablefunc_clause | substring_funcs_clause | { type: 'function'; name: proc_func_name; args: expr_list; suffix: literal_string; } | { type: 'function'; name: proc_func_name; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: proc_func_name; over?: on_update_current_timestamp; } | { type: 'function'; name: proc_func_name; args: expr_list; };
 
 export type extract_filed = 'string';
 
@@ -1870,7 +1874,9 @@ export type proc_stmt = AstStatement<proc_stmt_t>;
 
 export type assign_stmt_list = assign_stmt[];
 
-export type assign_stmt = { type: 'assign'; left: var_decl | without_prefix_var_decl; symbol: ':=' | '='; right: proc_expr; };
+export type assign_stmt_timezone = { type: 'assign';  left: expr_list; symbol: 'to'; right: interval_unit; } | { type: 'assign'; left: literal_string; symbol?: 'to'; right: literal; };
+
+export type assign_stmt = assign_stmt_timezone | { type: 'assign'; left: var_decl | without_prefix_var_decl; symbol: ':=' | '='; right: proc_expr; };
 
 export type return_stmt = { type: 'return'; expr: proc_expr; };
 
