@@ -1686,6 +1686,13 @@ describe('Postgres', () => {
         `SELECT start_time::TIMESTAMP AT TIME ZONE 'UTC' AS "start_time" FROM "my_table"`
       ]
     },
+    {
+      title: 'create index with if not exists',
+      sql: [
+        'CREATE UNIQUE INDEX IF NOT EXISTS public_i_locations_pkey ON public.i_locations (id);',
+        'CREATE UNIQUE INDEX IF NOT EXISTS "public_i_locations_pkey" ON "public"."i_locations" (id)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
