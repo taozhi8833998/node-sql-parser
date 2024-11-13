@@ -1061,6 +1061,7 @@ create_index_stmt
   = a:KW_CREATE __
   kw:KW_UNIQUE? __
   t:KW_INDEX __
+  ife:if_not_exists_stmt?
   co:KW_CONCURRENTLY? __
   n:ident? __
   on:KW_ON __
@@ -1074,6 +1075,7 @@ create_index_stmt
     export interface create_index_stmt_node {
       type: 'create';
       index_type?: 'unique';
+      if_not_exists: if_not_exists_stmt;
       keyword: 'index';
       concurrently?: 'concurrently';
       index: string;
@@ -1097,6 +1099,7 @@ create_index_stmt
           keyword: t.toLowerCase(),
           concurrently: co && co.toLowerCase(),
           index: n,
+          if_not_exists: ife,
           on_kw: on[0].toLowerCase(),
           table: ta,
           index_using: um,
@@ -1749,7 +1752,7 @@ ALTER_ADD_COLUMN
         action: 'add';
         keyword: KW_COLUMN;
         resource: 'column';
-        if_not_exists: ife;
+        if_not_exists: if_not_exists_stmt;
         type: 'alter';
       } & create_column_definition;
       */
