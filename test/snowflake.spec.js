@@ -448,6 +448,13 @@ describe('snowflake', () => {
         'SELECT "bi_json"."limit" AS "limit" FROM "modelc"'
       ]
     },
+    {
+      title: 'listagg function',
+      sql: [
+        'select listagg(distinct id, ", ") as ids from foo;',
+        'SELECT listagg(DISTINCT "id", ", ") AS "ids" FROM "foo"'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
