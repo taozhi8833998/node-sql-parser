@@ -3704,7 +3704,7 @@ KW_SUM_MAX_MIN_AVG
   = KW_SUM / KW_MAX / KW_MIN / KW_AVG
 
 aggr_fun_count
-  = name:(KW_COUNT / KW_GROUP_CONCAT) __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
+  = name:(KW_COUNT / KW_GROUP_CONCAT / 'LISTAGG'i) __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
     // => { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'; args:count_arg; over: over_partition }
       return {
         type: 'aggr_func',
@@ -3740,7 +3740,7 @@ concat_separator
   = kw:COMMA __ s:literal_string {
     // => { symbol: ','; delimiter: literal_string; }
     return {
-      symbol: ke,
+      symbol: kw,
       delimiter: s
     }
   }
