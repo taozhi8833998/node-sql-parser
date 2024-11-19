@@ -2039,6 +2039,21 @@ count_arg
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
+arrow_func
+  = v:ident_without_kw_type __ '->' __ e:expr {
+      return createBinaryExpr('->', v, e)
+  }
+
+filter_func
+  = 'filter'i __ LPAREN __ ar:expr __ COMMA __ af:arrow_func __ RPAREN {
+      return {
+        type: 'function',
+        name: { name: [{ type: 'origin', value: 'filter' }] },
+        args: { type: 'expr_list', value: [ar, af] },
+        ...getLocationObject(),
+      };
+  }
+  
 func_call
   = name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
@@ -2049,7 +2064,7 @@ func_call
         ...getLocationObject(),
       };
     }
-  / extract_func
+  / extract_func / filter_func
   / f:scalar_time_func __ up:on_update_current_timestamp? {
     return {
         type: 'function',
