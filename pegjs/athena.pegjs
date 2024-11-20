@@ -47,7 +47,7 @@
     'JOIN': true,
     'JSON': true,
 
-    'KEY': true,
+    // 'KEY': true,
 
     'LEFT': true,
     'LIKE': true,
@@ -1845,7 +1845,16 @@ unary_operator
   = '!' / '-' / '+' / '~'
 
 column_ref
-  = tbl:ident __ DOT __ col:column {
+  = schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) {
+      columnList.add(`select::${schema}.${tbl[3]}::${col[3].value}`);
+      return {
+        type: 'column_ref',
+        schema: schema,
+        table: tbl[3],
+        column: col[3]
+      };
+    }
+  / tbl:ident __ DOT __ col:column {
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
