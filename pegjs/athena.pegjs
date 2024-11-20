@@ -1102,7 +1102,7 @@ with_offset
   }
 
 from_unnest_item
-  = 'UNNEST'i __ LPAREN __ a:expr? __ RPAREN __ alias:alias_clause? __ wf:with_offset? {
+  = 'UNNEST'i __ LPAREN __ a:expr? __ RPAREN __ alias:(func_call / alias_clause)? __ wf:with_offset? {
     return {
       type: 'unnest',
       expr: a,

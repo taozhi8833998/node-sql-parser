@@ -332,5 +332,10 @@ describe('athena', () => {
     WHERE
         i.field = 'status'`
     expect(getParsedSql(sql)).to.be.equal("SELECT `j`.`id`, `h`.`created` AS `change_time`, `i`.`fromstring` AS `from_status`, `i`.`tostring` AS `to_status` FROM `bronze_prod`.`jira_issues` AS `j` CROSS JOIN UNNEST(`j`.`changelog`.`histories`) AS T(`h`) CROSS JOIN UNNEST(`h`.`items`) AS T(`i`) WHERE `i`.`field` = 'status'")
+    sql = `SELECT id, array_agg(json_extract_scalar(elem, '$.value')) er_teams
+    FROM "bronze_prod"."jira_issues"
+    CROSS JOIN UNNEST(cast(json_extract(json_parse(fields), '$.customfield_10100') AS array(json))) AS t(elem)
+    GROUP BY id`
+    expect(getParsedSql(sql)).to.be.equal("SELECT `id`, array_agg(json_extract_scalar(`elem`, '$.value')) AS `er_teams` FROM `bronze_prod`.`jira_issues` CROSS JOIN UNNEST(CAST(json_extract(json_parse(`fields`), '$.customfield_10100') AS ARRAY(JSON))) AS t(`elem`) GROUP BY `id`")
   })
 })
