@@ -305,7 +305,7 @@ describe('athena', () => {
       expect(getParsedSql(sql)).to.be.equal('SELECT `id`, CAST(CURRENT_TIMESTAMP AS TIMESTAMP(6)) AS `dbt_insert_time` FROM `some_table` WHERE cardinality(FILTER(map_values(`note`), VALUE -> `VALUE` IS NOT NULL)) = 0')
   })
   it('should support key as column name', () => {
-    const sql = `WITH CTE AS (
+    let sql = `WITH CTE AS (
       SELECT * FROM test_cte
     )
     SELECT
@@ -318,5 +318,19 @@ describe('athena', () => {
     CROSS JOIN UNNEST(tags_counts) AS t(key, value)
     ORDER BY 1, 2`;
     expect(getParsedSql(sql)).to.be.equal('WITH `CTE` AS (SELECT * FROM `test_cte`) SELECT `organization`, DATE , `author_email`, `t`.`key` AS `tag`, `t`.`value` AS `count` FROM `CTE` CROSS JOIN UNNEST(`tags_counts`) AS t(`key`, `value`) ORDER BY 1 ASC, 2 ASC')
+    sql = `SELECT
+        j.id,
+        h.created AS change_time,
+        i.fromstring AS from_status,
+        i.tostring AS to_status
+    FROM
+        "bronze_prod"."jira_issues" j
+    CROSS JOIN
+        UNNEST(j.changelog.histories) AS T (h)
+    CROSS JOIN
+        UNNEST(h.items) AS T (i)
+    WHERE
+        i.field = 'status'`
+    expect(getParsedSql(sql)).to.be.equal("SELECT `j`.`id`, `h`.`created` AS `change_time`, `i`.`fromstring` AS `from_status`, `i`.`tostring` AS `to_status` FROM `bronze_prod`.`jira_issues` AS `j` CROSS JOIN UNNEST(`j`.`changelog`.`histories`) AS T(`h`) CROSS JOIN UNNEST(`h`.`items`) AS T(`i`) WHERE `i`.`field` = 'status'")
   })
 })
