@@ -47,7 +47,7 @@
     'JOIN': true,
     'JSON': true,
 
-    'KEY': true,
+    // 'KEY': true,
 
     'LEFT': true,
     'LIKE': true,

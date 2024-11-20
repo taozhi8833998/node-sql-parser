@@ -304,4 +304,19 @@ describe('athena', () => {
       ) = 0;`
       expect(getParsedSql(sql)).to.be.equal('SELECT `id`, CAST(CURRENT_TIMESTAMP AS TIMESTAMP(6)) AS `dbt_insert_time` FROM `some_table` WHERE cardinality(FILTER(map_values(`note`), VALUE -> `VALUE` IS NOT NULL)) = 0')
   })
+  it('should support key as column name', () => {
+    const sql = `WITH CTE AS (
+      SELECT * FROM test_cte
+    )
+    SELECT
+        organization,
+        date,
+        author_email,
+        t.key AS tag,
+        t.value AS count
+    FROM CTE
+    CROSS JOIN UNNEST(tags_counts) AS t(key, value)
+    ORDER BY 1, 2`;
+    expect(getParsedSql(sql)).to.be.equal('WITH `CTE` AS (SELECT * FROM `test_cte`) SELECT `organization`, DATE , `author_email`, `t`.`key` AS `tag`, `t`.`value` AS `count` FROM `CTE` CROSS JOIN UNNEST(`tags_counts`) AS t(`key`, `value`) ORDER BY 1 ASC, 2 ASC')
+  })
 })
