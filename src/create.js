@@ -182,7 +182,7 @@ function createIndexToSQL(stmt) {
     with: withExpr, with_before_where: withBeforeWhere,
   } = stmt
   const withIndexOpt = withExpr && `WITH (${indexOptionListToSQL(withExpr).join(', ')})`
-  const includeColumns = include && `${toUpper(include.keyword)} (${include.columns.map(col => identifierToSql(col)).join(', ')})`
+  const includeColumns = include && `${toUpper(include.keyword)} (${include.columns.map(col => (typeof col === 'string' ? identifierToSql(col) : exprToSQL(col))).join(', ')})`
   let indexName = index
   if (index) {
     indexName = typeof index === 'string' ? identifierToSql(index) : [identifierToSql(index.schema), identifierToSql(index.name)].filter(hasVal).join('.')

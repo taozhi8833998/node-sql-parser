@@ -1693,6 +1693,13 @@ describe('Postgres', () => {
         'CREATE UNIQUE INDEX IF NOT EXISTS "public_i_locations_pkey" ON "public"."i_locations" (id)'
       ]
     },
+    {
+      title: 'create index with include clause',
+      sql: [
+        'CREATE INDEX ON tableName (supplier, amount) INCLUDE(id);',
+        'CREATE INDEX ON "tableName" (supplier, amount) INCLUDE (id)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
