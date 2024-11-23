@@ -1057,6 +1057,16 @@ create_sequence_definition_list
     return createList(head, tail, 1)
 }
 
+include_column
+  = k:'INCLUDE'i __ LPAREN __ c:column_list __ RPAREN {
+    // => { type: 'include', keyword: 'include', columns: column_list }
+    return {
+      type: k.toLowerCase(),
+      keyword: k.toLowerCase(),
+      columns:c,
+    }
+  }
+  
 create_index_stmt
   = a:KW_CREATE __
   kw:KW_UNIQUE? __
@@ -1068,6 +1078,7 @@ create_index_stmt
   ta:table_name __
   um:index_type? __
   LPAREN __ cols:column_order_list __ RPAREN __
+  include:include_column? __
   wr:(KW_WITH __ LPAREN __ index_options_list __ RPAREN)? __
   ts:(KW_TABLESPACE __ ident_name)? __
   w:where_clause? __ {
@@ -1083,6 +1094,7 @@ create_index_stmt
       table: table_name;
       index_using?: index_type;
       index_columns: column_order[];
+      include?: column_list_items;
       with?: index_option[];
       with_before_where: true;
       tablespace?: {type: 'origin'; value: string; }
@@ -1104,6 +1116,7 @@ create_index_stmt
           table: ta,
           index_using: um,
           index_columns: cols,
+          include,
           with: wr && wr[4],
           with_before_where: true,
           tablespace: ts && { type: 'origin', value: ts[2] },
