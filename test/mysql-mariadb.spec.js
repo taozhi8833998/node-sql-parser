@@ -1010,6 +1010,13 @@ describe('mysql', () => {
         ]
       },
       {
+        title: 'alter table with first column',
+        sql: [
+          "ALTER TABLE product MODIFY COLUMN type enum('one','two') NOT NULL FIRST",
+          "ALTER TABLE `product` MODIFY COLUMN `type` ENUM('one', 'two') NOT NULL FIRST"
+        ]
+      },
+      {
         title: 'create table with check constraint',
         sql: [
           'CREATE TABLE `Pattern` (`IsInterpolated` INT NOT NULL, `Value` DOUBLE, CONSTRAINT `CHK_Value_IsInterpolated` CHECK ((`Value` IS NOT NULL) OR (`IsInterpolated` = 0)));',

@@ -1027,12 +1027,12 @@ alter_table_stmt
     }
 
 alter_column_suffix
-  = k:('after'i / 'first'i) __ i:column_ref {
-    return {
-      keyword: k,
-      expr: i
+  = k:"first"i {
+      return { keyword: k };
     }
-  }
+  / k:"after"i __ i:column_ref {
+      return { keyword: k, expr: i };
+    }
 
 alter_action_list
   = head:alter_action tail:(__ COMMA __ alter_action)* {

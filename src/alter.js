@@ -64,7 +64,7 @@ function alterExprToSQL(expr) {
     toUpper(prefix),
     name && name.trim(),
     dataType.filter(hasVal).join(' '),
-    suffix && `${toUpper(suffix.keyword)} ${columnRefToSQL(suffix.expr)}`,
+    suffix && `${toUpper(suffix.keyword)}${suffix.expr ? ` ${columnRefToSQL(suffix.expr)}` : ''}`,
   ]
   return alterArray.filter(hasVal).join(' ')
 }
