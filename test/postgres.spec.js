@@ -1687,6 +1687,13 @@ describe('Postgres', () => {
       ]
     },
     {
+      title: 'complex at time zone',
+      sql: [
+        'select date(cast(t.start_time at time zone loc.timezone as timestamptz)) as start_time from my_table t',
+        'SELECT date(CAST("t".start_time AT TIME ZONE "loc".timezone AS TIMESTAMPTZ)) AS "start_time" FROM "my_table" AS "t"',
+      ]
+    },
+    {
       title: 'create index with if not exists',
       sql: [
         'CREATE UNIQUE INDEX IF NOT EXISTS public_i_locations_pkey ON public.i_locations (id);',
