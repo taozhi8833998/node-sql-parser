@@ -3309,8 +3309,8 @@ cast_data_type
   }
 
 column_item_suffix
-  = 'AT' __ KW_TIME __ 'ZONE'i __ t:quoted_ident_type {
-    // => [{ type: 'origin'; value: string; }, quoted_ident_type]
+  = 'AT'i __ KW_TIME __ 'ZONE'i __ t:(quoted_ident_type / column_ref) {
+    // => [{ type: 'origin'; value: string; }, quoted_ident_type | column_ref]
     return [
       {
         type: 'origin',
