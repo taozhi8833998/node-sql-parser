@@ -455,6 +455,18 @@ describe('snowflake', () => {
         'SELECT listagg(DISTINCT "id", ", ") AS "ids" FROM "foo"'
       ]
     },
+    {
+      title: 'float4 and float8 data type',
+      sql: [
+        `SELECT
+      my_column::float AS "my_number",
+      my_column::float4 AS "my_number2",
+      my_column::float8 AS "my_number3"
+    FROM
+      "my_table"`,
+      'SELECT "my_column"::FLOAT AS "my_number", "my_column"::FLOAT4 AS "my_number2", "my_column"::FLOAT8 AS "my_number3" FROM "my_table"'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
