@@ -3118,15 +3118,8 @@ comment_on_stmt
       expr: is,
     }
   }
-select_stmt
-  = KW_SELECT __ ';' {
-    // => { type: 'select'; }
-    return {
-      type: 'select',
-    }
-  }
-  / select_stmt_nake
-  / s:('(' __ select_stmt __ ')') {
+select_stmt_parentheses
+  = s:('(' __ select_stmt __ ')') {
     /*
     export interface select_stmt_node extends select_stmt_nake  {
        parentheses: true;
@@ -3138,6 +3131,14 @@ select_stmt
         parentheses_symbol: true,
       }
     }
+select_stmt
+  = KW_SELECT __ ';' {
+    // => { type: 'select'; }
+    return {
+      type: 'select',
+    }
+  }
+  / select_stmt_nake / select_stmt_parentheses
 
 with_clause
   = KW_WITH __ head:cte_definition tail:(__ COMMA __ cte_definition)* {
@@ -3820,7 +3821,7 @@ number_or_param
   / param
 
 limit_clause
-  = l:(KW_LIMIT __ (number_or_param / KW_ALL))? __ tail:(KW_OFFSET __ number_or_param)? {
+  = l:(KW_LIMIT __ (number_or_param / KW_ALL / select_stmt_parentheses))? __ tail:(KW_OFFSET __ number_or_param)? {
     // => { separator: 'offset' | ''; value: [number_or_param | { type: 'origin', value: 'all' }, number_or_param?] }
       const res = []
       if (l) res.push(typeof l[2] === 'string' ? { type: 'origin', value: 'all' } : l[2])
