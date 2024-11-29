@@ -338,4 +338,11 @@ describe('athena', () => {
     GROUP BY id`
     expect(getParsedSql(sql)).to.be.equal("SELECT `id`, array_agg(json_extract_scalar(`elem`, '$.value')) AS `er_teams` FROM `bronze_prod`.`jira_issues` CROSS JOIN UNNEST(CAST(json_extract(json_parse(`fields`), '$.customfield_10100') AS ARRAY(JSON))) AS t(`elem`) GROUP BY `id`")
   })
+  it('should support double quoted table mentions', () => {
+    const sql = `SELECT
+    "my_table"."my_column"
+  FROM
+    "my_table"`
+    expect(getParsedSql(sql)).to.be.equal('SELECT `my_table`.`my_column` FROM `my_table`')
+  })
 })
