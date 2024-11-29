@@ -389,6 +389,13 @@ describe('transactsql', () => {
         'SELECT [a].[username] AS [姓名] FROM [users] AS [a]'
       ]
     },
+    {
+      title: 'double quoted table mentions',
+      sql: [
+        'SELECT	a.username FROM	"users" a',
+        'SELECT [a].[username] FROM [users] AS [a]'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo

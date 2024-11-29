@@ -2838,7 +2838,7 @@ literal_string
         value: ca[1].join(''),
       };
     }
-  / ca:("\"" single_quote_char* "\"") {
+  / ca:("\"" single_quote_char* "\"") !DOT {
       return {
         type: 'double_quote_string',
         value: ca[1].join('')
