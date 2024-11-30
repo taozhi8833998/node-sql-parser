@@ -1707,6 +1707,13 @@ describe('Postgres', () => {
         'CREATE INDEX ON "tableName" (supplier, amount) INCLUDE (id)'
       ]
     },
+    {
+      title: 'limit by select stmt',
+      sql: [
+        'SELECT * FROM user LIMIT (SELECT COUNT(*) / 2 FROM user);',
+        'SELECT * FROM "user" LIMIT (SELECT COUNT(*) / 2 FROM "user")'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
