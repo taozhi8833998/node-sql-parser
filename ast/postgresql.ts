@@ -202,9 +202,12 @@ export type create_sequence_definition = sequence_definition_increment | sequenc
 
 export type create_sequence_definition_list = create_sequence_definition[];
 
+export type include_column = { type: 'include', keyword: 'include', columns: column_list };
+
 export interface create_index_stmt_node {
       type: 'create';
       index_type?: 'unique';
+      if_not_exists: if_not_exists_stmt;
       keyword: 'index';
       concurrently?: 'concurrently';
       index: string;
@@ -212,6 +215,7 @@ export interface create_index_stmt_node {
       table: table_name;
       index_using?: index_type;
       index_columns: column_order[];
+      include?: column_list_items;
       with?: index_option[];
       with_before_where: true;
       tablespace?: {type: 'origin'; value: string; }
@@ -413,7 +417,7 @@ export type ALTER_ADD_COLUMN = {
         action: 'add';
         keyword: KW_COLUMN;
         resource: 'column';
-        if_not_exists: ife;
+        if_not_exists: if_not_exists_stmt;
         type: 'alter';
       } & create_column_definition;;
 
@@ -856,7 +860,9 @@ export interface select_stmt_node extends select_stmt_nake  {
        parentheses: true;
       }
 
-export type select_stmt = { type: 'select'; } | select_stmt_nake | select_stmt_node;
+export type select_stmt_parentheses = select_stmt_node;
+
+export type select_stmt = { type: 'select'; } | select_stmt_nake | select_stmt_parentheses;
 
 export type with_clause = cte_definition[] | [cte_definition & { recursive: true; }];
 
@@ -900,7 +906,7 @@ export type expr_item = binary_column_expr & { array_index: array_index };
 
 export type cast_data_type = data_type & { quoted?: string };
 
-export type column_item_suffix = [{ type: 'origin'; value: string; }, quoted_ident_type];
+export type column_item_suffix = [{ type: 'origin'; value: string; }, quoted_ident_type | column_ref];
 
 export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; } | { expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
 
