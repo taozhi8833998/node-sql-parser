@@ -2687,6 +2687,13 @@ window_frame_clause
     // => string
     return `rows between ${p.value} and ${f.value}`
   }
+  / 'RANGE'i __ KW_BETWEEN __ i:interval_expr __ 'PRECEDING'i __ KW_AND __ f:interval_expr __ 'PRECEDING'i {
+    return {
+      type: 'range',
+      between: i,
+      and: f
+    }
+  }
 
 window_frame_following
   = s:window_frame_value __ 'FOLLOWING'i  {
