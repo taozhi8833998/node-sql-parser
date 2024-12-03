@@ -4999,14 +4999,22 @@ func_call
       };
     }
   / extract_func
-  / f:scalar_time_func __ up:on_update_current_timestamp? {
+  / f:scalar_time_func __ l:column_item_suffix? __ up:on_update_current_timestamp? {
     // => { type: 'function'; name: proc_func_name; over?: on_update_current_timestamp; }
-    return {
+    const rest = {}
+    if (l) {
+      rest.args = { type: 'expr_list', value: l }
+      rest.args_parentheses = false
+      rest.separator = ' '
+    }
+    const result = {
         type: 'function',
         name: { name: [{ type: 'origin', value: f }] },
         over: up,
+        ...rest,
         ...getLocationObject(),
     }
+    return result
   }
   / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
       // => { type: 'function'; name: proc_func_name; args: expr_list; }
