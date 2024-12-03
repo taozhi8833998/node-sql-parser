@@ -1714,6 +1714,20 @@ describe('Postgres', () => {
         'SELECT * FROM "user" LIMIT (SELECT COUNT(*) / 2 FROM "user")'
       ]
     },
+    {
+      title: 'current_timestamp with at time zone',
+      sql: [
+        "select CURRENT_TIMESTAMP AT TIME ZONE 'UTC' AS right_now, my_field FROM my_table;",
+        `SELECT CURRENT_TIMESTAMP AT TIME ZONE 'UTC' AS "right_now", my_field FROM "my_table"`
+      ]
+    },
+    {
+      title: 'cast now at time zone',
+      sql: [
+        "select CAST(now() AT TIME ZONE 'UTC' AS TIMESTAMPTZ) AS right_now, my_field FROM my_table;",
+        `SELECT CAST(now() AT TIME ZONE 'UTC' AS TIMESTAMPTZ) AS "right_now", my_field FROM "my_table"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
