@@ -1,14 +1,14 @@
 import { hasVal, toUpper } from './util'
 import { exprToSQL, orderOrPartitionByToSQL } from './expr'
-import { intervalToSQL } from './interval'
 import { overToSQL } from './over'
 
-function rangeExprToSQL(rangeExpr) {
-  if (!rangeExpr) return
-  if (typeof rangeExpr === 'string') return toUpper(rangeExpr)
-  const { type, between, and } = rangeExpr
-  const result = [toUpper(type), 'BETWEEN', intervalToSQL(between), 'PRECEDING', 'AND', intervalToSQL(and), 'PRECEDING']
-  return result.filter(hasVal).join(' ')
+function windowFrameExprToSQL(windowFrameExpr) {
+  if (!windowFrameExpr) return
+  const { type } = windowFrameExpr
+  if (type === 'rows') {
+    return [toUpper(type), exprToSQL(windowFrameExpr.expr)].filter(hasVal).join(' ')
+  }
+  return exprToSQL(windowFrameExpr)
 }
 function windowSpecificationToSQL(windowSpec) {
   const {
@@ -21,7 +21,7 @@ function windowSpecificationToSQL(windowSpec) {
     name,
     orderOrPartitionByToSQL(partitionby, 'partition by'),
     orderOrPartitionByToSQL(orderby, 'order by'),
-    rangeExprToSQL(windowFrame),
+    windowFrameExprToSQL(windowFrame),
   ]
   return result.filter(hasVal).join(' ')
 }
