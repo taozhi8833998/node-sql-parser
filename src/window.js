@@ -2,6 +2,14 @@ import { hasVal, toUpper } from './util'
 import { exprToSQL, orderOrPartitionByToSQL } from './expr'
 import { overToSQL } from './over'
 
+function windowFrameExprToSQL(windowFrameExpr) {
+  if (!windowFrameExpr) return
+  const { type } = windowFrameExpr
+  if (type === 'rows') {
+    return [toUpper(type), exprToSQL(windowFrameExpr.expr)].filter(hasVal).join(' ')
+  }
+  return exprToSQL(windowFrameExpr)
+}
 function windowSpecificationToSQL(windowSpec) {
   const {
     name,
@@ -13,7 +21,7 @@ function windowSpecificationToSQL(windowSpec) {
     name,
     orderOrPartitionByToSQL(partitionby, 'partition by'),
     orderOrPartitionByToSQL(orderby, 'order by'),
-    toUpper(windowFrame),
+    windowFrameExprToSQL(windowFrame),
   ]
   return result.filter(hasVal).join(' ')
 }

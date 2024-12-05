@@ -467,6 +467,23 @@ describe('snowflake', () => {
       'SELECT "my_column"::FLOAT AS "my_number", "my_column"::FLOAT4 AS "my_number2", "my_column"::FLOAT8 AS "my_number3" FROM "my_table"'
       ]
     },
+    {
+      title: 'over window frame',
+      sql: [
+        `SELECT
+    user_id,
+    date(derived_tstamp) AS event_date,
+    price_point,
+    MAX(price_point) OVER (
+        PARTITION BY user_id
+        ORDER BY date(derived_tstamp)
+        RANGE BETWEEN INTERVAL '29 DAYS' PRECEDING AND INTERVAL '1 DAY' PRECEDING
+    ) AS max_price_point_last_30_days
+    FROM
+        some_table;`,
+        `SELECT "user_id", date("derived_tstamp") AS "event_date", "price_point", MAX("price_point") OVER (PARTITION BY "user_id" ORDER BY date("derived_tstamp") ASC RANGE BETWEEN INTERVAL '29 DAYS' PRECEDING AND INTERVAL '1 DAY' PRECEDING) AS "max_price_point_last_30_days" FROM "some_table"`
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
