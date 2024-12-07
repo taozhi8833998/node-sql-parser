@@ -3442,7 +3442,7 @@ column_ref
         ...getLocationObject()
       };
     }
-  / col:column_type {
+  / col:column_type !LPAREN {
     // => IGNORE
       columnList.add(`select::null::${col.value}`);
       return {

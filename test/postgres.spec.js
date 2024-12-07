@@ -2116,6 +2116,9 @@ describe('Postgres', () => {
         }
       })
       expect(parser.sqlify(ast.ast, opt)).to.be.equals('SELECT "col1" + "col2" FROM "t1"')
+      sql = 'SELECT SUM("source"."point" + "other_source"."other_point") FROM foo';
+      ast = parser.parse(sql, opt)
+      expect(ast.columnList).to.be.eql(['select::source::point', 'select::other_source::other_point'])
     })
 
     it('should support conflict be empty', () => {
