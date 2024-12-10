@@ -3807,7 +3807,10 @@ window_frame_value
   / literal_numeric
 
 partition_by_clause
-  = KW_PARTITION __ KW_BY __ bc:column_ref_list { /* => { type: 'expr'; expr: column_ref_list }[] */ return bc.map(item => ({ type: 'expr', expr: item })); }
+  = KW_PARTITION __ KW_BY __ bc:(column_ref_list / func_call) {
+    /* => { type: 'expr'; expr: column_ref_list }[] */
+    return Array.isArray(bc) ? bc.map(item => ({ type: 'expr', expr: item })) : [{ type: 'expr', expr: bc }];
+  }
 
 order_by_clause
   = KW_ORDER __ KW_BY __ l:order_by_list { /* => order_by_list */ return l; }
