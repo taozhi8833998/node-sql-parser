@@ -2061,6 +2061,13 @@ describe('Postgres', () => {
           `COMMENT ON DATABASE my_database IS 'Development Database'`,
         ],
       },
+      {
+        title: 'partition by func call',
+        sql: [
+          'SELECT Year, Title, ROW_NUMBER() OVER (PARTITION BY EXTRACT(YEAR FROM CreationDate)) AS rn FROM yearly_views;',
+          'SELECT Year, Title, ROW_NUMBER() OVER (PARTITION BY EXTRACT(YEAR FROM CreationDate)) AS "rn" FROM "yearly_views"'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
