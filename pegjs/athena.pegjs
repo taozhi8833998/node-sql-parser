@@ -1855,29 +1855,32 @@ unary_operator
   = '!' / '-' / '+' / '~'
 
 column_ref
-  = schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) {
+  = schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) ce:(__ collate_expr)? {
       columnList.add(`select::${schema}.${tbl[3]}::${col[3].value}`);
       return {
         type: 'column_ref',
         schema: schema,
         table: tbl[3],
-        column: col[3]
+        column: col[3],
+        collate: ce && ce[1],
       };
     }
-  / tbl:ident __ DOT __ col:column {
+  / tbl:ident __ DOT __ col:column ce:(__ collate_expr)? {
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
         table: tbl,
-        column: col
+        column: col,
+        collate: ce && ce[1],
       };
     }
-  / col:column {
+  / col:column ce:(__ collate_expr)? {
       columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
         table: null,
-        column: col
+        column: col,
+        collate: ce && ce[1],
       };
     }
 

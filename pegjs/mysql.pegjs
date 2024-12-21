@@ -1027,18 +1027,7 @@ create_trigger_stmt
     }
 
 collate_expr
-  = KW_COLLATE __ ca:ident_name __ s:KW_ASSIGIN_EQUAL __ t:ident {
-    return {
-      type: 'collate',
-      keyword: 'collate',
-      collate: {
-        name: ca,
-        symbol: s,
-        value: t
-      }
-    }
-  }
-  / KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
+  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
     return {
       type: 'collate',
       keyword: 'collate',
@@ -3141,22 +3130,24 @@ primary
   }
 
 column_ref
-  = db:(ident_name / backticks_quoted_ident) __ DOT __ tbl:(ident_name / backticks_quoted_ident) __ DOT __ col:column_without_kw {
+  = db:(ident_name / backticks_quoted_ident) __ DOT __ tbl:(ident_name / backticks_quoted_ident) __ DOT __ col:column_without_kw ce:(__ collate_expr)? {
       columnList.add(`select::${typeof db === 'object' ? db.value : db}::${typeof tbl === 'object' ? tbl.value : tbl}::${col}`);
       return {
         type: 'column_ref',
         db: db,
         table: tbl,
         column: col,
+        collate: ce && ce[1],
         ...getLocationObject(),
       };
     }
-  / tbl:(ident_name / backticks_quoted_ident) __ DOT __ col:column_without_kw {
+  / tbl:(ident_name / backticks_quoted_ident) __ DOT __ col:column_without_kw ce:(__ collate_expr)? {
       columnList.add(`select::${typeof tbl === 'object' ? tbl.value : tbl}::${col}`);
       return {
         type: 'column_ref',
         table: tbl,
         column: col,
+        collate: ce && ce[1],
         ...getLocationObject(),
       };
     }
@@ -3173,12 +3164,13 @@ column_ref
         ...getLocationObject(),
       };
     }
-  / col:column {
+  / col:column ce:(__ collate_expr)? {
       columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
         table: null,
         column: col,
+        collate: ce && ce[1],
         ...getLocationObject(),
       };
     }

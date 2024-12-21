@@ -307,6 +307,7 @@ describe('create', () => {
       it('should throw error, when resource unkonwn', () => {
         const columnDefinition = [{
           "column": {
+            "collate": null,
             "type": "column_ref",
             "table": null,
             "column": "id"

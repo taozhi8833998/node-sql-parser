@@ -952,18 +952,7 @@ column_constraint
   }
 
 collate_expr
-  = KW_COLLATE __ ca:ident_name __ s:KW_ASSIGIN_EQUAL __ t:ident {
-    return {
-      type: 'collate',
-      keyword: 'collate',
-      collate: {
-        name: ca,
-        symbol: s,
-        value: t
-      }
-    }
-  }
-  / KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
+  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
     return {
       type: 'collate',
       keyword: 'collate',
@@ -3458,7 +3447,7 @@ column_ref
           ...getLocationObject()
       }
     }
-  / schema:ident tbl:(__ column_symbol __ ident_without_kw) col:(__ column_symbol __ column_without_kw) {
+  / schema:ident tbl:(__ column_symbol __ ident_without_kw) col:(__ column_symbol __ column_without_kw) ce:(__ collate_expr)? {
       columnList.add(`select::${schema}.${tbl[3]}::${col[3]}`);
       return {
         type: 'column_ref',
@@ -3466,26 +3455,29 @@ column_ref
         notations: [tbl[1], col[1]],
         table: tbl[3],
         column: col[3],
+        collate: ce && ce[1],
         ...getLocationObject()
       };
     }
-  / tbl:ident __ s:column_symbol __ col:column_without_kw {
+  / tbl:ident __ s:column_symbol __ col:column_without_kw ce:(__ collate_expr)? {
       columnList.add(`select::${tbl}::${col}`);
       return {
         type: 'column_ref',
         table: tbl,
         notations: [s],
         column: col,
+        collate: ce && ce[1],
         ...getLocationObject()
       };
     }
-  / col:column {
+  / col:column ce:(__ collate_expr)? {
     // => IGNORE
       columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
         table: null,
         column: col,
+        collate: ce && ce[1],
         ...getLocationObject()
       };
     }

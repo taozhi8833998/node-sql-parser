@@ -788,7 +788,7 @@ describe('AST', () => {
             expect(ast.where).to.eql({
                 type: 'binary_expr',
                 operator: '=',
-                left: { type: 'column_ref', table: null, column: 'id' },
+                left: { collate: null, type: 'column_ref', table: null, column: 'id' },
                 right: { type: 'number', value: 1 }
             });
         });
@@ -803,7 +803,7 @@ describe('AST', () => {
                 left: {
                     type: 'binary_expr',
                     operator: '=',
-                    left: { type: 'column_ref', table: null, column: 'id' },
+                    left: { collate: null,  type: 'column_ref', table: null, column: 'id' },
                     right: { type: 'number', value: 1 }
                 },
                 right: {
@@ -822,7 +822,7 @@ describe('AST', () => {
             expect(ast.where).to.eql({
                 type: 'binary_expr',
                 operator: '=',
-                left: { type: 'column_ref', table: null, column: 'col2' },
+                left: { collate: null, type: 'column_ref', table: null, column: 'col2' },
                 right: { type: 'string', value: 'John Doe' }
             });
         });
@@ -834,7 +834,7 @@ describe('AST', () => {
             expect(ast.where).to.eql({
                 type: 'binary_expr',
                 operator: '=',
-                left: { type: 'column_ref', table: null, column: 'isMain' },
+                left: { collate: null,  type: 'column_ref', table: null, column: 'isMain' },
                 right: { type: 'bool', value: true }
             });
         });
@@ -846,7 +846,7 @@ describe('AST', () => {
             expect(ast.where).to.eql({
                 type: 'binary_expr',
                 operator: '=',
-                left: { type: 'column_ref', table: null, column: 'col2' },
+                left: { collate: null,  type: 'column_ref', table: null, column: 'col2' },
                 right: { type: 'null', value: null }
             });
         });
@@ -858,7 +858,7 @@ describe('AST', () => {
             expect(ast.where).to.eql({
                 type: 'binary_expr',
                 operator: '=',
-                left: { type: 'column_ref', table: null, column: 'id' },
+                left: { collate: null,  type: 'column_ref', table: null, column: 'id' },
                 right: {
                     type: 'expr_list',
                     value: [
@@ -1081,6 +1081,7 @@ describe('AST', () => {
                         "type": "binary_expr",
                         "operator": operator,
                         "left": {
+                            "collate": null,
                             "type": "column_ref",
                             "table": null,
                             "column": "id"
@@ -1230,15 +1231,16 @@ describe('AST', () => {
             const expr = [
                 {
                 "expr": {
-                  "type": "column_ref",
-                  "table": null,
-                  "column": "gender"
+                    "collate": null,
+                    "type": "column_ref",
+                    "table": null,
+                    "column": "gender"
                 },
                 "as": null
                 }
             ]
             expect(orderOrPartitionByToSQL(expr, 'default')).to.equal('DEFAULT `gender`')
-          })
+        })
     })
 
     describe('transactsql', () => {
@@ -1313,6 +1315,7 @@ describe('AST', () => {
               "type": "binary_expr",
               "operator": "->>",
               "left": {
+                "collate": null,
                 "type": "column_ref",
                 "table": "company",
                 "column": {
@@ -1339,6 +1342,7 @@ describe('AST', () => {
               "type": "binary_expr",
               "operator": "->>",
               "left": {
+                "collate": null,
                 "type": "column_ref",
                 "table": "company",
                 "column": {

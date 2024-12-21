@@ -558,18 +558,7 @@ identity_stmt
   }
 
 collate_expr
-  = KW_COLLATE __ ca:ident_name __ s:KW_ASSIGIN_EQUAL __ t:ident {
-    return {
-      type: 'collate',
-      keyword: 'collate',
-      collate: {
-        name: ca,
-        symbol: s,
-        value: t
-      }
-    }
-  }
-  / KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
+  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
     return {
       type: 'collate',
       keyword: 'collate',
@@ -2411,7 +2400,7 @@ unary_operator
   = '!' / '-' / '+' / '~'
 
 column_ref
-  = db:(ident __ DOT)? __ schema:(ident __ DOT)? __ tbl:(ident __ DOT)? __ col:column {
+  = db:(ident __ DOT)? __ schema:(ident __ DOT)? __ tbl:(ident __ DOT)? __ col:column ce:(__ collate_expr)? {
       const obj = { table: null, db: null, schema: null }
       if (db !== null) {
         obj.table = db[0]
@@ -2430,7 +2419,8 @@ column_ref
       return {
         type: 'column_ref',
         ...obj,
-        column: col
+        column: col,
+        collate: ce && ce[1],
       };
     }
 

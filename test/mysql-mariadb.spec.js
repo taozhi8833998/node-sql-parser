@@ -1081,14 +1081,14 @@ describe('mysql', () => {
         title: 'collate',
         sql: [
           'select * from test order by id COLLATE utf8mb4_unicode_ci',
-          'SELECT * FROM `test` ORDER BY `id` ASC COLLATE utf8mb4_unicode_ci'
+          'SELECT * FROM `test` ORDER BY `id` COLLATE utf8mb4_unicode_ci ASC'
         ]
       },
       {
         title: 'collate with symbol and value',
         sql: [
           'select * from test where id COLLATE utf8mb4_unicode_ci = abc',
-          'SELECT * FROM `test` WHERE `id` COLLATE utf8mb4_unicode_ci = abc'
+          'SELECT * FROM `test` WHERE `id` COLLATE utf8mb4_unicode_ci = `abc`'
         ]
       },
       {
@@ -1175,6 +1175,13 @@ describe('mysql', () => {
           'SELECT * FROM `table1`, LATERAL (SELECT * FROM `table2` WHERE `table2`.`id` = `table1`.`id`) AS `subquery`'
         ]
       },
+      {
+        title: 'collate expression with column',
+        sql: [
+          'SELECT users.id FROM users LEFT JOIN orders ON users.id COLLATE utf8mb4_general_ci = orders.user_id;',
+          'SELECT `users`.`id` FROM `users` LEFT JOIN `orders` ON `users`.`id` COLLATE utf8mb4_general_ci = `orders`.`user_id`',
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
@@ -1191,7 +1198,7 @@ describe('mysql', () => {
       expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "*", "+", ",", "-", "--", "->", "->>", "/", "/*", "<", "<<", "<=", "<>", "<@", "=", ">", ">=", ">>", "?", "?&", "?|", "@>", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "mod", "|", "||", or [ \\t\\n\\r] but ")" found.')
       expect(parser.astify.bind(parser, 'select convert("");')).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "*", "+", ",", "-", "--", "->", "->>", "/", "/*", "<", "<<", "<=", "<>", "<@", "=", ">", ">=", ">>", "?", "?&", "?|", "@>", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "OR", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "mod", "|", "||", or [ \\t\\n\\r] but ")" found.')
       sql = 'SELECT AVG(Quantity,age) FROM table1;'
-      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "(", ")", "*", "+", "-", "--", "->", "->>", ".", "/", "/*", "<", "<<", "<=", "<>", "<@", "=", ">", ">=", ">>", "?", "?&", "?|", "@>", "BETWEEN", "IN", "IS", "LIKE", "NOT", "REGEXP", "RLIKE", "XOR", "^", "div", "mod", "|", "||", [ \\t\\n\\r], [A-Za-z0-9_$\\x80-￿], or [A-Za-z0-9_:] but "," found.')
+      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "(", ")", "*", "+", "-", "--", "->", "->>", ".", "/", "/*", "<", "<<", "<=", "<>", "<@", "=", ">", ">=", ">>", "?", "?&", "?|", "@>", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "REGEXP", "RLIKE", "XOR", "^", "div", "mod", "|", "||", [ \\t\\n\\r], [A-Za-z0-9_$\\x80-￿], or [A-Za-z0-9_:] but "," found')
     })
 
     it('should join multiple table with comma', () => {
