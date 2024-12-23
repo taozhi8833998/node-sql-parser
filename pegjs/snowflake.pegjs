@@ -2678,6 +2678,15 @@ window_specification_frameless
     }
   }
 
+interval_expr_preceding
+  = i:interval_expr __ 'PRECEDING'i {
+    const suffix = {
+      type: 'origin',
+      value: 'preceding',
+    }
+    i.suffix = suffix;
+    return i;
+  }
 window_frame_clause
   = kw:KW_ROWS __ s:(window_frame_following / window_frame_preceding) {
     return {
@@ -2696,17 +2705,11 @@ window_frame_clause
     }
     return createBinaryExpr(op, left, right)
   }
-  / 'RANGE'i __ op:KW_BETWEEN __ p:interval_expr __ 'PRECEDING'i __ KW_AND __ f:interval_expr __ 'PRECEDING'i {
+  / 'RANGE'i __ op:KW_BETWEEN __ p:interval_expr_preceding __ KW_AND __ f:(interval_expr_preceding / window_frame_current_row) {
     const left = {
       type: 'origin',
       value: 'range',
     }
-    const suffix = {
-      type: 'origin',
-      value: 'preceding',
-    }
-    p.suffix = suffix
-    f.suffix = suffix
     const right = {
       type: 'expr_list',
       value: [p, f]
