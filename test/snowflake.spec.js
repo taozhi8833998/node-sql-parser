@@ -484,6 +484,22 @@ describe('snowflake', () => {
         `SELECT "user_id", date("derived_tstamp") AS "event_date", "price_point", MAX("price_point") OVER (PARTITION BY "user_id" ORDER BY date("derived_tstamp") ASC RANGE BETWEEN INTERVAL '29 DAYS' PRECEDING AND INTERVAL '1 DAY' PRECEDING) AS "max_price_point_last_30_days" FROM "some_table"`
       ]
     },
+    {
+      title: 'window function with range',
+      sql: [
+        `SELECT
+          SUM(id) OVER (
+            PARTITION BY
+              name
+            ORDER BY
+              created_at ASC RANGE BETWEEN INTERVAL '9 DAYS' PRECEDING
+              AND CURRENT ROW 
+          ) last10Dmatches
+        FROM
+          model1`,
+        `SELECT SUM("id") OVER (PARTITION BY "name" ORDER BY "created_at" ASC RANGE BETWEEN INTERVAL '9 DAYS' PRECEDING AND CURRENT ROW) AS "last10Dmatches" FROM "model1"`
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
