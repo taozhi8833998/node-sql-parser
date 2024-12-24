@@ -2399,7 +2399,7 @@ table_ref_list
       return tail;
     }
   / lp:LPAREN+ __ head:table_base tail:table_ref* __ rp:RPAREN+ {
-      if (lp.length !== rp.length) throw new Error('parentheses not match in from clause')
+      if (lp.length !== rp.length) throw new Error(`parentheses not match in from clause: ${lp.length} != ${rp.length}`)
       tail.unshift(head);
       tail.forEach(tableInfo => {
         const { table, as } = tableInfo

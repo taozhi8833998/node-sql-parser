@@ -350,4 +350,8 @@ describe('athena', () => {
     from some_table`
     expect(getParsedSql(sql)).to.be.equal('SELECT COUNT(`renewals_effective_date`) OVER (PARTITION BY `customer_id` ORDER BY `update_date` ASC, `renewals_effective_date` ASC ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS `helper` FROM `some_table`')
   })
+  it('quoted function name, from multiple paraentheses', () => {
+    const sql = 'SELECT "concat"(name, name) from ((raw_listings))'
+    expect(getParsedSql(sql)).to.be.equal('SELECT "concat"(`name`, `name`) FROM ((`raw_listings`))')
+  })
 })
