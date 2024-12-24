@@ -998,7 +998,10 @@ select_stmt_nake
     h:having_clause?    __
     o:order_by_clause?  __
     l:limit_clause? {
-      if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
+      if(f) {
+        const tables = Array.isArray(f) ? f : f.expr
+        tables.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`))
+      }
       return {
           with: cte,
           type: 'select',
@@ -1177,6 +1180,22 @@ table_ref_list
         refreshColumnList(columnList)
       })
       return tail;
+    }
+  / lp:LPAREN+ __ head:table_base tail:table_ref* __ rp:RPAREN+ {
+      if (lp.length !== rp.length) throw new Error(`parentheses not match in from clause: ${lp.length} != ${rp.length}`)
+      tail.unshift(head);
+      tail.forEach(tableInfo => {
+        const { table, as } = tableInfo
+        tableAlias[table] = table
+        if (as) tableAlias[as] = table
+        refreshColumnList(columnList)
+      })
+      return {
+        expr: tail,
+        parentheses: {
+          length: rp.length
+        }
+      }
     }
 
 table_ref
@@ -1435,7 +1454,7 @@ delete_stmt
     t: table_ref_list? __
     f:from_clause __
     w:where_clause? {
-     if(f) f.forEach(tableInfo => {
+      if(f) f.forEach(tableInfo => {
         const { db, as, table, join } = tableInfo
         const action = join ? 'select' : 'delete'
         if (table) tableList.add(`${action}::${db}::${table}`)
@@ -2252,7 +2271,7 @@ literal_string
         value: ca[1].join('')
       };
     }
-  / ca:("\"" single_quote_char* "\"") !DOT {
+  / ca:("\"" single_quote_char* "\"") !(DOT / LPAREN) {
       return {
         type: 'double_quote_string',
         value: ca[1].join('')
