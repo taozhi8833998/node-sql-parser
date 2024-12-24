@@ -340,9 +340,14 @@ describe('athena', () => {
   })
   it('should support double quoted table mentions', () => {
     const sql = `SELECT
-    "my_table"."my_column"
-  FROM
-    "my_table"`
+      "my_table"."my_column"
+    FROM
+        "my_table"`
     expect(getParsedSql(sql)).to.be.equal('SELECT `my_table`.`my_column` FROM `my_table`')
+  })
+  it('should over partition by', () => {
+    const sql = `select count(renewals_effective_date) OVER (PARTITION BY customer_id ORDER BY update_date ASC, renewals_effective_date ASC ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) helper
+    from some_table`
+    expect(getParsedSql(sql)).to.be.equal('SELECT COUNT(`renewals_effective_date`) OVER (PARTITION BY `customer_id` ORDER BY `update_date` ASC, `renewals_effective_date` ASC ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS `helper` FROM `some_table`')
   })
 })

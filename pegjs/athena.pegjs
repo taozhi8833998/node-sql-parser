@@ -1325,7 +1325,7 @@ window_frame_clause
       expr: s
     }
   }
-  / KW_ROWS __ op:KW_BETWEEN __ p:window_frame_preceding __ KW_AND __ f:window_frame_following {
+  / KW_ROWS __ op:KW_BETWEEN __ p:window_frame_preceding __ KW_AND __ f:(window_frame_following / window_frame_preceding) {
     const left = {
       type: 'origin',
       value: 'rows',
