@@ -12,6 +12,7 @@ function aggrToSQL(expr) {
   const separator = ' '
   if (args.distinct) str = ['DISTINCT', str].join(separator)
   if (args.separator && args.separator.delimiter) str = [str, literalToSQL(args.separator.delimiter)].join(`${args.separator.symbol} `)
+  if (args.separator && args.separator.expr) str = [str, exprToSQL(args.separator.expr)].join(' ')
   if (args.orderby) str = [str, orderOrPartitionByToSQL(args.orderby, 'order by')].join(' ')
   if (args.separator && args.separator.value) str = [str, toUpper(args.separator.keyword), literalToSQL(args.separator.value)].filter(hasVal).join(' ')
   const withinGroup = within_group_orderby ? `WITHIN GROUP (${orderOrPartitionByToSQL(within_group_orderby, 'order by')})` : ''

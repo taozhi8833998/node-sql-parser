@@ -1999,6 +1999,7 @@ param
 aggr_func
   = aggr_fun_count
   / aggr_fun_smma
+  / aggr_array_agg
 
 aggr_fun_smma
   = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN __ bc:over_partition?   {
@@ -2056,10 +2057,17 @@ aggr_fun_count
         over: bc
       };
     }
+concat_separator
+  = kw:(COMMA / OPERATOR_CONCATENATION) __ s:literal_string {
+    // => { symbol: ',' | '||'; delimiter: literal_string; }
+    return {
+      symbol: kw,
+      delimiter: s
+    }
+  }
 
-count_arg
-  = e:star_expr { return { expr: e }; }
-  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN tail:(__ (KW_AND / KW_OR) __ expr)* __ or:order_by_clause? {
+distinct_args
+  = d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ tail:(__ (KW_AND / KW_OR) __ expr)* __ s:concat_separator? __ or:order_by_clause? {
     const len = tail.length
     let result = c
     result.parentheses = true
@@ -2070,9 +2078,30 @@ count_arg
       distinct: d,
       expr: result,
       orderby: or,
+      separator: s
     };
   }
-  / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause? { return { distinct: d, expr: c, orderby: or }; }
+  / d:KW_DISTINCT? __ c:(column_ref / or_and_expr) __ s:(concat_separator __ expr)? __ or:order_by_clause? {
+    const separator = s && s[0]
+    if (s && s[1]) {
+      separator.expr = s[2]
+    }
+    return { distinct: d, expr: c, orderby: or, separator };
+  }
+  
+count_arg
+  = e:star_expr { return { expr: e }; }
+  / distinct_args
+
+aggr_array_agg
+  = pre:(ident __ DOT)? __ name:(KW_ARRAY_AGG) __ LPAREN __ arg:distinct_args __ RPAREN {
+    // => { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG' | 'STRING_AGG';  }
+    return {
+      type: 'aggr_func',
+      name: pre ? `${pre[0]}.${name}` : name,
+      args: arg,
+    };
+  }
 
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
@@ -2479,6 +2508,7 @@ KW_END      = "END"i        !ident_start
 KW_CAST     = "CAST"i       !ident_start { return 'CAST' }
 
 KW_ARRAY    = "ARRAY"i !ident_start { return 'ARRAY'; }
+KW_ARRAY_AGG = "ARRAY_AGG"i !ident_start { return 'ARRAY_AGG'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
 KW_NUMERIC  = "NUMERIC"i  !ident_start { return 'NUMERIC'; }
