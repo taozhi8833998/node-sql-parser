@@ -2120,6 +2120,32 @@ filter_func
         ...getLocationObject(),
       };
   }
+
+trim_position
+  = 'BOTH'i / 'LEADING'i / 'TRAILING'i
+
+trim_rem
+  = p:trim_position? __ rm:literal_string? __ k:KW_FROM {
+    let value = []
+    if (p) value.push({type: 'origin', value: p })
+    if (rm) value.push(rm)
+    value.push({type: 'origin', value: 'from' })
+    return {
+      type: 'expr_list',
+      value,
+    }
+  }
+
+trim_func_clause
+  = 'trim'i __ LPAREN __ tr:trim_rem? __ s:expr_item __ RPAREN {
+    let args = tr || { type: 'expr_list', value: [] }
+    args.value.push(s)
+    return {
+        type: 'function',
+        name: { name: [{ type: 'origin', value: 'trim' }] },
+        args,
+    };
+  }
   
 func_call
   = name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
@@ -2131,7 +2157,7 @@ func_call
         ...getLocationObject(),
       };
     }
-  / extract_func / filter_func
+  / extract_func / filter_func / trim_func_clause
   / f:scalar_time_func __ up:on_update_current_timestamp? {
     return {
         type: 'function',
