@@ -1092,6 +1092,9 @@ column_list_item
       return { type: 'expr', expr: e, as: alias };
     }
 
+value_alias_clause
+  = KW_AS? __ i:(func_call / alias_ident) { return i; }
+  
 alias_clause
   = KW_AS __ i:(func_call / alias_ident) { return i; }
   / KW_AS? __ i:ident { return i; }
@@ -1232,6 +1235,18 @@ table_base
         type: 'dual'
       };
   }
+  / stmt:value_clause __ alias:value_alias_clause? {
+    return {
+      expr: { type: 'values', values: stmt },
+      as: alias
+    };
+  }
+  / LPAREN __ stmt:value_clause __ RPAREN __ alias:value_alias_clause? {
+      return {
+        expr: { type: 'values', values: stmt, parentheses: true },
+        as: alias
+      };
+    }
   / t:table_name __ alias:alias_clause? {
       if (t.type === 'var') {
         t.as = alias;
@@ -1590,6 +1605,7 @@ value_item
   = LPAREN __ l:expr_list  __ RPAREN {
       return l;
     }
+  / func_call
 
 expr_list
   = head:expr tail:(__ COMMA __ expr)* {
@@ -2326,7 +2342,7 @@ literal_string
         value: ca[1].join('')
       };
     }
-  / ca:("\"" single_quote_char* "\"") !(DOT / LPAREN) {
+  / ca:("\"" single_quote_char* "\"") __ !(DOT / LPAREN) {
       return {
         type: 'double_quote_string',
         value: ca[1].join('')
