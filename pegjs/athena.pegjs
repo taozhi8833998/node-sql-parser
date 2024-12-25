@@ -1870,14 +1870,21 @@ primary
   / var_decl
 
 unary_expr_or_primary
-  = primary
+  = jsonb_expr
   / op:(unary_operator) tail:(__ unary_expr_or_primary) {
-    // if (op === '!') op = 'NOT'
+    // => unary_expr
     return createUnaryExpr(op, tail[1])
   }
 
 unary_operator
   = '!' / '-' / '+' / '~'
+
+jsonb_expr
+  = head:primary __ tail: (__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / SINGLE_ARROW / '@>' / '<@') __  primary)* {
+    // => primary | binary_expr
+    if (!tail || tail.length === 0) return head
+    return createBinaryExprChain(head, tail)
+  }
 
 column_ref
   = schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) {
@@ -2113,8 +2120,8 @@ star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
 arrow_func
-  = v:ident_without_kw_type __ '->' __ e:expr {
-      return createBinaryExpr('->', v, e)
+  = v:ident_without_kw_type __ s:SINGLE_ARROW __ e:expr {
+      return createBinaryExpr(s, v, e)
   }
 
 filter_func
@@ -2643,7 +2650,7 @@ LBRAKE    = '['
 RBRAKE    = ']'
 
 SEMICOLON = ';'
-
+SINGLE_ARROW = '->'
 OPERATOR_CONCATENATION = '||'
 OPERATOR_AND = '&&'
 LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
