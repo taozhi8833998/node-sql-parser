@@ -244,6 +244,9 @@ function literalToSQL(literal) {
     case 'var_string':
       str = `N'${escape(value)}'`
       break
+    case 'unicode_string':
+      str = `U&'${escape(value)}'`
+      break
     default:
       break
   }
