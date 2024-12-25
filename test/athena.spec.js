@@ -361,7 +361,7 @@ describe('athena', () => {
     expect(getParsedSql(sql)).to.be.equal('SELECT TRIM(BOTH FROM split("a,b", \',\')[1]) FROM `model_a`')
   })
   it('from values clause', () => {
-    const sql = `SELECT
+    let sql = `SELECT
       CAST(date_column AS date) update_date
     FROM
       (
@@ -376,5 +376,37 @@ describe('athena', () => {
         CROSS JOIN UNNEST (date_array) t2 (date_column)
       )`
     expect(getParsedSql(sql)).to.be.equal('SELECT CAST(`date_column` AS DATE) AS `update_date` FROM ((VALUES ("sequence"("date"(\'2022-10-01\'), CURRENT_DATE, INTERVAL \'1\' DAY))) AS t1(`date_array`) CROSS JOIN UNNEST(`date_array`) AS t2(`date_column`))')
+    sql = `SELECT
+        leads.*
+      , from_unixtime(CAST(substrinfg(leads.demo_meeting_date_c, 1, 10) AS double)) demo_meeting_date_correct
+      , CAST(first_conversion_date_c AS date) first_conversion_date_correct
+      , aes.ae_owner
+      , created.created_by
+      FROM
+        (((("salesforce_leads" leads
+      LEFT JOIN salesforce_opportunitys opps ON (leads.converted_opportunity_id = opps.id))
+      LEFT JOIN (
+        SELECT
+          id user_id
+        , name lead_owner
+        FROM
+          salesforce_users
+      )  owners ON (leads.owner_id = owners.user_id))
+      LEFT JOIN (
+        SELECT
+          id user_id
+        , name ae_owner
+        FROM
+          salesforce_users
+      )  aes ON (leads.a_e_owner_c = aes.user_id))
+      LEFT JOIN (
+        SELECT
+          id user_id
+        , name created_by
+        FROM
+          salesforce_users
+      )  created ON (leads.created_by_id = created.user_id))
+      WHERE (((NOT (leads.company LIKE '%test%')) AND (NOT (leads.company LIKE '%Test%'))) AND ((NOT (leads.name LIKE '%test%')) AND (NOT (leads.name LIKE '%Test%'))))`
+      expect(getParsedSql(sql)).to.be.equal("SELECT `leads`.*, from_unixtime(CAST(substrinfg(`leads`.`demo_meeting_date_c`, 1, 10) AS DOUBLE)) AS `demo_meeting_date_correct`, CAST(`first_conversion_date_c` AS DATE) AS `first_conversion_date_correct`, `aes`.`ae_owner`, `created`.`created_by` FROM ((((`salesforce_leads` AS `leads` LEFT JOIN `salesforce_opportunitys` AS `opps` ON (`leads`.`converted_opportunity_id` = `opps`.`id`)) LEFT JOIN (SELECT `id` AS `user_id`, `name` AS `lead_owner` FROM `salesforce_users`) AS `owners` ON (`leads`.`owner_id` = `owners`.`user_id`)) LEFT JOIN (SELECT `id` AS `user_id`, `name` AS `ae_owner` FROM `salesforce_users`) AS `aes` ON (`leads`.`a_e_owner_c` = `aes`.`user_id`)) LEFT JOIN (SELECT `id` AS `user_id`, `name` AS `created_by` FROM `salesforce_users`) AS `created` ON (`leads`.`created_by_id` = `created`.`user_id`)) WHERE (((NOT(`leads`.`company` LIKE '%test%')) AND (NOT(`leads`.`company` LIKE '%Test%'))) AND ((NOT(`leads`.`name` LIKE '%test%')) AND (NOT(`leads`.`name` LIKE '%Test%'))))")
   })
 })

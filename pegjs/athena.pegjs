@@ -1173,8 +1173,7 @@ index_option
   / keyword_comment
 
 table_ref_list
-  = head:table_base
-    tail:table_ref* {
+  = head:table_base __ tail:table_ref* {
       tail.unshift(head);
       tail.forEach(tableInfo => {
         const { table, as } = tableInfo
@@ -1183,22 +1182,6 @@ table_ref_list
         refreshColumnList(columnList)
       })
       return tail;
-    }
-  / lp:LPAREN+ __ head:table_base tail:table_ref* __ rp:RPAREN+ {
-      if (lp.length !== rp.length) throw new Error(`parentheses not match in from clause: ${lp.length} != ${rp.length}`)
-      tail.unshift(head);
-      tail.forEach(tableInfo => {
-        const { table, as } = tableInfo
-        tableAlias[table] = table
-        if (as) tableAlias[as] = table
-        refreshColumnList(columnList)
-      })
-      return {
-        expr: tail,
-        parentheses: {
-          length: rp.length
-        }
-      }
     }
 
 table_ref
@@ -1217,7 +1200,7 @@ table_join
       t.on   = expr;
       return t;
     }
-  / op:(join_op / set_op) __ LPAREN __ stmt:union_stmt __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
+  / op:(join_op / set_op) __ LPAREN __ stmt:(union_stmt / table_ref_list) __ RPAREN __ alias:alias_clause? __ expr:on_clause? {
     stmt.parentheses = true;
     return {
       expr: stmt,
@@ -1266,6 +1249,13 @@ table_base
         as: alias
       };
     }
+  / LPAREN __ stmt:table_ref_list __ RPAREN __ alias:alias_clause? {
+    stmt = { type: 'tables', expr: stmt, parentheses: true }
+    return {
+      expr: stmt,
+      as: alias
+    };
+  }
 
 join_op
   = KW_LEFT __ KW_OUTER? __ KW_JOIN { return 'LEFT JOIN'; }
@@ -2336,7 +2326,13 @@ literal_bool
     }
 
 literal_string
-  = ca:("'" single_char* "'") {
+  = r:'u&'i ca:("'" single_char* "'") {
+      return {
+        type: 'unicode_string',
+        value: ca[1].join('')
+      };
+    }
+  / ca:("'" single_char* "'") {
       return {
         type: 'single_quote_string',
         value: ca[1].join('')
