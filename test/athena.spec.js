@@ -293,7 +293,7 @@ describe('athena', () => {
       expect(getParsedSql(sql)).to.be.equal("WITH `user_logins` AS (SELECT `user_id`, `event`, `dttm`, `dashboard_id`, `slice_id` FROM (SELECT `l`.`user_id`, 'login' AS `event`, `l`.`dttm`, CAST(NULL AS BIGINT) AS `dashboard_id`, CAST(NULL AS BIGINT) AS `slice_id`, LAG(`l`.`dttm`) OVER (PARTITION BY `l`.`user_id` ORDER BY `l`.`dttm` ASC) AS `previous_dttm` FROM `bronze_prod`.`superset_logs` AS `l` WHERE `l`.`action` = 'welcome') WHERE `previous_dttm` IS NULL OR `dttm` > `previous_dttm` + INTERVAL '1' HOUR ORDER BY `user_id` ASC, `dttm` ASC), `user_events` AS (SELECT `l`.`user_id`, json_extract_scalar(`l`.`json`, '$.event_name') AS `event`, `l`.`dttm`, NULLIF(COALESCE(CAST(json_extract_scalar(`l`.`json`, '$.source_id') AS BIGINT), `l`.`dashboard_id`), 0) AS `dashboard_id`, NULLIF(COALESCE(CAST(json_extract_scalar(`l`.`json`, '$.slice_id') AS BIGINT), CAST(json_extract_scalar(`l`.`json`, '$.chartId') AS BIGINT), `l`.`slice_id`), 0) AS `slice_id` FROM `bronze_prod`.`superset_logs` AS `l` WHERE json_extract_scalar(\"json\", '$.event_name') IN ('spa_navigation', 'mount_dashboard', 'export_csv_dashboard_chart', 'chart_download_as_image', 'export_xlsx_dashboard_chart', 'change_dashboard_filter')), `export_dashboard_logs` AS (SELECT `user_id`, `event`, `dttm`, CAST(json_extract_scalar(`json_array_element`, '$.value') AS BIGINT) AS `dashboard_id`, CAST(NULL AS BIGINT) AS `slice_id` FROM (SELECT `user_id`, `event`, `dttm`, `json_array_element` FROM (SELECT `l`.`user_id`, 'export_dashboard' AS `event`, `l`.`dttm`, json_extract(`l`.`json`, '$.rison.filters') AS `filters_array` FROM `bronze_prod`.`superset_logs` AS `l` WHERE `action` = 'ReportScheduleRestApi.get_list') CROSS JOIN UNNEST(CAST(`filters_array` AS ARRAY<JSON>)) AS t(`json_array_element`) WHERE json_extract_scalar(`json_array_element`, '$.col') = 'dashboard_id')), `relevant_logs` AS (SELECT *, ROW_NUMBER() OVER (PARTITION BY `user_id`, `dttm` ORDER BY `dashboard_id` ASC) AS `RN` FROM (SELECT `user_id`, `dttm`, `event`, MAX(`dashboard_id`) AS `dashboard_id`, MAX(`slice_id`) AS `slice_id` FROM (SELECT * FROM `user_logins` UNION ALL SELECT * FROM `user_events` UNION ALL SELECT * FROM `export_dashboard_logs`) GROUP BY `user_id`, `dttm`, `event`)), `organizational_domains` AS (SELECT lower(split_part(split_part(`therapist_mail`, '@', 2), '.', 1)) AS `organization_domain`, MAX(`therapist_organization_name`) AS `organization` FROM `silver_prod`.`eleos_full_therapist_info` GROUP BY 1) SELECT `l`.`user_id`, `l`.`dttm`, `l`.`event`, `l`.`dashboard_id`, `l`.`slice_id`, `u`.`last_name`, `u`.`email`, `o`.`organization`, `d`.`dashboard_title`, `s`.`slice_name`, 'Client Facing' AS `superset_instance` FROM `relevant_logs` AS `l` INNER JOIN `bronze_prod`.`superset_ab_user` AS `u` ON `l`.`user_id` = `u`.`id` LEFT JOIN `bronze_prod`.`superset_dashboards` AS `d` ON `l`.`dashboard_id` = `d`.`id` LEFT JOIN `bronze_prod`.`superset_slices` AS `s` ON `l`.`slice_id` = `s`.`id` LEFT JOIN `organizational_domains` AS `o` ON lower(split_part(split_part(`u`.`email`, '@', 2), '.', 1)) = `o`.`organization_domain` WHERE `RN` = 1 AND lower(`u`.`email`) NOT LIKE '%eleos%' AND lower(`u`.`email`) NOT LIKE '%test%' AND lower(`u`.`username`) NOT LIKE '%eleos%' AND lower(`u`.`username`) NOT LIKE '%test%' AND lower(`u`.`username`) NOT LIKE '%admin%'")
   })
   it('should support filter function', () => {
-    const sql = `SELECT
+    let sql = `SELECT
       id,
       CAST(CURRENT_TIMESTAMP AS TIMESTAMP(6)) AS dbt_insert_time
     FROM
@@ -303,6 +303,67 @@ describe('athena', () => {
         filter(map_values(note), VALUE -> VALUE IS NOT NULL)
       ) = 0;`
       expect(getParsedSql(sql)).to.be.equal('SELECT `id`, CAST(CURRENT_TIMESTAMP AS TIMESTAMP(6)) AS `dbt_insert_time` FROM `some_table` WHERE cardinality(FILTER(map_values(`note`), VALUE -> `VALUE` IS NOT NULL)) = 0')
+    sql = `WITH
+      base_data AS (
+        SELECT
+          *
+        FROM
+          (
+            abc sqls
+            FULL JOIN def mqls ON (sqls.lead_id = mqls.id)
+          )
+        ORDER BY
+          COALESCE(opp_created_date, CAST(mqls.mql_date AS date)) ASC
+      ),
+      layer_1 AS (
+        SELECT
+          *
+        FROM
+          base_data
+        ORDER BY
+          xxx_date DESC
+      )
+    SELECT
+      *,
+      (
+        CASE
+          WHEN (
+            opp_closed_quarter_start_date > opp_created_quarter_start_date
+          ) THEN ARRAY_JOIN (
+            TRANSFORM (
+              FILTER (
+                SEQUENCE (
+                  DATE_ADD('month', 3, opp_created_quarter_start_date),
+                  DATE_ADD(
+                    'month',
+                    (
+                      3 * (
+                        date_diff (
+                          'month',
+                          opp_created_quarter_start_date,
+                          opp_closed_quarter_start_date
+                        ) / 3
+                      )
+                    ),
+                    opp_created_quarter_start_date
+                  ),
+                  INTERVAL '3' MONTH
+                ),
+                (x) -> (
+                  (x > opp_created_quarter_start_date)
+                  AND (x < opp_closed_quarter_start_date)
+                )
+              ),
+              (x) -> date_format(x, '%Y-%m-%d')
+            ),
+            ', '
+          )
+          ELSE null
+        END
+      ) active_q
+    FROM
+      layer_1`
+    expect(getParsedSql(sql)).to.be.equal("WITH `base_data` AS (SELECT * FROM (`abc` AS `sqls` FULL JOIN `def` AS `mqls` ON (`sqls`.`lead_id` = `mqls`.`id`)) ORDER BY COALESCE(`opp_created_date`, CAST(`mqls`.`mql_date` AS DATE)) ASC), `layer_1` AS (SELECT * FROM `base_data` ORDER BY `xxx_date` DESC) SELECT *, (CASE WHEN (`opp_closed_quarter_start_date` > `opp_created_quarter_start_date`) THEN ARRAY_JOIN(TRANSFORM(FILTER(SEQUENCE(DATE_ADD('month', 3, `opp_created_quarter_start_date`), DATE_ADD('month', (3 * (date_diff('month', `opp_created_quarter_start_date`, `opp_closed_quarter_start_date`) / 3)), `opp_created_quarter_start_date`), INTERVAL '3' MONTH), (`x`) -> ((`x` > `opp_created_quarter_start_date`) AND (`x` < `opp_closed_quarter_start_date`))), (`x`) -> date_format(`x`, '%Y-%m-%d')), ', ') ELSE NULL END) AS `active_q` FROM `layer_1`")
   })
   it('should support key as column name', () => {
     let sql = `WITH CTE AS (
