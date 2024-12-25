@@ -360,4 +360,21 @@ describe('athena', () => {
     sql = `select trim(BOTH FROM split("a,b", ',')[1]) from model_a`
     expect(getParsedSql(sql)).to.be.equal('SELECT TRIM(BOTH FROM split("a,b", \',\')[1]) FROM `model_a`')
   })
+  it('from values clause', () => {
+    const sql = `SELECT
+      CAST(date_column AS date) update_date
+    FROM
+      (
+        (
+          VALUES
+            "sequence" (
+              "date"('2022-10-01'),
+              current_date,
+              INTERVAL '1' DAY
+            )
+        ) t1 (date_array)
+        CROSS JOIN UNNEST (date_array) t2 (date_column)
+      )`
+    expect(getParsedSql(sql)).to.be.equal('SELECT CAST(`date_column` AS DATE) AS `update_date` FROM ((VALUES ("sequence"("date"(\'2022-10-01\'), CURRENT_DATE, INTERVAL \'1\' DAY))) AS t1(`date_array`) CROSS JOIN UNNEST(`date_array`) AS t2(`date_column`))')
+  })
 })
