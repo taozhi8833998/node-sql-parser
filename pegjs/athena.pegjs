@@ -2080,7 +2080,7 @@ concat_separator
   }
 
 distinct_args
-  = d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ tail:(__ (KW_AND / KW_OR) __ expr)* __ s:concat_separator? __ or:order_by_clause? {
+  = d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ tail:(__ (KW_AND / KW_OR / OPERATOR_CONCATENATION) __ expr)* __ or:order_by_clause? {
     const len = tail.length
     let result = c
     result.parentheses = true
@@ -2091,15 +2091,15 @@ distinct_args
       distinct: d,
       expr: result,
       orderby: or,
-      separator: s
     };
   }
-  / d:KW_DISTINCT? __ c:(column_ref / or_and_expr) __ s:(concat_separator __ expr)? __ or:order_by_clause? {
-    const separator = s && s[0]
-    if (s && s[1]) {
-      separator.expr = s[2]
+  / d:KW_DISTINCT? __ c:(column_ref / or_and_expr) __ tail:(__ (COMMA / OPERATOR_CONCATENATION) __ expr)* __ or:order_by_clause? {
+    const len = tail.length
+    let result = c
+    for (let i = 0; i < len; ++i) {
+      result = createBinaryExpr(tail[i][1], result, tail[i][3])
     }
-    return { distinct: d, expr: c, orderby: or, separator };
+    return { distinct: d, expr: result, orderby: or };
   }
   
 count_arg
