@@ -416,8 +416,8 @@ describe('athena', () => {
     expect(getParsedSql(sql)).to.be.equal('SELECT "concat"(`name`, `name`) FROM ((`raw_listings`))')
   })
   it('array_agg and trim function', () => {
-    let sql = "select ARRAY_AGG(comments.real_name || ':' comments.text ORDER BY comments.comment_ts) AS comments FROM some_table"
-    expect(getParsedSql(sql)).to.be.equal("SELECT ARRAY_AGG(`comments`.`real_name`|| ':' `comments`.`text` ORDER BY `comments`.`comment_ts` ASC) AS `comments` FROM `some_table`")
+    let sql = "select ARRAY_AGG(comments.real_name || ':' || comments.text ORDER BY comments.comment_ts) AS comments FROM some_table"
+    expect(getParsedSql(sql)).to.be.equal("SELECT ARRAY_AGG(`comments`.`real_name` || ':' || `comments`.`text` ORDER BY `comments`.`comment_ts` ASC) AS `comments` FROM `some_table`")
     sql = `select trim(BOTH FROM split("a,b", ',')[1]) from model_a`
     expect(getParsedSql(sql)).to.be.equal('SELECT TRIM(BOTH FROM split("a,b", \',\')[1]) FROM `model_a`')
   })
