@@ -75,6 +75,7 @@ describe('update', () => {
               type: "expr_list",
               value: [
                 {
+                  collate: null,
                   type: "column_ref",
                   table: null,
                   column: "name"
@@ -153,11 +154,13 @@ describe('update', () => {
               "type": "binary_expr",
               "operator": "=",
               "left": {
+                "collate": null,
                  "type": "column_ref",
                  "table": "r",
                  "column": "Train"
               },
               "right": {
+                "collate": null,
                  "type": "column_ref",
                  "table": "t",
                  "column": "TrainID"
@@ -173,11 +176,13 @@ describe('update', () => {
               "type": "binary_expr",
               "operator": "+",
               "left": {
+                "collate": null,
                  "type": "column_ref",
                  "table": "t",
                  "column": "Capacity"
               },
               "right": {
+                "collate": null,
                  "type": "column_ref",
                  "table": "r",
                  "column": "NoSeats"
@@ -190,6 +195,7 @@ describe('update', () => {
       "type": "binary_expr",
       "operator": "=",
       "left": {
+        "collate": null,
         "type": "column_ref",
         "table": "r",
         "column": "ReservationID"

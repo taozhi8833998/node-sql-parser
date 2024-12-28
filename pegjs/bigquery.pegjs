@@ -1208,18 +1208,7 @@ keyword_comment
   }
 
 collate_expr
-  = KW_COLLATE __ ca:ident_name __ s:KW_ASSIGIN_EQUAL __ t:ident {
-    return {
-      type: 'collate',
-      keyword: 'collate',
-      collate: {
-        name: ca,
-        symbol: s,
-        value: t
-      }
-    }
-  }
-  / KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
+  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident {
     return {
       type: 'collate',
       keyword: 'collate',
@@ -2435,7 +2424,7 @@ case_else = KW_ELSE __ result:expr {
   }
 
 column_ref
-  = tbl:column_without_kw col:(__ DOT __ column_without_kw)+ __ cof:(column_offset_expr_list __ (DOT __ column_without_kw)?)? {
+  = tbl:column_without_kw col:(__ DOT __ column_without_kw)+ __ cof:(column_offset_expr_list __ (DOT __ column_without_kw)?)? ce:(__ collate_expr)? {
       const cols = col.map(c => c[3])
       columnList.add(`select::${tbl}::${cols[0]}`)
       const column = cof
@@ -2456,15 +2445,17 @@ column_ref
         type: 'column_ref',
         table: tbl,
         ...column,
+        collate: ce && ce[1],
         ...getLocationObject(),
       };
     }
-  / col:column {
+  / col:column ce:(__ collate_expr)? {
       columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
         table: null,
         column: col,
+        collate: ce && ce[1],
         ...getLocationObject()
       };
     }

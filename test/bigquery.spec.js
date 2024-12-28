@@ -927,6 +927,7 @@ describe('BigQuery', () => {
     const ast = parser.astify(sql, opt)
     const column = {
       expr: {
+        collate: null,
         type: 'column_ref',
         table: 'a',
         column: 'b',

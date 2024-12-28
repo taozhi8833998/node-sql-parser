@@ -10,7 +10,7 @@ describe('delete', () => {
       return parser.sqlify(ast, opt);
   }
 
-    it('should parse baisc usage', () => {
+    it('should parse basic usage', () => {
       const { tableList, columnList, ast } = parser.parse('delete from a where id = 1');
       expect(tableList).to.eql(['delete::null::a']);
       expect(columnList).to.eql(['select::null::id', 'delete::a::(.*)']);
@@ -30,6 +30,7 @@ describe('delete', () => {
         type: 'binary_expr',
         operator: '=',
         left: {
+          collate: null, 
           type: 'column_ref',
           table: null,
           column: 'id',
@@ -40,7 +41,7 @@ describe('delete', () => {
         }
       });
     });
-    it('should parse baisc usage', () => {
+    it('should parse basic usage', () => {
       const { tableList, columnList, ast } = parser.parse('delete from a');
       expect(tableList).to.eql(['delete::null::a']);
       expect(columnList).to.eql(['delete::a::(.*)']);
@@ -92,11 +93,13 @@ describe('delete', () => {
                type: 'binary_expr',
                operator: '=',
                left: {
+                  collate: null,
                   type: 'column_ref',
                   table: 't1',
                   column: 'id'
                },
                right: {
+                  collate: null,
                   type: 'column_ref',
                   table: 't2',
                   column: 'id'
@@ -108,6 +111,7 @@ describe('delete', () => {
          type: 'binary_expr',
          operator: '=',
          left: {
+            collate: null, 
             type: 'column_ref',
             table: 't1',
             column: 'id',
@@ -117,7 +121,7 @@ describe('delete', () => {
             value: 25,
          }
       });
-    });
+   });
 
    it('should support order by and limit in delete sql', () => {
       expect(getParsedSql('delete from t1 where id = 1 order by id')).to.be.equal('DELETE FROM `t1` WHERE `id` = 1 ORDER BY `id` ASC')

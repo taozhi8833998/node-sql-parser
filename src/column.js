@@ -1,3 +1,4 @@
+import { collateToSQL } from './collate'
 import { constraintDefinitionToSQL } from './constrain'
 import { exprToSQL } from './expr'
 import { arrayDimensionToSymbol, castToSQL } from './func'
@@ -35,7 +36,7 @@ function arrayIndexToSQL(arrayIndexList) {
 }
 function columnRefToSQL(expr) {
   const {
-    array_index, as, column, db, isDual, notations = [], options, schema, table, parentheses,
+    array_index, as, column, collate, db, isDual, notations = [], options, schema, table, parentheses,
     suffix, order_by, subFields = [],
   } = expr
   let str = column === '*' ? '*' : columnOffsetToSQL(column, isDual)
@@ -51,6 +52,7 @@ function columnRefToSQL(expr) {
   str = [`${str}${arrayIndexToSQL(array_index)}`, ...subFields].join('.')
   const result = [
     str,
+    collateToSQL(collate),
     exprToSQL(options),
     commonOptionConnector('AS', exprToSQL, as),
   ]

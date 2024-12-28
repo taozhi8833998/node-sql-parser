@@ -187,14 +187,14 @@ describe('select', () => {
     it('should parse aliases w/o "AS" keyword', () => {
       const ast = parser.astify('SELECT a aa FROM  t');
       expect(ast.columns).to.eql([
-        { expr: { type: 'column_ref', table: null, column: 'a' }, as: 'aa' }
+        { expr: { collate: null, type: 'column_ref', table: null, column: 'a' }, as: 'aa' }
       ]);
     });
 
     it('should parse aliases w/ "AS" keyword', () => {
       const ast = parser.astify('SELECT b.c as bc FROM t');
       expect(ast.columns).to.eql([
-        { expr: { type: 'column_ref', table: 'b', column: 'c' },  as: 'bc' }
+        { expr: { collate: null, type: 'column_ref', table: 'b', column: 'c' },  as: 'bc' }
       ]);
     });
 
@@ -221,6 +221,7 @@ describe('select', () => {
                 }
               },
               right: {
+                collate: null,
                 type: 'column_ref',
                 table: null,
                 column: 'b'
@@ -233,13 +234,14 @@ describe('select', () => {
               type: 'binary_expr',
               operator: '&&',
               left: {
-                 type: 'column_ref',
-                 table: 't',
-                 column: 'cd'
+                  collate: null, 
+                  type: 'column_ref',
+                  table: 't',
+                  column: 'cd'
               },
               right: {
-                 type: 'double_quote_string',
-                 value: 'ef'
+                  type: 'double_quote_string',
+                  value: 'ef'
               }
            },
            "as": null
@@ -294,7 +296,7 @@ describe('select', () => {
               over: null,
               args: {
                 type  : 'expr_list',
-                value : [ { type: 'column_ref', table: null, column: 'd' } ]
+                value : [ { collate: null, type: 'column_ref', table: null, column: 'd' } ]
               }
             },
             as: null
@@ -381,7 +383,7 @@ describe('select', () => {
       const ast = parser.astify('SELECT b.c as bc, 1+3 FROM t');
 
       expect(ast.columns).to.eql([
-        { expr: { type: 'column_ref', table: 'b', column: 'c' },  as: 'bc' },
+        { expr: { collate: null, type: 'column_ref', table: 'b', column: 'c' },  as: 'bc' },
         {
           expr: {
             type: 'binary_expr',
@@ -439,7 +441,7 @@ describe('select', () => {
               distinct: null,
               locking_read: null,
               from: [{ db: null, table: 't1', as: null }],
-              columns: [{ expr: { type: 'column_ref', table: null, column: 'id' }, as: null }],
+              columns: [{ expr: { collate: null, type: 'column_ref', table: null, column: 'id' }, as: null }],
               into: { position: null },
               where: null,
               groupby: null,
@@ -481,8 +483,8 @@ describe('select', () => {
                 on: {
                   type: 'binary_expr',
                   operator: '=',
-                  left: { type: 'column_ref', table: 'd', column: 'd' },
-                  right: { type: 'column_ref', table: 'd', column: 'a' }
+                  left: { collate: null, type: 'column_ref', table: 'd', column: 'd' },
+                  right: { collate: null, type: 'column_ref', table: 'd', column: 'a' }
                 }
               }
             ]);
@@ -507,8 +509,8 @@ describe('select', () => {
                 locking_read: null,
                 from: [{ db: null, table: 't2', as: null }],
                 columns: [
-                  { expr: { type: 'column_ref', table: null, 'column': 'id' }, as: null },
-                  { expr: { type: 'column_ref', table: null, 'column': 'col1' }, as: null }
+                  { expr: { collate: null, type: 'column_ref', table: null, 'column': 'id' }, as: null },
+                  { expr: { collate: null, type: 'column_ref', table: null, 'column': 'col1' }, as: null }
                 ],
                 into: { position: null },
                 where: null,
@@ -526,8 +528,8 @@ describe('select', () => {
             on: {
               type: 'binary_expr',
               operator: '=',
-              left: { type: 'column_ref', table: 't1', column: 'id' },
-              right: { type: 'column_ref', table: 'someAlias', column: 'id' }
+              left: { collate: null, type: 'column_ref', table: 't1', column: 'id' },
+              right: { collate: null, type: 'column_ref', table: 'someAlias', column: 'id' }
             }
           }
         ]);
@@ -571,7 +573,7 @@ describe('select', () => {
       expect(ast.where).to.eql({
         type: 'binary_expr',
         operator: '>',
-        left: { type: 'column_ref', table: 't', column: 'a' },
+        left: { collate: null, type: 'column_ref', table: 't', column: 'a' },
         right: { type: 'number', value: 0 }
       });
     });
@@ -604,7 +606,7 @@ describe('select', () => {
       expect(ast.where).to.eql({
         type: 'binary_expr',
         operator: '>',
-        left: { type: 'column_ref', table: 't', column: 'a' },
+        left: { collate: null, type: 'column_ref', table: 't', column: 'a' },
         right: { type: 'param', value: 'my_param' }
       });
     });
@@ -618,7 +620,7 @@ describe('select', () => {
         left: {
           type: 'binary_expr',
           operator: 'BETWEEN',
-          left: { type: 'column_ref', table: 't', column: 'c' },
+          left: { collate: null, type: 'column_ref', table: 't', column: 'c' },
           right: {
             type : 'expr_list',
             value : [
@@ -641,7 +643,7 @@ describe('select', () => {
       expect(ast.where).to.eql({
         type: 'binary_expr',
         operator: '=',
-        left: { type: 'column_ref', table: 't', column: 'a' },
+        left: { collate: null, type: 'column_ref', table: 't', column: 'a' },
         right: { type: 'bool', value: true }
       });
     });
@@ -660,7 +662,7 @@ describe('select', () => {
         expect(ast.where).to.eql({
           type: 'binary_expr',
           operator: operator.toUpperCase(),
-          left: { type: 'column_ref', table: null, column: 'col' },
+          left: { collate: null, type: 'column_ref', table: null, column: 'col' },
           right: { type: 'null', value: null }
         });
       });
@@ -718,15 +720,15 @@ describe('select', () => {
           as: null
         },
         {
-          expr: { type: 'unary_expr', operator: '-', expr: { type: 'column_ref', table: null, column: 'a' } } ,
+          expr: { type: 'unary_expr', operator: '-', expr: { collate: null, type: 'column_ref', table: null, column: 'a' } } ,
           as: null
         },
         {
-          expr: { type: 'unary_expr', operator: '+', expr: { type: 'column_ref', table: null, column: 'b' } },
+          expr: { type: 'unary_expr', operator: '+', expr: { collate: null, type: 'column_ref', table: null, column: 'b' } },
           as: null
         },
         {
-          expr: { type: 'unary_expr', operator: '+', expr: { type: 'column_ref', table: 'abc', column: 'e' } },
+          expr: { type: 'unary_expr', operator: '+', expr: { collate: null, type: 'column_ref', table: 'abc', column: 'e' } },
           as: null
         }
       ])
@@ -838,15 +840,15 @@ describe('select', () => {
   describe('group by clause', () => {
     it('should parse single columns', () => {
       const ast = parser.astify('SELECT a FROM b WHERE c = 0 GROUP BY d');
-      expect(ast.groupby.columns).to.eql([{ type:'column_ref', table: null, column: 'd' }])
+      expect(ast.groupby.columns).to.eql([{ collate: null, type:'column_ref', table: null, column: 'd' }])
     });
 
     it('should parse multiple columns', () => {
       const ast = parser.astify('SELECT a FROM b WHERE c = 0 GROUP BY d, t.b, t.c WITH ROLLUP');
       expect(ast.groupby.columns).to.eql([
-        { type: 'column_ref', table: null, column: 'd' },
-        { type: 'column_ref', table: 't', column: 'b' },
-        { type: 'column_ref', table: 't', column: 'c' }
+        { collate: null, type: 'column_ref', table: null, column: 'd' },
+        { collate: null, type: 'column_ref', table: 't', column: 'b' },
+        { collate: null, type: 'column_ref', table: 't', column: 'c' }
       ]);
       expect(ast.groupby.modifiers).to.eql([
         { type: 'origin', value: 'with rollup' }
@@ -898,7 +900,7 @@ describe('select', () => {
             type: 'aggr_func',
             name: 'SUM',
             over: null,
-            args: { expr: { type: 'column_ref', table: null, column: 'col2' } }
+            args: { expr: { collate: null, type: 'column_ref', table: null, column: 'col2' } }
           },
           right: { type: 'number', value: 10 }
         },
@@ -921,16 +923,16 @@ describe('select', () => {
     it('should parse single column', () => {
       const ast = parser.astify('SELECT a FROM b WHERE c = 0 order BY d');
       expect(ast.orderby).to.eql([
-        { expr: { type: 'column_ref', table: null, column: 'd' }, type: null }
+        { expr: { collate: null, type: 'column_ref', table: null, column: 'd' }, type: null }
       ]);
     });
 
     it('should parse multiple columns', () => {
       const ast = parser.astify('SELECT a FROM b WHERE c = 0 order BY d, t.b desc, t.c asc');
       expect(ast.orderby).to.eql([
-        { expr: { type: 'column_ref', table: null, column: 'd' },  type: null },
-        { expr: { type: 'column_ref', table: 't', column: 'b' }, type: 'DESC' },
-        { expr: { type: 'column_ref', table: 't', column: 'c' }, type: 'ASC' }
+        { expr: { collate: null, type: 'column_ref', table: null, column: 'd' },  type: null },
+        { expr: { collate: null, type: 'column_ref', table: 't', column: 'b' }, type: 'DESC' },
+        { expr: { collate: null, type: 'column_ref', table: 't', column: 'c' }, type: 'ASC' }
       ]);
     });
 
@@ -938,13 +940,13 @@ describe('select', () => {
       const ast = parser.astify("SELECT a FROM b WHERE c = 0 order BY d, SuM(e)");
 
       expect(ast.orderby).to.eql([
-        { expr: { type: 'column_ref', table: null, column: 'd' },  type: null },
+        { expr: { collate: null, type: 'column_ref', table: null, column: 'd' },  type: null },
         {
           expr: {
             type: 'aggr_func',
             name: 'SUM',
             over: null,
-            args: { expr: { type: 'column_ref', table: null, column: 'e' } }
+            args: { expr: { collate: null, type: 'column_ref', table: null, column: 'e' } }
           },
           type: null
         }
@@ -1028,8 +1030,8 @@ describe('select', () => {
         left: {
           type: 'expr_list',
           value: [
-            { column: 'firstname', table: null, type: 'column_ref' },
-            { column: 'lastname', table: null, type: 'column_ref' }
+            { collate: null, column: 'firstname', table: null, type: 'column_ref' },
+            { collate: null, column: 'lastname', table: null, type: 'column_ref' }
           ],
           parentheses: true
         },
@@ -1092,6 +1094,7 @@ describe('select', () => {
       expect(cte)
         .to.have.property('columns')
         .and.to.be.eql([{
+              "collate": null,
               "column": "col1",
               "table": null,
               "type": "column_ref"
@@ -1105,11 +1108,13 @@ describe('select', () => {
       const cte = ast.with[0];
       expect(cte.columns).to.be.eql([
         {
+          "collate": null,
           "column": "col1",
           "table": null,
           "type": "column_ref"
         },
         {
+          "collate": null,
           "column": "col2",
           "table": null,
           "type": "column_ref"
