@@ -3535,7 +3535,7 @@ trim_position
   = 'BOTH'i / 'LEADING'i / 'TRAILING'i
 
 trim_rem
-  = p:trim_position? __ rm:literal_string? __ k:KW_FROM {
+  = p:trim_position? __ rm:expr? __ k:KW_FROM {
     let value = []
     if (p) value.push({type: 'origin', value: p })
     if (rm) value.push(rm)

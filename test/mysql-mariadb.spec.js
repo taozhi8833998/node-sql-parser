@@ -1182,6 +1182,23 @@ describe('mysql', () => {
           'SELECT `users`.`id` FROM `users` LEFT JOIN `orders` ON `users`.`id` COLLATE utf8mb4_general_ci = `orders`.`user_id`',
         ]
       },
+      {
+        title: 'trim expr from',
+        sql: [
+          `create table \`table1\` (
+              \`id\` int primary key not null,
+              \`data\` varchar(255) not null,
+              \`removed_id\` varchar(55) GENERATED ALWAYS AS (
+                    trim(
+                        trailing concat('.',substring_index(\`data\`,'.',-(3)))
+                        from
+                        trim(leading concat(substring_index(\`data\`,'.',3),'.') from \`data\`)
+                    )
+                ) STORED
+          );`,
+          "CREATE TABLE `table1` (`id` INT NOT NULL PRIMARY KEY, `data` VARCHAR(255) NOT NULL, `removed_id` VARCHAR(55) GENERATED ALWAYS AS (TRIM(TRAILING concat('.', substring_index(`data`, '.', -(3))) FROM TRIM(LEADING concat(substring_index(`data`, '.', 3), '.') FROM `data`))) STORED)"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
