@@ -2825,13 +2825,12 @@ column_list_item
     // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
-  / e:expr_item __ s:KW_DOUBLE_COLON __ t:cast_data_type __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
+  / e:expr_item __ c:cast_double_colon __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ alias:alias_clause? {
     return {
+      ...c,
       as: alias,
       type: 'cast',
       expr: e,
-      symbol: '::',
-      target: t,
       tail: tail && tail[0] && { operator: tail[0][1], expr: tail[0][3] },
     }
   }
@@ -4442,11 +4441,11 @@ scalar_func
   / "NTILE"i
 
 cast_double_colon
-  = s:KW_DOUBLE_COLON __ t:data_type __ alias:alias_clause? {
+  = s:(KW_DOUBLE_COLON __ data_type)+ __ alias:alias_clause? {
     return {
       as: alias,
       symbol: '::',
-      target: t,
+      target: s.map(v => v[2]),
     }
   }
 cast_expr
@@ -4457,7 +4456,7 @@ cast_expr
       keyword: c.toLowerCase(),
       expr: e,
       symbol: 'as',
-      target: t,
+      target: [t],
     };
   }
   / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
@@ -4467,9 +4466,9 @@ cast_expr
       keyword: c.toLowerCase(),
       expr: e,
       symbol: 'as',
-      target: {
+      target: [{
         dataType: 'DECIMAL(' + precision + ')'
-      }
+      }]
     };
   }
   / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
@@ -4479,9 +4478,9 @@ cast_expr
         keyword: c.toLowerCase(),
         expr: e,
         symbol: 'as',
-        target: {
+        target: [{
           dataType: 'DECIMAL(' + precision + ', ' + scale + ')'
-        }
+        }]
       };
     }
   / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
@@ -4491,9 +4490,9 @@ cast_expr
       keyword: c.toLowerCase(),
       expr: e,
       symbol: 'as',
-      target: {
+      target: [{
         dataType: s + (t ? ' ' + t: '')
-      }
+      }]
     };
   }
   / LPAREN __ e:(or_expr / column_ref_array_index / param) __ RPAREN __ c:cast_double_colon?  {

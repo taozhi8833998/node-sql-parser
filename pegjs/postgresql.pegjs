@@ -6,6 +6,7 @@
     'AND': true,
     'AS': true,
     'ASC': true,
+    'AT': true,
 
     'BETWEEN': true,
     'BY': true,
@@ -3289,14 +3290,6 @@ expr_item
     return e
   }
 
-cast_data_type
-  = p:'"'? t: data_type s:'"'? {
-    // => data_type & { quoted?: string }
-    if ((p && !s) || (!p && s)) throw new Error('double quoted not match')
-    if (p && s) t.quoted = '"'
-    return t
-  }
-
 column_item_suffix
   = 'AT'i __ KW_TIME __ 'ZONE'i __ t:(quoted_ident_type / column_ref) {
     // => [{ type: 'origin'; value: string; }, quoted_ident_type | column_ref]
@@ -3313,29 +3306,27 @@ column_list_item
     // => { expr: expr; as: null; }
     return { expr: c, as: null }
   }
-  / e:column_ref __ s:KW_DOUBLE_COLON __ t:cast_data_type __ cs:column_item_suffix+ __ alias:alias_clause? {
-    // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; }
-    t.suffix = cs.flat()
+  / e:column_ref __ c:cast_double_colon __ cs:column_item_suffix+ __ alias:alias_clause? {
+    // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type[];  as?: null; }
+    c.target[c.target.length - 1].suffix = cs.flat()
     return {
+      ...c,
       as: alias,
       type: 'cast',
       expr: e,
-      symbol: '::',
-      target: t,
       suffix: cs.flat(),
     }
   }
-  / e:(column_ref_quoted / expr_item) __ s:KW_DOUBLE_COLON __ t:cast_data_type __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ cs:column_item_suffix* __ alias:alias_clause? {
-    // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; }
+  / e:(column_ref_quoted / expr_item) __ c:cast_double_colon __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ cs:column_item_suffix* __ alias:alias_clause? {
+    // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type[];  as?: null; }
     if (e.type === 'column_ref' && cs.length) {
       e.column.options = { type: 'expr_list', value: cs.flat(), separator: ' ' }
     }
     return {
+      ...c,
       as: alias,
       type: 'cast',
       expr: e,
-      symbol: '::',
-      target: t,
       tail: tail && tail[0] && { operator: tail[0][1], expr: tail[0][3] },
     }
   }
@@ -5077,18 +5068,26 @@ scalar_func
   / KW_SYSTEM_USER
   / "NTILE"i
 
+cast_data_type
+  = p:'"'? t:data_type s:'"'? {
+    // => data_type & { quoted?: string }
+    if ((p && !s) || (!p && s)) throw new Error('double quoted not match')
+    if (p && s) t.quoted = '"'
+    return t
+  }
+  
 cast_double_colon
-  = s:KW_DOUBLE_COLON __ t:data_type __ alias:alias_clause? {
+  = s:(KW_DOUBLE_COLON __ cast_data_type)+ __ alias:alias_clause? {
     /* => {
         as?: alias_clause,
         symbol: '::' | 'as',
-        target: data_type;
+        target: cast_data_type[];
       }
       */
     return {
       as: alias,
       symbol: '::',
-      target: t,
+      target: s.map(v => v[2]),
     }
   }
 cast_expr
@@ -5099,7 +5098,7 @@ cast_expr
       keyword: c.toLowerCase(),
       expr: e,
       symbol: 'as',
-      target: t,
+      target: [t],
     };
   }
   / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
@@ -5109,9 +5108,9 @@ cast_expr
       keyword: c.toLowerCase(),
       expr: e,
       symbol: 'as',
-      target: {
+      target: [{
         dataType: 'DECIMAL(' + precision + ')'
-      }
+      }]
     };
   }
   / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
@@ -5121,9 +5120,9 @@ cast_expr
         keyword: c.toLowerCase(),
         expr: e,
         symbol: 'as',
-        target: {
+        target: [{
           dataType: 'DECIMAL(' + precision + ', ' + scale + ')'
-        }
+        }]
       };
     }
   / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
@@ -5133,9 +5132,9 @@ cast_expr
       keyword: c.toLowerCase(),
       expr: e,
       symbol: 'as',
-      target: {
+      target: [{
         dataType: s + (t ? ' ' + t: '')
-      }
+      }]
     };
   }
   / LPAREN __ e:(or_expr / column_ref_array_index / param) __ RPAREN __ c:cast_double_colon?  {
@@ -5149,10 +5148,10 @@ cast_expr
     e.parentheses = true
     if (!c) return e
     return {
+      ...c,
       type: 'cast',
       keyword: 'cast',
       expr: e,
-      ...c,
     }
   }
   / e:(column_ref_quoted / literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref_array_index / param) __ c:cast_double_colon? {
@@ -5165,10 +5164,10 @@ cast_expr
       */
     if (!c) return e
     return {
+      ...c,
       type: 'cast',
       keyword: 'cast',
       expr: e,
-      ...c,
     }
   }
 
