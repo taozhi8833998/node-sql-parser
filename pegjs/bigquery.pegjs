@@ -1177,9 +1177,8 @@ create_fulltext_spatial_index_definition
   = p: (KW_FULLTEXT / KW_SPATIAL) __
     kc:(KW_INDEX / KW_KEY)? __
     c:column? __
-    de: cte_column_definition __
-    id: index_options? __
-     {
+    de:cte_column_definition __
+    id:index_options? {
       return {
         index: c,
         definition: de,
@@ -2141,7 +2140,7 @@ array_expr
       brackets: true,
     }
   }
-   / s:(array_type / KW_ARRAY)? __ l:(LBRAKE) __ c:(parentheses_list_expr / expr) __ r:(RBRAKE) {
+  / s:(array_type / KW_ARRAY)? __ l:(LBRAKE) __ c:(parentheses_list_expr / expr) __ r:(RBRAKE) {
     return {
       definition: s,
       expr_list: c,
@@ -2449,12 +2448,13 @@ column_ref
         ...getLocationObject(),
       };
     }
-  / col:column ce:(__ collate_expr)? {
-      columnList.add(`select::null::${col}`);
+  / col:(quoted_ident_type / column) ce:(__ collate_expr)? {
+      const column = typeof col === 'string' ? col : col.value;
+      columnList.add(`select::null::${column}`);
       return {
         type: 'column_ref',
         table: null,
-        column: col,
+        column: typeof col === 'string' ? col : { expr: col },
         collate: ce && ce[1],
         ...getLocationObject()
       };
