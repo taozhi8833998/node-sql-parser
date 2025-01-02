@@ -1715,9 +1715,14 @@ columns_list
       return createList(head, tail);
     }
 
+array_index
+  = LBRAKE __ n:(literal_numeric / literal_string) __ RBRAKE {
+    return { value: n }
+  }
+
 column_offset_expr_list
-  = l:(LBRAKE __ (literal_numeric / literal_string) __ RBRAKE)+ {
-    return l.map(item => ({ value: item[2] }))
+  = l:array_index+ {
+    return l
   }
   / l:(LBRAKE __ (KW_OFFSET / KW_ORDINAL / KW_SAFE_OFFSET / KW_SAFE_ORDINAL) __ LPAREN __ (literal_numeric / literal_string) __ RPAREN __ RBRAKE)+ {
     return l.map(item => ({ name: item[2], value: item[6] }))
@@ -2448,13 +2453,15 @@ column_ref
         ...getLocationObject(),
       };
     }
-  / col:(quoted_ident_type / column) ce:(__ collate_expr)? {
-      const column = typeof col === 'string' ? col : col.value;
-      columnList.add(`select::null::${column}`);
+  / col:(quoted_ident_type / column) __ cf:array_index* ce:(__ collate_expr)? {
+      const columnName = typeof col === 'string' ? col : col.value;
+      columnList.add(`select::null::${columnName}`);
+      const column = typeof col === 'string' ? { expr: { type: 'default', value: col }} : { expr: col }
+      if (cf) column.offset = cf;
       return {
         type: 'column_ref',
         table: null,
-        column: typeof col === 'string' ? col : { expr: col },
+        column, 
         collate: ce && ce[1],
         ...getLocationObject()
       };
