@@ -870,6 +870,13 @@ describe('BigQuery', () => {
         'CREATE OR REPLACE VIEW project.database.schema AS (SELECT employee_id, first_name, last_name, salary, hire_date, modified FROM database.table WHERE salary > 50000)'
       ]
     },
+    {
+      title: 'quoted column',
+      sql: [
+        'SELECT `Customer id` FROM transactions',
+        'SELECT `Customer id` FROM transactions'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
