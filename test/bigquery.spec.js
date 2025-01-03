@@ -877,6 +877,13 @@ describe('BigQuery', () => {
         'SELECT `Customer id` FROM transactions'
       ]
     },
+    {
+      title: 'math operation together with array access',
+      sql: [
+        'SELECT my_array[0]/100 FROM table1',
+        'SELECT my_array[0] / 100 FROM table1'
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {
