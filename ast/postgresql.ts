@@ -322,7 +322,7 @@ export type create_column_definition = {
 
 export type column_constraint = { constraint: constraint_name; } | { nullable: literal_null | literal_not_null; default_val: default_expr; };
 
-export type collate_expr = { type: 'collate'; keyword: 'collate'; collate: { symbol: '=' ; name: ident_type; value: ident_type; }} | { type: 'collate'; keyword: 'collate'; collate: { symbol: '=' | null ; name: ident_type; }};
+export type collate_expr = { type: 'collate'; keyword: 'collate'; collate: { symbol: '=' | null ; name: ident_type; }};
 
 export type column_format = { type: 'column_format'; value: 'fixed' | 'dynamic' | 'default'; };
 
@@ -904,11 +904,9 @@ export type array_index_list = array_index[];
 
 export type expr_item = binary_column_expr & { array_index: array_index };
 
-export type cast_data_type = data_type & { quoted?: string };
-
 export type column_item_suffix = [{ type: 'origin'; value: string; }, quoted_ident_type | column_ref];
 
-export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type;  as?: null; } | { expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
+export type column_list_item = { expr: expr; as: null; } | { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type[];  as?: null; } | { expr: column_ref; as: null; } | { type: 'expr'; expr: expr; as?: alias_clause; };
 
 
 
@@ -1033,15 +1031,15 @@ export type window_specification = { name: null; partitionby: partition_by_claus
 
 export type window_specification_frameless = { name: null; partitionby: partition_by_clause; orderby: order_by_clause; window_frame_clause: null };
 
-export type window_frame_clause = string;
+export type window_frame_clause = { type: 'row'; expr: window_frame_following / window_frame_preceding } | binary_expr;
 
 export type window_frame_following = string | window_frame_current_row;
 
 export type window_frame_preceding = string | window_frame_current_row;
 
-export type window_frame_current_row = { type: 'single_quote_string'; value: string };
+export type window_frame_current_row = { type: 'origin'; value: string };
 
-export type window_frame_value = literal_string | literal_numeric;
+export type window_frame_value = { type: 'origin'; value: string } | literal_numeric;
 
 
 
@@ -1245,10 +1243,12 @@ export type column_ref = string_constants_escape | {
         schema: string;
         table: string;
         column: column | '*';
+        collate?: collate_expr;
       } | {
         type: 'column_ref';
         table: ident;
         column: column | '*';
+        collate?: collate_expr;
       };
 
 export type column_ref_quoted = unknown;
@@ -1369,12 +1369,14 @@ export type scalar_time_func = KW_CURRENT_DATE | KW_CURRENT_TIME | KW_CURRENT_TI
 
 export type scalar_func = scalar_time_func | KW_CURRENT_USER | KW_USER | KW_SESSION_USER | KW_SYSTEM_USER | "NTILE";
 
+export type cast_data_type = data_type & { quoted?: string };
+
 
 
 export type cast_double_colon = {
         as?: alias_clause,
         symbol: '::' | 'as',
-        target: data_type;
+        target: cast_data_type[];
       };
 
 
