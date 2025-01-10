@@ -1490,6 +1490,33 @@ drop_stmt
         }
       };
     }
+  / a:KW_DROP __
+    r:KW_VIEW __
+    ife:if_exists? __
+    t:table_ref_list __
+    op:view_options? {
+      /*
+      export interface drop_view_stmt_node {
+        type: 'drop';
+        prefix?: string;
+        keyword: 'view';
+        name: table_ref_list;
+        options?: view_options;
+      }
+      => AstStatement<drop_view_stmt_node>
+      */
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: r.toLowerCase(),
+          prefix: ife,
+          name: t,
+          options: op && [{ type: 'origin', value: op }],
+        }
+      };
+    }
 
 truncate_table_name
   = t:table_name __ s:STAR? {
@@ -2209,6 +2236,12 @@ on_reference
     }
   }
 
+view_options
+  = kc:('RESTRICT'i / 'CASCADE'i) {
+    // => 'restrict' | 'cascade';
+    return kc.toLowerCase()
+  }
+  
 reference_option
   = kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
     // => { type: 'function'; name: string; args: expr_list; }

@@ -1728,6 +1728,13 @@ describe('Postgres', () => {
         `SELECT CAST(now() AT TIME ZONE 'UTC' AS TIMESTAMPTZ) AS "right_now", my_field FROM "my_table"`
       ]
     },
+    {
+      title: 'drop view',
+      sql: [
+        'DROP VIEW view_name;',
+        'DROP VIEW "view_name"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
