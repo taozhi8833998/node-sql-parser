@@ -42,24 +42,11 @@ function namedWindowExprListToSQL(namedWindowExprInfo) {
   return expr.map(namedWindowExprToSQL).join(', ')
 }
 
-function isConsiderNullsInArgs(fnName) {
-  // position of IGNORE/RESPECT NULLS varies by function
-  switch (toUpper(fnName)) {
-    case 'NTH_VALUE':
-    case 'LEAD':
-    case 'LAG':
-      return false
-    default:
-      return true
-  }
-}
-
 function constructArgsList(expr) {
-  const { args, name, consider_nulls = '' } = expr
-  const argsList = args ? exprToSQL(args).join(', ') : ''
+  const { args, name, consider_nulls = '', separator = ', ' } = expr
+  const argsList = args ? exprToSQL(args).join(separator) : ''
   // cover Syntax from FN_NAME(...args [RESPECT NULLS]) [RESPECT NULLS]
-  const isConsidernulls = isConsiderNullsInArgs(name)
-  const result = [name, '(', argsList, !isConsidernulls && ')', consider_nulls && ' ', consider_nulls, isConsidernulls && ')']
+  const result = [name, '(', argsList, ')', consider_nulls && ' ', consider_nulls]
   return result.filter(hasVal).join('')
 }
 

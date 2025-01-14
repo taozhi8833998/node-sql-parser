@@ -500,6 +500,17 @@ describe('snowflake', () => {
         `SELECT SUM("id") OVER (PARTITION BY "name" ORDER BY "created_at" ASC RANGE BETWEEN INTERVAL '9 DAYS' PRECEDING AND CURRENT ROW) AS "last10Dmatches" FROM "model1"`
       ]
     },
+    {
+      title: 'window function ignore null',
+      sql: [
+        `SELECT
+          LAST_VALUE(ac_install_date)
+              IGNORE NULLS
+              OVER (PARTITION BY player_id ORDER BY date DESC) AS ac_install_date
+          FROM some_table;`,
+        'SELECT LAST_VALUE("ac_install_date") IGNORE NULLS OVER (PARTITION BY "player_id" ORDER BY "date" DESC) AS "ac_install_date" FROM "some_table"'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
