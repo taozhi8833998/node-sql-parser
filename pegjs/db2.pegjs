@@ -30,6 +30,7 @@
     'EXPLAIN': true,
 
     'FALSE': true,
+    'FETCH': true,
     'FROM': true,
     'FULL': true,
 
@@ -898,9 +899,7 @@ table_option
 
 
 ALTER_ADD_FULLETXT_SPARITAL_INDEX
-  = KW_ADD __
-    fsid:create_fulltext_spatial_index_definition
-     {
+  = KW_ADD __ fsid:create_fulltext_spatial_index_definition {
       return {
         action: 'add',
         type: 'alter',
