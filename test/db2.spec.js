@@ -13,5 +13,7 @@ describe('db2', () => {
   it('should support basic db2', () => {
     let sql = 'SELECT  id as test FROM customers'
     expect(getParsedSql(sql)).to.be.equal('SELECT id AS test FROM customers')
+    sql = 'SELECT * FROM "FGVST2"."CONTACT_TABLE25" FETCH FIRST 10 ROWS ONLY'
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM FGVST2.CONTACT_TABLE25 FETCH FIRST 10 ROWS ONLY')
   })
 })
