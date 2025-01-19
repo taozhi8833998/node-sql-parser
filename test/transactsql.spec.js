@@ -285,7 +285,7 @@ describe('transactsql', () => {
     const sql = 'INSERT INTO [dbo].[mytable]([value]) values( 0x11 );'
     expect(getParsedSql(sql)).to.be.equal('INSERT INTO [dbo].[mytable] (value) VALUES (0x11)')
   })
-  it('should support for xml', () => {
+  it('should support for xml / json', () => {
     const base = `SELECT Cust.CustomerID,
         OrderHeader.CustomerID,
         OrderHeader.SalesOrderID,
@@ -302,6 +302,10 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML PATH([rowName])`)
     sql = [base, 'for xml path(\'\')'].join('\n')
     expect(getParsedSql(sql)).to.be.equal(`${sqlfiyBase} FOR XML PATH('')`)
+    sql = 'SELECT column_name FROM table_name FOR XML PATH';
+    expect(getParsedSql(sql)).to.be.equal(`SELECT [column_name] FROM [table_name] FOR XML PATH`)
+    sql = 'SELECT column_name FROM table_name FOR JSON PATH';
+    expect(getParsedSql(sql)).to.be.equal(`SELECT [column_name] FROM [table_name] FOR JSON PATH`)
   })
   it('should support cross and outer apply', () => {
     const applies = ['cross', 'outer']
@@ -411,3 +415,4 @@ describe('transactsql', () => {
     })
   })
 })
+
