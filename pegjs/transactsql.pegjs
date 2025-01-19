@@ -2534,6 +2534,7 @@ param
 aggr_func
   = aggr_fun_count
   / aggr_fun_smma
+  / aggr_array_agg
 
 aggr_fun_smma
   = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN __ bc:over_partition? {
@@ -2688,9 +2689,16 @@ aggr_fun_count
       };
     }
 
-count_arg
-  = e:star_expr { return { expr: e }; }
-  / d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN tail:(__ (KW_AND / KW_OR) __ expr)* __ or:order_by_clause? {
+concat_separator
+  = kw:COMMA __ s:literal_string {
+    return {
+      symbol: kw,
+      delimiter: s
+    }
+  }
+
+distinct_args
+  = d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN __ tail:(__ (KW_AND / KW_OR) __ expr)* __ s:concat_separator? __ or:order_by_clause? {
     const len = tail.length
     let result = c
     result.parentheses = true
@@ -2701,9 +2709,25 @@ count_arg
       distinct: d,
       expr: result,
       orderby: or,
+      separator: s
     };
   }
-  / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause? { return { distinct: d, expr: c, orderby: or }; }
+  / d:KW_DISTINCT? __ c:or_and_expr __ s:concat_separator? __ or:order_by_clause? {
+    return { distinct: d, expr: c, orderby: or, separator: s };
+  }
+  
+count_arg
+  = e:star_expr { return { expr: e }; }
+  / distinct_args
+
+aggr_array_agg
+  = pre:(ident __ DOT)? __ name:(KW_ARRAY_AGG / KW_STRING_AGG) __ LPAREN __ arg:distinct_args __ RPAREN {
+      return {
+        type: 'aggr_func',
+        name: pre ? `${pre[0]}.${name}` : name,
+        args: arg,
+      };
+    }
 
 
 star_expr
@@ -3037,6 +3061,8 @@ KW_NOT      = "NOT"i        !ident_start { return 'NOT'; }
 KW_AND      = "AND"i        !ident_start { return 'AND'; }
 KW_OR       = "OR"i         !ident_start { return 'OR'; }
 
+KW_ARRAY_AGG = "ARRAY_AGG"i !ident_start { return 'ARRAY_AGG'; }
+KW_STRING_AGG = "STRING_AGG"i !ident_start { return 'STRING_AGG'; }
 KW_COUNT    = "COUNT"i      !ident_start { return 'COUNT'; }
 KW_MAX      = "MAX"i        !ident_start { return 'MAX'; }
 KW_MIN      = "MIN"i        !ident_start { return 'MIN'; }

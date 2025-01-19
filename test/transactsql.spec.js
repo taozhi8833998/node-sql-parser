@@ -396,6 +396,13 @@ describe('transactsql', () => {
         'SELECT [a].[username] FROM [users] AS [a]'
       ]
     },
+    {
+      title: 'string_agg function',
+      sql: [
+        "SELECT STRING_AGG(DISTINCT column_name, ',') AS aggregated_values FROM table_name;",
+        "SELECT STRING_AGG(DISTINCT [column_name], ',') AS [aggregated_values] FROM [table_name]"
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
