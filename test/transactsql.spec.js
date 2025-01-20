@@ -415,6 +415,13 @@ describe('transactsql', () => {
         'SELECT * FROM [transactions] ORDER BY [created_at] ASC OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY'
       ]
     },
+    {
+      title: 'subquery with alias in identifiers',
+      sql: [
+        'SELECT * FROM (SELECT * FROM [dummy_table]) AS [dummy_table_alias]',
+        'SELECT * FROM (SELECT * FROM [dummy_table]) AS [dummy_table_alias]'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
