@@ -306,6 +306,7 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.be.equal(`SELECT [column_name] FROM [table_name] FOR XML PATH`)
     sql = 'SELECT column_name FROM table_name FOR JSON PATH';
     expect(getParsedSql(sql)).to.be.equal(`SELECT [column_name] FROM [table_name] FOR JSON PATH`)
+    
   })
   it('should support cross and outer apply', () => {
     const applies = ['cross', 'outer']
@@ -405,6 +406,13 @@ describe('transactsql', () => {
       sql: [
         "SELECT STRING_AGG(DISTINCT column_name, ',') AS aggregated_values FROM table_name;",
         "SELECT STRING_AGG(DISTINCT [column_name], ',') AS [aggregated_values] FROM [table_name]"
+      ]
+    },
+    {
+      title: 'fetch and offset',
+      sql: [
+        'SELECT * FROM transactions ORDER BY created_at OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY',
+        'SELECT * FROM [transactions] ORDER BY [created_at] ASC OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY'
       ]
     },
   ]

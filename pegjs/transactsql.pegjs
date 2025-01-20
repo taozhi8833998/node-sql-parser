@@ -1937,6 +1937,29 @@ limit_clause
         value: res
       };
     }
+  / k:KW_FETCH __ 'FIRST'i __ i1:(number_or_param) __ 'ROWS'i __ 'ONLY'i {
+    return {
+      fetch: {
+        prefix: 'fetch first',
+        value: i1,
+        suffix: 'rows only'
+      }
+    }
+  }
+  / KW_OFFSET __ i1:(number_or_param) __ 'ROWS'i __ KW_FETCH __ 'NEXT'i __  i2:(number_or_param) __ 'ROWS'i __ 'ONLY'i {
+    return {
+      offset: {
+        prefix: 'offset',
+        value: i1,
+        suffix: 'rows',
+      },
+      fetch: {
+        prefix: 'fetch next',
+        value: i2,
+        suffix: 'rows only'
+      }
+    }
+  }
 for_xml_item
   = i:('RAW'i / 'AUTO'i /  'EXPLICIT'i) {
     return {
@@ -3061,6 +3084,7 @@ KW_HAVING   = "HAVING"i     !ident_start
 
 KW_LIMIT    = "LIMIT"i      !ident_start
 KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET'; }
+KW_FETCH    = "FETCH"i      !ident_start { return 'FETCH'; }
 
 KW_ASC      = "ASC"i        !ident_start { return 'ASC'; }
 KW_DESC     = "DESC"i       !ident_start { return 'DESC'; }
