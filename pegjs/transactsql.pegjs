@@ -1518,7 +1518,7 @@ column_list_item
       return { expr: e, as: alias };
     }
 value_alias_clause
-  = KW_AS? __ name:ident_name c:(__ LPAREN __ column_list __ RPAREN)? {
+  = KW_AS? __ name:ident c:(__ LPAREN __ column_list __ RPAREN)? {
       if (!c) return name;
       return `${name}(${c[3].join(', ')})`
     }
