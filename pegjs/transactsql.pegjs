@@ -33,6 +33,7 @@
     'FALSE': true,
     'FROM': true,
     'FULL': true,
+    'FOR': true,
 
     'GROUP': true,
 
@@ -1425,7 +1426,7 @@ select_stmt_nake
     h:having_clause?    __
     o:order_by_clause?  __
     l:limit_clause? __
-    fx:for_xml? {
+    fx:for_expr? {
       if(f) f.forEach(info => info.table && tableList.add(`select::${[info.server, info.db, info.schema].filter(Boolean).join('.') || null}::${info.table}`));
       return {
           with: cte,
@@ -1956,6 +1957,22 @@ for_xml
     }
   }
 
+for_json_item
+  = i:'PATH'i {
+    return {
+      keyword: i,
+    }
+  }
+for_json
+  = 'FOR'i __ 'JSON'i __ v:for_json_item {
+    return {
+      type: 'for json',
+      ...v,
+    }
+  }
+
+for_expr
+  = for_json / for_xml
 update_stmt
   = __ cte:with_clause? __ KW_UPDATE    __
     t:table_ref_list __
@@ -3453,3 +3470,4 @@ uniqueidentifier_type
   = lb:LBRAKE? __ t:(KW_UNIQUEIDENTIFIER) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
     return { dataType: t }
   }
+
