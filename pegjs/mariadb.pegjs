@@ -2039,8 +2039,8 @@ column_list_item
         as: null
       };
     }
-  / a:select_assign_stmt {
-    return { expr: a, as: null }
+  / a:select_assign_stmt __ alias:alias_clause? {
+    return { expr: a, as: alias }
   }
   / e:binary_column_expr __ alias:alias_clause? {
       return { expr: e, as: alias };

@@ -1199,6 +1199,13 @@ describe('mysql', () => {
           "CREATE TABLE `table1` (`id` INT NOT NULL PRIMARY KEY, `data` VARCHAR(255) NOT NULL, `removed_id` VARCHAR(55) GENERATED ALWAYS AS (TRIM(TRAILING concat('.', substring_index(`data`, '.', -(3))) FROM TRIM(LEADING concat(substring_index(`data`, '.', 3), '.') FROM `data`))) STORED)"
         ]
       },
+      {
+        title: 'assign with alias',
+        sql: [
+          'SELECT T2.id FROM ( SELECT @r AS _id, (SELECT @r := parent_id FROM product_category WHERE id = _id AND is_active = 1) AS parent_id, @l := @l + 1 AS lvl FROM (SELECT @r := :catId, @l := 0) vars, product_category h WHERE @r <> 0) T1 JOIN product_category T2 ON T1._id = T2.id ORDER BY T1.lvl DESC;',
+          'SELECT `T2`.`id` FROM (SELECT @r AS `_id`, (SELECT @r := `parent_id` FROM `product_category` WHERE `id` = `_id` AND `is_active` = 1) AS `parent_id`, @l := @l + 1 AS `lvl` FROM (SELECT @r := :catId, @l := 0) AS `vars`, `product_category` AS `h` WHERE @r <> 0) AS `T1` INNER JOIN `product_category` AS `T2` ON `T1`.`_id` = `T2`.`id` ORDER BY `T1`.`lvl` DESC',
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
