@@ -232,7 +232,7 @@ describe('Command SQL', () => {
     })
 
     it(`should support MySQL alter drop check and column`, () => {
-      KEYWORDS.concat(['CHECK ']).forEach(keyword => {
+      KEYWORDS.concat(['CHECK ', 'CONSTRAINT ']).forEach(keyword => {
         expect(getParsedSql(`alter table a drop ${keyword}xxx`))
         .to.equal(`ALTER TABLE \`a\` DROP ${keyword}\`xxx\``);
         expect(getParsedSql(`alter table a drop ${keyword}xxx, drop ${keyword}yyy`))

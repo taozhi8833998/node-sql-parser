@@ -1428,6 +1428,15 @@ ALTER_DROP_CONSTRAINT
         type: 'alter',
       }
     }
+  / KW_DROP __ kc:'CONSTRAINT'i __ c:ident_name {
+    return {
+      action: 'drop',
+      constraint: c,
+      keyword: kc.toLowerCase(),
+      resource: 'constraint',
+      type: 'alter',
+    }
+  }
 
 ALTER_ENABLE_CONSTRAINT
   = KW_WITH __ 'CHECK'i __ 'CHECK'i __ KW_CONSTRAINT __ c:ident_name {
