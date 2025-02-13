@@ -3125,6 +3125,8 @@ KW_MONEY  = "MONEY"i  !ident_start { return 'MONEY'; }
 KW_SMALLMONEY  = "SMALLMONEY"i  !ident_start { return 'SMALLMONEY'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
 KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
+KW_BINARY     = "BINARY"i     !ident_start { return 'BINARY'; }
+KW_VARBINARY  = "VARBINARY"i  !ident_start { return 'VARBINARY';}
 KW_NCHAR  = "NCHAR"i  !ident_start { return 'NCHAR';}
 KW_NVARCHAR  = "NVARCHAR"i  !ident_start { return 'NVARCHAR';}
 KW_NUMERIC  = "NUMERIC"i  !ident_start { return 'NUMERIC'; }
@@ -3433,27 +3435,26 @@ mem_chain
   }
 
 data_type
-  = character_string_type
+  = character_binary_type
   / numeric_type
   / datetime_type
   / json_type
   / text_type
   / uniqueidentifier_type
 
-character_string_type
-  = lb:LBRAKE? __ t:(KW_CHAR / KW_VARCHAR / KW_NCHAR / KW_NVARCHAR) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } __ LPAREN __ l:[0-9]+ __ RPAREN {
+character_binary_type
+  = lb:LBRAKE? __ t:(KW_CHAR / KW_VARCHAR / KW_NCHAR / KW_NVARCHAR / KW_BINARY / KW_VARBINARY) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } __ LPAREN __ l:[0-9]+ __ RPAREN {
     return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true };
   }
-  / lb:LBRAKE? __ t:(KW_CHAR / KW_VARCHAR) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
-    return { dataType: t };
-  }
-  / lb:LBRAKE? __ t:KW_NVARCHAR __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } __ LPAREN __ m:'MAX'i __ RPAREN {
+  / lb:LBRAKE? __ t:(KW_NVARCHAR / KW_VARCHAR / KW_VARBINARY) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } __ LPAREN __ m:'MAX'i __ RPAREN {
     return {
       dataType: t,
       length: 'max'
     }
   }
-
+  / lb:LBRAKE? __ t:(KW_CHAR / KW_VARCHAR / KW_BINARY / KW_VARBINARY) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
+    return { dataType: t };
+  }
 numeric_type_suffix
   = un: KW_UNSIGNED? __ ze: KW_ZEROFILL? {
     const result = []

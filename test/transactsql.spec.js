@@ -422,6 +422,20 @@ describe('transactsql', () => {
         'SELECT * FROM (SELECT * FROM [dummy_table]) AS [dummy_table_alias]'
       ]
     },
+    {
+      title: 'varchar max',
+      sql: [
+        'CREATE TABLE [visits] ([url] varchar(max));',
+        'CREATE TABLE [visits] ([url] VARCHAR(max))'
+      ]
+    },
+    {
+      title: 'varbinary max',
+      sql: [
+        'CREATE TABLE [visits] ([url] varbinary(max));',
+        'CREATE TABLE [visits] ([url] VARBINARY(max))'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
