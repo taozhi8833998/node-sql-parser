@@ -965,4 +965,12 @@ describe('BigQuery', () => {
     ast = parser.parse(sql, opt)
     expect(ast.columnList).to.be.eql(['select::null::my_date'])
   })
+  it('should support table function in from clause', () => {
+    let sql = 'SELECT * FROM table_function();'
+    expect(getParsedSql(sql, opt)).to.equal('SELECT * FROM table_function()')
+    sql = 'SELECT * FROM table_function(1,2,3);'
+    expect(getParsedSql(sql, opt)).to.equal('SELECT * FROM table_function(1, 2, 3)')
+    sql = 'SELECT * FROM table_function(@param1, @param2, @param3);'
+    expect(getParsedSql(sql, opt)).to.equal('SELECT * FROM table_function(@param1, @param2, @param3)')
+  })
 })

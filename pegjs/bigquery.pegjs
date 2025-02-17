@@ -1891,7 +1891,9 @@ tablesample
 
 //NOTE that, the table assigned to `var` shouldn't write in `table_join`
 table_base
-  = from_unnest_item
+  = from_unnest_item / e:func_call __ alias:alias_clause? {
+      return { type: 'expr', expr: e, as: alias };
+  }
   / t:table_name
     ht:hint? __
 	  ts:tablesample? __
