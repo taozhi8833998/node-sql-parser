@@ -46,7 +46,7 @@ class Parser {
     for (const authority of authorityList) {
       let hasCorrespondingAuthority = false
       for (const whiteAuthority of whiteList) {
-        const regex = new RegExp(whiteAuthority, 'i')
+        const regex = new RegExp(`^${whiteAuthority}$`, 'i')
         if (regex.test(authority)) {
           hasCorrespondingAuthority = true
           break
