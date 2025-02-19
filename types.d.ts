@@ -106,6 +106,7 @@ export interface ColumnRefItem {
   column: string | { expr: ValueExpr };
   options?: ExprList;
   loc?: LocationRange;
+  collate?: { collate: CollateExpr };
 }
 export interface ColumnRefExpr {
   type: "expr";
