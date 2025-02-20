@@ -163,6 +163,19 @@ describe('Postgres', () => {
         ]
     },
     {
+      title: 'Windows Fns + Rows between following',
+      sql: [
+        `SELECT
+          SUM(column3) OVER (
+          PARTITION BY column1
+          ORDER BY column2 ASC
+          ROWS BETWEEN 1 FOLLOWING AND 2 FOLLOWING
+          )
+        FROM table1;`,
+        'SELECT SUM(column3) OVER (PARTITION BY column1 ORDER BY column2 ASC ROWS BETWEEN 1 FOLLOWING AND 2 FOLLOWING) FROM "table1"'
+      ]
+    },
+    {
         title: 'Window Fns + ROWS unbounded preceding + current row',
         sql: [
           `SELECT
@@ -1763,7 +1776,7 @@ describe('Postgres', () => {
   })
   describe('tables to sql', () => {
     it('should parse object tables', () => {
-      const ast = parser.astify(SQL_LIST[100].sql[0], opt)
+      const ast = parser.astify(SQL_LIST[101].sql[0], opt)
       ast[0].from[0].expr.parentheses = false
       expect(parser.sqlify(ast, opt)).to.be.equal('SELECT last_name, salary FROM "employees" INNER JOIN "salaries" ON "employees".emp_no = "salaries".emp_no')
     })
