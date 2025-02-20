@@ -1244,6 +1244,12 @@ describe('select', () => {
         const fun = parser.whiteListCheck.bind(parser, sql, whiteList, mode)
         expect(fun).to.throw(`authority = 'select::b::name' is required in ${mode.type} whiteList to execute SQL = '${sql}'`)
       })
+      it('should fail for prefix check', () => {
+        const sql = 'SELECT u.usernameXXX FROM user u;'
+        const whiteList = ['select::user::username']
+        const fun = parser.whiteListCheck.bind(parser, sql, whiteList, { ...mode, database: 'postgresql' })
+        expect(fun).to.throw(`authority = 'select::user::usernameXXX' is required in ${mode.type} whiteList to execute SQL = '${sql}'`)
+      })
       it('should fail the complex sql and regex check', () => {
         const sql = 'UPDATE a SET id = 1 WHERE name IN (SELECT name FROM b)'
         const whiteList = ['select::(.*)::(id|name)']
