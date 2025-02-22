@@ -86,6 +86,11 @@ function flattenFunToSQL(stmt) {
   return `${toUpper(type)}(${argsStr})`
 }
 
+function funcArgToSQL(argExpr) {
+  const { name, symbol, expr } = argExpr.value
+  return [name, symbol, exprToSQL(expr)].filter(hasVal).join(' ')
+}
+
 function funcToSQL(expr) {
   const { args, array_index, name, args_parentheses, parentheses, over, suffix } = expr
   const overStr = overToSQL(over)
@@ -132,6 +137,7 @@ export {
   castToSQL,
   extractFunToSQL,
   flattenFunToSQL,
+  funcArgToSQL,
   funcToSQL,
   jsonObjectArgToSQL,
   lambdaToSQL,

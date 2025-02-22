@@ -6,7 +6,7 @@ import { binaryToSQL } from './binary'
 import { caseToSQL } from './case'
 import { collateToSQL } from './collate'
 import { columnDefinitionToSQL, columnRefToSQL, fullTextSearchToSQL } from './column'
-import { anyValueFuncToSQL, castToSQL, extractFunToSQL, flattenFunToSQL, funcToSQL, jsonObjectArgToSQL, lambdaToSQL, tablefuncFunToSQL } from './func'
+import { anyValueFuncToSQL, castToSQL, extractFunToSQL, flattenFunToSQL, funcArgToSQL, funcToSQL, jsonObjectArgToSQL, lambdaToSQL, tablefuncFunToSQL } from './func'
 import { intervalToSQL } from './interval'
 import { jsonExprToSQL, jsonVisitorExprToSQL } from './json'
 import { selectToSQL } from './select'
@@ -40,6 +40,7 @@ const exprToSQLConvertFn = {
   json              : jsonExprToSQL,
   json_object_arg   : jsonObjectArgToSQL,
   json_visitor      : jsonVisitorExprToSQL,
+  func_arg          : funcArgToSQL,
   show              : showToSQL,
   struct            : arrayStructExprToSQL,
   tablefunc         : tablefuncFunToSQL,

@@ -5006,8 +5006,37 @@ substring_funcs_clause
         separator
       }
   }
+
+make_interval_func_args_item
+  = n:('years'i / 'months'i / 'weeks'i / 'days'i / 'hours'i / 'mins'i) __ '=>' __ v:(integer / expr) {
+    // => { type: 'func_arg', value: { name: ident_name; symbol: '=>', value: literal_numeric; } }
+      return { type: 'func_arg', value: { name: n, symbol: '=>', expr: v } };
+    }
+  / n:('secs'i) __ '=>' __ v:(double_float / expr) {
+    // => IGNORE
+      return { type: 'func_arg', value: { name: n, symbol: '=>', expr: v } };
+    }
+
+make_interval_func_args
+  = head:make_interval_func_args_item tail:(__ COMMA __ make_interval_func_args_item)* {
+    // => make_interval_func_args_item[]
+      return { type: 'expr_list', value: createList(head, tail) };
+    }
+  / expr_list
+  
+make_interval_func_clause
+  = name:'make_interval'i __ LPAREN __ l:make_interval_func_args __ RPAREN {
+    // => { type: 'function'; name: proc_func_name; args: make_interval_func_args; }
+      return {
+        type: 'function',
+        name: { name: [{ type: 'origin', value: name }] },
+        args: l,
+        ...getLocationObject(),
+      }
+  }
+  
 func_call
-  = trim_func_clause / tablefunc_clause / substring_funcs_clause
+  = trim_func_clause / tablefunc_clause / substring_funcs_clause / make_interval_func_clause
   / name:'now'i __ LPAREN __ l:expr_list? __ RPAREN __ 'at'i __ KW_TIME __ 'zone'i __ z:literal_string {
     // => { type: 'function'; name: proc_func_name; args: expr_list; suffix: literal_string; }
       z.prefix = 'at time zone'
@@ -5338,11 +5367,28 @@ line_terminator
 literal_numeric
   = n:number {
     // => number | { type: 'bigint'; value: string; }
-      if (n && n.type === 'bigint') return n
+      if (n && typeof n === 'object') return n
       return { type: 'number', value: n };
     }
 
-number
+integer
+  = int_:int exp:exp {
+    // => IGNORE
+    const numStr = int_ + exp
+    return {
+      type: 'bigint',
+      value: numStr
+    }
+  }
+  / int_:int {
+    // => IGNORE
+    if (isBigInt(int_)) return {
+      type: 'bigint',
+      value: int_
+    }
+    return { type: 'number', value: parseFloat(int_) };
+  }
+double_float
   = int_:int? frac:frac exp:exp {
     const numStr = (int_ || '') + frac + exp
     return {
@@ -5359,28 +5405,14 @@ number
     }
     return parseFloat(numStr);
   }
-  / int_:int exp:exp {
-    // => IGNORE
-    const numStr = int_ + exp
-    return {
-      type: 'bigint',
-      value: numStr
-    }
-  }
-  / int_:int {
-    // => IGNORE
-    if (isBigInt(int_)) return {
-      type: 'bigint',
-      value: int_
-    }
-    return parseFloat(int_);
-  }
+number
+  = double_float / integer
 
 int
   = digits
   / digit:digit
   / op:("-" / "+" ) digits:digits { return op + digits; }
-   / op:("-" / "+" ) digit:digit { return op + digit; }
+  / op:("-" / "+" ) digit:digit { return op + digit; }
 
 frac
   = "." digits:digits { return "." + digits; }
