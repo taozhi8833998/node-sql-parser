@@ -1748,6 +1748,19 @@ describe('Postgres', () => {
         'DROP VIEW "view_name"'
       ]
     },
+    {
+      title: 'make interval func',
+      sql: [
+        `SELECT
+            gid,
+            '2020-01-01 00:00:00'::TIMESTAMP WITH TIME ZONE + make_interval(secs => (
+                (gid - (SELECT min(gid) FROM nyct20))::FLOAT / (SELECT max(gid) - min(gid) FROM nyct20)) * 31536000 -- One year in seconds
+            ) AS generated_timestamp
+        FROM
+            nyct20;`,
+        `SELECT gid, '2020-01-01 00:00:00'::TIMESTAMP WITH TIME ZONE + MAKE_INTERVAL(secs => ((gid - (SELECT MIN(gid) FROM "nyct20"))::FLOAT / (SELECT MAX(gid) - MIN(gid) FROM "nyct20")) * 31536000) AS "generated_timestamp" FROM "nyct20"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
