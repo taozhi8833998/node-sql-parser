@@ -1721,7 +1721,7 @@ alter_schema_stmt
 
 alter_table_stmt
   = KW_ALTER  __
-    KW_TABLE __
+    KW_TABLE? __
     ife:if_exists? __
     o:'only'i? __
     t:table_ref_list __
@@ -6050,8 +6050,15 @@ enum_type
 json_type
   = t:(KW_JSON / KW_JSONB) { /* =>  data_type */  return { dataType: t }; }
 
+geometry_type_args
+  = t:('POINT'i / 'LINESTRING'i / 'POLYGON'i / 'MULTIPOINT'i / 'MULTILINESTRING'i / 'MULTIPOLYGON'i / 'GEOMETRYCOLLECTION'i) __ srid:(COMMA __ [0-9]+)? {
+    return {
+      length: t,
+      scale: srid && srid[2] && parseInt(srid[2].join(''), 10)
+    }
+  }
 geometry_type
-  = t:KW_GEOMETRY {/* =>  data_type */  return { dataType: t }; }
+  = t:KW_GEOMETRY geo:(__ LPAREN __ geometry_type_args __ RPAREN )? {/* =>  data_type */  return { dataType: t, ...(geo && geo[3] || {}), parentheses: geo ? true : false }; }
 
 serial_interval_type
   = t:(KW_SERIAL / KW_INTERVAL) { /* =>  data_type */  return { dataType: t }; }

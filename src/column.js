@@ -9,6 +9,7 @@ import {
   commonOptionConnector,
   commonTypeValue,
   commentToSQL,
+  dataTypeToSQL,
   getParserOpt,
   hasVal,
   identifierToSql,
@@ -65,9 +66,7 @@ function columnRefToSQL(expr) {
 function columnDataType(definition) {
   if (!definition) return
   const { dataType, length, suffix, scale, expr } = definition
-  let result = dataType
-  if (length != null) result += `(${[length, scale].filter(val => val != null).join(', ')})`
-  if (suffix && suffix.length) result += ` ${suffix.join(' ')}`
+  let result = dataTypeToSQL({ dataType, length, suffix, scale, parentheses: length != null ? true : false })
   if (expr) result += exprToSQL(expr)
   if (definition.array) {
     const arrayExpr = arrayDimensionToSymbol(definition)
