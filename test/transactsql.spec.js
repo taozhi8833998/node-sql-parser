@@ -436,6 +436,13 @@ describe('transactsql', () => {
         'CREATE TABLE [visits] ([url] VARBINARY(max))'
       ]
     },
+    {
+      title: 'table-valued function in from clause',
+      sql: [
+        "select * from dbo.fn_name(N'000')",
+        "SELECT * FROM dbo.fn_name(N'000')"
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo

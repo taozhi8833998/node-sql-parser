@@ -1814,6 +1814,9 @@ table_base
         type: 'dual'
       };
   }
+  / e:func_call __ alias:alias_clause? {
+      return { type: 'expr', expr: e, as: alias };
+  }
   / t:table_name __ tt:temporal_table? __ alias:alias_clause? __ th:table_hint? {
       t.as = alias
       t.table_hint = th
