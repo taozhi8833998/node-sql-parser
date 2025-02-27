@@ -1761,6 +1761,13 @@ describe('Postgres', () => {
         `SELECT gid, '2020-01-01 00:00:00'::TIMESTAMP WITH TIME ZONE + MAKE_INTERVAL(secs => ((gid - (SELECT MIN(gid) FROM "nyct20"))::FLOAT / (SELECT MAX(gid) - MIN(gid) FROM "nyct20")) * 31536000) AS "generated_timestamp" FROM "nyct20"`
       ]
     },
+    {
+      title: 'geometry type',
+      sql: [
+        'ALTER table my_table ADD COLUMN geom geometry(Point, 4326);',
+        'ALTER TABLE "my_table" ADD COLUMN geom GEOMETRY(Point, 4326)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
