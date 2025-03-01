@@ -349,7 +349,15 @@ export interface drop_index_stmt_node {
         options?: 'cascade' | 'restrict';
       }
 
-export type drop_stmt = AstStatement<drop_stmt_node> | AstStatement<drop_index_stmt_node>;
+export interface drop_view_stmt_node {
+        type: 'drop';
+        prefix?: string;
+        keyword: 'view';
+        name: table_ref_list;
+        options?: view_options;
+      }
+
+export type drop_stmt = AstStatement<drop_stmt_node> | AstStatement<drop_index_stmt_node> | AstStatement<drop_view_stmt_node>;
 
 export type truncate_table_name = table_name & { suffix?: string };
 
@@ -608,6 +616,8 @@ export type reference_definition = {
     };
 
 export type on_reference = { type: 'on delete' | 'on update'; value: reference_option; };
+
+export type view_options = 'restrict' | 'cascade';;
 
 export type reference_option = { type: 'function'; name: string; args: expr_list; } | 'restrict' | 'cascade' | 'set null' | 'no action' | 'set default' | 'current_timestamp';
 
@@ -1359,7 +1369,13 @@ export type tablefunc_clause = { type: 'tablefunc'; name: proc_func_name; args: 
 
 export type substring_funcs_clause = { type: 'function'; name: 'substring'; args: expr_list; };
 
-export type func_call = trim_func_clause | tablefunc_clause | substring_funcs_clause | { type: 'function'; name: proc_func_name; args: expr_list; suffix: literal_string; } | { type: 'function'; name: proc_func_name; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: proc_func_name; over?: on_update_current_timestamp; } | { type: 'function'; name: proc_func_name; args: expr_list; };
+export type make_interval_func_args_item = { type: 'func_arg', value: { name: ident_name; symbol: '=>', value: literal_numeric; } };
+
+export type make_interval_func_args = make_interval_func_args_item[] | expr_list;
+
+export type make_interval_func_clause = { type: 'function'; name: proc_func_name; args: make_interval_func_args; };
+
+export type func_call = trim_func_clause | tablefunc_clause | substring_funcs_clause | make_interval_func_clause | { type: 'function'; name: proc_func_name; args: expr_list; suffix: literal_string; } | { type: 'function'; name: proc_func_name; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: proc_func_name; over?: on_update_current_timestamp; } | { type: 'function'; name: proc_func_name; args: expr_list; };
 
 export type extract_filed = 'string';
 
@@ -1431,6 +1447,10 @@ export type escape_char = string;
 export type line_terminator = string;
 
 export type literal_numeric = number | { type: 'bigint'; value: string; };
+
+type integer = never;
+
+type double_float = never;
 
 export type int = string;
 
@@ -1974,6 +1994,8 @@ export type enum_type = data_type;
 
 
 export type json_type = data_type;
+
+export type geometry_type_args = { length: string, scale?: number | null };
 
 
 

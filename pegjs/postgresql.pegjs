@@ -5390,6 +5390,7 @@ integer
   }
 double_float
   = int_:int? frac:frac exp:exp {
+    // => IGNORE
     const numStr = (int_ || '') + frac + exp
     return {
       type: 'bigint',
@@ -6052,6 +6053,7 @@ json_type
 
 geometry_type_args
   = t:('POINT'i / 'LINESTRING'i / 'POLYGON'i / 'MULTIPOINT'i / 'MULTILINESTRING'i / 'MULTIPOLYGON'i / 'GEOMETRYCOLLECTION'i) __ srid:(COMMA __ [0-9]+)? {
+    // => { length: string, scale?: number | null }
     return {
       length: t,
       scale: srid && srid[2] && parseInt(srid[2].join(''), 10)
