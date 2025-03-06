@@ -23,4 +23,9 @@ describe('MariaDB Command SQL', () => {
       })
     });
   })
+  
+  describe('returning', () => {
+    let sql = 'INSERT INTO `user`(`firstName`, `lastName`, `creationDate`) VALUES (?, ?, DEFAULT) RETURNING `firstName`, `lastName`, `creationDate`';
+    expect(getParsedSql(sql)).to.equal('INSERT INTO `user` (firstName, lastName, creationDate) VALUES (?,?,`DEFAULT`) RETURNING `firstName`, `lastName`, `creationDate`');
+  })
 })
