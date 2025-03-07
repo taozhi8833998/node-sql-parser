@@ -340,12 +340,7 @@ function returningToSQL(returning) {
   const { columns } = returning
   return [
     'RETURNING',
-    columns.map(column => {
-      if (column.type === 'column_ref') {
-        return columnRefToSQL(column)
-      }
-      return columnToSQL(column)
-    }).filter(hasVal).join(', '),
+    columns.map(columnToSQL).filter(hasVal).join(', '),
   ].join(' ')
 }
 

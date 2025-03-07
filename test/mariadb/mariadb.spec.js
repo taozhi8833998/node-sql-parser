@@ -25,7 +25,19 @@ describe('MariaDB Command SQL', () => {
   })
   
   describe('returning', () => {
-    let sql = 'INSERT INTO `user`(`firstName`, `lastName`, `creationDate`) VALUES (?, ?, DEFAULT) RETURNING `firstName`, `lastName`, `creationDate`';
-    expect(getParsedSql(sql)).to.equal('INSERT INTO `user` (firstName, lastName, creationDate) VALUES (?,?,`DEFAULT`) RETURNING `firstName`, `lastName`, `creationDate`');
+    it('insert returning', () => {
+      const sql = 'INSERT INTO `user`(`firstName`, `lastName`, `creationDate`) VALUES (?, ?, DEFAULT) RETURNING `firstName`, `lastName`, `creationDate`';
+      expect(getParsedSql(sql)).to.equal('INSERT INTO `user` (firstName, lastName, creationDate) VALUES (?,?,`DEFAULT`) RETURNING `firstName`, `lastName`, `creationDate`');
+    })
+    
+    it('replace returning', () => {
+      const sql = "REPLACE INTO t2 VALUES (1,'Leopard'),(2,'Dog') RETURNING id2, id2+id2";
+      expect(getParsedSql(sql)).to.equal("REPLACE INTO `t2` VALUES (1,'Leopard'), (2,'Dog') RETURNING `id2`, `id2` + `id2`");
+    })
+    
+    it('delete returning', () => {
+      const sql = "DELETE FROM t RETURNING f1";
+      expect(getParsedSql(sql)).to.equal('DELETE FROM `t` RETURNING `f1`');
+    })
   })
 })
