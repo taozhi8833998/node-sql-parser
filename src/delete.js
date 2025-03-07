@@ -2,11 +2,11 @@ import { columnsToSQL } from './column'
 import { exprToSQL, orderOrPartitionByToSQL } from './expr'
 import { limitToSQL } from './limit'
 import { tablesToSQL } from './tables'
-import { commonOptionConnector, hasVal } from './util'
+import { commonOptionConnector, hasVal, returningToSQL } from './util'
 import { withToSQL } from './with'
 
 function deleteToSQL(stmt) {
-  const { columns, from, table, where, orderby, with: withInfo, limit } = stmt
+  const { columns, from, table, where, orderby, with: withInfo, limit, returning } = stmt
   const clauses = [withToSQL(withInfo), 'DELETE']
   const columnInfo = columnsToSQL(columns, from)
   clauses.push(columnInfo)
@@ -17,6 +17,7 @@ function deleteToSQL(stmt) {
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
   clauses.push(orderOrPartitionByToSQL(orderby, 'order by'))
   clauses.push(limitToSQL(limit))
+  clauses.push(returningToSQL(returning))
   return clauses.filter(hasVal).join(' ')
 }
 

@@ -2164,11 +2164,11 @@ set_item
   }
 
 returning_stmt
-  = k:KW_RETURNING __ c:(STAR / column_ref_list) {
-    // => { type: 'returning'; columns: column_ref_list | column_ref; }
+  = k:KW_RETURNING __ c:(column_clause / select_stmt) {
+    // => { type: 'returning'; columns: column_clause | select_stmt; }
     return {
       type: k && k.toLowerCase() || 'returning',
-      columns: c === '*' && [{ type: 'columne_ref', table: null, column: '*' }] || c
+      columns: c === '*' && [{ type: 'expr', expr: { type: 'column_ref', table: null, column: '*' }, as: null }] || c
     }
   }
 

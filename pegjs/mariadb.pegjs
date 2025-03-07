@@ -74,6 +74,7 @@
     // 'REPLACE': true,
     'RIGHT': true,
     'READ': true, // for lock table
+    'RETURNING': true,
 
     'SELECT': true,
     'SESSION_USER': true,
@@ -2366,7 +2367,8 @@ delete_stmt
   = __ cte:with_clause? __ KW_DELETE    __
     t: table_ref_list? __
     f:from_clause __
-    w:where_clause? {
+    w:where_clause? __
+    r:returning_stmt? {
       if(f) {
         const tables = Array.isArray(f) ? f : f.expr
         tables.forEach(tableInfo => {
@@ -2393,7 +2395,8 @@ delete_stmt
           type: 'delete',
           table: t,
           from: f,
-          where: w
+          where: w,
+          returning: r,
         }
       };
     }
@@ -2416,11 +2419,10 @@ set_item
   }
 
 returning_stmt
-  = k:KW_RETURNING __ c:(STAR / column_ref_list) {
-    // => { type: 'returning'; columns: column_ref_list | column_ref; }
+  = k:KW_RETURNING __ c:(column_clause / select_stmt) {
     return {
       type: k && k.toLowerCase() || 'returning',
-      columns: c === '*' && [{ type: 'columne_ref', table: null, column: '*' }] || c
+      columns: c === '*' && [{ type: 'expr', expr: { type: 'column_ref', table: null, column: '*' }, as: null }] || c
     }
   }
 
