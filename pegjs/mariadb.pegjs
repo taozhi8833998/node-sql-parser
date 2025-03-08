@@ -74,6 +74,7 @@
     // 'REPLACE': true,
     'RIGHT': true,
     'READ': true, // for lock table
+    'RETURNING': true,
 
     'SELECT': true,
     'SESSION_USER': true,
@@ -2366,7 +2367,8 @@ delete_stmt
   = __ cte:with_clause? __ KW_DELETE    __
     t: table_ref_list? __
     f:from_clause __
-    w:where_clause? {
+    w:where_clause? __
+    r:returning_stmt? {
       if(f) {
         const tables = Array.isArray(f) ? f : f.expr
         tables.forEach(tableInfo => {
@@ -2393,7 +2395,8 @@ delete_stmt
           type: 'delete',
           table: t,
           from: f,
-          where: w
+          where: w,
+          returning: r,
         }
       };
     }
@@ -2415,6 +2418,14 @@ set_item
       return { column: c, value: v, table: tbl && tbl[0], keyword: 'values' };
   }
 
+returning_stmt
+  = k:KW_RETURNING __ c:(column_clause / select_stmt) {
+    return {
+      type: k && k.toLowerCase() || 'returning',
+      columns: c === '*' && [{ type: 'expr', expr: { type: 'column_ref', table: null, column: '*' }, as: null }] || c
+    }
+  }
+
 insert_value_clause
   = value_clause
   / select_stmt_nake
@@ -2434,7 +2445,8 @@ replace_insert_stmt
     t:table_name  __
     p:insert_partition? __ LPAREN __ c:column_list  __ RPAREN __
     v:insert_value_clause __
-    odp:on_duplicate_update_stmt? {
+    odp:on_duplicate_update_stmt? __
+    r:returning_stmt? {
       if (t) {
         tableList.add(`insert::${t.db}::${t.table}`)
         t.as = null
@@ -2462,6 +2474,7 @@ replace_insert_stmt
           partition: p,
           prefix,
           on_duplicate_update: odp,
+          returning: r,
         }
       };
     }
@@ -2473,7 +2486,8 @@ insert_no_columns_stmt
     t:table_name  __
     p:insert_partition? __
     v:insert_value_clause __
-    odp:on_duplicate_update_stmt? {
+    odp:on_duplicate_update_stmt? __
+    r:returning_stmt? {
       if (t) {
         tableList.add(`insert::${t.db}::${t.table}`)
         columnList.add(`insert::${t.table}::(.*)`);
@@ -2491,6 +2505,7 @@ insert_no_columns_stmt
           partition: p,
           prefix,
           on_duplicate_update: odp,
+          returning: r,
         }
       };
     }
@@ -2503,7 +2518,8 @@ insert_into_set
     p:insert_partition? __
     KW_SET       __
     l:set_list   __
-    odp:on_duplicate_update_stmt? {
+    odp:on_duplicate_update_stmt? __
+    r:returning_stmt? {
       if (t) {
         tableList.add(`insert::${t.db}::${t.table}`)
         columnList.add(`insert::${t.table}::(.*)`);
@@ -2521,6 +2537,7 @@ insert_into_set
           prefix,
           set: l,
           on_duplicate_update: odp,
+          returning: r,
         }
       };
     }
@@ -2875,7 +2892,7 @@ column_ref
         ...getLocationObject(),
       }
   }
-  / col:column ce:(__ collate_expr)? {
+  / col:column __ ce:(__ collate_expr)? {
       columnList.add(`select::null::${col}`);
       return {
         type: 'column_ref',
@@ -3587,6 +3604,7 @@ KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
 KW_RECURSIVE= "RECURSIVE"i   !ident_start
 KW_REPLACE  = "REPLACE"i    !ident_start
+KW_RETURNING  = "RETURNING"i    !ident_start { return 'RETURNING' }
 KW_RENAME   = "RENAME"i     !ident_start
 KW_IGNORE   = "IGNORE"i     !ident_start
 KW_EXPLAIN  = "EXPLAIN"i    !ident_start

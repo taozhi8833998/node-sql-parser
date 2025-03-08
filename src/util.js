@@ -338,7 +338,10 @@ function triggerEventToSQL(events) {
 function returningToSQL(returning) {
   if (!returning) return ''
   const { columns } = returning
-  return ['RETURNING', columns.map(columnToSQL).filter(hasVal).join(', ')].join(' ')
+  return [
+    'RETURNING',
+    columns.map(columnToSQL).filter(hasVal).join(', '),
+  ].join(' ')
 }
 
 function commonKeywordArgsToSQL(kwArgs) {

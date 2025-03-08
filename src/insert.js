@@ -80,8 +80,8 @@ function insertToSQL(stmt) {
   clauses.push(commonOptionConnector('ON CONFLICT', conflictToSQL, conflict))
   clauses.push(commonOptionConnector('SET', setToSQL, set))
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))
-  clauses.push(returningToSQL(returning))
   clauses.push(commonOptionConnector(keyword, setToSQL, duplicateSet))
+  clauses.push(returningToSQL(returning))
   return clauses.filter(hasVal).join(' ')
 }
 
