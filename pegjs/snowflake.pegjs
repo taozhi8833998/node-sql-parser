@@ -2782,13 +2782,15 @@ update_stmt
      => AstStatement<update_stmt_node>
      */
       const dbObj = {}
-      if (t) t.forEach(tableInfo => {
-        const { db, as, schema, table, join } = tableInfo
+      const addTableFun = (tableInfo) => {
+        const { server, db, schema, as, table, join } = tableInfo
         const action = join ? 'select' : 'update'
-        const fullName = [db, schema].filter(Boolean).join('.') || null
+        const fullName = [server, db, schema].filter(Boolean).join('.') || null
         if (db) dbObj[table] = fullName
         if (table) tableList.add(`${action}::${fullName}::${table}`)
-      });
+      }
+      if (t) t.forEach(addTableFun);
+      if (f) f.forEach(addTableFun);
       if(l) {
         l.forEach(col => {
           if (col.table) {
