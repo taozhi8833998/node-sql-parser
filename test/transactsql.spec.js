@@ -344,6 +344,20 @@ describe('transactsql', () => {
     sql = 'SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED'
     expect(getParsedSql(sql)).to.be.equal('SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED')
   })
+  it('should support update from statements', () => {
+    let sql = "UPDATE CustomerDataImports SET CustomerStateImport='FL'"
+    expect(getParsedSql(sql)).to.be.equal("UPDATE [CustomerDataImports] SET [CustomerStateImport] = 'FL'")
+    sql = "UPDATE CustomerDataImports SET CustomerStateImport='FL' FROM CustomerDataImports AS t0"
+    expect(getParsedSql(sql)).to.be.equal("UPDATE [CustomerDataImports] SET [CustomerStateImport] = 'FL' FROM [CustomerDataImports] AS [t0]")
+    sql = "UPDATE CustomerDataImports SET [CustomerStateImport]='FL' FROM CustomerDataImports AS t0"
+    expect(getParsedSql(sql)).to.be.equal("UPDATE [CustomerDataImports] SET [CustomerStateImport] = 'FL' FROM [CustomerDataImports] AS [t0]")
+    sql = "UPDATE CustomerDataImports SET [CustomerStateImport] = 'FL' FROM CustomerDataImports AS t0 WHERE t0.SICCodeImport = 654"
+    expect(getParsedSql(sql)).to.be.equal("UPDATE [CustomerDataImports] SET [CustomerStateImport] = 'FL' FROM [CustomerDataImports] AS [t0] WHERE [t0].[SICCodeImport] = 654")
+    sql = "UPDATE CustomerDataImports SET [CustomerStateImport] = 'FL' WHERE t0.SICCodeImport = 654"
+    expect(getParsedSql(sql)).to.be.equal("UPDATE [CustomerDataImports] SET [CustomerStateImport] = 'FL' WHERE [t0].[SICCodeImport] = 654")
+    sql = "UPDATE CustomerDataImports SET CustomerStateImport='FL' FROM CustomerDataImports AS t0 INNER JOIN LookupEntity AS t1 ON t0.CustomerStateImport = t1.LookupValue1 WHERE t0.SheetName = 'Somethings'"
+    expect(getParsedSql(sql)).to.be.equal("UPDATE [CustomerDataImports] SET [CustomerStateImport] = 'FL' FROM [CustomerDataImports] AS [t0] INNER JOIN [LookupEntity] AS [t1] ON [t0].[CustomerStateImport] = [t1].[LookupValue1] WHERE [t0].[SheetName] = 'Somethings'")
+  })
   describe('if else', () => {
     it('should support if only statement', () => {
       const sql = `IF EXISTS(SELECT 1 from sys.views where name='MyView' and type='v')
