@@ -270,14 +270,15 @@ update_stmt
     w:where_clause? __
     or:order_by_clause? __
     lc:limit_clause? {
-      if (t) t.forEach(tableInfo => {
-        const { db, as, table, join } = tableInfo
+      const addTableFun = (tableInfo) => {
+        const { server, db, schema, as, table, join } = tableInfo
         const action = join ? 'select' : 'update'
-        tableList.add(`${action}::${db}::${table}`)
-      });
-      if(f) f.forEach(info => {
-        info.table && tableList.add(`update::${info.db}::${info.table}`);
-      });
+        const fullName = [server, db, schema].filter(Boolean).join('.') || null
+        if (db) dbObj[table] = fullName
+        if (table) tableList.add(`${action}::${fullName}::${table}`)
+      }
+      if (t) t.forEach(addTableFun);
+      if (f) f.forEach(addTableFun);
       if(l) {
         l.forEach(col => columnList.add(`update::${col.table}::${col.column}`));
       }

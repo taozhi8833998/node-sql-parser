@@ -2004,15 +2004,18 @@ update_stmt
     t:table_ref_list __
     KW_SET       __
     l:set_list   __
+    f:from_clause? __
     w:where_clause? {
       const dbObj = {}
-      if (t) t.forEach(tableInfo => {
+      const addTableFun = (tableInfo) => {
         const { server, db, schema, as, table, join } = tableInfo
         const action = join ? 'select' : 'update'
         const fullName = [server, db, schema].filter(Boolean).join('.') || null
         if (db) dbObj[table] = fullName
         if (table) tableList.add(`${action}::${fullName}::${table}`)
-      });
+      }
+      if (t) t.forEach(addTableFun);
+      if (f) f.forEach(addTableFun);
       if(l) {
         l.forEach(col => {
           if (col.table) {
@@ -2030,6 +2033,7 @@ update_stmt
           type: 'update',
           table: t,
           set: l,
+          from: f,
           where: w
         }
       };
