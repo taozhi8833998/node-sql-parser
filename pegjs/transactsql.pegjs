@@ -1024,6 +1024,7 @@ create_constraint_definition
   / create_constraint_unique
   / create_constraint_foreign
   / create_constraint_check
+  / create_constraint_default
 
 constraint_name
   = kc:KW_CONSTRAINT __
@@ -1091,6 +1092,19 @@ create_constraint_check
       }
   }
 
+create_constraint_default
+  = kc:constraint_name? __ u:KW_DEFAULT __ c:or_and_where_expr __ 'FOR'i __ cn:column? __ w:(KW_WITH __ KW_VALUES)? {
+    return {
+        constraint_type: u[0].toLowerCase(),
+        keyword: kc && kc.keyword,
+        constraint: kc && kc.constraint,
+        definition: [c],
+        resource: 'constraint',
+        for: cn,
+        with_values: w && { type: 'origin', value: 'with values' },
+      }
+  }
+  
 create_constraint_foreign
   = kc:constraint_name? __
   p:('FOREIGN KEY'i) __

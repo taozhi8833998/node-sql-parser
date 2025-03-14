@@ -457,6 +457,20 @@ describe('transactsql', () => {
         "SELECT * FROM dbo.fn_name(N'000')"
       ]
     },
+    {
+      title: 'alter table add contraint default expr',
+      sql: [
+        'ALTER TABLE [dbo].[Employee] ADD CONSTRAINT [Employee_IsActive]  DEFAULT ((1)) FOR [IsActive]',
+        'ALTER TABLE [dbo].[Employee] ADD CONSTRAINT [Employee_IsActive] DEFAULT ((1)) FOR [IsActive]'
+      ]
+    },
+    {
+      title: 'alter table add contraint default expr with values',
+      sql: [
+        'ALTER TABLE [dbo].[Employee] ADD CONSTRAINT [Employee_IsActive]  DEFAULT ((1)) FOR [IsActive] WITH VALUES',
+        'ALTER TABLE [dbo].[Employee] ADD CONSTRAINT [Employee_IsActive] DEFAULT ((1)) FOR [IsActive] WITH VALUES'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
