@@ -1,5 +1,7 @@
 import {
+  commonOptionConnector,
   identifierToSql,
+  literalToSQL,
   getParserOpt,
   hasVal,
   toUpper,
@@ -16,6 +18,8 @@ function constraintDefinitionToSQL(constraintDefinition) {
     index,
     keyword,
     reference_definition: referenceDefinition,
+    for: forColumn,
+    with_values: withValues,
   } = constraintDefinition
   const constraintSQL = []
   const { database } = getParserOpt()
@@ -28,6 +32,8 @@ function constraintDefinitionToSQL(constraintDefinition) {
   constraintSQL.push(...indexTypeAndOptionToSQL(constraintDefinition))
   constraintSQL.push(...columnReferenceDefinitionToSQL(referenceDefinition))
   constraintSQL.push(toUpper(enforced))
+  constraintSQL.push(commonOptionConnector('FOR', identifierToSql, forColumn))
+  constraintSQL.push(literalToSQL(withValues))
   return constraintSQL.filter(hasVal).join(' ')
 }
 
