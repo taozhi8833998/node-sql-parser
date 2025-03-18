@@ -40,4 +40,8 @@ describe('MariaDB Command SQL', () => {
       expect(getParsedSql(sql)).to.equal('DELETE FROM `t` RETURNING `f1`');
     })
   })
+  it('should support uuid type', () => {
+    const sql = 'CREATE TABLE t1 (id UUID);'
+    expect(getParsedSql(sql)).to.equal('CREATE TABLE `t1` (`id` UUID)');
+  })
 })
