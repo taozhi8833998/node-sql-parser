@@ -3719,6 +3719,7 @@ KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_YEAR = "YEAR"i !ident_start { return 'YEAR'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
 KW_USER     = "USER"i     !ident_start { return 'USER'; }
+KW_UUID     = "UUID"i     !ident_start { return 'UUID'; }
 
 KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
 KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
@@ -4031,6 +4032,7 @@ data_type
   / json_type
   / text_type
   / enum_type
+  / uuid_type
   / boolean_type
   / binary_type
   / blob_type
@@ -4105,6 +4107,9 @@ text_type
   = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) num:data_type_size? {
     return { dataType: t, ...(num || {}) }
   }
+
+uuid_type
+  = t:KW_UUID {/* =>  data_type */  return { dataType: t }}
 
 geometry_type
   = t:(KW_GEOMETRY / KW_POINT / KW_LINESTRING / KW_POLYGON / KW_MULTIPOINT / KW_MULTILINESTRING / KW_MULTIPOLYGON / KW_GEOMETRYCOLLECTION ) { return { dataType: t }}
