@@ -467,7 +467,7 @@ type CreateDefinition =
 
 export interface Create {
   type: "create";
-  keyword: "table" | "index" | "database";
+  keyword: "aggregate" | "table" | "trigger" | "extension" | "function" | "index" | "database" | "schema" | "view" | "domain" | "type" | "user";
   temporary?: "temporary" | null;
   table?: { db: string; table: string }[];
   if_not_exists?: "if not exists" | null;
