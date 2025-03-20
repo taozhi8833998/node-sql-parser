@@ -471,6 +471,13 @@ describe('transactsql', () => {
         'ALTER TABLE [dbo].[Employee] ADD CONSTRAINT [Employee_IsActive] DEFAULT ((1)) FOR [IsActive] WITH VALUES'
       ]
     },
+    {
+      title: 'function within group',
+      sql: [
+        'SELECT mh.*, PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY daily_reach) OVER (PARTITION BY mh.ig_user_id) AS median_per_user FROM tableName',
+        'SELECT [mh].*, PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY [daily_reach] ASC) OVER (PARTITION BY [mh].[ig_user_id]) AS [median_per_user] FROM [tableName]'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
