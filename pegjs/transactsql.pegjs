@@ -2794,6 +2794,11 @@ aggr_array_agg
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
 
+within_group
+  = 'WITHIN'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN {
+      return { type: 'within', keyword: 'group', orderby: or };
+  }
+  
 func_call
   = name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
@@ -2812,12 +2817,13 @@ func_call
         ...getLocationObject(),
     }
   }
-  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ bc:over_partition? {
+  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN __ wg:within_group? __ bc:over_partition? {
     if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
       return {
         type: 'function',
         name: name,
         args: l ? l: { type: 'expr_list', value: [] },
+        within_group: wg,
         over: bc,
         ...getLocationObject(),
       };
