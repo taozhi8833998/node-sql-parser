@@ -1,5 +1,5 @@
 import { arrayIndexToSQL } from './column'
-import { exprToSQL } from './expr'
+import { exprToSQL, orderOrPartitionByToSQL } from './expr'
 import { hasVal, identifierToSql, literalToSQL, toUpper } from './util'
 import { overToSQL } from './over'
 
@@ -91,12 +91,19 @@ function funcArgToSQL(argExpr) {
   return [name, symbol, exprToSQL(expr)].filter(hasVal).join(' ')
 }
 
+function withinGroupToSQL(stmt) {
+  if (!stmt) return ''
+  const { type, keyword, orderby } = stmt
+  return [toUpper(type), toUpper(keyword), `(${orderOrPartitionByToSQL(orderby, 'order by')})`].filter(hasVal).join(' ')
+}
+
 function funcToSQL(expr) {
-  const { args, array_index, name, args_parentheses, parentheses, over, suffix } = expr
+  const { args, array_index, name, args_parentheses, parentheses, within_group: withinGroup, over, suffix } = expr
   const overStr = overToSQL(over)
+  const withinGroupStr = withinGroupToSQL(withinGroup)
   const suffixStr = exprToSQL(suffix)
   const funcName = [literalToSQL(name.schema), name.name.map(literalToSQL).join('.')].filter(hasVal).join('.')
-  if (!args) return [funcName, overStr].filter(hasVal).join(' ')
+  if (!args) return [funcName, withinGroupStr, overStr].filter(hasVal).join(' ')
   let separator = expr.separator || ', '
   if (toUpper(funcName) === 'TRIM') separator = ' '
   let str = [funcName]
@@ -114,7 +121,7 @@ function funcToSQL(expr) {
   if (args_parentheses !== false) str.push(')')
   str.push(arrayIndexToSQL(array_index))
   str = [str.join(''), suffixStr].filter(hasVal).join(' ')
-  return [parentheses ? `(${str})` : str, overStr].filter(hasVal).join(' ')
+  return [parentheses ? `(${str})` : str, withinGroupStr, overStr].filter(hasVal).join(' ')
 }
 
 function tablefuncFunToSQL(expr) {
