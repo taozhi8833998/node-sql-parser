@@ -27,6 +27,7 @@
     'ELSE': true,
     'END': true,
     'EXISTS': true,
+    'EXCEPT': true,
     'EXPLAIN': true,
 
     'FALSE': true,
@@ -252,8 +253,8 @@ multiple_stmt
       }
     }
 set_op
-  = KW_UNION __ s:(KW_ALL / KW_DISTINCT)? {
-    return s ? `union ${s.toLowerCase()}` : 'union'
+  = u:(KW_UNION / KW_INTERSECT / KW_EXCEPT) __ s:(KW_ALL / KW_DISTINCT)? {
+    return s ? `${u.toLowerCase()} ${s.toLowerCase()}` : `${u.toLowerCase()}`
   }
 
 union_stmt
@@ -2297,7 +2298,9 @@ KW_INNER    = "INNER"i    !ident_start
 KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
 KW_OVER     = "OVER"i     !ident_start
-KW_UNION    = "UNION"i    !ident_start
+KW_UNION    = "UNION"i    !ident_start { return 'UNION'; }
+KW_INTERSECT    = "INTERSECT"i    !ident_start { return 'INTERSECT'; }
+KW_EXCEPT   = "EXCEPT"i   !ident_start { return 'EXCEPT'; }
 KW_VALUES   = "VALUES"i   !ident_start
 KW_USING    = "USING"i    !ident_start
 
