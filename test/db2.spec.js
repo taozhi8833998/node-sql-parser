@@ -16,4 +16,22 @@ describe('db2', () => {
     sql = 'SELECT * FROM "FGVST2"."CONTACT_TABLE25" FETCH FIRST 10 ROWS ONLY'
     expect(getParsedSql(sql)).to.be.equal('SELECT * FROM FGVST2.CONTACT_TABLE25 FETCH FIRST 10 ROWS ONLY')
   })
+  
+  SQL_LIST = [
+    {
+      title: 'except multiple select stmt',
+      sql: [
+        `SELECT CUSTOMER_NUMBER FROM "ORG"."CUSTOMER_INFO_1"
+        EXCEPT
+        SELECT CUSTOMER_NUMBER FROM "ORG"."CUSTOMER_BACKUP";`,
+        'SELECT CUSTOMER_NUMBER FROM ORG.CUSTOMER_INFO_1 EXCEPT SELECT CUSTOMER_NUMBER FROM ORG.CUSTOMER_BACKUP'
+      ]
+    },
+  ]
+  SQL_LIST.forEach(sqlInfo => {
+    const { title, sql } = sqlInfo
+    it(`should support ${title}`, () => {
+      expect(getParsedSql(sql[0])).to.equal(sql[1])
+    })
+  })
 })
