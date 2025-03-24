@@ -55,6 +55,7 @@
     'LIMIT': true,
     'LOW_PRIORITY': true, // for lock table
 
+    'MINUS': true,
     'NOT': true,
     'NULL': true,
 
@@ -256,6 +257,7 @@ set_op
   = u:(KW_UNION / KW_INTERSECT / KW_EXCEPT) __ s:(KW_ALL / KW_DISTINCT)? {
     return s ? `${u.toLowerCase()} ${s.toLowerCase()}` : `${u.toLowerCase()}`
   }
+  / KW_MINUS { return 'minus' }
 
 union_stmt
   = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
@@ -2299,6 +2301,7 @@ KW_JOIN     = "JOIN"i     !ident_start
 KW_OUTER    = "OUTER"i    !ident_start
 KW_OVER     = "OVER"i     !ident_start
 KW_UNION    = "UNION"i    !ident_start { return 'UNION'; }
+KW_MINUS    = "MINUS"i    !ident_start { return 'MINUS'; }
 KW_INTERSECT    = "INTERSECT"i    !ident_start { return 'INTERSECT'; }
 KW_EXCEPT   = "EXCEPT"i   !ident_start { return 'EXCEPT'; }
 KW_VALUES   = "VALUES"i   !ident_start
