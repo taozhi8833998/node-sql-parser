@@ -27,6 +27,13 @@ describe('db2', () => {
         'SELECT CUSTOMER_NUMBER FROM ORG.CUSTOMER_INFO_1 EXCEPT SELECT CUSTOMER_NUMBER FROM ORG.CUSTOMER_BACKUP'
       ]
     },
+    {
+      title: 'isolation clause',
+      sql: [
+        'SELECT * FROM STAFF WITH UR',
+        'SELECT * FROM STAFF WITH UR'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
