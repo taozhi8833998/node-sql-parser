@@ -1046,7 +1046,8 @@ select_stmt_nake
     g:group_by_clause?  __
     h:having_clause?    __
     o:order_by_clause?  __
-    l:limit_clause? {
+    l:limit_clause? 
+    iso:isolation_clause? __ {
       if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
           with: cte,
@@ -1059,7 +1060,8 @@ select_stmt_nake
           groupby: g,
           having: h,
           orderby: o,
-          limit: l
+          limit: l,
+          isolation: iso,
       };
   }
 
@@ -1341,6 +1343,14 @@ limit_clause
     }
   }
 
+isolation_clause
+  = KW_WITH __ is:('CS'i / 'UR'i / 'RS'i / 'RR'i) {
+    return {
+      type: 'isolation',
+      keyword: 'with',
+      expr: { type: 'origin', value: is },
+    }
+  }
 update_stmt
   = KW_UPDATE    __
     t:table_ref_list __

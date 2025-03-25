@@ -3,7 +3,7 @@ import { columnsToSQL } from './column'
 import { limitToSQL } from './limit'
 import { withToSQL } from './with'
 import { tablesToSQL } from './tables'
-import { hasVal, commonOptionConnector, connector, identifierToSql, topToSQL, toUpper } from './util'
+import { hasVal, commonOptionConnector, connector, identifierToSql, topToSQL, toUpper, literalToSQL } from './util'
 import { collateToSQL } from './collate'
 
 function distinctToSQL(distinct) {
@@ -67,6 +67,7 @@ function selectToSQL(stmt) {
     groupby,
     having,
     into = {},
+    isolation,
     limit,
     options,
     orderby,
@@ -100,6 +101,7 @@ function selectToSQL(stmt) {
   clauses.push(orderOrPartitionByToSQL(orderby, 'order by'))
   clauses.push(collateToSQL(collate))
   clauses.push(limitToSQL(limit))
+  if (isolation) clauses.push(commonOptionConnector(isolation.keyword, literalToSQL, isolation.expr))
   clauses.push(toUpper(lockingRead))
   if (position === 'end') clauses.push(intoSQL)
   clauses.push(forXmlToSQL(forXml))
