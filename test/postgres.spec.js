@@ -2108,6 +2108,15 @@ describe('Postgres', () => {
           'SELECT Year, Title, ROW_NUMBER() OVER (PARTITION BY EXTRACT(YEAR FROM CreationDate)) AS "rn" FROM "yearly_views"'
         ]
       },
+      {
+        title: 'collate with schema',
+        sql: [
+          `CREATE TABLE features (
+            feature_name text COLLATE pg_catalog."default" NOT NULL
+          );`,
+          'CREATE TABLE "features" (feature_name TEXT NOT NULL COLLATE pg_catalog."default")'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
