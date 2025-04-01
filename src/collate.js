@@ -6,7 +6,7 @@ function collateToSQL(stmt) {
   const { keyword, collate: { name, symbol, value } } = stmt
   const result = [toUpper(keyword)]
   if (!value) result.push(symbol)
-  result.push(literalToSQL(name))
+  result.push(Array.isArray(name) ? name.map(literalToSQL).join('.') : literalToSQL(name))
   if (value) result.push(symbol)
   result.push(exprToSQL(value))
   return result.filter(hasVal).join(' ')

@@ -1387,13 +1387,13 @@ column_constraint
   }
 
 collate_expr
-  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ ca:ident_type {
+  = KW_COLLATE __ s:KW_ASSIGIN_EQUAL? __ schema:(ident_type __ DOT __ )? ca:ident_type {
     // => { type: 'collate'; keyword: 'collate'; collate: { symbol: '=' | null ; name: ident_type; }}
     return {
       type: 'collate',
       keyword: 'collate',
       collate: {
-        name: ca,
+        name: schema ? [schema[0], ca] : ca,
         symbol: s,
       }
     }
