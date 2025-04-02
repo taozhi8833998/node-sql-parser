@@ -132,6 +132,7 @@ function columnIdentifierToSql(ident) {
   const { database } = getParserOpt()
   if (!ident) return
   switch (database && database.toLowerCase()) {
+    case 'athena':
     case 'db2':
     case 'postgresql':
     case 'redshift':
@@ -159,6 +160,7 @@ function identifierToSql(ident, isDual) {
     case 'mysql':
     case 'mariadb':
       return `\`${ident}\``
+    case 'athena':
     case 'postgresql':
     case 'redshift':
     case 'snowflake':
