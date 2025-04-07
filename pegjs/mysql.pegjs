@@ -2396,10 +2396,16 @@ table_ref_list
       })
       return tail;
     }
-  / lp:LPAREN+ __ head:table_base tail:table_ref* __ rp:RPAREN+ {
+  / lp:LPAREN+ __ head:table_base tail:table_ref* __ rp:RPAREN+ __ jt:table_ref* {
       if (lp.length !== rp.length) throw new Error(`parentheses not match in from clause: ${lp.length} != ${rp.length}`)
       tail.unshift(head);
       tail.forEach(tableInfo => {
+        const { table, as } = tableInfo
+        tableAlias[table] = table
+        if (as) tableAlias[as] = table
+        refreshColumnList(columnList)
+      })
+      jt.forEach(tableInfo => {
         const { table, as } = tableInfo
         tableAlias[table] = table
         if (as) tableAlias[as] = table
@@ -2409,7 +2415,8 @@ table_ref_list
         expr: tail,
         parentheses: {
           length: rp.length
-        } 
+        },
+        joins: jt
       }
     }
 
