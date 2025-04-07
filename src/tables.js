@@ -160,7 +160,7 @@ function tableToSQL(tableInfo) {
 function tablesToSQL(tables) {
   if (!tables) return ''
   if (!Array.isArray(tables)) {
-    const { expr, parentheses } = tables
+    const { expr, parentheses, joins } = tables
     const sql = tablesToSQL(expr)
     if (parentheses) {
       const leftParentheses = []
@@ -171,7 +171,8 @@ function tablesToSQL(tables) {
         leftParentheses.push('(')
         rightParentheses.push(')')
       }
-      return leftParentheses.join('') + sql + rightParentheses.join('')
+      const joinsSQL = joins && joins.length > 0 ? tablesToSQL(['', ...joins]) : ''
+      return leftParentheses.join('') + sql + rightParentheses.join('') + joinsSQL
     }
     return sql
   }

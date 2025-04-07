@@ -1206,6 +1206,13 @@ describe('mysql', () => {
           'SELECT `T2`.`id` FROM (SELECT @r AS `_id`, (SELECT @r := `parent_id` FROM `product_category` WHERE `id` = `_id` AND `is_active` = 1) AS `parent_id`, @l := @l + 1 AS `lvl` FROM (SELECT @r := :catId, @l := 0) AS `vars`, `product_category` AS `h` WHERE @r <> 0) AS `T1` INNER JOIN `product_category` AS `T2` ON `T1`.`_id` = `T2`.`id` ORDER BY `T1`.`lvl` DESC',
         ]
       },
+      {
+        title: 'table ref list with join after parentheses',
+        sql: [
+          'select * from (`table`, `table2` as `t2`, `jacob` as `jacobian`) left join`table3` as `t3` on`t2`.`id` = `t3`.`table2_id`',
+          'SELECT * FROM (`table`, `table2` AS `t2`, `jacob` AS `jacobian`) LEFT JOIN `table3` AS `t3` ON `t2`.`id` = `t3`.`table2_id`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
