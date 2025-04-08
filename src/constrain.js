@@ -26,9 +26,9 @@ function constraintDefinitionToSQL(constraintDefinition) {
   constraintSQL.push(toUpper(keyword))
   constraintSQL.push(identifierToSql(constraint))
   let constraintTypeStr = toUpper(constraintType)
-  if (database === 'sqlite' && constraintTypeStr === 'UNIQUE KEY') constraintTypeStr = 'UNIQUE'
+  if (database.toLowerCase() === 'sqlite' && constraintTypeStr === 'UNIQUE KEY') constraintTypeStr = 'UNIQUE'
   constraintSQL.push(constraintTypeStr)
-  constraintSQL.push(database !== 'sqlite' && identifierToSql(index))
+  constraintSQL.push(database.toLowerCase() !== 'sqlite' && identifierToSql(index))
   constraintSQL.push(...indexTypeAndOptionToSQL(constraintDefinition))
   constraintSQL.push(...columnReferenceDefinitionToSQL(referenceDefinition))
   constraintSQL.push(toUpper(enforced))

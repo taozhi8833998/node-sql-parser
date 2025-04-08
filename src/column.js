@@ -125,7 +125,7 @@ function columnOption(definition) {
   if (generated) columnOpt.push(nullSQL)
   columnOpt.push(autoIncrementToSQL(autoIncrement), toUpper(primaryKey), toUpper(uniqueKey), commentToSQL(comment))
   columnOpt.push(...commonTypeValue(characterSet))
-  if (database !== 'sqlite') columnOpt.push(exprToSQL(collate))
+  if (database.toLowerCase() !== 'sqlite') columnOpt.push(exprToSQL(collate))
   columnOpt.push(...commonTypeValue(columnFormat))
   columnOpt.push(...commonTypeValue(storage))
   columnOpt.push(...columnReferenceDefinitionToSQL(referenceDefinition))
