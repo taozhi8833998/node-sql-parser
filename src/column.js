@@ -214,6 +214,7 @@ export {
   columnToSQL,
   columnsToSQL,
   columnDataType,
+  columnOffsetToSQL,
   columnOrderToSQL,
   columnReferenceDefinitionToSQL,
   fullTextSearchToSQL,

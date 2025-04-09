@@ -378,7 +378,7 @@ describe('BigQuery', () => {
       ]
     },
     {
-      title: 'select offset after funtion',
+      title: 'select offset after function',
       sql: [
         "select split('To - be - split', ' - ')[OFFSET(0)] from abc",
         "SELECT split('To - be - split', ' - ')[OFFSET(0)] FROM abc"
@@ -882,6 +882,13 @@ describe('BigQuery', () => {
       sql: [
         'SELECT my_array[0]/100 FROM table1',
         'SELECT my_array[0] / 100 FROM table1'
+      ]
+    },
+    {
+      title: 'safe_cast with split array index',
+      sql: [
+        "select SAFE_CAST(SPLIT(t1.CREATED_BY, 'a')[0] AS STRING) AS FIRST_SPLIT_ARG, from  table1 t1 where CREATED_BY = 'node-sql-parser' AND FIRST_SPLIT_ARG = @FIRST_SPLIT_ARG limit 1",
+        "SELECT SAFE_CAST(SPLIT(t1.CREATED_BY, 'a')[0] AS STRING) AS FIRST_SPLIT_ARG FROM table1 AS t1 WHERE CREATED_BY = 'node-sql-parser' AND FIRST_SPLIT_ARG = @FIRST_SPLIT_ARG LIMIT 1"
       ]
     },
   ]
