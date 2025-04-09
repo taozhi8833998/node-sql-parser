@@ -1,4 +1,4 @@
-import { arrayIndexToSQL } from './column'
+import { arrayIndexToSQL, columnOffsetToSQL } from './column'
 import { exprToSQL, orderOrPartitionByToSQL } from './expr'
 import { hasVal, identifierToSql, literalToSQL, toUpper } from './util'
 import { overToSQL } from './over'
@@ -28,8 +28,8 @@ function arrayDimensionToSymbol(target) {
 }
 
 function castToSQL(expr) {
-  const { target: targets, expr: expression, keyword, symbol, as: alias, parentheses: outParentheses } = expr
-  let prefix = exprToSQL(expression)
+  const { target: targets, expr: expression, keyword, symbol, as: alias, offset, parentheses: outParentheses } = expr
+  let prefix = columnOffsetToSQL({ expr: expression, offset })
   const result = []
   for (let i = 0, len = targets.length; i < len; ++i) {
     const target = targets[i]

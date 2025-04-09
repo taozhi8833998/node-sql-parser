@@ -2764,45 +2764,51 @@ extract_func
       };
   }
 
+cast_expr_arg
+  = n:expr __ l:column_offset_expr_list? {
+    const result = { expr: n }
+    if (l) result.offset = l
+    return result
+  }
 cast_keyword
   = KW_CAST / KW_SAFE_CAST
 cast_expr
-  = c:cast_keyword __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
+  = c:cast_keyword __ LPAREN __ e:cast_expr_arg __ KW_AS __ t:data_type __ RPAREN {
     return {
       type: 'cast',
       keyword: c.toLowerCase(),
-      expr: e,
+      ...e,
       symbol: 'as',
       target: [t]
     };
   }
-  / c:cast_keyword __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
+  / c:cast_keyword __ LPAREN __ e:cast_expr_arg __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
     return {
       type: 'cast',
       keyword: c.toLowerCase(),
-      expr: e,
+      ...e,
       symbol: 'as',
       target: [{
         dataType: 'DECIMAL(' + precision + ')'
       }]
     };
   }
-  / c:cast_keyword __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
+  / c:cast_keyword __ LPAREN __ e:cast_expr_arg __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
       return {
         type: 'cast',
         keyword: c.toLowerCase(),
-        expr: e,
+        ...e,
         symbol: 'as',
         target: [{
           dataType: 'DECIMAL(' + precision + ', ' + scale + ')'
         }]
       };
     }
-  / c:cast_keyword __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
+  / c:cast_keyword __ LPAREN __ e:cast_expr_arg __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
     return {
       type: 'cast',
       keyword: c.toLowerCase(),
-      expr: e,
+      ...e,
       symbol: 'as',
       target: [{
         dataType: s + (t ? ' ' + t: '')
