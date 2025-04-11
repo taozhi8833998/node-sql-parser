@@ -1491,6 +1491,33 @@ drop_stmt
       };
     }
   / a:KW_DROP __
+    r:KW_TYPE __
+    ife:if_exists? __
+    i:column_ref_list __
+    op:('CASCADE'i / 'RESTRICT'i)? {
+      /*
+      export interface drop_index_stmt_node {
+        type: 'drop';
+        prefix?: string;
+        keyword: string;
+        name: column_ref_list;
+        options?: 'cascade' | 'restrict';
+      }
+      => AstStatement<drop_index_stmt_node>
+      */
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: a.toLowerCase(),
+          keyword: r.toLowerCase(),
+          prefix: [ife].filter(v => v).join(' '),
+          name: i,
+          options: op && [{ type: 'origin', value: op }]
+        }
+      };
+    }
+  / a:KW_DROP __
     r:KW_VIEW __
     ife:if_exists? __
     t:table_ref_list __
@@ -5630,6 +5657,7 @@ KW_DUAL = "DUAL"i
 KW_ADD     = "ADD"i     !ident_start { return 'ADD'; }
 KW_COLUMN  = "COLUMN"i  !ident_start { return 'COLUMN'; }
 KW_INDEX   = "INDEX"i  !ident_start { return 'INDEX'; }
+KW_TYPE   = "TYPE"i  !ident_start { return 'TYPE'; }
 KW_KEY     = "KEY"i  !ident_start { return 'KEY'; }
 KW_FULLTEXT = "FULLTEXT"i  !ident_start { return 'FULLTEXT'; }
 KW_SPATIAL  = "SPATIAL"i  !ident_start { return 'SPATIAL'; }
