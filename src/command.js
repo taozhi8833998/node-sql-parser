@@ -33,6 +33,9 @@ function commonCmdToSQL(stmt) {
     case 'index':
       clauses.push(columnRefToSQL(name), ...stmt.table ? ['ON', tableToSQL(stmt.table)] : [], stmt.options && stmt.options.map(exprToSQL).filter(hasVal).join(' '))
       break
+    case 'type':
+      clauses.push(name.map(columnRefToSQL).join(', '), stmt.options && stmt.options.map(exprToSQL).filter(hasVal).join(' '))
+      break
     default:
       break
   }

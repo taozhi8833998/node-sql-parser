@@ -2117,6 +2117,13 @@ describe('Postgres', () => {
           'CREATE TABLE "features" (feature_name TEXT NOT NULL COLLATE pg_catalog."default")'
         ]
       },
+      {
+        title: 'drop type stmt',
+        sql: [
+          'DROP TYPE IF EXISTS some_type, other_type CASCADE',
+          'DROP TYPE IF EXISTS some_type, other_type CASCADE'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
