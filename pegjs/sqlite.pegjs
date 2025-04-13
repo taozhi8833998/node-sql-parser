@@ -562,6 +562,9 @@ column_definition_opt
   / co:keyword_comment {
     return { comment: co }
   }
+  / kc:KW_CONSTRAINT __ n:ident_without_kw_type {
+    return { constraint: { keyword: kc.toLowerCase(), constraint: n } }
+  }
   / ca:collate_expr {
     return { collate: ca }
   }

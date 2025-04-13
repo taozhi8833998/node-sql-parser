@@ -206,4 +206,11 @@ describe('sqlite', () => {
     sql = 'CREATE INDEX if not exists schema_name.visits_url_index ON visits (url collate cn asc) where id > 10;'
     expect(getParsedSql(sql)).to.be.equal('CREATE INDEX IF NOT EXISTS "schema_name"."visits_url_index" ON "visits" ("url" COLLATE cn ASC) WHERE "id" > 10')
   })
+  it('should support constraint in create table', () => {
+    const sql = `CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+        "MigrationId" TEXT NOT NULL CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY,
+        "ProductVersion" TEXT NOT NULL
+    );`
+    expect(getParsedSql(sql)).to.be.equal(`CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" ("MigrationId" TEXT NOT NULL CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY, "ProductVersion" TEXT NOT NULL)`)
+  })
 })
