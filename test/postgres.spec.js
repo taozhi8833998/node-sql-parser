@@ -2124,6 +2124,16 @@ describe('Postgres', () => {
           'DROP TYPE IF EXISTS some_type, other_type CASCADE'
         ]
       },
+      {
+        title: 'unlogged table',
+        sql: [
+          `CREATE UNLOGGED TABLE t1 (
+              id integer PRIMARY KEY,
+              data text
+          );`,
+          'CREATE UNLOGGED TABLE "t1" (id INTEGER PRIMARY KEY, data TEXT)'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })

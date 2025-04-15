@@ -812,6 +812,7 @@ create_domain_stmt
 create_table_stmt
   = a:KW_CREATE __
     tp:KW_TEMPORARY? __
+    ul:KW_UNLOGGED? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
     t:table_ref_list __
@@ -825,6 +826,7 @@ create_table_stmt
           type: a[0].toLowerCase(),
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
+          unlogged: ul,
           if_not_exists: ife,
           table: t,
           partition_of: po
@@ -833,6 +835,7 @@ create_table_stmt
     }
   /  a:KW_CREATE __
     tp:KW_TEMPORARY? __
+    ul:KW_UNLOGGED? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
     t:table_ref_list __
@@ -847,6 +850,7 @@ create_table_stmt
         type: 'create';
         keyword: 'table';
         temporary?: 'temporary';
+        unlogged?: 'unlogged';
         if_not_exists?: 'if not exists';
         table: table_ref_list;
       }
@@ -867,6 +871,7 @@ create_table_stmt
           type: a[0].toLowerCase(),
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
+          unlogged: ul,
           if_not_exists:ife,
           table: t,
           ignore_replace: ir && ir[0].toLowerCase(),
@@ -879,6 +884,7 @@ create_table_stmt
     }
   / a:KW_CREATE __
     tp:KW_TEMPORARY? __
+    ul:KW_UNLOGGED? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
     t:table_ref_list __
@@ -898,6 +904,7 @@ create_table_stmt
           type: a[0].toLowerCase(),
           keyword: 'table',
           temporary: tp && tp[0].toLowerCase(),
+          unlogged: ul,
           if_not_exists:ife,
           table: t,
           like: lt
@@ -5477,6 +5484,7 @@ KW_SELECT   = "SELECT"i     !ident_start
 KW_UPDATE   = "UPDATE"i     !ident_start
 KW_CREATE   = "CREATE"i     !ident_start
 KW_TEMPORARY = "TEMPORARY"i !ident_start
+KW_UNLOGGED = "UNLOGGED" !ident_start { return 'UNLOGGED'; }
 KW_TEMP     = "TEMP"i !ident_start
 KW_DELETE   = "DELETE"i     !ident_start
 KW_INSERT   = "INSERT"i     !ident_start
