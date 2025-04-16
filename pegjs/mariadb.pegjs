@@ -3502,6 +3502,7 @@ literal_datetime
 single_quote_char
   = [^"\\\0-\x1F\x7f]
   / escape_char
+  / [\n]
 
 single_char
   = [^'\\]
