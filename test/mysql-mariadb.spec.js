@@ -1213,6 +1213,15 @@ describe('mysql', () => {
           'SELECT * FROM (`table`, `table2` AS `t2`, `jacob` AS `jacobian`) LEFT JOIN `table3` AS `t3` ON `t2`.`id` = `t3`.`table2_id`'
         ]
       },
+      {
+        title: 'newline in string',
+        sql: [
+          `SELECT "asd
+          "`,
+          `SELECT "asd
+          "`
+        ]
+      }
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
