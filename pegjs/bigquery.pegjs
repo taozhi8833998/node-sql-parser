@@ -1864,7 +1864,7 @@ table_ref
 
 
 table_join
-  = op:join_op __ t:table_base __ KW_USING __ LPAREN __ head:ident_name tail:(__ COMMA __ ident_name)* __ RPAREN {
+  = op:join_op __ t:table_base __ KW_USING __ LPAREN __ head:ident_without_kw_type tail:(__ COMMA __ ident_without_kw_type)* __ RPAREN {
       t.join = op;
       t.using = createList(head, tail);
       return t;

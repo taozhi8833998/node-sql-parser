@@ -2995,7 +2995,7 @@ table_ref
   / __ t:table_join { /* => table_join */ return t; }
 
 table_join
-  = op:join_op __ t:table_base __ KW_USING __ LPAREN __ head:ident_without_kw tail:(__ COMMA __ ident_name)* __ RPAREN {
+  = op:join_op __ t:table_base __ KW_USING __ LPAREN __ head:ident_without_kw_type tail:(__ COMMA __ ident_without_kw_type)* __ RPAREN {
       // => table_base & {join: join_op; using: ident_name[]; }
       t.join = op;
       t.using = createList(head, tail);

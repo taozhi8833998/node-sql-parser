@@ -1221,7 +1221,20 @@ describe('mysql', () => {
           `SELECT "asd
           "`
         ]
-      }
+      },
+      {
+        title: 'join using quoted ident',
+        sql: [
+          `SELECT * FROM employees
+            inner join salaries using (emp_no)
+          order by emp_no desc;
+
+          SELECT * FROM \`employees\` 
+          INNER JOIN \`salaries\` USING (\`emp_no\`) 
+          ORDER BY \`emp_no\` DESC;`,
+          'SELECT * FROM `employees` INNER JOIN `salaries` USING (emp_no) ORDER BY `emp_no` DESC ; SELECT * FROM `employees` INNER JOIN `salaries` USING (`emp_no`) ORDER BY `emp_no` DESC'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

@@ -29,7 +29,7 @@ describe('redshift', () => {
         left join ppc_keywords_mapping mp using (campaign_keyword)
       )
       select is_brand as "b/nb" from pv where mp."brand/non-brand" = 'brand'`
-      expect(getParsedSql(sql)).to.be.equal(`WITH "pv" AS (SELECT action_date, visitor_id_v, visit_country_name, referer_channel_group, email, sgid, "mp"."brand/non-brand" AS "is_brand" FROM "dwh_fact_pageviews" AS "pv" LEFT JOIN "ppc_keywords_mapping" AS "mp" USING ("campaign_keyword")) SELECT is_brand AS "b/nb" FROM "pv" WHERE "mp"."brand/non-brand" = 'brand'`)
+      expect(getParsedSql(sql)).to.be.equal(`WITH "pv" AS (SELECT action_date, visitor_id_v, visit_country_name, referer_channel_group, email, sgid, "mp"."brand/non-brand" AS "is_brand" FROM "dwh_fact_pageviews" AS "pv" LEFT JOIN "ppc_keywords_mapping" AS "mp" USING (campaign_keyword)) SELECT is_brand AS "b/nb" FROM "pv" WHERE "mp"."brand/non-brand" = 'brand'`)
   })
 
   it('should support unary operator', () => {

@@ -187,7 +187,7 @@ function tablesToSQL(tables) {
     str.push(join ? ` ${toUpper(join)}` : ',')
     str.push(tableToSQL(joinExpr))
     str.push(commonOptionConnector('ON', exprToSQL, on))
-    if (using) str.push(`USING (${using.map(identifierToSql).join(', ')})`)
+    if (using) str.push(`USING (${using.map(literalToSQL).join(', ')})`)
     clauses.push(str.filter(hasVal).join(' '))
   }
   return clauses.filter(hasVal).join('')
