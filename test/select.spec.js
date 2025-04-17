@@ -540,16 +540,16 @@ describe('select', () => {
 
         expect(ast.from).to.eql([
           { db: null, table: 't1', as: null },
-          { db: null, table: 't2', as: null, join: 'INNER JOIN', using: ['id'] }
+          { db: null, table: 't2', as: null, join: 'INNER JOIN', using: [{ type: 'default', value: 'id' }] }
         ]);
       });
 
       it('should parse joins with USING (multiple columns)', () => {
-        const ast = parser.astify('SELECT * FROM t1 JOIN t2 USING (id1, id2)');
+        const ast = parser.astify('SELECT * FROM t1 JOIN t2 USING (id1, `id2`)');
 
         expect(ast.from).to.eql([
           { db: null, table: 't1', as: null },
-          { db: null, table: 't2', as: null, join: 'INNER JOIN', using: ['id1', 'id2'] }
+          { db: null, table: 't2', as: null, join: 'INNER JOIN', using: [{ type: 'default', value: 'id1' }, { type: 'backticks_quote_string', value: 'id2' }] }
         ]);
       });
     });

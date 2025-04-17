@@ -58,7 +58,7 @@ describe('Postgres', () => {
         `SELECT FirstName
         FROM Roster INNER JOIN PlayerStats
         USING (LastName);`,
-        'SELECT FirstName FROM "Roster" INNER JOIN "PlayerStats" USING ("LastName")'
+        'SELECT FirstName FROM "Roster" INNER JOIN "PlayerStats" USING (LastName)'
       ]
     },
     {
@@ -1227,7 +1227,7 @@ describe('Postgres', () => {
               END IF;
           END
         $$;`,
-        'CREATE FUNCTION "public".inventory_in_stock(p_inventory_id INTEGER) RETURNS BOOLEAN LANGUAGE plpgsql AS $$ DECLARE v_rentals INTEGER; v_out INTEGER BEGIN SELECT COUNT(*) INTO "v_rentals" FROM "rental" WHERE inventory_id = p_inventory_id ; IF v_rentals = 0 THEN RETURN TRUE; END IF ; SELECT COUNT(rental_id) INTO "v_out" FROM "inventory" LEFT JOIN "rental" USING ("inventory_id") WHERE "inventory".inventory_id = p_inventory_id AND "rental".return_date IS NULL ; IF v_out > 0 THEN RETURN FALSE; ELSEIF v_out = 0 THEN RETURN FALSE ; ELSE RETURN TRUE; END IF END $$'
+        'CREATE FUNCTION "public".inventory_in_stock(p_inventory_id INTEGER) RETURNS BOOLEAN LANGUAGE plpgsql AS $$ DECLARE v_rentals INTEGER; v_out INTEGER BEGIN SELECT COUNT(*) INTO "v_rentals" FROM "rental" WHERE inventory_id = p_inventory_id ; IF v_rentals = 0 THEN RETURN TRUE; END IF ; SELECT COUNT(rental_id) INTO "v_out" FROM "inventory" LEFT JOIN "rental" USING (inventory_id) WHERE "inventory".inventory_id = p_inventory_id AND "rental".return_date IS NULL ; IF v_out > 0 THEN RETURN FALSE; ELSEIF v_out = 0 THEN RETURN FALSE ; ELSE RETURN TRUE; END IF END $$'
       ]
     },
     {
@@ -1511,10 +1511,10 @@ describe('Postgres', () => {
     FROM
         film f
     INNER JOIN film_actor fa USING (film_id)
-    INNER JOIN actor a USING (actor_id)
+    INNER JOIN actor a USING ("actor_id")
     GROUP BY
         f.title;`,
-        `SELECT "f".title, STRING_AGG("a".first_name || ' ' || "a".last_name, ',' ORDER BY "a".first_name ASC, "a".last_name ASC) AS "actors" FROM "film" AS "f" INNER JOIN "film_actor" AS "fa" USING ("film_id") INNER JOIN "actor" AS "a" USING ("actor_id") GROUP BY "f".title`
+        `SELECT "f".title, STRING_AGG("a".first_name || ' ' || "a".last_name, ',' ORDER BY "a".first_name ASC, "a".last_name ASC) AS "actors" FROM "film" AS "f" INNER JOIN "film_actor" AS "fa" USING (film_id) INNER JOIN "actor" AS "a" USING ("actor_id") GROUP BY "f".title`
       ]
     },
     {
