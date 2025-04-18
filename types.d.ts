@@ -337,6 +337,7 @@ type DataType = {
   dataType: string;
   length?: number;
   parentheses?: true;
+  scale?: number;
   suffix?: Timezone | (KW_UNSIGNED | KW_ZEROFILL)[];
   array?: "one" | "two";
 };
