@@ -44,4 +44,8 @@ describe('MariaDB Command SQL', () => {
     const sql = 'CREATE TABLE t1 (id UUID);'
     expect(getParsedSql(sql)).to.equal('CREATE TABLE `t1` (`id` UUID)');
   })
+  it('should support default row format', () => {
+    const sql = 'CREATE TABLE mytable (ID INT(10) UNSIGNED NOT NULL AUTO_INCREMENT) ROW_FORMAT=DEFAULT;'
+    expect(getParsedSql(sql)).to.equal('CREATE TABLE `mytable` (`ID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT) ROW_FORMAT = DEFAULT')
+  })
 })
