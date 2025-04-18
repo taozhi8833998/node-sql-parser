@@ -1697,7 +1697,7 @@ table_option
       value: c.toUpperCase()
     }
   }
-  / kw:'ROW_FORMAT'i __ s:(KW_ASSIGIN_EQUAL)? __ c:(KW_DEFAULT / 'DYNAMIC'i / 'FIXED'i / 'COMPRESSED'i / 'REDUNDANT'i / 'COMPACT'i) {
+  / kw:'ROW_FORMAT'i __ s:(KW_ASSIGIN_EQUAL)? __ c:('DEFAULT'i / 'DYNAMIC'i / 'FIXED'i / 'COMPRESSED'i / 'REDUNDANT'i / 'COMPACT'i) {
     return {
       keyword: kw.toLowerCase(),
       symbol: s,
