@@ -1041,6 +1041,7 @@ alter_action
   / ALTER_ALGORITHM
   / ALTER_LOCK
   / ALTER_CHANGE_COLUMN
+  / ALTER_OPERATE_PARTITION
   / t:table_option {
     t.resource = t.keyword
     t[t.keyword] = t.value
@@ -1051,6 +1052,47 @@ alter_action
     }
   }
 
+alter_table_add_partition
+  = KW_PARTITION __ n:ident_without_kw_type __ KW_VALUES __ 'LESS'i __ 'THAN'i __ LPAREN __ v:literal_numeric __ RPAREN {
+    return {
+      name: n,
+      value: {
+        type: 'less than',
+        value: v,
+        parentheses: true,
+      }
+    }
+  }
+
+alter_table_add_partition_list
+  = head:alter_table_add_partition tail:(__ COMMA __ alter_table_add_partition)* {
+    return createList(head, tail)
+  }
+ALTER_OPERATE_PARTITION
+  = a:('DROP'i / 'TRUNCATE'i / 'DISCARD'i / 'IMPORT'i / 'COALESCE'i / 'ANALYZE'i / 'CHECK'i) __ kc:KW_PARTITION __ t:column_clause __ ts:'TABLESPACE'i? {
+      const expr = {
+        action: a.toLowerCase(),
+        keyword: kc,
+        resource: 'partition',
+        type: 'alter',
+        partitions: t,
+      }
+      if (ts) expr.suffix = {
+        keyword: ts,
+      }
+      return expr
+    }
+  / KW_ADD __ kc:KW_PARTITION __ LPAREN __ e:alter_table_add_partition_list  __ RPAREN {
+    const expr = {
+        action: 'add',
+        keyword: kc,
+        resource: 'partition',
+        type: 'alter',
+        partitions: e,
+      }
+      return expr
+  }
+    
 ALTER_ADD_COLUMN
   = KW_ADD __
     kc:KW_COLUMN? __

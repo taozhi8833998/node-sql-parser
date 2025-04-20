@@ -1235,6 +1235,20 @@ describe('mysql', () => {
           'SELECT * FROM `employees` INNER JOIN `salaries` USING (emp_no) ORDER BY `emp_no` DESC ; SELECT * FROM `employees` INNER JOIN `salaries` USING (`emp_no`) ORDER BY `emp_no` DESC'
         ]
       },
+      {
+        titel: 'alter table truncate partiton',
+        sql: [
+          'ALTER TABLE test_table TRUNCATE PARTITION p202503,p202504;',
+          'ALTER TABLE `test_table` TRUNCATE PARTITION `p202503`, `p202504`'
+        ]
+      },
+      {
+        title: 'alter table add partition',
+        sql: [
+          'ALTER TABLE test_table ADD PARTITION (PARTITION p202503 VALUES LESS THAN (20250301), PARTITION p202504 VALUES LESS THAN (20250401));',
+          'ALTER TABLE `test_table` ADD PARTITION (`PARTITION` `p202503` VALUES LESS THAN (20250301), `PARTITION` `p202504` VALUES LESS THAN (20250401))'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

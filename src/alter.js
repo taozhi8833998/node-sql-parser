@@ -1,4 +1,4 @@
-import { columnDefinitionToSQL, columnRefToSQL } from './column'
+import { columnDefinitionToSQL, columnRefToSQL, columnsToSQL } from './column'
 import { createDefinitionToSQL } from './create'
 import { indexTypeAndOptionToSQL } from './index-definition'
 import { tablesToSQL, tableToSQL } from './tables'
@@ -6,6 +6,15 @@ import { exprToSQL } from './expr'
 import { selectToSQL } from './select'
 import { dataTypeToSQL, hasVal, toUpper, identifierToSql, literalToSQL } from './util'
 
+function alterExprPartition(action, expr) {
+  switch (action) {
+    case 'add':
+      const { name, value } = expr
+      return ['PARTITION', literalToSQL(name), toUpper(value.type), `(${literalToSQL(value.value)})`];
+    default:
+      return columnsToSQL(expr) 
+  }
+}
 function alterExprToSQL(expr) {
   if (!expr) return ''
   const {
@@ -47,6 +56,9 @@ function alterExprToSQL(expr) {
     case 'constraint':
       name = identifierToSql(expr[resource])
       dataType = [createDefinitionToSQL(createDefinition)]
+      break
+    case 'partition':
+      dataType = [alterExprPartition(action, expr.partitions)]
       break
     case 'key':
       name = identifierToSql(expr[resource])
