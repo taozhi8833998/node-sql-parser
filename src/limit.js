@@ -1,9 +1,9 @@
-import { connector, toUpper, hasVal } from './util'
+import { connector, toUpper, hasVal, literalToSQL } from './util'
 import { exprToSQL } from './expr'
 
 function composePrefixValSuffix(stmt) {
   if (!stmt) return []
-  return [toUpper(stmt.prefix), exprToSQL(stmt.value), toUpper(stmt.suffix)]
+  return [stmt.prefix.map(literalToSQL).join(' '), exprToSQL(stmt.value), stmt.suffix.map(literalToSQL).join(' ')]
 }
 
 function fetchOffsetToSQL(stmt) {

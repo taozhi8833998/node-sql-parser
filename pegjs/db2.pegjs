@@ -1319,26 +1319,42 @@ number_or_param
   / param
 
 limit_clause
-  = k:KW_FETCH __ 'FIRST'i __ i1:(number_or_param) __ 'ROWS'i __ 'ONLY'i {
+  = k:KW_FETCH __ 'FIRST'i __ i1:(number_or_param) __ r:('ROWS'i / 'ROW'i) __ 'ONLY'i {
     return {
       fetch: {
-        prefix: 'fetch first',
+        prefix: [
+          { type: 'origin', value: 'fetch' },
+          { type: 'origin', value: 'first' },
+        ],
         value: i1,
-        suffix: 'rows only'
+        suffix: [
+          { type: 'origin', value: r },
+          { type: 'origin', value: 'only' },
+        ]
       }
     }
   }
-  / KW_OFFSET __ i1:(number_or_param) __ 'ROWS'i __ KW_FETCH __ 'NEXT'i __  i2:(number_or_param) __ 'ROWS'i __ 'ONLY'i {
+  / KW_OFFSET __ i1:(number_or_param) __ 'ROWS'i __ KW_FETCH __ 'NEXT'i __  i2:(number_or_param) __ r:('ROWS'i / 'ROW'i) __ 'ONLY'i {
     return {
       offset: {
-        prefix: 'offset',
+        prefix:[
+          { type: 'origin', value: 'offset' },
+        ],
         value: i1,
-        suffix: 'rows',
+        suffix: [
+          { type: 'origin', value: 'rows' },
+        ]
       },
       fetch: {
-        prefix: 'fetch next',
+        prefix: [
+          { type: 'origin', value: 'fetch' },
+          { type: 'origin', value: 'next' },
+        ],
         value: i2,
-        suffix: 'rows only'
+        suffix: [
+          { type: 'origin', value: r },
+          { type: 'origin', value: 'only' },
+        ]
       }
     }
   }
