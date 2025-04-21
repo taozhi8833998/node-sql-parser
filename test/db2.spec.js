@@ -34,6 +34,13 @@ describe('db2', () => {
         'SELECT * FROM STAFF WITH UR'
       ]
     },
+    {
+      title: 'fetch row',
+      sql: [
+        'SELECT * FROM my_table FETCH FIRST 1 ROW ONLY;',
+        'SELECT * FROM my_table FETCH FIRST 1 ROW ONLY'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
