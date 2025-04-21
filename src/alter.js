@@ -9,10 +9,10 @@ import { dataTypeToSQL, hasVal, toUpper, identifierToSql, literalToSQL } from '.
 function alterExprPartition(action, expr) {
   switch (action) {
     case 'add':
-      const { name, value } = expr
-      return ['PARTITION', literalToSQL(name), toUpper(value.type), `(${literalToSQL(value.value)})`];
+      const sql = expr.map(({ name, value }) => ['PARTITION', literalToSQL(name), 'VALUES', toUpper(value.type), `(${literalToSQL(value.expr)})`].join(' ')).join(', ')
+      return `(${sql})`
     default:
-      return columnsToSQL(expr) 
+      return columnsToSQL(expr)
   }
 }
 function alterExprToSQL(expr) {

@@ -1058,7 +1058,7 @@ alter_table_add_partition
       name: n,
       value: {
         type: 'less than',
-        value: v,
+        expr: v,
         parentheses: true,
       }
     }
