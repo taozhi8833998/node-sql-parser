@@ -154,8 +154,8 @@ export interface Cast {
   symbol: "as";
   target: {
     dataType: string;
-    suffix: unknown[];
-  };
+    quoted?: string;
+  }[];
 }
 export interface AggrFunc {
   type: "aggr_func";
