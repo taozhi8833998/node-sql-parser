@@ -154,6 +154,7 @@ export type create_table_stmt_node = create_table_stmt_node_simple | create_tabl
         type: 'create';
         keyword: 'table';
         temporary?: 'temporary';
+        unlogged?: 'unlogged';
         if_not_exists?: 'if not exists';
         table: table_ref_list;
       }
@@ -346,6 +347,14 @@ export interface drop_index_stmt_node {
         prefix?: string;
         keyword: string;
         name: column_ref;
+        options?: 'cascade' | 'restrict';
+      }
+
+export interface drop_index_stmt_node {
+        type: 'drop';
+        prefix?: string;
+        keyword: string;
+        name: column_ref_list;
         options?: 'cascade' | 'restrict';
       }
 
@@ -956,7 +965,7 @@ export type table_ref = table_base | table_join;
 
 
 
-export type table_join = table_base & {join: join_op; using: ident_name[]; } | table_base & {join: join_op; on?: on_clause; } | {
+export type table_join = table_base & {join: join_op; using: ident_without_kw_type[]; } | table_base & {join: join_op; on?: on_clause; } | {
       expr: (union_stmt | table_ref_list) & { parentheses: true; };
       as?: alias_clause;
       join: join_op | set_op;
@@ -1494,6 +1503,8 @@ type KW_CREATE = never;
 
 type KW_TEMPORARY = never;
 
+type KW_UNLOGGED = never;
+
 type KW_TEMP = never;
 
 type KW_DELETE = never;
@@ -1809,6 +1820,8 @@ type KW_ADD = never;
 type KW_COLUMN = never;
 
 type KW_INDEX = never;
+
+type KW_TYPE = never;
 
 type KW_KEY = never;
 
