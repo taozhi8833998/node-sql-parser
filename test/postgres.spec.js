@@ -1768,6 +1768,15 @@ describe('Postgres', () => {
         'ALTER TABLE "my_table" ADD COLUMN geom GEOMETRY(Point, 4326)'
       ]
     },
+    {
+      title: 'create table with function default expr',
+      sql: [
+        `CREATE TABLE public.person (
+            external_id character varying(255) DEFAULT "substring"(md5((random())::text), 1, 6)
+        );`,
+        'CREATE TABLE "public"."person" (external_id CHARACTER VARYING(255) DEFAULT "substring"(md5((random())::TEXT), 1, 6))'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
