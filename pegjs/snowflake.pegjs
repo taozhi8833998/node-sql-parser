@@ -2243,11 +2243,6 @@ column_list_item
         ...getLocationObject()
       }
     }
-  / c:double_quoted_ident __ d:DOT? !{ if(d) return true } __  alias: alias_clause? {
-      // => { type: 'expr'; expr: expr; as?: alias_clause; }
-      columnList.add(`select::null::${c.value}`)
-      return { type: 'expr', expr: { type: 'column_ref', table: null, column: { expr: c } }, as: alias, ...getLocationObject() };
-  }
   / e:expr_item  __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
       return { type: 'expr', expr: e, as: alias, ...getLocationObject(), };
