@@ -511,6 +511,13 @@ describe('snowflake', () => {
         'SELECT LAST_VALUE("ac_install_date") IGNORE NULLS OVER (PARTITION BY "player_id" ORDER BY "date" DESC) AS "ac_install_date" FROM "some_table"'
       ]
     },
+    {
+      title: 'additive operator in column',
+      sql: [
+        'SELECT "a"+"b" FROM DUAL',
+        'SELECT "a" + "b" FROM DUAL'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
