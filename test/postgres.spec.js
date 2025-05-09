@@ -1777,6 +1777,13 @@ describe('Postgres', () => {
         'CREATE TABLE "public"."person" (external_id CHARACTER VARYING(255) DEFAULT "substring"(md5((random())::TEXT), 1, 6))'
       ]
     },
+    {
+      title: 'alter table owner to',
+      sql: [
+        'ALTER TABLE public.person OWNER TO postgres;',
+        'ALTER TABLE "public"."person" OWNER TO "postgres"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

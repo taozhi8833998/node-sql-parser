@@ -1758,7 +1758,7 @@ alter_table_stmt
     KW_TABLE? __
     ife:if_exists? __
     o:'only'i? __
-    t:table_ref_list __
+    t:table_name __
     e:alter_action_list {
       /*
       export interface alter_table_stmt_node {
@@ -1780,7 +1780,7 @@ alter_table_stmt
           keyword: 'table',
           if_exists: ife,
           prefix: o && { type: 'origin', value: o },
-          table: t,
+          table: [t],
           expr: e
         }
       };
@@ -1801,6 +1801,7 @@ alter_action
   / ALTER_RENAME
   / ALTER_ALGORITHM
   / ALTER_LOCK
+  / ALTER_OWNER_TO
   / ALTER_COLUMN_DATA_TYPE
   / ALTER_COLUMN_DEFAULT
   / ALTER_COLUMN_NOT_NULL
