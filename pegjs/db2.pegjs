@@ -59,6 +59,7 @@
     'NOT': true,
     'NULL': true,
 
+    'OFFSET': true,
     'ON': true,
     'OR': true,
     'ORDER': true,
@@ -1319,12 +1320,12 @@ number_or_param
   / param
 
 limit_clause
-  = k:KW_FETCH __ 'FIRST'i __ i1:(number_or_param) __ r:('ROWS'i / 'ROW'i) __ 'ONLY'i {
+  = k:KW_FETCH __ t:('FIRST'i / 'LAST'i / 'NEXT'i)  __ i1:(number_or_param) __ r:('ROWS'i / 'ROW'i) __ 'ONLY'i {
     return {
       fetch: {
         prefix: [
           { type: 'origin', value: 'fetch' },
-          { type: 'origin', value: 'first' },
+          { type: 'origin', value: t.toLowerCase() },
         ],
         value: i1,
         suffix: [
@@ -1334,29 +1335,35 @@ limit_clause
       }
     }
   }
-  / KW_OFFSET __ i1:(number_or_param) __ 'ROWS'i __ KW_FETCH __ 'NEXT'i __  i2:(number_or_param) __ r:('ROWS'i / 'ROW'i) __ 'ONLY'i {
-    return {
+  / KW_OFFSET __ i1:(number_or_param) __ s:('ROWS'i)? __ f:(KW_FETCH __ 'NEXT'i __ number_or_param __ ('ROWS'i / 'ROW'i) __ 'ONLY'i)? {
+    const result = {
       offset: {
-        prefix:[
+        prefix: [
           { type: 'origin', value: 'offset' },
         ],
         value: i1,
-        suffix: [
-          { type: 'origin', value: 'rows' },
-        ]
-      },
-      fetch: {
+        suffix: [],
+      }
+    }
+    if (s) {
+      result.offset.suffix = [
+        { type: 'origin', value: 'rows' },
+      ]
+    }
+    if (f) {
+      result.fetch = {
         prefix: [
           { type: 'origin', value: 'fetch' },
-          { type: 'origin', value: 'next' },
+          { type: 'origin', value: f[2].toLowerCase() },
         ],
-        value: i2,
+        value: f[4],
         suffix: [
-          { type: 'origin', value: r },
+          { type: 'origin', value: f[6].toLowerCase() },
           { type: 'origin', value: 'only' },
         ]
       }
     }
+    return result
   }
 
 isolation_clause

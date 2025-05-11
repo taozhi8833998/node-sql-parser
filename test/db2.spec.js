@@ -35,10 +35,38 @@ describe('db2', () => {
       ]
     },
     {
-      title: 'fetch row',
+      title: 'fetch first row',
       sql: [
         'SELECT * FROM my_table FETCH FIRST 1 ROW ONLY;',
         'SELECT * FROM my_table FETCH FIRST 1 ROW ONLY'
+      ]
+    },
+    {
+      title: 'fetch last rows',
+      sql: [
+        'SELECT * FROM my_table FETCH LAST 10 ROWS ONLY;',
+        'SELECT * FROM my_table FETCH LAST 10 ROWS ONLY'
+      ]
+    },
+    {
+      title: 'fetch next row',
+      sql: [
+        'SELECT * FROM my_table FETCH NEXT 10 ROWS ONLY;',
+        'SELECT * FROM my_table FETCH NEXT 10 ROWS ONLY'
+      ]
+    },
+    {
+      title: 'OFFSET rows',
+      sql: [
+        'SELECT * FROM my_table OFFSET 10 ROWS',
+        'SELECT * FROM my_table OFFSET 10 ROWS'
+      ]
+    },
+    {
+      title: 'OFFSET number of rows',
+      sql: [
+        'SELECT * FROM my_table OFFSET 10',
+        'SELECT * FROM my_table OFFSET 10'
       ]
     },
   ]
