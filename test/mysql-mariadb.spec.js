@@ -1249,6 +1249,13 @@ describe('mysql', () => {
           'ALTER TABLE `test_table` ADD PARTITION (PARTITION p202503 VALUES LESS THAN (20250301), PARTITION p202504 VALUES LESS THAN (20250401))'
         ]
       },
+      {
+        title: 'transaction stmt',
+        sql: [
+          'start transaction',
+          'START TRANSACTION'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
