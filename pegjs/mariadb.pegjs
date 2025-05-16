@@ -251,6 +251,7 @@ cmd_stmt
   / desc_stmt
   / grant_stmt
   / explain_stmt
+  / transaction_stmt
 
 create_stmt
   = create_table_stmt
@@ -1724,6 +1725,89 @@ explain_stmt
     }
   }
 
+transaction_mode_isolation_level
+  = 'SERIALIZABLE'i {
+    return {
+      type: 'origin',
+      value: 'serializable'
+    }
+  }
+  / 'REPEATABLE'i __ 'READ'i {
+    return {
+      type: 'origin',
+      value: 'repeatable read'
+    }
+  }
+  / 'READ'i __ e:('COMMITTED'i / 'UNCOMMITTED'i) {
+    return {
+      type: 'origin',
+      value: `read ${e.toLowerCase()}`
+    }
+  }
+  
+transaction_mode
+  = 'ISOLATION'i __ 'LEVEL'i __ l:transaction_mode_isolation_level {
+    return {
+      type: 'origin',
+      value: `isolation level ${l.value}`
+    }
+  }
+  / 'READ'i __ e:('WRITE'i / 'ONLY'i) {
+    return {
+      type: 'origin',
+      value: `read ${e.toLowerCase()}`
+    }
+  }
+  / n:KW_NOT? __ 'DEFERRABLE'i {
+    return {
+      type: 'origin',
+      value: n ? 'not deferrable' : 'deferrable'
+    }
+  }
+
+transaction_mode_list
+  = head: transaction_mode tail:(__ COMMA __ transaction_mode)* {
+    return createList(head, tail)
+  }
+transaction_stmt
+  = k:('commit'i / 'rollback'i) {
+    return {
+      type: 'transaction',
+      expr: {
+        action: {
+          type: 'origin',
+          value: k
+        },
+      }
+    }
+  }
+  / 'begin'i __ k:('WORK'i / 'TRANSACTION'i)? __ m:transaction_mode_list? {
+    return {
+      type: 'transaction',
+      expr: {
+        action: {
+          type: 'origin',
+          value: 'begin'
+        },
+        keyword: k,
+        modes: m
+      }
+    }
+  }
+  / 'start'i __ k:'transaction'i __ m:transaction_mode_list? {
+    return {
+      type: 'transaction',
+      expr: {
+        action: {
+          type: 'origin',
+          value: 'start'
+        },
+        keyword: k,
+        modes: m
+      }
+    }
+  }
+  
 lock_type
   = "READ"i __ s:("LOCAL"i)? {
     return {
