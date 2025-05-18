@@ -213,4 +213,30 @@ describe('sqlite', () => {
     );`
     expect(getParsedSql(sql)).to.be.equal(`CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" ("MigrationId" TEXT NOT NULL CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY, "ProductVersion" TEXT NOT NULL)`)
   })
+
+  it('should support INSERT ... RETURNING *', () => {
+    const sql = `INSERT INTO users (email) VALUES (?) RETURNING *`
+    expect(getParsedSql(sql)).to.be.equal(`INSERT INTO "users" (email) VALUES (?) RETURNING *`)
+  })
+  it('should support INSERT ... RETURNING specific columns', () => {
+    const sql = `INSERT INTO users (email) VALUES (?) RETURNING id, email as email_address`
+    expect(getParsedSql(sql)).to.be.equal(`INSERT INTO "users" (email) VALUES (?) RETURNING "id", "email" AS "email_address"`)
+  })
+  it('should support UPDATE ... RETURNING *', () => {
+    const sql = `UPDATE users SET email = ? RETURNING *`
+    expect(getParsedSql(sql)).to.be.equal(`UPDATE "users" SET "email" = ? RETURNING *`)
+  })
+  it('should support UPDATE ... RETURNING specific columns', () => {
+    const sql = `UPDATE users SET email = ? RETURNING id, email as email_address`
+    expect(getParsedSql(sql)).to.be.equal(`UPDATE "users" SET "email" = ? RETURNING "id", "email" AS "email_address"`)
+  })
+  it('should support DELETE ... RETURNING *', () => {
+    const sql = `DELETE FROM users WHERE last_login > ? RETURNING *`
+    expect(getParsedSql(sql)).to.be.equal(`DELETE FROM "users" WHERE "last_login" > ? RETURNING *`)
+  })
+  it('should support DELETE ... RETURNING *', () => {
+    const sql = `DELETE FROM users WHERE last_login > ? RETURNING id, email as email_address`
+    expect(getParsedSql(sql)).to.be.equal(`DELETE FROM "users" WHERE "last_login" > ? RETURNING "id", "email" AS "email_address"`)
+  })
+
 })
