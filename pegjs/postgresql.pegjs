@@ -701,7 +701,7 @@ create_func_opt
     }
   }
   / return_stmt
-  
+
 create_function_stmt
   = a:KW_CREATE __
   or:(KW_OR __ KW_REPLACE)? __
@@ -1074,7 +1074,7 @@ include_column
       columns:c,
     }
   }
-  
+
 create_index_stmt
   = a:KW_CREATE __
   kw:KW_UNIQUE? __
@@ -2276,7 +2276,7 @@ view_options
     // => 'restrict' | 'cascade';
     return kc.toLowerCase()
   }
-  
+
 reference_option
   = kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN {
     // => { type: 'function'; name: string; args: expr_list; }
@@ -3046,7 +3046,7 @@ transaction_mode_isolation_level
       value: `read ${e.toLowerCase()}`
     }
   }
-  
+
 transaction_mode
   = 'ISOLATION'i __ 'LEVEL'i __ l:transaction_mode_isolation_level {
     // => { type: 'origin'; value: string; }
@@ -3950,7 +3950,8 @@ delete_stmt
   = KW_DELETE    __
     t:table_ref_list? __
     f:from_clause __
-    w:where_clause? {
+    w:where_clause? __
+    r:returning_stmt? {
       /*
       export interface table_ref_addition extends table_name {
         addition: true;
@@ -3959,7 +3960,9 @@ delete_stmt
        export interface delete_stmt_node {
          type: 'delete';
          table?: table_ref_list | [table_ref_addition];
+         from?: from_clause;
          where?: where_clause;
+         returning?: returning_stmt;
       }
      => AstStatement<delete_stmt_node>
      */
@@ -3987,7 +3990,8 @@ delete_stmt
           type: 'delete',
           table: t,
           from: f,
-          where: w
+          where: w,
+          returning: r,
         }
       };
     }
@@ -4611,7 +4615,7 @@ column_ref
         table: null,
         column: { expr: col },
         collate: ce && ce[1],
-      }; 
+      };
     }
 
 column_ref_quoted
@@ -5060,7 +5064,7 @@ make_interval_func_args
       return { type: 'expr_list', value: createList(head, tail) };
     }
   / expr_list
-  
+
 make_interval_func_clause
   = name:'make_interval'i __ LPAREN __ l:make_interval_func_args __ RPAREN {
     // => { type: 'function'; name: proc_func_name; args: make_interval_func_args; }
@@ -5071,7 +5075,7 @@ make_interval_func_clause
         ...getLocationObject(),
       }
   }
-  
+
 func_call
   = trim_func_clause / tablefunc_clause / substring_funcs_clause / make_interval_func_clause
   / name:'now'i __ LPAREN __ l:expr_list? __ RPAREN __ 'at'i __ KW_TIME __ 'zone'i __ z:literal_string {
@@ -5174,7 +5178,7 @@ cast_data_type
     if (p && s) t.quoted = '"'
     return t
   }
-  
+
 cast_double_colon
   = s:(KW_DOUBLE_COLON __ cast_data_type)+ __ alias:alias_clause? {
     /* => {

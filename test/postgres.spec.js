@@ -810,6 +810,20 @@ describe('Postgres', () => {
       ]
     },
     {
+      title: 'delete statement with returning',
+      sql: [
+        'DELETE FROM users WHERE id = 2 RETURNING id, email as email_address;',
+        'DELETE FROM "users" WHERE id = 2 RETURNING id, email AS "email_address"',
+      ]
+    },
+    {
+      title: 'delete statement with returning *',
+      sql: [
+        'DELETE FROM users WHERE id = 2 RETURNING *;',
+        'DELETE FROM "users" WHERE id = 2 RETURNING *',
+      ]
+    },
+    {
       title: 'column quoted data type',
       sql: [
         `select 'a'::"char" as b;`,
@@ -1812,7 +1826,7 @@ describe('Postgres', () => {
   })
   describe('tables to sql', () => {
     it('should parse object tables', () => {
-      const ast = parser.astify(SQL_LIST[101].sql[0], opt)
+      const ast = parser.astify(SQL_LIST[103].sql[0], opt)
       ast[0].from[0].expr.parentheses = false
       expect(parser.sqlify(ast, opt)).to.be.equal('SELECT last_name, salary FROM "employees" INNER JOIN "salaries" ON "employees".emp_no = "salaries".emp_no')
     })
@@ -2153,7 +2167,7 @@ describe('Postgres', () => {
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
-  
+
   describe('pg ast', () => {
     it('should get correct columns and tables', () => {
       let sql = 'SELECT "Id" FROM "Test";'
