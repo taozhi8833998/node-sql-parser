@@ -409,7 +409,7 @@ column_order
       order_by: o && o.toLowerCase(),
     }
   }
-  
+
 create_index_stmt
   = a:KW_CREATE __
   kw:(KW_UNIQUE)? __
@@ -436,7 +436,7 @@ create_index_stmt
         }
     }
   }
-  
+
 view_with
   = KW_WITH __ c:("CASCADED"i / "LOCAL"i) __ "CHECK"i __ "OPTION" {
     return `with ${c.toLowerCase()} check option`
@@ -1709,6 +1709,7 @@ update_stmt
     KW_SET       __
     l:set_list   __
     w:where_clause? __
+    r:returning_stmt? __
     or:order_by_clause? __
     lc:limit_clause? {
       const dbObj = {}
@@ -1737,6 +1738,7 @@ update_stmt
           table: t,
           set: l,
           where: w,
+          returning: r,
           orderby: or,
           limit: lc,
         }
@@ -1748,6 +1750,7 @@ delete_stmt
     t: table_ref_list? __
     f:from_clause __
     w:where_clause? __
+    r:returning_stmt? __
     or:order_by_clause? __
     l:limit_clause? {
      if(f) f.forEach(tableInfo => {
@@ -1773,6 +1776,7 @@ delete_stmt
           table: t,
           from: f,
           where: w,
+          returning: r,
           orderby: or,
           limit: l,
         }
@@ -1796,6 +1800,15 @@ set_item
       return { column: c, value: v, table: tbl && tbl[0], keyword: 'values' };
   }
 
+returning_stmt
+  = k:KW_RETURNING __ c:(column_clause / select_stmt) {
+    // => { type: 'returning'; columns: column_clause | select_stmt; }
+    return {
+      type: k && k.toLowerCase() || 'returning',
+      columns: c === '*' && [{ type: 'expr', expr: { type: 'column_ref', table: null, column: '*' }, as: null }] || c
+    }
+  }
+
 insert_value_clause
   = value_clause
   / select_stmt_nake
@@ -1814,7 +1827,8 @@ replace_insert_stmt
     t:table_name  __
     p:insert_partition? __ LPAREN __ c:column_list  __ RPAREN __
     v:insert_value_clause __
-    odp:on_duplicate_update_stmt? {
+    odp:on_duplicate_update_stmt? __
+    r:returning_stmt? {
       if (t) {
         tableList.add(`insert::${t.db}::${t.table}`)
         t.as = null
@@ -1840,6 +1854,7 @@ replace_insert_stmt
           values: v,
           partition: p,
           on_duplicate_update: odp,
+          returning: r,
         }
       };
     }
@@ -2695,6 +2710,7 @@ KW_INSERT   = "INSERT"i     !ident_start
 KW_RECURSIVE= "RECURSIVE"i   !ident_start
 KW_REPLACE  = "REPLACE"i    !ident_start
 KW_RENAME   = "RENAME"i     !ident_start
+KW_RETURNING = "RETURNING"i !ident_start { return 'RETURNING' }
 KW_IGNORE   = "IGNORE"i     !ident_start
 KW_EXPLAIN  = "EXPLAIN"i    !ident_start
 KW_PARTITION = "PARTITION"i !ident_start { return 'PARTITION' }
