@@ -1784,6 +1784,13 @@ describe('Postgres', () => {
         'ALTER TABLE "public"."person" OWNER TO "postgres"'
       ]
     },
+    {
+      title: 'alter sequence restart',
+      sql: [
+        'ALTER SEQUENCE serial RESTART WITH 105;',
+        'ALTER SEQUENCE "serial" RESTART WITH 105'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
