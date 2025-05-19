@@ -261,6 +261,7 @@ alter_stmt
   / alter_domain_type_stmt
   / alter_function_stmt
   / alter_aggregate_stmt
+  / alter_sequence_stmt
 
 crud_stmt
   = union_stmt
@@ -1006,6 +1007,14 @@ sequence_definition_start
       value: n
     }
   }
+  / k:'RESTART'i __ w:KW_WITH? __ n:literal_numeric {
+    // => sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: w ? `${k.toLowerCase()} with` : k.toLowerCase(),
+      value: n
+    }
+  }
 
 sequence_definition_cache
   = k:'CACHE'i __ n:literal_numeric {
@@ -1684,6 +1693,32 @@ alter_aggregate_stmt
         }
       };
   }
+alter_sequence_stmt
+  = KW_ALTER __ KW_SEQUENCE __ ife:if_exists? __ t:table_name __ as:(KW_AS __ data_type)?__ c:create_sequence_definition_list? {
+    /*
+      export type alter_sequence_stmt = {
+        type: 'alter',
+        keyword: 'sequence',
+        if_exists?: 'if exists',
+        sequence: [table_name],
+        create_definitions?: create_sequence_definition_list
+      }
+      => AstStatement<alter_sequence_stmt>
+      */
+      t.as = as && as[2]
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'alter',
+          keyword: 'sequence',
+          if_exists: ife,
+          sequence: [t],
+          expr: c,
+        }
+      }
+  }
+  
 alter_function_stmt
   = KW_ALTER __ t:'FUNCTION'i __ s:table_name __ ags:(LPAREN __ alter_func_args? __ RPAREN)? __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
     // => AstStatement<alter_resource_stmt_node>

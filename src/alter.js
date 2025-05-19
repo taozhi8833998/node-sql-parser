@@ -154,6 +154,15 @@ function alterAggregateToSQL(stmt) {
   return result.filter(hasVal).join(' ')
 }
 
+function alterSequenceToSQL(stmt) {
+  const { type, keyword, sequence, if_exists, expr = [] } = stmt
+  const action = toUpper(type)
+  const sequenceName = tablesToSQL(sequence)
+  const exprList = expr.map(createDefinitionToSQL)
+  const result = [action, toUpper(keyword), toUpper(if_exists), sequenceName, exprList.join(', ')]
+  return result.filter(hasVal).join(' ')
+}
+
 function alterToSQL(stmt) {
   const { keyword = 'table' } = stmt
   switch (keyword) {
@@ -163,6 +172,8 @@ function alterToSQL(stmt) {
       return alterTableToSQL(stmt)
     case 'schema':
       return alterSchemaToSQL(stmt)
+    case 'sequence':
+      return alterSequenceToSQL(stmt)
     case 'domain':
     case 'type':
       return alterDomainTypeToSQL(stmt)
