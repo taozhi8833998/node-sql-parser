@@ -1693,15 +1693,68 @@ alter_aggregate_stmt
         }
       };
   }
+
+alter_sequence_definition_owner
+  = 'OWNER'i __ KW_TO __ o:(KW_CURRENT_ROLE / KW_CURRENT_USER / KW_SESSION_USER / ident_type) {
+    /*
+    export type alter_sequence_definition = { "resource": "sequence", prefix?: string,value: literal_string }
+    => alter_sequence_definition
+    */
+    const value = typeof o === 'string' ? { type: 'origin', value: o } : o;
+    return {
+      resource: 'sequence',
+      prefix: 'owner to',
+      value: value
+    }
+  }
+
+alter_sequence_definition_rename
+  = KW_RENAME __ KW_TO __ o:ident_type {
+    // => alter_sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: 'rename to',
+      value: o
+    }
+  }
+
+alter_sequence_definition_set
+  = KW_SET __ o:('LOGGED'i / 'UNLOGGED'i) {
+    // => alter_sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: 'set',
+      value: { type: 'origin', value: o }
+    }
+  }
+  / KW_SET __ KW_SCHEMA __ o:ident_type {
+    // => alter_sequence_definition
+    return {
+      resource: 'sequence',
+      prefix: 'set schema',
+      value: o
+    }
+  }
+alter_sequence_definition
+  = alter_sequence_definition_owner
+  / alter_sequence_definition_rename
+  / alter_sequence_definition_set
+
+alter_sequence_definition_list
+  = head: alter_sequence_definition tail:(__ alter_sequence_definition)* {
+    // => alter_sequence_definition[]
+    return createList(head, tail, 1)
+}
+
 alter_sequence_stmt
-  = KW_ALTER __ KW_SEQUENCE __ ife:if_exists? __ t:table_name __ as:(KW_AS __ data_type)?__ c:create_sequence_definition_list? {
+  = KW_ALTER __ KW_SEQUENCE __ ife:if_exists? __ t:table_name __ as:(KW_AS __ data_type)?__ c:(create_sequence_definition_list / alter_sequence_definition_list)? {
     /*
       export type alter_sequence_stmt = {
         type: 'alter',
         keyword: 'sequence',
         if_exists?: 'if exists',
         sequence: [table_name],
-        create_definitions?: create_sequence_definition_list
+        create_definitions?: create_sequence_definition_list | alter_sequence_definition_list
       }
       => AstStatement<alter_sequence_stmt>
       */

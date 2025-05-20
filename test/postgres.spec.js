@@ -1791,6 +1791,34 @@ describe('Postgres', () => {
         'ALTER SEQUENCE "serial" RESTART WITH 105'
       ]
     },
+    {
+      title: 'alter sequence owner to',
+      sql: [
+        'ALTER SEQUENCE serial OWNER TO postgres;',
+        'ALTER SEQUENCE "serial" OWNER TO postgres'
+      ]
+    },
+    {
+      title: 'alter sequence rename to',
+      sql: [
+        'ALTER SEQUENCE serial RENAME TO postgres;',
+        'ALTER SEQUENCE "serial" RENAME TO postgres'
+      ]
+    },
+    {
+      title: 'alter sequence set logged',
+      sql: [
+        'ALTER SEQUENCE serial set logged;',
+        'ALTER SEQUENCE "serial" SET LOGGED'
+      ]
+    },
+    {
+      title: 'alter sequence set schema',
+      sql: [
+        'ALTER SEQUENCE serial set schema postgres;',
+        'ALTER SEQUENCE "serial" SET SCHEMA postgres'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
