@@ -4039,7 +4039,7 @@ cast_double_colon
   }
   
 cast_expr
-  = c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
+  = c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
     // => IGNORE
     return {
       type: 'cast',
@@ -4049,7 +4049,7 @@ cast_expr
       target: [t],
     };
   }
-  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
+  / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ RPAREN __ RPAREN {
     // => IGNORE
     return {
       type: 'cast',
@@ -4061,7 +4061,7 @@ cast_expr
       }]
     };
   }
-  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
+  / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ KW_DECIMAL __ LPAREN __ precision:int __ COMMA __ scale:int __ RPAREN __ RPAREN {
       // => IGNORE
       return {
         type: 'cast',
@@ -4073,7 +4073,7 @@ cast_expr
         }]
       };
     }
-  / c:KW_CAST __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
+  / c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ s:signedness __ t:KW_INTEGER? __ RPAREN { /* MySQL cast to un-/signed integer */
     // => IGNORE
     return {
       type: 'cast',
@@ -4403,6 +4403,7 @@ KW_ELSE     = "ELSE"i       !ident_start
 KW_END      = "END"i        !ident_start
 
 KW_CAST     = "CAST"i       !ident_start { return 'CAST' }
+KW_TRY_CAST = "TRY_CAST"i   !ident_start { return 'TRY_CAST' }
 
 KW_BINARY = "BINARY"i !ident_start { return 'BINARY'; }
 KW_VARBINARY = "VARBINARY"i !ident_start { return 'VARBINARY'; }
