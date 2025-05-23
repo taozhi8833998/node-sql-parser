@@ -120,6 +120,13 @@ describe('snowflake', () => {
       ]
     },
     {
+      title: "try_cast",
+      sql: [
+        `SELECT SHA512(TRY_CAST(CONCAT(a, b, c) AS VARCHAR)) AS Hashed FROM v`,
+        `SELECT SHA512(TRY_CAST(CONCAT("a", "b", "c") AS VARCHAR)) AS "Hashed" FROM "v"`,
+      ],
+    },
+    {
       title: 'regexp operator',
       sql: [
         `SELECT v
