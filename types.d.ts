@@ -285,6 +285,11 @@ export interface Insert_Replace {
     set: SetList[];
   };
   loc?: LocationRange;
+  returning?: Returning
+}
+export interface Returning {
+  type: 'returning';
+  columns: ColumnRef | Select;
 }
 export interface Update {
   type: "update";
@@ -293,6 +298,7 @@ export interface Update {
   set: SetList[];
   where: Binary | Function | null;
   loc?: LocationRange;
+  returning?: Returning
 }
 export interface Delete {
   type: "delete";
@@ -300,6 +306,7 @@ export interface Delete {
   from: Array<From | Dual>;
   where: Binary | Function | null;
   loc?: LocationRange;
+  returning?: Returning
 }
 
 export interface Alter {
