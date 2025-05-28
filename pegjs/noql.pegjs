@@ -3939,9 +3939,16 @@ unary_expr_or_primary
 unary_operator
   = '!' / '-' / '+' / '~'
 
+primary_array_index
+  = e:primary __ a:array_index_list? {
+    // => primary & { array_index: array_index }
+    if (a) e.array_index = a
+    return e
+  }
+
 jsonb_expr
-  = head:primary __ tail: (__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW / '@>' / '<@') __  primary)* {
-    // => primary | binary_expr
+  = head:primary_array_index __ tail: (__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW / '@>' / '<@') __  primary_array_index)* {
+    // => primary_array_index | binary_expr
     if (!tail || tail.length === 0) return head
     return createBinaryExprChain(head, tail)
   }
