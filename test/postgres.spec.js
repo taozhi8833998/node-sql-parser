@@ -1833,6 +1833,27 @@ describe('Postgres', () => {
         'ALTER SEQUENCE "serial" SET SCHEMA postgres'
       ]
     },
+    {
+      title: 'case when then array index',
+      sql: [
+        "SELECT CASE WHEN POSITION(' - ' in col) > 0 THEN SPLIT(col, ' - ')[0] ELSE col END FROM DUAL",
+        "SELECT CASE WHEN POSITION(' - ' IN col) > 0 THEN SPLIT(col, ' - ')[0] ELSE col END FROM DUAL"
+      ]
+    },
+    {
+      title: 'case when then else',
+      sql: [
+        "SELECT CASE WHEN a[0] = '1' THEN '1' ELSE '2' END FROM DUAL",
+        "SELECT CASE WHEN a[0] = '1' THEN '1' ELSE '2' END FROM DUAL"
+      ]
+    },
+    {
+      title: 'case when expr with array index',
+      sql: [
+        "SELECT CASE WHEN SPLIT('a - b', ' - ')[0] = 'a' THEN '1' ELSE '2' END FROM DUAL",
+        "SELECT CASE WHEN SPLIT('a - b', ' - ')[0] = 'a' THEN '1' ELSE '2' END FROM DUAL"
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

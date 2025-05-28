@@ -4343,8 +4343,8 @@ case_when_then_list
   }
 
 case_when_then
-  = KW_WHEN __ condition:or_and_where_expr __ KW_THEN __ result:expr {
-    // => { type: 'when'; cond: or_and_where_expr; result: expr; }
+  = KW_WHEN __ condition:or_and_expr __ KW_THEN __ result:expr_item {
+    // => { type: 'when'; cond: or_and_expr; result: expr_item; }
     return {
       type: 'when',
       cond: condition,
@@ -4635,9 +4635,16 @@ unary_expr_or_primary
 unary_operator
   = '!' / '-' / '+' / '~'
 
+primary_array_index
+  = e:primary __ a:array_index_list? {
+    // => primary & { array_index: array_index }
+    if (a) e.array_index = a
+    return e
+  }
+
 jsonb_expr
-  = head:primary __ tail: (__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW / '@>' / '<@') __  primary)* {
-    // => primary | binary_expr
+  = head:primary_array_index __ tail: (__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW / '@>' / '<@') __  primary_array_index)* {
+    // => primary_array_index | binary_expr
     if (!tail || tail.length === 0) return head
     return createBinaryExprChain(head, tail)
   }
@@ -5046,6 +5053,32 @@ aggr_array_agg
 star_expr
   = "*" { /* => { type: 'star'; value: '*' } */ return { type: 'star', value: '*' }; }
 
+position_func_args
+  = s:literal_string __ KW_IN __ e:expr start:(__ KW_FROM __ literal_numeric)? {
+    // => expr_list
+    let value = [s, { type: 'origin', value: 'in' }, e]
+    if (start) {
+      value.push({ type: 'origin', value: 'from' })
+      value.push(start[3])
+    }
+    return {
+      type: 'expr_list',
+      value,
+    }
+  }
+
+position_func_clause
+  = 'POSITION'i __ LPAREN __ args:position_func_args __ RPAREN {
+    // => { type: 'function'; name: string; args: expr_list; }
+    return {
+        type: 'function',
+        name: { name: [{ type: 'origin', value: 'position' }]},
+        separator: ' ',
+        args,
+        ...getLocationObject(),
+    };
+  }
+  
 trim_position
   = 'BOTH'i / 'LEADING'i / 'TRAILING'i
 
@@ -5165,7 +5198,7 @@ make_interval_func_clause
   }
 
 func_call
-  = trim_func_clause / tablefunc_clause / substring_funcs_clause / make_interval_func_clause
+  = position_func_clause / trim_func_clause / tablefunc_clause / substring_funcs_clause / make_interval_func_clause
   / name:'now'i __ LPAREN __ l:expr_list? __ RPAREN __ 'at'i __ KW_TIME __ 'zone'i __ z:literal_string {
     // => { type: 'function'; name: proc_func_name; args: expr_list; suffix: literal_string; }
       z.prefix = 'at time zone'

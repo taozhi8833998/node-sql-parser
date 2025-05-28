@@ -1725,6 +1725,28 @@ column_clause
       return createList(head, tail);
     }
 
+array_index
+  = LBRAKE __ n:(literal_numeric / literal_string) __ RBRAKE {
+    // => { brackets: boolean, number: number }
+    return {
+      brackets: true,
+      index: n
+    }
+  }
+
+array_index_list
+  = head:array_index tail:(__ array_index)* {
+    // => array_index[]
+    return createList(head, tail, 1)
+  }
+
+expr_item
+  = e:binary_column_expr __ a:array_index_list? {
+    // => binary_column_expr & { array_index: array_index }
+    if (a) e.array_index = a
+    return e
+  }
+  
 column_list_item
   = e:binary_column_expr s:KW_DOUBLE_COLON t:data_type {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; }
@@ -2336,7 +2358,7 @@ case_when_then_list
   }
 
 case_when_then
-  = KW_WHEN __ condition:or_and_where_expr __ KW_THEN __ result:expr {
+  = KW_WHEN __ condition:or_and_where_expr __ KW_THEN __ result:expr_item {
     // => { type: 'when'; cond: expr; result: expr; }
     return {
       type: 'when',
@@ -2633,9 +2655,16 @@ unary_expr_or_primary
 unary_operator
   = '!' / '-' / '+' / '~'
 
+primary_array_index
+  = e:primary __ a:array_index_list? {
+    // => primary & { array_index: array_index }
+    if (a) e.array_index = a
+    return e
+  }
+
 jsonb_expr
-  = head:primary __ tail: (__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW / '@>' / '<@') __  primary)* {
-    // => primary | binary_expr
+  = head:primary_array_index __ tail: (__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW / '@>' / '<@') __  primary_array_index)* {
+    // => primary_array_index | binary_expr
     if (!tail || tail.length === 0) return head
     return createBinaryExprChain(head, tail)
   }
