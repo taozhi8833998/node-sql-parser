@@ -478,6 +478,13 @@ describe('transactsql', () => {
         'SELECT [mh].*, PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY [daily_reach] ASC) OVER (PARTITION BY [mh].[ig_user_id]) AS [median_per_user] FROM [tableName]'
       ]
     },
+    {
+      title: 'ntext type',
+      sql: [
+        'CREATE TABLE [dbo].[Ordine]([NoteInvioEmail][ntext])',
+        'CREATE TABLE [dbo].[Ordine] ([NoteInvioEmail] NTEXT)'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
