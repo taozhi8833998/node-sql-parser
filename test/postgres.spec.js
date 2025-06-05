@@ -1854,6 +1854,13 @@ describe('Postgres', () => {
         "SELECT CASE WHEN SPLIT('a - b', ' - ')[0] = 'a' THEN '1' ELSE '2' END FROM DUAL"
       ]
     },
+    {
+      title: 'decimal number keep zeros',
+      sql: [
+        'SELECT 100.0 * count(_timestamp) as "y_axis_1"  FROM "default"',
+        'SELECT 100.0 * COUNT(_timestamp) AS "y_axis_1" FROM "default"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

@@ -867,7 +867,7 @@ describe('BigQuery', () => {
         FROM
             database.table
         WHERE salary > 50000.00)`,
-        'CREATE OR REPLACE VIEW project.database.schema AS (SELECT employee_id, first_name, last_name, salary, hire_date, modified FROM database.table WHERE salary > 50000)'
+        'CREATE OR REPLACE VIEW project.database.schema AS (SELECT employee_id, first_name, last_name, salary, hire_date, modified FROM database.table WHERE salary > 50000.00)'
       ]
     },
     {

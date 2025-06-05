@@ -3959,7 +3959,8 @@ number
       type: 'bigint',
       value: numStr
     }
-    return parseFloat(numStr);
+    const fixed = frac.length >= 1 ? frac.length - 1 : 0
+    return parseFloat(numStr).toFixed(fixed);
   }
   / int_:int exp:exp {
     const numStr = int_ + exp
