@@ -5566,7 +5566,7 @@ double_float
       type: 'bigint',
       value: numStr
     }
-    return parseFloat(numStr);
+    return parseFloat(numStr).toFixed(frac.length - 1);
   }
 number
   = double_float / integer

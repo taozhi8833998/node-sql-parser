@@ -4265,7 +4265,7 @@ number
       type: 'bigint',
       value: numStr
     }
-    return parseFloat(numStr);
+    return parseFloat(numStr).toFixed(frac.length - 1);
   }
   / int_:int exp:exp {
     // => IGNORE

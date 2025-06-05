@@ -3020,7 +3020,7 @@ number
       type: 'bigint',
       value: numStr
     }
-    return parseFloat(numStr);
+    return parseFloat(numStr).toFixed(frac.length - 1);
   }
   / int_:int exp:exp {
     const numStr = int_ + exp
@@ -3041,7 +3041,7 @@ int
   = digits
   / digit:digit
   / op:("-" / "+" ) digits:digits { return op + digits; }
-   / op:("-" / "+" ) digit:digit { return op + digit; }
+  / op:("-" / "+" ) digit:digit { return op + digit; }
 
 frac
   = "." digits:digits { return "." + digits; }
