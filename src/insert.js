@@ -63,6 +63,7 @@ function insertToSQL(stmt) {
   const {
     table,
     type,
+    or: orExpr = [],
     prefix = 'into',
     columns,
     conflict,
@@ -74,7 +75,7 @@ function insertToSQL(stmt) {
     set,
   } = stmt
   const { keyword, set: duplicateSet } = onDuplicateUpdate || {}
-  const clauses = [toUpper(type), toUpper(prefix), tablesToSQL(table), partitionToSQL(partition)]
+  const clauses = [toUpper(type), orExpr.map(literalToSQL).join(' '), toUpper(prefix), tablesToSQL(table), partitionToSQL(partition)]
   if (Array.isArray(columns)) clauses.push(`(${columns.map(literalToSQL).join(', ')})`)
   clauses.push(commonOptionConnector(Array.isArray(values) ? 'VALUES' : '', valuesToSQL, values))
   clauses.push(commonOptionConnector('ON CONFLICT', conflictToSQL, conflict))

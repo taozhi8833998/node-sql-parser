@@ -1848,7 +1848,7 @@ replace_insert_stmt
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
-          type: ri,
+          ...ri,
           table: [t],
           columns: c,
           values: v,
@@ -1877,7 +1877,7 @@ insert_no_columns_stmt
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
-          type: ri,
+          ...ri,
           table: [t],
           columns: null,
           values: v,
@@ -1905,7 +1905,7 @@ insert_into_set
         tableList: Array.from(tableList),
         columnList: columnListTableAlias(columnList),
         ast: {
-          type: ri,
+          ...ri,
           table: [t],
           columns: null,
           partition: p,
@@ -1924,8 +1924,28 @@ on_duplicate_update_stmt
   }
 
 replace_insert
-  = KW_INSERT   { return 'insert'; }
-  / KW_REPLACE  { return 'replace'; }
+  = KW_INSERT tail:(__ KW_OR __ ('ABORT'i / 'FAIL'i / 'IGNORE'i / 'REPLACE'i / 'ROLLBACK'i))? {
+    const result = {
+      type: 'insert',
+    }
+    if (!tail || tail.length === 0) {
+      return result;
+    }
+    result.or = [
+      {
+        type: 'origin',
+        value: 'or',
+      },
+      {
+        type: 'origin',
+        value: tail[3],
+      }
+    ]
+    return result
+  }
+  / KW_REPLACE  {
+    return { type: 'replace' }
+  }
 
 value_clause
   = KW_VALUES __ l:value_list  { return l; }
