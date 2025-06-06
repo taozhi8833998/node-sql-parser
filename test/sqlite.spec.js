@@ -238,5 +238,11 @@ describe('sqlite', () => {
     const sql = `DELETE FROM users WHERE last_login > ? RETURNING id, email as email_address`
     expect(getParsedSql(sql)).to.be.equal(`DELETE FROM "users" WHERE "last_login" > ? RETURNING "id", "email" AS "email_address"`)
   })
-
+  it('should support insert or replace', () => {
+    const keywords = ['ABORT', 'FAIL', 'IGNORE', 'REPLACE', 'ROLLBACK']
+    keywords.forEach(keyword => {
+      const sql = `INSERT OR ${keyword} INTO test (category) VALUES ('Infra, Layer1, DePIN')`
+      expect(getParsedSql(sql)).to.be.equal(`INSERT OR ${keyword} INTO "test" (category) VALUES ('Infra, Layer1, DePIN')`)
+    })
+  })
 })
