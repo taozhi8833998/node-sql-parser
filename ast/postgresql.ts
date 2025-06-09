@@ -11,7 +11,7 @@ export type cmd_stmt = drop_stmt | create_stmt | declare_stmt | truncate_stmt | 
 
 export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence | create_db_stmt | create_domain_stmt | create_type_stmt | create_view_stmt | create_aggregate_stmt;
 
-export type alter_stmt = alter_table_stmt | alter_schema_stmt | alter_domain_type_stmt | alter_function_stmt | alter_aggregate_stmt;
+export type alter_stmt = alter_table_stmt | alter_schema_stmt | alter_domain_type_stmt | alter_function_stmt | alter_aggregate_stmt | alter_sequence_stmt;
 
 export type crud_stmt = union_stmt | update_stmt | replace_insert_stmt | insert_no_columns_stmt | delete_stmt | cmd_stmt | proc_stmts;
 
@@ -398,6 +398,28 @@ export type alter_func_arg_item = { mode?: string; name?: string; type: data_typ
 export type alter_func_args = alter_func_arg_item[];
 
 export type alter_aggregate_stmt = AstStatement<alter_resource_stmt_node>;
+
+export type alter_sequence_definition = { "resource": "sequence", prefix?: string,value: literal_string }
+
+export type alter_sequence_definition_owner = alter_sequence_definition;
+
+export type alter_sequence_definition_rename = alter_sequence_definition;
+
+export type alter_sequence_definition_set = alter_sequence_definition;
+
+export type alter_sequence_definition = alter_sequence_definition_owner | alter_sequence_definition_rename | alter_sequence_definition_set;
+
+export type alter_sequence_definition_list = alter_sequence_definition[];
+
+export type alter_sequence_stmt = {
+        type: 'alter',
+        keyword: 'sequence',
+        if_exists?: 'if exists',
+        sequence: [table_name],
+        create_definitions?: create_sequence_definition_list | alter_sequence_definition_list
+      }
+
+export type alter_sequence_stmt = AstStatement<alter_sequence_stmt>;
 
 export type alter_function_stmt = AstStatement<alter_resource_stmt_node>;
 
@@ -1168,7 +1190,7 @@ export type case_expr = {
 
 export type case_when_then_list = case_when_then[];
 
-export type case_when_then = { type: 'when'; cond: or_and_where_expr; result: expr; };
+export type case_when_then = { type: 'when'; cond: or_and_expr; result: expr_item; };
 
 export type case_else = { type: 'else'; condition?: never; result: expr; };
 
@@ -1251,7 +1273,9 @@ export type unary_expr_or_primary = jsonb_expr | unary_expr;
 
 export type unary_operator = "!" | "-" | "+" | "~";
 
-export type jsonb_expr = primary | binary_expr;
+export type primary_array_index = primary & { array_index: array_index };
+
+export type jsonb_expr = primary_array_index | binary_expr;
 
 export type string_constants_escape = { type: 'origin'; value: string; };
 
@@ -1370,6 +1394,10 @@ export type aggr_array_agg = { type: 'aggr_func'; args:count_arg; name: 'ARRAY_A
 
 export type star_expr = { type: 'star'; value: '*' };
 
+export type position_func_args = expr_list;
+
+export type position_func_clause = { type: 'function'; name: string; args: expr_list; };
+
 export type trim_position = "BOTH" | "LEADING" | "TRAILING";
 
 export type trim_rem = expr_list;
@@ -1386,7 +1414,7 @@ export type make_interval_func_args = make_interval_func_args_item[] | expr_list
 
 export type make_interval_func_clause = { type: 'function'; name: proc_func_name; args: make_interval_func_args; };
 
-export type func_call = trim_func_clause | tablefunc_clause | substring_funcs_clause | make_interval_func_clause | { type: 'function'; name: proc_func_name; args: expr_list; suffix: literal_string; } | { type: 'function'; name: proc_func_name; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: proc_func_name; over?: on_update_current_timestamp; } | { type: 'function'; name: proc_func_name; args: expr_list; };
+export type func_call = position_func_clause | trim_func_clause | tablefunc_clause | substring_funcs_clause | make_interval_func_clause | { type: 'function'; name: proc_func_name; args: expr_list; suffix: literal_string; } | { type: 'function'; name: proc_func_name; args: expr_list; over?: over_partition; } | extract_func | { type: 'function'; name: proc_func_name; over?: on_update_current_timestamp; } | { type: 'function'; name: proc_func_name; args: expr_list; };
 
 export type extract_filed = 'string';
 
