@@ -470,4 +470,8 @@ describe('athena', () => {
       WHERE (((NOT (leads.company LIKE '%test%')) AND (NOT (leads.company LIKE '%Test%'))) AND ((NOT (leads.name LIKE '%test%')) AND (NOT (leads.name LIKE '%Test%'))))`
     expect(getParsedSql(sql)).to.be.equal(`SELECT "leads".*, from_unixtime(CAST(substrinfg("leads"."demo_meeting_date_c", 1, 10) AS DOUBLE)) AS "demo_meeting_date_correct", CAST("first_conversion_date_c" AS DATE) AS "first_conversion_date_correct", "aes"."ae_owner", "created"."created_by" FROM (((("salesforce_leads" AS "leads" LEFT JOIN "salesforce_opportunitys" AS "opps" ON ("leads"."converted_opportunity_id" = "opps"."id")) LEFT JOIN (SELECT "id" AS "user_id", "name" AS "lead_owner" FROM "salesforce_users") AS "owners" ON ("leads"."owner_id" = "owners"."user_id")) LEFT JOIN (SELECT "id" AS "user_id", "name" AS "ae_owner" FROM "salesforce_users") AS "aes" ON ("leads"."a_e_owner_c" = "aes"."user_id")) LEFT JOIN (SELECT "id" AS "user_id", "name" AS "created_by" FROM "salesforce_users") AS "created" ON ("leads"."created_by_id" = "created"."user_id")) WHERE (((NOT("leads"."company" LIKE '%test%')) AND (NOT("leads"."company" LIKE '%Test%'))) AND ((NOT("leads"."name" LIKE '%test%')) AND (NOT("leads"."name" LIKE '%Test%'))))`)
   })
+  it('should support boolean type', () => {
+    const sql = 'SELECT * from table_name WHERE CAST ( foo.bar.baz as boolean) = false'
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM "table_name" WHERE CAST("foo"."bar"."baz" AS BOOLEAN) = FALSE')
+  })
 })
