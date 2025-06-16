@@ -1895,7 +1895,7 @@ jsonb_expr
 
 column_ref
   = schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) ce:(__ collate_expr)? {
-      columnList.add(`select::${schema}.${tbl[3]}::${col[3].value}`);
+      columnList.add(`select::${schema}.${tbl[3]}::${col[3].value || col[3]}`);
       return {
         type: 'column_ref',
         schema: schema,
@@ -2876,6 +2876,7 @@ data_type_item
   / datetime_type
   / json_type
   / text_type
+  / boolean_type
 
 data_type_list
   = head:data_type_item tail:(__ COMMA __ data_type_item)* {
@@ -2929,3 +2930,6 @@ json_type
 
 text_type
   = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) { return { dataType: t }}
+
+boolean_type
+  = 'boolean'i { return { dataType: 'BOOLEAN' }; }
