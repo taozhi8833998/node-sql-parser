@@ -3231,7 +3231,7 @@ comment_on_option
       name,
     }
   }
-  / t:(KW_INDEX / KW_COLLATION / KW_TABLESPACE / KW_SCHEMA / 'DOMAIN'i / KW_DATABASE / 'ROLE'i / 'SEQUENCE'i / 'SERVER'i / 'SUBSCRIPTION'i ) __ name:ident_type {
+  / t:(KW_INDEX / KW_COLLATION / KW_TABLESPACE / KW_SCHEMA / 'DOMAIN'i / KW_DATABASE / 'ROLE'i / 'SEQUENCE'i / 'SERVER'i / 'SUBSCRIPTION'i / 'EXTENSION'i) __ name:ident_type {
     // => { type: string; name: ident; }
     return {
       type: t.toLowerCase(),

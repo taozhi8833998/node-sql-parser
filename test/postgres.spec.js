@@ -1861,6 +1861,13 @@ describe('Postgres', () => {
         'SELECT 100.0 * COUNT(_timestamp) AS "y_axis_1" FROM "default"'
       ]
     },
+    {
+      title: 'comment on extension',
+      sql: [
+        "COMMENT ON EXTENSION pgcrypto IS 'HELLO WORLD'",
+        "COMMENT ON EXTENSION pgcrypto IS 'HELLO WORLD'"
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
