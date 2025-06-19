@@ -1403,6 +1403,18 @@ describe('mysql', () => {
         expect(selectIntoToSQL({})).to.be.undefined
       })
     })
+    describe('load data', () => {
+      it('should support load data', () => {
+        let sql = `LOAD DATA LOCAL INFILE "mycsv.csv" INTO TABLE mytable FIELDS TERMINATED BY ' ^' IGNORE 1 LINES;`
+        expect(getParsedSql(sql)).to.equal(`LOAD DATA LOCAL INFILE "mycsv.csv" INTO TABLE \`mytable\` FIELDS TERMINATED BY ' ^' IGNORE 1 LINES`)
+        sql = `LOAD DATA LOW_PRIORITY LOCAL INFILE '/tmp/test.txt' REPLACE INTO TABLE test FIELDS TERMINATED BY '\t' ENCLOSED BY '' ESCAPED BY '\\' LINES TERMINATED BY '\n' STARTING BY ''`
+        expect(getParsedSql(sql)).to.equal("LOAD DATA LOW_PRIORITY LOCAL INFILE '/tmp/test.txt' REPLACE INTO TABLE `test` FIELDS TERMINATED BY '\t' ENCLOSED BY '' ESCAPED BY '\\' LINES STARTING BY '' TERMINATED BY '\n'")
+        sql = `LOAD DATA LOW_PRIORITY LOCAL INFILE '/tmp/test.txt' REPLACE INTO TABLE test FIELDS TERMINATED BY '\t' OPTIONALLY ENCLOSED BY '' ESCAPED BY '\\' IGNORE 1 LINES (column1, @var1) SET column2 = @var1/100;`
+        expect(getParsedSql(sql)).to.equal("LOAD DATA LOW_PRIORITY LOCAL INFILE '/tmp/test.txt' REPLACE INTO TABLE \`test\` FIELDS TERMINATED BY '\t' OPTIONALLY ENCLOSED BY '' ESCAPED BY '\\' IGNORE 1 LINES (`column1`, @var1) SET `column2` = @var1 / 100")
+        sql = `LOAD DATA INFILE 'file.txt' INTO TABLE t1 (column1, column2) SET column3 = CURRENT_TIMESTAMP;`
+        expect(getParsedSql(sql)).to.equal("LOAD DATA INFILE 'file.txt' INTO TABLE `t1` (`column1`, `column2`) SET `column3` = CURRENT_TIMESTAMP")
+      })
+    })
   })
 
 })
