@@ -89,5 +89,6 @@ function insertToSQL(stmt) {
 export {
   conflictToSQL,
   insertToSQL,
+  partitionToSQL,
   valuesToSQL,
 }
