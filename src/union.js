@@ -26,6 +26,7 @@ import {
 import { execToSQL } from './exec'
 import { orderOrPartitionByToSQL } from './expr'
 import { limitToSQL } from './limit'
+import { loadDataToSQL } from './load'
 import { procToSQL } from './proc'
 import { transactionToSQL } from './transaction'
 import { showToSQL } from './show'
@@ -47,6 +48,7 @@ const typeToSQLFn = {
   update      : updateToSQL,
   if          : ifToSQL,
   insert      : insertToSQL,
+  load_data   : loadDataToSQL,
   drop        : commonCmdToSQL,
   truncate    : commonCmdToSQL,
   replace     : insertToSQL,

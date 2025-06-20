@@ -12,6 +12,7 @@ import { jsonExprToSQL, jsonVisitorExprToSQL } from './json'
 import { selectToSQL } from './select'
 import { showToSQL } from './show'
 import { arrayStructExprToSQL } from './array-struct'
+import { loadDataToSQL } from './load'
 import { tablesToSQL, unnestToSQL } from './tables'
 import { unionToSQL } from './union'
 import { namedWindowExprListToSQL, windowFuncToSQL } from './window'
@@ -35,6 +36,7 @@ const exprToSQLConvertFn = {
   fulltext_search   : fullTextSearchToSQL,
   function          : funcToSQL,
   lambda            : lambdaToSQL,
+  load_data         : loadDataToSQL,
   insert            : unionToSQL,
   interval          : intervalToSQL,
   json              : jsonExprToSQL,
