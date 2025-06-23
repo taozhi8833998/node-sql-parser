@@ -347,6 +347,7 @@ type DataType = {
   scale?: number;
   suffix?: Timezone | (KW_UNSIGNED | KW_ZEROFILL)[];
   array?: "one" | "two";
+  expr?: Expr | ExprList;
 };
 
 type LiteralNotNull = {
