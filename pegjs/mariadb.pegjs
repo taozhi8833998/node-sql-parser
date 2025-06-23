@@ -252,6 +252,7 @@ cmd_stmt
   / grant_stmt
   / explain_stmt
   / transaction_stmt
+  / load_data_stmt
 
 create_stmt
   = create_table_stmt
@@ -1808,6 +1809,70 @@ transaction_stmt
     }
   }
   
+load_data_field
+  = k:('FIELDS'i / 'COLUMNS'i) __ t:('TERMINATED'i __ 'BY'i __ ident_without_kw_type)? __ en:(('OPTIONALLY'i)? __ 'ENCLOSED'i __ 'BY'i __ ident_without_kw_type)? __ es:('ESCAPED'i __ 'BY'i __ ident_without_kw_type)? {
+    if (t) t[4].prefix = 'TERMINATED BY'
+    if (en) en[6].prefix = `${en[0] && en[0].toUpperCase() === 'OPTIONALLY' ? 'OPTIONALLY ' : ''}ENCLOSED BY`
+    if (es) es[4].prefix = 'ESCAPED BY'
+    return {
+      keyword: k,
+      terminated: t && t[4],
+      enclosed: en && en[6],
+      escaped: es && es[4]
+    }
+  }
+
+load_data_line_starting
+  = k:('STARTING'i / 'TERMINATED'i) __ 'BY'i __ s:ident_without_kw_type {
+    s.prefix = `${k.toUpperCase()} BY`
+    return {
+      type: k.toLowerCase(),
+      [k.toLowerCase()]: s
+    }
+  }
+load_data_line
+  = k:'LINES'i __ s:load_data_line_starting? __ t:load_data_line_starting? {
+    if (s && t && s.type === t.type) throw new Error('LINES cannot be specified twice')
+    if (s) Reflect.deleteProperty(s, 'type')
+    if (t) Reflect.deleteProperty(t, 'type')
+    return {
+      keyword: k,
+      ...(s || {}),
+      ...(t || {})
+    }
+  }
+
+load_data_stmt
+  = 'LOAD'i __ 'DATA'i __ lc:('LOW_PRIORITY'i / 'CONCURRENT'i)? __ lo:('LOCAL'i)? __
+  'INFILE'i __ file:ident_without_kw_type __ ri:replace_insert? __
+  'INTO'i __ 'TABLE'i __ table:table_name __
+  pa:insert_partition? __
+  cs:(create_option_character_set_kw __ ident_without_kw_type)? __
+  fields:load_data_field? __
+  lines:load_data_line? __
+  ig:(KW_IGNORE __ literal_numeric __ ('LINES'i / 'ROWS'i))? __
+  co:column_clause? __
+  set:(KW_SET __ set_list)? {
+    return {
+      type: 'load_data',
+      mode: lc,
+      local: lo,
+      file: file,
+      replace_ignore: ri,
+      table: table,
+      partition: pa,
+      character_set: cs,
+      fields: fields,
+      lines: lines,
+      ignore: ig && {
+        count: ig[2],
+        suffix: ig[4]
+      },
+      column: co,
+      set: set && set[2]
+    }
+  }
+
 lock_type
   = "READ"i __ s:("LOCAL"i)? {
     return {
@@ -3092,7 +3157,7 @@ double_quoted_ident
   }
 
 single_quoted_ident
-  = "'" chars:[^']+ "'" {
+  = "'" chars:[^']* "'" {
     return {
       type: 'single_quote_string',
       value: chars.join('')
