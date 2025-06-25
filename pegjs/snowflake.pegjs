@@ -4239,6 +4239,7 @@ escape_char
     }
   / "\\" { return "\\"; }
   / "''" { return "''" }
+  / '""' { return '""' }
 
 line_terminator
   = [\n\r]
