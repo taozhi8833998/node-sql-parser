@@ -355,7 +355,7 @@ type LiteralNotNull = {
   value: "not null";
 };
 
-type LiteralNull = { type: "null"; value: null };
+type LiteralNull = { type: "null"; value: null | "null" };
 
 type LiteralNumeric = number | { type: "bigint"; value: string };
 
