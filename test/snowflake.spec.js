@@ -525,6 +525,20 @@ describe('snowflake', () => {
         'SELECT "a" + "b" FROM DUAL'
       ]
     },
+    {
+      title: 'escape double quoted',
+      sql: [
+        'SELECT "foo""bar"',
+        'SELECT "foo""bar"'
+      ]
+    },
+    {
+      title: 'escape double quoted twice',
+      sql: [
+        'SELECT "my ""column"""',
+        'SELECT "my ""column"""'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
