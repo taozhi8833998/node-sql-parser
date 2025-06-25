@@ -3986,9 +3986,9 @@ jsonb_expr
 
 string_constants_escape
   = 'E'i"'" __ n:single_char* __ "'" {
-    // => { type: 'origin'; value: string; }
+    // => { type: 'default'; value: string; }
     return {
-      type: 'origin',
+      type: 'default',
       value: `E'${n.join('')}'`
     }
   }
