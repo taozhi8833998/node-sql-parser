@@ -100,6 +100,8 @@ export interface ValueExpr<T = string | number | boolean> {
   value: T;
 }
 
+export type SortDirection = 'ASC' | 'DESC';
+
 export interface ColumnRefItem {
   type: "column_ref";
   table: string | null;
@@ -107,6 +109,7 @@ export interface ColumnRefItem {
   options?: ExprList;
   loc?: LocationRange;
   collate?: { collate: CollateExpr };
+  order_by?: SortDirection | null;
 }
 export interface ColumnRefExpr {
   type: "expr";
