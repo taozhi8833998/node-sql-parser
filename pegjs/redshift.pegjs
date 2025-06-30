@@ -3432,7 +3432,7 @@ set_list
  * 'col1 = (col2 > 3)'
  */
 set_item
-  = tbl:(ident __ DOT)? __ c:column_without_kw_type __ '=' __ v:additive_expr {
+  = tbl:(ident __ DOT)? __ c:column_without_kw_type __ '=' __ v:expr {
       // => { column: ident; value: additive_expr; table?: ident;}
       return { column: { expr: c }, value: v, table: tbl && tbl[0] };
     }

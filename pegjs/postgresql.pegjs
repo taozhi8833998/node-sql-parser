@@ -4095,7 +4095,7 @@ set_list
  * 'col1 = (col2 > 3)'
  */
 set_item
-  = c:column_ref_array_index __ '=' __ v:additive_expr {
+  = c:column_ref_array_index __ '=' __ v:expr {
     // => { column: ident; value: additive_expr; table?: ident;}
     return {  ...c, value: v };
   }
