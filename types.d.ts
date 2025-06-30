@@ -384,7 +384,7 @@ type ColumnDefinitionOptList = {
   character_set?: { type: "CHARACTER SET"; value: string; symbol?: "=" };
 };
 
-type CreateColumnDefinition = {
+export type CreateColumnDefinition = {
   column: ColumnRef;
   definition: DataType;
   resource: "column";
@@ -401,7 +401,7 @@ type IndexOption = {
   expr: LiteralNumeric;
 };
 
-type CreateIndexDefinition = {
+export type CreateIndexDefinition = {
   index?: string;
   definition: ColumnRef[];
   keyword: "index" | "key";
@@ -410,7 +410,7 @@ type CreateIndexDefinition = {
   index_options?: IndexOption[];
 };
 
-type CreateFulltextSpatialIndexDefinition = {
+export type CreateFulltextSpatialIndexDefinition = {
   index?: string;
   definition: ColumnRef[];
   keyword?:
@@ -426,7 +426,7 @@ type CreateFulltextSpatialIndexDefinition = {
 
 type ConstraintName = { keyword: "constraint"; constraint: string };
 
-type CreateConstraintPrimary = {
+export type CreateConstraintPrimary = {
   constraint?: ConstraintName["constraint"];
   definition: ColumnRef[];
   constraint_type: "primary key";
@@ -436,7 +436,7 @@ type CreateConstraintPrimary = {
   index_options?: IndexOption[];
 };
 
-type CreateConstraintUnique = {
+export type CreateConstraintUnique = {
   constraint?: ConstraintName["constraint"];
   definition: ColumnRef[];
   constraint_type: "unique key" | "unique" | "unique index";
@@ -447,7 +447,7 @@ type CreateConstraintUnique = {
   index_options?: IndexOption[];
 };
 
-type CreateConstraintForeign = {
+export type CreateConstraintForeign = {
   constraint?: ConstraintName["constraint"];
   definition: ColumnRef[];
   constraint_type: "FOREIGN KEY";
@@ -457,7 +457,7 @@ type CreateConstraintForeign = {
   reference_definition?: any;
 };
 
-type CreateConstraintCheck = {
+export type CreateConstraintCheck = {
   constraint?: ConstraintName["constraint"];
   definition: any[];
   constraint_type: "check";
@@ -465,13 +465,13 @@ type CreateConstraintCheck = {
   resource: "constraint";
 };
 
-type CreateConstraintDefinition =
+export type CreateConstraintDefinition =
   | CreateConstraintPrimary
   | CreateConstraintUnique
   | CreateConstraintForeign
   | CreateConstraintCheck;
 
-type CreateDefinition =
+export type CreateDefinition =
   | CreateColumnDefinition
   | CreateIndexDefinition
   | CreateFulltextSpatialIndexDefinition
