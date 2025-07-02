@@ -19,7 +19,7 @@ function partitionToSQL(partition) {
   if (!partition) return ''
   const partitionArr = ['PARTITION', '(']
   if (Array.isArray(partition)) {
-    partitionArr.push(partition.map(identifierToSql).join(', '))
+    partitionArr.push(partition.map(partitionItem => identifierToSql(partitionItem)).join(', '))
   } else {
     const { value } = partition
     partitionArr.push(value.map(exprToSQL).join(', '))

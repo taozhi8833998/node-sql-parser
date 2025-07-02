@@ -151,11 +151,12 @@ function columnIdentifierToSql(ident) {
   }
 }
 
-function identifierToSql(ident, isDual) {
-  const { database } = getParserOpt()
+function identifierToSql(ident, isDual, surround) {
   if (isDual === true) return `'${ident}'`
   if (!ident) return
   if (ident === '*') return ident
+  if (surround) return `${surround}${ident}${surround}`
+  const { database } = getParserOpt()
   switch (database && database.toLowerCase()) {
     case 'mysql':
     case 'mariadb':
