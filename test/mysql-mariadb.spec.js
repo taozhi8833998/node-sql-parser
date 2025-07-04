@@ -1256,6 +1256,13 @@ describe('mysql', () => {
           'START TRANSACTION'
         ]
       },
+      {
+        title: 'keyword in database and table name',
+        sql: [
+          'SELECT * FROM system.tables;',
+          'SELECT * FROM `system`.`tables`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
