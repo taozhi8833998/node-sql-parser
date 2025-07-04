@@ -4095,7 +4095,7 @@ set_list
  * 'col1 = (col2 > 3)'
  */
 set_item
-  = c:column_ref_array_index __ '=' __ v:additive_expr {
+  = c:column_ref_array_index __ '=' __ v:expr {
     // => { column: ident; value: additive_expr; table?: ident;}
     return {  ...c, value: v };
   }
@@ -4651,9 +4651,9 @@ jsonb_expr
 
 string_constants_escape
   = 'E'i"'" __ n:single_char* __ "'" {
-    // => { type: 'origin'; value: string; }
+    // => { type: 'default'; value: string; }
     return {
-      type: 'origin',
+      type: 'default',
       value: `E'${n.join('')}'`
     }
   }

@@ -359,7 +359,6 @@ export type LiteralNotNull = {
 };
 
 export type LiteralNull = { type: "null"; value: null | "null" };
-
 export type LiteralNumeric = number | { type: "bigint"; value: string };
 
 export type ColumnConstraint = {

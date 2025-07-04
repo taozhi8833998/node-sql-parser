@@ -891,6 +891,13 @@ describe('BigQuery', () => {
         "SELECT SAFE_CAST(SPLIT(t1.CREATED_BY, 'a')[0] AS STRING) AS FIRST_SPLIT_ARG FROM table1 AS t1 WHERE CREATED_BY = 'node-sql-parser' AND FIRST_SPLIT_ARG = @FIRST_SPLIT_ARG LIMIT 1"
       ]
     },
+    {
+      title: 'quoted table name',
+      sql: [
+        'SELECT COUNT(*) FROM `bigquery-public-data.blah.events_*`',
+        'SELECT COUNT(*) FROM `bigquery-public-data.blah.events_*`'
+      ]
+    }
   ]
 
   SQL_LIST.forEach(sqlInfo => {

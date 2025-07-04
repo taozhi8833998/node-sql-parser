@@ -56,7 +56,7 @@ function tableHintToSQL(tableHintExpr) {
       result.push(toUpper(keyword), '=', exprToSQL(expr))
       break
     case 'index':
-      result.push(toUpper(prefix), toUpper(keyword), parentheses ? `(${expr.map(identifierToSql).join(', ')})` : `= ${identifierToSql(expr)}`)
+      result.push(toUpper(prefix), toUpper(keyword), parentheses ? `(${expr.map(indexItem => identifierToSql(indexItem)).join(', ')})` : `= ${identifierToSql(expr)}`)
       break
     default:
       result.push(exprToSQL(expr))
@@ -114,11 +114,11 @@ function generateVirtualTable(stmt) {
 
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
-  const { table, db, as, expr, operator, prefix: prefixStr, schema, server, suffix, tablesample, temporal_table, table_hint } = tableInfo
-  const serverName = identifierToSql(server)
-  const database = identifierToSql(db)
-  const schemaStr = identifierToSql(schema)
-  let tableName = table && identifierToSql(table)
+  const { table, db, as, expr, operator, prefix: prefixStr, schema, server, suffix, tablesample, temporal_table, table_hint, surround = {} } = tableInfo
+  const serverName = identifierToSql(server, false, surround.server)
+  const database = identifierToSql(db, false, surround.db)
+  const schemaStr = identifierToSql(schema, false, surround.schema)
+  let tableName = table && identifierToSql(table, false, surround.table)
   if (expr) {
     const exprType = expr.type
     switch (exprType) {

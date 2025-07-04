@@ -1868,6 +1868,20 @@ describe('Postgres', () => {
         "COMMENT ON EXTENSION pgcrypto IS 'HELLO WORLD'"
       ]
     },
+    {
+      title: 'constant string with case sensitive',
+      sql: [
+        "SELECT * FROM users WHERE id = E'one'",
+        `SELECT * FROM "users" WHERE id = E'one'`
+      ]
+    },
+    {
+      title: 'set item support full expr',
+      sql: [
+        'update api.entities set is_active = not is_active WHERE id = $1',
+        'UPDATE "api"."entities" SET is_active = NOT is_active WHERE id = $1'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
