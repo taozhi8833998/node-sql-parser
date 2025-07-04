@@ -2440,7 +2440,7 @@ table_name
       }
       return obj
     }
-  / part:ident tail:(__ DOT __ ident)? {
+  / part:ident tail:(__ DOT __ ident_without_kw)? {
       const obj = { db: null, table: part }
       if (tail !== null) {
         obj.db = part
@@ -2563,7 +2563,7 @@ update_stmt
 
 delete_stmt
   = __ cte:with_clause? __ KW_DELETE    __
-    t: table_ref_list? __
+    t:table_ref_list? __
     f:from_clause __
     w:where_clause? __
     r:returning_stmt? {

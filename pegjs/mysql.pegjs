@@ -234,7 +234,7 @@
     'STARTING': true,
     'STORED': true,
     'STRAIGHT_JOIN': true,
-    'SYSTEM': true,
+    // 'SYSTEM': true,
 
     'TABLE': true,
     'TERMINATED': true,
@@ -2702,7 +2702,7 @@ table_name
       }
       return obj
     }
-  / part:ident tail:(__ DOT __ ident)? {
+  / part:ident tail:(__ DOT __ ident_without_kw)? {
       const obj = { db: null, table: part }
       if (tail !== null) {
         obj.db = part
