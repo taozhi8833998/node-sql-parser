@@ -325,25 +325,25 @@ export interface Use {
   loc?: LocationRange;
 }
 
-type KW_UNSIGNED = "UNSIGNED";
-type KW_ZEROFILL = "ZEROFILL";
+export type KW_UNSIGNED = "UNSIGNED";
+export type KW_ZEROFILL = "ZEROFILL";
 
-type Timezone = ["WITHOUT" | "WITH", "TIME", "ZONE"];
+export type Timezone = ["WITHOUT" | "WITH", "TIME", "ZONE"];
 
-type KeywordComment = {
+export type KeywordComment = {
   type: "comment";
   keyword: "comment";
   symbol?: "=";
   value: string;
 };
 
-type CollateExpr = {
+export type CollateExpr = {
   type: "collate";
   symbol?: "=";
   value: string;
 };
 
-type DataType = {
+export type DataType = {
   dataType: string;
   length?: number;
   parentheses?: true;
@@ -353,16 +353,16 @@ type DataType = {
   expr?: Expr | ExprList;
 };
 
-type LiteralNotNull = {
+export type LiteralNotNull = {
   type: "not null";
   value: "not null";
 };
 
-type LiteralNull = { type: "null"; value: null | "null" };
+export type LiteralNull = { type: "null"; value: null | "null" };
 
-type LiteralNumeric = number | { type: "bigint"; value: string };
+export type LiteralNumeric = number | { type: "bigint"; value: string };
 
-type ColumnConstraint = {
+export type ColumnConstraint = {
   default_val: {
     type: "default";
     value: any;
@@ -370,7 +370,7 @@ type ColumnConstraint = {
   nullable: LiteralNotNull | LiteralNull;
 };
 
-type ColumnDefinitionOptList = {
+export type ColumnDefinitionOptList = {
   nullable?: ColumnConstraint["nullable"];
   default_val?: ColumnConstraint["default_val"];
   auto_increment?: "auto_increment";
@@ -390,12 +390,12 @@ export type CreateColumnDefinition = {
   resource: "column";
 } & ColumnDefinitionOptList;
 
-type IndexType = {
+export type IndexType = {
   keyword: "using";
   type: "btree" | "hash" | "gist" | "gin";
 };
 
-type IndexOption = {
+export type IndexOption = {
   type: "key_block_size";
   symbol?: "=";
   expr: LiteralNumeric;
@@ -424,7 +424,7 @@ export type CreateFulltextSpatialIndexDefinition = {
   resource: "index";
 };
 
-type ConstraintName = { keyword: "constraint"; constraint: string };
+export type ConstraintName = { keyword: "constraint"; constraint: string };
 
 export type CreateConstraintPrimary = {
   constraint?: ConstraintName["constraint"];
