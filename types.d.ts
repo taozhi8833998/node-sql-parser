@@ -325,25 +325,25 @@ export interface Use {
   loc?: LocationRange;
 }
 
-type KW_UNSIGNED = "UNSIGNED";
-type KW_ZEROFILL = "ZEROFILL";
+export type KW_UNSIGNED = "UNSIGNED";
+export type KW_ZEROFILL = "ZEROFILL";
 
-type Timezone = ["WITHOUT" | "WITH", "TIME", "ZONE"];
+export type Timezone = ["WITHOUT" | "WITH", "TIME", "ZONE"];
 
-type KeywordComment = {
+export type KeywordComment = {
   type: "comment";
   keyword: "comment";
   symbol?: "=";
   value: string;
 };
 
-type CollateExpr = {
+export type CollateExpr = {
   type: "collate";
   symbol?: "=";
   value: string;
 };
 
-type DataType = {
+export type DataType = {
   dataType: string;
   length?: number;
   parentheses?: true;
@@ -353,16 +353,15 @@ type DataType = {
   expr?: Expr | ExprList;
 };
 
-type LiteralNotNull = {
+export type LiteralNotNull = {
   type: "not null";
   value: "not null";
 };
 
-type LiteralNull = { type: "null"; value: null | "null" };
+export type LiteralNull = { type: "null"; value: null | "null" };
+export type LiteralNumeric = number | { type: "bigint"; value: string };
 
-type LiteralNumeric = number | { type: "bigint"; value: string };
-
-type ColumnConstraint = {
+export type ColumnConstraint = {
   default_val: {
     type: "default";
     value: any;
@@ -370,7 +369,7 @@ type ColumnConstraint = {
   nullable: LiteralNotNull | LiteralNull;
 };
 
-type ColumnDefinitionOptList = {
+export type ColumnDefinitionOptList = {
   nullable?: ColumnConstraint["nullable"];
   default_val?: ColumnConstraint["default_val"];
   auto_increment?: "auto_increment";
@@ -384,24 +383,24 @@ type ColumnDefinitionOptList = {
   character_set?: { type: "CHARACTER SET"; value: string; symbol?: "=" };
 };
 
-type CreateColumnDefinition = {
+export type CreateColumnDefinition = {
   column: ColumnRef;
   definition: DataType;
   resource: "column";
 } & ColumnDefinitionOptList;
 
-type IndexType = {
+export type IndexType = {
   keyword: "using";
   type: "btree" | "hash" | "gist" | "gin";
 };
 
-type IndexOption = {
+export type IndexOption = {
   type: "key_block_size";
   symbol?: "=";
   expr: LiteralNumeric;
 };
 
-type CreateIndexDefinition = {
+export type CreateIndexDefinition = {
   index?: string;
   definition: ColumnRef[];
   keyword: "index" | "key";
@@ -410,7 +409,7 @@ type CreateIndexDefinition = {
   index_options?: IndexOption[];
 };
 
-type CreateFulltextSpatialIndexDefinition = {
+export type CreateFulltextSpatialIndexDefinition = {
   index?: string;
   definition: ColumnRef[];
   keyword?:
@@ -424,9 +423,9 @@ type CreateFulltextSpatialIndexDefinition = {
   resource: "index";
 };
 
-type ConstraintName = { keyword: "constraint"; constraint: string };
+export type ConstraintName = { keyword: "constraint"; constraint: string };
 
-type CreateConstraintPrimary = {
+export type CreateConstraintPrimary = {
   constraint?: ConstraintName["constraint"];
   definition: ColumnRef[];
   constraint_type: "primary key";
@@ -436,7 +435,7 @@ type CreateConstraintPrimary = {
   index_options?: IndexOption[];
 };
 
-type CreateConstraintUnique = {
+export type CreateConstraintUnique = {
   constraint?: ConstraintName["constraint"];
   definition: ColumnRef[];
   constraint_type: "unique key" | "unique" | "unique index";
@@ -447,7 +446,7 @@ type CreateConstraintUnique = {
   index_options?: IndexOption[];
 };
 
-type CreateConstraintForeign = {
+export type CreateConstraintForeign = {
   constraint?: ConstraintName["constraint"];
   definition: ColumnRef[];
   constraint_type: "FOREIGN KEY";
@@ -457,7 +456,7 @@ type CreateConstraintForeign = {
   reference_definition?: any;
 };
 
-type CreateConstraintCheck = {
+export type CreateConstraintCheck = {
   constraint?: ConstraintName["constraint"];
   definition: any[];
   constraint_type: "check";
@@ -465,13 +464,13 @@ type CreateConstraintCheck = {
   resource: "constraint";
 };
 
-type CreateConstraintDefinition =
+export type CreateConstraintDefinition =
   | CreateConstraintPrimary
   | CreateConstraintUnique
   | CreateConstraintForeign
   | CreateConstraintCheck;
 
-type CreateDefinition =
+export type CreateDefinition =
   | CreateColumnDefinition
   | CreateIndexDefinition
   | CreateFulltextSpatialIndexDefinition
