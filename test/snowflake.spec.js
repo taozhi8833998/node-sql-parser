@@ -567,4 +567,13 @@ describe('snowflake', () => {
       expect(() => parser.whiteListCheck(sql, ['select::foo:baz'], opt)).to.throw("authority = 'select::foo.bar::baz' is required in table whiteList to execute SQL = 'SELECT * from foo.bar.baz'")
     })
   })
+
+  describe('columnList contains literal string', () => {
+    it('should contain literal string', () => {
+      const sql = 'SELECT "abcdefg" FROM DUAL'
+      const ast = parser.parse(sql, opt)
+      expect(ast.columnList).to.be.eql(['select::null::abcdefg'])
+      expect(getParsedSql(sql, opt)).to.equal('SELECT "abcdefg" FROM DUAL')
+    })
+  })
 })
