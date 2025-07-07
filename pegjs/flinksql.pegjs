@@ -1771,6 +1771,9 @@ column_list_item
     }
   / e:binary_column_expr __ alias:alias_clause? {
     // => { type: 'expr'; expr: expr; as?: alias_clause; }
+      if (e.type === 'double_quote_string' || e.type === 'single_quote_string') {
+        columnList.add(`select::null::${e.value}`)
+      }
       return { type: 'expr', expr: e, as: alias };
     }
 

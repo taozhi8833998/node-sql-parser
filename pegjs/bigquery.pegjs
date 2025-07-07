@@ -1806,7 +1806,12 @@ column_list_item
         ...getLocationObject()
       }
   }
-  / expr_alias
+  / e:expr_alias {
+    if (e.expr.type === 'double_quote_string' || e.expr.type === 'single_quote_string') {
+      columnList.add(`select::null::${e.expr.value}`)
+    }
+    return e
+  }
 
 alias_clause
   = KW_AS __ i:alias_ident { return i; }
