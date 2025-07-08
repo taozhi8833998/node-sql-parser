@@ -1882,6 +1882,17 @@ describe('Postgres', () => {
         'UPDATE "api"."entities" SET is_active = NOT is_active WHERE id = $1'
       ]
     },
+    {
+      title: 'array data type',
+      sql: [
+        `CREATE TABLE sal_emp (
+            name            text,
+            pay_by_quarter  integer[],
+            schedule        text[][]
+        );`,
+        'CREATE TABLE "sal_emp" (name TEXT, pay_by_quarter INTEGER[], schedule TEXT[][])'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
