@@ -152,6 +152,8 @@ describe('sqlite', () => {
     expect(getParsedSql(sql)).to.be.equal('SELECT "column_name" FROM "table_name" WHERE "type" = "abc"')
     sql = "SELECT partition from table_name where partition like '%'"
     expect(getParsedSql(sql)).to.be.equal(`SELECT "partition" FROM "table_name" WHERE "partition" LIKE '%'`)
+    sql = `SELECT "m"."model_family", COUNT(*) AS "total_mentions" FROM "brand_mentions" AS "bm" INNER JOIN "model_responses" AS "mr" ON "bm"."response_id" = "mr"."response_id" INNER JOIN "models" AS "m" ON "mr"."model_id" = "m"."model_id" WHERE "bm"."brand_name" = 'ketch' AND "m"."model_family" IN ('a', 'b', 'c') AND "mr"."error_occurred" = 0 GROUP BY "m"."model_family" LIMIT 100`
+    expect(getParsedSql(sql)).to.be.equal(`SELECT "m"."model_family", COUNT(*) AS "total_mentions" FROM "brand_mentions" AS "bm" INNER JOIN "model_responses" AS "mr" ON "bm"."response_id" = "mr"."response_id" INNER JOIN "models" AS "m" ON "mr"."model_id" = "m"."model_id" WHERE "bm"."brand_name" = 'ketch' AND "m"."model_family" IN ('a', 'b', 'c') AND "mr"."error_occurred" = 0 GROUP BY "m"."model_family" LIMIT 100`)
   })
 
   it('should support sqlify autoincrement to other db', () => {
