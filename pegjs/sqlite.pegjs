@@ -14,6 +14,7 @@
     'CASE': true,
     'CREATE': true,
     'CONTAINS': true,
+    'COUNT': true,
     'CURRENT_DATE': true,
     'CURRENT_TIME': true,
     'CURRENT_TIMESTAMP': true,
@@ -2590,13 +2591,13 @@ literal_string
         value: ca.join('')
       };
   }
-  / ca:("'" single_char* "'") {
+  / ca:("'" single_char* "'") __ !(DOT / LPAREN) {
       return {
         type: 'single_quote_string',
         value: ca[1].join('')
       };
     }
-  / ca:("\"" single_quote_char* "\"") {
+  / ca:("\"" single_quote_char* "\"") __ !(DOT / LPAREN) {
       return {
         type: 'double_quote_string',
         value: ca[1].join('')
