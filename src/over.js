@@ -1,5 +1,5 @@
-import { toUpper } from './util'
-import { exprToSQL } from './expr'
+import { hasVal, toUpper } from './util'
+import { exprToSQL, orderOrPartitionByToSQL } from './expr'
 import { asWindowSpecToSQL } from './window'
 
 function overToSQL(over) {
@@ -12,6 +12,9 @@ function overToSQL(over) {
     const args = exprToSQL(expr) || []
     if (parentheses) onUpdate = `${onUpdate}(${args.join(', ')})`
     return onUpdate
+  }
+  if (over.partitionby) {
+    return ['OVER', `(${orderOrPartitionByToSQL(over.partitionby, 'partition by')}`, `${orderOrPartitionByToSQL(over.orderby, 'order by')})`].filter(hasVal).join(' ')
   }
   throw new Error('unknown over type')
 }
