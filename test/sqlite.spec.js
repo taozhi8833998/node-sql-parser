@@ -163,6 +163,24 @@ describe('sqlite', () => {
     sql = ' CREATE TABLE `Test` (  `id` int(11) NOT NULL,  `name` varchar(255) COLLATE utf8mb4_unicode_520_ci NOT NULL,  PRIMARY KEY (`id`),  UNIQUE KEY `name` (`name`));'
     ast = parser.astify(sql, { database: 'mariadb' })
     expect(parser.sqlify(ast, DEFAULT_OPT)).to.be.equal('CREATE TABLE "Test" ("id" INT(11) NOT NULL, "name" VARCHAR(255) NOT NULL, PRIMARY KEY ("id"), UNIQUE ("name"))')
+    sql = `SELECT 
+          b.brand_name,
+          p.prompt_text,
+          m.model_name,
+          mr.brand_visibility_score,
+          AVG(mr.brand_visibility_score) OVER (PARTITION BY b.brand_name) as avg_brand_visibility,
+          AVG(mr.brand_visibility_score) OVER (PARTITION BY m.model_name) as avg_model_visibility,
+          AVG(mr.brand_visibility_score) OVER (PARTITION BY p.prompt_id) as avg_prompt_visibility
+      FROM model_responses mr
+      INNER JOIN experiment_runs er ON mr.run_id = er.run_id
+      INNER JOIN brands b ON er.brand_id = b.brand_id
+      INNER JOIN models m ON mr.model_id = m.model_id
+      INNER JOIN prompts p ON mr.prompt_id = p.prompt_id
+      WHERE b.brand_name IN ('prod1', 'prod2', 'prod3')
+          AND mr.error_occurred = 0
+      ORDER BY b.brand_name, mr.brand_visibility_score DESC, m.model_name, p.prompt_text
+      LIMIT 100`
+    expect(getParsedSql(sql)).to.be.equal(`SELECT "b"."brand_name", "p"."prompt_text", "m"."model_name", "mr"."brand_visibility_score", AVG("mr"."brand_visibility_score") OVER (PARTITION BY "b"."brand_name" ) AS "avg_brand_visibility", AVG("mr"."brand_visibility_score") OVER (PARTITION BY "m"."model_name" ) AS "avg_model_visibility", AVG("mr"."brand_visibility_score") OVER (PARTITION BY "p"."prompt_id" ) AS "avg_prompt_visibility" FROM "model_responses" AS "mr" INNER JOIN "experiment_runs" AS "er" ON "mr"."run_id" = "er"."run_id" INNER JOIN "brands" AS "b" ON "er"."brand_id" = "b"."brand_id" INNER JOIN "models" AS "m" ON "mr"."model_id" = "m"."model_id" INNER JOIN "prompts" AS "p" ON "mr"."prompt_id" = "p"."prompt_id" WHERE "b"."brand_name" IN ('prod1', 'prod2', 'prod3') AND "mr"."error_occurred" = 0 ORDER BY "b"."brand_name" ASC, "mr"."brand_visibility_score" DESC, "m"."model_name" ASC, "p"."prompt_text" ASC LIMIT 100`)
   })
 
   it('should support create or drop view', () => {
