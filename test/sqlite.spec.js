@@ -163,7 +163,7 @@ describe('sqlite', () => {
     sql = ' CREATE TABLE `Test` (  `id` int(11) NOT NULL,  `name` varchar(255) COLLATE utf8mb4_unicode_520_ci NOT NULL,  PRIMARY KEY (`id`),  UNIQUE KEY `name` (`name`));'
     ast = parser.astify(sql, { database: 'mariadb' })
     expect(parser.sqlify(ast, DEFAULT_OPT)).to.be.equal('CREATE TABLE "Test" ("id" INT(11) NOT NULL, "name" VARCHAR(255) NOT NULL, PRIMARY KEY ("id"), UNIQUE ("name"))')
-    sql = `SELECT 
+    sql = `SELECT
           b.brand_name,
           p.prompt_text,
           m.model_name,
@@ -264,5 +264,9 @@ describe('sqlite', () => {
       const sql = `INSERT OR ${keyword} INTO test (category) VALUES ('Infra, Layer1, DePIN')`
       expect(getParsedSql(sql)).to.be.equal(`INSERT OR ${keyword} INTO "test" (category) VALUES ('Infra, Layer1, DePIN')`)
     })
+  })
+  it('should support LIKE with ESCAPE', () => {
+    const sql = `SELECT * FROM table_name WHERE column_name LIKE '%pattern%' ESCAPE '\'`
+    expect(getParsedSql(sql)).to.be.equal(`SELECT * FROM "table_name" WHERE "column_name" LIKE '%pattern%' ESCAPE '\'`)
   })
 })
