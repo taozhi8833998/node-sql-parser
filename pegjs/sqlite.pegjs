@@ -2172,6 +2172,16 @@ regexp_op
   = n: KW_NOT? __ k:(KW_REGEXP / KW_RLIKE) {
     return n ? `${n} ${k}` : k
   }
+
+escape_op
+  = kw:'ESCAPE'i __ c:literal_string {
+    // => { type: 'ESCAPE'; value: literal_string }
+    return {
+      type: 'ESCAPE',
+      value: c,
+    }
+  }
+
 in_op
   = nk:(KW_NOT __ KW_IN) { return nk[0] + ' ' + nk[2]; }
   / KW_IN
@@ -2185,7 +2195,8 @@ regexp_op_right
   }
 
 like_op_right
-  = op:like_op __ right:(literal / comparison_expr) {
+  = op:like_op __ right:(literal / comparison_expr ) __ es:escape_op? {
+      if (es) right.escape = es
       return { op: op, right: right };
     }
 
