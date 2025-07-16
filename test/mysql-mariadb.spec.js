@@ -1263,6 +1263,13 @@ describe('mysql', () => {
           'SELECT * FROM `system`.`tables`'
         ]
       },
+      {
+        title: 'interval expr with parentheses',
+        sql: [
+          'SELECT * FROM T WHERE date BETWEEN start AND start + INTERVAL (duration + 1) DAY',
+          'SELECT * FROM `T` WHERE `date` BETWEEN `start` AND `start` + INTERVAL (`duration` + 1) DAY'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

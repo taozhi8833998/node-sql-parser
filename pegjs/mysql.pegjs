@@ -3031,9 +3031,9 @@ expr_list
     }
 
 interval_expr
-  = KW_INTERVAL                    __
-    e:expr                       __
-    u: interval_unit {
+  = KW_INTERVAL __
+    e:expr __
+    u:interval_unit {
       return {
         type: 'interval',
         expr: e,
@@ -3316,12 +3316,12 @@ jsonb_expr
   }
 
 primary
-  = aggr_func
+  = interval_expr
+  / aggr_func
   / fulltext_search
   / func_call
   / cast_expr
   / case_expr
-  / interval_expr
   / literal_basic
   / column_ref
   / literal_numeric

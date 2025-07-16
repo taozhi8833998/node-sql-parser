@@ -2455,11 +2455,11 @@ multiplicative_operator
   = "*" / "/" / "%"
 
 primary
-  = aggr_func
+  = interval_expr
+  / aggr_func
   / func_call
   / cast_expr
   / case_expr
-  / interval_expr
   / literal
   / column_ref
   / param

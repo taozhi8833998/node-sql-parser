@@ -1835,10 +1835,10 @@ multiplicative_operator
 primary
   = cast_expr
   / literal
+  / interval_expr
   / aggr_func
   / func_call
   / case_expr
-  / interval_expr
   / column_ref
   / param
   / LPAREN __ list:or_and_where_expr __ RPAREN {

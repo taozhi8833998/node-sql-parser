@@ -3049,12 +3049,12 @@ unary_operator
   = '!' / '-' / '+' / '~'
 
 primary
-  = aggr_func
+  = interval_expr
+  / aggr_func
   / fulltext_search
   / func_call
   / cast_expr
   / case_expr
-  / interval_expr
   / literal_basic
   / column_ref
   / literal_numeric

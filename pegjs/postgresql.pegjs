@@ -5381,7 +5381,7 @@ cast_expr
       expr: e,
     }
   }
-  / e:(aggr_func / window_func / func_call / column_ref_quoted / literal / case_expr / interval_expr / column_ref_array_index / param) __ c:cast_double_colon? {
+  / e:(interval_expr / aggr_func / window_func / func_call / column_ref_quoted / literal / case_expr / column_ref_array_index / param) __ c:cast_double_colon? {
     /* => ({
         type: 'cast';
         expr: literal | jsonb_expr | aggr_func | func_call | case_expr | interval_expr | column_ref | param

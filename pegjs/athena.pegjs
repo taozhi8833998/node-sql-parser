@@ -1855,10 +1855,10 @@ multiplicative_operator
 primary
   = cast_expr
   / literal
+  / interval_expr
   / aggr_func
   / func_call
   / case_expr
-  / interval_expr
   / c:column_ref __ a:array_index_list {
     // => column_ref
     c.array_index = a
