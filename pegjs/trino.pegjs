@@ -4028,7 +4028,7 @@ cast_expr
       }]
     };
   }
-  / LPAREN __ e:(func_call / aggr_func / window_func / case_expr / interval_expr / literal / column_ref_array_index / param) __ RPAREN __ c:cast_double_colon?  {
+  / LPAREN __ e:(interval_expr / func_call / aggr_func / window_func / case_expr / literal / column_ref_array_index / param) __ RPAREN __ c:cast_double_colon?  {
     /* => {
         type: 'cast';
         expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param
@@ -4046,7 +4046,7 @@ cast_expr
       ...c,
     }
   }
-  / e:(func_call/ aggr_func / window_func / case_expr / interval_expr / literal / column_ref_array_index / param) __ c:cast_double_colon? {
+  / e:(interval_expr / func_call/ aggr_func / window_func / case_expr / literal / column_ref_array_index / param) __ c:cast_double_colon? {
     /* => {
         type: 'cast';
         expr: literal | aggr_func | func_call | case_expr | interval_expr | column_ref | param

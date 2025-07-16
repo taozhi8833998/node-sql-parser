@@ -4096,7 +4096,7 @@ cast_expr
       }]
     };
   }
-  / LPAREN __ e:(literal / aggr_func / window_func / func_call / case_expr / interval_expr / column_ref_array_index / param) __ RPAREN __ c:cast_double_colon?  {
+  / LPAREN __ e:(literal / interval_expr / aggr_func / window_func / func_call / case_expr / column_ref_array_index / param) __ RPAREN __ c:cast_double_colon?  {
     e.parentheses = true
     if (!c) return e
     return {

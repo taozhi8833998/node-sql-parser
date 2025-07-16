@@ -2371,6 +2371,7 @@ multiplicative_operator
 
 primary
   = array_expr
+  / interval_expr
   / aggr_func
   / func_call
   / struct_expr
@@ -2378,7 +2379,6 @@ primary
   / cast_expr
   / literal
   / case_expr
-  / interval_expr
   / column_ref
   / param
   / LPAREN __ list:or_and_where_expr __ RPAREN {
