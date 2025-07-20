@@ -3177,7 +3177,11 @@ not_expr
 comparison_expr
   = left:additive_expr __ rh:comparison_op_right? {
       if (rh === null) return left;
-      else if (rh.type === 'arithmetic') return createBinaryExprChain(left, rh.tail);
+      else if (rh.type === 'arithmetic') {
+        if (!rh.in) return createBinaryExprChain(left, rh.tail);
+        const leftExpr = createBinaryExprChain(left, rh.tail);
+        return createBinaryExpr(rh.in.op, leftExpr, rh.in.right);
+      }
       else return createBinaryExpr(rh.op, left, rh.right);
     }
   / literal_string
@@ -3202,8 +3206,8 @@ comparison_op_right
   / regexp_op_right
 
 arithmetic_op_right
-  = l:(__ arithmetic_comparison_operator __ additive_expr)+ {
-      return { type: 'arithmetic', tail: l };
+  = l:(__ arithmetic_comparison_operator __ additive_expr)+ __ i:in_op_right? {
+      return { type: 'arithmetic', tail: l, in: i };
     }
 
 arithmetic_comparison_operator

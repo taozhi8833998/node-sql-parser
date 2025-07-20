@@ -1284,6 +1284,13 @@ describe('mysql', () => {
           'SELECT * FROM `A` INNER JOIN (`B` INNER JOIN `C` ON `B`.`x` = `C`.`x`) ON `A`.`y` = `C`.`y`'
         ]
       },
+      {
+        title: 'arithmetic and in expr',
+        sql: [
+          'SELECT * FROM T1 WHERE a = b IN (SELECT flag FROM T2)',
+          'SELECT * FROM `T1` WHERE `a` = `b` IN (SELECT `flag` FROM `T2`)'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
