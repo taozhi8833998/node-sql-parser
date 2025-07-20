@@ -1270,6 +1270,20 @@ describe('mysql', () => {
           'SELECT * FROM `T` WHERE `date` BETWEEN `start` AND `start` + INTERVAL (`duration` + 1) DAY'
         ]
       },
+      {
+        title: 'join using clause',
+        sql: [
+          'SELECT * FROM A JOIN (B JOIN C USING (x)) USING (y)',
+          'SELECT * FROM `A` INNER JOIN (`B` INNER JOIN `C` USING (x)) USING (y)'
+        ]
+      },
+      {
+        title: 'join on clause',
+        sql: [
+          'SELECT * FROM A JOIN (B JOIN C ON B.x = C.x) ON A.y = C.y',
+          'SELECT * FROM `A` INNER JOIN (`B` INNER JOIN `C` ON `B`.`x` = `C`.`x`) ON `A`.`y` = `C`.`y`'
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
@@ -1280,7 +1294,7 @@ describe('mysql', () => {
         expect(getParsedSql(sql[0], mariadb)).to.equal(sql[1])
       })
     })
-
+    
     it('should throw error when args is not right', () => {
       let sql = `select convert(json_unquote(json_extract('{"thing": "252"}', "$.thing")));`
       expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "*", "+", ",", "-", "--", "->", "->>", "/", "/*", "<", "<<", "<=", "<>", "<@", "=", ">", ">=", ">>", "?", "?&", "?|", "@>", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "mod", "|", "||", or [ \\t\\n\\r] but ")" found.')
