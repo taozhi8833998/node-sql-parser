@@ -184,8 +184,9 @@ function tablesToSQL(tables) {
     const joinExpr = tables[i]
     const { on, using, join } = joinExpr
     const str = []
+    const isTables = Array.isArray(joinExpr) || Object.hasOwnProperty.call(joinExpr, 'joins')
     str.push(join ? ` ${toUpper(join)}` : ',')
-    str.push(tableToSQL(joinExpr))
+    str.push(isTables ? tablesToSQL(joinExpr) : tableToSQL(joinExpr))
     str.push(commonOptionConnector('ON', exprToSQL, on))
     if (using) str.push(`USING (${using.map(literalToSQL).join(', ')})`)
     clauses.push(str.filter(hasVal).join(' '))
