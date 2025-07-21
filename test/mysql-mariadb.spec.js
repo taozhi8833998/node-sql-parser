@@ -1291,6 +1291,20 @@ describe('mysql', () => {
           'SELECT * FROM `T1` WHERE `a` = `b` IN (SELECT `flag` FROM `T2`)'
         ]
       },
+      {
+        title: 'with cte recursive',
+        sql: [
+          `WITH RECURSIVE
+          T AS (
+              SELECT 'foo'
+          ),
+          U AS (
+              SELECT 'bar'
+          )
+          SELECT * FROM T, U`,
+          "WITH RECURSIVE `T` AS (SELECT 'foo'), `U` AS (SELECT 'bar') SELECT * FROM `T`, `U`"
+        ]
+      }
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
