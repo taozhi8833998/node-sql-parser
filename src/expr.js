@@ -7,6 +7,7 @@ import { caseToSQL } from './case'
 import { collateToSQL } from './collate'
 import { columnDefinitionToSQL, columnRefToSQL, fullTextSearchToSQL } from './column'
 import { anyValueFuncToSQL, castToSQL, extractFunToSQL, flattenFunToSQL, funcArgToSQL, funcToSQL, jsonObjectArgToSQL, lambdaToSQL, tablefuncFunToSQL } from './func'
+import { valuesToSQL } from './insert'
 import { intervalToSQL } from './interval'
 import { jsonExprToSQL, jsonVisitorExprToSQL } from './json'
 import { selectToSQL } from './select'
@@ -48,6 +49,7 @@ const exprToSQLConvertFn = {
   tablefunc         : tablefuncFunToSQL,
   tables            : tablesToSQL,
   unnest            : unnestToSQL,
+  values            : valuesToSQL,
   'window'          : namedWindowExprListToSQL,
 }
 

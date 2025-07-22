@@ -16,17 +16,25 @@ describe('insert', () => {
       expect(ast.type).to.be.eql('insert');
       expect(ast.table).to.be.eql([ { db: null, table: 't', as: null } ]);
       expect(ast.columns).to.be.eql(["col1", "col2"]);
-      expect(ast.values).to.eql([{
-        type: "expr_list",
-        value: [{
-          type: "number",
-          value: 1
-        },
-        {
-          type: "number",
-          value: 2
-        }]
-      }]);
+      expect(ast.values).to.eql({
+        type: 'values',
+        values: [
+          {
+            type: 'expr_list',
+            value: [
+              {
+                type: 'number',
+                value: 1
+              },
+              {
+                type: 'number',
+                value: 2
+              }
+            ],
+            prefix: null
+          }
+        ]
+      });
     });
 
     it('should support parse insert with multiple rows', () => {
@@ -72,7 +80,9 @@ describe('insert', () => {
             "as": null
           }
         ],
-        "values": [
+        "values": {
+          type: 'values',
+          values: [
           {
             "type": "expr_list",
             "value": [
@@ -85,8 +95,8 @@ describe('insert', () => {
                 "value": 2
               }
             ]
-          }
-        ]
+          }]
+        }
       }
       expect(parser.sqlify(ast)).to.be.eql('INSERT INTO `t` VALUES (1,2)')
       ast.columns = ['col1', 'col2']
@@ -98,7 +108,21 @@ describe('insert', () => {
       for (const bigNumber of bigNumberList) {
         const sql = `INSERT INTO t1(id) VALUES(${bigNumber})`
         const ast = parser.astify(sql)
-        expect(ast.values[0].value).to.be.eql([{ type: 'bigint', value: bigNumber }])
+        expect(ast.values).to.be.eql({
+          type: 'values',
+          values: [
+            {
+              type: 'expr_list',
+              value: [
+                {
+                  type: 'bigint',
+                  value: bigNumber
+                }
+              ],
+              prefix: null
+            }
+          ]
+        })
         expect(parser.sqlify(ast)).to.equal('INSERT INTO `t1` (id) VALUES (' + bigNumber + ')')
       }
     })

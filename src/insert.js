@@ -6,13 +6,18 @@ import { selectToSQL } from './select'
 import { setToSQL } from './update'
 
 /**
- * @param {Array} values
+ * @param {Array} stmt
  * @return {string}
  */
-function valuesToSQL(values) {
-  if (values.type === 'select') return selectToSQL(values)
-  const clauses = values.map(exprToSQL)
-  return `(${clauses.join('), (')})`
+function valuesToSQL(stmt) {
+  const { type } = stmt
+  if (type === 'select') return selectToSQL(stmt)
+  const values = type === 'values' ? stmt.values : stmt
+  const clauses = values.map(value => {
+    const sql = exprToSQL(value)
+    return [toUpper(value.prefix), `(${sql})`].filter(hasVal).join('')
+  })
+  return clauses.join(', ')
 }
 
 function partitionToSQL(partition) {
@@ -77,7 +82,7 @@ function insertToSQL(stmt) {
   const { keyword, set: duplicateSet } = onDuplicateUpdate || {}
   const clauses = [toUpper(type), orExpr.map(literalToSQL).join(' '), toUpper(prefix), tablesToSQL(table), partitionToSQL(partition)]
   if (Array.isArray(columns)) clauses.push(`(${columns.map(literalToSQL).join(', ')})`)
-  clauses.push(commonOptionConnector(Array.isArray(values) ? 'VALUES' : '', valuesToSQL, values))
+  clauses.push(commonOptionConnector(values && values.type === 'values' ? 'VALUES' : '', valuesToSQL, values))
   clauses.push(commonOptionConnector('ON CONFLICT', conflictToSQL, conflict))
   clauses.push(commonOptionConnector('SET', setToSQL, set))
   clauses.push(commonOptionConnector('WHERE', exprToSQL, where))

@@ -2061,7 +2061,7 @@ with_clause
     }
 
 cte_definition
-  = name:(literal_string / ident_name / table_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:set_op_stmt __ RPAREN {
+  = name:(literal_string / ident_name / table_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:(value_clause / set_op_stmt) __ RPAREN {
     if (typeof name === 'string') name = { type: 'default', value: name }
     if (name.table) name = { type: 'default', value: name.table }
     return { name, stmt, columns };
@@ -2411,12 +2411,11 @@ table_base
     }
   / stmt:value_clause __ alias:alias_clause? {
     return {
-      expr: { type: 'values', values: stmt, prefix: 'row' },
+      expr: stmt,
       as: alias
     };
   }
   / l:('LATERAL'i)? __ LPAREN __ stmt:(set_op_stmt / value_clause) __ RPAREN __ alias:alias_clause? {
-      if (Array.isArray(stmt)) stmt = { type: 'values', values: stmt, prefix: 'row' }
       stmt.parentheses = true;
       const result = {
         expr: stmt,
@@ -2654,8 +2653,8 @@ replace_insert_stmt
       }
       if (c) {
         let table = t && t.table || null
-        if(Array.isArray(v)) {
-          v.forEach((row, idx) => {
+        if(Array.isArray(v.values)) {
+          v.values.forEach((row, idx) => {
             if(row.value.length != c.length) {
               throw new Error(`Error: column count doesn't match value count at row ${idx+1}`)
             }
@@ -2756,7 +2755,7 @@ replace_insert
   / KW_REPLACE  { return 'replace'; }
 
 value_clause
-  = KW_VALUES __ l:value_list  { return l; }
+  = KW_VALUES __ l:value_list  { return { type: 'values', values: l } }
 
 value_list
   = head:value_item tail:(__ COMMA __ value_item)* {
@@ -2764,7 +2763,8 @@ value_list
     }
 
 value_item
-  = 'ROW'i? __ LPAREN __ l:expr_list  __ RPAREN {
+  = r:'ROW'i? __ LPAREN __ l:expr_list  __ RPAREN {
+      l.prefix = r && r.toLowerCase();
       return l;
     }
 
