@@ -1304,7 +1304,14 @@ describe('mysql', () => {
           SELECT * FROM T, U`,
           "WITH RECURSIVE `T` AS (SELECT 'foo'), `U` AS (SELECT 'bar') SELECT * FROM `T`, `U`"
         ]
-      }
+      },
+      {
+        title: 'xor operator',
+        sql: [
+          "SELECT * FROM T WHERE a LIKE 'foobar%' XOR c = d",
+          "SELECT * FROM `T` WHERE `a` LIKE 'foobar%' XOR `c` = `d`"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

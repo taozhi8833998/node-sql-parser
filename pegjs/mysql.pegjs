@@ -3137,7 +3137,7 @@ or_and_expr
   }
 
 or_and_where_expr
-	= head:expr tail:(__ (KW_AND / KW_OR / COMMA) __ expr)* {
+	= head:expr tail:(__ (KW_AND / KW_OR / COMMA / LOGIC_OPERATOR) __ expr)* {
     const len = tail.length
     let result = head;
     let seperator = ''
@@ -3264,7 +3264,7 @@ regexp_op_right
   }
 
 like_op_right
-  = op:like_op __ right:(literal / param / comparison_expr ) __ es:escape_op? {
+  = op:like_op __ right:(literal / param / comparison_expr) __ es:escape_op? {
       if (es) right.escape = es
       return { op: op, right: right };
     }
