@@ -1771,7 +1771,7 @@ alter_sequence_stmt
         }
       }
   }
-  
+
 alter_function_stmt
   = KW_ALTER __ t:'FUNCTION'i __ s:table_name __ ags:(LPAREN __ alter_func_args? __ RPAREN)? __ ac:(ALTER_RENAME / ALTER_OWNER_TO / ALTER_SET_SCHEMA) {
     // => AstStatement<alter_resource_stmt_node>
@@ -5083,7 +5083,7 @@ position_func_clause
         ...getLocationObject(),
     };
   }
-  
+
 trim_position
   = 'BOTH'i / 'LEADING'i / 'TRAILING'i
 
@@ -5756,6 +5756,10 @@ KW_REGPROC  = "REGPROC"i     !ident_start { return 'REGPROC'; }
 KW_REGPROCEDURE  = "REGPROCEDURE"i     !ident_start { return 'REGPROCEDURE'; }
 KW_REGROLE  = "REGROLE"i     !ident_start { return 'REGROLE'; }
 KW_REGTYPE  = "REGTYPE"i     !ident_start { return 'REGTYPE'; }
+KW_CIDR = "CIDR"i     !ident_start { return 'CIDR'; }
+KW_INET = "INET"i     !ident_start { return 'INET'; }
+KW_MACADDR = "MACADDR"i     !ident_start { return 'MACADDR'; }
+KW_MACADDR8 = "MACADDR8"i     !ident_start { return 'MACADDR8'; }
 
 KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
 KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
@@ -6121,6 +6125,7 @@ data_type
   / binary_type
   / oid_type
   / record_type
+  / network_address_type
   / custom_types
 
 
@@ -6245,6 +6250,9 @@ uuid_type
 
 record_type
   = 'RECORD'i {/* =>  data_type */  return { dataType: 'RECORD' }}
+
+network_address_type
+  = t:(KW_INET / KW_CIDR / KW_MACADDR8 / KW_MACADDR) {/* =>  data_type */  return { dataType: t }}
 
 custom_types
   = name:ident_name &{ return customTypes.has(name) } {
