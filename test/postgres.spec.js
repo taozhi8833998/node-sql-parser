@@ -2259,6 +2259,19 @@ describe('Postgres', () => {
           'CREATE UNLOGGED TABLE "t1" (id INTEGER PRIMARY KEY, data TEXT)'
         ]
       },
+      {
+        title: 'network address type',
+        sql: [
+          `CREATE TABLE "network_address" (
+              id integer PRIMARY KEY,
+              inet_address inet,
+              cidr_address cidr,
+              mac_address macaddr,
+              mac_address8 macaddr8
+          );`,
+          'CREATE TABLE "network_address" (id INTEGER PRIMARY KEY, inet_address INET, cidr_address CIDR, mac_address MACADDR, mac_address8 MACADDR8)'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
