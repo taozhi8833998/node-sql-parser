@@ -1094,7 +1094,7 @@ ALTER_OPERATE_PARTITION
       }
       return expr
   }
-    
+
 ALTER_ADD_COLUMN
   = KW_ADD __
     kc:KW_COLUMN? __
@@ -1745,7 +1745,7 @@ transaction_mode_isolation_level
       value: `read ${e.toLowerCase()}`
     }
   }
-  
+
 transaction_mode
   = 'ISOLATION'i __ 'LEVEL'i __ l:transaction_mode_isolation_level {
     return {
@@ -1808,7 +1808,7 @@ transaction_stmt
       }
     }
   }
-  
+
 load_data_field
   = k:('FIELDS'i / 'COLUMNS'i) __ t:('TERMINATED'i __ 'BY'i __ ident_without_kw_type)? __ en:(('OPTIONALLY'i)? __ 'ENCLOSED'i __ 'BY'i __ ident_without_kw_type)? __ es:('ESCAPED'i __ 'BY'i __ ident_without_kw_type)? {
     if (t) t[4].prefix = 'TERMINATED BY'
@@ -3203,7 +3203,7 @@ ident_start = [A-Za-z_\u4e00-\u9fa5]
 ident_part  = [A-Za-z0-9_$$\u4e00-\u9fa5\u00C0-\u017F]
 
 // to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_:]
+column_part  = [A-Za-z0-9_:\u4e00-\u9fa5\u00C0-\u017F]
 
 param
   = l:(':' ident_name) {
@@ -3612,7 +3612,7 @@ literal_basic
   / literal_bool
   / literal_null
   / literal_datetime
-  
+
 literal
   = literal_basic / literal_numeric
 

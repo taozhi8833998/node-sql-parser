@@ -3558,7 +3558,7 @@ ident_start = [A-Za-z_\u4e00-\u9fa5]
 ident_part  = [A-Za-z0-9_$\u0080-\uffff]
 
 // to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_\u4e00-\u9fa5]
+column_part  = [A-Za-z0-9_\u4e00-\u9fa5\u00C0-\u017F]
 
 param
   = l:(':' ident_name) {
@@ -3970,7 +3970,7 @@ cast_data_type
     if (p && s) t.quoted = '"'
     return t
   }
-  
+
 cast_double_colon
   = s:(KW_DOUBLE_COLON __ cast_data_type)+ __ alias:alias_clause? {
     return {

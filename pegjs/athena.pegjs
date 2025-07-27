@@ -1097,7 +1097,7 @@ column_list_item
 
 value_alias_clause
   = KW_AS? __ i:(func_call / alias_ident) { return i; }
-  
+
 alias_clause
   = KW_AS __ i:(func_call / alias_ident) { return i; }
   / KW_AS? __ i:ident { return i; }
@@ -2015,7 +2015,7 @@ ident_start = [A-Za-z_]
 ident_part  = [A-Za-z0-9_]
 
 // to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_:]
+column_part  = [A-Za-z0-9_:\u4e00-\u9fa5\u00C0-\u017F]
 
 param
   = l:(':' ident_name) {
@@ -2114,7 +2114,7 @@ distinct_args
     }
     return { distinct: d, expr: result, orderby: or };
   }
-  
+
 count_arg
   = e:star_expr { return { expr: e }; }
   / distinct_args
@@ -2172,7 +2172,7 @@ trim_func_clause
         args,
     };
   }
-  
+
 func_call
   = name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {

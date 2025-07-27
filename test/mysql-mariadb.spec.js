@@ -382,7 +382,7 @@ describe('mysql', () => {
           'SELECT * FROM (`t1` AS `eti` INNER JOIN `bagel` ON `bagel`.`id` = `eti`.`id`) ; SELECT * FROM ((`t1`))'
         ]
       },
-      
+
       {
         title: 'blob data type',
         sql: [
@@ -1229,8 +1229,8 @@ describe('mysql', () => {
             inner join salaries using (emp_no)
           order by emp_no desc;
 
-          SELECT * FROM \`employees\` 
-          INNER JOIN \`salaries\` USING (\`emp_no\`) 
+          SELECT * FROM \`employees\`
+          INNER JOIN \`salaries\` USING (\`emp_no\`)
           ORDER BY \`emp_no\` DESC;`,
           'SELECT * FROM `employees` INNER JOIN `salaries` USING (emp_no) ORDER BY `emp_no` DESC ; SELECT * FROM `employees` INNER JOIN `salaries` USING (`emp_no`) ORDER BY `emp_no` DESC'
         ]
@@ -1312,6 +1312,13 @@ describe('mysql', () => {
           "SELECT * FROM `T` WHERE `a` LIKE 'foobar%' XOR `c` = `d`"
         ]
       },
+      {
+        title: 'support accentuated identifiers',
+        sql: [
+          "SELECT crème AS brûlée FROM café WHERE théâtre = 'Molière'",
+          "SELECT `crème` AS `brûlée` FROM `café` WHERE `théâtre` = 'Molière'"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
@@ -1322,13 +1329,13 @@ describe('mysql', () => {
         expect(getParsedSql(sql[0], mariadb)).to.equal(sql[1])
       })
     })
-    
+
     it('should throw error when args is not right', () => {
       let sql = `select convert(json_unquote(json_extract('{"thing": "252"}', "$.thing")));`
       expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "*", "+", ",", "-", "--", "->", "->>", "/", "/*", "<", "<<", "<=", "<>", "<@", "=", ">", ">=", ">>", "?", "?&", "?|", "@>", "AND", "BETWEEN", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "mod", "|", "||", or [ \\t\\n\\r] but ")" found.')
       expect(parser.astify.bind(parser, 'select convert("");')).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "*", "+", ",", "-", "--", "->", "->>", "/", "/*", "<", "<<", "<=", "<>", "<@", "=", ">", ">=", ">>", "?", "?&", "?|", "@>", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "OR", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "mod", "|", "||", or [ \\t\\n\\r] but ")" found.')
       sql = 'SELECT AVG(Quantity,age) FROM table1;'
-      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "(", ")", "*", "+", "-", "--", "->", "->>", ".", "/", "/*", "<", "<<", "<=", "<>", "<@", "=", ">", ">=", ">>", "?", "?&", "?|", "@>", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "REGEXP", "RLIKE", "XOR", "^", "div", "mod", "|", "||", [ \\t\\n\\r], [A-Za-z0-9_$\\x80-￿], or [A-Za-z0-9_:] but "," found')
+      expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "(", ")", "*", "+", "-", "--", "->", "->>", ".", "/", "/*", "<", "<<", "<=", "<>", "<@", "=", ">", ">=", ">>", "?", "?&", "?|", "@>", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "REGEXP", "RLIKE", "XOR", "^", "div", "mod", "|", "||", [ \\t\\n\\r], [A-Za-z0-9_$\\x80-￿], or [A-Za-z0-9_:一-龥À-ſ] but "," found')
     })
 
     it('should join multiple table with comma', () => {

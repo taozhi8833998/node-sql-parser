@@ -1104,7 +1104,7 @@ create_constraint_default
         with_values: w && { type: 'origin', value: 'with values' },
       }
   }
-  
+
 create_constraint_foreign
   = kc:constraint_name? __
   p:('FOREIGN KEY'i) __
@@ -2603,7 +2603,7 @@ ident_start = [A-Za-z_@#\u4e00-\u9fa5]
 ident_part  = [A-Za-z0-9_\-@$$\u4e00-\u9fa5\u00C0-\u017F]
 
 // to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_:]
+column_part  = [A-Za-z0-9_:\u4e00-\u9fa5\u00C0-\u017F]
 
 param
   = l:(':' ident_name) {
@@ -2794,7 +2794,7 @@ distinct_args
   / d:KW_DISTINCT? __ c:or_and_expr __ s:concat_separator? __ or:order_by_clause? {
     return { distinct: d, expr: c, orderby: or, separator: s };
   }
-  
+
 count_arg
   = e:star_expr { return { expr: e }; }
   / distinct_args
@@ -2816,7 +2816,7 @@ within_group
   = 'WITHIN'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN {
       return { type: 'within', keyword: 'group', orderby: or };
   }
-  
+
 func_call
   = name:scalar_func __ LPAREN __ l:expr_list? __ RPAREN __ bc:over_partition? {
       return {
@@ -3541,4 +3541,3 @@ uniqueidentifier_type
   = lb:LBRAKE? __ t:(KW_UNIQUEIDENTIFIER) __ rb:RBRAKE? !{ return (lb && !rb) || (!lb && rb) } {
     return { dataType: t }
   }
-

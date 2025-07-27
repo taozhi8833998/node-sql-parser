@@ -1297,7 +1297,7 @@ ALTER_OPERATE_PARTITION
       }
       return expr
   }
-  
+
 ALTER_ADD_COLUMN
   = KW_ADD __
     kc:KW_COLUMN __
@@ -2028,7 +2028,7 @@ transaction_mode_isolation_level
       value: `read ${e.toLowerCase()}`
     }
   }
-  
+
 transaction_mode
   = 'ISOLATION'i __ 'LEVEL'i __ l:transaction_mode_isolation_level {
     return {
@@ -3483,7 +3483,7 @@ ident_start = [A-Za-z_\u4e00-\u9fa5]
 ident_part  = [A-Za-z0-9_$\u0080-\uffff]
 
 // to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_:]
+column_part  = [A-Za-z0-9_:\u4e00-\u9fa5\u00C0-\u017F]
 
 param
   = l:(':' ident_name) {
@@ -3893,10 +3893,10 @@ literal_basic
   / literal_bool
   / literal_null
   / literal_datetime
-  
+
 literal
   = literal_basic / literal_numeric
-  
+
 
 literal_list
   = head:literal tail:(__ COMMA __ literal)* {
@@ -3965,7 +3965,7 @@ literal_string
         value: ca[1].join('')
       };
     }
-  
+
 
 literal_datetime
   = type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("'" single_char* "'") {
