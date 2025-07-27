@@ -195,7 +195,7 @@
     columnList.clear()
     columns.forEach(col => columnList.add(col))
   }
-  
+
   function getSurroundFromLiteralType(literal) {
     switch (literal.type) {
       case 'double_quote_string':
@@ -2484,7 +2484,7 @@ column_ref
       return {
         type: 'column_ref',
         table: null,
-        column, 
+        column,
         collate: ce && ce[1],
         ...getLocationObject()
       };
@@ -2579,7 +2579,7 @@ ident_start = [A-Za-z_]
 ident_part  = [A-Za-z0-9_-]
 
 // to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_:]
+column_part  = [A-Za-z0-9_:\u4e00-\u9fa5\u00C0-\u017F]
 
 param
   = s:(':'/'@') n:ident_name {

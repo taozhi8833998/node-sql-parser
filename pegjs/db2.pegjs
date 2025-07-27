@@ -1047,7 +1047,7 @@ select_stmt_nake
     g:group_by_clause?  __
     h:having_clause?    __
     o:order_by_clause?  __
-    l:limit_clause? 
+    l:limit_clause?
     iso:isolation_clause? __ {
       if(f) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
       return {
@@ -1972,7 +1972,7 @@ ident_start = [A-Za-z_\u4e00-\u9fa5]
 ident_part  = [A-Za-z0-9_$\u4e00-\u9fa5\u00C0-\u017F]
 
 // to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_:]
+column_part  = [A-Za-z0-9_:\u4e00-\u9fa5\u00C0-\u017F]
 
 param
   = l:(':' ident_name) {
