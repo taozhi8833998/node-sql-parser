@@ -100,7 +100,7 @@ export interface ValueExpr<T = string | number | boolean> {
   value: T;
 }
 
-export type SortDirection = 'ASC' | 'DESC';
+export type SortDirection = 'ASC' | 'DESC' | 'asc' | 'desc';
 
 export interface ColumnRefItem {
   type: "column_ref";
@@ -480,7 +480,7 @@ export interface Create {
   type: "create";
   keyword: "aggregate" | "table" | "trigger" | "extension" | "function" | "index" | "database" | "schema" | "view" | "domain" | "type" | "user";
   temporary?: "temporary" | null;
-  table?: { db: string; table: string }[];
+  table?: { db: string; table: string }[] | { db: string | null, table: string };
   if_not_exists?: "if not exists" | null;
   like?: {
     type: "like";
@@ -496,9 +496,9 @@ export interface Create {
     keyword: "using";
     type: "btree" | "hash";
   } | null;
-  index?: string | null;
+  index?: string | null | { schema: string | null, name: string};
   on_kw?: "on" | null;
-  index_columns?: any[] | null;
+  index_columns?: ColumnRefItem[] | null;
   index_type?: "unique" | "fulltext" | "spatial" | null;
   index_options?: any[] | null;
   algorithm_option?: {
@@ -517,6 +517,7 @@ export interface Create {
   } | null;
   database?: string;
   loc?: LocationRange;
+  where?: Binary | Function | null
 }
 
 export interface Drop {
