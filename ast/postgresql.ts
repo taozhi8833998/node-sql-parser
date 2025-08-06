@@ -905,7 +905,7 @@ export type select_stmt_parentheses = select_stmt_node;
 
 export type select_stmt = { type: 'select'; } | select_stmt_nake | select_stmt_parentheses;
 
-export type with_clause = cte_definition[] | [cte_definition & { recursive: true; }];
+export type with_clause = cte_definition[] | (cte_definition & { recursive?: true; })[];
 
 export type cte_definition = { name: { type: 'default'; value: string; }; stmt: crud_stmt; columns?: cte_column_definition; };
 
@@ -1162,7 +1162,7 @@ export type replace_insert = 'insert' | 'replace';
 
 
 
-export type value_clause = value_list;
+export type value_clause = { type: 'values', values: value_list };
 
 export type value_list = value_item[];
 
@@ -1277,7 +1277,7 @@ export type primary_array_index = primary & { array_index: array_index };
 
 export type jsonb_expr = primary_array_index | binary_expr;
 
-export type string_constants_escape = { type: 'origin'; value: string; };
+export type string_constants_escape = { type: 'default'; value: string; };
 
 
 
@@ -1785,6 +1785,14 @@ type KW_REGROLE = never;
 
 type KW_REGTYPE = never;
 
+type KW_CIDR = never;
+
+type KW_INET = never;
+
+type KW_MACADDR = never;
+
+type KW_MACADDR8 = never;
+
 type KW_CURRENT_DATE = never;
 
 type KW_ADD_DATE = never;
@@ -2059,5 +2067,9 @@ export type uuid_type = data_type;
 
 
 export type record_type = data_type;
+
+
+
+export type network_address_type = data_type;
 
 export type custom_types = data_type;
