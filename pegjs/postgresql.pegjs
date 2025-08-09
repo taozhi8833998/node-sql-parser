@@ -3425,8 +3425,8 @@ column_clause
   / column_list_items
 
 array_index
-  = LBRAKE __ n:(literal_numeric / literal_string) __ RBRAKE {
-    // => { brackets: boolean, number: number }
+  = LBRAKE __ n:(literal_numeric / literal_string / func_call) __ RBRAKE {
+    // => { brackets: boolean, index: literal_numeric | literal_string | func_call }
     return {
       brackets: true,
       index: n

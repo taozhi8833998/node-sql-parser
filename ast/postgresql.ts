@@ -939,7 +939,7 @@ export type column_list_items = column_list_item[];
 
 export type column_clause = 'ALL' | '*' | column_list_item[] | column_list_items;
 
-export type array_index = { brackets: boolean, number: number };
+export type array_index = { brackets: boolean, index: literal_numeric | literal_string | func_call };
 
 export type array_index_list = array_index[];
 

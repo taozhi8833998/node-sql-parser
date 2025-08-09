@@ -29,7 +29,7 @@ function arrayIndexToSQL(arrayIndexList) {
   if (!arrayIndexList || arrayIndexList.length === 0) return ''
   const result = []
   for (const arrayIndex of arrayIndexList) {
-    let arrayIndexStr = arrayIndex.brackets ? `[${literalToSQL(arrayIndex.index)}]` : `${arrayIndex.notation}${literalToSQL(arrayIndex.index)}`
+    let arrayIndexStr = arrayIndex.brackets ? `[${exprToSQL(arrayIndex.index)}]` : `${arrayIndex.notation}${exprToSQL(arrayIndex.index)}`
     if (arrayIndex.property) arrayIndexStr = `${arrayIndexStr}.${literalToSQL(arrayIndex.property)}`
     result.push(arrayIndexStr)
   }
