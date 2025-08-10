@@ -1893,6 +1893,26 @@ describe('Postgres', () => {
         'CREATE TABLE "sal_emp" (name TEXT, pay_by_quarter INTEGER[], schedule TEXT[][])'
       ]
     },
+    {
+      title: 'bracket array index with func call',
+      sql: [
+        `SELECT
+          p.description AS description,
+          p.invoice_date AS invoice_date
+        FROM anonymized_schema.payments p
+        JOIN anonymized_schema.entities e
+          ON p.entity_id = e.entity_id
+        LEFT JOIN anonymized_schema.entities pe
+          ON p.parent_entity_id = pe.entity_id
+        LEFT JOIN anonymized_schema.entities ppe
+          ON pe.parent_ids[ array_upper(pe.parent_ids, 1) ] = ppe.entity_id
+        WHERE e.entity_type IN ('A', 'B')
+          AND p.invoice_date >= '2025-08-01'
+          AND p.invoice_date <  '2025-09-01'
+          AND CAST(p.amount AS NUMERIC) > 0`,
+        `SELECT "p".description AS "description", "p".invoice_date AS "invoice_date" FROM "anonymized_schema"."payments" AS "p" INNER JOIN "anonymized_schema"."entities" AS "e" ON "p".entity_id = "e".entity_id LEFT JOIN "anonymized_schema"."entities" AS "pe" ON "p".parent_entity_id = "pe".entity_id LEFT JOIN "anonymized_schema"."entities" AS "ppe" ON "pe".parent_ids[array_upper("pe".parent_ids, 1)] = "ppe".entity_id WHERE "e".entity_type IN ('A', 'B') AND "p".invoice_date >= '2025-08-01' AND "p".invoice_date < '2025-09-01' AND CAST("p".amount AS NUMERIC) > 0`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
