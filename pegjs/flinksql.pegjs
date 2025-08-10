@@ -1745,7 +1745,7 @@ expr_item
     if (a) e.array_index = a
     return e
   }
-  
+
 column_list_item
   = e:binary_column_expr s:KW_DOUBLE_COLON t:data_type {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: data_type;  as?: null; }
@@ -2831,7 +2831,7 @@ ident_name
       return start + parts.join('');
     }
 
-ident_start = [A-Za-z_\u4e00-\u9fa5]
+ident_start = [A-Za-z_\u4e00-\u9fa5\u00C0-\u017F]
 
 ident_part  = [A-Za-z0-9_\-$\u4e00-\u9fa5\u00C0-\u017F]
 

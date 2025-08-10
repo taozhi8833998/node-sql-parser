@@ -1319,6 +1319,13 @@ describe('mysql', () => {
           "SELECT `crème` AS `brûlée` FROM `café` WHERE `théâtre` = 'Molière'"
         ]
       },
+      {
+        title: 'support accentuated identifiers',
+        sql: [
+          "SELECT crème AS brûlée FROM café WHERE âtre = 'Molière'",
+          "SELECT `crème` AS `brûlée` FROM `café` WHERE `âtre` = 'Molière'"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
