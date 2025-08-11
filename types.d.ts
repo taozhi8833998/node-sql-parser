@@ -108,7 +108,7 @@ export interface ColumnRefItem {
   column: string | { expr: ValueExpr };
   options?: ExprList;
   loc?: LocationRange;
-  collate?: { collate: CollateExpr };
+  collate?: { collate: CollateExpr } | null;
   order_by?: SortDirection | null;
 }
 export interface ColumnRefExpr {
