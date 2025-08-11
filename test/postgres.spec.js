@@ -2390,7 +2390,7 @@ describe('Postgres', () => {
     it('should throw error', () => {
       const sql = "select 1 as 'one'"
       const fun = parser.astify.bind(parser, sql, opt)
-      expect(fun).to.throw(`Expected "--", "/*", "\\"", [ \\t\\n\\r], or [A-Za-z_一-龥] but "'" found.`)
+      expect(fun).to.throw(`Expected "--", "/*", "\\"", [ \\t\\n\\r], or [A-Za-z_一-龥À-ſ] but "'" found.`)
     })
   })
   describe('pg parse speed', function () {
