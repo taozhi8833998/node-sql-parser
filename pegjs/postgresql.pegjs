@@ -1295,6 +1295,13 @@ column_definition_opt
     // => { comment: keyword_comment; }
     return { comment: co }
   }
+  / gbd:('GENERATED'i)? __ 'BY'i __ 'DEFAULT'i __ 'AS'i __ 'IDENTITY'i {
+    // => { generated_by_default: { type: 'origin', value: string } }
+    const sql = []
+    if (gbd) sql.push('generated')
+    sql.push('by', 'default', 'as', 'identity')
+    return { generated_by_default: { type: 'origin', value: sql.join(' ').toLowerCase('') } }
+  }
   / ca:collate_expr {
     // => { collate: collate_expr; }
     return { collate: ca }
