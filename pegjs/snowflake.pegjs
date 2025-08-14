@@ -3446,14 +3446,23 @@ column_ref
           ...getLocationObject()
       }
     }
-  / schema:ident tbl:(__ column_symbol __ ident_without_kw) col:(__ column_symbol __ column_without_kw) ce:(__ collate_expr)? {
-      columnList.add(`select::${schema}.${tbl[3]}::${col[3]}`);
+  / schema:ident tbl:(__ column_symbol __ ident_without_kw) col:(__ column_symbol __ column_without_kw)+ ce:(__ collate_expr)? {
+      if (col.length === 1) {
+        columnList.add(`select::${schema}.${tbl[3]}::${col[0][3]}`);
+        return {
+          type: 'column_ref',
+          schema: schema,
+          notations: [tbl[1], col[0][1]],
+          table: tbl[3],
+          column: col[0][3],
+          collate: ce && ce[1],
+          ...getLocationObject()
+        };
+      }
+      const left = createBinaryExpr(column_symbol, schema, tbl[3])
       return {
         type: 'column_ref',
-        schema: schema,
-        notations: [tbl[1], col[1]],
-        table: tbl[3],
-        column: col[3],
+        column: { expr: createBinaryExprChain(left, col) },
         collate: ce && ce[1],
         ...getLocationObject()
       };
@@ -3564,7 +3573,7 @@ column_without_kw_type
     return { type: 'default', value: n }
   }
   / quoted_ident_type
-  
+
 column
   = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { /* => string */ return name; }
   / quoted_ident
@@ -4037,7 +4046,7 @@ cast_data_type
     if (p && s) t.quoted = '"'
     return t
   }
-  
+
 cast_double_colon
   = s:(KW_DOUBLE_COLON __ cast_data_type)+ __ alias:alias_clause? {
     return {
@@ -4046,7 +4055,7 @@ cast_double_colon
       target: s.map(v => v[2]),
     }
   }
-  
+
 cast_expr
   = c:(KW_CAST / KW_TRY_CAST) __ LPAREN __ e:expr __ KW_AS __ t:data_type __ RPAREN {
     // => IGNORE

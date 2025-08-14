@@ -1897,13 +1897,21 @@ jsonb_expr
   }
 
 column_ref
-  = schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column) ce:(__ collate_expr)? {
-      columnList.add(`select::${schema}.${tbl[3]}::${col[3].value || col[3]}`);
+  = schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column)+ ce:(__ collate_expr)? {
+      if (col.length === 1) {
+        columnList.add(`select::${schema}.${tbl[3]}::${col[0][3].value || col[0][3]}`);
+        return {
+          type: 'column_ref',
+          schema: schema,
+          table: tbl[3],
+          column: col[0][3],
+          collate: ce && ce[1],
+        };
+      }
+      const left = createBinaryExpr('.', schema, tbl[3])
       return {
         type: 'column_ref',
-        schema: schema,
-        table: tbl[3],
-        column: col[3],
+        column: { expr: createBinaryExprChain(left, col) },
         collate: ce && ce[1],
       };
     }

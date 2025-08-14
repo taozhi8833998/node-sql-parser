@@ -500,7 +500,7 @@ describe('snowflake', () => {
               name
             ORDER BY
               created_at ASC RANGE BETWEEN INTERVAL '9 DAYS' PRECEDING
-              AND CURRENT ROW 
+              AND CURRENT ROW
           ) last10Dmatches
         FROM
           model1`,
@@ -546,7 +546,7 @@ describe('snowflake', () => {
       expect(getParsedSql(sql[0], opt)).to.equal(sql[1])
     })
   })
-  
+
   describe('white list check db.schema::table', () => {
     it('should check pass db.schema.table', () => {
       let sql = 'SELECT * from foo.bar.baz'
