@@ -1236,7 +1236,7 @@ describe('mysql', () => {
         ]
       },
       {
-        titel: 'alter table truncate partiton',
+        title: 'alter table truncate partiton',
         sql: [
           'ALTER TABLE test_table TRUNCATE PARTITION p202503,p202504;',
           'ALTER TABLE `test_table` TRUNCATE PARTITION `p202503`, `p202504`'
@@ -1326,6 +1326,41 @@ describe('mysql', () => {
           "SELECT `crème` AS `brûlée` FROM `café` WHERE `âtre` = 'Molière'"
         ]
       },
+      {
+        title: 'support json_table with basic columns',
+        sql: [
+          `select * from json_table('{"name": "John", "age": 30}', '$' columns (name varchar(50) path '$.name', age int path '$.age')) as jt`,
+          `SELECT * FROM JSON_TABLE( '{"name": "John", "age": 30}' , '$' COLUMNS (\`name\` VARCHAR(50) PATH '$.name', \`age\` INT PATH '$.age') ) AS \`jt\``
+        ]
+      },
+      {
+        title: 'support json_table with ordinality',
+        sql: [
+          `select * from json_table('[{"name": "John"}, {"name": "Jane"}]', '$[*]' columns (row_id for ordinality, name varchar(50) path '$.name')) as jt`,
+          `SELECT * FROM JSON_TABLE( '[{"name": "John"}, {"name": "Jane"}]' , '$[*]' COLUMNS (\`row_id\` FOR ORDINALITY, \`name\` VARCHAR(50) PATH '$.name') ) AS \`jt\``
+        ]
+      },
+      {
+        title: 'support json_table with exists',
+        sql: [
+          `select * from json_table('{"users": [{"name": "John", "email": "john@example.com"}]}', '$.users[*]' columns (name varchar(50) path '$.name', has_email boolean exists path '$.email')) as jt`,
+          `SELECT * FROM JSON_TABLE( '{"users": [{"name": "John", "email": "john@example.com"}]}' , '$.users[*]' COLUMNS (\`name\` VARCHAR(50) PATH '$.name', \`has_email\` BOOLEAN EXISTS PATH '$.email') ) AS \`jt\``
+        ]
+      },
+      {
+        title: 'support json_table with nested columns',
+        sql: [
+          `select * from json_table('{"users": [{"name": "John", "contacts": [{"type": "email", "value": "john@example.com"}]}]}', '$.users[*]' columns (name varchar(50) path '$.name', nested path '$.contacts[*]' columns (contact_type varchar(20) path '$.type', contact_value varchar(100) path '$.value'))) as jt`,
+          `SELECT * FROM JSON_TABLE( '{"users": [{"name": "John", "contacts": [{"type": "email", "value": "john@example.com"}]}]}' , '$.users[*]' COLUMNS (\`name\` VARCHAR(50) PATH '$.name', NESTED PATH '$.contacts[*]' COLUMNS (\`contact_type\` VARCHAR(20) PATH '$.type', \`contact_value\` VARCHAR(100) PATH '$.value')) ) AS \`jt\``
+        ]
+      },
+      {
+        title: 'support json_table with on empty and on error clauses',
+        sql: [
+          `select * from json_table('{"data": [{"name": "John"}]}', '$.data[*]' columns (name varchar(50) path '$.name', age int path '$.age' default '0' on empty error on error)) as jt`,
+          `SELECT * FROM JSON_TABLE( '{"data": [{"name": "John"}]}' , '$.data[*]' COLUMNS (\`name\` VARCHAR(50) PATH '$.name', \`age\` INT PATH '$.age' DEFAULT '0' ON EMPTY ERROR ON ERROR) ) AS \`jt\``
+        ]
+      }
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo

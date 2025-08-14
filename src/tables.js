@@ -3,7 +3,7 @@ import { columnRefToSQL } from './column'
 import { exprToSQL } from './expr'
 import { valuesToSQL } from './insert'
 import { intervalToSQL } from './interval'
-import { commonOptionConnector, commonTypeValue, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
+import { commonOptionConnector, commonTypeValue, dataTypeToSQL, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
 
 function unnestToSQL(unnestExpr) {
   const { type, as, expr, with_offset: withOffset } = unnestExpr
@@ -112,6 +112,84 @@ function generateVirtualTable(stmt) {
   return `${toUpper(keyword)}(${toUpper(type)}(${generatorSQL}))`
 }
 
+function jsonTableOnClauseToSQL(onClause, clauseType) {
+  const { type, value } = onClause
+
+  switch (type) {
+    case 'null':
+      return `NULL ON ${clauseType}`
+    case 'default':
+      return `DEFAULT ${literalToSQL(value)} ON ${clauseType}`
+    case 'error':
+      return `ERROR ON ${clauseType}`
+    default:
+      return ''
+  }
+}
+
+function jsonTableColumnToSQL(column) {
+  const { type, name, datatype, path, on_empty, on_error, columns } = column
+
+  switch (type) {
+    case 'ordinality':
+      return `${identifierToSql(name)} FOR ORDINALITY`
+
+    case 'column':
+      const result = [identifierToSql(name)]
+      if (datatype) {
+        result.push(dataTypeToSQL(datatype))
+      }
+      result.push('PATH', literalToSQL(path))
+
+      if (on_empty) {
+        result.push(jsonTableOnClauseToSQL(on_empty, 'EMPTY'))
+      }
+      if (on_error) {
+        result.push(jsonTableOnClauseToSQL(on_error, 'ERROR'))
+      }
+
+      return result.join(' ')
+
+    case 'exists':
+      const existsResult = [identifierToSql(name)]
+      if (datatype) {
+        existsResult.push(dataTypeToSQL(datatype))
+      }
+      existsResult.push('EXISTS PATH', literalToSQL(path))
+      return existsResult.join(' ')
+
+    case 'nested':
+      const nestedResult = ['NESTED PATH', literalToSQL(path), 'COLUMNS']
+      if (columns && columns.length > 0) {
+        const columnsList = columns.map(jsonTableColumnToSQL).join(', ')
+        nestedResult.push(`(${columnsList})`)
+      }
+      return nestedResult.join(' ')
+
+    default:
+      return ''
+  }
+}
+
+function jsonTableToSQL(jsonTableExpr) {
+  const { expr, path, columns } = jsonTableExpr
+
+  const result = ['JSON_TABLE(']
+  result.push(exprToSQL(expr))
+  result.push(',')
+  result.push(literalToSQL(path))
+  result.push('COLUMNS')
+
+  if (columns && columns.length > 0) {
+    const columnsList = columns.map(jsonTableColumnToSQL).join(', ')
+    result.push(`(${columnsList})`)
+  }
+
+  result.push(')')
+
+  return result.join(' ')
+}
+
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
   const { table, db, as, expr, operator, prefix: prefixStr, schema, server, suffix, tablesample, temporal_table, table_hint, surround = {} } = tableInfo
@@ -135,6 +213,9 @@ function tableToSQL(tableInfo) {
         break
       case 'generator':
         tableName = generateVirtualTable(expr)
+        break
+      case 'json_table':
+        tableName = jsonTableToSQL(expr)
         break
       default:
         tableName = exprToSQL(expr)
@@ -223,4 +304,5 @@ export {
   tableOptionToSQL,
   tableToSQL,
   unnestToSQL,
+  jsonTableToSQL,
 }
