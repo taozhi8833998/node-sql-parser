@@ -1682,7 +1682,7 @@ select_stmt_nake
     o:order_by_clause?  __
     l:limit_clause? __
     win:window_clause? {
-      if(Array.isArray(f)) f.forEach(info => info.table && tableList.add(`select::${info.db}::${info.table}`));
+      if(Array.isArray(f)) f.forEach(info => info.table && tableList.add(`select::${[info.db, info.schema].filter(Boolean).join('.') || null}::${info.table}`));
       return {
           type: 'select',
           as_struct_val: sv,
