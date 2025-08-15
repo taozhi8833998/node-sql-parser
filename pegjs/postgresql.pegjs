@@ -4682,7 +4682,7 @@ column_ref
           column: '*'
       }
     }
-  / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column_without_kw_type) ce:(__ collate_expr)? {
+  / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column_without_kw_type)+ ce:(__ collate_expr)? {
     /* => {
         type: 'column_ref';
         schema: string;
@@ -4690,12 +4690,21 @@ column_ref
         column: column | '*';
         collate?: collate_expr;
       } */
-      columnList.add(`select::${schema}.${tbl[3]}::${col[3].value}`);
+
+      if (col.length === 1) {
+        columnList.add(`select::${schema}.${tbl[3]}::${col[0][3].value}`);
+        return {
+          type: 'column_ref',
+          schema: schema,
+          table: tbl[3],
+          column: { expr: col[0][3] },
+          collate: ce && ce[1],
+        };
+      }
+      const left = createBinaryExpr('.', schema, tbl[3])
       return {
         type: 'column_ref',
-        schema: schema,
-        table: tbl[3],
-        column: { expr: col[3] },
+        column: { expr: createBinaryExprChain(left, col) },
         collate: ce && ce[1],
       };
     }
