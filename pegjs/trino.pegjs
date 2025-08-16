@@ -3340,7 +3340,7 @@ multiplicative_operator
   = "*" / "/" / "%" / "||"
 
 column_ref_array_index
-  = c:column_ref __ a:array_index? {
+  = c:column_ref __ a:array_index_list? {
     // => column_ref
     if (a) c.array_index = a
     return c
