@@ -84,6 +84,20 @@ describe('trino', () => {
         `SELECT ddd(split(name, '_')[1]) AS "test" FROM "tableName" WHERE u BETWEEN t('today') AND t('tomorrow') LIMIT 10`
       ]
     },
+    {
+      title: 'array index',
+      sql: [
+        'SELECT a[1] FROM t',
+        'SELECT a[1] FROM "t"'
+      ]
+    },
+    {
+      title: 'array index list',
+      sql: [
+        'SELECT a[1][2], a[2] FROM t',
+        'SELECT a[1][2], a[2] FROM "t"'
+      ]
+    }
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
