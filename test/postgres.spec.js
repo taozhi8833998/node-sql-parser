@@ -2308,6 +2308,20 @@ describe('Postgres', () => {
           'CREATE TABLE "network_address" (id INTEGER PRIMARY KEY, inet_address INET, cidr_address CIDR, mac_address MACADDR, mac_address8 MACADDR8)'
         ]
       },
+      {
+        title: 'smallserial data type',
+        sql: [
+          `CREATE TABLE t_pgsql_generate_test
+          (
+              id_col               SERIAL PRIMARY KEY NOT NULL,
+              small_int_col        SMALLINT           NOT NULL,
+              small_serial_col     SMALLSERIAL        NOT NULL,
+              integer_type_col     INTEGER            NOT NULL,
+              big_int_col          BIGINT             NOT NULL
+          );`,
+          'CREATE TABLE "t_pgsql_generate_test" (id_col SERIAL NOT NULL PRIMARY KEY, small_int_col SMALLINT NOT NULL, small_serial_col SMALLSERIAL NOT NULL, integer_type_col INTEGER NOT NULL, big_int_col BIGINT NOT NULL)'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
