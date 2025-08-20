@@ -539,6 +539,13 @@ describe('snowflake', () => {
         'SELECT "my ""column"""'
       ]
     },
+    {
+      title: 'array index',
+      sql: [
+        "SELECT split('12-34', '-')[0] FROM DUAL",
+        "SELECT split('12-34', '-')[0] FROM DUAL"
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
