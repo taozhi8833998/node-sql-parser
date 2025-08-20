@@ -2645,6 +2645,13 @@ table_base
         type: 'dual'
       };
   }
+  / jt:json_table_expr __ alias:alias_clause? {
+      return {
+        expr: jt,
+        as: alias,
+        ...getLocationObject(),
+      };
+    }
   / t:table_name __ alias:alias_clause? {
       if (t.type === 'var') {
         t.as = alias;
@@ -2686,6 +2693,89 @@ table_base
       }
       if (l) result.prefix = l;
       return result
+    }
+
+// JSON_TABLE expression
+json_table_expr
+  = KW_JSON_TABLE __ LPAREN __
+    expr:expr __ COMMA __
+    path:literal_string __
+    KW_COLUMNS __ LPAREN __
+    columns:json_table_column_list __
+    RPAREN __ RPAREN {
+      return {
+        type: 'json_table',
+        expr: expr,
+        path: path,
+        columns: columns,
+        ...getLocationObject(),
+      };
+    }
+
+json_table_column_list
+  = head:json_table_column tail:(__ COMMA __ json_table_column)* {
+      return createList(head, tail);
+    }
+
+json_table_column
+  = name:ident_name __ KW_FOR __ KW_ORDINALITY {
+      return {
+        type: 'ordinality',
+        name: name,
+        ...getLocationObject(),
+      };
+    }
+  / name:ident_name __ datatype:data_type __ KW_PATH __ path:literal_string __
+    on_empty:json_table_on_empty? __ on_error:json_table_on_error? {
+      return {
+        type: 'column',
+        name: name,
+        datatype: datatype,
+        path: path,
+        on_empty: on_empty,
+        on_error: on_error,
+        ...getLocationObject(),
+      };
+    }
+  / name:ident_name __ datatype:data_type __ KW_EXISTS __ KW_PATH __ path:literal_string {
+      return {
+        type: 'exists',
+        name: name,
+        datatype: datatype,
+        path: path,
+        ...getLocationObject(),
+      };
+    }
+  / KW_NESTED __ KW_PATH? __ path:literal_string __ KW_COLUMNS __ LPAREN __
+    columns:json_table_column_list __ RPAREN {
+      return {
+        type: 'nested',
+        path: path,
+        columns: columns,
+        ...getLocationObject(),
+      };
+    }
+
+json_table_on_empty
+  = KW_NULL __ KW_ON __ KW_EMPTY {
+      return { type: 'null' };
+    }
+  / KW_DEFAULT __ value:literal_string __ KW_ON __ KW_EMPTY {
+      return { type: 'default', value: value };
+    }
+  / KW_ERROR __ KW_ON __ KW_EMPTY {
+      return { type: 'error' };
+    }
+
+json_table_on_error
+  = KW_NULL __ KW_ON __ KW_ERROR {
+      return { type: 'null' };
+    }
+  / KW_DEFAULT __ value:literal_string __ KW_ON __ KW_ERROR {
+      return { type: 'default', value: value };
+    }
+  / KW_ERROR __ KW_ON __ KW_ERROR {
+      return { type: 'error' };
     }
 
 join_op
@@ -4283,6 +4373,16 @@ KW_KEY_BLOCK_SIZE = "KEY_BLOCK_SIZE"i !ident_start { return 'KEY_BLOCK_SIZE'; }
 KW_COMMENT     = "COMMENT"i  !ident_start { return 'COMMENT'; }
 KW_CONSTRAINT  = "CONSTRAINT"i  !ident_start { return 'CONSTRAINT'; }
 KW_REFERENCES  = "REFERENCES"i  !ident_start { return 'REFERENCES'; }
+
+// JSON_TABLE Keywords
+KW_JSON_TABLE   = "JSON_TABLE"i    !ident_start { return 'JSON_TABLE'; }
+KW_PATH         = "PATH"i          !ident_start { return 'PATH'; }
+KW_COLUMNS      = "COLUMNS"i       !ident_start { return 'COLUMNS'; }
+KW_NESTED       = "NESTED"i        !ident_start { return 'NESTED'; }
+KW_ORDINALITY   = "ORDINALITY"i    !ident_start { return 'ORDINALITY'; }
+KW_FOR          = "FOR"i           !ident_start { return 'FOR'; }
+KW_EMPTY        = "EMPTY"i         !ident_start { return 'EMPTY'; }
+KW_ERROR        = "ERROR"i         !ident_start { return 'ERROR'; }
 
 // MySQL extensions to SQL
 OPT_SQL_CALC_FOUND_ROWS = "SQL_CALC_FOUND_ROWS"i
