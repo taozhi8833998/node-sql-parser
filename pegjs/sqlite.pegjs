@@ -2195,7 +2195,7 @@ regexp_op_right
   }
 
 like_op_right
-  = op:like_op __ right:(literal / comparison_expr ) __ es:escape_op? {
+  = op:like_op __ right:(comparison_expr / literal) __ es:escape_op? {
       if (es) right.escape = es
       return { op: op, right: right };
     }
