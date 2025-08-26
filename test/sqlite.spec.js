@@ -269,4 +269,20 @@ describe('sqlite', () => {
     const sql = `SELECT * FROM table_name WHERE column_name LIKE '%pattern%' ESCAPE '\'`
     expect(getParsedSql(sql)).to.be.equal(`SELECT * FROM "table_name" WHERE "column_name" LIKE '%pattern%' ESCAPE '\'`)
   })
+  it('should support GROUP_CONCAT', () => {
+    const sql = `SELECT
+        CASE
+            WHEN rs.url LIKE 'http://%' THEN SUBSTR(rs.url, 8, INSTR(SUBSTR(rs.url, 8), '/') - 1)
+            WHEN rs.url LIKE 'https://%' THEN SUBSTR(rs.url, 9, INSTR(SUBSTR(rs.url, 9), '/') - 1)
+            ELSE SUBSTR(rs.url, 1, INSTR(rs.url, '/') - 1)
+        END AS domain,
+        COUNT(*) AS total_citations,
+        COUNT(DISTINCT mr.model_id) AS models_citing,
+        COUNT(DISTINCT mr.response_id) AS responses_citing,
+        GROUP_CONCAT(DISTINCT m.model_name) AS citing_models,
+        AVG(mr.brand_visibility_score) AS avg_visibility_score,
+        AVG(mr.recommendation_quality_score) AS avg_recommendation_quality
+    FROM response_sources rs`
+    expect(getParsedSql(sql)).to.be.equal(`SELECT CASE WHEN "rs"."url" LIKE 'http://%' THEN SUBSTR("rs"."url", 8, INSTR(SUBSTR("rs"."url", 8), '/') - 1) WHEN "rs"."url" LIKE 'https://%' THEN SUBSTR("rs"."url", 9, INSTR(SUBSTR("rs"."url", 9), '/') - 1) ELSE SUBSTR("rs"."url", 1, INSTR("rs"."url", '/') - 1) END AS "domain", COUNT(*) AS "total_citations", COUNT(DISTINCT "mr"."model_id") AS "models_citing", COUNT(DISTINCT "mr"."response_id") AS "responses_citing", GROUP_CONCAT(DISTINCT "m"."model_name") AS "citing_models", AVG("mr"."brand_visibility_score") AS "avg_visibility_score", AVG("mr"."recommendation_quality_score") AS "avg_recommendation_quality" FROM "response_sources" AS "rs"`)
+  })
 })
