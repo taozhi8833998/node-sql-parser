@@ -2504,7 +2504,7 @@ table_base
     // => table_name & { as?: alias_clause; }
       if (t.type === 'var') {
         t.as = alias;
-        Object.assign(t, {...getLocationObject()})
+        t = { ...t, ...getLocationObject() }
         return t;
       } else {
         return {

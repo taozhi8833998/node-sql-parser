@@ -82,6 +82,7 @@
     ],
     "max-len": 0,
     "prefer-arrow-callback": 2,
+    "prefer-object-spread": "error",
     "arrow-spacing": [
       2,
       {
