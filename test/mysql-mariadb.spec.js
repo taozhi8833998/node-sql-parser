@@ -1326,6 +1326,13 @@ describe('mysql', () => {
           "SELECT `crème` AS `brûlée` FROM `café` WHERE `âtre` = 'Molière'"
         ]
       },
+      {
+        title: 'with clause',
+        sql: [
+          "WITH T AS (VALUES ROW('foobar')) SELECT * FROM T",
+          "WITH `T` AS (VALUES ROW('foobar')) SELECT * FROM `T`"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
