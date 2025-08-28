@@ -1333,6 +1333,13 @@ describe('mysql', () => {
           "WITH `T` AS (VALUES ROW('foobar')) SELECT * FROM `T`"
         ]
       },
+      {
+        title: 'except clause',
+        sql: [
+          "SELECT * FROM T1 EXCEPT SELECT * FROM T2",
+          "SELECT * FROM `T1` EXCEPT SELECT * FROM `T2`"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
