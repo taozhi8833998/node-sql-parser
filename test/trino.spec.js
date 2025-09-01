@@ -97,6 +97,13 @@ describe('trino', () => {
         'SELECT a[1][2], a[2] FROM t',
         'SELECT a[1][2], a[2] FROM "t"'
       ]
+    },
+    {
+      title: 'ROW expression',
+      sql: [
+        'SELECT ROW(12 AS x, 122 y) FROM t',
+        'SELECT ROW(12 AS "x", 122 AS "y") FROM "t"'
+      ]
     }
   ]
   SQL_LIST.forEach(sqlInfo => {
