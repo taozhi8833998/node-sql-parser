@@ -284,7 +284,7 @@ export type create_table_definition = create_definition[];
 
 export type create_definition = create_column_definition | create_index_definition | create_fulltext_spatial_index_definition | create_constraint_definition;
 
-export type column_definition_opt = column_constraint | { auto_increment: 'auto_increment'; } | { unique: 'unique' | 'unique key'; } | { unique: 'key' | 'primary key'; } | { comment: keyword_comment; } | { collate: collate_expr; } | { column_format: column_format; } | { storage: storage } | { reference_definition: reference_definition; } | { check: check_constraint_definition; } | { character_set: { type: 'CHARACTER SET'; symbol: '=' | null; value: ident_without_kw_type; } };
+export type column_definition_opt = column_constraint | { auto_increment: 'auto_increment'; } | { unique: 'unique' | 'unique key'; } | { unique: 'key' | 'primary key'; } | { comment: keyword_comment; } | { generated_by_default: { type: 'origin', value: string } } | { collate: collate_expr; } | { column_format: column_format; } | { storage: storage } | { reference_definition: reference_definition; } | { check: check_constraint_definition; } | { character_set: { type: 'CHARACTER SET'; symbol: '=' | null; value: ident_without_kw_type; } };
 
 
 
@@ -1718,6 +1718,8 @@ type KW_GEOMETRY = never;
 type KW_SMALLINT = never;
 
 type KW_SERIAL = never;
+
+type KW_SMALLSERIAL = never;
 
 type KW_TINYINT = never;
 
