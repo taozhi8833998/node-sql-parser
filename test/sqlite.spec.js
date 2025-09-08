@@ -269,6 +269,10 @@ describe('sqlite', () => {
     const sql = `SELECT * FROM table_name WHERE column_name LIKE '%pattern%' ESCAPE '\'`
     expect(getParsedSql(sql)).to.be.equal(`SELECT * FROM "table_name" WHERE "column_name" LIKE '%pattern%' ESCAPE '\'`)
   })
+  it('should support string concatenation in LIKE opts', () => {
+    const sql = `SELECT * FROM file WHERE path LIKE 'C:' || CHAR(92) || 'Users' || CHAR(92) || 'example.txt'`
+    expect(getParsedSql(sql)).to.be.equal(`SELECT * FROM "file" WHERE "path" LIKE 'C:' || CHAR(92) || 'Users' || CHAR(92) || 'example.txt'`)
+  })
   it('should support GROUP_CONCAT', () => {
     const sql = `SELECT
         CASE
