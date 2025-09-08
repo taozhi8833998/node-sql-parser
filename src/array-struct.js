@@ -22,6 +22,7 @@ function arrayStructValueToSQL(expr) {
   } = expr
   switch (toUpper(type)) {
     case 'STRUCT':
+    case 'ROW':
       return `(${columnsToSQL(exprList)})`
     case 'ARRAY':
       return arrayExprListToSQL(expr)

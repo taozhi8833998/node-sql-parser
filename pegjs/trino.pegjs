@@ -66,6 +66,7 @@
     'RENAME': true,
     // 'REPLACE': true,
     'RIGHT': true,
+    'ROW': true,
     'ROWS': true,
 
     'SELECT': true,
@@ -2470,7 +2471,7 @@ table_base
     // => table_name & { as?: alias_clause; }
       if (t.type === 'var') {
         t.as = alias;
-        Object.assign(t, {...getLocationObject()})
+        t = { ...t, ...getLocationObject() }
         return t;
       } else {
         return {
@@ -3073,6 +3074,21 @@ case_else = KW_ELSE __ result:expr {
     return { type: 'else', result: result };
   }
 
+row_value_list
+  = head:column_list_item tail:(__ COMMA __ column_list_item)* {
+      // => column_list_item[]
+      return createList(head, tail);
+    }
+
+row_expr
+  = KW_ROW __ LPAREN __ l:row_value_list __ RPAREN {
+    // => { type: 'row_constructor', value: row_value_list }
+    return {
+      type: 'struct',
+      keyword: 'row',
+      expr_list: l
+    };
+  }
 /**
  * Borrowed from PL/SQL ,the priority of below list IS ORDER BY DESC
  * ---------------------------------------------------------------------------------------------------
@@ -3347,6 +3363,7 @@ column_ref_array_index
   }
 primary
   = cast_expr
+  / row_expr
   / LPAREN __ list:or_and_where_expr __ RPAREN {
     // => or_and_where_expr
         list.parentheses = true;
@@ -4396,6 +4413,7 @@ KW_BIGSERIAL   = "BIGSERIAL"i   !ident_start { return 'BIGSERIAL'; }
 KW_REAL     = "REAL"i   !ident_start { return 'REAL'; }
 KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
 KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
+KW_ROW      = "ROW"i      !ident_start { return 'ROW'; }
 KW_ROWS     = "ROWS"i     !ident_start { return 'ROWS'; }
 KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }

@@ -491,6 +491,7 @@ set_op
   }
   / KW_MINUS { return 'minus' }
   / KW_INTERSECT { return 'intersect' }
+  / KW_EXCEPT { return 'except' }
 
 set_op_stmt
   = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
@@ -2289,7 +2290,7 @@ with_clause
     }
 
 cte_definition
-  = name:(literal_string / ident_name / table_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:set_op_stmt __ RPAREN {
+  = name:(literal_string / ident_name / table_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:(value_clause / set_op_stmt) __ RPAREN {
     if (typeof name === 'string') name = { type: 'default', value: name }
     if (name.table) name = { type: 'default', value: name.table }
     return { name, stmt, columns };
@@ -4126,6 +4127,7 @@ KW_OVER     = "OVER"i     !ident_start
 KW_UNION    = "UNION"i    !ident_start
 KW_MINUS    = "MINUS"i    !ident_start
 KW_INTERSECT    = "INTERSECT"i    !ident_start
+KW_EXCEPT    = "EXCEPT"i    !ident_start
 KW_VALUES   = "VALUES"i   !ident_start
 KW_USING    = "USING"i    !ident_start
 
