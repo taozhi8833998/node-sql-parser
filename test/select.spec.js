@@ -234,7 +234,7 @@ describe('select', () => {
               type: 'binary_expr',
               operator: '&&',
               left: {
-                  collate: null, 
+                  collate: null,
                   type: 'column_ref',
                   table: 't',
                   column: 'cd'
@@ -1184,10 +1184,14 @@ describe('select', () => {
         expect(result).to.be.eql(undefined)
       })
       it('should fail for simple check', () => {
-        const sql = 'SELECT * FROM b'
-        const whiteList = ['select::(.*)::a']
-        const fun = parser.whiteListCheck.bind(parser, sql, whiteList)
+        let sql = 'SELECT * FROM b'
+        let whiteList = ['select::(.*)::a']
+        let fun = parser.whiteListCheck.bind(parser, sql, whiteList)
         expect(fun).to.throw(`authority = 'select::null::b' is required in table whiteList to execute SQL = '${sql}'`)
+        sql = 'SHOW TABLES'
+        whiteList = ['(select)::(.*)::(.*)']
+        fun = parser.whiteListCheck.bind(parser, sql, whiteList)
+        expect(fun).to.throw(`authority = 'show::null::null' is required in table whiteList to execute SQL = '${sql}'`)
       })
       it('should fail for as column reserved word check', () => {
         const sql = 'SELECT id as delete FROM b'
