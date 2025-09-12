@@ -1871,6 +1871,7 @@ show_stmt
     }
   }
   / KW_SHOW __ KW_TABLES {
+    tableList.add(`show::null::null`)
     return {
       tableList: Array.from(tableList),
       columnList: columnListTableAlias(columnList),
