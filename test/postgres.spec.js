@@ -2322,6 +2322,16 @@ describe('Postgres', () => {
           'CREATE TABLE "t_pgsql_generate_test" (id_col SERIAL NOT NULL PRIMARY KEY, small_int_col SMALLINT NOT NULL, small_serial_col SMALLSERIAL NOT NULL, integer_type_col INTEGER NOT NULL, big_int_col BIGINT NOT NULL)'
         ]
       },
+      {
+        title: 'custom data type for create table',
+        sql: [
+          `create type public.Gender AS ENUM ('MALE', 'FEMALE');
+            create table users (
+              gender public."Gender"
+            );`,
+          `CREATE TYPE "public"."Gender" AS ENUM ('MALE', 'FEMALE') ; CREATE TABLE "users" (gender public.Gender)`
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
