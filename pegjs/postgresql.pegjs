@@ -6272,7 +6272,11 @@ network_address_type
   = t:(KW_INET / KW_CIDR / KW_MACADDR8 / KW_MACADDR) {/* =>  data_type */  return { dataType: t }}
 
 custom_types
-  = name:ident_name &{ return customTypes.has(name) } {
+  = schema:ident_name __ DOT __ name:ident_without_kw &{ return customTypes.has(`${schema}.${name}`) }  {
+      // => data_type
+      return { schema: schema, dataType: name }
+  }
+  / name:ident_name &{ return customTypes.has(name) } {
       // => data_type
       return { dataType: name }
   }
