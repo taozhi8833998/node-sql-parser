@@ -5777,6 +5777,7 @@ KW_CIDR = "CIDR"i     !ident_start { return 'CIDR'; }
 KW_INET = "INET"i     !ident_start { return 'INET'; }
 KW_MACADDR = "MACADDR"i     !ident_start { return 'MACADDR'; }
 KW_MACADDR8 = "MACADDR8"i     !ident_start { return 'MACADDR8'; }
+KW_BIT = "BIT"i     !ident_start { return 'BIT'; }
 
 KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
 KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
@@ -6143,6 +6144,7 @@ data_type
   / oid_type
   / record_type
   / network_address_type
+  / bit_type
   / custom_types
 
 
@@ -6270,6 +6272,21 @@ record_type
 
 network_address_type
   = t:(KW_INET / KW_CIDR / KW_MACADDR8 / KW_MACADDR) {/* =>  data_type */  return { dataType: t }}
+
+bit_type
+  = t:KW_BIT __ v:('varying'i)? __ num:(__ LPAREN __ [0-9]+ __ RPAREN)? {
+    /* =>  data_type */
+    let dataType = t
+    if (v) {
+      dataType += ' VARYING'
+    }
+    const result = { dataType }
+    if (num) {
+      result.length = parseInt(num[3].join(''), 10)
+      result.parentheses = true
+    }
+    return result
+  }
 
 custom_types
   = schema:ident_name __ DOT __ name:ident_without_kw &{ return customTypes.has(`${schema}.${name}`) }  {

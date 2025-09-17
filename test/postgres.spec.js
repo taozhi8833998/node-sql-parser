@@ -2332,6 +2332,13 @@ describe('Postgres', () => {
           `CREATE TYPE "public"."Gender" AS ENUM ('MALE', 'FEMALE') ; CREATE TABLE "users" (gender public.Gender)`
         ]
       },
+      {
+        title: 'bit data type',
+        sql: [
+          'SELECT CAST(1 AS bit)',
+          'SELECT CAST(1 AS BIT)',
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
