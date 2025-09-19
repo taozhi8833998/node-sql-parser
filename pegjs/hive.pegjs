@@ -1449,7 +1449,9 @@ set_item
 
 insert_value_clause
   = value_clause
-  / select_stmt_nake
+  / u:union_stmt {
+      return u.ast
+  }
 
 insert_partition
   = KW_PARTITION __ LPAREN __ head:ident_name tail:(__ COMMA __ ident_name)* __ RPAREN {

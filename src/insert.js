@@ -2,7 +2,7 @@ import { tablesToSQL } from './tables'
 import { exprToSQL } from './expr'
 import { columnRefToSQL } from './column'
 import { identifierToSql, commonOptionConnector, hasVal, toUpper, returningToSQL, literalToSQL } from './util'
-import { selectToSQL } from './select'
+import { unionToSQL } from './union'
 import { setToSQL } from './update'
 
 /**
@@ -11,7 +11,7 @@ import { setToSQL } from './update'
  */
 function valuesToSQL(stmt) {
   const { type } = stmt
-  if (type === 'select') return selectToSQL(stmt)
+  if (type === 'select') return unionToSQL(stmt)
   const values = type === 'values' ? stmt.values : stmt
   const clauses = values.map(value => {
     const sql = exprToSQL(value)

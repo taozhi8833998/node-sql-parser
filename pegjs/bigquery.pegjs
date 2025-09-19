@@ -586,7 +586,9 @@ insert_partition
 
 insert_value_clause
   = value_clause
-  / select_stmt_nake
+  / u:union_stmt {
+      return u.ast
+  }
 
 on_duplicate_update_stmt
   = KW_ON __ 'DUPLICATE'i __ KW_KEY __ KW_UPDATE __ s:set_list {
