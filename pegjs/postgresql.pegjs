@@ -812,7 +812,7 @@ create_domain_stmt
     }
 create_table_stmt
   = a:KW_CREATE __
-    tp:KW_TEMPORARY? __
+    tp:(KW_TEMP / KW_TEMPORARY)? __
     ul:KW_UNLOGGED? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
@@ -835,7 +835,7 @@ create_table_stmt
       }
     }
   /  a:KW_CREATE __
-    tp:KW_TEMPORARY? __
+    tp:(KW_TEMP / KW_TEMPORARY)? __
     ul:KW_UNLOGGED? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
@@ -884,7 +884,7 @@ create_table_stmt
       }
     }
   / a:KW_CREATE __
-    tp:KW_TEMPORARY? __
+    tp:(KW_TEMP / KW_TEMPORARY)? __
     ul:KW_UNLOGGED? __
     KW_TABLE __
     ife:if_not_exists_stmt? __
