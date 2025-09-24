@@ -4125,6 +4125,7 @@ returning_stmt
 insert_value_clause
   = value_clause
   / u:union_stmt {
+      // => union_stmt_node
       return u.ast
   }
 

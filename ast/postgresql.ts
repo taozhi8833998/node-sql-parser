@@ -1130,7 +1130,7 @@ export type set_item = { column: ident; value: additive_expr; table?: ident;} | 
 
 export type returning_stmt = { type: 'returning'; columns: column_clause | select_stmt; };
 
-export type insert_value_clause = value_clause | select_stmt_nake;
+export type insert_value_clause = value_clause | union_stmt_node;
 
 export type insert_partition = ident_name[] | value_item;
 
@@ -1795,6 +1795,8 @@ type KW_MACADDR = never;
 
 type KW_MACADDR8 = never;
 
+type KW_BIT = never;
+
 type KW_CURRENT_DATE = never;
 
 type KW_ADD_DATE = never;
@@ -2073,5 +2075,9 @@ export type record_type = data_type;
 
 
 export type network_address_type = data_type;
+
+
+
+export type bit_type = data_type;
 
 export type custom_types = data_type;
