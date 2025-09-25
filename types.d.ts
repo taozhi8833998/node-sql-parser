@@ -127,6 +127,7 @@ export interface SetList {
 export interface InsertReplaceValue {
   type: "expr_list";
   value: any[];
+  prefix?: string;
   loc?: LocationRange;
 }
 
@@ -280,7 +281,10 @@ export interface Insert_Replace {
   type: "replace" | "insert";
   table: any;
   columns: string[] | null;
-  values: InsertReplaceValue[] | Select;
+  values: {
+    type: 'values',
+    values: InsertReplaceValue[]
+  } | Select;
   partition: any[];
   prefix: string;
   on_duplicate_update: {
