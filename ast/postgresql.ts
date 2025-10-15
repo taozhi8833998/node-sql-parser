@@ -1797,6 +1797,8 @@ type KW_MACADDR8 = never;
 
 type KW_BIT = never;
 
+type KW_MONEY = never;
+
 type KW_CURRENT_DATE = never;
 
 type KW_ADD_DATE = never;
@@ -2027,6 +2029,10 @@ export type numeric_type_suffix = any[];;
 
 
 export type numeric_type = data_type;
+
+
+
+export type money_type = data_type;
 
 
 
