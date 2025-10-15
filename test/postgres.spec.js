@@ -2353,6 +2353,13 @@ describe('Postgres', () => {
           'CREATE TEMP TABLE "test" (id INT, name TEXT)'
         ]
       },
+      {
+        title: 'money type',
+        sql: [
+          'CREATE TEMP TABLE test (id INT, price MONEY);',
+          'CREATE TEMP TABLE "test" (id INT, price MONEY)'
+        ]
+      },
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })
