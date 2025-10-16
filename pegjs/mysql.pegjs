@@ -265,6 +265,7 @@
     'VARCHARACTER': true,
     'VARYING': true,
     'VIRTUAL': true,
+    'VECTOR': true,
 
     'WHEN': true,
     'WHERE': true,
@@ -4215,6 +4216,7 @@ KW_TIMESTAMP = "TIMESTAMP"i !ident_start { return 'TIMESTAMP'; }
 KW_YEAR = "YEAR"i !ident_start { return 'YEAR'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
 KW_USER     = "USER"i     !ident_start { return 'USER'; }
+KW_VECTOR   = "VECTOR"i     !ident_start { return 'VECTOR'; }
 
 KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
 KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
@@ -4561,6 +4563,7 @@ data_type
   / binary_type
   / blob_type
   / geometry_type
+  / vector_type
 
 data_type_size
   = LPAREN __ l:[0-9]+ __ RPAREN __ s:numeric_type_suffix? {
@@ -4635,3 +4638,15 @@ text_type
 
 geometry_type
   = t:(KW_GEOMETRY / KW_POINT / KW_LINESTRING / KW_POLYGON / KW_MULTIPOINT / KW_MULTILINESTRING / KW_MULTIPOLYGON / KW_GEOMETRYCOLLECTION ) { return { dataType: t }}
+
+vector_type
+  = t:KW_VECTOR __ LPAREN __ d:[0-9]+ __ RPAREN {
+    return {
+      dataType: t,
+      length: parseInt(d.join(''), 10),
+      parentheses: true
+    };
+  }
+  / t:KW_VECTOR {
+    return { dataType: t };
+  }
