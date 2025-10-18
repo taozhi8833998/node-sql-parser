@@ -306,7 +306,7 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.be.equal(`SELECT [column_name] FROM [table_name] FOR XML PATH`)
     sql = 'SELECT column_name FROM table_name FOR JSON PATH';
     expect(getParsedSql(sql)).to.be.equal(`SELECT [column_name] FROM [table_name] FOR JSON PATH`)
-    
+
   })
   it('should support cross and outer apply', () => {
     const applies = ['cross', 'outer']
@@ -485,6 +485,15 @@ describe('transactsql', () => {
         'CREATE TABLE [dbo].[Ordine] ([NoteInvioEmail] NTEXT)'
       ]
     },
+    {
+      title: 'Latin-1 Supplement as part of column name',
+      sql: [
+        `SELECT YEAR(DateTime) AS Year, FLOOR(Thickness_Avg/100.0) * 100 AS Thickness_Group_µm, COUNT(DISTINCT Coil_ID) AS Coil_Count
+        FROM ValuesHSM_ExitIMS_PG WHERE Coil_ID IS NOT NULL GROUP BY YEAR(DateTime), FLOOR(Thickness_Avg/100.0) * 100
+        ORDER BY Year, Thickness_Group_µm`,
+        'SELECT YEAR([DateTime]) AS [Year], FLOOR([Thickness_Avg] / 100.0) * 100 AS [Thickness_Group_µm], COUNT(DISTINCT [Coil_ID]) AS [Coil_Count] FROM [ValuesHSM_ExitIMS_PG] WHERE [Coil_ID] IS NOT NULL GROUP BY YEAR([DateTime]), FLOOR([Thickness_Avg] / 100.0) * 100 ORDER BY [Year] ASC, [Thickness_Group_µm] ASC'
+      ]
+    },
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
@@ -493,4 +502,3 @@ describe('transactsql', () => {
     })
   })
 })
-
