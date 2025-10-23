@@ -546,6 +546,14 @@ describe('snowflake', () => {
         "SELECT split('12-34', '-')[0] FROM DUAL"
       ]
     },
+    {
+      title: 'trim with two parameters',
+      sql: [
+        "SELECT trim(col, ' ') FROM DUAL",
+        "SELECT trim(\"col\", ' ') FROM DUAL",
+      ]
+    },
+
   ]
   SQL_LIST.forEach(sqlInfo => {
     const { title, sql } = sqlInfo
