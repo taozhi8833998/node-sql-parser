@@ -105,10 +105,10 @@ function funcToSQL(expr) {
   const funcName = [literalToSQL(name.schema), name.name.map(literalToSQL).join('.')].filter(hasVal).join('.')
   if (!args) return [funcName, withinGroupStr, overStr].filter(hasVal).join(' ')
   let separator = expr.separator || ', '
-  if (toUpper(funcName) === 'TRIM') separator = ' '
   let str = [funcName]
   str.push(args_parentheses === false ? ' ' : '(')
   const argsList = exprToSQL(args)
+  if (toUpper(funcName) === 'TRIM' && argsList.length > 2) separator = ' '
   if (Array.isArray(separator)) {
     let argsSQL = argsList[0]
     for (let i = 1, len = argsList.length; i < len; ++i) {
