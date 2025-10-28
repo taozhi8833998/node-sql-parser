@@ -104,8 +104,17 @@ function funcToSQL(expr) {
   const suffixStr = exprToSQL(suffix)
   const funcName = [literalToSQL(name.schema), name.name.map(literalToSQL).join('.')].filter(hasVal).join('.')
   if (!args) return [funcName, withinGroupStr, overStr].filter(hasVal).join(' ')
-  let separator = expr.separator || ', '
-  if (toUpper(funcName) === 'TRIM') separator = ' '
+  const separator = expr.separator || ', '
+  let fromPosition = 0
+  if (toUpper(funcName) === 'TRIM') {
+    for (let i = 0, len = args.value.length; i < len; ++i) {
+      const arg = args.value[i]
+      if (arg.type === 'origin' && arg.value === 'from') {
+        fromPosition = i
+        break
+      }
+    }
+  }
   let str = [funcName]
   str.push(args_parentheses === false ? ' ' : '(')
   const argsList = exprToSQL(args)
@@ -115,6 +124,8 @@ function funcToSQL(expr) {
       argsSQL = [argsSQL, argsList[i]].join(` ${exprToSQL(separator[i - 1])} `)
     }
     str.push(argsSQL)
+  } else if (toUpper(funcName) === 'TRIM' && fromPosition > 0) {
+    str.push([argsList.slice(0, fromPosition + 1).join(' '), argsList.slice(fromPosition + 1).join(', ')].join(' '))
   } else {
     str.push(argsList.join(separator))
   }

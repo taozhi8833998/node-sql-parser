@@ -552,6 +552,13 @@ describe('snowflake', () => {
         'SELECT * FROM my_table',
         'SELECT * FROM my_table'
       ]
+    },
+    {
+      title: 'trim function with multiple args',
+      sql: [
+        "SELECT trim(col, ' ') FROM DUAL;",
+        `SELECT trim("col", ' ') FROM DUAL`
+      ]
     }
   ]
   SQL_LIST.forEach(sqlInfo => {

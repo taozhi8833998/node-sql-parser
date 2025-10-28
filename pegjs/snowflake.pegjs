@@ -177,7 +177,7 @@
   function commonStrToLiteral(strOrLiteral) {
     return typeof strOrLiteral === 'string' ? { type: 'same', value: strOrLiteral } : strOrLiteral
   }
-  
+
   function getSurroundFromLiteralType(literal) {
     switch (literal.type) {
       case 'double_quote_string':
@@ -2571,7 +2571,7 @@ table_name
       v.table = v.name;
       return v;
     }
-  
+
 
 or_and_expr
 	= head:expr tail:(__ (KW_AND / KW_OR) __ expr)* {
