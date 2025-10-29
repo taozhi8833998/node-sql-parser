@@ -21,6 +21,7 @@
 
     'DELETE': true,
     'DESC': true,
+    'DESCRIBE': true,
     'DISTINCT': true,
     'DROP': true,
 
@@ -254,6 +255,7 @@ cmd_stmt
   / set_stmt
   / lock_stmt
   / show_stmt
+  / desc_stmt
   / deallocate_stmt
 
 create_stmt
@@ -1986,6 +1988,25 @@ show_stmt
         var: c,
       }
     }
+  }
+
+desc_stmt
+  = KW_DESCRIBE __ t:table_name {
+    /*
+      export interface desc_stmt_node {
+        type: 'describe';
+        table: table_name;
+      }
+      => AstStatement<desc_stmt_node>
+    */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'describe',
+        table: t
+      }
+    };
   }
 
 deallocate_stmt
@@ -4348,6 +4369,7 @@ KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET' }
 
 KW_ASC      = "ASC"i        !ident_start { return 'ASC'; }
 KW_DESC     = "DESC"i       !ident_start { return 'DESC'; }
+KW_DESCRIBE = "DESCRIBE"i   !ident_start { return 'DESCRIBE'; }
 
 KW_ALL      = "ALL"i        !ident_start { return 'ALL'; }
 KW_DISTINCT = "DISTINCT"i   !ident_start { return 'DISTINCT';}

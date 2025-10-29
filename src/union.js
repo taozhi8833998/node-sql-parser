@@ -57,6 +57,7 @@ const typeToSQLFn = {
   rename      : renameToSQL,
   call        : callToSQL,
   desc        : descToSQL,
+  describe    : descToSQL,
   set         : setVarToSQL,
   lock        : lockUnlockToSQL,
   unlock      : lockUnlockToSQL,
