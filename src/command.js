@@ -46,7 +46,8 @@ function commonCmdToSQL(stmt) {
 function descToSQL(stmt) {
   const { type, table } = stmt
   const action = toUpper(type)
-  return `${action} ${identifierToSql(table)}`
+  const tableName = typeof table === 'string' ? identifierToSql(table) : tableToSQL(table)
+  return `${action} ${tableName}`
 }
 
 function executeToSQL(stmt) {
