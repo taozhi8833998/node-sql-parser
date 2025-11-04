@@ -2360,6 +2360,13 @@ describe('Postgres', () => {
           'CREATE TEMP TABLE "test" (id INT, price MONEY)'
         ]
       },
+      {
+        title: 'create index',
+        sql: [
+          `CREATE INDEX "test" ON "test" USING BTREE ("a" ASC, "b" ASC, "c" DESC);`,
+          'CREATE INDEX "test" ON "test" USING BTREE ("a" ASC, "b" ASC, "c" DESC)'
+        ]
+      }
     ]
     neatlyNestTestedSQL(SQL_LIST)
   })

@@ -135,8 +135,8 @@ function columnOption(definition) {
 }
 
 function columnOrderToSQL(columnOrder) {
-  const { column, collate, nulls, opclass, order_by } = columnOrder
-  const columnExpr = typeof column === 'string' ? { type: 'column_ref', table: columnOrder.table, column } : columnOrder
+  const { order_by, column, collate, nulls, opclass } = columnOrder
+  const columnExpr = typeof column === 'string' ? { type: 'column_ref', table: columnOrder.table, column } : ({ ...columnOrder, order_by: null })
   columnExpr.collate = null
   const result = [
     exprToSQL(columnExpr),
