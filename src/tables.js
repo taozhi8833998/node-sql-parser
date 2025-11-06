@@ -13,7 +13,7 @@ function unnestToSQL(unnestExpr) {
     commonOptionConnector(
       toUpper(withOffset && withOffset.keyword),
       identifierToSql,
-      withOffset && withOffset.as
+      withOffset && withOffset.as,
     ),
   ]
   return result.filter(hasVal).join(' ')
