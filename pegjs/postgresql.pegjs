@@ -1890,6 +1890,7 @@ alter_action_list
 alter_action
   = ALTER_ADD_COLUMN
   / ALTER_ADD_CONSTRAINT
+  / ALTER_DROP_CONSTRAINT
   / ALTER_DROP_COLUMN
   / ALTER_ADD_INDEX_OR_KEY
   / ALTER_ADD_FULLETXT_SPARITAL_INDEX
@@ -1959,6 +1960,24 @@ ALTER_ADD_CONSTRAINT
       return {
         action: 'add',
         create_definitions: c,
+        resource: 'constraint',
+        type: 'alter',
+      }
+    }
+
+ALTER_DROP_CONSTRAINT
+  = KW_DROP __ kc:'CONSTRAINT'i __ c:ident {
+  /* => {
+        action: 'drop';
+        constraint: ident,
+        keyword: 'constraint',
+        resource: 'constraint',
+        type: 'alter';
+      } */
+      return {
+        action: 'drop',
+        constraint: c,
+        keyword: kc.toLowerCase(),
         resource: 'constraint',
         type: 'alter',
       }
