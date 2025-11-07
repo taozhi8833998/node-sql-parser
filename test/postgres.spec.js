@@ -1929,6 +1929,20 @@ describe('Postgres', () => {
         'SELECT * FROM "table_name" WHERE foo.bar.baz.qux = FALSE'
       ]
     },
+    {
+      title: 'drop constraint',
+      sql: [
+        `ALTER TABLE "test" DROP CONSTRAINT "test_constraint";`,
+        'ALTER TABLE "test" DROP CONSTRAINT "test_constraint"'
+      ]
+    },
+    {
+      title: 'add constraint',
+      sql: [
+        'ALTER TABLE "configuration" ADD CONSTRAINT "configuration_pk" PRIMARY KEY("something","something_else","something_something_else");',
+        'ALTER TABLE "configuration" ADD CONSTRAINT "configuration_pk" PRIMARY KEY ("something", "something_else", "something_something_else")',
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
