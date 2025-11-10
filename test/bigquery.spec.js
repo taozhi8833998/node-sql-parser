@@ -897,7 +897,52 @@ describe('BigQuery', () => {
         'SELECT COUNT(*) FROM `bigquery-public-data.blah.events_*`',
         'SELECT COUNT(*) FROM `bigquery-public-data.blah.events_*`'
       ]
-    }
+    },
+    {
+      title: 'struct expr',
+      sql: [
+        `WITH thingie AS (
+          SELECT
+            thingie2,
+            thingie3,
+            COUNT(*) as thingie4
+          FROM thingie5.thingie6
+          WHERE thingie7 BETWEEN '2025-10-24' AND '2025-10-30'
+            AND thingie8 = TRUE
+            AND thingie2 IS NOT NULL
+          GROUP BY thingie2, thingie3
+        ),
+        path_totals AS (
+          SELECT
+            thingie2,
+            SUM(thingie4) as thingie9
+          FROM thingie
+          GROUP BY thingie2
+        ),
+        thingie13 AS (
+          SELECT SUM(thingie9) as overall_total
+          FROM path_totals
+        ),
+        thingie10 AS (
+          SELECT
+            thingie2,
+            ARRAY_AGG(STRUCT(thingie3, thingie4) ORDER BY thingie4 DESC LIMIT 3) as thingie11
+          FROM thingie
+          GROUP BY thingie2
+        )
+        SELECT
+          pt.thingie2,
+          pt.thingie9 as thingie4,
+          ROUND(100.0 * pt.thingie9 / tar.overall_total, 2) as thingie12,
+          tc.thingie11
+        FROM path_totals pt
+        CROSS JOIN thingie13 tar
+        JOIN thingie10 tc ON pt.thingie2 = tc.thingie2
+        ORDER BY pt.thingie9 DESC
+        LIMIT 20`,
+        "WITH thingie AS (SELECT thingie2, thingie3, COUNT(*) AS thingie4 FROM thingie5.thingie6 WHERE thingie7 BETWEEN '2025-10-24' AND '2025-10-30' AND thingie8 = TRUE AND thingie2 IS NOT NULL GROUP BY thingie2, thingie3), path_totals AS (SELECT thingie2, SUM(thingie4) AS thingie9 FROM thingie GROUP BY thingie2), thingie13 AS (SELECT SUM(thingie9) AS overall_total FROM path_totals), thingie10 AS (SELECT thingie2, ARRAY_AGG(undefined) AS thingie11 FROM thingie GROUP BY thingie2) SELECT pt.thingie2, pt.thingie9 AS thingie4, ROUND(100.0 * pt.thingie9 / tar.overall_total, 2) AS thingie12, tc.thingie11 FROM path_totals AS pt CROSS JOIN thingie13 AS tar JOIN thingie10 AS tc ON pt.thingie2 = tc.thingie2 ORDER BY pt.thingie9 DESC LIMIT 20"
+      ]
+    },
   ]
 
   SQL_LIST.forEach(sqlInfo => {

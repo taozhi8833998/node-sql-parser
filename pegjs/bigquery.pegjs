@@ -2201,13 +2201,15 @@ json_expr
   }
 
 struct_expr
-  = s:(struct_type / KW_STRUCT) __ LPAREN __ c:column_clause __ RPAREN {
+  = s:(struct_type / KW_STRUCT) __ LPAREN __ c:column_clause __ RPAREN __ o:order_by_clause?  __ l:limit_clause? {
     return {
       definition: s,
       expr_list: c,
       type: 'struct',
       keyword: s && 'struct',
-      parentheses: true
+      parentheses: true,
+      order_by: o,
+      limit: l
     }
   }
 
@@ -2598,6 +2600,7 @@ aggr_func_list
 aggr_func
   = aggr_fun_count
   / aggr_fun_smma
+  / aggr_array_agg
 
 aggr_fun_smma
   = name:KW_SUM_MAX_MIN_AVG  __ LPAREN __ e:additive_expr __ RPAREN __ bc:over_partition? {
@@ -2674,6 +2677,16 @@ count_arg
     };
   }
   / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause?  { return { distinct: d, expr: c, orderby: or, ...getLocationObject() }; }
+
+aggr_array_agg
+  = pre:(ident __ DOT)? __ name:(KW_ARRAY_AGG / KW_STRING_AGG) __ LPAREN __ arg:expr __ RPAREN {
+    // => { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG' | 'STRING_AGG';  }
+      return {
+        type: 'aggr_func',
+        name: pre ? `${pre[0]}.${name}` : name,
+        args: arg,
+      };
+    }
 
 star_expr
   = "*" { return { type: 'star', value: '*' }; }
@@ -3089,6 +3102,8 @@ KW_CAST     = "CAST"i       !ident_start { return 'CAST' }
 KW_SAFE_CAST     = "SAFE_CAST"i   !ident_start { return 'SAFE_CAST' }
 
 KW_ARRAY     = "ARRAY"i     !ident_start { return 'ARRAY'; }
+KW_ARRAY_AGG = "ARRAY_AGG"i !ident_start { return 'ARRAY_AGG'; }
+KW_STRING_AGG = "STRING_AGG"i !ident_start { return 'STRING_AGG'; }
 KW_BYTES     = "BYTES"i     !ident_start { return 'BYTES'; }
 KW_BOOL     = "BOOL"i     !ident_start { return 'BOOL'; }
 KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
