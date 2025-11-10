@@ -1347,6 +1347,13 @@ describe('mysql', () => {
           "SELECT SUM(`a` = 'a' AND `b` = 1) AS `foo` FROM `bar`"
         ]
       },
+      {
+        title: 'select * with no space between * and select',
+        sql: [
+          "SELECT* FROM T1",
+          "SELECT * FROM `T1`"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
