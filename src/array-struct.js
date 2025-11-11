@@ -1,5 +1,6 @@
 import { columnsToSQL } from './column'
-import { exprToSQL } from './expr'
+import { exprToSQL, orderOrPartitionByToSQL } from './expr'
+import { limitToSQL } from './limit'
 import { arrayStructTypeToSQL, hasVal, toUpper } from './util'
 
 function arrayExprListToSQL(expr) {
@@ -32,13 +33,13 @@ function arrayStructValueToSQL(expr) {
 }
 
 function arrayStructExprToSQL(expr) {
-  const { definition, keyword } = expr
+  const { definition, keyword, orderby, limit } = expr
   const result = [toUpper(keyword)]
   if (definition && typeof definition === 'object') {
     result.length = 0
     result.push(arrayStructTypeToSQL(definition))
   }
-  result.push(arrayStructValueToSQL(expr))
+  result.push(arrayStructValueToSQL(expr), orderOrPartitionByToSQL(orderby, 'order by'), limitToSQL(limit))
   return result.filter(hasVal).join('')
 }
 
