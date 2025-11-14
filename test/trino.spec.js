@@ -101,13 +101,21 @@ describe('trino', () => {
     {
       title: 'ROW expression',
       sql: [
-        'SELECT ROW(12 AS x, 122 y) FROM t',
+        "SELECT ROW(12 AS x, 122 y) FROM t",
         'SELECT ROW(12 AS "x", 122 AS "y") FROM "t"'
-      ]
-    }
-  ]
-  SQL_LIST.forEach(sqlInfo => {
-    const { title, sql } = sqlInfo
+      ],
+    },
+    {
+      title: "DESCRIBE statement",
+      sql: ["DESCRIBE my_table", 'DESCRIBE "my_table"'],
+    },
+    {
+      title: "DESCRIBE statement with fully qualified name",
+      sql: ['DESCRIBE my_catalog.my_schema.my_table', 'DESCRIBE "my_catalog"."my_schema"."my_table"'],
+    },
+  ];
+  SQL_LIST.forEach((sqlInfo) => {
+    const { title, sql } = sqlInfo;
     it(`should support ${title}`, () => {
       expect(getParsedSql(sql[0], opt)).to.equal(sql[1])
     })
