@@ -34,6 +34,7 @@
     'FROM': true,
     'FULL': true,
 
+    'GENERATED': true,
     'GROUP': true,
 
     'HAVING': true,
@@ -584,6 +585,9 @@ column_definition_opt
   / t:create_option_character_set_kw __ s:KW_ASSIGIN_EQUAL? __ v:ident_without_kw_type {
     return { character_set: { type: t, value: v, symbol: s }}
   }
+  / g:generated {
+    return { generated: g }
+  }
 
 column_definition_opt_list
   = head:column_definition_opt __ tail:(__ column_definition_opt)* {
@@ -643,6 +647,21 @@ default_expr
       value: ce
     }
   }
+generated_always
+  = ga:('GENERATED'i __ 'ALWAYS'i) {
+    return ga.join('').toLowerCase()
+  }
+
+generated
+  = gn:(generated_always? __ 'AS'i) __ LPAREN __ expr:(literal / expr) __ RPAREN __ st:('STORED'i / 'VIRTUAL'i)* {
+      return {
+        type: 'generated',
+        expr: expr,
+        value: gn.filter(s => typeof s === 'string').join(' ').toLowerCase(),
+        storage_type: st && st[0] && st[0].toLowerCase()
+      }
+    }
+
 analyze_stmt
   = a:KW_ANALYZE __ t:table_name __ {
       tableList.add(`${a}::${t.db}::${t.table}`);
