@@ -369,6 +369,11 @@ describe('Command SQL', () => {
         .to.equal(`SET @@${keyword}.id = 123 ; SET @@${keyword}.yy.xx = "abcd"`);
       })
     })
+
+    it('should support set variable with cast', () => {
+      expect(getParsedSql('SET @myvar=CAST("123.1" AS DOUBLE)'))
+        .to.equal('SET @myvar = CAST("123.1" AS DOUBLE)');
+    })
   })
 
   describe('unlock', () => {
