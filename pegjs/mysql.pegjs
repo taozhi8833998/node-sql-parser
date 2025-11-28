@@ -4399,7 +4399,7 @@ assign_stmt_list
   }
 
 assign_stmt
-  = va:(var_decl / without_prefix_var_decl) __ s: (KW_ASSIGN / KW_ASSIGIN_EQUAL) __ e:proc_expr {
+  = va:(var_decl / without_prefix_var_decl) __ s: (KW_ASSIGN / KW_ASSIGIN_EQUAL) __ e:expr {
     return {
       type: 'assign',
       left: va,
@@ -4409,7 +4409,7 @@ assign_stmt
   }
 
 select_assign_stmt
-  = va:(var_decl / without_prefix_var_decl) __ s:KW_ASSIGN __ e:proc_expr {
+  = va:(var_decl / without_prefix_var_decl) __ s:KW_ASSIGN __ e:expr {
     return {
       type: 'assign',
       left: va,
