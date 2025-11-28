@@ -3334,8 +3334,8 @@ primary
   / cast_expr
   / case_expr
   / literal_basic
-  / column_ref
   / literal_numeric
+  / column_ref
   / param
   / LPAREN __ list:or_and_where_expr __ RPAREN {
     list.parentheses = true
@@ -4018,34 +4018,23 @@ line_terminator
   = [\n\r]
 
 literal_numeric
-  = n:number {
+  = n:number !ident_part {
       if (n && n.type === 'bigint') return n
       return { type: 'number', value: n };
     }
 
 number
   = int_:int frac:frac exp:exp {
-    const numStr = int_ + frac + exp
-    return {
-      type: 'bigint',
-      value: numStr
-    }
+    return int_ + frac + exp;
   }
   / int_:int frac:frac {
-    const numStr = int_ + frac
-    if (isBigInt(int_)) return {
-      type: 'bigint',
-      value: numStr
-    }
-    const fixed = frac.length >= 1 ? frac.length - 1 : 0
-    return parseFloat(numStr).toFixed(fixed);
+    const numStr = int_ + frac;
+    const num = parseFloat(numStr);
+    if (num.toString() === numStr) return num;
+    return numStr;
   }
   / int_:int exp:exp {
-    const numStr = int_ + exp
-    return {
-      type: 'bigint',
-      value: numStr
-    }
+    return int_ + exp;
   }
   / int_:int {
     if (isBigInt(int_)) return {
@@ -4399,7 +4388,7 @@ assign_stmt_list
   }
 
 assign_stmt
-  = va:(var_decl / without_prefix_var_decl) __ s: (KW_ASSIGN / KW_ASSIGIN_EQUAL) __ e:proc_expr {
+  = va:(var_decl / without_prefix_var_decl) __ s: (KW_ASSIGN / KW_ASSIGIN_EQUAL) __ e:expr {
     return {
       type: 'assign',
       left: va,
@@ -4409,7 +4398,7 @@ assign_stmt
   }
 
 select_assign_stmt
-  = va:(var_decl / without_prefix_var_decl) __ s:KW_ASSIGN __ e:proc_expr {
+  = va:(var_decl / without_prefix_var_decl) __ s:KW_ASSIGN __ e:expr {
     return {
       type: 'assign',
       left: va,
