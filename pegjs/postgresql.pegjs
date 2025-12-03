@@ -1901,6 +1901,7 @@ alter_action
   / ALTER_COLUMN_DATA_TYPE
   / ALTER_COLUMN_DEFAULT
   / ALTER_COLUMN_NOT_NULL
+  / ALTER_REPLICA_IDENTITY
 
 ALTER_ADD_COLUMN
   = KW_ADD __
@@ -2159,6 +2160,25 @@ ALTER_COLUMN_NOT_NULL
         keyword: kc,
         resource: 'column',
         nullable: n,
+        type: 'alter',
+      }
+  }
+
+ALTER_REPLICA_IDENTITY
+  = 'REPLICA'i __ 'IDENTITY'i __ n:('DEFAULT'i / 'FULL'i / 'NOTHING'i) {
+    /* => {
+        action: 'replica';
+        keyword?: 'identity';
+        resource: 'replica_identity';
+        type: 'alter';
+        replica_identity: 'default' | 'full' | 'nothing';
+      }
+      */
+      return {
+        action: 'replica',
+        keyword: 'identity',
+        resource: 'replica_identity',
+        replica_identity: n,
         type: 'alter',
       }
   }
