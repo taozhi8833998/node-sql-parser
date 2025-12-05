@@ -1950,6 +1950,13 @@ describe('Postgres', () => {
         'ALTER TABLE "table_name" REPLICA IDENTITY FULL',
       ]
     },
+    {
+      title: 'cast without parentheses and with alias',
+      sql: [
+        'SELECT "createdAt"::date AS created_at, "updatedAt"::date "updated_at", count(*) as "value"',
+        'SELECT "createdAt"::DATE AS "created_at", "updatedAt"::DATE AS "updated_at", COUNT(*) AS "value"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
