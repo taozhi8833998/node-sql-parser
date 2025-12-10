@@ -4019,9 +4019,8 @@ cast_data_type
   }
 
 cast_double_colon
-  = s:(KW_DOUBLE_COLON __ cast_data_type)+ __ alias:alias_clause? {
+  = s:(KW_DOUBLE_COLON __ cast_data_type)+ {
     return {
-      as: alias,
       symbol: '::',
       target: s.map(v => v[2]),
     }
