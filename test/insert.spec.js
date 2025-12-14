@@ -104,9 +104,12 @@ describe('insert', () => {
     })
 
     it('should support big number', () => {
-      const bigNumberList = ['3511161156327326047123', '23.3e+12323243434']
+      const bigNumberList = [
+        { value: '3511161156327326047123', type: 'bigint' },
+        { value: '23.3e+12323243434', type: 'number' }
+      ]
       for (const bigNumber of bigNumberList) {
-        const sql = `INSERT INTO t1(id) VALUES(${bigNumber})`
+        const sql = `INSERT INTO t1(id) VALUES(${bigNumber.value})`
         const ast = parser.astify(sql)
         expect(ast.values).to.be.eql({
           type: 'values',
@@ -115,15 +118,15 @@ describe('insert', () => {
               type: 'expr_list',
               value: [
                 {
-                  type: 'bigint',
-                  value: bigNumber
+                  type: bigNumber.type,
+                  value: bigNumber.value
                 }
               ],
               prefix: null
             }
           ]
         })
-        expect(parser.sqlify(ast)).to.equal('INSERT INTO `t1` (id) VALUES (' + bigNumber + ')')
+        expect(parser.sqlify(ast)).to.equal('INSERT INTO `t1` (id) VALUES (' + bigNumber.value + ')')
       }
     })
 

@@ -12,13 +12,12 @@ export interface With {
     columnList: string[];
     ast: Select;
   };
-  columns?: any[];
+  columns: ColumnRef[] | null;
 }
 import { LocationRange } from "pegjs";
 
 export { LocationRange, Location } from "pegjs";
 
-export type WhilteListCheckMode = "table" | "column";
 export interface ParseOptions {
   includeLocations?: boolean;
 }
@@ -32,6 +31,7 @@ export interface TableColumnAst {
   tableList: string[];
   columnList: string[];
   ast: AST[] | AST;
+  parentheses?: boolean;
   loc?: LocationRange;
 }
 export interface BaseFrom {
@@ -39,6 +39,7 @@ export interface BaseFrom {
   table: string;
   as: string | null;
   schema?: string;
+  addition?: boolean;
   loc?: LocationRange;
 }
 export interface Join extends BaseFrom {
@@ -48,10 +49,12 @@ export interface Join extends BaseFrom {
 }
 export interface TableExpr {
   expr: {
+    tableList: string[];
+    columnList: string[];
     ast: Select;
+    parentheses: boolean;
   };
-  as?: string | null;
-  parentheses: boolean | { length: number }
+  as: string | null;
 }
 export interface Dual {
   type: "dual";
@@ -69,8 +72,8 @@ export interface Limit {
   loc?: LocationRange;
 }
 export interface OrderBy {
-  type: "ASC" | "DESC";
-  expr: any;
+  type: "ASC" | "DESC" | null;
+  expr: ExpressionValue;
   loc?: LocationRange;
 }
 
@@ -78,6 +81,7 @@ export interface ValueExpr<T = string | number | boolean> {
   type:
     | "backticks_quote_string"
     | "string"
+    | "number"
     | "regex_string"
     | "hex_string"
     | "full_hex_string"
@@ -104,30 +108,24 @@ export type SortDirection = 'ASC' | 'DESC' | 'asc' | 'desc';
 
 export interface ColumnRefItem {
   type: "column_ref";
-  table: string | null;
+  table?: string | null;
   column: string | { expr: ValueExpr };
   options?: ExprList;
   loc?: LocationRange;
-  collate?: { collate: CollateExpr } | null;
+  collate?: CollateExpr | null;
   order_by?: SortDirection | null;
 }
-export interface ColumnRefExpr {
-  type: "expr";
-  expr: ColumnRefItem;
-  as: string | null;
-}
-
-export type ColumnRef = ColumnRefItem | ColumnRefExpr;
+export type ColumnRef = ColumnRefItem;
 export interface SetList {
   column: string;
-  value: any;
+  value: ExpressionValue;
   table: string | null;
   loc?: LocationRange;
 }
 export interface InsertReplaceValue {
   type: "expr_list";
-  value: any[];
-  prefix?: string;
+  value: ExpressionValue[];
+  prefix: string | null;
   loc?: LocationRange;
 }
 
@@ -166,11 +164,13 @@ export interface AggrFunc {
   name: string;
   args: {
     expr: ExpressionValue;
-    distinct: "DISTINCT" | null;
-    orderby: OrderBy[] | null;
+    distinct?: "DISTINCT" | null;
+    orderby?: OrderBy[] | null;
     parentheses?: boolean;
+    separator?: { keyword: string; value: Value } | string | null;
   };
   loc?: LocationRange;
+  over: { type: 'window'; as_window_specification: AsWindowSpec } | null;
 }
 
 export type FunctionName = {
@@ -181,7 +181,8 @@ export interface Function {
   type: "function";
   name: FunctionName;
   args?: ExprList;
-  suffix?: any;
+  suffix?: OnUpdateCurrentTimestamp | null;
+  over?: { type: 'window'; as_window_specification: AsWindowSpec } | null;
   loc?: LocationRange;
 }
 export interface Column {
@@ -199,7 +200,9 @@ export interface Interval {
 
 export type Param = { type: "param"; value: string; loc?: LocationRange };
 
-export type Value = { type: string; value: any; loc?: LocationRange };
+export type Var = { type: "var"; name: string; members: string[]; prefix: string; loc?: LocationRange };
+
+export type Value = { type: string; value: string | number | boolean | null; loc?: LocationRange };
 
 export type Binary = {
   type: "binary_expr";
@@ -210,37 +213,49 @@ export type Binary = {
   parentheses?: boolean;
 };
 
-export type Expr = Binary;
+export type Unary = {
+  type: "unary_expr";
+  operator: string;
+  expr: ExpressionValue;
+  loc?: LocationRange;
+  parentheses?: boolean;
+};
+
+export type Expr = Binary | Unary;
 
 export type ExpressionValue =
   | ColumnRef
   | Param
+  | Var
   | Function
   | Case
   | AggrFunc
   | Value
   | Binary
+  | Unary
   | Cast
-  | Interval;
+  | Interval
+  | Star
+  | TableColumnAst;
 
 export type ExprList = {
   type: "expr_list";
-  value: ExpressionValue[];
+  value: ExpressionValue[] | null;
   loc?: LocationRange;
   parentheses?: boolean;
   separator?: string;
 };
 
-export type PartitionBy = {
-  type: 'expr';
-  expr: ColumnRef[];
-}[];
+export type PartitionBy = Column[];
 
 export type WindowSpec = {
-  name: null;
-  partitionby: PartitionBy;
+  name: string | null;
+  partitionby: PartitionBy | null;
   orderby: OrderBy[] | null;
-  window_frame_clause: string | null; };
+  window_frame_clause: WindowFrameClause | null;
+};
+
+export type WindowFrameClause = Binary;
 
 export type AsWindowSpec = string | { window_specification: WindowSpec; parentheses: boolean };
 
@@ -258,17 +273,23 @@ export type WindowExpr = {
 export interface Select {
   with: With[] | null;
   type: "select";
-  options: any[] | null;
+  options: ValueExpr<string>[] | null;
   distinct: "DISTINCT" | null;
-  columns: any[] | Column[];
-  from: From[] | TableExpr | null ;
-  where: Binary | Function | null;
-  groupby: { columns: ColumnRef[] | null, modifiers: ValueExpr<string>[] };
-  having: any[] | null;
+  columns: Column[];
+  into: {
+    keyword?: string;
+    type?: string;
+    expr?: Var[] | Value;
+    position: 'column' | 'from' | 'end' | null;
+  };
+  from: From[] | TableExpr | { expr: From[], parentheses: { length: number }, joins: From[] } | null;
+  where: Binary | Unary | Function | null;
+  groupby: { columns: ColumnRef[] | null, modifiers: (ValueExpr<string> | null)[] } | null;
+  having: Binary | null;
   orderby: OrderBy[] | null;
   limit: Limit | null;
-  window?: WindowExpr;
-  qualify?: any[] | null;
+  window: WindowExpr | null;
+  qualify?: Binary[] | null;
   _orderby?: OrderBy[] | null;
   _limit?: Limit | null;
   parentheses_symbol?: boolean;
@@ -276,52 +297,228 @@ export interface Select {
   loc?: LocationRange;
   _next?: Select;
   set_op?: string;
+  collate: CollateExpr | null;
+  locking_read: {
+    type: 'for_update' | 'lock_in_share_mode';
+    of_tables?: From[];
+    wait?: 'nowait' | 'skip_locked' | null;
+  } | null;
 }
 export interface Insert_Replace {
   type: "replace" | "insert";
-  table: any;
+  table: From[] | From;
   columns: string[] | null;
-  values: {
+  values?: {
     type: 'values',
     values: InsertReplaceValue[]
   } | Select;
-  partition: any[];
+  set?: SetList[];
+  partition: string[] | null;
   prefix: string;
   on_duplicate_update: {
     keyword: "on duplicate key update",
     set: SetList[];
-  };
+  } | null;
   loc?: LocationRange;
   returning?: Returning
 }
 export interface Returning {
   type: 'returning';
-  columns: ColumnRef | Select;
+  columns: Column[];
 }
 export interface Update {
+  with: With[] | null;
   type: "update";
-  db: string | null;
   table: Array<From | Dual> | null;
   set: SetList[];
-  where: Binary | Function | null;
+  where: Binary | Unary | Function | null;
+  orderby: OrderBy[] | null;
+  limit: Limit | null;
   loc?: LocationRange;
   returning?: Returning
 }
 export interface Delete {
+  with: With[] | null;
   type: "delete";
-  table: any;
+  table: (From & { addition?: boolean })[] | null;
   from: Array<From | Dual>;
-  where: Binary | Function | null;
+  where: Binary | Unary | Function | null;
+  orderby: OrderBy[] | null;
+  limit: Limit | null;
   loc?: LocationRange;
   returning?: Returning
 }
 
 export interface Alter {
   type: "alter";
-  table: From[];
-  expr: any;
+  table: Array<{ db: string | null; table: string }>;
+  expr: AlterExpr[];
   loc?: LocationRange;
 }
+
+export type AlterExpr = 
+  | AlterAddColumn
+  | AlterDropColumn
+  | AlterModifyColumn
+  | AlterChangeColumn
+  | AlterRenameTable
+  | AlterRenameColumn
+  | AlterAddIndex
+  | AlterDropIndex
+  | AlterDropKey
+  | AlterAddConstraint
+  | AlterDropConstraint
+  | AlterAddPartition
+  | AlterDropPartition
+  | AlterAlgorithm
+  | AlterLock
+  | AlterTableOption;
+
+export type AlterAddColumn = {
+  type: 'alter';
+  resource: 'column';
+  action: 'add';
+  keyword?: 'COLUMN';
+  column: ColumnRef;
+  definition: DataType;
+  suffix: string | null | { keyword: string };
+};
+
+export type AlterDropColumn = {
+  type: 'alter';
+  resource: 'column';
+  action: 'drop';
+  keyword?: 'COLUMN';
+  column: ColumnRef;
+};
+
+export type AlterModifyColumn = {
+  type: 'alter';
+  resource: 'column';
+  action: 'modify';
+  keyword: 'COLUMN' | null;
+  column: ColumnRef;
+  definition: DataType;
+  suffix: string | null | { keyword: string };
+};
+
+export type AlterChangeColumn = {
+  type: 'alter';
+  resource: 'column';
+  action: 'change';
+  keyword: 'COLUMN' | null;
+  old_column: ColumnRef;
+  column: ColumnRef;
+  definition: DataType;
+  suffix: string | null | { keyword: string };
+};
+
+export type AlterRenameTable = {
+  type: 'alter';
+  resource: 'table';
+  action: 'rename';
+  keyword: string;
+  table: string;
+};
+
+export type AlterRenameColumn = {
+  type: 'alter';
+  resource: 'column';
+  action: 'rename';
+  keyword: 'column';
+  old_column: ColumnRef;
+  prefix: string;
+  column: ColumnRef;
+};
+
+export type AlterAddIndex = {
+  type: 'alter';
+  resource: 'index';
+  action: 'add';
+  keyword: string;
+  index: string;
+  definition: ColumnRef[];
+  index_type: IndexType | null;
+  index_options: IndexOption[] | null;
+};
+
+export type AlterDropIndex = {
+  type: 'alter';
+  resource: 'index';
+  action: 'drop';
+  keyword: string;
+  index: string;
+};
+
+export type AlterDropKey = {
+  type: 'alter';
+  resource: 'key';
+  action: 'drop';
+  keyword: string;
+  key: string;
+};
+
+export type AlterAddConstraint = {
+  type: 'alter';
+  resource: 'constraint';
+  action: 'add';
+  create_definitions: CreateConstraintDefinition;
+};
+
+export type AlterDropConstraint = {
+  type: 'alter';
+  resource: 'constraint';
+  action: 'drop';
+  keyword: string;
+  constraint: string;
+};
+
+export type AlterAddPartition = {
+  type: 'alter';
+  resource: 'partition';
+  action: 'add';
+  keyword: 'PARTITION';
+  partitions: Array<{
+    name: ValueExpr;
+    value: {
+      type: string;
+      expr: Value;
+      parentheses: boolean;
+    };
+  }>;
+};
+
+export type AlterDropPartition = {
+  type: 'alter';
+  resource: 'partition';
+  action: 'drop';
+  keyword: 'PARTITION';
+  partitions: Column[];
+};
+
+export type AlterAlgorithm = {
+  type: 'alter';
+  resource: 'algorithm';
+  keyword: 'algorithm';
+  symbol: string;
+  algorithm: string;
+};
+
+export type AlterLock = {
+  type: 'alter';
+  resource: 'lock';
+  keyword: 'lock';
+  symbol: string;
+  lock: string;
+};
+
+export type AlterTableOption = {
+  type: 'alter';
+  resource: string;
+  keyword: string;
+  symbol: string;
+  engine?: string;
+};
 
 export interface Use {
   type: "use";
@@ -329,22 +526,25 @@ export interface Use {
   loc?: LocationRange;
 }
 
-export type KW_UNSIGNED = "UNSIGNED";
-export type KW_ZEROFILL = "ZEROFILL";
-
 export type Timezone = ["WITHOUT" | "WITH", "TIME", "ZONE"];
 
 export type KeywordComment = {
   type: "comment";
   keyword: "comment";
-  symbol?: "=";
-  value: string;
+  symbol?: "=" | null;
+  value: ValueExpr | string;
 };
 
 export type CollateExpr = {
   type: "collate";
-  symbol?: "=";
-  value: string;
+  keyword?: "collate";
+  symbol?: "=" | null;
+  value?: string;
+  collate?: {
+    name: string;
+    symbol: "=" | null;
+  };
+  name?: string;
 };
 
 export type DataType = {
@@ -352,9 +552,16 @@ export type DataType = {
   length?: number;
   parentheses?: true;
   scale?: number;
-  suffix?: Timezone | (KW_UNSIGNED | KW_ZEROFILL)[];
+  suffix?: Timezone | ("UNSIGNED" | "ZEROFILL")[] | OnUpdateCurrentTimestamp | null;
   array?: "one" | "two";
   expr?: Expr | ExprList;
+  quoted?: string;
+};
+
+export type OnUpdateCurrentTimestamp = {
+  type: 'on_update_current_timestamp';
+  keyword: 'on update';
+  expr: Function;
 };
 
 export type LiteralNotNull = {
@@ -363,12 +570,11 @@ export type LiteralNotNull = {
 };
 
 export type LiteralNull = { type: "null"; value: null | "null" };
-export type LiteralNumeric = number | { type: "bigint"; value: string };
 
 export type ColumnConstraint = {
   default_val: {
     type: "default";
-    value: any;
+    value: ExpressionValue;
   };
   nullable: LiteralNotNull | LiteralNull;
 };
@@ -380,11 +586,35 @@ export type ColumnDefinitionOptList = {
   unique?: "unique" | "unique key";
   primary?: "key" | "primary key";
   comment?: KeywordComment;
-  collate?: { collate: CollateExpr };
-  column_format?: { column_format: any };
-  storage?: { storage: any };
-  reference_definition?: { reference_definition: any };
-  character_set?: { type: "CHARACTER SET"; value: string; symbol?: "=" };
+  collate?: CollateExpr;
+  column_format?: { type: string; value: string };
+  storage?: { type: string; value: string };
+  reference_definition?: ReferenceDefinition;
+  character_set?: { type: "CHARACTER SET"; value: ValueExpr; symbol: "=" | null };
+  check?: {
+    type: 'check';
+    expr: Binary;
+  };
+  generated?: {
+    type: 'generated';
+    expr: ExpressionValue;
+    value: string;
+    storage_type?: 'stored' | 'virtual';
+  };
+};
+
+export type ReferenceDefinition = {
+  definition?: ColumnRef[];
+  table?: From[];
+  keyword?: string;
+  match?: string | null;
+  on_action: OnReference[];
+};
+
+export type OnReference = {
+  type: 'on update' | 'on delete' | 'on_reference';
+  keyword?: 'on delete' | 'on update';
+  value: 'restrict' | 'cascade' | 'set null' | 'no action' | 'set default' | ValueExpr;
 };
 
 export type CreateColumnDefinition = {
@@ -401,20 +631,23 @@ export type IndexType = {
 export type IndexOption = {
   type: "key_block_size";
   symbol?: "=";
-  expr: LiteralNumeric;
+  expr: Value;
+} | {
+  keyword: "using";
+  type: "btree" | "hash";
 };
 
 export type CreateIndexDefinition = {
-  index?: string;
+  index: string | null;
   definition: ColumnRef[];
   keyword: "index" | "key";
-  index_type?: IndexType;
+  index_type: IndexType | null;
   resource: "index";
-  index_options?: IndexOption[];
+  index_options: IndexOption[] | null;
 };
 
 export type CreateFulltextSpatialIndexDefinition = {
-  index?: string;
+  index?: string | null;
   definition: ColumnRef[];
   keyword?:
     | "fulltext"
@@ -423,49 +656,50 @@ export type CreateFulltextSpatialIndexDefinition = {
     | "spatial key"
     | "fulltext index"
     | "spatial index";
-  index_options?: IndexOption[];
+  index_options?: IndexOption[] | null;
   resource: "index";
 };
 
 export type ConstraintName = { keyword: "constraint"; constraint: string };
 
 export type CreateConstraintPrimary = {
-  constraint?: ConstraintName["constraint"];
+  constraint?: ConstraintName["constraint"] | null;
   definition: ColumnRef[];
   constraint_type: "primary key";
-  keyword?: ConstraintName["keyword"];
-  index_type?: IndexType;
+  keyword?: ConstraintName["keyword"] | null;
+  index_type?: IndexType | null;
   resource: "constraint";
-  index_options?: IndexOption[];
+  index_options?: IndexOption[] | null;
 };
 
 export type CreateConstraintUnique = {
-  constraint?: ConstraintName["constraint"];
+  constraint?: ConstraintName["constraint"] | null;
   definition: ColumnRef[];
   constraint_type: "unique key" | "unique" | "unique index";
-  keyword?: ConstraintName["keyword"];
-  index_type?: IndexType;
-  index?: string;
+  keyword?: ConstraintName["keyword"] | null;
+  index_type?: IndexType | null;
+  index?: string | null;
   resource: "constraint";
-  index_options?: IndexOption[];
+  index_options?: IndexOption[] | null;
 };
 
 export type CreateConstraintForeign = {
-  constraint?: ConstraintName["constraint"];
+  constraint?: ConstraintName["constraint"] | null;
   definition: ColumnRef[];
-  constraint_type: "FOREIGN KEY";
-  keyword?: ConstraintName["keyword"];
-  index?: string;
+  constraint_type: "foreign key" | "FOREIGN KEY";
+  keyword?: ConstraintName["keyword"] | null;
+  index?: string | null;
   resource: "constraint";
-  reference_definition?: any;
+  reference_definition?: ReferenceDefinition;
 };
 
 export type CreateConstraintCheck = {
-  constraint?: ConstraintName["constraint"];
-  definition: any[];
+  constraint?: ConstraintName["constraint"] | null;
+  definition: Binary[];
   constraint_type: "check";
-  keyword?: ConstraintName["keyword"];
+  keyword?: ConstraintName["keyword"] | null;
   resource: "constraint";
+  index_type?: IndexType | null;
 };
 
 export type CreateConstraintDefinition =
@@ -480,54 +714,345 @@ export type CreateDefinition =
   | CreateFulltextSpatialIndexDefinition
   | CreateConstraintDefinition;
 
-export interface Create {
+export interface CreateTable {
   type: "create";
-  keyword: "aggregate" | "table" | "trigger" | "extension" | "function" | "index" | "database" | "schema" | "view" | "domain" | "type" | "user";
-  temporary?: "temporary" | null;
-  table?: { db: string; table: string }[] | { db: string | null, table: string };
-  if_not_exists?: "if not exists" | null;
+  keyword: "table";
+  temporary: "temporary" | null;
+  table: { db: string | null; table: string }[] | { db: string | null, table: string };
+  if_not_exists: "IF NOT EXISTS" | null;
   like?: {
     type: "like";
-    table: string;
+    table: From[];
     parentheses?: boolean;
   } | null;
   ignore_replace?: "ignore" | "replace" | null;
   as?: string | null;
-  query_expr?: any | null;
+  query_expr?: Select | null;
   create_definitions?: CreateDefinition[] | null;
-  table_options?: any[] | null;
+  table_options?: TableOption[] | null;
+  loc?: LocationRange;
+}
+
+export interface CreateDatabase {
+  type: "create";
+  keyword: "database";
+  if_not_exists?: "IF NOT EXISTS" | null;
+  database?: string | { schema: ValueExpr[] };
+  loc?: LocationRange;
+}
+
+export interface CreateSchema {
+  type: "create";
+  keyword: "schema";
+  if_not_exists?: "IF NOT EXISTS" | null;
+  database?: string | { schema: ValueExpr[] };
+  loc?: LocationRange;
+}
+
+export interface CreateIndex {
+  type: "create";
+  keyword: "index";
   index_using?: {
     keyword: "using";
     type: "btree" | "hash";
   } | null;
   index?: string | null | { schema: string | null, name: string};
   on_kw?: "on" | null;
+  table?: { db: string | null; table: string }[] | { db: string | null, table: string };
   index_columns?: ColumnRefItem[] | null;
   index_type?: "unique" | "fulltext" | "spatial" | null;
-  index_options?: any[] | null;
+  index_options?: IndexOption[] | null;
   algorithm_option?: {
     type: "alter";
     keyword: "algorithm";
     resource: "algorithm";
     symbol: "=" | null;
-    algorithm: "default" | "instant" | "inplace" | "copy";
+    algorithm: string;
   } | null;
   lock_option?: {
     type: "alter";
     keyword: "lock";
     resource: "lock";
     symbol: "=" | null;
-    lock: "default" | "none" | "shared" | "exclusive";
+    lock: string;
   } | null;
-  database?: string;
   loc?: LocationRange;
-  where?: Binary | Function | null
 }
 
-export interface Drop {
-  type: "drop";
+export interface CreateView {
+  type: "create";
+  keyword: "view";
+  replace?: boolean | null;
+  algorithm?: 'undefined' | 'merge' | 'temptable' | null;
+  definer?: Binary | null;
+  sql_security?: 'definer' | 'invoker' | null;
+  view?: { db: string | null; view: string } | From | null;
+  columns?: string[] | null;
+  select?: Select | null;
+  with?: 'cascaded' | 'local' | null;
+  loc?: LocationRange;
+}
+
+export interface CreateTrigger {
+  type: "create";
+  keyword: "trigger";
+  definer?: Binary | null;
+  trigger?: { db: string | null; table: string };
+  time?: string;
+  events?: TriggerEvent[] | null;
+  table?: { db: string | null; table: string }[] | { db: string | null, table: string };
+  for_each?: { keyword: string; args: string } | 'row' | 'statement' | null;
+  order?: {
+    keyword: 'FOLLOWS' | 'PRECEDES';
+    trigger: string;
+  } | null;
+  execute?: { type: "set"; expr: SetList[] } | SetList[] | null;
+  loc?: LocationRange;
+}
+
+export interface CreateUser {
+  type: "create";
+  keyword: "user";
+  if_not_exists?: "IF NOT EXISTS" | null;
+  user?: UserAuthOption[] | null;
+  default_role?: string[] | null;
+  require?: RequireOption | null;
+  resource_options?: ResourceOption | null;
+  password_options?: PasswordOption | null;
+  lock_option_user?: 'account lock' | 'account unlock' | null;
+  comment_user?: string | null;
+  attribute?: string | null;
+  loc?: LocationRange;
+}
+
+export type Create = CreateTable | CreateDatabase | CreateSchema | CreateIndex | CreateView | CreateTrigger | CreateUser;
+
+export type TriggerEvent = {
+  keyword: 'insert' | 'update' | 'delete';
+  args?: ColumnRef[];
+};
+
+export type UserAuthOption = {
+  user: {
+    name: ValueExpr;
+    host: ValueExpr;
+  };
+  auth_option?: {
+    keyword: string;
+    auth_plugin?: string | null;
+    value: ValueExpr & { prefix?: string };
+  } | null;
+};
+
+export type RequireOption = {
+  keyword: 'require';
+  value: ValueExpr;
+};
+
+export type ResourceOption = {
+  keyword: 'with';
+  value: Array<{
+    type: string;
+    value: number;
+    prefix: string;
+  }>;
+};
+
+export type PasswordOption = {
+  type: 'password_expire' | 'password_history' | 'password_reuse_interval' | 'password_require_current';
+  value: number | string | null;
+};
+
+export type TableOption = {
   keyword: string;
-  name: any[];
+  symbol?: '=';
+  value: ExpressionValue | string | number;
+};
+
+export interface DropTable {
+  type: "drop";
+  keyword: "table";
+  name: From[];
+  prefix: 'if exists' | null;
+  loc?: LocationRange;
+}
+
+export interface DropDatabase {
+  type: "drop";
+  keyword: "database" | "schema";
+  name: string;
+  prefix: 'if exists' | null;
+  loc?: LocationRange;
+}
+
+export interface DropView {
+  type: "drop";
+  keyword: "view";
+  name: From[];
+  prefix: 'if exists' | null;
+  options: 'restrict' | 'cascade' | null;
+  loc?: LocationRange;
+}
+
+export interface DropIndex {
+  type: "drop";
+  keyword: "index";
+  name: ColumnRef;
+  table: From;
+  options: 'restrict' | 'cascade' | null;
+  loc?: LocationRange;
+}
+
+export interface DropTrigger {
+  type: "drop";
+  keyword: "trigger";
+  name: Array<{ schema: string | null; trigger: string }>;
+  prefix: 'if exists' | null;
+  loc?: LocationRange;
+}
+
+export type Drop = DropTable | DropDatabase | DropView | DropIndex | DropTrigger;
+
+export interface Show {
+  type: "show";
+  keyword: string;
+  suffix?: string;
+  from?: From;
+  where?: Binary | Function | null;
+  like?: {
+    type: 'like';
+    value: string;
+  } | null;
+  loc?: LocationRange;
+}
+
+export interface Desc {
+  type: "desc";
+  table: string;
+  loc?: LocationRange;
+}
+
+export interface Explain {
+  type: "explain";
+  expr: Select | Update | Delete | Insert_Replace;
+  format?: string;
+  loc?: LocationRange;
+}
+
+export interface Call {
+  type: "call";
+  expr: Function;
+  loc?: LocationRange;
+}
+
+export interface Set {
+  type: "set";
+  keyword?: string | null;
+  expr: Array<{
+    type: "assign";
+    left: Var;
+    symbol: string;
+    right: ExpressionValue;
+  }>;
+  loc?: LocationRange;
+}
+
+export interface Lock {
+  type: "lock";
+  keyword: "tables";
+  tables: LockTable[];
+  loc?: LocationRange;
+}
+
+export type LockTable = {
+  table: From;
+  lock_type: {
+    type: 'read' | 'write';
+    suffix?: null;
+    prefix?: null;
+  };
+};
+
+export interface Unlock {
+  type: "unlock";
+  keyword: "tables";
+  loc?: LocationRange;
+}
+
+export interface Grant {
+  type: "grant";
+  keyword: "priv";
+  objects: Array<{
+    priv: ValueExpr;
+    columns: ColumnRef[] | null;
+  }>;
+  on: {
+    object_type: 'table' | 'function' | 'procedure' | null;
+    priv_level: Array<{
+      prefix: string;
+      name: string;
+    }>;
+  };
+  to_from: "TO" | "FROM";
+  user_or_roles: Array<{
+    name: ValueExpr;
+    host: ValueExpr | null;
+  }>;
+  with: any | null;
+  loc?: LocationRange;
+}
+
+export interface LoadData {
+  type: "load_data";
+  mode?: string | null;
+  local?: 'local' | null;
+  file: ValueExpr;
+  replace_ignore?: 'replace' | 'ignore' | null;
+  table: { db: string | null; table: string };
+  partition?: ValueExpr<string>[] | null;
+  character_set?: string | null;
+  fields?: LoadDataField | null;
+  lines?: LoadDataLine | null;
+  ignore?: number | null;
+  column?: ColumnRef[] | null;
+  set?: SetList[] | null;
+  loc?: LocationRange;
+}
+
+export type LoadDataField = {
+  keyword: 'FIELDS';
+  terminated: ValueExpr & { prefix: string } | null;
+  enclosed: ValueExpr & { prefix: string } | null;
+  escaped: ValueExpr & { prefix: string } | null;
+};
+
+export type LoadDataLine = {
+  keyword: 'LINES';
+  starting?: ValueExpr & { prefix: string };
+  terminated: ValueExpr & { prefix: string } | null;
+};
+
+export interface Truncate {
+  type: "truncate";
+  keyword: "table";
+  name: From[];
+  loc?: LocationRange;
+}
+
+export interface Rename {
+  type: "rename";
+  table: Array<[{ db: string | null; table: string }, { db: string | null; table: string }]>;
+  loc?: LocationRange;
+}
+
+export interface Transaction {
+  type: "transaction";
+  expr: {
+    action: ValueExpr<"start" | "begin" | "commit" | "rollback" | "START" | "COMMIT" | "ROLLBACK">;
+    keyword?: "TRANSACTION";
+    modes?: ValueExpr[] | null;
+  };
+  loc?: LocationRange;
 }
 
 export type AST =
@@ -538,7 +1063,19 @@ export type AST =
   | Delete
   | Alter
   | Create
-  | Drop;
+  | Drop
+  | Show
+  | Desc
+  | Explain
+  | Call
+  | Set
+  | Lock
+  | Unlock
+  | Grant
+  | LoadData
+  | Truncate
+  | Rename
+  | Transaction;
 
 export class Parser {
   constructor();
@@ -549,7 +1086,7 @@ export class Parser {
 
   sqlify(ast: AST[] | AST, opt?: Option): string;
 
-  exprToSQL(ast: any, opt?: Option): string;
+  exprToSQL(ast: ExpressionValue | ExprList | OrderBy | ColumnRef, opt?: Option): string;
 
   whiteListCheck(
     sql: string,
