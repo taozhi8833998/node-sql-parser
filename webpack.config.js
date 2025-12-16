@@ -64,7 +64,7 @@ const getPlugins = (parserName, target, plugins = []) => {
           'types.d.ts',
           'ast/**',
           {
-            from: 'index.d.ts',
+            from: `types/${parserName || 'index'}.d.ts`,
             to: tsFileName,
           }
         ],

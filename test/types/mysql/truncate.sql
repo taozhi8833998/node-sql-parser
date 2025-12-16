@@ -1,0 +1,2 @@
+TRUNCATE TABLE users;
+TRUNCATE TABLE mydb.users;
