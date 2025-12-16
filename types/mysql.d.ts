@@ -89,6 +89,7 @@ export interface ValueExpr {
     | "single_quote_string"
     | "double_quote_string"
     | "number"
+    | "bigint"
     | "bool"
     | "null"
     | "hex_string"

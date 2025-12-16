@@ -374,6 +374,7 @@ export function isValueExpr(obj: unknown): obj is ValueExpr {
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
         (typedObj["type"] === "number" ||
+            typedObj["type"] === "bigint" ||
             typedObj["type"] === "single_quote_string" ||
             typedObj["type"] === "double_quote_string" ||
             typedObj["type"] === "bool" ||
