@@ -6,7 +6,7 @@ import { join } from 'path';
 import { Parser } from './parser-loader.mjs';
 import {
   isSelect, isInsert_Replace, isUpdate, isDelete, isCreate, isDrop, isAlter, isTruncate,
-  isRename, isGrant, isDesc, isShow, isUse, isSet, isLock, isUnlock, isCall, isLoadData, isExplain
+  isRename, isGrant, isDesc, isShow, isUse, isSetStatement, isLock, isUnlock, isCall, isLoadData, isExplain
 } from './types.guard';
 
 const parser = new Parser();
@@ -158,7 +158,7 @@ test('set.sql statements', () => {
   const statements = readSqlFile('set.sql');
   for (const sql of statements) {
     const ast = astify(sql);
-    assertType(isSet, ast, `isSet: ${sql}`);
+    assertType(isSetStatement, ast, `isSetStatement: ${sql}`);
   }
 });
 

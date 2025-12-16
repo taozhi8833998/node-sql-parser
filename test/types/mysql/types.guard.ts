@@ -2,7 +2,7 @@
  * Generated type guards for "mysql.d.ts".
  * WARNING: Do not manually change this file.
  */
-import { With, ParseOptions, Option, TableColumnAst, BaseFrom, Join, Values, TableExpr, Dual, From, LimitValue, Limit, OrderBy, ValueExpr, StringValue, OriginValue, DefaultValue, NumberValue, IntervalExprValue, SeparatorValue, SortDirection, ColumnRefItem, ColumnRef, SetList, InsertReplaceValue, Star, Case, Cast, AggrFunc, FunctionNameValue, FunctionName, Function, FulltextSearch, Column, Interval, Param, Var, Assign, Binary, Unary, Expr, Extract, ExpressionValue, ExprList, PartitionBy, WindowSpec, WindowFrameClause, AsWindowSpec, NamedWindowExpr, WindowExpr, Select, Insert_Replace, Update, Delete, Alter, AlterExpr, AlterAddColumn, AlterDropColumn, AlterModifyColumn, AlterChangeColumn, AlterRenameTable, AlterRenameColumn, AlterAddIndex, AlterDropIndex, AlterDropKey, AlterAddConstraint, AlterDropConstraint, AlterEnableConstraint, AlterDisableConstraint, AlterAddPartition, AlterDropPartition, AlterOperatePartition, AlterAlgorithm, AlterLock, AlterTableOption, Use, KeywordComment, CollateExpr, DataType, OnUpdateCurrentTimestamp, LiteralNotNull, LiteralNull, ColumnConstraint, ColumnDefinitionOptList, ReferenceDefinition, OnReference, CreateColumnDefinition, IndexType, IndexOption, CreateIndexDefinition, CreateFulltextSpatialIndexDefinition, ConstraintName, CreateConstraintPrimary, CreateConstraintUnique, CreateConstraintForeign, CreateConstraintCheck, CreateConstraintDefinition, CreateDefinition, CreateTable, CreateDatabase, CreateSchema, CreateIndex, CreateView, CreateTrigger, CreateUser, Create, TriggerEvent, UserAuthOption, RequireOption, ResourceOption, PasswordOption, TableOption, DropTable, DropDatabase, DropView, DropIndex, DropTrigger, Drop, ShowLogs, ShowTables, ShowSimple, ShowProcedureFunctionStatus, ShowBinlogEvents, ShowCharacterSet, ShowCollationDatabases, ShowColumnsIndexes, ShowCreateTable, ShowCreateView, ShowCreateEvent, ShowCreateTrigger, ShowCreateProcedure, ShowGrants, Show, Desc, Explain, Call, SetAssign, Set, Lock, LockTable, Unlock, Grant, LoadData, LoadDataField, LoadDataLine, Truncate, Rename, Transaction, AST } from "./mysql";
+import { With, ParseOptions, Option, TableColumnAst, BaseFrom, Join, Values, TableExpr, Dual, From, LimitValue, Limit, OrderBy, ValueExpr, StringValue, OriginValue, DefaultValue, NumberValue, IntervalExprValue, SeparatorValue, SortDirection, ColumnRefItem, ColumnRef, SetList, InsertReplaceValue, Star, Case, Cast, AggrFunc, FunctionNameValue, FunctionName, Function, FulltextSearch, Column, Interval, Param, Var, Assign, Binary, Unary, Expr, ExtractFunc, ExpressionValue, ExprList, PartitionBy, WindowSpec, WindowFrameClause, AsWindowSpec, NamedWindowExpr, WindowExpr, Select, Insert_Replace, Update, Delete, Alter, AlterExpr, AlterAddColumn, AlterDropColumn, AlterModifyColumn, AlterChangeColumn, AlterRenameTable, AlterRenameColumn, AlterAddIndex, AlterDropIndex, AlterDropKey, AlterAddConstraint, AlterDropConstraint, AlterEnableConstraint, AlterDisableConstraint, AlterAddPartition, AlterDropPartition, AlterOperatePartition, AlterAlgorithm, AlterLock, AlterTableOption, Use, KeywordComment, CollateExpr, DataType, OnUpdateCurrentTimestamp, LiteralNotNull, LiteralNull, ColumnConstraint, ColumnDefinitionOptList, ReferenceDefinition, OnReference, CreateColumnDefinition, IndexType, IndexOption, CreateIndexDefinition, CreateFulltextSpatialIndexDefinition, ConstraintName, CreateConstraintPrimary, CreateConstraintUnique, CreateConstraintForeign, CreateConstraintCheck, CreateConstraintDefinition, CreateDefinition, CreateTable, CreateDatabase, CreateSchema, CreateIndex, CreateView, CreateTrigger, CreateUser, Create, TriggerEvent, UserAuthOption, RequireOption, ResourceOption, PasswordOption, TableOption, DropTable, DropDatabase, DropView, DropIndex, DropTrigger, Drop, ShowLogs, ShowTables, ShowSimple, ShowProcedureFunctionStatus, ShowBinlogEvents, ShowCharacterSet, ShowCollationDatabases, ShowColumnsIndexes, ShowCreateTable, ShowCreateView, ShowCreateEvent, ShowCreateTrigger, ShowCreateProcedure, ShowGrants, Show, Desc, Explain, Call, SetAssign, SetStatement, Lock, LockTable, Unlock, Grant, LoadData, LoadDataField, LoadDataLine, Truncate, Rename, Transaction, AST } from "./mysql";
 
 export function isWith(obj: unknown): obj is With {
     const typedObj = obj as With
@@ -116,7 +116,7 @@ export function isTableColumnAst(obj: unknown): obj is TableColumnAst {
             isDesc(typedObj["ast"]) as boolean ||
             isExplain(typedObj["ast"]) as boolean ||
             isCall(typedObj["ast"]) as boolean ||
-            isSet(typedObj["ast"]) as boolean ||
+            isSetStatement(typedObj["ast"]) as boolean ||
             isLock(typedObj["ast"]) as boolean ||
             isUnlock(typedObj["ast"]) as boolean ||
             isGrant(typedObj["ast"]) as boolean ||
@@ -597,7 +597,7 @@ export function isSetList(obj: unknown): obj is SetList {
             isVar(typedObj["value"]) as boolean ||
             isBinary(typedObj["value"]) as boolean ||
             isUnary(typedObj["value"]) as boolean ||
-            isExtract(typedObj["value"]) as boolean) &&
+            isExtractFunc(typedObj["value"]) as boolean) &&
         (typedObj["table"] === null ||
             typeof typedObj["table"] === "string") &&
         (typeof typedObj["loc"] === "undefined" ||
@@ -936,7 +936,7 @@ export function isColumn(obj: unknown): obj is Column {
             isAssign(typedObj["expr"]) as boolean ||
             isBinary(typedObj["expr"]) as boolean ||
             isUnary(typedObj["expr"]) as boolean ||
-            isExtract(typedObj["expr"]) as boolean) &&
+            isExtractFunc(typedObj["expr"]) as boolean) &&
         (typedObj["as"] === null ||
             typeof typedObj["as"] === "string") &&
         (typeof typedObj["type"] === "undefined" ||
@@ -1080,7 +1080,7 @@ export function isBinary(obj: unknown): obj is Binary {
             isVar(typedObj["left"]) as boolean ||
             isBinary(typedObj["left"]) as boolean ||
             isUnary(typedObj["left"]) as boolean ||
-            isExtract(typedObj["left"]) as boolean ||
+            isExtractFunc(typedObj["left"]) as boolean ||
             isExprList(typedObj["left"]) as boolean) &&
         (isTableColumnAst(typedObj["right"]) as boolean ||
             isValueExpr(typedObj["right"]) as boolean ||
@@ -1094,7 +1094,7 @@ export function isBinary(obj: unknown): obj is Binary {
             isVar(typedObj["right"]) as boolean ||
             isBinary(typedObj["right"]) as boolean ||
             isUnary(typedObj["right"]) as boolean ||
-            isExtract(typedObj["right"]) as boolean ||
+            isExtractFunc(typedObj["right"]) as boolean ||
             isExprList(typedObj["right"]) as boolean) &&
         (typeof typedObj["loc"] === "undefined" ||
             (typedObj["loc"] !== null &&
@@ -1157,8 +1157,8 @@ export function isExpr(obj: unknown): obj is Expr {
     )
 }
 
-export function isExtract(obj: unknown): obj is Extract {
-    const typedObj = obj as Extract
+export function isExtractFunc(obj: unknown): obj is ExtractFunc {
+    const typedObj = obj as ExtractFunc
     return (
         (typedObj !== null &&
             typeof typedObj === "object" ||
@@ -4075,12 +4075,12 @@ export function isSetAssign(obj: unknown): obj is SetAssign {
             isVar(typedObj["right"]) as boolean ||
             isBinary(typedObj["right"]) as boolean ||
             isUnary(typedObj["right"]) as boolean ||
-            isExtract(typedObj["right"]) as boolean)
+            isExtractFunc(typedObj["right"]) as boolean)
     )
 }
 
-export function isSet(obj: unknown): obj is Set {
-    const typedObj = obj as Set
+export function isSetStatement(obj: unknown): obj is SetStatement {
+    const typedObj = obj as SetStatement
     return (
         (typedObj !== null &&
             typeof typedObj === "object" ||
@@ -4582,7 +4582,7 @@ export function isAST(obj: unknown): obj is AST {
             isDesc(typedObj) as boolean ||
             isExplain(typedObj) as boolean ||
             isCall(typedObj) as boolean ||
-            isSet(typedObj) as boolean ||
+            isSetStatement(typedObj) as boolean ||
             isLock(typedObj) as boolean ||
             isUnlock(typedObj) as boolean ||
             isGrant(typedObj) as boolean ||

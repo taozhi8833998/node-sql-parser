@@ -152,7 +152,7 @@ export interface ColumnRefItem {
 export type ColumnRef = ColumnRefItem;
 export interface SetList {
   column: string;
-  value: ExpressionValue | Extract;
+  value: ExpressionValue | ExtractFunc;
   table: string | null;
   loc?: LocationRange;
 }
@@ -233,7 +233,7 @@ export interface FulltextSearch {
   as?: string | null;
 }
 export interface Column {
-  expr: ExpressionValue | Extract | Star | FulltextSearch | Assign;
+  expr: ExpressionValue | ExtractFunc | Star | FulltextSearch | Assign;
   as: string | null;
   type?: string;
   loc?: LocationRange;
@@ -260,8 +260,8 @@ export type Assign = {
 export type Binary = {
   type: "binary_expr";
   operator: string;
-  left: ExpressionValue | ExprList | Extract;
-  right: ExpressionValue | ExprList | Extract;
+  left: ExpressionValue | ExprList | ExtractFunc;
+  right: ExpressionValue | ExprList | ExtractFunc;
   loc?: LocationRange;
   parentheses?: boolean;
 };
@@ -276,7 +276,7 @@ export type Unary = {
 
 export type Expr = Binary | Unary;
 
-export interface Extract {
+export interface ExtractFunc {
   type: "extract";
   args: {
     field: string;
@@ -1147,10 +1147,10 @@ export interface SetAssign {
     prefix: string | null;
   };
   symbol: string;
-  right: ExpressionValue | Extract | FulltextSearch;
+  right: ExpressionValue | ExtractFunc | FulltextSearch;
 }
 
-export interface Set {
+export interface SetStatement {
   type: "set";
   keyword?: string | null;
   expr: SetAssign[];
@@ -1271,7 +1271,7 @@ export type AST =
   | Desc
   | Explain
   | Call
-  | Set
+  | SetStatement
   | Lock
   | Unlock
   | Grant
