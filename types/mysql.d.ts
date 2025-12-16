@@ -345,7 +345,7 @@ export interface Select {
   };
   from: From[] | TableExpr | { expr: From[], parentheses: { length: number }, joins: From[] } | null;
   where: Binary | Unary | Function | FulltextSearch | ColumnRef | null;
-  groupby: { columns: ColumnRef[] | null, modifiers: (OriginValue | null)[] } | null;
+  groupby: { columns: (ColumnRef | NumberValue)[] | null, modifiers: (OriginValue | null)[] } | null;
   having: Binary | null;
   orderby: OrderBy[] | null;
   limit: Limit | null;

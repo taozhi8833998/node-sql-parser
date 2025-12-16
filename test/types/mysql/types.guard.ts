@@ -1429,7 +1429,8 @@ export function isSelect(obj: unknown): obj is Select {
             (typedObj["groupby"]["columns"] === null ||
                 Array.isArray(typedObj["groupby"]["columns"]) &&
                 typedObj["groupby"]["columns"].every((e: any) =>
-                    isColumnRefItem(e) as boolean
+                (isNumberValue(e) as boolean ||
+                    isColumnRefItem(e) as boolean)
                 )) &&
             Array.isArray(typedObj["groupby"]["modifiers"]) &&
             typedObj["groupby"]["modifiers"].every((e: any) =>
