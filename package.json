@@ -5,14 +5,16 @@
   "main": "index.js",
   "types": "types.d.ts",
   "scripts": {
-    "start": "webpack --config webpack.config.js",
-    "build": "npm run lint && npm run compile && webpack --config webpack.config.js --mode production",
-    "test": "npm run lint && mochapack --reporter-option maxDiffSize=1000000 \"test/**/*.spec.js\"",
-    "lint": "eslint src",
+    "start": "npm run build:pegjs && webpack --config webpack.config.js",
+    "build": "npm run lint && npm run build:pegjs && webpack --config webpack.config.js --mode production",
+    "build:pegjs": "gulp render && gulp generate",
     "compile": "babel src -d lib",
-    "coverLocal": "cross-env NODE_ENV=coverage nyc --reporter=lcov --reporter=text npm run test",
-    "cover:run": "cross-env NODE_ENV=coverage nyc --reporter=text-lcov npm run test",
+    "test": "npm run lint && npm run build:pegjs && mochapack --reporter-option maxDiffSize=1000000 \"test/**/*.spec.js\"",
+    "lint": "eslint src",
+    "coverLocal": "npm run build:pegjs && cross-env NODE_ENV=coverage nyc --reporter=lcov --reporter=text npm run test:only",
+    "cover:run": "npm run build:pegjs && cross-env NODE_ENV=coverage nyc --reporter=text-lcov npm run test:only",
     "cover": "npm run cover:run && nyc report --reporter=text-lcov | coveralls",
+    "test:only": "mochapack --reporter-option maxDiffSize=1000000 \"test/**/*.spec.js\"",
     "release": "npm run build && npm publish output/prod"
   },
   "repository": {
@@ -56,6 +58,7 @@
   "devDependencies": {
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.10.5",
+    "@babel/plugin-bugfix-firefox-class-in-computed-class-key": "^7.28.5",
     "@babel/preset-env": "^7.10.4",
     "@babel/register": "^7.10.5",
     "@types/chai": "^4.1.7",
@@ -72,16 +75,17 @@
     "eslint-plugin-filenames": "^1.3.2",
     "eslint-plugin-import": "^2.16.0",
     "filemanager-webpack-plugin": "^3.1.1",
+    "gulp": "^4.0.2",
     "istanbul-instrumenter-loader": "^3.0.1",
     "mocha": "^10.0.0",
     "mochapack": "^2.0.3",
     "nyc": "15.1.0",
-    "pegjs": "^0.10.0",
-    "pegjs-loader": "^0.5.6",
+    "peggy": "^3.0.2",
     "pre-commit": "^1.2.2",
     "rimraf": "^5.0.1",
     "source-map-support": "^0.5.19",
     "tinyify": "^4.0.0",
+    "typescript": "^5.3.0",
     "vscode-mocha-hmr": "^1.0.0",
     "webpack": "^4.43.0",
     "webpack-cli": "^4.7.0",
@@ -95,7 +99,6 @@
     "sourceMap": false
   },
   "dependencies": {
-    "@types/pegjs": "^0.10.0",
     "big-integer": "^1.6.48"
   }
 }

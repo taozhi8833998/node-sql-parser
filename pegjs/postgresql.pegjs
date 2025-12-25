@@ -103,115 +103,9 @@
     'PERSIST_ONLY': true,
   };
 
-  function getLocationObject() {
-    return options.includeLocations ? {loc: location()} : {}
-  }
-
-  function createUnaryExpr(op, e) {
-    return {
-      type: 'unary_expr',
-      operator: op,
-      expr: e
-    };
-  }
-
-  function createBinaryExpr(op, left, right) {
-    return {
-      type: 'binary_expr',
-      operator: op,
-      left: left,
-      right: right,
-      ...getLocationObject(),
-    };
-  }
-
-  function isBigInt(numberStr) {
-    const previousMaxSafe = BigInt(Number.MAX_SAFE_INTEGER)
-    const num = BigInt(numberStr)
-    if (num < previousMaxSafe) return false
-    return true
-  }
-
-  function createList(head, tail, po = 3) {
-    const result = Array.isArray(head) ? head : [head];
-    for (let i = 0; i < tail.length; i++) {
-      delete tail[i][po].tableList
-      delete tail[i][po].columnList
-      result.push(tail[i][po]);
-    }
-    return result;
-  }
-
-  function createBinaryExprChain(head, tail) {
-    let result = head;
-    for (let i = 0; i < tail.length; i++) {
-      result = createBinaryExpr(tail[i][1], result, tail[i][3]);
-    }
-    return result;
-  }
-
-  function queryTableAlias(tableName) {
-    const alias = tableAlias[tableName]
-    if (alias) return alias
-    if (tableName) return tableName
-    return null
-  }
-
-  function columnListTableAlias(columnList) {
-    const newColumnsList = new Set()
-    const symbolChar = '::'
-    for(let column of columnList.keys()) {
-      const columnInfo = column.split(symbolChar)
-      if (!columnInfo) {
-        newColumnsList.add(column)
-        break
-      }
-      if (columnInfo && columnInfo[1]) columnInfo[1] = queryTableAlias(columnInfo[1])
-      newColumnsList.add(columnInfo.join(symbolChar))
-    }
-    return Array.from(newColumnsList)
-  }
-
-  function refreshColumnList(columnList) {
-    const columns = columnListTableAlias(columnList)
-    columnList.clear()
-    columns.forEach(col => columnList.add(col))
-  }
-
-  function commonStrToLiteral(strOrLiteral) {
-    return typeof strOrLiteral === 'string' ? { type: 'same', value: strOrLiteral } : strOrLiteral
-  }
-
-  const cmpPrefixMap = {
-    '+': true,
-    '-': true,
-    '*': true,
-    '/': true,
-    '>': true,
-    '<': true,
-    '!': true,
-    '=': true,
-
-    //between
-    'B': true,
-    'b': true,
-    //for is or in
-    'I': true,
-    'i': true,
-    //for like
-    'L': true,
-    'l': true,
-    //for not
-    'N': true,
-    'n': true
-  };
-
-  // used for dependency analysis
-  let varList = [];
-  const tableList = new Set();
-  const columnList = new Set();
-  const customTypes = new Set();
-  const tableAlias = {};
+  // Import common initializer functions (PostgreSQL variant with location and array-aware createList) and variables
+  @import 'common/initializer/functions-pg.pegjs'
+  @import 'common/initializer/variables-pg.pegjs'
 }
 
 start
@@ -3598,9 +3492,6 @@ into_clause
     }
   }
 
-from_clause
-  = KW_FROM __ l:table_ref_list { /*=>table_ref_list*/return l; }
-
 table_to_list
   = head:table_to_item tail:(__ COMMA __ table_to_item)* {
     // => table_to_item[]
@@ -3856,12 +3747,6 @@ or_and_expr
     return result
   }
 
-on_clause
-  = KW_ON __ e:or_and_where_expr { /* => or_and_where_expr */ return e; }
-
-where_clause
-  = KW_WHERE __ e:or_and_where_expr { /* => or_and_where_expr */ return e; }
-
 group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list {
     // => { columns: expr_list['value']; modifiers: literal_string[]; }
@@ -3875,9 +3760,6 @@ column_ref_list
     // => column_ref[]
       return createList(head, tail);
     }
-
-having_clause
-  = KW_HAVING __ e:or_and_where_expr { /* => expr */ return e; }
 
 window_clause
   = KW_WINDOW __ l:named_window_expr_list {
@@ -3994,15 +3876,6 @@ partition_by_clause
     /* => { type: 'expr'; expr: column_ref_list }[] */
     return Array.isArray(bc) ? bc.map(item => ({ type: 'expr', expr: item })) : [{ type: 'expr', expr: bc }];
   }
-
-order_by_clause
-  = KW_ORDER __ KW_BY __ l:order_by_list { /* => order_by_list */ return l; }
-
-order_by_list
-  = head:order_by_element tail:(__ COMMA __ order_by_element)* {
-    // => order_by_element[]
-      return createList(head, tail);
-    }
 
 order_by_element
   = e:expr __ d:(KW_DESC / KW_ASC)? __ nl:('NULLS'i __ ('FIRST'i / 'LAST'i)?)? {
@@ -4306,32 +4179,6 @@ insert_no_columns_stmt
 replace_insert
   = KW_INSERT   { /* => 'insert' */ return 'insert'; }
   / KW_REPLACE  { /* => 'replace' */return 'replace'; }
-
-value_clause
-  = KW_VALUES __ l:value_list  {
-    /* => { type: 'values', values: value_list } */
-    return { type: 'values', values: l }
-  }
-
-value_list
-  = head:value_item tail:(__ COMMA __ value_item)* {
-    // => value_item[]
-      return createList(head, tail);
-    }
-
-value_item
-  = LPAREN __ l:expr_list  __ RPAREN {
-    // => expr_list
-      return l;
-    }
-
-expr_list
-  = head:expr tail:(__ COMMA __ expr)* {
-    // => { type: 'expr_list'; value: expr[]; parentheses?: boolean; separator?: string; }
-      const el = { type: 'expr_list' };
-      el.value = createList(head, tail);
-      return el;
-    }
 
 interval_expr
   = KW_INTERVAL __
@@ -4830,41 +4677,9 @@ alias_ident
       return name.value;
     }
 
-quoted_ident_type
-  = double_quoted_ident / single_quoted_ident / backticks_quoted_ident
-
-quoted_ident
-  = v:(double_quoted_ident / single_quoted_ident / backticks_quoted_ident) {
-    // => string
-    return v.value
-  }
-
-double_quoted_ident
-  = '"' chars:[^"]+ '"' {
-    // => { type: 'double_quote_string'; value: string; }
-    return {
-      type: 'double_quote_string',
-      value: chars.join('')
-    }
-  }
-
-single_quoted_ident
-  = "'" chars:[^']+ "'" {
-    // => { type: 'single_quote_string'; value: string; }
-    return {
-      type: 'single_quote_string',
-      value: chars.join('')
-    }
-  }
-
-backticks_quoted_ident
-  = "`" chars:[^`]+ "`" {
-    // => { type: 'backticks_quote_string'; value: string; }
-    return {
-      type: 'backticks_quote_string',
-      value: chars.join('')
-    }
-  }
+// quoted_ident_type, quoted_ident, double_quoted_ident, single_quoted_ident, backticks_quoted_ident
+// are imported from common/identifier/quoted.pegjs
+@import 'common/identifier/quoted.pegjs'
 
 ident_without_kw
   = ident_name / quoted_ident
@@ -4897,12 +4712,7 @@ ident_name
       return start + parts.join('');
     }
 
-ident_start = [A-Za-z_\u4e00-\u9fa5\u00C0-\u017F]
-
-ident_part  = [A-Za-z0-9_\-$\u4e00-\u9fa5\u00C0-\u017F]
-
-// to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_\u4e00-\u9fa5\u00C0-\u017F]
+// ident_start, ident_part, column_part moved after common symbol imports
 
 param
   = l:(':' ident_name) {
@@ -5458,9 +5268,6 @@ cast_expr
   }
 
 
-signedness
-  = KW_SIGNED
-  / KW_UNSIGNED
 
 literal
   = literal_string
@@ -5470,16 +5277,9 @@ literal
   / literal_datetime
   / literal_array
 
+// PostgreSQL specific: literal_array
 literal_array
   = s:KW_ARRAY __ LBRAKE __ c:expr_list? __ RBRAKE {
-    /*
-      => {
-        expr_list: expr_list | {type: 'origin', value: ident },
-        type: string,
-        keyword: string,
-        brackets: boolean
-      }
-    */
     return {
       expr_list: c || { type: 'origin', value: '' },
       type: 'array',
@@ -5488,116 +5288,30 @@ literal_array
     }
   }
 
-literal_list
-  = head:literal tail:(__ COMMA __ literal)* {
-    // => literal[]
-      return createList(head, tail);
-    }
+// literal_list, literal_null, literal_not_null, literal_bool
+// are imported from common/literal/basic-no-numeric.pegjs
+// (PostgreSQL has custom literal_numeric, so we use the no-numeric variant)
+@import 'common/literal/basic-no-numeric.pegjs'
 
-literal_null
-  = KW_NULL {
-    // => { type: 'null'; value: null }
-      return { type: 'null', value: null };
-    }
+// literal_string is imported from common/literal/string-basic.pegjs
+@import 'common/literal/string-basic.pegjs'
 
-literal_not_null
-  = KW_NOT_NULL {
-    // => { type: 'not null'; value: 'not null' }
-    return {
-      type: 'not null',
-      value: 'not null',
-    }
-  }
+// literal_datetime is imported from common/literal/datetime.pegjs
+@import 'common/literal/datetime.pegjs'
 
-literal_bool
-  = KW_TRUE {
-      // => { type: 'bool', value: true }
-      return { type: 'bool', value: true };
-    }
-  / KW_FALSE {
-      //=> { type: 'bool', value: false }
-      return { type: 'bool', value: false };
-    }
+// single_quote_char, single_char, escape_char (minimal, only '' escape)
+// are imported from common/literal/string-chars-minimal.pegjs
+@import 'common/literal/string-chars-minimal.pegjs'
 
-literal_string
-  = ca:("'" single_char* "'") [\n]+ __ fs:("'" single_char* "'") {
-      // => { type: 'single_quote_string'; value: string; }
-      return {
-        type: 'single_quote_string',
-        value: `${ca[1].join('')}${fs[1].join('')}`
-      };
-    }
-  / ca:("'" single_char* "'") {
-      // => { type: 'single_quote_string'; value: string; }
-      return {
-        type: 'single_quote_string',
-        value: ca[1].join('')
-      };
-    }
-  / literal_double_quoted_string
-
-literal_double_quoted_string
-  = ca:("\"" single_quote_char* "\"") !DOT {
-      // => { type: 'string'; value: string; }
-      return {
-        type: 'double_quote_string',
-        value: ca[1].join('')
-      };
-    }
-
-literal_datetime
-  = type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("'" single_char* "'") {
-      // => { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string }
-      return {
-        type: type.toLowerCase(),
-        value: ca[1].join('')
-      };
-    }
-  / type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("\"" single_quote_char* "\"") {
-    // => { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string }
-      return {
-        type: type.toLowerCase(),
-        value: ca[1].join('')
-      };
-    }
-
-single_quote_char
-  = [^"\\\0-\x1F\x7f]
-  / escape_char
-
-single_char
-  = [^'\\]
-  / escape_char
-
-escape_char
-  = "\\'"  { return "\\'";  }
-  / '\\"'  { return '\\"';  }
-  / "\\\\" { return "\\\\"; }
-  / "\\/"  { return "\\/";  }
-  / "\\b"  { return "\b"; }
-  / "\\f"  { return "\f"; }
-  / "\\n"  { return "\n"; }
-  / "\\r"  { return "\r"; }
-  / "\\t"  { return "\t"; }
-  / "\\u" h1:hexDigit h2:hexDigit h3:hexDigit h4:hexDigit {
-      return String.fromCharCode(parseInt("0x" + h1 + h2 + h3 + h4));
-    }
-  / "\\" { return "\\"; }
-  / "''" { return "''" }
-
-line_terminator
-  = [\n\r]
-
+// PostgreSQL specific: number has special structure (double_float / integer)
 literal_numeric
   = n:number {
-    // => number | { type: 'bigint'; value: string; }
       if (n && typeof n === 'object') return n
       return { type: 'number', value: n };
     }
 
 integer
   = int_:int exp:exp {
-    // => IGNORE
     const numStr = int_ + exp
     return {
       type: 'bigint',
@@ -5605,16 +5319,15 @@ integer
     }
   }
   / int_:int {
-    // => IGNORE
     if (isBigInt(int_)) return {
       type: 'bigint',
       value: int_
     }
     return { type: 'number', value: parseFloat(int_) };
   }
+
 double_float
   = int_:int? frac:frac exp:exp {
-    // => IGNORE
     const numStr = (int_ || '') + frac + exp
     return {
       type: 'bigint',
@@ -5622,7 +5335,6 @@ double_float
     }
   }
   / int_:int? frac:frac {
-    // => IGNORE
     const numStr = (int_ || '') + frac
     if (int_ && isBigInt(int_)) return {
       type: 'bigint',
@@ -5630,6 +5342,7 @@ double_float
     }
     return parseFloat(numStr).toFixed(frac.length - 1);
   }
+
 number
   = double_float / integer
 
@@ -5657,253 +5370,28 @@ e
   = e:[eE] sign:[+-]? { return e + (sign !== null ? sign: ''); }
 
 
-KW_NULL     = "NULL"i       !ident_start
-KW_DEFAULT  = "DEFAULT"i    !ident_start
-KW_NOT_NULL = "NOT NULL"i   !ident_start
-KW_TRUE     = "TRUE"i       !ident_start
-KW_TO       = "TO"i         !ident_start
-KW_FALSE    = "FALSE"i      !ident_start
+// All KW_ keywords imported from common/keyword/core.pegjs
 
-KW_SHOW     = "SHOW"i       !ident_start
-KW_DROP     = "DROP"i       !ident_start { return 'DROP'; }
-KW_USE      = "USE"i        !ident_start
-KW_ALTER    = "ALTER"i      !ident_start
-KW_SELECT   = "SELECT"i     !ident_start
-KW_UPDATE   = "UPDATE"i     !ident_start
-KW_CREATE   = "CREATE"i     !ident_start
-KW_TEMPORARY = "TEMPORARY"i !ident_start
-KW_UNLOGGED = "UNLOGGED" !ident_start { return 'UNLOGGED'; }
-KW_TEMP     = "TEMP"i !ident_start
-KW_DELETE   = "DELETE"i     !ident_start
-KW_INSERT   = "INSERT"i     !ident_start
-KW_RECURSIVE= "RECURSIVE"i   !ident_start { return 'RECURSIVE'; }
-KW_REPLACE  = "REPLACE"i    !ident_start
-KW_RETURN = 'RETURN'i  !ident_start { return 'RETURN' }
-KW_RETURNING  = "RETURNING"i    !ident_start { return 'RETURNING' }
-KW_RENAME   = "RENAME"i     !ident_start
-KW_IGNORE   = "IGNORE"i     !ident_start
-KW_EXPLAIN  = "EXPLAIN"i    !ident_start
-KW_PARTITION = "PARTITION"i !ident_start { return 'PARTITION' }
+// Import common modules
+@import 'common/keyword/core.pegjs'
+@import 'common/symbol.pegjs'
+@import 'common/clause/core.pegjs'
+@import 'common/value/core.pegjs'
 
-KW_INTO     = "INTO"i       !ident_start
-KW_FROM     = "FROM"i       !ident_start
-KW_SET      = "SET"i        !ident_start { return 'SET' }
-KW_LOCK     = "LOCK"i       !ident_start
+// PostgreSQL specific: LOGIC_OPERATOR without XOR
+LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
 
-KW_AS       = "AS"i         !ident_start
-KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
-KW_DATABASE = "DATABASE"i      !ident_start { return 'DATABASE'; }
-KW_SCHEMA   = "SCHEMA"i      !ident_start { return 'SCHEMA'; }
-KW_SEQUENCE   = "SEQUENCE"i      !ident_start { return 'SEQUENCE'; }
-KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
-KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
-KW_COLLATION = "COLLATION"i    !ident_start { return 'COLLATION'; }
-KW_DEALLOCATE  = "DEALLOCATE"i    !ident_start { return 'DEALLOCATE'; }
-
-KW_ON       = "ON"i       !ident_start
-KW_LEFT     = "LEFT"i     !ident_start
-KW_RIGHT    = "RIGHT"i    !ident_start
-KW_FULL     = "FULL"i     !ident_start
-KW_INNER    = "INNER"i    !ident_start
-KW_JOIN     = "JOIN"i     !ident_start
-KW_OUTER    = "OUTER"i    !ident_start
-KW_UNION    = "UNION"i    !ident_start
-KW_INTERSECT   = "INTERSECT"i    !ident_start
-KW_EXCEPT    = "EXCEPT"i    !ident_start
-KW_VALUES   = "VALUES"i   !ident_start
-KW_USING    = "USING"i    !ident_start
-
-KW_WHERE    = "WHERE"i      !ident_start
-KW_WITH     = "WITH"i       !ident_start
-
-KW_GROUP    = "GROUP"i      !ident_start
-KW_BY       = "BY"i         !ident_start
-KW_ORDER    = "ORDER"i      !ident_start
-KW_HAVING   = "HAVING"i     !ident_start
-KW_WINDOW   = "WINDOW"i     !ident_start
-
-KW_LIMIT    = "LIMIT"i      !ident_start
-KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET' }
-
-KW_ASC      = "ASC"i        !ident_start { return 'ASC'; }
-KW_DESC     = "DESC"i       !ident_start { return 'DESC'; }
-
-KW_ALL      = "ALL"i        !ident_start { return 'ALL'; }
-KW_DISTINCT = "DISTINCT"i   !ident_start { return 'DISTINCT';}
-
-KW_BETWEEN  = "BETWEEN"i    !ident_start { return 'BETWEEN'; }
-KW_IN       = "IN"i         !ident_start { return 'IN'; }
-KW_IS       = "IS"i         !ident_start { return 'IS'; }
-KW_LIKE     = "LIKE"i       !ident_start { return 'LIKE'; }
-KW_ILIKE    = "ILIKE"i      !ident_start { return 'ILIKE'; }
-KW_EXISTS   = "EXISTS"i     !ident_start { /* => 'EXISTS' */ return 'EXISTS'; }
-
-KW_NOT      = "NOT"i        !ident_start { return 'NOT'; }
-KW_AND      = "AND"i        !ident_start { return 'AND'; }
-KW_OR       = "OR"i         !ident_start { return 'OR'; }
-
-KW_ARRAY    = "ARRAY"i !ident_start { return 'ARRAY'; }
-KW_ARRAY_AGG = "ARRAY_AGG"i !ident_start { return 'ARRAY_AGG'; }
-KW_STRING_AGG = "STRING_AGG"i !ident_start { return 'STRING_AGG'; }
-KW_COUNT    = "COUNT"i      !ident_start { return 'COUNT'; }
-KW_GROUP_CONCAT = "GROUP_CONCAT"i  !ident_start { return 'GROUP_CONCAT'; }
-KW_MAX      = "MAX"i        !ident_start { return 'MAX'; }
-KW_MIN      = "MIN"i        !ident_start { return 'MIN'; }
-KW_SUM      = "SUM"i        !ident_start { return 'SUM'; }
-KW_AVG      = "AVG"i        !ident_start { return 'AVG'; }
-
-KW_EXTRACT  = "EXTRACT"i    !ident_start { return 'EXTRACT'; }
-KW_CALL     = "CALL"i       !ident_start { return 'CALL'; }
-
-KW_CASE     = "CASE"i       !ident_start
-KW_WHEN     = "WHEN"i       !ident_start
-KW_THEN     = "THEN"i       !ident_start
-KW_ELSE     = "ELSE"i       !ident_start
-KW_END      = "END"i        !ident_start
-
-KW_CAST     = "CAST"i       !ident_start { return 'CAST' }
-
-KW_BOOL     = "BOOL"i     !ident_start { return 'BOOL'; }
-KW_BOOLEAN  = "BOOLEAN"i  !ident_start { return 'BOOLEAN'; }
-KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
-KW_CHARACTER = "CHARACTER"i     !ident_start { return 'CHARACTER'; }
-KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
-KW_NUMERIC  = "NUMERIC"i  !ident_start { return 'NUMERIC'; }
-KW_DECIMAL  = "DECIMAL"i  !ident_start { return 'DECIMAL'; }
-KW_SIGNED   = "SIGNED"i   !ident_start { return 'SIGNED'; }
-KW_UNSIGNED = "UNSIGNED"i !ident_start { return 'UNSIGNED'; }
-KW_INT      = "INT"i      !ident_start { return 'INT'; }
-KW_ZEROFILL = "ZEROFILL"i !ident_start { return 'ZEROFILL'; }
-KW_INTEGER  = "INTEGER"i  !ident_start { return 'INTEGER'; }
-KW_JSON     = "JSON"i     !ident_start { return 'JSON'; }
-KW_JSONB    = "JSONB"i    !ident_start { return 'JSONB'; }
-KW_GEOMETRY = "GEOMETRY"i !ident_start { return 'GEOMETRY'; }
-KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
-KW_SERIAL = "SERIAL"i !ident_start { return 'SERIAL'; }
-KW_SMALLSERIAL = "SMALLSERIAL"i !ident_start { return 'SMALLSERIAL'; }
-KW_TINYINT  = "TINYINT"i  !ident_start { return 'TINYINT'; }
-KW_TINYTEXT = "TINYTEXT"i !ident_start { return 'TINYTEXT'; }
-KW_TEXT     = "TEXT"i     !ident_start { return 'TEXT'; }
-KW_MEDIUMTEXT = "MEDIUMTEXT"i  !ident_start { return 'MEDIUMTEXT'; }
-KW_LONGTEXT  = "LONGTEXT"i  !ident_start { return 'LONGTEXT'; }
-KW_MEDIUMINT = "MEDIUMINT"i !ident_start { return 'MEDIUMINT'; }
-KW_TSVECTOR = "TSVECTOR"i !ident_start { return 'TSVECTOR'; }
-KW_TSQUERY = "TSQUERY"i !ident_start { return 'TSQUERY'; }
-KW_BIGINT   = "BIGINT"i   !ident_start { return 'BIGINT'; }
-KW_ENUM     = "ENUM"i   !ident_start { return 'ENUM'; }
-KW_FLOAT   = "FLOAT"i   !ident_start { return 'FLOAT'; }
-KW_DOUBLE   = "DOUBLE"i   !ident_start { return 'DOUBLE'; }
-KW_BIGSERIAL   = "BIGSERIAL"i   !ident_start { return 'BIGSERIAL'; }
-KW_REAL     = "REAL"i   !ident_start { return 'REAL'; }
-KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
-KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
-KW_ROWS     = "ROWS"i     !ident_start { return 'ROWS'; }
-KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
-KW_TIMESTAMP = "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
-KW_TIMESTAMPTZ = "TIMESTAMPTZ"i!ident_start { return 'TIMESTAMPTZ'; }
-KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
-KW_USER     = "USER"i     !ident_start { return 'USER'; }
-KW_UUID     = "UUID"i     !ident_start { return 'UUID'; }
-KW_OID      = "OID"i     !ident_start { return 'OID'; }
-KW_REGCLASS = "REGCLASS"i     !ident_start { return 'REGCLASS'; }
-KW_REGCOLLATION  = "REGCOLLATION"i     !ident_start { return 'REGCOLLATION'; }
-KW_REGCONFIG     = "REGCONFIG"i     !ident_start { return 'REGCONFIG'; }
-KW_REGDICTIONARY = "REGDICTIONARY"i     !ident_start { return 'REGDICTIONARY'; }
-KW_REGNAMESPACE  = "REGNAMESPACE"i     !ident_start { return 'REGNAMESPACE'; }
-KW_REGOPER  = "REGOPER"i     !ident_start { return 'REGOPER'; }
-KW_REGOPERATOR   = "REGOPERATOR"i     !ident_start { return 'REGOPERATOR'; }
-KW_REGPROC  = "REGPROC"i     !ident_start { return 'REGPROC'; }
-KW_REGPROCEDURE  = "REGPROCEDURE"i     !ident_start { return 'REGPROCEDURE'; }
-KW_REGROLE  = "REGROLE"i     !ident_start { return 'REGROLE'; }
-KW_REGTYPE  = "REGTYPE"i     !ident_start { return 'REGTYPE'; }
-KW_CIDR = "CIDR"i     !ident_start { return 'CIDR'; }
-KW_INET = "INET"i     !ident_start { return 'INET'; }
-KW_MACADDR = "MACADDR"i     !ident_start { return 'MACADDR'; }
-KW_MACADDR8 = "MACADDR8"i     !ident_start { return 'MACADDR8'; }
-KW_BIT = "BIT"i     !ident_start { return 'BIT'; }
-KW_MONEY  = "MONEY"i  !ident_start { return 'MONEY'; }
-
-KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
-KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
-KW_INTERVAL         = "INTERVAL"i !ident_start { return 'INTERVAL'; }
-KW_UNIT_YEAR        = "YEAR"i !ident_start { return 'YEAR'; }
-KW_UNIT_MONTH       = "MONTH"i !ident_start { return 'MONTH'; }
-KW_UNIT_DAY         = "DAY"i !ident_start { return 'DAY'; }
-KW_UNIT_HOUR        = "HOUR"i !ident_start { return 'HOUR'; }
-KW_UNIT_MINUTE      = "MINUTE"i !ident_start { return 'MINUTE'; }
-KW_UNIT_SECOND      = "SECOND"i !ident_start { return 'SECOND'; }
-KW_CURRENT_TIME     = "CURRENT_TIME"i !ident_start { return 'CURRENT_TIME'; }
-KW_CURRENT_TIMESTAMP= "CURRENT_TIMESTAMP"i !ident_start { return 'CURRENT_TIMESTAMP'; }
-KW_CURRENT_USER     = "CURRENT_USER"i !ident_start { return 'CURRENT_USER'; }
-KW_CURRENT_ROLE     = "CURRENT_ROLE"i !ident_start { return 'CURRENT_ROLE'; }
-KW_SESSION_USER     = "SESSION_USER"i !ident_start { return 'SESSION_USER'; }
-KW_SYSTEM_USER      = "SYSTEM_USER"i !ident_start { return 'SYSTEM_USER'; }
-
-KW_GLOBAL         = "GLOBAL"i    !ident_start { return 'GLOBAL'; }
-KW_SESSION        = "SESSION"i   !ident_start { return 'SESSION'; }
-KW_LOCAL          = "LOCAL"i     !ident_start { return 'LOCAL'; }
-KW_PERSIST        = "PERSIST"i   !ident_start { return 'PERSIST'; }
-KW_PERSIST_ONLY   = "PERSIST_ONLY"i   !ident_start { return 'PERSIST_ONLY'; }
-KW_VIEW           = "VIEW"i    !ident_start { return 'VIEW'; }
-
-KW_VAR__PRE_AT = '@'
-KW_VAR__PRE_AT_AT = '@@'
-KW_VAR_PRE_DOLLAR = '$'
-KW_VAR_PRE_DOLLAR_DOUBLE = '$$'
-KW_VAR_PRE
-  = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR / KW_VAR_PRE_DOLLAR
-KW_ASSIGN = ':='
-KW_DOUBLE_COLON = '::'
-KW_ASSIGIN_EQUAL = '='
-
-KW_DUAL = "DUAL"i
-
-// MySQL Alter
-KW_ADD     = "ADD"i     !ident_start { return 'ADD'; }
-KW_COLUMN  = "COLUMN"i  !ident_start { return 'COLUMN'; }
-KW_INDEX   = "INDEX"i  !ident_start { return 'INDEX'; }
-KW_TYPE   = "TYPE"i  !ident_start { return 'TYPE'; }
-KW_KEY     = "KEY"i  !ident_start { return 'KEY'; }
-KW_FULLTEXT = "FULLTEXT"i  !ident_start { return 'FULLTEXT'; }
-KW_SPATIAL  = "SPATIAL"i  !ident_start { return 'SPATIAL'; }
-KW_UNIQUE     = "UNIQUE"i  !ident_start { return 'UNIQUE'; }
-KW_KEY_BLOCK_SIZE = "KEY_BLOCK_SIZE"i !ident_start { return 'KEY_BLOCK_SIZE'; }
-KW_COMMENT     = "COMMENT"i  !ident_start { return 'COMMENT'; }
-KW_CONSTRAINT  = "CONSTRAINT"i  !ident_start { return 'CONSTRAINT'; }
-KW_CONCURRENTLY  = "CONCURRENTLY"i  !ident_start { return 'CONCURRENTLY'; }
-KW_REFERENCES  = "REFERENCES"i  !ident_start { return 'REFERENCES'; }
-
-
-
-// MySQL extensions to SQL
-OPT_SQL_CALC_FOUND_ROWS = "SQL_CALC_FOUND_ROWS"i
-OPT_SQL_CACHE           = "SQL_CACHE"i
-OPT_SQL_NO_CACHE        = "SQL_NO_CACHE"i
-OPT_SQL_SMALL_RESULT    = "SQL_SMALL_RESULT"i
-OPT_SQL_BIG_RESULT      = "SQL_BIG_RESULT"i
-OPT_SQL_BUFFER_RESULT   = "SQL_BUFFER_RESULT"i
-
-//special character
-DOT       = '.'
-COMMA     = ','
-STAR      = '*'
-LPAREN    = '('
-RPAREN    = ')'
-
-LBRAKE    = '['
-RBRAKE    = ']'
-
-SEMICOLON = ';'
-SINGLE_ARROW = '->'
-DOUBLE_ARROW = '->>'
+// PostgreSQL specific: additional arrow operators
 WELL_ARROW = '#>'
 DOUBLE_WELL_ARROW = '#>>'
 
-OPERATOR_CONCATENATION = '||'
-OPERATOR_AND = '&&'
-LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
+// PostgreSQL specific: ident_start, ident_part, column_part, line_terminator rules
+ident_start = [A-Za-z_\u4e00-\u9fa5\u00C0-\u017F]
+ident_part  = [A-Za-z0-9_\-$\u4e00-\u9fa5\u00C0-\u017F]
+column_part  = [A-Za-z0-9_\u4e00-\u9fa5\u00C0-\u017F]
+line_terminator = [\n\r]
 
-// separator
+// PostgreSQL specific: comment rules (has nested block comment)
 __
   = (whitespace / comment)*
 
@@ -5925,7 +5413,6 @@ pound_sign_comment
 
 keyword_comment
   = k:KW_COMMENT __ s:KW_ASSIGIN_EQUAL? __ c:literal_string {
-    // => { type: 'comment'; keyword: 'comment'; symbol: '='; value: literal_string; }
     return {
       type: k.toLowerCase(),
       keyword: k.toLowerCase(),
@@ -5936,14 +5423,6 @@ keyword_comment
 
 char = .
 
-interval_unit
-  = KW_UNIT_YEAR
-  / KW_UNIT_MONTH
-  / KW_UNIT_DAY
-  / KW_UNIT_HOUR
-  / KW_UNIT_MINUTE
-  / KW_UNIT_SECOND
-
 whitespace =
   [ \t\n\r]
 
@@ -5952,6 +5431,14 @@ EOL
   / [\n\r]+
 
 EOF = !.
+
+interval_unit
+  = KW_UNIT_YEAR
+  / KW_UNIT_MONTH
+  / KW_UNIT_DAY
+  / KW_UNIT_HOUR
+  / KW_UNIT_MINUTE
+  / KW_UNIT_SECOND
 
 //begin procedure extension
 proc_stmts
@@ -5965,12 +5452,10 @@ proc_stmt
       return { type: 'proc', stmt: s, vars: varList }
     }
 
-assign_stmt_list
-  = head:assign_stmt tail:(__ COMMA __ assign_stmt)* {
-    // => assign_stmt[]
-    return createList(head, tail);
-  }
+// assign_stmt_list is imported from common/procedure/assign-list.pegjs
+@import 'common/procedure/assign-list.pegjs'
 
+// PostgreSQL-specific: assign_stmt with timezone support
 assign_stmt_timezone
   = KW_TIME __ 'ZONE'i __ e:interval_expr __ KW_TO __ r:interval_unit {
     // => { type: 'assign';  left: expr_list; symbol: 'to'; right: interval_unit; }
@@ -6183,12 +5668,14 @@ data_type
   / uuid_type
   / boolean_type
   / enum_type
-  / serial_interval_type
+  / serial_type
+  / interval_type
   / binary_type
   / oid_type
   / record_type
   / network_address_type
   / bit_type
+  / byte_type
   / money_type
   / custom_types
 
@@ -6208,90 +5695,6 @@ array_type
   }
 
 
-boolean_type
-  = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
-
-binary_type
-  = 'bytea'i { /* => data_type */ return { dataType: 'BYTEA' }; }
-
-character_varying
-  = KW_CHARACTER __ ('varying'i)? {
-    // => string
-    return 'CHARACTER VARYING'
-  }
-character_string_type
-  = t:(KW_CHAR / KW_VARCHAR / character_varying) num:(__ LPAREN __ [0-9]+ __ RPAREN)? {
-    // => data_type
-    const result = { dataType: t }
-    if (num) {
-      result.length = parseInt(num[3].join(''), 10)
-      result.parentheses = true
-    }
-    return result
-  }
-
-numeric_type_suffix
-  = un: KW_UNSIGNED? __ ze: KW_ZEROFILL? {
-    // => any[];
-    const result = []
-    if (un) result.push(un)
-    if (ze) result.push(ze)
-    return result
-  }
-numeric_type
-  = t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_MEDIUMINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE __ 'PRECISION'i / KW_DOUBLE / KW_SERIAL / KW_SMALLSERIAL / KW_BIGSERIAL / KW_REAL) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: Array.isArray(t) ? `${t[0].toUpperCase()} ${t[2].toUpperCase()}` : t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_MEDIUMINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE __ 'PRECISION'i / KW_DOUBLE / KW_SERIAL / KW_SMALLSERIAL / KW_BIGSERIAL / KW_REAL)l:[0-9]+ __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: Array.isArray(t) ? `${t[0].toUpperCase()} ${t[2].toUpperCase()}` : t, length: parseInt(l.join(''), 10), suffix: s }; }
-  / t:(KW_NUMERIC / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_MEDIUMINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE __ 'PRECISION'i / KW_DOUBLE / KW_SERIAL / KW_SMALLSERIAL / KW_BIGSERIAL / KW_REAL) __ s:numeric_type_suffix? __{ /* =>  data_type */ return { dataType: Array.isArray(t) ? `${t[0].toUpperCase()} ${t[2].toUpperCase()}` : t, suffix: s }; }
-
-money_type
-  = t:(KW_MONEY) { /* => data_type */ return { dataType: t } }
-
-oid_type
-  = t:(KW_OID / KW_REGCLASS / KW_REGCOLLATION / KW_REGCONFIG / KW_REGDICTIONARY / KW_REGNAMESPACE / KW_REGOPER / KW_REGOPERATOR / KW_REGPROC / KW_REGPROCEDURE / KW_REGROLE / KW_REGTYPE) { /* => data_type */ return { dataType: t }}
-
-timezone
-  = w:('WITHOUT'i / 'WITH'i) __ KW_TIME __ 'ZONE'i {
-    // => string[];
-    return [w.toUpperCase(), 'TIME', 'ZONE']
-  }
-
-time_type
-  = t:(KW_TIME / KW_TIMESTAMP / KW_TIMESTAMPTZ) num:(__ LPAREN __ [0-9]+ __ RPAREN )? __ tz:timezone? {
-    /* =>  data_type */
-    const result = { dataType: t }
-    if (num) {
-      result.length = parseInt(num[3].join(''), 10)
-      result.parentheses = true
-    }
-    if (tz) result.suffix = tz
-    return result
-  }
-
-datetime_type
-  = t:(KW_DATE / KW_DATETIME) num:(__ LPAREN __ [0-9]+ __ RPAREN)? {
-    /* =>  data_type */
-    const result = { dataType: t }
-    if (num) {
-      result.length = parseInt(num[3].join(''), 10)
-      result.parentheses = true
-    }
-    return result
-  }
-  / time_type
-
-enum_type
-  = t:KW_ENUM __ e:value_item {
-    /* =>  data_type */
-    e.parentheses = true
-    return {
-      dataType: t,
-      expr: e
-    }
-  }
-
-json_type
-  = t:(KW_JSON / KW_JSONB) { /* =>  data_type */  return { dataType: t }; }
-
 geometry_type_args
   = t:('POINT'i / 'LINESTRING'i / 'POLYGON'i / 'MULTIPOINT'i / 'MULTILINESTRING'i / 'MULTIPOLYGON'i / 'GEOMETRYCOLLECTION'i) __ srid:(COMMA __ [0-9]+)? {
     // => { length: string, scale?: number | null }
@@ -6303,9 +5706,6 @@ geometry_type_args
 geometry_type
   = t:KW_GEOMETRY geo:(__ LPAREN __ geometry_type_args __ RPAREN )? {/* =>  data_type */  return { dataType: t, ...(geo && geo[3] || {}), parentheses: geo ? true : false }; }
 
-serial_interval_type
-  = t:(KW_SERIAL / KW_INTERVAL) { /* =>  data_type */  return { dataType: t }; }
-
 text_type
   = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) s:(LBRAKE __ RBRAKE)? {
     /* =>  data_type */
@@ -6313,36 +5713,23 @@ text_type
   }
   / t:(KW_TSVECTOR / KW_TSQUERY) {/* =>  data_type */  return { dataType: t }; }
 
-uuid_type
-  = t:KW_UUID {/* =>  data_type */  return { dataType: t }}
 
-record_type
-  = 'RECORD'i {/* =>  data_type */  return { dataType: 'RECORD' }}
-
-network_address_type
-  = t:(KW_INET / KW_CIDR / KW_MACADDR8 / KW_MACADDR) {/* =>  data_type */  return { dataType: t }}
-
-bit_type
-  = t:KW_BIT __ v:('varying'i)? __ num:(__ LPAREN __ [0-9]+ __ RPAREN)? {
-    /* =>  data_type */
-    let dataType = t
-    if (v) {
-      dataType += ' VARYING'
-    }
-    const result = { dataType }
-    if (num) {
-      result.length = parseInt(num[3].join(''), 10)
-      result.parentheses = true
-    }
-    return result
-  }
-
-custom_types
-  = schema:ident_name __ DOT __ name:ident_without_kw &{ return customTypes.has(`${schema}.${name}`) }  {
-      // => data_type
-      return { schema: schema, dataType: name }
-  }
-  / name:ident_name &{ return customTypes.has(name) } {
-      // => data_type
-      return { dataType: name }
-  }
+@import 'common/keyword/signedness.pegjs'
+@import 'common/datatype/size.pegjs'
+@import 'common/datatype/boolean.pegjs'
+@import 'common/datatype/blob.pegjs'
+@import 'common/datatype/binary.pegjs'
+@import 'common/datatype/character.pegjs'
+@import 'common/datatype/datetime.pegjs'
+@import 'common/datatype/numeric.pegjs'
+@import 'common/datatype/money.pegjs'
+@import 'common/datatype/oid.pegjs'
+@import 'common/datatype/enum.pegjs'
+@import 'common/datatype/json.pegjs'
+@import 'common/datatype/serial.pegjs'
+@import 'common/datatype/interval.pegjs'
+@import 'common/datatype/uuid.pegjs'
+@import 'common/datatype/record.pegjs'
+@import 'common/datatype/network.pegjs'
+@import 'common/datatype/byte.pegjs'
+@import 'common/datatype/custom.pegjs'
