@@ -351,6 +351,22 @@ parser.whiteListCheck(sql, whiteColumnList, opt) // if check failed, an error wo
 
 ## :kissing_heart: Acknowledgement
 
+## Developer quickstart
+
+Run tests locally:
+
+```bash
+npm ci
+npm test
+```
+
+For a faster local smoke-run during development:
+
+```bash
+npm run fast-test
+```
+
+
 This project is inspired by the SQL parser [flora-sql-parser](https://github.com/godmodelabs/flora-sql-parser) module.
 
 ## License
