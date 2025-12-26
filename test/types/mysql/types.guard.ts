@@ -2,7 +2,7 @@
  * Generated type guards for "mysql.d.ts".
  * WARNING: Do not manually change this file.
  */
-import { With, ParseOptions, Option, TableColumnAst, BaseFrom, Join, Values, TableExpr, Dual, From, LimitValue, Limit, OrderBy, ValueExpr, StringValue, OriginValue, DefaultValue, NumberValue, IntervalExprValue, SeparatorValue, SortDirection, ColumnRefItem, ColumnRef, SetList, InsertReplaceValue, Star, Case, Cast, AggrFunc, FunctionNameValue, FunctionName, Function, FulltextSearch, Column, Interval, Param, Var, Assign, Binary, Unary, Expr, ExtractFunc, ExpressionValue, ExprList, PartitionBy, WindowSpec, WindowFrameClause, AsWindowSpec, NamedWindowExpr, WindowExpr, Select, Insert_Replace, Update, Delete, Alter, AlterExpr, AlterAddColumn, AlterDropColumn, AlterModifyColumn, AlterChangeColumn, AlterRenameTable, AlterRenameColumn, AlterAddIndex, AlterDropIndex, AlterDropKey, AlterAddConstraint, AlterDropConstraint, AlterEnableConstraint, AlterDisableConstraint, AlterAddPartition, AlterDropPartition, AlterOperatePartition, AlterAlgorithm, AlterLock, AlterTableOption, Use, KeywordComment, CollateExpr, DataType, OnUpdateCurrentTimestamp, LiteralNotNull, LiteralNull, ColumnConstraint, ColumnDefinitionOptList, ReferenceDefinition, OnReference, CreateColumnDefinition, IndexType, IndexOption, CreateIndexDefinition, CreateFulltextSpatialIndexDefinition, ConstraintName, CreateConstraintPrimary, CreateConstraintUnique, CreateConstraintForeign, CreateConstraintCheck, CreateConstraintDefinition, CreateDefinition, CreateTable, DatabaseOption, CreateDatabase, CreateSchema, CreateIndex, CreateView, CreateTrigger, CreateUser, Create, TriggerEvent, UserAuthOption, RequireOption, ResourceOption, PasswordOption, TableOption, DropTable, DropDatabase, DropView, DropIndex, DropTrigger, Drop, ShowLogs, ShowTables, ShowSimple, ShowProcedureFunctionStatus, ShowBinlogEvents, ShowCharacterSet, ShowCollationDatabases, ShowColumnsIndexes, ShowCreateTable, ShowCreateView, ShowCreateEvent, ShowCreateTrigger, ShowCreateProcedure, ShowGrants, Show, Desc, Explain, Call, SetAssign, SetStatement, Lock, LockTable, Unlock, Grant, LoadData, LoadDataField, LoadDataLine, Truncate, Rename, Transaction, AST } from "./mysql";
+import { With, ParseOptions, Option, TableColumnAst, BaseFrom, Join, Values, TableExpr, Dual, From, LimitValue, Limit, OrderBy, ValueExpr, StringValue, OriginValue, DefaultValue, NumberValue, IntervalExprValue, SeparatorValue, SortDirection, ColumnRefItem, ColumnRef, SetList, InsertReplaceValue, Star, Case, Cast, AggrFunc, FunctionNameValue, FunctionName, Function, FulltextSearch, Column, Interval, Param, Var, Assign, Binary, Unary, Expr, ExtractFunc, ExpressionValue, ExprList, PartitionBy, WindowSpec, WindowFrameClause, AsWindowSpec, NamedWindowExpr, WindowExpr, Select, Insert_Replace, Update, Delete, Alter, AlterExpr, AlterAddColumn, AlterDropColumn, AlterModifyColumn, AlterChangeColumn, AlterRenameTable, AlterRenameColumn, AlterAddIndex, AlterDropIndex, AlterDropKey, AlterAddConstraint, AlterDropConstraint, AlterEnableConstraint, AlterDisableConstraint, AlterAddPartition, AlterDropPartition, AlterOperatePartition, AlterAlgorithm, AlterLock, AlterTableOption, Use, KeywordComment, CollateExpr, MysqlType, DataType, OnUpdateCurrentTimestamp, LiteralNotNull, LiteralNull, ColumnConstraint, ColumnDefinitionOptList, ReferenceDefinition, OnReference, CreateColumnDefinition, IndexType, IndexOption, CreateIndexDefinition, CreateFulltextSpatialIndexDefinition, ConstraintName, CreateConstraintPrimary, CreateConstraintUnique, CreateConstraintForeign, CreateConstraintCheck, CreateConstraintDefinition, CreateDefinition, CreateTable, DatabaseOption, CreateDatabase, CreateSchema, CreateIndex, CreateView, CreateTrigger, CreateUser, Create, TriggerEvent, UserAuthOption, RequireOption, ResourceOption, PasswordOption, TableOption, DropTable, DropDatabase, DropView, DropIndex, DropTrigger, Drop, ShowLogs, ShowTables, ShowSimple, ShowProcedureFunctionStatus, ShowBinlogEvents, ShowCharacterSet, ShowCollationDatabases, ShowColumnsIndexes, ShowCreateTable, ShowCreateView, ShowCreateEvent, ShowCreateTrigger, ShowCreateProcedure, ShowGrants, Show, Desc, Explain, Call, SetAssign, SetStatement, Lock, LockTable, Unlock, Grant, LoadData, LoadDataField, LoadDataLine, Truncate, Rename, Transaction, AST } from "./mysql";
 
 export function isWith(obj: unknown): obj is With {
     const typedObj = obj as With
@@ -2172,13 +2172,62 @@ export function isCollateExpr(obj: unknown): obj is CollateExpr {
     )
 }
 
+export function isMysqlType(obj: unknown): obj is MysqlType {
+    const typedObj = obj as MysqlType
+    return (
+        (typedObj === "CHAR" ||
+            typedObj === "VARCHAR" ||
+            typedObj === "BINARY" ||
+            typedObj === "VARBINARY" ||
+            typedObj === "TINYTEXT" ||
+            typedObj === "TEXT" ||
+            typedObj === "MEDIUMTEXT" ||
+            typedObj === "LONGTEXT" ||
+            typedObj === "TINYBLOB" ||
+            typedObj === "BLOB" ||
+            typedObj === "MEDIUMBLOB" ||
+            typedObj === "LONGBLOB" ||
+            typedObj === "TINYINT" ||
+            typedObj === "SMALLINT" ||
+            typedObj === "MEDIUMINT" ||
+            typedObj === "INT" ||
+            typedObj === "INTEGER" ||
+            typedObj === "BIGINT" ||
+            typedObj === "FLOAT" ||
+            typedObj === "DOUBLE" ||
+            typedObj === "DECIMAL" ||
+            typedObj === "NUMERIC" ||
+            typedObj === "BIT" ||
+            typedObj === "DATE" ||
+            typedObj === "TIME" ||
+            typedObj === "DATETIME" ||
+            typedObj === "TIMESTAMP" ||
+            typedObj === "YEAR" ||
+            typedObj === "BOOLEAN" ||
+            typedObj === "JSON" ||
+            typedObj === "ENUM" ||
+            typedObj === "SET" ||
+            typedObj === "GEOMETRY" ||
+            typedObj === "POINT" ||
+            typedObj === "LINESTRING" ||
+            typedObj === "POLYGON" ||
+            typedObj === "MULTIPOINT" ||
+            typedObj === "MULTILINESTRING" ||
+            typedObj === "MULTIPOLYGON" ||
+            typedObj === "GEOMETRYCOLLECTION" ||
+            typedObj === "VECTOR" ||
+            typedObj === "SIGNED" ||
+            typedObj === "UNSIGNED")
+    )
+}
+
 export function isDataType(obj: unknown): obj is DataType {
     const typedObj = obj as DataType
     return (
         (typedObj !== null &&
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
-        typeof typedObj["dataType"] === "string" &&
+        isMysqlType(typedObj["dataType"]) as boolean &&
         (typeof typedObj["length"] === "undefined" ||
             typedObj["length"] === null ||
             typeof typedObj["length"] === "number") &&
@@ -2191,9 +2240,9 @@ export function isDataType(obj: unknown): obj is DataType {
             typedObj["suffix"] === null ||
             Array.isArray(typedObj["suffix"]) &&
             typedObj["suffix"].every((e: any) =>
-            (e === "UNSIGNED" ||
-                e === "ZEROFILL" ||
-                e === "SIGNED")
+            (e === "SIGNED" ||
+                e === "UNSIGNED" ||
+                e === "ZEROFILL")
             )) &&
         (typeof typedObj["expr"] === "undefined" ||
             isBinary(typedObj["expr"]) as boolean ||

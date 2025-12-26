@@ -623,8 +623,25 @@ export type CollateExpr = {
   name?: string;
 };
 
+export type MysqlType =
+  | "CHAR" | "VARCHAR"
+  | "BINARY" | "VARBINARY"
+  | "TINYTEXT" | "TEXT" | "MEDIUMTEXT" | "LONGTEXT"
+  | "TINYBLOB" | "BLOB" | "MEDIUMBLOB" | "LONGBLOB"
+  | "TINYINT" | "SMALLINT" | "MEDIUMINT" | "INT" | "INTEGER" | "BIGINT"
+  | "FLOAT" | "DOUBLE" | "DECIMAL" | "NUMERIC"
+  | "BIT"
+  | "DATE" | "TIME" | "DATETIME" | "TIMESTAMP" | "YEAR"
+  | "BOOLEAN"
+  | "JSON"
+  | "ENUM" | "SET"
+  | "GEOMETRY" | "POINT" | "LINESTRING" | "POLYGON"
+  | "MULTIPOINT" | "MULTILINESTRING" | "MULTIPOLYGON" | "GEOMETRYCOLLECTION"
+  | "VECTOR"
+  | "SIGNED" | "UNSIGNED";
+
 export type DataType = {
-  dataType: string;
+  dataType: MysqlType;
   length?: number | null;
   parentheses?: true;
   scale?: number | null;
