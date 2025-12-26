@@ -2,7 +2,7 @@
  * Generated type guards for "mysql.d.ts".
  * WARNING: Do not manually change this file.
  */
-import { With, ParseOptions, Option, TableColumnAst, BaseFrom, Join, Values, TableExpr, Dual, From, LimitValue, Limit, OrderBy, ValueExpr, StringValue, OriginValue, DefaultValue, NumberValue, IntervalExprValue, SeparatorValue, SortDirection, ColumnRefItem, ColumnRef, SetList, InsertReplaceValue, Star, Case, Cast, AggrFunc, FunctionNameValue, FunctionName, Function, FulltextSearch, Column, Interval, Param, Var, Assign, Binary, Unary, Expr, ExtractFunc, ExpressionValue, ExprList, PartitionBy, WindowSpec, WindowFrameClause, AsWindowSpec, NamedWindowExpr, WindowExpr, Select, Insert_Replace, Update, Delete, Alter, AlterExpr, AlterAddColumn, AlterDropColumn, AlterModifyColumn, AlterChangeColumn, AlterRenameTable, AlterRenameColumn, AlterAddIndex, AlterDropIndex, AlterDropKey, AlterAddConstraint, AlterDropConstraint, AlterEnableConstraint, AlterDisableConstraint, AlterAddPartition, AlterDropPartition, AlterOperatePartition, AlterAlgorithm, AlterLock, AlterTableOption, Use, KeywordComment, CollateExpr, MysqlType, DataType, OnUpdateCurrentTimestamp, LiteralNotNull, LiteralNull, ColumnConstraint, ColumnDefinitionOptList, ReferenceDefinition, OnReference, CreateColumnDefinition, IndexType, IndexOption, CreateIndexDefinition, CreateFulltextSpatialIndexDefinition, ConstraintName, CreateConstraintPrimary, CreateConstraintUnique, CreateConstraintForeign, CreateConstraintCheck, CreateConstraintDefinition, CreateDefinition, CreateTable, DatabaseOption, CreateDatabase, CreateSchema, CreateIndex, CreateView, CreateTrigger, CreateUser, Create, TriggerEvent, UserAuthOption, RequireOption, ResourceOption, PasswordOption, TableOption, DropTable, DropDatabase, DropView, DropIndex, DropTrigger, Drop, ShowLogs, ShowTables, ShowSimple, ShowProcedureFunctionStatus, ShowBinlogEvents, ShowCharacterSet, ShowCollationDatabases, ShowColumnsIndexes, ShowCreateTable, ShowCreateView, ShowCreateEvent, ShowCreateTrigger, ShowCreateProcedure, ShowGrants, Show, Desc, Explain, Call, SetAssign, SetStatement, Lock, LockTable, Unlock, Grant, LoadData, LoadDataField, LoadDataLine, Truncate, Rename, Transaction, AST } from "./mysql";
+import { With, ParseOptions, Option, TableColumnAst, BaseFrom, Join, Values, TableExpr, Dual, From, LimitValue, Limit, OrderBy, ValueExpr, StringValue, OriginValue, DefaultValue, NumberValue, IntervalExprValue, SeparatorValue, SortDirection, ColumnRefItem, ColumnRef, SetList, InsertReplaceValue, Star, Case, Cast, AggrFunc, FunctionNameValue, FunctionName, Function, FulltextSearch, Column, Interval, Param, Var, Assign, Binary, Unary, Expr, ExtractFunc, ExpressionValue, ExprList, PartitionBy, WindowSpec, WindowFrameClause, AsWindowSpec, NamedWindowExpr, WindowExpr, Select, Insert_Replace, Update, Delete, Alter, AlterExpr, AlterAddColumn, AlterDropColumn, AlterModifyColumn, AlterChangeColumn, AlterRenameTable, AlterRenameColumn, AlterAddIndex, AlterDropIndex, AlterDropKey, AlterAddConstraint, AlterDropConstraint, AlterEnableConstraint, AlterDisableConstraint, AlterAddPartition, AlterDropPartition, AlterOperatePartition, AlterAlgorithm, AlterLock, AlterTableOption, Use, KeywordComment, CollateExpr, MysqlType, ConvertDataType, DataType, OnUpdateCurrentTimestamp, LiteralNotNull, LiteralNull, ColumnConstraint, ColumnDefinitionOptList, ReferenceDefinition, OnReference, CreateColumnDefinition, IndexType, IndexOption, CreateIndexDefinition, CreateFulltextSpatialIndexDefinition, ConstraintName, CreateConstraintPrimary, CreateConstraintUnique, CreateConstraintForeign, CreateConstraintCheck, CreateConstraintDefinition, CreateDefinition, CreateTable, DatabaseOption, CreateDatabase, CreateSchema, CreateIndex, CreateView, CreateTrigger, CreateUser, Create, TriggerEvent, UserAuthOption, RequireOption, ResourceOption, PasswordOption, TableOption, DropTable, DropDatabase, DropView, DropIndex, DropTrigger, Drop, ShowLogs, ShowTables, ShowSimple, ShowProcedureFunctionStatus, ShowBinlogEvents, ShowCharacterSet, ShowCollationDatabases, ShowColumnsIndexes, ShowCreateTable, ShowCreateView, ShowCreateEvent, ShowCreateTrigger, ShowCreateProcedure, ShowGrants, Show, Desc, Explain, Call, SetAssign, SetStatement, Lock, LockTable, Unlock, Grant, LoadData, LoadDataField, LoadDataLine, Truncate, Rename, Transaction, AST } from "./mysql";
 
 export function isWith(obj: unknown): obj is With {
     const typedObj = obj as With
@@ -743,7 +743,51 @@ export function isCast(obj: unknown): obj is Cast {
             (e !== null &&
                 typeof e === "object" ||
                 typeof e === "function") &&
-            typeof e["dataType"] === "string" &&
+            (e["dataType"] === "CHAR" ||
+                e["dataType"] === "VARCHAR" ||
+                e["dataType"] === "BINARY" ||
+                e["dataType"] === "VARBINARY" ||
+                e["dataType"] === "TINYTEXT" ||
+                e["dataType"] === "TEXT" ||
+                e["dataType"] === "MEDIUMTEXT" ||
+                e["dataType"] === "LONGTEXT" ||
+                e["dataType"] === "TINYBLOB" ||
+                e["dataType"] === "BLOB" ||
+                e["dataType"] === "MEDIUMBLOB" ||
+                e["dataType"] === "LONGBLOB" ||
+                e["dataType"] === "TINYINT" ||
+                e["dataType"] === "SMALLINT" ||
+                e["dataType"] === "MEDIUMINT" ||
+                e["dataType"] === "INT" ||
+                e["dataType"] === "INTEGER" ||
+                e["dataType"] === "BIGINT" ||
+                e["dataType"] === "FLOAT" ||
+                e["dataType"] === "DOUBLE" ||
+                e["dataType"] === "DECIMAL" ||
+                e["dataType"] === "NUMERIC" ||
+                e["dataType"] === "BIT" ||
+                e["dataType"] === "DATE" ||
+                e["dataType"] === "TIME" ||
+                e["dataType"] === "DATETIME" ||
+                e["dataType"] === "TIMESTAMP" ||
+                e["dataType"] === "YEAR" ||
+                e["dataType"] === "BOOLEAN" ||
+                e["dataType"] === "JSON" ||
+                e["dataType"] === "ENUM" ||
+                e["dataType"] === "SET" ||
+                e["dataType"] === "GEOMETRY" ||
+                e["dataType"] === "POINT" ||
+                e["dataType"] === "LINESTRING" ||
+                e["dataType"] === "POLYGON" ||
+                e["dataType"] === "MULTIPOINT" ||
+                e["dataType"] === "MULTILINESTRING" ||
+                e["dataType"] === "MULTIPOLYGON" ||
+                e["dataType"] === "GEOMETRYCOLLECTION" ||
+                e["dataType"] === "VECTOR" ||
+                e["dataType"] === "SIGNED" ||
+                e["dataType"] === "UNSIGNED" ||
+                e["dataType"] === "SIGNED INTEGER" ||
+                e["dataType"] === "UNSIGNED INTEGER") &&
             (typeof e["quoted"] === "undefined" ||
                 typeof e["quoted"] === "string")
         )
@@ -1229,7 +1273,7 @@ export function isExprList(obj: unknown): obj is ExprList {
                 isBinary(e) as boolean ||
                 isUnary(e) as boolean ||
                 isExprList(e) as boolean ||
-                isDataType(e) as boolean)
+                isConvertDataType(e) as boolean)
             )) &&
         (typeof typedObj["loc"] === "undefined" ||
             (typedObj["loc"] !== null &&
@@ -2215,9 +2259,76 @@ export function isMysqlType(obj: unknown): obj is MysqlType {
             typedObj === "MULTILINESTRING" ||
             typedObj === "MULTIPOLYGON" ||
             typedObj === "GEOMETRYCOLLECTION" ||
-            typedObj === "VECTOR" ||
-            typedObj === "SIGNED" ||
-            typedObj === "UNSIGNED")
+            typedObj === "VECTOR")
+    )
+}
+
+export function isConvertDataType(obj: unknown): obj is ConvertDataType {
+    const typedObj = obj as ConvertDataType
+    return (
+        (typedObj !== null &&
+            typeof typedObj === "object" ||
+            typeof typedObj === "function") &&
+        typedObj["type"] === "datatype" &&
+        (typedObj["dataType"] === "CHAR" ||
+            typedObj["dataType"] === "VARCHAR" ||
+            typedObj["dataType"] === "BINARY" ||
+            typedObj["dataType"] === "VARBINARY" ||
+            typedObj["dataType"] === "TINYTEXT" ||
+            typedObj["dataType"] === "TEXT" ||
+            typedObj["dataType"] === "MEDIUMTEXT" ||
+            typedObj["dataType"] === "LONGTEXT" ||
+            typedObj["dataType"] === "TINYBLOB" ||
+            typedObj["dataType"] === "BLOB" ||
+            typedObj["dataType"] === "MEDIUMBLOB" ||
+            typedObj["dataType"] === "LONGBLOB" ||
+            typedObj["dataType"] === "TINYINT" ||
+            typedObj["dataType"] === "SMALLINT" ||
+            typedObj["dataType"] === "MEDIUMINT" ||
+            typedObj["dataType"] === "INT" ||
+            typedObj["dataType"] === "INTEGER" ||
+            typedObj["dataType"] === "BIGINT" ||
+            typedObj["dataType"] === "FLOAT" ||
+            typedObj["dataType"] === "DOUBLE" ||
+            typedObj["dataType"] === "DECIMAL" ||
+            typedObj["dataType"] === "NUMERIC" ||
+            typedObj["dataType"] === "BIT" ||
+            typedObj["dataType"] === "DATE" ||
+            typedObj["dataType"] === "TIME" ||
+            typedObj["dataType"] === "DATETIME" ||
+            typedObj["dataType"] === "TIMESTAMP" ||
+            typedObj["dataType"] === "YEAR" ||
+            typedObj["dataType"] === "BOOLEAN" ||
+            typedObj["dataType"] === "JSON" ||
+            typedObj["dataType"] === "ENUM" ||
+            typedObj["dataType"] === "SET" ||
+            typedObj["dataType"] === "GEOMETRY" ||
+            typedObj["dataType"] === "POINT" ||
+            typedObj["dataType"] === "LINESTRING" ||
+            typedObj["dataType"] === "POLYGON" ||
+            typedObj["dataType"] === "MULTIPOINT" ||
+            typedObj["dataType"] === "MULTILINESTRING" ||
+            typedObj["dataType"] === "MULTIPOLYGON" ||
+            typedObj["dataType"] === "GEOMETRYCOLLECTION" ||
+            typedObj["dataType"] === "VECTOR" ||
+            typedObj["dataType"] === "SIGNED" ||
+            typedObj["dataType"] === "UNSIGNED") &&
+        (typeof typedObj["length"] === "undefined" ||
+            typedObj["length"] === null ||
+            typeof typedObj["length"] === "number") &&
+        (typeof typedObj["parentheses"] === "undefined" ||
+            typedObj["parentheses"] === true) &&
+        (typeof typedObj["scale"] === "undefined" ||
+            typedObj["scale"] === null ||
+            typeof typedObj["scale"] === "number") &&
+        (typeof typedObj["suffix"] === "undefined" ||
+            typedObj["suffix"] === null ||
+            Array.isArray(typedObj["suffix"]) &&
+            typedObj["suffix"].every((e: any) =>
+            (e === "SIGNED" ||
+                e === "UNSIGNED" ||
+                e === "ZEROFILL")
+            ))
     )
 }
 

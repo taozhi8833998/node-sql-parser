@@ -189,7 +189,7 @@ export interface Cast {
   expr: ExpressionValue;
   symbol: "as";
   target: {
-    dataType: string;
+    dataType: MysqlType | "SIGNED" | "UNSIGNED" | "SIGNED INTEGER" | "UNSIGNED INTEGER";
     quoted?: string;
   }[];
 }
@@ -301,7 +301,7 @@ export type ExpressionValue =
 
 export type ExprList = {
   type: "expr_list";
-  value: (ExpressionValue | DataType | ExprList)[] | null;
+  value: (ExpressionValue | ConvertDataType | ExprList)[] | null;
   loc?: LocationRange;
   parentheses?: boolean;
   separator?: string;
@@ -637,8 +637,16 @@ export type MysqlType =
   | "ENUM" | "SET"
   | "GEOMETRY" | "POINT" | "LINESTRING" | "POLYGON"
   | "MULTIPOINT" | "MULTILINESTRING" | "MULTIPOLYGON" | "GEOMETRYCOLLECTION"
-  | "VECTOR"
-  | "SIGNED" | "UNSIGNED";
+  | "VECTOR";
+
+export type ConvertDataType = {
+  type: "datatype";
+  dataType: MysqlType | "SIGNED" | "UNSIGNED";
+  length?: number | null;
+  parentheses?: true;
+  scale?: number | null;
+  suffix?: ("UNSIGNED" | "ZEROFILL" | "SIGNED")[] | null;
+};
 
 export type DataType = {
   dataType: MysqlType;
