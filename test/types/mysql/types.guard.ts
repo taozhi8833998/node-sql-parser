@@ -2,7 +2,7 @@
  * Generated type guards for "mysql.d.ts".
  * WARNING: Do not manually change this file.
  */
-import { With, ParseOptions, Option, TableColumnAst, BaseFrom, Join, Values, TableExpr, Dual, From, LimitValue, Limit, OrderBy, ValueExpr, StringValue, OriginValue, DefaultValue, NumberValue, IntervalExprValue, SeparatorValue, SortDirection, ColumnRefItem, ColumnRef, SetList, InsertReplaceValue, Star, Case, Cast, AggrFunc, FunctionNameValue, FunctionName, Function, FulltextSearch, Column, Interval, Param, Var, Assign, Binary, Unary, Expr, ExtractFunc, ExpressionValue, ExprList, PartitionBy, WindowSpec, WindowFrameClause, AsWindowSpec, NamedWindowExpr, WindowExpr, Select, Insert_Replace, Update, Delete, Alter, AlterExpr, AlterAddColumn, AlterDropColumn, AlterModifyColumn, AlterChangeColumn, AlterRenameTable, AlterRenameColumn, AlterAddIndex, AlterDropIndex, AlterDropKey, AlterAddConstraint, AlterDropConstraint, AlterEnableConstraint, AlterDisableConstraint, AlterAddPartition, AlterDropPartition, AlterOperatePartition, AlterAlgorithm, AlterLock, AlterTableOption, Use, KeywordComment, CollateExpr, DataType, OnUpdateCurrentTimestamp, LiteralNotNull, LiteralNull, ColumnConstraint, ColumnDefinitionOptList, ReferenceDefinition, OnReference, CreateColumnDefinition, IndexType, IndexOption, CreateIndexDefinition, CreateFulltextSpatialIndexDefinition, ConstraintName, CreateConstraintPrimary, CreateConstraintUnique, CreateConstraintForeign, CreateConstraintCheck, CreateConstraintDefinition, CreateDefinition, CreateTable, CreateDatabase, CreateSchema, CreateIndex, CreateView, CreateTrigger, CreateUser, Create, TriggerEvent, UserAuthOption, RequireOption, ResourceOption, PasswordOption, TableOption, DropTable, DropDatabase, DropView, DropIndex, DropTrigger, Drop, ShowLogs, ShowTables, ShowSimple, ShowProcedureFunctionStatus, ShowBinlogEvents, ShowCharacterSet, ShowCollationDatabases, ShowColumnsIndexes, ShowCreateTable, ShowCreateView, ShowCreateEvent, ShowCreateTrigger, ShowCreateProcedure, ShowGrants, Show, Desc, Explain, Call, SetAssign, SetStatement, Lock, LockTable, Unlock, Grant, LoadData, LoadDataField, LoadDataLine, Truncate, Rename, Transaction, AST } from "./mysql";
+import { With, ParseOptions, Option, TableColumnAst, BaseFrom, Join, Values, TableExpr, Dual, From, LimitValue, Limit, OrderBy, ValueExpr, StringValue, OriginValue, DefaultValue, NumberValue, IntervalExprValue, SeparatorValue, SortDirection, ColumnRefItem, ColumnRef, SetList, InsertReplaceValue, Star, Case, Cast, AggrFunc, FunctionNameValue, FunctionName, Function, FulltextSearch, Column, Interval, Param, Var, Assign, Binary, Unary, Expr, ExtractFunc, ExpressionValue, ExprList, PartitionBy, WindowSpec, WindowFrameClause, AsWindowSpec, NamedWindowExpr, WindowExpr, Select, Insert_Replace, Update, Delete, Alter, AlterExpr, AlterAddColumn, AlterDropColumn, AlterModifyColumn, AlterChangeColumn, AlterRenameTable, AlterRenameColumn, AlterAddIndex, AlterDropIndex, AlterDropKey, AlterAddConstraint, AlterDropConstraint, AlterEnableConstraint, AlterDisableConstraint, AlterAddPartition, AlterDropPartition, AlterOperatePartition, AlterAlgorithm, AlterLock, AlterTableOption, Use, KeywordComment, CollateExpr, DataType, OnUpdateCurrentTimestamp, LiteralNotNull, LiteralNull, ColumnConstraint, ColumnDefinitionOptList, ReferenceDefinition, OnReference, CreateColumnDefinition, IndexType, IndexOption, CreateIndexDefinition, CreateFulltextSpatialIndexDefinition, ConstraintName, CreateConstraintPrimary, CreateConstraintUnique, CreateConstraintForeign, CreateConstraintCheck, CreateConstraintDefinition, CreateDefinition, CreateTable, DatabaseOption, CreateDatabase, CreateSchema, CreateIndex, CreateView, CreateTrigger, CreateUser, Create, TriggerEvent, UserAuthOption, RequireOption, ResourceOption, PasswordOption, TableOption, DropTable, DropDatabase, DropView, DropIndex, DropTrigger, Drop, ShowLogs, ShowTables, ShowSimple, ShowProcedureFunctionStatus, ShowBinlogEvents, ShowCharacterSet, ShowCollationDatabases, ShowColumnsIndexes, ShowCreateTable, ShowCreateView, ShowCreateEvent, ShowCreateTrigger, ShowCreateProcedure, ShowGrants, Show, Desc, Explain, Call, SetAssign, SetStatement, Lock, LockTable, Unlock, Grant, LoadData, LoadDataField, LoadDataLine, Truncate, Rename, Transaction, AST } from "./mysql";
 
 export function isWith(obj: unknown): obj is With {
     const typedObj = obj as With
@@ -2715,6 +2715,25 @@ export function isCreateTable(obj: unknown): obj is CreateTable {
     )
 }
 
+export function isDatabaseOption(obj: unknown): obj is DatabaseOption {
+    const typedObj = obj as DatabaseOption
+    return (
+        (typedObj !== null &&
+            typeof typedObj === "object" ||
+            typeof typedObj === "function") &&
+        (typedObj["keyword"] === "collate" ||
+            typedObj["keyword"] === "character set" ||
+            typedObj["keyword"] === "default character set" ||
+            typedObj["keyword"] === "default collate" ||
+            typedObj["keyword"] === "charset" ||
+            typedObj["keyword"] === "default charset") &&
+        (typeof typedObj["symbol"] === "undefined" ||
+            typedObj["symbol"] === null ||
+            typedObj["symbol"] === "=") &&
+        isDefaultValue(typedObj["value"]) as boolean
+    )
+}
+
 export function isCreateDatabase(obj: unknown): obj is CreateDatabase {
     const typedObj = obj as CreateDatabase
     return (
@@ -2734,6 +2753,12 @@ export function isCreateDatabase(obj: unknown): obj is CreateDatabase {
             Array.isArray(typedObj["database"]["schema"]) &&
             typedObj["database"]["schema"].every((e: any) =>
                 isDefaultValue(e) as boolean
+            )) &&
+        (typeof typedObj["create_definitions"] === "undefined" ||
+            typedObj["create_definitions"] === null ||
+            Array.isArray(typedObj["create_definitions"]) &&
+            typedObj["create_definitions"].every((e: any) =>
+                isDatabaseOption(e) as boolean
             )) &&
         (typeof typedObj["loc"] === "undefined" ||
             (typedObj["loc"] !== null &&
@@ -2773,6 +2798,12 @@ export function isCreateSchema(obj: unknown): obj is CreateSchema {
             Array.isArray(typedObj["database"]["schema"]) &&
             typedObj["database"]["schema"].every((e: any) =>
                 isDefaultValue(e) as boolean
+            )) &&
+        (typeof typedObj["create_definitions"] === "undefined" ||
+            typedObj["create_definitions"] === null ||
+            Array.isArray(typedObj["create_definitions"]) &&
+            typedObj["create_definitions"].every((e: any) =>
+                isDatabaseOption(e) as boolean
             )) &&
         (typeof typedObj["loc"] === "undefined" ||
             (typedObj["loc"] !== null &&

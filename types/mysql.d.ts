@@ -817,11 +817,18 @@ export interface CreateTable {
   loc?: LocationRange;
 }
 
+export type DatabaseOption = {
+  keyword: "character set" | "collate" | "default character set" | "default collate" | "charset" | "default charset";
+  symbol?: "=" | null;
+  value: DefaultValue;
+};
+
 export interface CreateDatabase {
   type: "create";
   keyword: "database";
   if_not_exists?: "IF NOT EXISTS" | null;
   database?: string | { schema: DefaultValue[] };
+  create_definitions?: DatabaseOption[] | null;
   loc?: LocationRange;
 }
 
@@ -830,6 +837,7 @@ export interface CreateSchema {
   keyword: "schema";
   if_not_exists?: "IF NOT EXISTS" | null;
   database?: string | { schema: DefaultValue[] };
+  create_definitions?: DatabaseOption[] | null;
   loc?: LocationRange;
 }
 
