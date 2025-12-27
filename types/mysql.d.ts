@@ -987,11 +987,26 @@ export type PasswordOption = {
   value: OriginValue | NumberValue | Interval;
 };
 
-export type TableOption = {
-  keyword: string;
-  symbol?: '=' | null;
-  value: ExpressionValue | DefaultValue | string | number;
-};
+export type TableOption =
+  | { keyword: 'engine'; symbol?: '=' | null; value: string }
+  | { keyword: 'auto_increment'; symbol?: '=' | null; value: number }
+  | { keyword: 'avg_row_length'; symbol?: '=' | null; value: number }
+  | { keyword: 'key_block_size'; symbol?: '=' | null; value: number }
+  | { keyword: 'max_rows'; symbol?: '=' | null; value: number }
+  | { keyword: 'min_rows'; symbol?: '=' | null; value: number }
+  | { keyword: 'stats_sample_pages'; symbol?: '=' | null; value: number }
+  | { keyword: 'checksum'; symbol?: '=' | null; value: string }
+  | { keyword: 'delay_key_write'; symbol?: '=' | null; value: string }
+  | { keyword: 'comment'; symbol?: '=' | null; value: string }
+  | { keyword: 'compression'; symbol?: '=' | null; value: string }
+  | { keyword: 'connection'; symbol?: '=' | null; value: string }
+  | { keyword: 'data directory'; symbol?: '=' | null; value: string }
+  | { keyword: 'index directory'; symbol?: '=' | null; value: string }
+  | { keyword: 'engine_attribute'; symbol?: '=' | null; value: string }
+  | { keyword: 'secondary_engine_attribute'; symbol?: '=' | null; value: string }
+  | { keyword: 'row_format'; symbol?: '=' | null; value: string }
+  | { keyword: 'charset' | 'character set' | 'default charset' | 'default character set'; symbol?: '=' | null; value: DefaultValue }
+  | { keyword: 'collate' | 'default collate'; symbol?: '=' | null; value: DefaultValue };
 
 export interface DropTable {
   type: "drop";
