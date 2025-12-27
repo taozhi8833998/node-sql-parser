@@ -426,6 +426,8 @@ export type AlterExpr =
   | AlterLock
   | AlterTableOption;
 
+export type AlterColumnPosition = { keyword: string } | { keyword: string; expr: ColumnRef };
+
 export type AlterAddColumn = {
   type: 'alter';
   resource: 'column';
@@ -433,8 +435,8 @@ export type AlterAddColumn = {
   keyword?: 'COLUMN';
   column: ColumnRef;
   definition: DataType;
-  suffix: string | null | { keyword: string };
-};
+  suffix: AlterColumnPosition | null;
+} & Partial<ColumnDefinitionOptList>;
 
 export type AlterDropColumn = {
   type: 'alter';
@@ -451,8 +453,8 @@ export type AlterModifyColumn = {
   keyword: 'COLUMN' | null;
   column: ColumnRef;
   definition: DataType;
-  suffix: string | null | { keyword: string };
-};
+  suffix: AlterColumnPosition | null;
+} & Partial<ColumnDefinitionOptList>;
 
 export type AlterChangeColumn = {
   type: 'alter';
@@ -462,14 +464,14 @@ export type AlterChangeColumn = {
   old_column: ColumnRef;
   column: ColumnRef;
   definition: DataType;
-  suffix: string | null | { keyword: string };
-};
+  suffix: AlterColumnPosition | null;
+} & Partial<ColumnDefinitionOptList>;
 
 export type AlterRenameTable = {
   type: 'alter';
   resource: 'table';
   action: 'rename';
-  keyword: string | null;
+  keyword: 'to' | 'as' | null;
   table: string;
 };
 
@@ -479,7 +481,7 @@ export type AlterRenameColumn = {
   action: 'rename';
   keyword: 'column';
   old_column: ColumnRef;
-  prefix: string;
+  prefix: 'to' | 'as';
   column: ColumnRef;
 };
 
@@ -491,14 +493,14 @@ export type AlterAddIndex = {
   index: string;
   definition: ColumnRef[];
   index_type?: IndexType | null;
-  index_options?: IndexOption[] | null;
+  index_options: IndexOption[] | null;
 };
 
 export type AlterDropIndex = {
   type: 'alter';
   resource: 'index';
   action: 'drop';
-  keyword: string;
+  keyword: 'index' | 'key';
   index: string;
 };
 
@@ -506,7 +508,7 @@ export type AlterDropKey = {
   type: 'alter';
   resource: 'key';
   action: 'drop';
-  keyword: string;
+  keyword: 'primary key' | 'foreign key' | 'key';
   key: string;
 };
 
@@ -521,7 +523,7 @@ export type AlterDropConstraint = {
   type: 'alter';
   resource: 'constraint';
   action: 'drop';
-  keyword: string;
+  keyword: 'constraint' | 'check';
   constraint: string;
 };
 
@@ -548,7 +550,7 @@ export type AlterAddPartition = {
   partitions: Array<{
     name: DefaultValue;
     value: {
-      type: string;
+      type: 'less than';
       expr: NumberValue;
       parentheses: boolean;
     };
@@ -569,16 +571,13 @@ export type AlterOperatePartition = {
   action: 'analyze' | 'check' | 'truncate' | 'discard' | 'import' | 'coalesce';
   keyword: 'PARTITION';
   partitions: Column[];
-  suffix?: {
-    keyword: string;
-  };
 };
 
 export type AlterAlgorithm = {
   type: 'alter';
   resource: 'algorithm';
   keyword: 'algorithm';
-  symbol: string | null;
+  symbol: '=' | null;
   algorithm: string;
 };
 
@@ -586,17 +585,34 @@ export type AlterLock = {
   type: 'alter';
   resource: 'lock';
   keyword: 'lock';
-  symbol: string | null;
+  symbol: '=' | null;
   lock: string;
 };
 
-export type AlterTableOption = {
-  type: 'alter';
-  resource: string;
-  keyword: string;
-  symbol: string | null;
-  engine?: string;
-};
+export type AlterTableOption = 
+  | { type: 'alter'; resource: 'engine'; keyword: 'engine'; symbol: '=' | null; engine: string }
+  | { type: 'alter'; resource: 'auto_increment'; keyword: 'auto_increment'; symbol: '=' | null; auto_increment: number }
+  | { type: 'alter'; resource: 'avg_row_length'; keyword: 'avg_row_length'; symbol: '=' | null; avg_row_length: number }
+  | { type: 'alter'; resource: 'key_block_size'; keyword: 'key_block_size'; symbol: '=' | null; key_block_size: number }
+  | { type: 'alter'; resource: 'max_rows'; keyword: 'max_rows'; symbol: '=' | null; max_rows: number }
+  | { type: 'alter'; resource: 'min_rows'; keyword: 'min_rows'; symbol: '=' | null; min_rows: number }
+  | { type: 'alter'; resource: 'stats_sample_pages'; keyword: 'stats_sample_pages'; symbol: '=' | null; stats_sample_pages: number }
+  | { type: 'alter'; resource: 'checksum'; keyword: 'checksum'; symbol: '=' | null; checksum: string }
+  | { type: 'alter'; resource: 'delay_key_write'; keyword: 'delay_key_write'; symbol: '=' | null; delay_key_write: string }
+  | { type: 'alter'; resource: 'comment'; keyword: 'comment'; symbol: '=' | null; comment: string }
+  | { type: 'alter'; resource: 'compression'; keyword: 'compression'; symbol: '=' | null; compression: string }
+  | { type: 'alter'; resource: 'connection'; keyword: 'connection'; symbol: '=' | null; connection: string }
+  | { type: 'alter'; resource: 'data directory'; keyword: 'data directory'; symbol: '=' | null; 'data directory': string }
+  | { type: 'alter'; resource: 'index directory'; keyword: 'index directory'; symbol: '=' | null; 'index directory': string }
+  | { type: 'alter'; resource: 'engine_attribute'; keyword: 'engine_attribute'; symbol: '=' | null; engine_attribute: string }
+  | { type: 'alter'; resource: 'secondary_engine_attribute'; keyword: 'secondary_engine_attribute'; symbol: '=' | null; secondary_engine_attribute: string }
+  | { type: 'alter'; resource: 'row_format'; keyword: 'row_format'; symbol: '=' | null; row_format: string }
+  | { type: 'alter'; resource: 'charset'; keyword: 'charset'; symbol: '=' | null; charset: DefaultValue }
+  | { type: 'alter'; resource: 'character set'; keyword: 'character set'; symbol: '=' | null; 'character set': DefaultValue }
+  | { type: 'alter'; resource: 'default charset'; keyword: 'default charset'; symbol: '=' | null; 'default charset': DefaultValue }
+  | { type: 'alter'; resource: 'default character set'; keyword: 'default character set'; symbol: '=' | null; 'default character set': DefaultValue }
+  | { type: 'alter'; resource: 'collate'; keyword: 'collate'; symbol: '=' | null; collate: DefaultValue }
+  | { type: 'alter'; resource: 'default collate'; keyword: 'default collate'; symbol: '=' | null; 'default collate': DefaultValue };
 
 export interface Use {
   type: "use";

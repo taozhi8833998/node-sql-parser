@@ -2,7 +2,7 @@
  * Generated type guards for "mysql.d.ts".
  * WARNING: Do not manually change this file.
  */
-import { With, ParseOptions, Option, TableColumnAst, BaseFrom, Join, Values, TableExpr, Dual, From, LimitValue, Limit, OrderBy, ValueExpr, StringValue, OriginValue, DefaultValue, NumberValue, IntervalExprValue, SeparatorValue, SortDirection, ColumnRefItem, ColumnRef, SetList, InsertReplaceValue, Star, Case, Cast, AggrFunc, FunctionNameValue, FunctionName, Function, FulltextSearch, Column, Interval, Param, Var, Assign, Binary, Unary, Expr, ExtractFunc, ExpressionValue, ExprList, PartitionBy, WindowSpec, WindowFrameClause, AsWindowSpec, NamedWindowExpr, WindowExpr, Select, Insert_Replace, Update, Delete, Alter, AlterExpr, AlterAddColumn, AlterDropColumn, AlterModifyColumn, AlterChangeColumn, AlterRenameTable, AlterRenameColumn, AlterAddIndex, AlterDropIndex, AlterDropKey, AlterAddConstraint, AlterDropConstraint, AlterEnableConstraint, AlterDisableConstraint, AlterAddPartition, AlterDropPartition, AlterOperatePartition, AlterAlgorithm, AlterLock, AlterTableOption, Use, KeywordComment, CollateExpr, MysqlType, ConvertDataType, DataType, OnUpdateCurrentTimestamp, LiteralNotNull, LiteralNull, ColumnConstraint, ColumnDefinitionOptList, ReferenceDefinition, OnReference, CreateColumnDefinition, IndexType, IndexOption, CreateIndexDefinition, CreateFulltextSpatialIndexDefinition, ConstraintName, CreateConstraintPrimary, CreateConstraintUnique, CreateConstraintForeign, CreateConstraintCheck, CreateConstraintDefinition, CreateDefinition, CreateTable, DatabaseOption, CreateDatabase, CreateSchema, CreateIndex, CreateView, CreateTrigger, CreateUser, Create, TriggerEvent, UserAuthOption, RequireOption, ResourceOption, PasswordOption, TableOption, DropTable, DropDatabase, DropView, DropIndex, DropTrigger, Drop, ShowLogs, ShowTables, ShowSimple, ShowProcedureFunctionStatus, ShowBinlogEvents, ShowCharacterSet, ShowCollationDatabases, ShowColumnsIndexes, ShowCreateTable, ShowCreateView, ShowCreateEvent, ShowCreateTrigger, ShowCreateProcedure, ShowGrants, Show, Desc, Explain, Call, SetAssign, SetStatement, Lock, LockTable, Unlock, Grant, LoadData, LoadDataField, LoadDataLine, Truncate, Rename, Transaction, AST } from "./mysql";
+import { With, ParseOptions, Option, TableColumnAst, BaseFrom, Join, Values, TableExpr, Dual, From, LimitValue, Limit, OrderBy, ValueExpr, StringValue, OriginValue, DefaultValue, NumberValue, IntervalExprValue, SeparatorValue, SortDirection, ColumnRefItem, ColumnRef, SetList, InsertReplaceValue, Star, Case, Cast, AggrFunc, FunctionNameValue, FunctionName, Function, FulltextSearch, Column, Interval, Param, Var, Assign, Binary, Unary, Expr, ExtractFunc, ExpressionValue, ExprList, PartitionBy, WindowSpec, WindowFrameClause, AsWindowSpec, NamedWindowExpr, WindowExpr, Select, Insert_Replace, Update, Delete, Alter, AlterExpr, AlterColumnPosition, AlterAddColumn, AlterDropColumn, AlterModifyColumn, AlterChangeColumn, AlterRenameTable, AlterRenameColumn, AlterAddIndex, AlterDropIndex, AlterDropKey, AlterAddConstraint, AlterDropConstraint, AlterEnableConstraint, AlterDisableConstraint, AlterAddPartition, AlterDropPartition, AlterOperatePartition, AlterAlgorithm, AlterLock, AlterTableOption, Use, KeywordComment, CollateExpr, MysqlType, ConvertDataType, DataType, OnUpdateCurrentTimestamp, LiteralNotNull, LiteralNull, ColumnConstraint, ColumnDefinitionOptList, ReferenceDefinition, OnReference, CreateColumnDefinition, IndexType, IndexOption, CreateIndexDefinition, CreateFulltextSpatialIndexDefinition, ConstraintName, CreateConstraintPrimary, CreateConstraintUnique, CreateConstraintForeign, CreateConstraintCheck, CreateConstraintDefinition, CreateDefinition, CreateTable, DatabaseOption, CreateDatabase, CreateSchema, CreateIndex, CreateView, CreateTrigger, CreateUser, Create, TriggerEvent, UserAuthOption, RequireOption, ResourceOption, PasswordOption, TableOption, DropTable, DropDatabase, DropView, DropIndex, DropTrigger, Drop, ShowLogs, ShowTables, ShowSimple, ShowProcedureFunctionStatus, ShowBinlogEvents, ShowCharacterSet, ShowCollationDatabases, ShowColumnsIndexes, ShowCreateTable, ShowCreateView, ShowCreateEvent, ShowCreateTrigger, ShowCreateProcedure, ShowGrants, Show, Desc, Explain, Call, SetAssign, SetStatement, Lock, LockTable, Unlock, Grant, LoadData, LoadDataField, LoadDataLine, Truncate, Rename, Transaction, AST } from "./mysql";
 
 export function isWith(obj: unknown): obj is With {
     const typedObj = obj as With
@@ -1798,7 +1798,228 @@ export function isAlterExpr(obj: unknown): obj is AlterExpr {
             isAlterOperatePartition(typedObj) as boolean ||
             isAlterAlgorithm(typedObj) as boolean ||
             isAlterLock(typedObj) as boolean ||
-            isAlterTableOption(typedObj) as boolean)
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "engine" &&
+            typedObj["keyword"] === "engine" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["engine"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "auto_increment" &&
+            typedObj["keyword"] === "auto_increment" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["auto_increment"] === "number" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "avg_row_length" &&
+            typedObj["keyword"] === "avg_row_length" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["avg_row_length"] === "number" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "key_block_size" &&
+            typedObj["keyword"] === "key_block_size" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["key_block_size"] === "number" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "max_rows" &&
+            typedObj["keyword"] === "max_rows" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["max_rows"] === "number" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "min_rows" &&
+            typedObj["keyword"] === "min_rows" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["min_rows"] === "number" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "stats_sample_pages" &&
+            typedObj["keyword"] === "stats_sample_pages" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["stats_sample_pages"] === "number" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "checksum" &&
+            typedObj["keyword"] === "checksum" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["checksum"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "delay_key_write" &&
+            typedObj["keyword"] === "delay_key_write" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["delay_key_write"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "comment" &&
+            typedObj["keyword"] === "comment" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["comment"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "compression" &&
+            typedObj["keyword"] === "compression" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["compression"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "connection" &&
+            typedObj["keyword"] === "connection" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["connection"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "data directory" &&
+            typedObj["keyword"] === "data directory" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["data directory"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "index directory" &&
+            typedObj["keyword"] === "index directory" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["index directory"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "engine_attribute" &&
+            typedObj["keyword"] === "engine_attribute" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["engine_attribute"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "secondary_engine_attribute" &&
+            typedObj["keyword"] === "secondary_engine_attribute" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["secondary_engine_attribute"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "row_format" &&
+            typedObj["keyword"] === "row_format" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["row_format"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "charset" &&
+            typedObj["keyword"] === "charset" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            isDefaultValue(typedObj["charset"]) as boolean ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "character set" &&
+            typedObj["keyword"] === "character set" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            isDefaultValue(typedObj["character set"]) as boolean ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "default charset" &&
+            typedObj["keyword"] === "default charset" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            isDefaultValue(typedObj["default charset"]) as boolean ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "default character set" &&
+            typedObj["keyword"] === "default character set" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            isDefaultValue(typedObj["default character set"]) as boolean ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "collate" &&
+            typedObj["keyword"] === "collate" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            isDefaultValue(typedObj["collate"]) as boolean ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "default collate" &&
+            typedObj["keyword"] === "default collate" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            isDefaultValue(typedObj["default collate"]) as boolean)
+    )
+}
+
+export function isAlterColumnPosition(obj: unknown): obj is AlterColumnPosition {
+    const typedObj = obj as AlterColumnPosition
+    return (
+        ((typedObj !== null &&
+            typeof typedObj === "object" ||
+            typeof typedObj === "function") &&
+            typeof typedObj["keyword"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typeof typedObj["keyword"] === "string" &&
+            isColumnRefItem(typedObj["expr"]) as boolean)
     )
 }
 
@@ -1816,11 +2037,88 @@ export function isAlterAddColumn(obj: unknown): obj is AlterAddColumn {
         isColumnRefItem(typedObj["column"]) as boolean &&
         isDataType(typedObj["definition"]) as boolean &&
         (typedObj["suffix"] === null ||
-            typeof typedObj["suffix"] === "string" ||
             (typedObj["suffix"] !== null &&
                 typeof typedObj["suffix"] === "object" ||
                 typeof typedObj["suffix"] === "function") &&
-            typeof typedObj["suffix"]["keyword"] === "string")
+            typeof typedObj["suffix"]["keyword"] === "string" ||
+            (typedObj["suffix"] !== null &&
+                typeof typedObj["suffix"] === "object" ||
+                typeof typedObj["suffix"] === "function") &&
+            typeof typedObj["suffix"]["keyword"] === "string" &&
+            isColumnRefItem(typedObj["suffix"]["expr"]) as boolean) &&
+        (typedObj !== null &&
+            typeof typedObj === "object" ||
+            typeof typedObj === "function") &&
+        (typeof typedObj["nullable"] === "undefined" ||
+            isLiteralNotNull(typedObj["nullable"]) as boolean ||
+            isLiteralNull(typedObj["nullable"]) as boolean) &&
+        (typeof typedObj["default_val"] === "undefined" ||
+            (typedObj["default_val"] !== null &&
+                typeof typedObj["default_val"] === "object" ||
+                typeof typedObj["default_val"] === "function") &&
+            typedObj["default_val"]["type"] === "default" &&
+            isExpressionValue(typedObj["default_val"]["value"]) as boolean) &&
+        (typeof typedObj["auto_increment"] === "undefined" ||
+            typedObj["auto_increment"] === "auto_increment") &&
+        (typeof typedObj["unique"] === "undefined" ||
+            typedObj["unique"] === "unique" ||
+            typedObj["unique"] === "unique key") &&
+        (typeof typedObj["primary_key"] === "undefined" ||
+            typedObj["primary_key"] === "key" ||
+            typedObj["primary_key"] === "primary key") &&
+        (typeof typedObj["comment"] === "undefined" ||
+            isKeywordComment(typedObj["comment"]) as boolean) &&
+        (typeof typedObj["collate"] === "undefined" ||
+            isCollateExpr(typedObj["collate"]) as boolean) &&
+        (typeof typedObj["column_format"] === "undefined" ||
+            (typedObj["column_format"] !== null &&
+                typeof typedObj["column_format"] === "object" ||
+                typeof typedObj["column_format"] === "function") &&
+            typeof typedObj["column_format"]["type"] === "string" &&
+            typeof typedObj["column_format"]["value"] === "string") &&
+        (typeof typedObj["storage"] === "undefined" ||
+            (typedObj["storage"] !== null &&
+                typeof typedObj["storage"] === "object" ||
+                typeof typedObj["storage"] === "function") &&
+            typeof typedObj["storage"]["type"] === "string" &&
+            typeof typedObj["storage"]["value"] === "string") &&
+        (typeof typedObj["reference_definition"] === "undefined" ||
+            isReferenceDefinition(typedObj["reference_definition"]) as boolean) &&
+        (typeof typedObj["character_set"] === "undefined" ||
+            (typedObj["character_set"] !== null &&
+                typeof typedObj["character_set"] === "object" ||
+                typeof typedObj["character_set"] === "function") &&
+            typedObj["character_set"]["type"] === "CHARACTER SET" &&
+            isDefaultValue(typedObj["character_set"]["value"]) as boolean &&
+            (typedObj["character_set"]["symbol"] === null ||
+                typedObj["character_set"]["symbol"] === "=")) &&
+        (typeof typedObj["check"] === "undefined" ||
+            (typedObj["check"] !== null &&
+                typeof typedObj["check"] === "object" ||
+                typeof typedObj["check"] === "function") &&
+            typedObj["check"]["constraint_type"] === "check" &&
+            (typedObj["check"]["keyword"] === null ||
+                typedObj["check"]["keyword"] === "constraint") &&
+            (typedObj["check"]["constraint"] === null ||
+                typeof typedObj["check"]["constraint"] === "string") &&
+            Array.isArray(typedObj["check"]["definition"]) &&
+            typedObj["check"]["definition"].every((e: any) =>
+                isBinary(e) as boolean
+            ) &&
+            (typedObj["check"]["enforced"] === "" ||
+                typedObj["check"]["enforced"] === "enforced" ||
+                typedObj["check"]["enforced"] === "not enforced") &&
+            typedObj["check"]["resource"] === "constraint") &&
+        (typeof typedObj["generated"] === "undefined" ||
+            (typedObj["generated"] !== null &&
+                typeof typedObj["generated"] === "object" ||
+                typeof typedObj["generated"] === "function") &&
+            typedObj["generated"]["type"] === "generated" &&
+            isExpressionValue(typedObj["generated"]["expr"]) as boolean &&
+            typeof typedObj["generated"]["value"] === "string" &&
+            (typeof typedObj["generated"]["storage_type"] === "undefined" ||
+                typedObj["generated"]["storage_type"] === "stored" ||
+                typedObj["generated"]["storage_type"] === "virtual"))
     )
 }
 
@@ -1853,11 +2151,88 @@ export function isAlterModifyColumn(obj: unknown): obj is AlterModifyColumn {
         isColumnRefItem(typedObj["column"]) as boolean &&
         isDataType(typedObj["definition"]) as boolean &&
         (typedObj["suffix"] === null ||
-            typeof typedObj["suffix"] === "string" ||
             (typedObj["suffix"] !== null &&
                 typeof typedObj["suffix"] === "object" ||
                 typeof typedObj["suffix"] === "function") &&
-            typeof typedObj["suffix"]["keyword"] === "string")
+            typeof typedObj["suffix"]["keyword"] === "string" ||
+            (typedObj["suffix"] !== null &&
+                typeof typedObj["suffix"] === "object" ||
+                typeof typedObj["suffix"] === "function") &&
+            typeof typedObj["suffix"]["keyword"] === "string" &&
+            isColumnRefItem(typedObj["suffix"]["expr"]) as boolean) &&
+        (typedObj !== null &&
+            typeof typedObj === "object" ||
+            typeof typedObj === "function") &&
+        (typeof typedObj["nullable"] === "undefined" ||
+            isLiteralNotNull(typedObj["nullable"]) as boolean ||
+            isLiteralNull(typedObj["nullable"]) as boolean) &&
+        (typeof typedObj["default_val"] === "undefined" ||
+            (typedObj["default_val"] !== null &&
+                typeof typedObj["default_val"] === "object" ||
+                typeof typedObj["default_val"] === "function") &&
+            typedObj["default_val"]["type"] === "default" &&
+            isExpressionValue(typedObj["default_val"]["value"]) as boolean) &&
+        (typeof typedObj["auto_increment"] === "undefined" ||
+            typedObj["auto_increment"] === "auto_increment") &&
+        (typeof typedObj["unique"] === "undefined" ||
+            typedObj["unique"] === "unique" ||
+            typedObj["unique"] === "unique key") &&
+        (typeof typedObj["primary_key"] === "undefined" ||
+            typedObj["primary_key"] === "key" ||
+            typedObj["primary_key"] === "primary key") &&
+        (typeof typedObj["comment"] === "undefined" ||
+            isKeywordComment(typedObj["comment"]) as boolean) &&
+        (typeof typedObj["collate"] === "undefined" ||
+            isCollateExpr(typedObj["collate"]) as boolean) &&
+        (typeof typedObj["column_format"] === "undefined" ||
+            (typedObj["column_format"] !== null &&
+                typeof typedObj["column_format"] === "object" ||
+                typeof typedObj["column_format"] === "function") &&
+            typeof typedObj["column_format"]["type"] === "string" &&
+            typeof typedObj["column_format"]["value"] === "string") &&
+        (typeof typedObj["storage"] === "undefined" ||
+            (typedObj["storage"] !== null &&
+                typeof typedObj["storage"] === "object" ||
+                typeof typedObj["storage"] === "function") &&
+            typeof typedObj["storage"]["type"] === "string" &&
+            typeof typedObj["storage"]["value"] === "string") &&
+        (typeof typedObj["reference_definition"] === "undefined" ||
+            isReferenceDefinition(typedObj["reference_definition"]) as boolean) &&
+        (typeof typedObj["character_set"] === "undefined" ||
+            (typedObj["character_set"] !== null &&
+                typeof typedObj["character_set"] === "object" ||
+                typeof typedObj["character_set"] === "function") &&
+            typedObj["character_set"]["type"] === "CHARACTER SET" &&
+            isDefaultValue(typedObj["character_set"]["value"]) as boolean &&
+            (typedObj["character_set"]["symbol"] === null ||
+                typedObj["character_set"]["symbol"] === "=")) &&
+        (typeof typedObj["check"] === "undefined" ||
+            (typedObj["check"] !== null &&
+                typeof typedObj["check"] === "object" ||
+                typeof typedObj["check"] === "function") &&
+            typedObj["check"]["constraint_type"] === "check" &&
+            (typedObj["check"]["keyword"] === null ||
+                typedObj["check"]["keyword"] === "constraint") &&
+            (typedObj["check"]["constraint"] === null ||
+                typeof typedObj["check"]["constraint"] === "string") &&
+            Array.isArray(typedObj["check"]["definition"]) &&
+            typedObj["check"]["definition"].every((e: any) =>
+                isBinary(e) as boolean
+            ) &&
+            (typedObj["check"]["enforced"] === "" ||
+                typedObj["check"]["enforced"] === "enforced" ||
+                typedObj["check"]["enforced"] === "not enforced") &&
+            typedObj["check"]["resource"] === "constraint") &&
+        (typeof typedObj["generated"] === "undefined" ||
+            (typedObj["generated"] !== null &&
+                typeof typedObj["generated"] === "object" ||
+                typeof typedObj["generated"] === "function") &&
+            typedObj["generated"]["type"] === "generated" &&
+            isExpressionValue(typedObj["generated"]["expr"]) as boolean &&
+            typeof typedObj["generated"]["value"] === "string" &&
+            (typeof typedObj["generated"]["storage_type"] === "undefined" ||
+                typedObj["generated"]["storage_type"] === "stored" ||
+                typedObj["generated"]["storage_type"] === "virtual"))
     )
 }
 
@@ -1876,11 +2251,88 @@ export function isAlterChangeColumn(obj: unknown): obj is AlterChangeColumn {
         isColumnRefItem(typedObj["column"]) as boolean &&
         isDataType(typedObj["definition"]) as boolean &&
         (typedObj["suffix"] === null ||
-            typeof typedObj["suffix"] === "string" ||
             (typedObj["suffix"] !== null &&
                 typeof typedObj["suffix"] === "object" ||
                 typeof typedObj["suffix"] === "function") &&
-            typeof typedObj["suffix"]["keyword"] === "string")
+            typeof typedObj["suffix"]["keyword"] === "string" ||
+            (typedObj["suffix"] !== null &&
+                typeof typedObj["suffix"] === "object" ||
+                typeof typedObj["suffix"] === "function") &&
+            typeof typedObj["suffix"]["keyword"] === "string" &&
+            isColumnRefItem(typedObj["suffix"]["expr"]) as boolean) &&
+        (typedObj !== null &&
+            typeof typedObj === "object" ||
+            typeof typedObj === "function") &&
+        (typeof typedObj["nullable"] === "undefined" ||
+            isLiteralNotNull(typedObj["nullable"]) as boolean ||
+            isLiteralNull(typedObj["nullable"]) as boolean) &&
+        (typeof typedObj["default_val"] === "undefined" ||
+            (typedObj["default_val"] !== null &&
+                typeof typedObj["default_val"] === "object" ||
+                typeof typedObj["default_val"] === "function") &&
+            typedObj["default_val"]["type"] === "default" &&
+            isExpressionValue(typedObj["default_val"]["value"]) as boolean) &&
+        (typeof typedObj["auto_increment"] === "undefined" ||
+            typedObj["auto_increment"] === "auto_increment") &&
+        (typeof typedObj["unique"] === "undefined" ||
+            typedObj["unique"] === "unique" ||
+            typedObj["unique"] === "unique key") &&
+        (typeof typedObj["primary_key"] === "undefined" ||
+            typedObj["primary_key"] === "key" ||
+            typedObj["primary_key"] === "primary key") &&
+        (typeof typedObj["comment"] === "undefined" ||
+            isKeywordComment(typedObj["comment"]) as boolean) &&
+        (typeof typedObj["collate"] === "undefined" ||
+            isCollateExpr(typedObj["collate"]) as boolean) &&
+        (typeof typedObj["column_format"] === "undefined" ||
+            (typedObj["column_format"] !== null &&
+                typeof typedObj["column_format"] === "object" ||
+                typeof typedObj["column_format"] === "function") &&
+            typeof typedObj["column_format"]["type"] === "string" &&
+            typeof typedObj["column_format"]["value"] === "string") &&
+        (typeof typedObj["storage"] === "undefined" ||
+            (typedObj["storage"] !== null &&
+                typeof typedObj["storage"] === "object" ||
+                typeof typedObj["storage"] === "function") &&
+            typeof typedObj["storage"]["type"] === "string" &&
+            typeof typedObj["storage"]["value"] === "string") &&
+        (typeof typedObj["reference_definition"] === "undefined" ||
+            isReferenceDefinition(typedObj["reference_definition"]) as boolean) &&
+        (typeof typedObj["character_set"] === "undefined" ||
+            (typedObj["character_set"] !== null &&
+                typeof typedObj["character_set"] === "object" ||
+                typeof typedObj["character_set"] === "function") &&
+            typedObj["character_set"]["type"] === "CHARACTER SET" &&
+            isDefaultValue(typedObj["character_set"]["value"]) as boolean &&
+            (typedObj["character_set"]["symbol"] === null ||
+                typedObj["character_set"]["symbol"] === "=")) &&
+        (typeof typedObj["check"] === "undefined" ||
+            (typedObj["check"] !== null &&
+                typeof typedObj["check"] === "object" ||
+                typeof typedObj["check"] === "function") &&
+            typedObj["check"]["constraint_type"] === "check" &&
+            (typedObj["check"]["keyword"] === null ||
+                typedObj["check"]["keyword"] === "constraint") &&
+            (typedObj["check"]["constraint"] === null ||
+                typeof typedObj["check"]["constraint"] === "string") &&
+            Array.isArray(typedObj["check"]["definition"]) &&
+            typedObj["check"]["definition"].every((e: any) =>
+                isBinary(e) as boolean
+            ) &&
+            (typedObj["check"]["enforced"] === "" ||
+                typedObj["check"]["enforced"] === "enforced" ||
+                typedObj["check"]["enforced"] === "not enforced") &&
+            typedObj["check"]["resource"] === "constraint") &&
+        (typeof typedObj["generated"] === "undefined" ||
+            (typedObj["generated"] !== null &&
+                typeof typedObj["generated"] === "object" ||
+                typeof typedObj["generated"] === "function") &&
+            typedObj["generated"]["type"] === "generated" &&
+            isExpressionValue(typedObj["generated"]["expr"]) as boolean &&
+            typeof typedObj["generated"]["value"] === "string" &&
+            (typeof typedObj["generated"]["storage_type"] === "undefined" ||
+                typedObj["generated"]["storage_type"] === "stored" ||
+                typedObj["generated"]["storage_type"] === "virtual"))
     )
 }
 
@@ -1894,7 +2346,8 @@ export function isAlterRenameTable(obj: unknown): obj is AlterRenameTable {
         typedObj["resource"] === "table" &&
         typedObj["action"] === "rename" &&
         (typedObj["keyword"] === null ||
-            typeof typedObj["keyword"] === "string") &&
+            typedObj["keyword"] === "as" ||
+            typedObj["keyword"] === "to") &&
         typeof typedObj["table"] === "string"
     )
 }
@@ -1910,7 +2363,8 @@ export function isAlterRenameColumn(obj: unknown): obj is AlterRenameColumn {
         typedObj["action"] === "rename" &&
         typedObj["keyword"] === "column" &&
         isColumnRefItem(typedObj["old_column"]) as boolean &&
-        typeof typedObj["prefix"] === "string" &&
+        (typedObj["prefix"] === "as" ||
+            typedObj["prefix"] === "to") &&
         isColumnRefItem(typedObj["column"]) as boolean
     )
 }
@@ -1924,8 +2378,8 @@ export function isAlterAddIndex(obj: unknown): obj is AlterAddIndex {
         typedObj["type"] === "alter" &&
         typedObj["resource"] === "index" &&
         typedObj["action"] === "add" &&
-        (typedObj["keyword"] === "index" ||
-            typedObj["keyword"] === "key" ||
+        (typedObj["keyword"] === "key" ||
+            typedObj["keyword"] === "index" ||
             typedObj["keyword"] === "fulltext" ||
             typedObj["keyword"] === "spatial" ||
             typedObj["keyword"] === "fulltext key" ||
@@ -1940,8 +2394,7 @@ export function isAlterAddIndex(obj: unknown): obj is AlterAddIndex {
         (typeof typedObj["index_type"] === "undefined" ||
             typedObj["index_type"] === null ||
             isIndexType(typedObj["index_type"]) as boolean) &&
-        (typeof typedObj["index_options"] === "undefined" ||
-            typedObj["index_options"] === null ||
+        (typedObj["index_options"] === null ||
             Array.isArray(typedObj["index_options"]) &&
             typedObj["index_options"].every((e: any) =>
                 isIndexOption(e) as boolean
@@ -1958,7 +2411,8 @@ export function isAlterDropIndex(obj: unknown): obj is AlterDropIndex {
         typedObj["type"] === "alter" &&
         typedObj["resource"] === "index" &&
         typedObj["action"] === "drop" &&
-        typeof typedObj["keyword"] === "string" &&
+        (typedObj["keyword"] === "key" ||
+            typedObj["keyword"] === "index") &&
         typeof typedObj["index"] === "string"
     )
 }
@@ -1972,7 +2426,9 @@ export function isAlterDropKey(obj: unknown): obj is AlterDropKey {
         typedObj["type"] === "alter" &&
         typedObj["resource"] === "key" &&
         typedObj["action"] === "drop" &&
-        typeof typedObj["keyword"] === "string" &&
+        (typedObj["keyword"] === "key" ||
+            typedObj["keyword"] === "primary key" ||
+            typedObj["keyword"] === "foreign key") &&
         typeof typedObj["key"] === "string"
     )
 }
@@ -1999,7 +2455,8 @@ export function isAlterDropConstraint(obj: unknown): obj is AlterDropConstraint 
         typedObj["type"] === "alter" &&
         typedObj["resource"] === "constraint" &&
         typedObj["action"] === "drop" &&
-        typeof typedObj["keyword"] === "string" &&
+        (typedObj["keyword"] === "check" ||
+            typedObj["keyword"] === "constraint") &&
         typeof typedObj["constraint"] === "string"
     )
 }
@@ -2050,7 +2507,7 @@ export function isAlterAddPartition(obj: unknown): obj is AlterAddPartition {
             (e["value"] !== null &&
                 typeof e["value"] === "object" ||
                 typeof e["value"] === "function") &&
-            typeof e["value"]["type"] === "string" &&
+            e["value"]["type"] === "less than" &&
             isNumberValue(e["value"]["expr"]) as boolean &&
             typeof e["value"]["parentheses"] === "boolean"
         )
@@ -2082,8 +2539,8 @@ export function isAlterOperatePartition(obj: unknown): obj is AlterOperatePartit
             typeof typedObj === "function") &&
         typedObj["type"] === "alter" &&
         typedObj["resource"] === "partition" &&
-        (typedObj["action"] === "analyze" ||
-            typedObj["action"] === "check" ||
+        (typedObj["action"] === "check" ||
+            typedObj["action"] === "analyze" ||
             typedObj["action"] === "truncate" ||
             typedObj["action"] === "discard" ||
             typedObj["action"] === "import" ||
@@ -2092,12 +2549,7 @@ export function isAlterOperatePartition(obj: unknown): obj is AlterOperatePartit
         Array.isArray(typedObj["partitions"]) &&
         typedObj["partitions"].every((e: any) =>
             isColumn(e) as boolean
-        ) &&
-        (typeof typedObj["suffix"] === "undefined" ||
-            (typedObj["suffix"] !== null &&
-                typeof typedObj["suffix"] === "object" ||
-                typeof typedObj["suffix"] === "function") &&
-            typeof typedObj["suffix"]["keyword"] === "string")
+        )
     )
 }
 
@@ -2111,7 +2563,7 @@ export function isAlterAlgorithm(obj: unknown): obj is AlterAlgorithm {
         typedObj["resource"] === "algorithm" &&
         typedObj["keyword"] === "algorithm" &&
         (typedObj["symbol"] === null ||
-            typeof typedObj["symbol"] === "string") &&
+            typedObj["symbol"] === "=") &&
         typeof typedObj["algorithm"] === "string"
     )
 }
@@ -2126,7 +2578,7 @@ export function isAlterLock(obj: unknown): obj is AlterLock {
         typedObj["resource"] === "lock" &&
         typedObj["keyword"] === "lock" &&
         (typedObj["symbol"] === null ||
-            typeof typedObj["symbol"] === "string") &&
+            typedObj["symbol"] === "=") &&
         typeof typedObj["lock"] === "string"
     )
 }
@@ -2134,16 +2586,213 @@ export function isAlterLock(obj: unknown): obj is AlterLock {
 export function isAlterTableOption(obj: unknown): obj is AlterTableOption {
     const typedObj = obj as AlterTableOption
     return (
-        (typedObj !== null &&
+        ((typedObj !== null &&
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
-        typedObj["type"] === "alter" &&
-        typeof typedObj["resource"] === "string" &&
-        typeof typedObj["keyword"] === "string" &&
-        (typedObj["symbol"] === null ||
-            typeof typedObj["symbol"] === "string") &&
-        (typeof typedObj["engine"] === "undefined" ||
-            typeof typedObj["engine"] === "string")
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "engine" &&
+            typedObj["keyword"] === "engine" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["engine"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "auto_increment" &&
+            typedObj["keyword"] === "auto_increment" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["auto_increment"] === "number" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "avg_row_length" &&
+            typedObj["keyword"] === "avg_row_length" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["avg_row_length"] === "number" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "key_block_size" &&
+            typedObj["keyword"] === "key_block_size" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["key_block_size"] === "number" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "max_rows" &&
+            typedObj["keyword"] === "max_rows" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["max_rows"] === "number" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "min_rows" &&
+            typedObj["keyword"] === "min_rows" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["min_rows"] === "number" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "stats_sample_pages" &&
+            typedObj["keyword"] === "stats_sample_pages" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["stats_sample_pages"] === "number" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "checksum" &&
+            typedObj["keyword"] === "checksum" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["checksum"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "delay_key_write" &&
+            typedObj["keyword"] === "delay_key_write" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["delay_key_write"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "comment" &&
+            typedObj["keyword"] === "comment" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["comment"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "compression" &&
+            typedObj["keyword"] === "compression" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["compression"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "connection" &&
+            typedObj["keyword"] === "connection" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["connection"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "data directory" &&
+            typedObj["keyword"] === "data directory" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["data directory"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "index directory" &&
+            typedObj["keyword"] === "index directory" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["index directory"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "engine_attribute" &&
+            typedObj["keyword"] === "engine_attribute" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["engine_attribute"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "secondary_engine_attribute" &&
+            typedObj["keyword"] === "secondary_engine_attribute" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["secondary_engine_attribute"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "row_format" &&
+            typedObj["keyword"] === "row_format" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            typeof typedObj["row_format"] === "string" ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "charset" &&
+            typedObj["keyword"] === "charset" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            isDefaultValue(typedObj["charset"]) as boolean ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "character set" &&
+            typedObj["keyword"] === "character set" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            isDefaultValue(typedObj["character set"]) as boolean ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "default charset" &&
+            typedObj["keyword"] === "default charset" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            isDefaultValue(typedObj["default charset"]) as boolean ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "default character set" &&
+            typedObj["keyword"] === "default character set" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            isDefaultValue(typedObj["default character set"]) as boolean ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "collate" &&
+            typedObj["keyword"] === "collate" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            isDefaultValue(typedObj["collate"]) as boolean ||
+            (typedObj !== null &&
+                typeof typedObj === "object" ||
+                typeof typedObj === "function") &&
+            typedObj["type"] === "alter" &&
+            typedObj["resource"] === "default collate" &&
+            typedObj["keyword"] === "default collate" &&
+            (typedObj["symbol"] === null ||
+                typedObj["symbol"] === "=") &&
+            isDefaultValue(typedObj["default collate"]) as boolean)
     )
 }
 
@@ -2607,8 +3256,8 @@ export function isCreateIndexDefinition(obj: unknown): obj is CreateIndexDefinit
         typedObj["definition"].every((e: any) =>
             isColumnRefItem(e) as boolean
         ) &&
-        (typedObj["keyword"] === "index" ||
-            typedObj["keyword"] === "key") &&
+        (typedObj["keyword"] === "key" ||
+            typedObj["keyword"] === "index") &&
         (typedObj["index_type"] === null ||
             isIndexType(typedObj["index_type"]) as boolean) &&
         typedObj["resource"] === "index" &&
@@ -2882,11 +3531,11 @@ export function isDatabaseOption(obj: unknown): obj is DatabaseOption {
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
         (typedObj["keyword"] === "collate" ||
-            typedObj["keyword"] === "character set" ||
-            typedObj["keyword"] === "default character set" ||
-            typedObj["keyword"] === "default collate" ||
             typedObj["keyword"] === "charset" ||
-            typedObj["keyword"] === "default charset") &&
+            typedObj["keyword"] === "character set" ||
+            typedObj["keyword"] === "default charset" ||
+            typedObj["keyword"] === "default character set" ||
+            typedObj["keyword"] === "default collate") &&
         (typeof typedObj["symbol"] === "undefined" ||
             typedObj["symbol"] === null ||
             typedObj["symbol"] === "=") &&
@@ -3038,9 +3687,9 @@ export function isCreateIndex(obj: unknown): obj is CreateIndex {
             )) &&
         (typeof typedObj["index_type"] === "undefined" ||
             typedObj["index_type"] === null ||
+            typedObj["index_type"] === "unique" ||
             typedObj["index_type"] === "fulltext" ||
-            typedObj["index_type"] === "spatial" ||
-            typedObj["index_type"] === "unique") &&
+            typedObj["index_type"] === "spatial") &&
         (typeof typedObj["index_options"] === "undefined" ||
             typedObj["index_options"] === null ||
             Array.isArray(typedObj["index_options"]) &&
@@ -3556,10 +4205,10 @@ export function isTableOption(obj: unknown): obj is TableOption {
             (typedObj !== null &&
                 typeof typedObj === "object" ||
                 typeof typedObj === "function") &&
-            (typedObj["keyword"] === "character set" ||
-                typedObj["keyword"] === "default character set" ||
-                typedObj["keyword"] === "charset" ||
-                typedObj["keyword"] === "default charset") &&
+            (typedObj["keyword"] === "charset" ||
+                typedObj["keyword"] === "character set" ||
+                typedObj["keyword"] === "default charset" ||
+                typedObj["keyword"] === "default character set") &&
             (typeof typedObj["symbol"] === "undefined" ||
                 typedObj["symbol"] === null ||
                 typedObj["symbol"] === "=") &&
