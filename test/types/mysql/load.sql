@@ -1,0 +1,16 @@
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users;
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE mydb.users;
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users FIELDS TERMINATED BY ',';
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users LINES TERMINATED BY '\\n';
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users FIELDS TERMINATED BY ',' ENCLOSED BY '"' ESCAPED BY '\\\\';
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users LINES STARTING BY 'xxx' TERMINATED BY '\\n';
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users FIELDS TERMINATED BY ',';
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users LINES TERMINATED BY '\n';
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users FIELDS TERMINATED BY ',' ENCLOSED BY '"' ESCAPED BY '\\';
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users LINES STARTING BY 'xxx' TERMINATED BY '\n';
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users PARTITION (p0, p1);
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users CHARACTER SET utf8mb4;
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users IGNORE 1 LINES;
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users (id, name, email);
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users SET status = 'active';
+LOAD DATA INFILE '/tmp/data.csv' INTO TABLE users (id, name) SET status = 'active';

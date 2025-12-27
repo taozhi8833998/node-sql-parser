@@ -1,0 +1,16 @@
+REPLACE INTO users (id) VALUES (1);
+REPLACE users (id, name) VALUES (1, 'John');
+REPLACE INTO users (id, name) VALUES (1, 'John'), (2, 'Jane');
+REPLACE INTO users VALUES (1, 'John', 30);
+REPLACE users VALUES (1, 'John', 30);
+REPLACE INTO users SET name = "John", age = 30;
+REPLACE users SET id = 1, name = 'Jane';
+REPLACE INTO users PARTITION (p0) (id, name) VALUES (1, 'John');
+REPLACE INTO users PARTITION (p0, p1) VALUES (1, 'John', 30);
+REPLACE INTO users PARTITION (p0) SET id = 1, name = 'John';
+REPLACE INTO users (id, name) SELECT id, name FROM temp_users;
+REPLACE users SELECT * FROM temp_users;
+REPLACE INTO mydb.users (id) VALUES (1);
+REPLACE mydb.users SET id = 1;
+REPLACE IGNORE INTO users (id) VALUES (1);
+REPLACE INTO users (id, name) VALUES (1, 'John') ON DUPLICATE KEY UPDATE name = 'Updated';
