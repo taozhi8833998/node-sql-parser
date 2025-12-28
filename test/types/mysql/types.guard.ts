@@ -395,7 +395,13 @@ export function isValueExpr(obj: unknown): obj is ValueExpr {
             typeof typedObj["value"] === "string" ||
             typeof typedObj["value"] === "number" ||
             typedObj["value"] === false ||
-            typedObj["value"] === true)
+            typedObj["value"] === true) &&
+        (typeof typedObj["suffix"] === "undefined" ||
+            (typedObj["suffix"] !== null &&
+                typeof typedObj["suffix"] === "object" ||
+                typeof typedObj["suffix"] === "function") &&
+            (typeof typedObj["suffix"]["collate"] === "undefined" ||
+                isCollateExpr(typedObj["suffix"]["collate"]) as boolean))
     )
 }
 

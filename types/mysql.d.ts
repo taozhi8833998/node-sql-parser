@@ -105,6 +105,7 @@ export interface ValueExpr {
     | "origin"
     | "default";
   value: string | number | boolean | null;
+  suffix?: { collate?: CollateExpr };
 }
 
 export type StringValue = {
