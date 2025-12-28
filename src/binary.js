@@ -1,4 +1,5 @@
 import { exprToSQL } from './expr'
+import { collateToSQL } from './collate'
 import { hasVal, toUpper } from './util'
 
 function binaryToSQL(expr) {
@@ -25,9 +26,11 @@ function binaryToSQL(expr) {
   }
   const escape = expr.right.escape || {}
   const leftPart = Array.isArray(expr.left) ? expr.left.map(exprToSQL).join(', ') : exprToSQL(expr.left)
+  const collateStr = collateToSQL(expr.collate)
   const str = [leftPart, operator, rstr, toUpper(escape.type), exprToSQL(escape.value)].filter(hasVal).join(operator === '.' ? '' : ' ')
-  const result = [expr.parentheses ? `(${str})` : str]
-  return result.join(' ')
+  let result = expr.parentheses ? `(${str})` : str
+  if (collateStr) result = `${result} ${collateStr}`
+  return result
 }
 
 export {
