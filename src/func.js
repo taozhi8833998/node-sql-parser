@@ -1,4 +1,5 @@
 import { arrayIndexToSQL, columnOffsetToSQL } from './column'
+import { collateToSQL } from './collate'
 import { exprToSQL, orderOrPartitionByToSQL } from './expr'
 import { hasVal, identifierToSql, literalToSQL, toUpper } from './util'
 import { overToSQL } from './over'
@@ -28,7 +29,7 @@ function arrayDimensionToSymbol(target) {
 }
 
 function castToSQL(expr) {
-  const { target: targets, expr: expression, keyword, symbol, as: alias, offset, parentheses: outParentheses } = expr
+  const { target: targets, expr: expression, keyword, symbol, as: alias, offset, parentheses: outParentheses, collate } = expr
   let prefix = columnOffsetToSQL({ expr: expression, offset })
   const result = []
   for (let i = 0, len = targets.length; i < len; ++i) {
@@ -52,8 +53,9 @@ function castToSQL(expr) {
     targetResult.push(symbolChar, quoted, dataType, quoted, arrayDimension, str, suffix)
     result.push(targetResult.filter(hasVal).join(''))
   }
+  const collateStr = collateToSQL(collate)
   if (alias) result.push(` AS ${identifierToSql(alias)}`)
-  const sql = result.filter(hasVal).join('')
+  const sql = [result.filter(hasVal).join(''), collateStr].filter(hasVal).join(' ')
   return outParentheses ? `(${sql})` : sql
 }
 
@@ -98,12 +100,13 @@ function withinGroupToSQL(stmt) {
 }
 
 function funcToSQL(expr) {
-  const { args, array_index, name, args_parentheses, parentheses, within_group: withinGroup, over, suffix } = expr
+  const { args, array_index, collate, name, args_parentheses, parentheses, within_group: withinGroup, over, suffix } = expr
   const overStr = overToSQL(over)
   const withinGroupStr = withinGroupToSQL(withinGroup)
   const suffixStr = exprToSQL(suffix)
+  const collateStr = collateToSQL(collate)
   const funcName = [literalToSQL(name.schema), name.name.map(literalToSQL).join('.')].filter(hasVal).join('.')
-  if (!args) return [funcName, withinGroupStr, overStr].filter(hasVal).join(' ')
+  if (!args) return [funcName, collateStr, withinGroupStr, overStr].filter(hasVal).join(' ')
   const separator = expr.separator || ', '
   let fromPosition = 0
   if (toUpper(funcName) === 'TRIM') {
@@ -131,7 +134,7 @@ function funcToSQL(expr) {
   }
   if (args_parentheses !== false) str.push(')')
   str.push(arrayIndexToSQL(array_index))
-  str = [str.join(''), suffixStr].filter(hasVal).join(' ')
+  str = [str.join(''), suffixStr, collateStr].filter(hasVal).join(' ')
   return [parentheses ? `(${str})` : str, withinGroupStr, overStr].filter(hasVal).join(' ')
 }
 
