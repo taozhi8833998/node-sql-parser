@@ -131,6 +131,9 @@ export function isTableColumnAst(obj: unknown): obj is TableColumnAst {
         (typeof typedObj["parentheses"] === "undefined" ||
             typedObj["parentheses"] === false ||
             typedObj["parentheses"] === true) &&
+        (typeof typedObj["collate"] === "undefined" ||
+            typedObj["collate"] === null ||
+            isCollateExpr(typedObj["collate"]) as boolean) &&
         (typeof typedObj["loc"] === "undefined" ||
             (typedObj["loc"] !== null &&
                 typeof typedObj["loc"] === "object" ||
@@ -730,7 +733,10 @@ export function isCase(obj: unknown): obj is Case {
                 typeof e === "function") &&
             isExpressionValue(e["result"]) as boolean &&
             e["type"] === "else")
-        )
+        ) &&
+        (typeof typedObj["collate"] === "undefined" ||
+            typedObj["collate"] === null ||
+            isCollateExpr(typedObj["collate"]) as boolean)
     )
 }
 
@@ -796,7 +802,10 @@ export function isCast(obj: unknown): obj is Cast {
                 e["dataType"] === "UNSIGNED INTEGER") &&
             (typeof e["quoted"] === "undefined" ||
                 typeof e["quoted"] === "string")
-        )
+        ) &&
+        (typeof typedObj["collate"] === "undefined" ||
+            typedObj["collate"] === null ||
+            isCollateExpr(typedObj["collate"]) as boolean)
     )
 }
 
@@ -920,6 +929,9 @@ export function isFunction(obj: unknown): obj is Function {
                 typeof typedObj["over"] === "function") &&
             typedObj["over"]["type"] === "window" &&
             isAsWindowSpec(typedObj["over"]["as_window_specification"]) as boolean) &&
+        (typeof typedObj["collate"] === "undefined" ||
+            typedObj["collate"] === null ||
+            isCollateExpr(typedObj["collate"]) as boolean) &&
         (typeof typedObj["loc"] === "undefined" ||
             (typedObj["loc"] !== null &&
                 typeof typedObj["loc"] === "object" ||
@@ -1018,7 +1030,10 @@ export function isInterval(obj: unknown): obj is Interval {
             typeof typedObj === "function") &&
         typedObj["type"] === "interval" &&
         typeof typedObj["unit"] === "string" &&
-        isIntervalExprValue(typedObj["expr"]) as boolean
+        isIntervalExprValue(typedObj["expr"]) as boolean &&
+        (typeof typedObj["collate"] === "undefined" ||
+            typedObj["collate"] === null ||
+            isCollateExpr(typedObj["collate"]) as boolean)
     )
 }
 
@@ -1479,8 +1494,7 @@ export function isSelect(obj: unknown): obj is Select {
             (typedObj["groupby"]["columns"] === null ||
                 Array.isArray(typedObj["groupby"]["columns"]) &&
                 typedObj["groupby"]["columns"].every((e: any) =>
-                (isNumberValue(e) as boolean ||
-                    isColumnRefItem(e) as boolean)
+                    isExpressionValue(e) as boolean
                 )) &&
             Array.isArray(typedObj["groupby"]["modifiers"]) &&
             typedObj["groupby"]["modifiers"].every((e: any) =>

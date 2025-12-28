@@ -32,6 +32,7 @@ export interface TableColumnAst {
   columnList: string[];
   ast: AST[] | AST;
   parentheses?: boolean;
+  collate?: CollateExpr | null;
   loc?: LocationRange;
 }
 export interface BaseFrom {
@@ -183,6 +184,7 @@ export interface Case {
         type: "else";
       }
   >;
+  collate?: CollateExpr | null;
 }
 export interface Cast {
   type: "cast";
@@ -193,6 +195,7 @@ export interface Cast {
     dataType: MysqlType | "SIGNED" | "UNSIGNED" | "SIGNED INTEGER" | "UNSIGNED INTEGER";
     quoted?: string;
   }[];
+  collate?: CollateExpr | null;
 }
 export interface AggrFunc {
   type: "aggr_func";
@@ -222,6 +225,7 @@ export interface Function {
   name: FunctionName;
   args?: ExprList | null;
   over?: { type: 'window'; as_window_specification: AsWindowSpec } | OnUpdateCurrentTimestamp | null;
+  collate?: CollateExpr | null;
   loc?: LocationRange;
 }
 export interface FulltextSearch {
@@ -244,6 +248,7 @@ export interface Interval {
   type: "interval";
   unit: string;
   expr: IntervalExprValue;
+  collate?: CollateExpr | null;
 }
 
 export type Param = { type: "param"; value: string; loc?: LocationRange };
@@ -346,7 +351,7 @@ export interface Select {
   };
   from: From[] | TableExpr | { expr: From[], parentheses: { length: number }, joins: From[] } | null;
   where: Binary | Unary | Function | FulltextSearch | ColumnRef | null;
-  groupby: { columns: (ColumnRef | NumberValue)[] | null, modifiers: (OriginValue | null)[] } | null;
+  groupby: { columns: ExpressionValue[] | null, modifiers: (OriginValue | null)[] } | null;
   having: Binary | null;
   orderby: OrderBy[] | null;
   limit: Limit | null;
