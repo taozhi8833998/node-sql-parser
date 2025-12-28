@@ -760,6 +760,64 @@ describe('select', () => {
         .to.equal("SELECT CONVERT('test', CHAR(10) CHARACTER SET utf8mb4)")
       expect(getParsedSql(`SELECT CONVERT('test' USING utf8mb4) COLLATE utf8mb4_bin;`))
         .to.equal("SELECT CONVERT('test' USING UTF8MB4) COLLATE utf8mb4_bin")
+      expect(getParsedSql(`SELECT CONCAT("a", "b") COLLATE UTF8MB4_BIN = "AB" AS result`))
+        .to.equal('SELECT CONCAT("a", "b") COLLATE UTF8MB4_BIN = "AB" AS `result`')
+    })
+
+    it('should parse COLLATE on function expressions', () => {
+      const ast = parser.astify('SELECT CONCAT("a", "b") COLLATE UTF8MB4_BIN = "AB" AS result');
+      expect(ast.columns[0]).to.have.property('as', 'result');
+      expect(ast.columns[0].expr).to.have.property('type', 'binary_expr');
+      expect(ast.columns[0].expr).to.have.property('operator', '=');
+      expect(ast.columns[0].expr.left).to.have.property('type', 'function');
+      expect(ast.columns[0].expr.left).to.have.property('collate');
+      expect(ast.columns[0].expr.left.collate).to.have.property('type', 'collate');
+      expect(ast.columns[0].expr.left.collate.collate).to.have.property('name', 'UTF8MB4_BIN');
+    })
+
+    it('should parse COLLATE on CONVERT expressions', () => {
+      const ast = parser.astify("SELECT CONVERT('test' USING utf8mb4) COLLATE utf8mb4_bin");
+
+      expect(ast.columns[0].expr).to.have.property('type', 'function');
+      expect(ast.columns[0].expr).to.have.property('collate');
+      expect(ast.columns[0].expr.collate).to.have.property('type', 'collate');
+      expect(ast.columns[0].expr.collate.collate).to.have.property('name', 'utf8mb4_bin');
+    })
+
+    it('should parse COLLATE on parenthesized expressions', () => {
+      const ast = parser.astify("SELECT * FROM product WHERE (id = '1' OR id = '2') COLLATE utf8mb4_general_ci");
+
+      expect(ast.where).to.have.property('type', 'binary_expr');
+      expect(ast.where).to.have.property('operator', 'OR');
+      expect(ast.where).to.have.property('parentheses', true);
+      expect(ast.where).to.have.property('collate');
+      expect(ast.where.collate).to.have.property('type', 'collate');
+      expect(ast.where.collate.collate).to.have.property('name', 'utf8mb4_general_ci');
+    })
+
+    it('should parse COLLATE on CAST expressions', () => {
+      const ast = parser.astify('SELECT CAST(test AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_bin');
+
+      expect(ast.columns[0].expr).to.have.property('type', 'cast');
+      expect(ast.columns[0].expr).to.have.property('collate');
+      expect(ast.columns[0].expr.collate).to.have.property('type', 'collate');
+      expect(ast.columns[0].expr.collate.collate).to.have.property('name', 'utf8mb4_bin');
+    })
+
+    it('should parse COLLATE on arithmetic expressions', () => {
+      const ast = parser.astify('SELECT (1 + 2) COLLATE UTF8_BIN = "12" AS result');
+
+      expect(ast.columns[0]).to.have.property('as', 'result');
+      expect(ast.columns[0].expr).to.have.property('type', 'binary_expr');
+      expect(ast.columns[0].expr).to.have.property('operator', '=');
+      expect(ast.columns[0].expr.left).to.have.property('type', 'binary_expr');
+      expect(ast.columns[0].expr.left).to.have.property('parentheses', true);
+      expect(ast.columns[0].expr.left).to.have.property('collate');
+      expect(ast.columns[0].expr.left.collate).to.have.property('type', 'collate');
+      expect(ast.columns[0].expr.left.collate.collate).to.have.property('name', 'UTF8_BIN');
+    })
+
+    it('should support convert additive expr', () => {
       expect(getParsedSql(`select TYPE,taxpayer_Type,CONVERT(tax_Amount, DECIMAL(12,2)) AS tax_amount,CAST(tax_currency AS DECIMAL(12,2))  tax_currency from rs_order_tax where billno="{{billno}}" and Business_Type="order";`))
         .to.equal('SELECT `TYPE`, `taxpayer_Type`, CONVERT(`tax_Amount`, DECIMAL(12, 2)) AS `tax_amount`, CAST(`tax_currency` AS DECIMAL(12, 2)) AS `tax_currency` FROM `rs_order_tax` WHERE `billno` = "{{billno}}" AND `Business_Type` = "order"')
       expect(getParsedSql(`SELECT CONVERT('test', INT(11) unsigned);`))

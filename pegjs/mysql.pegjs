@@ -3320,10 +3320,12 @@ unary_operator
   = '!' / '-' / '+' / '~'
 
 jsonb_expr
-  = head:primary __ tail: (__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW / '@>' / '<@') __  primary)* {
+  = head:primary __ tail: (__ ('?|' / '?&' / '?' / '#-' / '#>>' / '#>' / DOUBLE_ARROW / SINGLE_ARROW / '@>' / '<@') __  primary)* __ ce:(collate_expr)? {
     // => primary | binary_expr
-    if (!tail || tail.length === 0) return head
-    return createBinaryExprChain(head, tail)
+    let result = head
+    if (tail && tail.length > 0) result = createBinaryExprChain(head, tail)
+    if (ce) result.collate = ce
+    return result
   }
 
 primary
