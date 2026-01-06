@@ -235,12 +235,16 @@ describe('sqlite', () => {
   })
 
   it('should support INSERT ... RETURNING *', () => {
-    const sql = `INSERT INTO users (email) VALUES (?) RETURNING *`
+    let sql = `INSERT INTO users (email) VALUES (?) RETURNING *`
     expect(getParsedSql(sql)).to.be.equal(`INSERT INTO "users" (email) VALUES (?) RETURNING *`)
+    sql = `INSERT INTO users VALUES (2, "example", "example@example.com") RETURNING *;`
+    expect(getParsedSql(sql)).to.be.equal(`INSERT INTO "users" VALUES (2,"example","example@example.com") RETURNING *`)
   })
   it('should support INSERT ... RETURNING specific columns', () => {
-    const sql = `INSERT INTO users (email) VALUES (?) RETURNING id, email as email_address`
+    let sql = `INSERT INTO users (email) VALUES (?) RETURNING id, email as email_address`
     expect(getParsedSql(sql)).to.be.equal(`INSERT INTO "users" (email) VALUES (?) RETURNING "id", "email" AS "email_address"`)
+    sql = `INSERT INTO users VALUES (2, "example", "example@example.com") RETURNING id, email;`
+    expect(getParsedSql(sql)).to.be.equal(`INSERT INTO "users" VALUES (2,"example","example@example.com") RETURNING "id", "email"`)
   })
   it('should support UPDATE ... RETURNING *', () => {
     const sql = `UPDATE users SET email = ? RETURNING *`

@@ -1891,7 +1891,8 @@ insert_no_columns_stmt
     t:table_name  __
     p:insert_partition? __
     v:insert_value_clause __
-    odp: on_duplicate_update_stmt? {
+    odp: on_duplicate_update_stmt? __
+    r:returning_stmt? {
       if (t) {
         tableList.add(`insert::${t.db}::${t.table}`)
         columnList.add(`insert::${t.table}::(.*)`);
@@ -1909,6 +1910,7 @@ insert_no_columns_stmt
           partition: p,
           prefix,
           on_duplicate_update: odp,
+          returning: r,
         }
       };
     }
