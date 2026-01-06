@@ -1950,6 +1950,16 @@ describe('Postgres', () => {
         'ALTER TABLE "table_name" REPLICA IDENTITY FULL',
       ]
     },
+    {
+      title: 'tsvector data type',
+      sql: [
+        `CREATE TABLE test_table (
+            id int not null,
+            vector tsvector
+        );`,
+        'CREATE TABLE "test_table" (id INT NOT NULL, vector TSVECTOR)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

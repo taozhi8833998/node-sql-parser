@@ -5787,6 +5787,8 @@ KW_TEXT     = "TEXT"i     !ident_start { return 'TEXT'; }
 KW_MEDIUMTEXT = "MEDIUMTEXT"i  !ident_start { return 'MEDIUMTEXT'; }
 KW_LONGTEXT  = "LONGTEXT"i  !ident_start { return 'LONGTEXT'; }
 KW_MEDIUMINT = "MEDIUMINT"i !ident_start { return 'MEDIUMINT'; }
+KW_TSVECTOR = "TSVECTOR"i !ident_start { return 'TSVECTOR'; }
+KW_TSQUERY = "TSQUERY"i !ident_start { return 'TSQUERY'; }
 KW_BIGINT   = "BIGINT"i   !ident_start { return 'BIGINT'; }
 KW_ENUM     = "ENUM"i   !ident_start { return 'ENUM'; }
 KW_FLOAT   = "FLOAT"i   !ident_start { return 'FLOAT'; }
@@ -6309,6 +6311,7 @@ text_type
     /* =>  data_type */
     return { dataType: `${t}${s ? '[]' : ''}` }
   }
+  / t:(KW_TSVECTOR / KW_TSQUERY) {/* =>  data_type */  return { dataType: t }; }
 
 uuid_type
   = t:KW_UUID {/* =>  data_type */  return { dataType: t }}
