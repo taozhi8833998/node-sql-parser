@@ -270,8 +270,12 @@ describe('sqlite', () => {
     })
   })
   it('should support LIKE with ESCAPE', () => {
-    const sql = `SELECT * FROM table_name WHERE column_name LIKE '%pattern%' ESCAPE '\'`
-    expect(getParsedSql(sql)).to.be.equal(`SELECT * FROM "table_name" WHERE "column_name" LIKE '%pattern%' ESCAPE '\'`)
+    const sql = `SELECT * FROM table_name WHERE column_name LIKE '%pattern%' ESCAPE 'x'`
+    expect(getParsedSql(sql)).to.be.equal(`SELECT * FROM "table_name" WHERE "column_name" LIKE '%pattern%' ESCAPE 'x'`)
+  })
+  it('should allow single backslash without escaping', () => {
+    const sql = `SELECT * FROM table_name WHERE column_name LIKE '\\_%' ESCAPE '\\'`
+    expect(getParsedSql(sql)).to.be.equal(`SELECT * FROM "table_name" WHERE "column_name" LIKE '\\_%' ESCAPE '\\'`)
   })
   it('should support string concatenation in LIKE opts', () => {
     const sql = `SELECT * FROM file WHERE path LIKE 'C:' || CHAR(92) || 'Users' || CHAR(92) || 'example.txt'`
