@@ -559,6 +559,13 @@ describe('snowflake', () => {
         "SELECT trim(col, ' ') FROM DUAL;",
         `SELECT trim("col", ' ') FROM DUAL`
       ]
+    },
+    {
+      title: 'trailing comma in column list',
+      sql: [
+        'SELECT col1, col2, FROM my_table',
+        'SELECT "col1", "col2" FROM my_table'
+      ]
     }
   ]
   SQL_LIST.forEach(sqlInfo => {

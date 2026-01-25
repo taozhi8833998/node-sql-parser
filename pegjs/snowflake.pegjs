@@ -2168,7 +2168,7 @@ column_star_option
   }
 
 column_clause
-  = head:column_list_item tail:(__ COMMA __ column_list_item)* {
+  = head:column_list_item tail:(__ COMMA __ column_list_item)* __ COMMA? {
     // => column_list_item[]
       return createList(head, tail);
     }
