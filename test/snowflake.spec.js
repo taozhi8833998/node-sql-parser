@@ -163,6 +163,13 @@ describe('snowflake', () => {
       ]
     },
     {
+      title: 'array index followed by object accessor',
+      sql: [
+        'SELECT column[0]:field, data[1]:nested:value FROM test_table',
+        'SELECT "column"[0] :field, "data"[1] :nested :value FROM test_table',
+      ]
+    },
+    {
       title: 'qualify expr',
       sql: [
         `SELECT i, p, o
