@@ -300,4 +300,13 @@ describe('sqlite', () => {
         expect(getParsedSql(sql)).to.be.equal(sql)
       });
   });
+  it('should support CTE with VALUES', () => {
+    const sql = `WITH RECURSIVE cnt(x) AS (
+  VALUES(1)
+  UNION ALL
+  SELECT x+1 FROM cnt WHERE x < 10
+)
+SELECT x FROM cnt;`
+    expect(getParsedSql(sql)).to.be.equal(`WITH RECURSIVE "cnt"("x") AS ((1)) SELECT "x" FROM "cnt"`)
+  })
 })
