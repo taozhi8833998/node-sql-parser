@@ -266,8 +266,14 @@ set_op
     return s ? `union ${s.toLowerCase()}` : 'union'
   }
 
+select_core
+  = select_stmt
+  / v:value_clause {
+      return { type: 'values', values: v.values }
+    }
+
 union_stmt
-  = head:select_stmt tail:(__ set_op __ select_stmt)* __ ob: order_by_clause? __ l:limit_clause? {
+  = head:select_core tail:(__ set_op __ select_core)* __ ob: order_by_clause? __ l:limit_clause? {
       let cur = head
       for (let i = 0; i < tail.length; i++) {
         cur._next = tail[i][3]
