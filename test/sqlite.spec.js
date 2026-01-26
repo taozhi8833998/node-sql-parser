@@ -300,4 +300,8 @@ describe('sqlite', () => {
         expect(getParsedSql(sql)).to.be.equal(sql)
       });
   });
+  it('should support table names with IN clauses', () => {
+    const sql = `SELECT * FROM pets WHERE owner_name IN people;`
+    expect(getParsedSql(sql)).to.be.equal('SELECT * FROM "pets" WHERE "owner_name" IN "people"')
+  })
 })
