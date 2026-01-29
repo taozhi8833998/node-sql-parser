@@ -3663,7 +3663,7 @@ aggr_filter
   }
 
 aggr_func
-  = e:(aggr_fun_count / aggr_fun_smma / aggr_array_agg) __ f:aggr_filter? {
+  = e:(aggr_fun_count / aggr_fun_smma / aggr_array_agg / aggr_listagg) __ f:aggr_filter? {
     // => { type: 'aggr_func'; name: string; args: { expr: additive_expr } | count_arg; over: over_partition; filter?: aggr_filter; }
     if (f) e.filter = f
     return e
@@ -3745,7 +3745,7 @@ KW_SUM_MAX_MIN_AVG
   = KW_SUM / KW_MAX / KW_MIN / KW_AVG
 
 aggr_fun_count
-  = name:(KW_COUNT / KW_GROUP_CONCAT / 'LISTAGG'i) __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
+  = name:(KW_COUNT / KW_GROUP_CONCAT) __ LPAREN __ arg:count_arg __ RPAREN __ bc:over_partition? {
     // => { type: 'aggr_func'; name: 'COUNT' | 'GROUP_CONCAT'; args:count_arg; over: over_partition }
       return {
         type: 'aggr_func',
@@ -3811,13 +3811,32 @@ count_arg
   = e:star_expr { /* => { expr: star_expr } */ return { expr: e }; }
   / distinct_args
 
+within_group_clause
+  = 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN {
+    // => order_by_clause
+    return or;
+  }
+
 aggr_array_agg
-  = pre:(ident __ DOT)? __ name:(KW_ARRAY_AGG / KW_STRING_AGG) __ LPAREN __ arg:distinct_args __ RPAREN {
-    // => { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG' | 'STRING_AGG';  }
+  = pre:(ident __ DOT)? __ name:(KW_ARRAY_AGG / KW_STRING_AGG) __ LPAREN __ arg:distinct_args __ RPAREN __ wg:within_group_clause? {
+    // => { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG' | 'STRING_AGG'; within_group_orderby?: order_by_clause }
       return {
         type: 'aggr_func',
         name: pre ? `${pre[0]}.${name}` : name,
         args: arg,
+        within_group_orderby: wg,
+      };
+    }
+
+aggr_listagg
+  = name:'LISTAGG'i __ LPAREN __ d:KW_DISTINCT? __ c:expr __ s:concat_separator? __ RPAREN __ wg:within_group_clause? __ bc:over_partition? {
+    // => { type: 'aggr_func'; name: 'LISTAGG'; args: count_arg; within_group_orderby?: order_by_clause; over?: over_partition }
+      return {
+        type: 'aggr_func',
+        name: name.toUpperCase(),
+        args: { distinct: d, expr: c, separator: s },
+        within_group_orderby: wg,
+        over: bc,
       };
     }
 
