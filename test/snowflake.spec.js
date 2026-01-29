@@ -459,7 +459,49 @@ describe('snowflake', () => {
       title: 'listagg function',
       sql: [
         'select listagg(distinct id, ", ") as ids from foo;',
-        'SELECT listagg(DISTINCT "id", ", ") AS "ids" FROM foo'
+        'SELECT LISTAGG(DISTINCT "id", ", ") AS "ids" FROM foo'
+      ]
+    },
+    {
+      title: 'ARRAY_AGG with WITHIN GROUP',
+      sql: [
+        'SELECT ARRAY_AGG(O_ORDERKEY) WITHIN GROUP (ORDER BY O_ORDERKEY ASC) FROM orders',
+        'SELECT ARRAY_AGG("O_ORDERKEY") WITHIN GROUP (ORDER BY "O_ORDERKEY" ASC) FROM orders'
+      ]
+    },
+    {
+      title: 'ARRAY_AGG with DISTINCT and WITHIN GROUP',
+      sql: [
+        'SELECT ARRAY_AGG(DISTINCT O_ORDERSTATUS) WITHIN GROUP (ORDER BY O_ORDERSTATUS ASC) FROM orders',
+        'SELECT ARRAY_AGG(DISTINCT "O_ORDERSTATUS") WITHIN GROUP (ORDER BY "O_ORDERSTATUS" ASC) FROM orders'
+      ]
+    },
+    {
+      title: 'STRING_AGG with WITHIN GROUP',
+      sql: [
+        "SELECT STRING_AGG(name, ', ') WITHIN GROUP (ORDER BY name ASC) FROM users",
+        `SELECT STRING_AGG("name", ', ') WITHIN GROUP (ORDER BY "name" ASC) FROM users`
+      ]
+    },
+    {
+      title: 'STRING_AGG with DISTINCT and WITHIN GROUP',
+      sql: [
+        'SELECT STRING_AGG(DISTINCT category) WITHIN GROUP (ORDER BY category DESC) FROM products',
+        'SELECT STRING_AGG(DISTINCT "category") WITHIN GROUP (ORDER BY "category" DESC) FROM products'
+      ]
+    },
+    {
+      title: 'LISTAGG with WITHIN GROUP',
+      sql: [
+        "SELECT LISTAGG(o_clerk, ', ') WITHIN GROUP (ORDER BY o_totalprice DESC) FROM orders",
+        `SELECT LISTAGG("o_clerk", ', ') WITHIN GROUP (ORDER BY "o_totalprice" DESC) FROM orders`
+      ]
+    },
+    {
+      title: 'LISTAGG with DISTINCT and WITHIN GROUP',
+      sql: [
+        'SELECT LISTAGG(DISTINCT o_clerk) WITHIN GROUP (ORDER BY o_clerk ASC) FROM orders',
+        'SELECT LISTAGG(DISTINCT "o_clerk") WITHIN GROUP (ORDER BY "o_clerk" ASC) FROM orders'
       ]
     },
     {
