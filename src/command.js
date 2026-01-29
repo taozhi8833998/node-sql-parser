@@ -160,6 +160,29 @@ function declareToSQL(stmt) {
   return result.join(' ')
 }
 
+function doToSQL(stmt) {
+  const { type, language, body } = stmt
+  const result = [toUpper(type)]
+
+  // Build body: symbol + DECLARE? + BEGIN? + statements + END? + symbol
+  const bodyParts = [
+    body.symbol,
+    body.declare && declareToSQL(body.declare),
+    toUpper(body.begin),
+    multipleToSQL(body.expr),
+    toUpper(body.end),
+    body.symbol,
+  ]
+  result.push(bodyParts.filter(hasVal).join(' '))
+
+  // Language clause (normalized to after body)
+  if (language) {
+    result.push(toUpper(language.prefix), language.value)
+  }
+
+  return result.filter(hasVal).join(' ')
+}
+
 function ifToSQL(stmt) {
   const {
     boolean_expr: boolExpr,
@@ -227,6 +250,7 @@ export {
   deallocateToSQL,
   declareToSQL,
   descToSQL,
+  doToSQL,
   executeToSQL,
   forLoopToSQL,
   grantAndRevokeToSQL,

@@ -119,6 +119,7 @@ start
 cmd_stmt
   = drop_stmt
   / create_stmt
+  / do_stmt
   / declare_stmt
   / truncate_stmt
   / rename_stmt
@@ -495,6 +496,46 @@ declare_stmt
         declare: vars,
         symbol: ';',
       }
+    }
+  }
+
+do_stmt
+  = 'DO'i __ lang:do_language_clause? __ body:do_body __ lang2:do_language_clause? __ SEMICOLON? {
+    /*
+      export type do_stmt_t = {
+        type: 'do';
+        language?: { type: 'default'; value: string; prefix: string; };
+        body: { type: 'as'; declare?: any; begin?: string; expr: any[]; end?: string; symbol: string; };
+      }
+      => AstStatement<do_stmt_t>
+    */
+    return {
+      tableList: Array.from(tableList),
+      columnList: columnListTableAlias(columnList),
+      ast: {
+        type: 'do',
+        language: lang || lang2,
+        body: body,
+      }
+    }
+  }
+
+do_language_clause
+  = 'LANGUAGE'i __ ln:ident_name __ {
+    // => { prefix: string; type: 'default'; value: string; }
+    return { prefix: 'LANGUAGE', type: 'default', value: ln }
+  }
+
+do_body
+  = c:[^ \s\t\n\r]+ __ de:declare_stmt? __ b:('BEGIN'i)? __ s:multiple_stmt __ e:KW_END? &{ return (b && e) || (!b && !e) } __ SEMICOLON? __ l:[^ \s\t\n\r;]+ &{ return c.join('') === l.join('') } {
+    // => { type: 'as'; declare?: any; begin?: string; expr: any[]; end?: string; symbol: string; }
+    return {
+      type: 'as',
+      declare: de && de.ast,
+      begin: b,
+      expr: Array.isArray(s.ast) ? s.ast.flat() : [s.ast],
+      end: e && e[0],
+      symbol: c.join(''),
     }
   }
 
