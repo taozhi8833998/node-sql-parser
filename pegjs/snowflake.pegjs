@@ -4485,7 +4485,10 @@ KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
 KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
 KW_TIMESTAMP_TZ = "TIMESTAMP_TZ"i !ident_start { return 'TIMESTAMP_TZ'; }
 KW_TIMESTAMP_NTZ = "TIMESTAMP_NTZ"i !ident_start { return 'TIMESTAMP_NTZ'; }
+KW_TIMESTAMP_LTZ = "TIMESTAMP_LTZ"i !ident_start { return 'TIMESTAMP_LTZ'; }
 KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
+KW_VARIANT  = "VARIANT"i !ident_start { return 'VARIANT'; }
+KW_OBJECT   = "OBJECT"i !ident_start { return 'OBJECT'; }
 KW_USER     = "USER"i     !ident_start { return 'USER'; }
 KW_UUID     = "UUID"i     !ident_start { return 'UUID'; }
 KW_OID      = "OID"i     !ident_start { return 'OID'; }
@@ -4833,6 +4836,7 @@ mem_chain
 
 data_type
   = array_type
+  / snowflake_array_type
   / character_string_type
   / numeric_type
   / datetime_type
@@ -4846,6 +4850,8 @@ data_type
   / binary_type
   / geography_type
   / oid_type
+  / variant_type
+  / object_type
 
 
 array_type
@@ -4909,8 +4915,8 @@ time_type
   / t:(KW_TIME / KW_TIMESTAMP) __ tz:timezone? { /* =>  data_type */  return { dataType: t, suffix: tz }; }
 
 datetime_type
-  = t:(KW_DATE / KW_DATETIME / KW_TIMESTAMP_TZ / KW_TIMESTAMP_NTZ) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
-  / t:(KW_DATE / KW_DATETIME / KW_TIMESTAMP_TZ / KW_TIMESTAMP_NTZ) { /* =>  data_type */  return { dataType: t }; }
+  = t:(KW_DATE / KW_DATETIME / KW_TIMESTAMP_LTZ / KW_TIMESTAMP_TZ / KW_TIMESTAMP_NTZ) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
+  / t:(KW_DATE / KW_DATETIME / KW_TIMESTAMP_LTZ / KW_TIMESTAMP_TZ / KW_TIMESTAMP_NTZ) { /* =>  data_type */  return { dataType: t }; }
   / time_type
 
 enum_type
@@ -4941,3 +4947,23 @@ text_type
 
 uuid_type
   = t:KW_UUID {/* =>  data_type */  return { dataType: t }}
+
+variant_type
+  = t:KW_VARIANT {/* =>  data_type */  return { dataType: t }}
+
+object_type
+  = t:KW_OBJECT {/* =>  data_type */  return { dataType: t }}
+
+snowflake_array_type
+  = t:KW_ARRAY __ LPAREN __ d:data_type __ RPAREN {
+    /* =>  data_type */
+    return {
+      dataType: t,
+      definition: [{ field_type: d }],
+      parentheses: true
+    }
+  }
+  / t:KW_ARRAY {
+    /* =>  data_type */
+    return { dataType: t }
+  }
