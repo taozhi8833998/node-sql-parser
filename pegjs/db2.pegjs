@@ -121,6 +121,7 @@ cmd_stmt
   / set_stmt
   / lock_stmt
   / unlock_stmt
+  / declare_stmt
 
 create_stmt
   = create_table_stmt
@@ -378,6 +379,83 @@ use_stmt
           db: d
         }
       };
+    }
+
+// DB2 DECLARE GLOBAL TEMPORARY TABLE statement
+declare_stmt
+  = KW_DECLARE __ KW_GLOBAL __ KW_TEMPORARY __ KW_TABLE __ t:table_name __
+    KW_AS __ LPAREN __ s:union_stmt __ RPAREN __
+    opts:declare_global_temp_table_opts? {
+      if (t) tableList.add(`declare::${t.db}::${t.table}`);
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'declare',
+          declare: [{
+            keyword: 'global temporary table',
+            name: t,
+            as: 'as',
+            prefix: 'global temporary table',
+            definition: s.ast,
+            definition_type: 'subquery',
+            ...(opts || {})
+          }]
+        }
+      }
+    }
+  / KW_DECLARE __ KW_GLOBAL __ KW_TEMPORARY __ KW_TABLE __ t:table_name __
+    c:create_table_definition __
+    opts:declare_global_temp_table_opts? {
+      if (t) tableList.add(`declare::${t.db}::${t.table}`);
+      return {
+        tableList: Array.from(tableList),
+        columnList: columnListTableAlias(columnList),
+        ast: {
+          type: 'declare',
+          declare: [{
+            keyword: 'global temporary table',
+            name: t,
+            prefix: 'global temporary table',
+            definition: c,
+            definition_type: 'columns',
+            ...(opts || {})
+          }]
+        }
+      }
+    }
+
+declare_global_temp_table_opts
+  = head:declare_global_temp_table_opt tail:(__ declare_global_temp_table_opt)* {
+      let result = head
+      for (let i = 0; i < tail.length; i++) {
+        result = { ...result, ...tail[i][1] }
+      }
+      return result
+    }
+
+declare_global_temp_table_opt
+  = KW_WITH __ kw:('DATA'i / 'NO'i __ 'DATA'i) {
+      const value = Array.isArray(kw) ? kw.filter(k => k && k.trim()).join(' ') : kw
+      return { with_data: value.toLowerCase() }
+    }
+  / KW_WITH __ 'REPLACE'i {
+      return { with_replace: 'replace' }
+    }
+  / 'DEFINITION'i __ 'ONLY'i {
+      return { definition_only: 'definition only' }
+    }
+  / KW_ON __ 'COMMIT'i __ action:('PRESERVE'i / 'DELETE'i) __ 'ROWS'i {
+      return { on_commit: `${action.toLowerCase()} rows` }
+    }
+  / KW_ON __ 'ROLLBACK'i __ action:('PRESERVE'i / 'DELETE'i) __ 'ROWS'i {
+      return { on_rollback: `${action.toLowerCase()} rows` }
+    }
+  / KW_NOT __ 'LOGGED'i {
+      return { not_logged: 'not logged' }
+    }
+  / KW_IN __ ts:ident_name {
+      return { in_tablespace: ts }
     }
 
 alter_table_stmt
