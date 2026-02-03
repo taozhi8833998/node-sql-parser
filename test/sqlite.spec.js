@@ -300,4 +300,46 @@ describe('sqlite', () => {
         expect(getParsedSql(sql)).to.be.equal(sql)
       });
   });
+
+  it('should support cross join with table aliases', () => {
+    const sql = 'SELECT * FROM users AS u CROSS JOIN products AS p';
+    expect(getParsedSql(sql)).to.be.equal(
+      'SELECT * FROM "users" AS "u" CROSS JOIN "products" AS "p"'
+    );
+  });
+
+  it('should support cross join with using clause', () => {
+    const sql = 'SELECT * FROM users CROSS JOIN products USING (id)';
+    expect(getParsedSql(sql)).to.be.equal(
+      'SELECT * FROM "users" CROSS JOIN "products" USING (id)'
+    );
+  });
+
+  it('should support cross join with on clause', () => {
+    const sql = 'SELECT * FROM t1 CROSS JOIN t2 ON t1.id = t2.id';
+    expect(getParsedSql(sql)).to.be.equal(
+      'SELECT * FROM "t1" CROSS JOIN "t2" ON "t1"."id" = "t2"."id"'
+    );
+  });
+
+  it('should support multiple cross joins', () => {
+    const sql = 'SELECT * FROM t1 CROSS JOIN t2 CROSS JOIN t3';
+    expect(getParsedSql(sql)).to.be.equal(
+      'SELECT * FROM "t1" CROSS JOIN "t2" CROSS JOIN "t3"'
+    );
+  });
+
+  it('should support cross join with subquery', () => {
+    const sql = 'SELECT * FROM users CROSS JOIN (SELECT * FROM products WHERE price > 50) AS p';
+    expect(getParsedSql(sql)).to.be.equal(
+      'SELECT * FROM "users" CROSS JOIN (SELECT * FROM "products" WHERE "price" > 50) AS "p"'
+    );
+  });
+
+  it('should support cross join mixed with INNER JOIN', () => {
+    const sql = 'SELECT * FROM t1 CROSS JOIN t2 INNER JOIN t3 ON t2.id = t3.id';
+    expect(getParsedSql(sql)).to.be.equal(
+      'SELECT * FROM "t1" CROSS JOIN "t2" INNER JOIN "t3" ON "t2"."id" = "t3"."id"'
+    );
+  });
 })
