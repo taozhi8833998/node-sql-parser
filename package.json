@@ -6,6 +6,7 @@
   "types": "types.d.ts",
   "scripts": {
     "start": "webpack --config webpack.config.js",
+    "prepare": "npm run compile && webpack --config webpack.config.js --mode production",
     "build": "npm run lint && npm run compile && webpack --config webpack.config.js --mode production",
     "test": "npm run lint && mochapack --reporter-option maxDiffSize=1000000 \"test/**/*.spec.js\"",
     "lint": "eslint src",
