@@ -21,6 +21,12 @@ function unnestToSQL(unnestExpr) {
 
 function pivotOperatorToSQL(operator) {
   const { as, column, expr, in_expr, type } = operator
+  if (!in_expr) {
+    // DuckDB standalone PIVOT: PIVOT table ON col USING aggr()
+    const aggrs = Array.isArray(expr) ? expr.map(exprToSQL).join(', ') : exprToSQL(expr)
+    const sql = [toUpper(type), 'ON', columnRefToSQL(column), 'USING', aggrs]
+    return sql.filter(hasVal).join(' ')
+  }
   const result = [
     exprToSQL(expr),
     'FOR',

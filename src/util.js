@@ -162,6 +162,7 @@ function identifierToSql(ident, isDual, surround) {
     case 'mariadb':
       return `\`${ident}\``
     case 'athena':
+    case 'duckdb':
     case 'postgresql':
     case 'redshift':
     case 'snowflake':

@@ -30,14 +30,41 @@ import { loadDataToSQL } from './load'
 import { procToSQL } from './proc'
 import { transactionToSQL } from './transaction'
 import { showToSQL } from './show'
-import { hasVal, toUpper } from './util'
+import { tablesToSQL } from './tables'
+import { hasVal, literalToSQL, toUpper } from './util'
+
+function summarizeToSQL(stmt) {
+  const { keyword, table, expr } = stmt
+  if (expr) return `${toUpper(keyword)} ${selectToSQL(expr)}`
+  return `${toUpper(keyword)} ${tablesToSQL(table)}`
+}
+
+function detachToSQL(stmt) {
+  const { keyword, expr } = stmt
+  return `${toUpper(keyword)} ${literalToSQL(expr)}`
+}
+
+function copyToSQL(stmt) {
+  const { keyword, table, to, from, options } = stmt
+  const result = [toUpper(keyword), tablesToSQL(table)]
+  if (to) result.push('TO', literalToSQL(to))
+  if (from) result.push('FROM', literalToSQL(from))
+  if (options) {
+    const optStr = options.map(opt => `${opt.key} ${typeof opt.value === 'string' ? `'${opt.value}'` : literalToSQL(opt.value)}`).join(', ')
+    result.push(`(${optStr})`)
+  }
+  return result.filter(hasVal).join(' ')
+}
 
 const typeToSQLFn = {
   alter       : alterToSQL,
   analyze     : analyzeToSQL,
   attach      : attachToSQL,
+  copy        : copyToSQL,
   create      : createToSQL,
   comment     : commentOnToSQL,
+  summarize   : summarizeToSQL,
+  detach      : detachToSQL,
   select      : selectToSQL,
   deallocate  : deallocateToSQL,
   delete      : deleteToSQL,
@@ -68,6 +95,8 @@ const typeToSQLFn = {
   raise       : raiseToSQL,
   transaction : transactionToSQL,
 }
+typeToSQLFn['insert or replace'] = insertToSQL
+typeToSQLFn['insert or ignore'] = insertToSQL
 
 function unionToSQL(stmt) {
   if (!stmt) return ''
