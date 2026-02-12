@@ -3470,6 +3470,7 @@ select_stmt
   }
   / select_stmt_nake / select_stmt_parentheses
   / from_shortcut_stmt
+  / pivot_standalone_stmt
 
 from_shortcut_stmt
   = f:from_clause __
@@ -3494,6 +3495,26 @@ from_shortcut_stmt
           orderby: o,
           limit: l,
       };
+  }
+
+pivot_standalone_stmt
+  = KW_PIVOT __ t:table_name __ 'ON'i __ c:column_ref __ 'USING'i __ head:aggr_func tail:(__ COMMA __ aggr_func)* {
+    // => select_stmt (DuckDB standalone PIVOT: PIVOT table ON col USING agg())
+    if (t) tableList.add(`select::${[t.db, t.schema].filter(Boolean).join('.') || null}::${t.table}`)
+    const aggrs = [head, ...tail.map(item => item[3])]
+    return {
+      type: 'select',
+      options: null,
+      distinct: null,
+      columns: [{ expr: { type: 'column_ref', table: null, column: '*' }, as: null }],
+      from: [{ ...t, as: null, operator: { type: 'pivot', expr: aggrs.length === 1 ? aggrs[0] : aggrs, column: c } }],
+      where: null,
+      groupby: null,
+      having: null,
+      qualify: null,
+      orderby: null,
+      limit: null,
+    };
   }
 
 with_clause
