@@ -176,7 +176,14 @@ function columnToSQL(column, isDual) {
   if (type === 'cast') return castToSQL(column)
   if (isDual) expr.isDual = isDual
   let str = exprToSQL(expr)
-  const { expr_list: exprList } = column
+  const { expr_list: exprList, exclude_list: excludeList, replace_list: replaceList } = column
+  if (type === 'exclude_replace' && excludeList && replaceList) {
+    const result = [str]
+    const exclStr = excludeList.map(col => columnToSQL(col, isDual)).join(', ')
+    const replStr = replaceList.map(col => columnToSQL(col, isDual)).join(', ')
+    result.push(`EXCLUDE(${exclStr})`, `REPLACE(${replStr})`)
+    return result.filter(hasVal).join(' ')
+  }
   if (exprList) {
     const result = [str]
     const columnsStr = exprList.map(col => columnToSQL(col, isDual)).join(', ')

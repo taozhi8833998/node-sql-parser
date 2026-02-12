@@ -117,6 +117,14 @@ function mapObjectToSQL(mapExpr) {
 
 exprToSQLConvertFn.map_object = mapObjectToSQL
 
+function structValueToSQL(expr) {
+  const { fields } = expr
+  const fieldsStr = fields.map(field => `'${field.key}': ${exprToSQL(field.value)}`).join(', ')
+  return `{${fieldsStr}}`
+}
+
+exprToSQLConvertFn.struct_value = structValueToSQL
+
 function orderOrPartitionByToSQL(expr, prefix) {
   if (!Array.isArray(expr)) return ''
   let expressions = []

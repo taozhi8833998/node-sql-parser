@@ -1,6 +1,7 @@
 import { parse as athena } from '../pegjs/athena.pegjs'
 import { parse as bigquery } from '../pegjs/bigquery.pegjs'
 import { parse as db2 } from '../pegjs/db2.pegjs'
+import { parse as duckdb } from '../pegjs/duckdb.pegjs'
 import { parse as flinksql } from '../pegjs/flinksql.pegjs'
 import { parse as hive } from '../pegjs/hive.pegjs'
 import { parse as mysql } from '../pegjs/mysql.pegjs'
@@ -17,6 +18,7 @@ export default {
   athena,
   bigquery,
   db2,
+  duckdb,
   flinksql,
   hive,
   mysql,
