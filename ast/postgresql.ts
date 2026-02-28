@@ -7,7 +7,7 @@
 
 export type start = multiple_stmt | create_function_stmt;
 
-export type cmd_stmt = drop_stmt | create_stmt | declare_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt | show_stmt | deallocate_stmt | grant_revoke_stmt | if_else_stmt | raise_stmt | execute_stmt | for_loop_stmt | transaction_stmt | comment_on_stmt;
+export type cmd_stmt = drop_stmt | create_stmt | do_stmt | declare_stmt | truncate_stmt | rename_stmt | call_stmt | use_stmt | alter_stmt | set_stmt | lock_stmt | show_stmt | deallocate_stmt | grant_revoke_stmt | if_else_stmt | raise_stmt | execute_stmt | for_loop_stmt | transaction_stmt | comment_on_stmt;
 
 export type create_stmt = create_table_stmt | create_constraint_trigger | create_extension_stmt | create_index_stmt | create_sequence | create_db_stmt | create_domain_stmt | create_type_stmt | create_view_stmt | create_aggregate_stmt;
 
@@ -110,6 +110,18 @@ export type declare_variables = declare_variable_item[];
 export type declare_stmt_t = { type: 'declare'; declare: declare_variable_item[]; }
 
 export type declare_stmt = AstStatement<declare_stmt_t>;
+
+export type do_stmt_t = {
+        type: 'do';
+        language?: { type: 'default'; value: string; prefix: string; };
+        body: { type: 'as'; declare?: any; begin?: string; expr: any[]; end?: string; symbol: string; };
+      }
+
+export type do_stmt = AstStatement<do_stmt_t>;
+
+export type do_language_clause = { prefix: string; type: 'default'; value: string; };
+
+export type do_body = { type: 'as'; declare?: any; begin?: string; expr: any[]; end?: string; symbol: string; };
 
 export type create_func_opt = literal_string | { type: 'as'; begin?: string; declare?: declare_stmt; expr: multiple_stmt; end?: string; symbol: string; } | literal_numeric | { type: "set"; parameter: ident_name; value?: { prefix: string; expr: expr }} | return_stmt;
 
@@ -981,10 +993,6 @@ export type alias_clause = alias_ident;
 
 export type into_clause = { keyword: 'var'; type: 'into'; expr: var_decl_list; } | { keyword: 'var'; type: 'into'; expr: literal_string | ident; };
 
-
-
-export type from_clause = table_ref_list;
-
 export type table_to_list = table_to_item[];
 
 export type table_to_item = table_name[];
@@ -1064,21 +1072,9 @@ export type BINARY_OPERATORS =
 
 export type or_and_expr = binary_expr;
 
-
-
-export type on_clause = or_and_where_expr;
-
-
-
-export type where_clause = or_and_where_expr;
-
 export type group_by_clause = { columns: expr_list['value']; modifiers: literal_string[]; };
 
 export type column_ref_list = column_ref[];
-
-
-
-export type having_clause = expr;
 
 export type window_clause = { keyword: 'window'; type: 'window', expr: named_window_expr_list; };
 
@@ -1105,12 +1101,6 @@ export type window_frame_value = { type: 'origin'; value: string } | literal_num
 
 
 export type partition_by_clause = { type: 'expr'; expr: column_ref_list }[];
-
-
-
-export type order_by_clause = order_by_list;
-
-export type order_by_list = order_by_element[];
 
 export type order_by_element = { expr: expr; type: 'ASC' | 'DESC' | undefined;  nulls: 'NULLS FIRST' | 'NULLS LAST' | undefined };
 
@@ -1179,16 +1169,6 @@ export type insert_no_columns_stmt = AstStatement<replace_insert_stmt_node>;
 
 
 export type replace_insert = 'insert' | 'replace';
-
-
-
-export type value_clause = { type: 'values', values: value_list };
-
-export type value_list = value_item[];
-
-export type value_item = expr_list;
-
-export type expr_list = { type: 'expr_list'; value: expr[]; parentheses?: boolean; separator?: string; };
 
 export type interval_expr = { type: 'interval', expr: expr; unit: interval_unit; };
 
@@ -1332,13 +1312,13 @@ export type alias_ident = string;
 
 export type quoted_ident_type = double_quoted_ident | single_quoted_ident | backticks_quoted_ident;
 
-export type quoted_ident = string;
+type quoted_ident = never;
 
-export type double_quoted_ident = { type: 'double_quote_string'; value: string; };
+type double_quoted_ident = never;
 
-export type single_quoted_ident = { type: 'single_quote_string'; value: string; };
+type single_quoted_ident = never;
 
-export type backticks_quoted_ident = { type: 'backticks_quote_string'; value: string; };
+type backticks_quoted_ident = never;
 
 export type ident_without_kw = ident_name | quoted_ident;
 
@@ -1357,12 +1337,6 @@ export type column = string | quoted_ident;
 export type column_name = string;
 
 export type ident_name = string;
-
-type ident_start = never;
-
-type ident_part = never;
-
-type column_part = never;
 
 export type param = { type: 'param'; value: ident_name };
 
@@ -1469,32 +1443,23 @@ export type cast_expr = {
         keyword: 'cast';
       } & cast_double_colon);
 
-export type signedness = KW_SIGNED | KW_UNSIGNED;
-
 export type literal = literal_string | literal_numeric | literal_bool | literal_null | literal_datetime | literal_array;
 
+type literal_array = never;
 
+type literal_null = never;
 
-export type literal_array = {
-        expr_list: expr_list | {type: 'origin', value: ident },
-        type: string,
-        keyword: string,
-        brackets: boolean
-      };
+type literal_not_null = never;
 
-export type literal_list = literal[];
+type literal_bool = never;
 
-export type literal_null = { type: 'null'; value: null };
+type literal_list = never;
 
-export type literal_not_null = { type: 'not null'; value: 'not null' };
+type literal_string = never;
 
-export type literal_bool = { type: 'bool', value: true } | { type: 'bool', value: false };
+type literal_double_quoted_string = never;
 
-export type literal_string = { type: 'single_quote_string'; value: string; } | literal_double_quoted_string;
-
-export type literal_double_quoted_string = { type: 'string'; value: string; };
-
-export type literal_datetime = { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string };
+type literal_datetime = never;
 
 export type single_quote_char = string;
 
@@ -1502,9 +1467,7 @@ export type single_char = string;
 
 export type escape_char = string;
 
-export type line_terminator = string;
-
-export type literal_numeric = number | { type: 'bigint'; value: string; };
+type literal_numeric = never;
 
 type integer = never;
 
@@ -1552,8 +1515,6 @@ type KW_CREATE = never;
 
 type KW_TEMPORARY = never;
 
-type KW_UNLOGGED = never;
-
 type KW_TEMP = never;
 
 type KW_DELETE = never;
@@ -1574,19 +1535,33 @@ type KW_IGNORE = never;
 
 type KW_EXPLAIN = never;
 
+type KW_DESCRIBE = never;
+
 type KW_PARTITION = never;
+
+type KW_ANALYZE = never;
+
+type KW_ATTACH = never;
+
+type KW_DECLARE = never;
 
 type KW_INTO = never;
 
 type KW_FROM = never;
 
+type KW_OVERWRITE = never;
+
 type KW_SET = never;
+
+type KW_UNLOCK = never;
 
 type KW_LOCK = never;
 
 type KW_AS = never;
 
 type KW_TABLE = never;
+
+type KW_TABLES = never;
 
 type KW_DATABASE = never;
 
@@ -1602,7 +1577,15 @@ type KW_COLLATION = never;
 
 type KW_DEALLOCATE = never;
 
+type KW_TRIGGER = never;
+
+type KW_VIEW = never;
+
+type KW_UNLOGGED = never;
+
 type KW_ON = never;
+
+type KW_OFF = never;
 
 type KW_LEFT = never;
 
@@ -1612,15 +1595,29 @@ type KW_FULL = never;
 
 type KW_INNER = never;
 
+type KW_CROSS = never;
+
 type KW_JOIN = never;
 
 type KW_OUTER = never;
 
+type KW_OVER = never;
+
+type KW_NATURAL = never;
+
+type KW_APPLY = never;
+
+type KW_STRAIGHT_JOIN = never;
+
 type KW_UNION = never;
+
+type KW_MINUS = never;
 
 type KW_INTERSECT = never;
 
 type KW_EXCEPT = never;
+
+type KW_VALUE = never;
 
 type KW_VALUES = never;
 
@@ -1630,6 +1627,8 @@ type KW_WHERE = never;
 
 type KW_WITH = never;
 
+type KW_GO = never;
+
 type KW_GROUP = never;
 
 type KW_BY = never;
@@ -1638,11 +1637,17 @@ type KW_ORDER = never;
 
 type KW_HAVING = never;
 
+type KW_QUALIFY = never;
+
 type KW_WINDOW = never;
 
 type KW_LIMIT = never;
 
 type KW_OFFSET = never;
+
+type KW_FETCH = never;
+
+type KW_TOP = never;
 
 type KW_ASC = never;
 
@@ -1662,6 +1667,12 @@ type KW_LIKE = never;
 
 type KW_ILIKE = never;
 
+type KW_RLIKE = never;
+
+type KW_REGEXP = never;
+
+type KW_SIMILAR = never;
+
 type KW_EXISTS = never;
 
 type KW_NOT = never;
@@ -1670,15 +1681,7 @@ type KW_AND = never;
 
 type KW_OR = never;
 
-type KW_ARRAY = never;
-
-type KW_ARRAY_AGG = never;
-
-type KW_STRING_AGG = never;
-
 type KW_COUNT = never;
-
-type KW_GROUP_CONCAT = never;
 
 type KW_MAX = never;
 
@@ -1688,9 +1691,27 @@ type KW_SUM = never;
 
 type KW_AVG = never;
 
-type KW_EXTRACT = never;
+type KW_GROUP_CONCAT = never;
+
+type KW_STRING_AGG = never;
+
+type KW_LISTAGG = never;
+
+type KW_COLLECT = never;
+
+type KW_RANK = never;
+
+type KW_DENSE_RANK = never;
+
+type KW_ROW_NUMBER = never;
 
 type KW_CALL = never;
+
+type KW_EXTRACT = never;
+
+type KW_ARRAY = never;
+
+type KW_ARRAY_AGG = never;
 
 type KW_CASE = never;
 
@@ -1704,6 +1725,10 @@ type KW_END = never;
 
 type KW_CAST = never;
 
+type KW_TRY_CAST = never;
+
+type KW_SAFE_CAST = never;
+
 type KW_BOOL = never;
 
 type KW_BOOLEAN = never;
@@ -1714,9 +1739,31 @@ type KW_CHARACTER = never;
 
 type KW_VARCHAR = never;
 
+type KW_NCHAR = never;
+
+type KW_NVARCHAR = never;
+
+type KW_STRING = never;
+
+type KW_TEXT = never;
+
+type KW_NTEXT = never;
+
+type KW_TINYTEXT = never;
+
+type KW_MEDIUMTEXT = never;
+
+type KW_LONGTEXT = never;
+
+type KW_BYTES = never;
+
+type KW_BYTEA = never;
+
 type KW_NUMERIC = never;
 
 type KW_DECIMAL = never;
+
+type KW_NUMBER = never;
 
 type KW_SIGNED = never;
 
@@ -1724,55 +1771,73 @@ type KW_UNSIGNED = never;
 
 type KW_INT = never;
 
-type KW_ZEROFILL = never;
+type KW_INT_64 = never;
 
 type KW_INTEGER = never;
 
-type KW_JSON = never;
-
-type KW_JSONB = never;
-
-type KW_GEOMETRY = never;
-
 type KW_SMALLINT = never;
+
+type KW_MEDIUMINT = never;
+
+type KW_TINYINT = never;
+
+type KW_BYTEINT = never;
+
+type KW_BIGINT = never;
+
+type KW_FLOAT = never;
+
+type KW_FLOAT4 = never;
+
+type KW_FLOAT8 = never;
+
+type KW_FLOAT_64 = never;
+
+type KW_DOUBLE = never;
+
+type KW_REAL = never;
+
+type KW_PRECISION = never;
+
+type KW_ZEROFILL = never;
 
 type KW_SERIAL = never;
 
 type KW_SMALLSERIAL = never;
 
-type KW_TINYINT = never;
+type KW_BIGSERIAL = never;
 
-type KW_TINYTEXT = never;
+type KW_BINARY = never;
 
-type KW_TEXT = never;
+type KW_VARBINARY = never;
 
-type KW_MEDIUMTEXT = never;
+type KW_BIT = never;
 
-type KW_LONGTEXT = never;
+type KW_JSON = never;
 
-type KW_MEDIUMINT = never;
-
-type KW_TSVECTOR = never;
-
-type KW_TSQUERY = never;
-
-type KW_BIGINT = never;
+type KW_JSONB = never;
 
 type KW_ENUM = never;
 
-type KW_FLOAT = never;
+type KW_STRUCT = never;
 
-type KW_DOUBLE = never;
+type KW_ROW = never;
 
-type KW_BIGSERIAL = never;
+type KW_ROWS = never;
 
-type KW_REAL = never;
+type KW_MAP = never;
+
+type KW_MULTISET = never;
 
 type KW_DATE = never;
 
 type KW_DATETIME = never;
 
-type KW_ROWS = never;
+type KW_DATETIME2 = never;
+
+type KW_DATETIMEOFFSET = never;
+
+type KW_SMALLDATETIME = never;
 
 type KW_TIME = never;
 
@@ -1780,11 +1845,33 @@ type KW_TIMESTAMP = never;
 
 type KW_TIMESTAMPTZ = never;
 
-type KW_TRUNCATE = never;
+type KW_TIMESTAMP_TZ = never;
 
-type KW_USER = never;
+type KW_TIMESTAMP_NTZ = never;
+
+type KW_YEAR = never;
+
+type KW_GEOMETRY = never;
+
+type KW_GEOGRAPHY = never;
+
+type KW_POINT = never;
+
+type KW_LINESTRING = never;
+
+type KW_POLYGON = never;
+
+type KW_MULTIPOINT = never;
+
+type KW_MULTILINESTRING = never;
+
+type KW_MULTIPOLYGON = never;
+
+type KW_GEOMETRYCOLLECTION = never;
 
 type KW_UUID = never;
+
+type KW_UNIQUEIDENTIFIER = never;
 
 type KW_OID = never;
 
@@ -1810,6 +1897,10 @@ type KW_REGROLE = never;
 
 type KW_REGTYPE = never;
 
+type KW_TSVECTOR = never;
+
+type KW_TSQUERY = never;
+
 type KW_CIDR = never;
 
 type KW_INET = never;
@@ -1818,27 +1909,21 @@ type KW_MACADDR = never;
 
 type KW_MACADDR8 = never;
 
-type KW_BIT = never;
-
 type KW_MONEY = never;
+
+type KW_SMALLMONEY = never;
+
+type KW_VECTOR = never;
+
+type KW_TRUNCATE = never;
+
+type KW_USER = never;
 
 type KW_CURRENT_DATE = never;
 
 type KW_ADD_DATE = never;
 
 type KW_INTERVAL = never;
-
-type KW_UNIT_YEAR = never;
-
-type KW_UNIT_MONTH = never;
-
-type KW_UNIT_DAY = never;
-
-type KW_UNIT_HOUR = never;
-
-type KW_UNIT_MINUTE = never;
-
-type KW_UNIT_SECOND = never;
 
 type KW_CURRENT_TIME = never;
 
@@ -1852,6 +1937,50 @@ type KW_SESSION_USER = never;
 
 type KW_SYSTEM_USER = never;
 
+type KW_UNIT_YEAR = never;
+
+type KW_UNIT_ISOYEAR = never;
+
+type KW_UNIT_QUARTER = never;
+
+type KW_UNIT_MONTH = never;
+
+type KW_UNIT_WEEK = never;
+
+type KW_UNIT_DAY = never;
+
+type KW_UNIT_HOUR = never;
+
+type KW_UNIT_MINUTE = never;
+
+type KW_UNIT_SECOND = never;
+
+type KW_UNIT_SECONDS = never;
+
+type KW_UNIT_MICROSECOND = never;
+
+type KW_UNIT_SECOND_MICROSECOND = never;
+
+type KW_UNIT_MINUTE_MICROSECOND = never;
+
+type KW_UNIT_MINUTE_SECOND = never;
+
+type KW_UNIT_HOUR_MICROSECOND = never;
+
+type KW_UNIT_HOUR_SECOND = never;
+
+type KW_UNIT_HOUR_MINUTE = never;
+
+type KW_UNIT_DAY_MICROSECOND = never;
+
+type KW_UNIT_DAY_SECOND = never;
+
+type KW_UNIT_DAY_MINUTE = never;
+
+type KW_UNIT_DAY_HOUR = never;
+
+type KW_UNIT_YEAR_MONTH = never;
+
 type KW_GLOBAL = never;
 
 type KW_SESSION = never;
@@ -1862,7 +1991,15 @@ type KW_PERSIST = never;
 
 type KW_PERSIST_ONLY = never;
 
-type KW_VIEW = never;
+type KW_PIVOT = never;
+
+type KW_UNPIVOT = never;
+
+type KW_ORDINAL = never;
+
+type KW_SAFE_ORDINAL = never;
+
+type KW_SAFE_OFFSET = never;
 
 type KW_VAR__PRE_AT = never;
 
@@ -1876,15 +2013,19 @@ type KW_VAR_PRE = never;
 
 type KW_ASSIGN = never;
 
+type KW_ASSIGIN_EQUAL = never;
+
 type KW_DOUBLE_COLON = never;
 
-type KW_ASSIGIN_EQUAL = never;
+type KW_SINGLE_COLON = never;
 
 type KW_DUAL = never;
 
 type KW_ADD = never;
 
 type KW_COLUMN = never;
+
+type KW_MODIFY = never;
 
 type KW_INDEX = never;
 
@@ -1898,6 +2039,10 @@ type KW_SPATIAL = never;
 
 type KW_UNIQUE = never;
 
+type KW_CLUSTERED = never;
+
+type KW_NONCLUSTERED = never;
+
 type KW_KEY_BLOCK_SIZE = never;
 
 type KW_COMMENT = never;
@@ -1907,6 +2052,32 @@ type KW_CONSTRAINT = never;
 type KW_CONCURRENTLY = never;
 
 type KW_REFERENCES = never;
+
+type KW_TUMBLE = never;
+
+type KW_TUMBLE_START = never;
+
+type KW_TUMBLE_END = never;
+
+type KW_TUMBLE_ROWTIME = never;
+
+type KW_TUMBLE_PROCTIME = never;
+
+type KW_HOP_START = never;
+
+type KW_HOP_END = never;
+
+type KW_HOP_ROWTIME = never;
+
+type KW_HOP_PROCTIME = never;
+
+type KW_SESSION_START = never;
+
+type KW_SESSION_END = never;
+
+type KW_SESSION_ROWTIME = never;
+
+type KW_SESSION_PROCTIME = never;
 
 export type OPT_SQL_CALC_FOUND_ROWS = "SQL_CALC_FOUND_ROWS";
 
@@ -1934,21 +2105,53 @@ export type LBRAKE = "[";
 
 export type RBRAKE = "]";
 
+export type LANGLE_BRACKET = "<";
+
+export type RANGLE_BRACKET = ">";
+
 export type SEMICOLON = ";";
 
 export type SINGLE_ARROW = "->";
 
 export type DOUBLE_ARROW = "->>";
 
-export type WELL_ARROW = "#>";
-
-export type DOUBLE_WELL_ARROW = "#>>";
-
 export type OPERATOR_CONCATENATION = "||";
 
 export type OPERATOR_AND = "&&";
 
+type from_clause = never;
+
+type on_clause = never;
+
+type where_clause = never;
+
+type having_clause = never;
+
+type order_by_clause = never;
+
+type order_by_list = never;
+
+type value_clause = never;
+
+type value_list = never;
+
+type value_item = never;
+
+type expr_list = never;
+
 export type LOGIC_OPERATOR = OPERATOR_CONCATENATION | OPERATOR_AND;
+
+export type WELL_ARROW = "#>";
+
+export type DOUBLE_WELL_ARROW = "#>>";
+
+type ident_start = never;
+
+type ident_part = never;
+
+type column_part = never;
+
+export type line_terminator = string;
 
 export type __ = (whitespace | comment)[];
 
@@ -1962,11 +2165,9 @@ type line_comment = never;
 
 type pound_sign_comment = never;
 
-export type keyword_comment = { type: 'comment'; keyword: 'comment'; symbol: '='; value: literal_string; };
+type keyword_comment = never;
 
 type char = never;
-
-export type interval_unit = KW_UNIT_YEAR | KW_UNIT_MONTH | KW_UNIT_DAY | KW_UNIT_HOUR | KW_UNIT_MINUTE | KW_UNIT_SECOND;
 
 type whitespace = never;
 
@@ -1974,13 +2175,15 @@ type EOL = never;
 
 type EOF = never;
 
+export type interval_unit = KW_UNIT_YEAR | KW_UNIT_MONTH | KW_UNIT_DAY | KW_UNIT_HOUR | KW_UNIT_MINUTE | KW_UNIT_SECOND;
+
 export type proc_stmts = (proc_stmt)[];
 
 export interface proc_stmt_t { type: 'proc'; stmt: assign_stmt | return_stmt; vars: any }
 
 export type proc_stmt = AstStatement<proc_stmt_t>;
 
-export type assign_stmt_list = assign_stmt[];
+type assign_stmt_list = never;
 
 export type assign_stmt_timezone = { type: 'assign';  left: expr_list; symbol: 'to'; right: interval_unit; } | { type: 'assign'; left: literal_string; symbol?: 'to'; right: literal; };
 
@@ -2031,27 +2234,43 @@ export type data_type = {
 
 export type array_type = data_type;
 
-
-
-export type boolean_type = data_type;
+export type geometry_type_args = { length: string, scale?: number | null };
 
 
 
-export type binary_type = data_type;
-
-export type character_varying = string;
-
-export type character_string_type = data_type;
-
-export type numeric_type_suffix = any[];;
+export type geometry_type = data_type;
 
 
 
 
 
+export type text_type = data_type;
 
+export type signedness = KW_SIGNED | KW_UNSIGNED;
 
-export type numeric_type = data_type;
+type data_type_size = never;
+
+type boolean_type = never;
+
+type blob_type = never;
+
+type binary_type = never;
+
+type character_varying = never;
+
+type character_string_type = never;
+
+export type timezone = string[];;
+
+type time_type = never;
+
+type datetime_type = never;
+
+type numeric_type_suffix = never;
+
+type KW_DOUBLE_PRECISION = never;
+
+type numeric_type = never;
 
 
 
@@ -2061,54 +2280,26 @@ export type money_type = data_type;
 
 export type oid_type = data_type;
 
-export type timezone = string[];;
+type enum_type = never;
 
+type json_type = never;
 
+type serial_type = never;
 
-export type time_type = data_type;
+type interval_type = never;
 
+type uuid_type = never;
 
-
-export type datetime_type = data_type | time_type;
-
-
-
-export type enum_type = data_type;
-
-
-
-export type json_type = data_type;
-
-export type geometry_type_args = { length: string, scale?: number | null };
-
-
-
-export type geometry_type = data_type;
-
-
-
-export type serial_interval_type = data_type;
-
-
-
-
-
-export type text_type = data_type;
-
-
-
-export type uuid_type = data_type;
-
-
-
-export type record_type = data_type;
+type record_type = never;
 
 
 
 export type network_address_type = data_type;
 
+type byte_type = never;
+
 
 
 export type bit_type = data_type;
 
-export type custom_types = data_type;
+type custom_types = never;

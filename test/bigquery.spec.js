@@ -25,7 +25,7 @@ describe('BigQuery', () => {
       title: 'select *',
       sql: [
         'SELECT * FROM (SELECT "apple" AS fruit, "carrot" AS vegetable);',
-        "SELECT * FROM (SELECT 'apple' AS fruit, 'carrot' AS vegetable)"
+        'SELECT * FROM (SELECT "apple" AS fruit, "carrot" AS vegetable)'
       ]
     },
     {
@@ -44,7 +44,7 @@ describe('BigQuery', () => {
           "bread" AS grain)
         SELECT g.*
         FROM groceries AS g;`,
-        "WITH groceries AS (SELECT 'milk' AS dairy, 'eggs' AS protein, 'bread' AS grain) SELECT g.* FROM groceries AS g"
+        'WITH groceries AS (SELECT "milk" AS dairy, "eggs" AS protein, "bread" AS grain) SELECT g.* FROM groceries AS g'
       ]
     },
     {
@@ -73,7 +73,7 @@ describe('BigQuery', () => {
         SELECT STRUCT("Phoenix" AS city, "Arizona" AS state) AS location)
       SELECT l.locations.*
       FROM locations l;`,
-        "WITH locations AS (SELECT STRUCT('Seattle' AS city, 'Washington' AS state) AS location UNION ALL SELECT STRUCT('Phoenix' AS city, 'Arizona' AS state) AS location) SELECT l.locations.* FROM locations AS l"
+        'WITH locations AS (SELECT STRUCT("Seattle" AS city, "Washington" AS state) AS location UNION ALL SELECT STRUCT("Phoenix" AS city, "Arizona" AS state) AS location) SELECT l.locations.* FROM locations AS l'
       ]
     },
     {
@@ -84,7 +84,7 @@ describe('BigQuery', () => {
           ("Phoenix", "Arizona")] AS location)
       SELECT l.*
       FROM locations l;`,
-        "WITH locations AS (SELECT ARRAY<STRUCT<city STRING, state STRING>>[('Seattle', 'Washington'), ('Phoenix', 'Arizona')] AS location) SELECT l.* FROM locations AS l"
+        'WITH locations AS (SELECT ARRAY<STRUCT<city STRING, state STRING>>[("Seattle", "Washington"), ("Phoenix", "Arizona")] AS location) SELECT l.* FROM locations AS l'
       ]
     },
     {
@@ -96,7 +96,7 @@ describe('BigQuery', () => {
         200 as quantity)
       SELECT * EXCEPT (order_id), orders.* EXCEPT(order_time)
       FROM orders;`,
-        "WITH orders AS (SELECT 5 AS order_id, 'sprocket' AS item_name, 200 AS quantity) SELECT * EXCEPT(order_id), orders.* EXCEPT(order_time) FROM orders"
+        'WITH orders AS (SELECT 5 AS order_id, "sprocket" AS item_name, 200 AS quantity) SELECT * EXCEPT(order_id), orders.* EXCEPT(order_time) FROM orders'
       ]
     },
     {
@@ -108,7 +108,7 @@ describe('BigQuery', () => {
         200 as quantity)
       SELECT * REPLACE ("widget" AS item_name)
       FROM orders;`,
-        "WITH orders AS (SELECT 5 AS order_id, 'sprocket' AS item_name, 200 AS quantity) SELECT * REPLACE('widget' AS item_name) FROM orders"
+        'WITH orders AS (SELECT 5 AS order_id, "sprocket" AS item_name, 200 AS quantity) SELECT * REPLACE("widget" AS item_name) FROM orders'
       ]
     },
     {
@@ -120,7 +120,7 @@ describe('BigQuery', () => {
         200 as quantity)
       SELECT * REPLACE (quantity/2 AS quantity)
       FROM orders;`,
-        "WITH orders AS (SELECT 5 AS order_id, 'sprocket' AS item_name, 200 AS quantity) SELECT * REPLACE(quantity / 2 AS quantity) FROM orders"
+        'WITH orders AS (SELECT 5 AS order_id, "sprocket" AS item_name, 200 AS quantity) SELECT * REPLACE(quantity / 2 AS quantity) FROM orders'
       ]
     },
     {
@@ -359,7 +359,7 @@ describe('BigQuery', () => {
           ("Phoenix", "Arizona")] AS location)
       SELECT l.LOCATION[offset(0)].*
       FROM locations l;`,
-        "WITH locations AS (SELECT ARRAY<STRUCT<city STRING, state STRING>>[('Seattle', 'Washington'), ('Phoenix', 'Arizona')] AS location) SELECT l.LOCATION[OFFSET(0)].* FROM locations AS l"
+        'WITH locations AS (SELECT ARRAY<STRUCT<city STRING, state STRING>>[("Seattle", "Washington"), ("Phoenix", "Arizona")] AS location) SELECT l.LOCATION[OFFSET(0)].* FROM locations AS l'
       ]
     },
     {
@@ -418,7 +418,7 @@ describe('BigQuery', () => {
         `SELECT
         DATETIME(2008, 12, 25, 05, 30, 00) as datetime_ymdhms,
         DATETIME(TIMESTAMP "2008-12-25 05:30:00+00", "America/Los_Angeles") as datetime_tstz;`,
-        "SELECT DATETIME(2008, 12, 25, 5, 30, 0) AS datetime_ymdhms, DATETIME(TIMESTAMP '2008-12-25 05:30:00+00', 'America/Los_Angeles') AS datetime_tstz"
+        `SELECT DATETIME(2008, 12, 25, 5, 30, 0) AS datetime_ymdhms, DATETIME(TIMESTAMP '2008-12-25 05:30:00+00', "America/Los_Angeles") AS datetime_tstz`
       ]
     },
     {
