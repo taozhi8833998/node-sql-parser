@@ -1,0 +1,19 @@
+{
+  "dialects": [
+    "athena",
+    "bigquery", 
+    "db2",
+    "flinksql",
+    "hive",
+    "mariadb",
+    "mysql",
+    "noql", 
+    "postgresql",
+    "redshift",
+    "snowflake",
+    "sqlite",
+    "transactsql",
+    "trino"
+  ],
+  "outputs": ["build", "dist"]
+}

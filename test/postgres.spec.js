@@ -1269,6 +1269,48 @@ describe('Postgres', () => {
       ]
     },
     {
+      title: 'do statement basic',
+      sql: [
+        `DO $$ BEGIN SELECT 1; END $$;`,
+        'DO $$ BEGIN SELECT 1 END $$'
+      ]
+    },
+    {
+      title: 'do statement with declare',
+      sql: [
+        `DO $$ DECLARE test INTEGER; BEGIN SELECT 1 INTO test; END $$;`,
+        'DO $$ DECLARE test INTEGER BEGIN SELECT 1 INTO "test" END $$'
+      ]
+    },
+    {
+      title: 'do statement with language after body',
+      sql: [
+        `DO $$ BEGIN SELECT 1; END $$ LANGUAGE plpgsql;`,
+        'DO $$ BEGIN SELECT 1 END $$ LANGUAGE plpgsql'
+      ]
+    },
+    {
+      title: 'do statement with language before body',
+      sql: [
+        `DO LANGUAGE plpgsql $$ BEGIN SELECT 1; END $$;`,
+        'DO $$ BEGIN SELECT 1 END $$ LANGUAGE plpgsql'
+      ]
+    },
+    {
+      title: 'do statement with custom dollar tag',
+      sql: [
+        `DO $tag$ BEGIN SELECT 1; END $tag$;`,
+        'DO $tag$ BEGIN SELECT 1 END $tag$'
+      ]
+    },
+    {
+      title: 'do statement without begin/end',
+      sql: [
+        `DO $$ SELECT 1 $$;`,
+        'DO $$ SELECT 1 $$'
+      ]
+    },
+    {
       title: 'create aggregate',
       sql: [
         `CREATE AGGREGATE public.group_concat(text order by integer, id integer) (
