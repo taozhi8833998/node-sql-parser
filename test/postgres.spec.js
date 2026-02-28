@@ -303,6 +303,76 @@ describe('Postgres', () => {
       ]
     },
     {
+      title: 'array slice with both bounds',
+      sql: [
+        'SELECT schedule[1:2] FROM sal_emp',
+        'SELECT schedule[1:2] FROM "sal_emp"'
+      ]
+    },
+    {
+      title: 'array slice with start only',
+      sql: [
+        'SELECT schedule[2:] FROM sal_emp',
+        'SELECT schedule[2:] FROM "sal_emp"'
+      ]
+    },
+    {
+      title: 'array slice with end only',
+      sql: [
+        'SELECT schedule[:3] FROM sal_emp',
+        'SELECT schedule[:3] FROM "sal_emp"'
+      ]
+    },
+    {
+      title: 'array slice open bounds',
+      sql: [
+        'SELECT schedule[:] FROM sal_emp',
+        'SELECT schedule[:] FROM "sal_emp"'
+      ]
+    },
+    {
+      title: 'multidimensional array slice',
+      sql: [
+        'SELECT schedule[1:2][1:1] FROM sal_emp',
+        'SELECT schedule[1:2][1:1] FROM "sal_emp"'
+      ]
+    },
+    {
+      title: 'array slice mixed with single index',
+      sql: [
+        'SELECT schedule[1:2][2] FROM sal_emp',
+        'SELECT schedule[1:2][2] FROM "sal_emp"'
+      ]
+    },
+    {
+      title: 'array slice in where clause',
+      sql: [
+        "SELECT * FROM sal_emp WHERE pay_by_quarter[1:2] = '{10000,10000}'",
+        `SELECT * FROM "sal_emp" WHERE pay_by_quarter[1:2] = '{10000,10000}'`
+      ]
+    },
+    {
+      title: 'array slice with function call bounds',
+      sql: [
+        'SELECT arr[array_lower(arr, 1):array_upper(arr, 1)] FROM t',
+        'SELECT arr[array_lower(arr, 1):array_upper(arr, 1)] FROM "t"'
+      ]
+    },
+    {
+      title: 'array slice with arithmetic expression bounds',
+      sql: [
+        'SELECT arr[(1+1):5] FROM t',
+        'SELECT arr[(1 + 1):5] FROM "t"'
+      ]
+    },
+    {
+      title: 'array slice with column ref bounds',
+      sql: [
+        'SELECT arr[start_idx:end_idx] FROM t',
+        'SELECT arr[start_idx:end_idx] FROM "t"'
+      ]
+    },
+    {
       title: 'row function column',
       sql: [
         "SELECT ROW(col1, col2, 'literal', 1) from tableb",
@@ -2030,7 +2100,7 @@ describe('Postgres', () => {
   })
   describe('tables to sql', () => {
     it('should parse object tables', () => {
-      const ast = parser.astify(SQL_LIST[103].sql[0], opt)
+      const ast = parser.astify(SQL_LIST[113].sql[0], opt)
       ast[0].from[0].expr.parentheses = false
       expect(parser.sqlify(ast, opt)).to.be.equal('SELECT last_name, salary FROM "employees" INNER JOIN "salaries" ON "employees".emp_no = "salaries".emp_no')
     })

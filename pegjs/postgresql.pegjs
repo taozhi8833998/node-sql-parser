@@ -3405,9 +3405,29 @@ column_clause
     }
   / column_list_items
 
+array_index_expr
+  = LPAREN __ e:additive_expr __ RPAREN {
+    // => additive_expr & { parentheses: boolean }
+    e.parentheses = true
+    return e
+  }
+  / literal_numeric
+  / literal_string
+  / func_call
+  / column_ref
+
 array_index
-  = LBRAKE __ n:(literal_numeric / literal_string / func_call) __ RBRAKE {
-    // => { brackets: boolean, index: literal_numeric | literal_string | func_call }
+  = LBRAKE __ start:array_index_expr? __ ':' __ end:array_index_expr? __ RBRAKE {
+    // => { brackets: boolean, type: 'slice', start?: array_index_expr, end?: array_index_expr }
+    return {
+      brackets: true,
+      type: 'slice',
+      start: start || null,
+      end: end || null
+    }
+  }
+  / LBRAKE __ n:array_index_expr __ RBRAKE {
+    // => { brackets: boolean, index: array_index_expr }
     return {
       brackets: true,
       index: n
