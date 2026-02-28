@@ -15,6 +15,7 @@
     'CREATE': true,
     'CONTAINS': true,
     'COUNT': true,
+    'CROSS': true,
     'CURRENT_DATE': true,
     'CURRENT_TIME': true,
     'CURRENT_TIMESTAMP': true,
@@ -1545,6 +1546,7 @@ table_base
 
 join_op
   = KW_LEFT __ KW_OUTER? __ KW_JOIN { return 'LEFT JOIN'; }
+  / KW_CROSS __ KW_JOIN { return 'CROSS JOIN'; }
   / (KW_INNER __)? KW_JOIN { return 'INNER JOIN'; }
 
 table_name
