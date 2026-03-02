@@ -3271,9 +3271,10 @@ multiplicative_operator
   = "*" / "/" / "%" / "||"
 
 column_ref_array_index
-  = c:column_ref __ a:array_index_list? {
+  = c:column_ref __ a:array_index_list? __ j:json_visit_list? {
     // => column_ref
     if (a) c.array_index = a
+    if (j) c.suffix = j
     return c
   }
 primary
@@ -3744,7 +3745,8 @@ json_visit_list
   = head:json_visit tail:(__ json_visit)* {
     return {
       type: 'expr_list',
-      value: createList(head, tail, 1)
+      value: createList(head, tail, 1),
+      separator: ' '
     }
   }
 
