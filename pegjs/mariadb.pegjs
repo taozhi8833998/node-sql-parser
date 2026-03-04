@@ -2696,7 +2696,7 @@ interval_expr
  * | +, -                                                     | identity, negation                   |
  * | *, /                                                     | multiplication, division             |
  * | +, -                                                     | addition, subtraction, concatenation |
- * | =, <, >, <=, >=, <>, !=, IS, LIKE, BETWEEN, IN           | comparion                            |
+ * | <=>, =, <, >, <=, >=, <>, !=, IS, LIKE, BETWEEN, IN      | comparion                            |
  * | !, NOT                                                   | logical negation                     |
  * | AND                                                      | conjunction                          |
  * | OR                                                       | inclusion                            |
@@ -2810,7 +2810,7 @@ arithmetic_op_right
     }
 
 arithmetic_comparison_operator
-  = ">=" / ">" / "<=" / "<>" / "<" / "=" / "!="
+  = "<=>" / ">=" / ">" / "<=" / "<>" / "<" / "=" / "!="
 
 is_op_right
   = KW_IS __ right:additive_expr {
