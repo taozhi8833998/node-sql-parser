@@ -4259,6 +4259,7 @@ mem_chain
 
 data_type
   = array_type
+  / snowflake_array_type
   / character_string_type
   / numeric_type
   / datetime_type
@@ -4289,7 +4290,19 @@ array_type
     return { ...t, array: { keyword: 'array' } }
   }
 
-
+snowflake_array_type
+  = t:KW_ARRAY __ LPAREN __ d:data_type __ RPAREN {
+    /* =>  data_type */
+    return {
+      dataType: t,
+      definition: [{ field_type: d }],
+      parentheses: true
+    }
+  }
+  / t:KW_ARRAY {
+    /* =>  data_type */
+    return { dataType: t }
+  }
 
 text_type
   = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) LBRAKE __ RBRAKE { /* =>  data_type */ return { dataType: `${t}[]` }}
@@ -4311,3 +4324,5 @@ text_type
 @import 'common/datatype/serial.pegjs'
 @import 'common/datatype/interval.pegjs'
 @import 'common/datatype/uuid.pegjs'
+@import 'common/datatype/variant.pegjs'
+@import 'common/datatype/object.pegjs'
