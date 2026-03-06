@@ -274,6 +274,7 @@ KW_TIMESTAMP = "TIMESTAMP"i !ident_start { return 'TIMESTAMP'; }
 KW_TIMESTAMPTZ = "TIMESTAMPTZ"i !ident_start { return 'TIMESTAMPTZ'; }
 KW_TIMESTAMP_TZ = "TIMESTAMP_TZ"i !ident_start { return 'TIMESTAMP_TZ'; }
 KW_TIMESTAMP_NTZ = "TIMESTAMP_NTZ"i !ident_start { return 'TIMESTAMP_NTZ'; }
+KW_TIMESTAMP_LTZ = "TIMESTAMP_LTZ"i !ident_start { return 'TIMESTAMP_LTZ'; }
 KW_YEAR     = "YEAR"i       !ident_start { return 'YEAR'; }
 
 // ============================================================================
@@ -414,6 +415,9 @@ KW_VAR_PRE_DOLLAR = '$'
 KW_VAR_PRE_DOLLAR_DOUBLE = '$$'
 KW_VAR_PRE
   = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR_DOUBLE / KW_VAR_PRE_DOLLAR
+
+KW_VARIANT  = "VARIANT"i !ident_start { return 'VARIANT'; }
+KW_OBJECT   = "OBJECT"i !ident_start { return 'OBJECT'; }
 
 // ============================================================================
 // Operators and Symbols
