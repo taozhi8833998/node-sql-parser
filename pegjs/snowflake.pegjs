@@ -4276,6 +4276,8 @@ data_type
   / binary_type
   / geometry_type
   / oid_type
+  / variant_type
+  / object_type
 
 
 array_type

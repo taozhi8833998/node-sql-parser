@@ -127,6 +127,69 @@ describe('snowflake', () => {
       ],
     },
     {
+      title: 'cast to VARIANT type',
+      sql: [
+        `SELECT col::VARIANT AS variant_col FROM t`,
+        `SELECT "col"::VARIANT AS "variant_col" FROM t`,
+      ],
+    },
+    {
+      title: 'cast to OBJECT type',
+      sql: [
+        `SELECT col::OBJECT AS object_col FROM t`,
+        `SELECT "col"::OBJECT AS "object_col" FROM t`,
+      ],
+    },
+    {
+      title: 'cast to ARRAY type (untyped)',
+      sql: [
+        `SELECT col::ARRAY AS array_col FROM t`,
+        `SELECT "col"::ARRAY AS "array_col" FROM t`,
+      ],
+    },
+    {
+      title: 'cast to ARRAY(TYPE) type (typed)',
+      sql: [
+        `SELECT col::ARRAY(VARCHAR) AS typed_array_col FROM t`,
+        `SELECT "col"::ARRAY(VARCHAR) AS "typed_array_col" FROM t`,
+      ],
+    },
+    {
+      title: 'cast to ARRAY(NUMBER) type',
+      sql: [
+        `SELECT col::ARRAY(NUMBER) AS num_array FROM t`,
+        `SELECT "col"::ARRAY(NUMBER) AS "num_array" FROM t`,
+      ],
+    },
+    {
+      title: 'cast to TIMESTAMP_LTZ type',
+      sql: [
+        `SELECT col::TIMESTAMP_LTZ AS ts_ltz FROM t`,
+        `SELECT "col"::TIMESTAMP_LTZ AS "ts_ltz" FROM t`,
+      ],
+    },
+    {
+      title: 'CAST AS VARIANT',
+      sql: [
+        `SELECT CAST(col AS VARIANT) AS variant_col FROM t`,
+        `SELECT CAST("col" AS VARIANT) AS "variant_col" FROM t`,
+      ],
+    },
+    {
+      title: 'CAST AS ARRAY',
+      sql: [
+        `SELECT CAST(col AS ARRAY) AS array_col FROM t`,
+        `SELECT CAST("col" AS ARRAY) AS "array_col" FROM t`,
+      ],
+    },
+    {
+      title: 'CAST AS ARRAY(INTEGER)',
+      sql: [
+        `SELECT CAST(col AS ARRAY(INTEGER)) AS int_array_col FROM t`,
+        `SELECT CAST("col" AS ARRAY(INTEGER)) AS "int_array_col" FROM t`,
+      ],
+    },
+    {
       title: 'regexp operator',
       sql: [
         `SELECT v
