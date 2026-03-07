@@ -117,81 +117,11 @@
     system_user: true
   }
 
-  function getLocationObject() {
-    return options.includeLocations ? {loc: location()} : {}
-  }
+  // Import common initializer functions (with location tracking) and variables
+  @import 'common/initializer/functions-location.pegjs'
+  @import 'common/initializer/variables.pegjs'
 
-  function createUnaryExpr(op, e) {
-    return {
-      type: 'unary_expr',
-      operator: op,
-      expr: e
-    };
-  }
-
-  function createBinaryExpr(op, left, right) {
-    return {
-      type: 'binary_expr',
-      operator: op,
-      left: left,
-      right: right,
-      ...getLocationObject()
-    };
-  }
-
-  function isBigInt(numberStr) {
-    const previousMaxSafe = BigInt(Number.MAX_SAFE_INTEGER)
-    const num = BigInt(numberStr)
-    if (num < previousMaxSafe) return false
-    return true
-  }
-
-  function createList(head, tail, po = 3) {
-    const result = [head];
-    for (let i = 0; i < tail.length; i++) {
-      delete tail[i][po].tableList
-      delete tail[i][po].columnList
-      result.push(tail[i][po]);
-    }
-    return result;
-  }
-
-  function createBinaryExprChain(head, tail) {
-    let result = head;
-    for (let i = 0; i < tail.length; i++) {
-      result = createBinaryExpr(tail[i][1], result, tail[i][3]);
-    }
-    return result;
-  }
-
-  function queryTableAlias(tableName) {
-    const alias = tableAlias[tableName]
-    if (alias) return alias
-    if (tableName) return tableName
-    return null
-  }
-
-  function columnListTableAlias(columnList) {
-    const newColumnsList = new Set()
-    const symbolChar = '::'
-    for(let column of columnList.keys()) {
-      const columnInfo = column.split(symbolChar)
-      if (!columnInfo) {
-        newColumnsList.add(column)
-        break
-      }
-      if (columnInfo && columnInfo[1]) columnInfo[1] = queryTableAlias(columnInfo[1])
-      newColumnsList.add(columnInfo.join(symbolChar))
-    }
-    return Array.from(newColumnsList)
-  }
-
-  function refreshColumnList(columnList) {
-    const columns = columnListTableAlias(columnList)
-    columnList.clear()
-    columns.forEach(col => columnList.add(col))
-  }
-
+  // Trino specific helper functions
   function commonStrToLiteral(strOrLiteral) {
     return typeof strOrLiteral === 'string' ? { type: 'same', value: strOrLiteral } : strOrLiteral
   }
@@ -206,37 +136,6 @@
     }
     return true
   }
-
-  const cmpPrefixMap = {
-    '+': true,
-    '-': true,
-    '*': true,
-    '/': true,
-    '>': true,
-    '<': true,
-    '!': true,
-    '=': true,
-
-    //between
-    'B': true,
-    'b': true,
-    //for is or in
-    'I': true,
-    'i': true,
-    //for like
-    'L': true,
-    'l': true,
-    //for not
-    'N': true,
-    'n': true
-  };
-
-  // used for dependency analysis
-  let varList = [];
-
-  const tableList = new Set();
-  const columnList = new Set();
-  const tableAlias = {};
 }
 
 start
@@ -2312,9 +2211,6 @@ into_clause
     }
   }
 
-from_clause
-  = KW_FROM __ l:table_ref_list { /*=>table_ref_list*/return l; }
-
 table_to_list
   = head:table_to_item tail:(__ COMMA __ table_to_item)* {
     // => table_to_item[]
@@ -2556,12 +2452,6 @@ or_and_expr
     return result
   }
 
-on_clause
-  = KW_ON __ e:or_and_where_expr { /* => or_and_where_expr */ return e; }
-
-where_clause
-  = KW_WHERE __ e:or_and_where_expr { /* => binary_expr */ return e; }
-
 group_by_clause
   = KW_GROUP __ KW_BY __ e:expr_list {
     return {
@@ -2574,9 +2464,6 @@ column_ref_list
     // => column_ref[]
       return createList(head, tail);
     }
-
-having_clause
-  = KW_HAVING __ e:or_and_where_expr { /* => expr */ return e; }
 
 window_clause
   = KW_WINDOW __ l:named_window_expr_list {
@@ -2686,15 +2573,6 @@ window_frame_value
 
 partition_by_clause
   = KW_PARTITION __ KW_BY __ bc:column_ref_list { return bc.map(item => ({ type: 'expr', expr: item })) }
-
-order_by_clause
-  = KW_ORDER __ KW_BY __ l:order_by_list { /* => order_by_list */ return l; }
-
-order_by_list
-  = head:order_by_element tail:(__ COMMA __ order_by_element)* {
-    // => order_by_element[]
-      return createList(head, tail);
-    }
 
 order_by_element
   = e:expr __ d:(KW_DESC / KW_ASC)? __ nl:('NULLS'i __ ('FIRST'i / 'LAST'i)?)? {
@@ -2995,29 +2873,6 @@ replace_insert
   = KW_INSERT   { /* => 'insert' */ return 'insert'; }
   / KW_REPLACE  { /* => 'replace' */return 'replace'; }
 
-value_clause
-  = KW_VALUES __ l:value_list  { return { type: 'values', values: l } }
-
-value_list
-  = head:value_item tail:(__ COMMA __ value_item)* {
-    // => value_item[]
-      return createList(head, tail);
-    }
-
-value_item
-  = LPAREN __ l:expr_list  __ RPAREN {
-    // => expr_list
-      return l;
-    }
-
-expr_list
-  = head:expr tail:(__ COMMA __ expr)* {
-    // => { type: 'expr_list'; value: expr[] }
-      const el = { type: 'expr_list' };
-      el.value = createList(head, tail);
-      return el;
-    }
-
 interval_expr
   = KW_INTERVAL __
     e:expr __
@@ -3038,64 +2893,6 @@ interval_expr
         unit: '',
       }
     }
-
-case_expr
-  = KW_CASE                         __
-    condition_list:case_when_then_list  __
-    otherwise:case_else?            __
-    KW_END __ KW_CASE? {
-      /* => {
-          type: 'case';
-          expr:  null;
-          // nb: Only the last element is a case_else
-          args: (case_when_then | case_else)[];
-        } */
-      if (otherwise) condition_list.push(otherwise);
-      return {
-        type: 'case',
-        expr: null,
-        args: condition_list
-      };
-    }
-  / KW_CASE                        __
-    expr:expr                      __
-    condition_list:case_when_then_list  __
-    otherwise:case_else?            __
-    KW_END __ KW_CASE? {
-      /* => {
-          type: 'case';
-          expr: expr;
-          // nb: Only the last element is a case_else
-          args: (case_when_then | case_else)[];
-        } */
-      if (otherwise) condition_list.push(otherwise);
-      return {
-        type: 'case',
-        expr: expr,
-        args: condition_list
-      };
-    }
-
-case_when_then_list
-  = head:case_when_then __ tail:(__ case_when_then)* {
-    // => case_when_then[]
-    return createList(head, tail, 1)
-  }
-
-case_when_then
-  = KW_WHEN __ condition:or_and_where_expr __ KW_THEN __ result:expr {
-    // => { type: 'when'; cond: binary_expr; result: expr; }
-    return {
-      type: 'when',
-      cond: condition,
-      result: result
-    };
-  }
-
-case_else = KW_ELSE __ result:expr {
-    // => { type: 'else'; condition?: never; result: expr; }
-    return { type: 'else', result: result };
-  }
 
 row_value_list
   = head:column_list_item tail:(__ COMMA __ column_list_item)* {
@@ -3520,37 +3317,9 @@ alias_ident
       return name;
     }
 
-quoted_ident_type
-  = double_quoted_ident / single_quoted_ident / backticks_quoted_ident
-
-quoted_ident
-  = v:(double_quoted_ident / single_quoted_ident / backticks_quoted_ident) {
-    return v.value
-  }
-
-double_quoted_ident
-  = '"' chars:[^"]+ '"' {
-    return {
-      type: 'double_quote_string',
-      value: chars.join('')
-    }
-  }
-
-single_quoted_ident
-  = "'" chars:[^']+ "'" {
-    return {
-      type: 'single_quote_string',
-      value: chars.join('')
-    }
-  }
-
-backticks_quoted_ident
-  = "`" chars:[^`]+ "`" {
-    return {
-      type: 'backticks_quote_string',
-      value: chars.join('')
-    }
-  }
+// quoted_ident_type, quoted_ident, double_quoted_ident, single_quoted_ident, backticks_quoted_ident
+// are imported from common/identifier/quoted.pegjs
+@import 'common/identifier/quoted.pegjs'
 
 ident_without_kw_type
   = n:ident_name {
@@ -3570,12 +3339,11 @@ ident_without_kw_type_list
     return createList(head, tail)
   }
 
-column_without_kw
-  = name:column_name {
-    return name;
-  }
-  / quoted_ident
+// column_without_kw, column, column_name, ident_name, param
+// are imported from common/identifier/column.pegjs
+@import 'common/identifier/column.pegjs'
 
+// Trino-specific extensions
 column_without_kw_type
   = n:column_name {
     return { type: 'default', value: n }
@@ -3587,31 +3355,8 @@ column_type
     return { type: 'default', value: name }
   }
   / quoted_ident_type
-column
-  = name:column_name !{ return reservedMap[name.toUpperCase()] === true; } { /* => string */ return name; }
-  / quoted_ident
 
-column_name
-  =  start:ident_start parts:column_part* { /* => string */ return start + parts.join(''); }
-
-ident_name
-  =  start:ident_start parts:ident_part* {
-      // => string
-      return start + parts.join('');
-    }
-
-ident_start = [A-Za-z_\u4e00-\u9fa5\u00C0-\u017F]
-
-ident_part  = [A-Za-z0-9_$\u0080-\uffff]
-
-// to support column name like `cf1:name` in hbase
-column_part  = [A-Za-z0-9_\u4e00-\u9fa5\u00C0-\u017F]
-
-param
-  = l:(':' ident_name) {
-    // => { type: 'param'; value: ident_name }
-      return { type: 'param', value: l[1] };
-    }
+// ident_start, ident_part, column_part moved after common symbol imports
 
 on_update_current_timestamp
   = KW_ON __ KW_UPDATE __ kw:KW_CURRENT_TIMESTAMP __ LPAREN __ l:expr_list? __ RPAREN{
@@ -4109,10 +3854,6 @@ cast_expr
   }
 
 
-signedness
-  = KW_SIGNED
-  / KW_UNSIGNED
-
 literal
   = literal_string
   / literal_numeric
@@ -4121,16 +3862,9 @@ literal
   / literal_datetime
   / literal_array
 
+// Trino specific: literal_array
 literal_array
   = s:KW_ARRAY __ LBRAKE __ c:expr_list? __ RBRAKE {
-    /*
-      => {
-        expr_list: expr_list | {type: 'origin', value: ident },
-        type: string,
-        keyword: string,
-        brackets: boolean
-      }
-    */
     return {
       expr_list: c || { type: 'origin', value: '' },
       type: 'array',
@@ -4139,404 +3873,48 @@ literal_array
     }
   }
 
-literal_list
-  = head:literal tail:(__ COMMA __ literal)* {
-    // => literal[]
-      return createList(head, tail);
-    }
+// literal_list, literal_null, literal_not_null, literal_bool, literal_numeric
+// are imported from common/literal/basic.pegjs
+@import 'common/literal/basic.pegjs'
 
-literal_null
-  = KW_NULL {
-    // => { type: 'null'; value: null }
-      return { type: 'null', value: null };
-    }
+// literal_string is imported from common/literal/string-basic.pegjs
+@import 'common/literal/string-basic.pegjs'
 
-literal_not_null
-  = KW_NOT_NULL {
-    // => { type: 'not null'; value: 'not null' }
-    return {
-      type: 'not null',
-      value: 'not null',
-    }
-  }
+// literal_datetime is imported from common/literal/datetime.pegjs
+@import 'common/literal/datetime.pegjs'
 
-literal_bool
-  = KW_TRUE {
-      // => { type: 'bool', value: true }
-      return { type: 'bool', value: true };
-    }
-  / KW_FALSE {
-      //=> { type: 'bool', value: false }
-      return { type: 'bool', value: false };
-    }
+// single_quote_char, single_char, escape_char (minimal, only '' escape)
+// are imported from common/literal/string-chars-minimal.pegjs
+@import 'common/literal/string-chars-minimal.pegjs'
 
-literal_string
-  = ca:("'" single_char* "'") [\n]+ __ fs:("'" single_char* "'") {
-      // => { type: 'single_quote_string'; value: string; }
-      return {
-        type: 'single_quote_string',
-        value: `${ca[1].join('')}${fs[1].join('')}`,
-        ...getLocationObject()
-      };
-    }
-  / ca:("'" single_char* "'") {
-      // => { type: 'single_quote_string'; value: string; }
-      return {
-        type: 'single_quote_string',
-        value: ca[1].join(''),
-        ...getLocationObject()
-      };
-    }
-  / ca:("\"" single_quote_char* "\"") !DOT {
-      // => { type: 'string'; value: string; }
-      return {
-        type: 'double_quote_string',
-        value: ca[1].join('')
-      };
-    }
-
-literal_datetime
-  = type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("'" single_char* "'") {
-      // => { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string }
-      return {
-        type: type.toLowerCase(),
-        value: ca[1].join('')
-      };
-    }
-  / type:(KW_TIME / KW_DATE / KW_TIMESTAMP / KW_DATETIME) __ ca:("\"" single_quote_char* "\"") {
-    // => { type: 'TIME' | 'DATE' | 'TIMESTAMP' | 'DATETIME', value: string }
-      return {
-        type: type.toLowerCase(),
-        value: ca[1].join('')
-      };
-    }
-
-single_quote_char
-  = [^"\\\0-\x1F\x7f]
-  / escape_char
-
-single_char
-  = [^'\\]
-  / escape_char
-
-escape_char
-  = "\\'"  { return "\\'";  }
-  / '\\"'  { return '\\"';  }
-  / "\\\\" { return "\\\\"; }
-  / "\\/"  { return "\\/";  }
-  / "\\b"  { return "\b"; }
-  / "\\f"  { return "\f"; }
-  / "\\n"  { return "\n"; }
-  / "\\r"  { return "\r"; }
-  / "\\t"  { return "\t"; }
-  / "\\u" h1:hexDigit h2:hexDigit h3:hexDigit h4:hexDigit {
-      return String.fromCharCode(parseInt("0x" + h1 + h2 + h3 + h4));
-    }
-  / "\\" { return "\\"; }
-  / "''" { return "''" }
-
-line_terminator
-  = [\n\r]
-
-literal_numeric
-  = n:number {
-    // => number | { type: 'bigint'; value: string; }
-      if (n && n.type === 'bigint') return n
-      return { type: 'number', value: n };
-    }
-
-number
-  = int_:int? frac:frac exp:exp {
-    const numStr = (int_ || '') + frac + exp
-    return {
-      type: 'bigint',
-      value: numStr
-    }
-  }
-  / int_:int? frac:frac {
-    // => IGNORE
-    const numStr = (int_ || '') + frac
-    if (int_ && isBigInt(int_)) return {
-      type: 'bigint',
-      value: numStr
-    }
-    return parseFloat(numStr).toFixed(frac.length - 1);
-  }
-  / int_:int exp:exp {
-    // => IGNORE
-    const numStr = int_ + exp
-    return {
-      type: 'bigint',
-      value: numStr
-    }
-  }
-  / int_:int {
-    // => IGNORE
-    if (isBigInt(int_)) return {
-      type: 'bigint',
-      value: int_
-    }
-    return parseFloat(int_);
-  }
-
-int
-  = digits
-  / digit:digit
-  / op:("-" / "+" ) digits:digits { return op + digits; }
-  / op:("-" / "+" ) digit:digit { return op + digit; }
-
-frac
-  = "." digits:digits { return "." + digits; }
-
-exp
-  = e:e digits:digits { return e + digits; }
-
-digits
-  = digits:digit+ { return digits.join(""); }
-
-digit   = [0-9]
-
-hexDigit
-  = [0-9a-fA-F]
-
-e
-  = e:[eE] sign:[+-]? { return e + (sign !== null ? sign: ''); }
+// number (with optional int), int, frac, exp, digits, digit, hexDigit, e
+// are imported from common/literal/number-optional-int.pegjs
+@import 'common/literal/number-optional-int.pegjs'
 
 
-KW_NULL     = "NULL"i       !ident_start
-KW_DEFAULT  = "DEFAULT"i    !ident_start
-KW_NOT_NULL = "NOT NULL"i   !ident_start
-KW_TRUE     = "TRUE"i       !ident_start
-KW_TO       = "TO"i         !ident_start
-KW_FALSE    = "FALSE"i      !ident_start
+// All KW_ keywords imported from common/keyword/core.pegjs
+@import 'common/keyword/core.pegjs'
 
-KW_SHOW     = "SHOW"i       !ident_start
-KW_DROP     = "DROP"i       !ident_start { return 'DROP'; }
-KW_USE      = "USE"i        !ident_start
-KW_ALTER    = "ALTER"i      !ident_start
-KW_SELECT   = "SELECT"i     !ident_start
-KW_UPDATE   = "UPDATE"i     !ident_start
-KW_CREATE   = "CREATE"i     !ident_start
-KW_TEMPORARY = "TEMPORARY"i !ident_start
-KW_TEMP     = "TEMP"i !ident_start
-KW_DELETE   = "DELETE"i     !ident_start
-KW_INSERT   = "INSERT"i     !ident_start
-KW_RECURSIVE= "RECURSIVE"i   !ident_start { return 'RECURSIVE'; }
-KW_REPLACE  = "REPLACE"i    !ident_start
-KW_RETURNING  = "RETURNING"i    !ident_start { return 'RETURNING' }
-KW_RENAME   = "RENAME"i     !ident_start
-KW_IGNORE   = "IGNORE"i     !ident_start
-KW_EXPLAIN  = "EXPLAIN"i    !ident_start
-KW_PARTITION = "PARTITION"i !ident_start { return 'PARTITION' }
+// Import common modules
+@import 'common/symbol.pegjs'
+@import 'common/clause/core.pegjs'
+@import 'common/expression/case.pegjs'
+@import 'common/value/core.pegjs'
 
-KW_INTO     = "INTO"i       !ident_start
-KW_FROM     = "FROM"i       !ident_start
-KW_SET      = "SET"i        !ident_start { return 'SET' }
-KW_LOCK     = "LOCK"i       !ident_start
+// Trino specific: LOGIC_OPERATOR without XOR
+LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
 
-KW_AS       = "AS"i         !ident_start
-KW_TABLE    = "TABLE"i      !ident_start { return 'TABLE'; }
-KW_DATABASE = "DATABASE"i      !ident_start { return 'DATABASE'; }
-KW_SCHEMA   = "SCHEMA"i      !ident_start { return 'SCHEMA'; }
-KW_SEQUENCE   = "SEQUENCE"i      !ident_start { return 'SEQUENCE'; }
-KW_TABLESPACE  = "TABLESPACE"i      !ident_start { return 'TABLESPACE'; }
-KW_COLLATE  = "COLLATE"i    !ident_start { return 'COLLATE'; }
-KW_DEALLOCATE  = "DEALLOCATE"i    !ident_start { return 'DEALLOCATE'; }
-
-KW_ON       = "ON"i       !ident_start
-KW_LEFT     = "LEFT"i     !ident_start
-KW_RIGHT    = "RIGHT"i    !ident_start
-KW_FULL     = "FULL"i     !ident_start
-KW_INNER    = "INNER"i    !ident_start
-KW_JOIN     = "JOIN"i     !ident_start
-KW_OUTER    = "OUTER"i    !ident_start
-KW_UNION    = "UNION"i    !ident_start
-KW_VALUES   = "VALUES"i   !ident_start
-KW_USING    = "USING"i    !ident_start
-
-KW_WHERE    = "WHERE"i      !ident_start
-KW_WITH     = "WITH"i       !ident_start
-
-KW_GROUP    = "GROUP"i      !ident_start
-KW_BY       = "BY"i         !ident_start
-KW_ORDER    = "ORDER"i      !ident_start
-KW_HAVING   = "HAVING"i     !ident_start
-KW_WINDOW   = "WINDOW"i     !ident_start
-
-KW_LIMIT    = "LIMIT"i      !ident_start
-KW_OFFSET   = "OFFSET"i     !ident_start { return 'OFFSET' }
-
-KW_ASC      = "ASC"i        !ident_start { return 'ASC'; }
-KW_DESC     = "DESC"i       !ident_start { return 'DESC'; }
-KW_DESCRIBE = "DESCRIBE"i   !ident_start { return 'DESCRIBE'; }
-
-KW_ALL      = "ALL"i        !ident_start { return 'ALL'; }
-KW_DISTINCT = "DISTINCT"i   !ident_start { return 'DISTINCT';}
-
-KW_BETWEEN  = "BETWEEN"i    !ident_start { return 'BETWEEN'; }
-KW_IN       = "IN"i         !ident_start { return 'IN'; }
-KW_IS       = "IS"i         !ident_start { return 'IS'; }
-KW_LIKE     = "LIKE"i       !ident_start { return 'LIKE'; }
-KW_ILIKE    = "ILIKE"i      !ident_start { return 'ILIKE'; }
-KW_EXISTS   = "EXISTS"i     !ident_start { /* => 'EXISTS' */ return 'EXISTS'; }
-
-KW_NOT      = "NOT"i        !ident_start { return 'NOT'; }
-KW_AND      = "AND"i        !ident_start { return 'AND'; }
-KW_OR       = "OR"i         !ident_start { return 'OR'; }
-
-KW_ARRAY    = "ARRAY"i !ident_start { return 'ARRAY'; }
-KW_ARRAY_AGG = "ARRAY_AGG"i !ident_start { return 'ARRAY_AGG'; }
-KW_STRING_AGG = "STRING_AGG"i !ident_start { return 'STRING_AGG'; }
-KW_COUNT    = "COUNT"i      !ident_start { return 'COUNT'; }
-KW_GROUP_CONCAT = "GROUP_CONCAT"i  !ident_start { return 'GROUP_CONCAT'; }
-KW_MAX      = "MAX"i        !ident_start { return 'MAX'; }
-KW_MIN      = "MIN"i        !ident_start { return 'MIN'; }
-KW_SUM      = "SUM"i        !ident_start { return 'SUM'; }
-KW_AVG      = "AVG"i        !ident_start { return 'AVG'; }
-
-KW_EXTRACT  = "EXTRACT"i    !ident_start { return 'EXTRACT'; }
-KW_CALL     = "CALL"i       !ident_start { return 'CALL'; }
-
-KW_CASE     = "CASE"i       !ident_start
-KW_WHEN     = "WHEN"i       !ident_start
-KW_THEN     = "THEN"i       !ident_start
-KW_ELSE     = "ELSE"i       !ident_start
-KW_END      = "END"i        !ident_start
-
-KW_CAST     = "CAST"i       !ident_start { return 'CAST' }
-KW_TRY_CAST = "TRY_CAST"i   !ident_start { return 'TRY_CAST' }
-
-KW_BOOL     = "BOOL"i     !ident_start { return 'BOOL'; }
-KW_BOOLEAN  = "BOOLEAN"i  !ident_start { return 'BOOLEAN'; }
-KW_CHAR     = "CHAR"i     !ident_start { return 'CHAR'; }
-KW_CHARACTER = "CHARACTER"i     !ident_start { return 'CHARACTER'; }
-KW_VARCHAR  = "VARCHAR"i  !ident_start { return 'VARCHAR';}
-KW_NUMBER  = "NUMBER"i  !ident_start { return 'NUMBER'; }
-KW_DECIMAL  = "DECIMAL"i  !ident_start { return 'DECIMAL'; }
-KW_SIGNED   = "SIGNED"i   !ident_start { return 'SIGNED'; }
-KW_UNSIGNED = "UNSIGNED"i !ident_start { return 'UNSIGNED'; }
-KW_INT      = "INT"i      !ident_start { return 'INT'; }
-KW_ZEROFILL = "ZEROFILL"i !ident_start { return 'ZEROFILL'; }
-KW_INTEGER  = "INTEGER"i  !ident_start { return 'INTEGER'; }
-KW_JSON     = "JSON"i     !ident_start { return 'JSON'; }
-KW_JSONB    = "JSONB"i    !ident_start { return 'JSONB'; }
-KW_GEOMETRY = "GEOMETRY"i !ident_start { return 'GEOMETRY'; }
-KW_SMALLINT = "SMALLINT"i !ident_start { return 'SMALLINT'; }
-KW_SERIAL = "SERIAL"i !ident_start { return 'SERIAL'; }
-KW_TINYINT  = "TINYINT"i  !ident_start { return 'TINYINT'; }
-KW_TINYTEXT = "TINYTEXT"i !ident_start { return 'TINYTEXT'; }
-KW_TEXT     = "TEXT"i     !ident_start { return 'TEXT'; }
-KW_MEDIUMTEXT = "MEDIUMTEXT"i  !ident_start { return 'MEDIUMTEXT'; }
-KW_LONGTEXT  = "LONGTEXT"i  !ident_start { return 'LONGTEXT'; }
-KW_BIGINT   = "BIGINT"i   !ident_start { return 'BIGINT'; }
-KW_ENUM     = "ENUM"i   !ident_start { return 'ENUM'; }
-KW_FLOAT   = "FLOAT"i   !ident_start { return 'FLOAT'; }
-KW_DOUBLE   = "DOUBLE"i   !ident_start { return 'DOUBLE'; }
-KW_BIGSERIAL   = "BIGSERIAL"i   !ident_start { return 'BIGSERIAL'; }
-KW_REAL     = "REAL"i   !ident_start { return 'REAL'; }
-KW_DATE     = "DATE"i     !ident_start { return 'DATE'; }
-KW_DATETIME     = "DATETIME"i     !ident_start { return 'DATETIME'; }
-KW_ROW      = "ROW"i      !ident_start { return 'ROW'; }
-KW_ROWS     = "ROWS"i     !ident_start { return 'ROWS'; }
-KW_TIME     = "TIME"i     !ident_start { return 'TIME'; }
-KW_TIMESTAMP= "TIMESTAMP"i!ident_start { return 'TIMESTAMP'; }
-KW_TRUNCATE = "TRUNCATE"i !ident_start { return 'TRUNCATE'; }
-KW_USER     = "USER"i     !ident_start { return 'USER'; }
-KW_UUID     = "UUID"i     !ident_start { return 'UUID'; }
-KW_OID      = "OID"i     !ident_start { return 'OID'; }
-KW_REGCLASS = "REGCLASS"i     !ident_start { return 'REGCLASS'; }
-KW_REGCOLLATION  = "REGCOLLATION"i     !ident_start { return 'REGCOLLATION'; }
-KW_REGCONFIG     = "REGCONFIG"i     !ident_start { return 'REGCONFIG'; }
-KW_REGDICTIONARY = "REGDICTIONARY"i     !ident_start { return 'REGDICTIONARY'; }
-KW_REGNAMESPACE  = "REGNAMESPACE"i     !ident_start { return 'REGNAMESPACE'; }
-KW_REGOPER  = "REGOPER"i     !ident_start { return 'REGOPER'; }
-KW_REGOPERATOR   = "REGOPERATOR"i     !ident_start { return 'REGOPERATOR'; }
-KW_REGPROC  = "REGPROC"i     !ident_start { return 'REGPROC'; }
-KW_REGPROCEDURE  = "REGPROCEDURE"i     !ident_start { return 'REGPROCEDURE'; }
-KW_REGROLE  = "REGROLE"i     !ident_start { return 'REGROLE'; }
-KW_REGTYPE  = "REGTYPE"i     !ident_start { return 'REGTYPE'; }
-
-KW_CURRENT_DATE     = "CURRENT_DATE"i !ident_start { return 'CURRENT_DATE'; }
-KW_ADD_DATE         = "ADDDATE"i !ident_start { return 'ADDDATE'; }
-KW_INTERVAL         = "INTERVAL"i !ident_start { return 'INTERVAL'; }
-KW_UNIT_YEAR        = "YEAR"i !ident_start { return 'YEAR'; }
-KW_UNIT_MONTH       = "MONTH"i !ident_start { return 'MONTH'; }
-KW_UNIT_WEEK        = "WEEK"i !ident_start { return 'WEEK'; }
-KW_UNIT_DAY         = "DAY"i !ident_start { return 'DAY'; }
-KW_UNIT_HOUR        = "HOUR"i !ident_start { return 'HOUR'; }
-KW_UNIT_MINUTE      = "MINUTE"i !ident_start { return 'MINUTE'; }
-KW_UNIT_SECOND      = "SECOND"i !ident_start { return 'SECOND'; }
-KW_CURRENT_TIME     = "CURRENT_TIME"i !ident_start { return 'CURRENT_TIME'; }
-KW_CURRENT_TIMESTAMP= "CURRENT_TIMESTAMP"i !ident_start { return 'CURRENT_TIMESTAMP'; }
-KW_CURRENT_USER     = "CURRENT_USER"i !ident_start { return 'CURRENT_USER'; }
-KW_SESSION_USER     = "SESSION_USER"i !ident_start { return 'SESSION_USER'; }
-KW_SYSTEM_USER      = "SYSTEM_USER"i !ident_start { return 'SYSTEM_USER'; }
-
-KW_GLOBAL         = "GLOBAL"i    !ident_start { return 'GLOBAL'; }
-KW_SESSION        = "SESSION"i   !ident_start { return 'SESSION'; }
-KW_LOCAL          = "LOCAL"i     !ident_start { return 'LOCAL'; }
-KW_PERSIST        = "PERSIST"i   !ident_start { return 'PERSIST'; }
-KW_PERSIST_ONLY   = "PERSIST_ONLY"i   !ident_start { return 'PERSIST_ONLY'; }
-KW_VIEW           = "VIEW"i    !ident_start { return 'VIEW'; }
-
-KW_VAR__PRE_AT = '@'
-KW_VAR__PRE_AT_AT = '@@'
-KW_VAR_PRE_DOLLAR = '$'
-KW_VAR_PRE_DOLLAR_DOUBLE = '$$'
-KW_VAR_PRE
-  = KW_VAR__PRE_AT_AT / KW_VAR__PRE_AT / KW_VAR_PRE_DOLLAR / KW_VAR_PRE_DOLLAR
-KW_RETURN = 'return'i
-KW_ASSIGN = ':='
-KW_DOUBLE_COLON = '::'
-KW_ASSIGIN_EQUAL = '='
-
-KW_DUAL = "DUAL"i
-
-// MySQL Alter
-KW_ADD     = "ADD"i     !ident_start { return 'ADD'; }
-KW_COLUMN  = "COLUMN"i  !ident_start { return 'COLUMN'; }
-KW_INDEX   = "INDEX"i  !ident_start { return 'INDEX'; }
-KW_KEY     = "KEY"i  !ident_start { return 'KEY'; }
-KW_FULLTEXT = "FULLTEXT"i  !ident_start { return 'FULLTEXT'; }
-KW_SPATIAL  = "SPATIAL"i  !ident_start { return 'SPATIAL'; }
-KW_UNIQUE     = "UNIQUE"i  !ident_start { return 'UNIQUE'; }
-KW_KEY_BLOCK_SIZE = "KEY_BLOCK_SIZE"i !ident_start { return 'KEY_BLOCK_SIZE'; }
-KW_COMMENT     = "COMMENT"i  !ident_start { return 'COMMENT'; }
-KW_CONSTRAINT  = "CONSTRAINT"i  !ident_start { return 'CONSTRAINT'; }
-KW_CONCURRENTLY  = "CONCURRENTLY"i  !ident_start { return 'CONCURRENTLY'; }
-KW_REFERENCES  = "REFERENCES"i  !ident_start { return 'REFERENCES'; }
-
-
-
-// MySQL extensions to SQL
-OPT_SQL_CALC_FOUND_ROWS = "SQL_CALC_FOUND_ROWS"i
-OPT_SQL_CACHE           = "SQL_CACHE"i
-OPT_SQL_NO_CACHE        = "SQL_NO_CACHE"i
-OPT_SQL_SMALL_RESULT    = "SQL_SMALL_RESULT"i
-OPT_SQL_BIG_RESULT      = "SQL_BIG_RESULT"i
-OPT_SQL_BUFFER_RESULT   = "SQL_BUFFER_RESULT"i
-
-//special character
-DOT       = '.'
-COMMA     = ','
-STAR      = '*'
-LPAREN    = '('
-RPAREN    = ')'
-
-LBRAKE    = '['
-RBRAKE    = ']'
-
-SEMICOLON = ';'
-SINGLE_ARROW = '->'
-DOUBLE_ARROW = '->>'
+// Trino specific: additional arrow operators
 WELL_ARROW = '#>'
 DOUBLE_WELL_ARROW = '#>>'
 
-OPERATOR_CONCATENATION = '||'
-OPERATOR_AND = '&&'
-LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND
+// Trino specific: ident_start, ident_part, column_part, line_terminator rules
+ident_start = [A-Za-z_\u4e00-\u9fa5\u00C0-\u017F]
+ident_part  = [A-Za-z0-9_$\u0080-\uffff]
+column_part  = [A-Za-z0-9_\u4e00-\u9fa5\u00C0-\u017F]
+line_terminator = [\n\r]
 
-// separator
+// Trino specific: comment rules (has nested block comment and double slash comment)
 __
   = (whitespace / comment)*
 
@@ -4562,7 +3940,6 @@ pound_sign_comment
 
 keyword_comment
   = k:KW_COMMENT __ s:KW_ASSIGIN_EQUAL? __ c:literal_string {
-    // => { type: 'comment'; keyword: 'comment'; symbol: '='; value: literal_string; }
     return {
       type: k.toLowerCase(),
       keyword: k.toLowerCase(),
@@ -4573,15 +3950,6 @@ keyword_comment
 
 char = .
 
-interval_unit
-  = KW_UNIT_YEAR
-  / KW_UNIT_MONTH
-  / KW_UNIT_WEEK
-  / KW_UNIT_DAY
-  / KW_UNIT_HOUR
-  / KW_UNIT_MINUTE
-  / KW_UNIT_SECOND
-
 whitespace =
   [ \t\n\r]
 
@@ -4590,6 +3958,15 @@ EOL
   / [\n\r]+
 
 EOF = !.
+
+interval_unit
+  = KW_UNIT_YEAR
+  / KW_UNIT_MONTH
+  / KW_UNIT_WEEK
+  / KW_UNIT_DAY
+  / KW_UNIT_HOUR
+  / KW_UNIT_MINUTE
+  / KW_UNIT_SECOND
 
 //begin procedure extension
 proc_stmts
@@ -4601,21 +3978,8 @@ proc_stmt
       return { type: 'proc', stmt: s, vars: varList };
     }
 
-assign_stmt_list
-  = head:assign_stmt tail:(__ COMMA __ assign_stmt)* {
-    return createList(head, tail);
-  }
-
-assign_stmt
-  = va:(var_decl / without_prefix_var_decl) __ s: (KW_ASSIGN / KW_ASSIGIN_EQUAL) __ e:proc_expr {
-    // => { type: 'assign'; left: var_decl | without_prefix_var_decl; symbol: ':=' | '='; right: proc_expr; }
-    return {
-      type: 'assign',
-      left: va,
-      symbol: s,
-      right: e
-    };
-  }
+// assign_stmt_list and assign_stmt are imported from common/procedure/assign.pegjs
+@import 'common/procedure/assign.pegjs'
 
 
 return_stmt
@@ -4794,7 +4158,8 @@ data_type
   / uuid_type
   / boolean_type
   / enum_type
-  / serial_interval_type
+  / serial_type
+  / interval_type
   / binary_type
   / oid_type
 
@@ -4813,73 +4178,18 @@ array_type
     return { ...t, array: { keyword: 'array' } }
   }
 
-boolean_type
-  = t:(KW_BOOL / KW_BOOLEAN) { /* => data_type */ return { dataType: t }}
-
-binary_type
-  = 'bytea'i { /* => data_type */ return { dataType: 'BYTEA' }; }
-
-character_string_type
-  = t:(KW_CHAR / KW_VARCHAR) __ LPAREN __ l:[0-9]+ __ RPAREN {
-    // => data_type
-    return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true };
-  }
-  / t:(KW_CHAR / KW_CHARACTER) { /* =>  data_type */ return { dataType: t }; }
-  / t:KW_VARCHAR { /* =>  data_type */  return { dataType: t }; }
-
-numeric_type_suffix
-  = un: KW_UNSIGNED? __ ze: KW_ZEROFILL? {
-    // => any[];
-    const result = []
-    if (un) result.push(un)
-    if (ze) result.push(ze)
-    return result
-  }
-numeric_type
-  = t:(KW_NUMBER / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_SERIAL / KW_BIGSERIAL /  KW_REAL) __ LPAREN __ l:[0-9]+ __ r:(COMMA __ [0-9]+)? __ RPAREN __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), scale: r && parseInt(r[2].join(''), 10), parentheses: true, suffix: s }; }
-  / t:(KW_NUMBER / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_SERIAL / KW_BIGSERIAL /  KW_REAL)l:[0-9]+ __ s:numeric_type_suffix? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), suffix: s }; }
-  / t:(KW_NUMBER / KW_DECIMAL / KW_INT / KW_INTEGER / KW_SMALLINT / KW_TINYINT / KW_BIGINT / KW_FLOAT / KW_DOUBLE / KW_SERIAL / KW_BIGSERIAL /  KW_REAL) __ s:numeric_type_suffix? __{ /* =>  data_type */ return { dataType: t, suffix: s }; }
-
-oid_type
-  = t:(KW_OID / KW_REGCLASS / KW_REGCOLLATION / KW_REGCONFIG / KW_REGDICTIONARY / KW_REGNAMESPACE / KW_REGOPER / KW_REGOPERATOR / KW_REGPROC / KW_REGPROCEDURE / KW_REGROLE / KW_REGTYPE) { /* => data_type */ return { dataType: t }}
-
-timezone
-  = w:('WITHOUT'i / 'WITH'i) __ KW_TIME __ 'ZONE'i {
-    // => string[];
-    return [w.toUpperCase(), 'TIME', 'ZONE']
-  }
-
-time_type
-  = t:(KW_TIME / KW_TIMESTAMP) __ LPAREN __ l:[0-9]+ __ RPAREN __ tz:timezone? { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true, suffix: tz }; }
-  / t:(KW_TIME / KW_TIMESTAMP) __ tz:timezone? { /* =>  data_type */  return { dataType: t, suffix: tz }; }
-
-datetime_type
-  = t:(KW_DATE / KW_DATETIME) __ LPAREN __ l:[0-9]+ __ RPAREN { /* =>  data_type */ return { dataType: t, length: parseInt(l.join(''), 10), parentheses: true }; }
-  / t:(KW_DATE / KW_DATETIME) { /* =>  data_type */  return { dataType: t }; }
-  / time_type
-
-enum_type
-  = t:KW_ENUM __ e:value_item {
-    /* =>  data_type */
-    e.parentheses = true
-    return {
-      dataType: t,
-      expr: e
-    }
-  }
-
-json_type
-  = t:(KW_JSON / KW_JSONB) { /* =>  data_type */  return { dataType: t }; }
-
-geometry_type
-  = t:KW_GEOMETRY {/* =>  data_type */  return { dataType: t }; }
-
-serial_interval_type
-  = t:(KW_SERIAL / KW_INTERVAL) { /* =>  data_type */  return { dataType: t }; }
-
-text_type
-  = t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) LBRAKE __ RBRAKE { /* =>  data_type */ return { dataType: `${t}[]` }}
-  / t:(KW_TINYTEXT / KW_TEXT / KW_MEDIUMTEXT / KW_LONGTEXT) { /* =>  data_type */ return { dataType: t }}
-
-uuid_type
-  = t:KW_UUID {/* =>  data_type */  return { dataType: t }}
+@import 'common/keyword/signedness.pegjs'
+@import 'common/datatype/dialects/trino.pegjs'
+@import 'common/datatype/size.pegjs'
+@import 'common/datatype/boolean.pegjs'
+@import 'common/datatype/binary.pegjs'
+@import 'common/datatype/character.pegjs'
+@import 'common/datatype/numeric.pegjs'
+@import 'common/datatype/oid.pegjs'
+@import 'common/datatype/datetime.pegjs'
+@import 'common/datatype/enum.pegjs'
+@import 'common/datatype/json.pegjs'
+@import 'common/datatype/geometry.pegjs'
+@import 'common/datatype/serial.pegjs'
+@import 'common/datatype/interval.pegjs'
+@import 'common/datatype/uuid.pegjs'

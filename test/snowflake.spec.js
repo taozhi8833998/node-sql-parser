@@ -226,6 +226,13 @@ describe('snowflake', () => {
       ]
     },
     {
+      title: 'array index followed by object accessor',
+      sql: [
+        'SELECT column[0]:field, data[1]:nested:value FROM test_table',
+        'SELECT "column"[0] :field, "data"[1] :nested :value FROM test_table',
+      ]
+    },
+    {
       title: 'qualify expr',
       sql: [
         `SELECT i, p, o
@@ -621,6 +628,13 @@ describe('snowflake', () => {
       sql: [
         "SELECT trim(col, ' ') FROM DUAL;",
         `SELECT trim("col", ' ') FROM DUAL`
+      ]
+    },
+    {
+      title: 'trailing comma in column list',
+      sql: [
+        'SELECT col1, col2, FROM my_table',
+        'SELECT "col1", "col2" FROM my_table'
       ]
     }
   ]

@@ -14,9 +14,17 @@ export interface With {
   };
   columns?: any[];
 }
-import { LocationRange } from "pegjs";
+export interface Location {
+  line: number;
+  column: number;
+  offset: number;
+}
 
-export { LocationRange, Location } from "pegjs";
+export interface LocationRange {
+  source?: string;
+  start: Location;
+  end: Location;
+}
 
 export type WhilteListCheckMode = "table" | "column";
 export interface ParseOptions {

@@ -138,8 +138,8 @@ function declareToSQL(stmt) {
   const { type, declare, symbol } = stmt
   const result = [toUpper(type)]
   const info = declare.map(dec => {
-    const { at, name, as, constant, datatype, not_null, prefix, definition, keyword } = dec
-    const declareInfo = [[at, name].filter(hasVal).join(''), toUpper(as), toUpper(constant)]
+    const { at, name, as, constant, datatype, not_null, prefix, definition, definition_type, keyword } = dec
+    const declareInfo = [[at, typeof name === 'string' ? name : tableToSQL(name)].filter(hasVal).join(''), toUpper(as), toUpper(constant)]
     switch (keyword) {
       case 'variable':
         declareInfo.push(columnDataType(datatype), exprToSQL(dec.collate), toUpper(not_null))
@@ -151,13 +151,52 @@ function declareToSQL(stmt) {
       case 'table':
         declareInfo.push(toUpper(prefix), `(${definition.map(createDefinitionToSQL).join(', ')})`)
         break
+      case 'global temporary table':
+        declareInfo.unshift(toUpper(prefix))
+        if (definition_type === 'subquery') {
+          declareInfo.push(`(${astToSQL(definition)})`)
+        } else if (definition_type === 'columns') {
+          declareInfo.push(`(${definition.map(createDefinitionToSQL).join(', ')})`)
+        }
+        // Add DB2-specific options
+        if (dec.definition_only) declareInfo.push(toUpper(dec.definition_only))
+        if (dec.with_data) declareInfo.push('WITH', toUpper(dec.with_data))
+        if (dec.with_replace) declareInfo.push('WITH', toUpper(dec.with_replace))
+        if (dec.on_commit) declareInfo.push('ON COMMIT', toUpper(dec.on_commit))
+        if (dec.on_rollback) declareInfo.push('ON ROLLBACK', toUpper(dec.on_rollback))
+        if (dec.not_logged) declareInfo.push(toUpper(dec.not_logged))
+        if (dec.in_tablespace) declareInfo.push('IN', dec.in_tablespace)
+        break
       default:
         break
     }
     return declareInfo.filter(hasVal).join(' ')
-  }).join(`${symbol} `)
+  }).join(`${symbol || ''} `)
   result.push(info)
   return result.join(' ')
+}
+
+function doToSQL(stmt) {
+  const { type, language, body } = stmt
+  const result = [toUpper(type)]
+
+  // Build body: symbol + DECLARE? + BEGIN? + statements + END? + symbol
+  const bodyParts = [
+    body.symbol,
+    body.declare && declareToSQL(body.declare),
+    toUpper(body.begin),
+    multipleToSQL(body.expr),
+    toUpper(body.end),
+    body.symbol,
+  ]
+  result.push(bodyParts.filter(hasVal).join(' '))
+
+  // Language clause (normalized to after body)
+  if (language) {
+    result.push(toUpper(language.prefix), language.value)
+  }
+
+  return result.filter(hasVal).join(' ')
 }
 
 function ifToSQL(stmt) {
@@ -227,6 +266,7 @@ export {
   deallocateToSQL,
   declareToSQL,
   descToSQL,
+  doToSQL,
   executeToSQL,
   forLoopToSQL,
   grantAndRevokeToSQL,

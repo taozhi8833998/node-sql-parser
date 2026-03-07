@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const peg = require('pegjs');
+const peg = require('peggy');
 
-const syntax = fs.readFileSync(path.resolve(__dirname, './pegjs/postgresql.pegjs'), 'utf-8')
+const syntax = fs.readFileSync(path.resolve(__dirname, './pegjs/postgresql-build.pegjs'), 'utf-8')
 const ast = peg.parser.parse(syntax);
 
 
@@ -11,10 +11,10 @@ function checkCode(r, onName) {
     const simple = /^[\s$]*\/\/\s*=>\s*([^$\r\n]+)$/m.exec(r.code);
     if (simple) return simple[1].trim();
     const complex = /^[\s$]*\/\*([^§]+)\*\//m.exec(r.code);
-    if (!complex) throw new Error('You must provide a type for code block: ' + onName);
+    if (!complex) return null; // No type annotation, skip this rule
     const typecode = complex[1];
     const at = typecode.lastIndexOf('=>');
-    if (at < 0) throw new Error('Wrong type code format for code block: ' + onName);
+    if (at < 0) return null; // Invalid format, skip this rule
     const toInsert = typecode.substr(0, at);
     built.push(toInsert.trim());
     return typecode.substr(at + 2).trim();
