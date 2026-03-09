@@ -223,6 +223,14 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal(`CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1), [session_id] INT NOT NULL, PRIMARY KEY CLUSTERED ([id] ASC) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 90, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]`)
   })
 
+  it('should support foreign key references in create table', () => {
+    const sql = `CREATE TABLE [T] (
+      [Id] INT NOT NULL,
+      CONSTRAINT [FK_T_P] FOREIGN KEY ([Id]) REFERENCES [P] ([Id])
+    )`
+    expect(getParsedSql(sql)).to.equal('CREATE TABLE [T] ([Id] INT NOT NULL, CONSTRAINT [FK_T_P] FOREIGN KEY ([Id]) REFERENCES [P] ([Id]))')
+  })
+
   it('should support alter table', () => {
     const sql = `ALTER TABLE [Class]
     ADD CONSTRAINT [chk_quizId_or_QuizLink]
@@ -231,6 +239,25 @@ describe('transactsql', () => {
         ([quizId] IS NULL AND [QuizLink] IS NOT NULL)
     );`
     expect(getParsedSql(sql)).to.equal(`ALTER TABLE [Class] ADD CONSTRAINT [chk_quizId_or_QuizLink] CHECK (([quizId] IS NOT NULL AND [QuizLink] IS NULL) OR ([quizId] IS NULL AND [QuizLink] IS NOT NULL))`)
+  })
+
+  it('should support foreign key references in alter table', () => {
+    const sql = `ALTER TABLE [ADRABC]
+    ADD CONSTRAINT [FK_ADRABC_ADRESSEN]
+    FOREIGN KEY ([ROWADRESSEN]) REFERENCES [ADRESSEN] ([ROWADRESSEN])
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE`
+    expect(getParsedSql(sql)).to.equal('ALTER TABLE [ADRABC] ADD CONSTRAINT [FK_ADRABC_ADRESSEN] FOREIGN KEY ([ROWADRESSEN]) REFERENCES [ADRESSEN] ([ROWADRESSEN]) ON UPDATE NO ACTION ON DELETE CASCADE')
+  })
+
+  it('should reject aliases in references targets', () => {
+    const sql = 'CREATE TABLE [T] ([Id] INT, FOREIGN KEY ([Id]) REFERENCES [P] AS [Alias] ([Id]))'
+    expect(() => parser.astify(sql, tsqlOpt)).to.throw()
+  })
+
+  it('should reject table hints in references targets', () => {
+    const sql = 'CREATE TABLE [T] ([Id] INT, FOREIGN KEY ([Id]) REFERENCES [P] WITH (NOLOCK) ([Id]))'
+    expect(() => parser.astify(sql, tsqlOpt)).to.throw()
   })
 
   it('should support pviot and unpviot clause', () => {
