@@ -113,6 +113,10 @@ describe('trino', () => {
       title: "DESCRIBE statement with fully qualified name",
       sql: ['DESCRIBE my_catalog.my_schema.my_table', 'DESCRIBE "my_catalog"."my_schema"."my_table"'],
     },
+    {
+      title: "SESSION is not a keyword",
+      sql: ['SELECT s.id FROM support.data.session s', 'SELECT "s".id FROM "support"."data"."session" AS "s"']
+    }
   ];
   SQL_LIST.forEach((sqlInfo) => {
     const { title, sql } = sqlInfo;
