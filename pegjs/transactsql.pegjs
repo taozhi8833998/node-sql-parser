@@ -1344,7 +1344,8 @@ select_stmt_nake
     h:having_clause?    __
     o:order_by_clause?  __
     l:limit_clause? __
-    fx:for_expr? {
+    fx:for_expr? __
+    qh:tsql_query_hints? {
       if(f) f.forEach(info => info.table && tableList.add(`select::${[info.server, info.db, info.schema].filter(Boolean).join('.') || null}::${info.table}`));
       return {
           with: cte,
@@ -1363,7 +1364,8 @@ select_stmt_nake
           having: h,
           top,
           orderby: o,
-          limit: l
+          limit: l,
+          query_hints: qh
       };
   }
 
@@ -1381,6 +1383,35 @@ top_clause
       percent: p && p.toLowerCase()
     }
   }
+
+// T-SQL: final OPTION (query_hint [, ...]) clause, accepted at the end of
+// SELECT / UPDATE / DELETE / MERGE statements. Covers the common query
+// hints with either no argument or a single numeric argument. More complex
+// hints like `OPTIMIZE FOR (@p = value)` or `USE HINT('...')` are left out
+// of this first pass and can be added in a follow-up.
+tsql_query_hints
+  = 'OPTION'i __ LPAREN __ head:tsql_query_hint tail:(__ COMMA __ tsql_query_hint)* __ RPAREN {
+    const hints = [head];
+    for (let i = 0, l = tail.length; i < l; ++i) {
+      hints.push(tail[i][3]);
+    }
+    return hints;
+  }
+
+// Note: KEEPFIXED PLAN must be listed before KEEP PLAN, otherwise the shorter
+// keyword would greedily match the `KEEP` prefix of `KEEPFIXED`.
+tsql_query_hint
+  = 'RECOMPILE'i                                        { return { type: 'query_hint', name: 'RECOMPILE' } }
+  / 'FORCE'i __ 'ORDER'i                                { return { type: 'query_hint', name: 'FORCE ORDER' } }
+  / 'LOOP'i __ 'JOIN'i                                  { return { type: 'query_hint', name: 'LOOP JOIN' } }
+  / 'HASH'i __ 'JOIN'i                                  { return { type: 'query_hint', name: 'HASH JOIN' } }
+  / 'MERGE'i __ 'JOIN'i                                 { return { type: 'query_hint', name: 'MERGE JOIN' } }
+  / 'KEEPFIXED'i __ 'PLAN'i                             { return { type: 'query_hint', name: 'KEEPFIXED PLAN' } }
+  / 'KEEP'i __ 'PLAN'i                                  { return { type: 'query_hint', name: 'KEEP PLAN' } }
+  / 'OPTIMIZE'i __ 'FOR'i __ 'UNKNOWN'i                 { return { type: 'query_hint', name: 'OPTIMIZE FOR UNKNOWN' } }
+  / 'MAXDOP'i __ v:number                               { return { type: 'query_hint', name: 'MAXDOP', value: v } }
+  / 'MAXRECURSION'i __ v:number                         { return { type: 'query_hint', name: 'MAXRECURSION', value: v } }
+  / 'FAST'i __ v:number                                 { return { type: 'query_hint', name: 'FAST', value: v } }
 
 // MySQL extensions to standard SQL
 option_clause
@@ -1446,7 +1477,10 @@ value_alias_clause
 
 alias_clause
   = KW_AS __ i:alias_ident { return i; }
-  / KW_AS? __ i:ident { return i; }
+  // Without an explicit `AS`, `OPTION (...)` must not be parsed as an implicit
+  // table alias: it is the T-SQL final query-hint clause handled by
+  // `tsql_query_hints` in `select_stmt_nake`.
+  / KW_AS? __ !('OPTION'i __ LPAREN) i:ident { return i; }
 
 into_clause
   = KW_INTO __ f:ident {

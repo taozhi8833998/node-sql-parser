@@ -27,6 +27,50 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal('SELECT TOP 10 * FROM [myTable]')
   })
 
+  it('should support select OPTION query hints', () => {
+    // Argument-less hints
+    let sql = 'SELECT col FROM myTable OPTION (RECOMPILE)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (RECOMPILE)')
+    sql = 'SELECT col FROM myTable OPTION (FORCE ORDER)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (FORCE ORDER)')
+    sql = 'SELECT col FROM myTable OPTION (LOOP JOIN)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (LOOP JOIN)')
+    sql = 'SELECT col FROM myTable OPTION (HASH JOIN)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (HASH JOIN)')
+    sql = 'SELECT col FROM myTable OPTION (MERGE JOIN)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (MERGE JOIN)')
+    sql = 'SELECT col FROM myTable OPTION (OPTIMIZE FOR UNKNOWN)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (OPTIMIZE FOR UNKNOWN)')
+
+    // KEEPFIXED PLAN must be parsed before KEEP PLAN; verify both variants.
+    sql = 'SELECT col FROM myTable OPTION (KEEPFIXED PLAN)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (KEEPFIXED PLAN)')
+    sql = 'SELECT col FROM myTable OPTION (KEEP PLAN)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (KEEP PLAN)')
+
+    // Numeric-argument hints
+    sql = 'SELECT col FROM myTable OPTION (MAXDOP 8)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (MAXDOP 8)')
+    sql = 'SELECT col FROM myTable OPTION (MAXRECURSION 100)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (MAXRECURSION 100)')
+    sql = 'SELECT col FROM myTable OPTION (FAST 10)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (FAST 10)')
+
+    // Multiple hints in a single OPTION clause
+    sql = 'SELECT col FROM myTable OPTION (RECOMPILE, MAXDOP 4)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (RECOMPILE, MAXDOP 4)')
+    sql = 'SELECT col FROM myTable ORDER BY col OPTION (RECOMPILE, MAXDOP 8, FORCE ORDER)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] ORDER BY [col] ASC OPTION (RECOMPILE, MAXDOP 8, FORCE ORDER)')
+
+    // OPTION must appear after ORDER BY
+    sql = 'SELECT TOP 10 col FROM myTable ORDER BY col OPTION (MAXRECURSION 0)'
+    expect(getParsedSql(sql)).to.equal('SELECT TOP 10 [col] FROM [myTable] ORDER BY [col] ASC OPTION (MAXRECURSION 0)')
+
+    // Case-insensitive input is normalized to canonical upper-case form
+    sql = 'select col from myTable option (recompile, maxdop 2)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (RECOMPILE, MAXDOP 2)')
+  })
+
   it('should support select count', () => {
     let sql = 'select count(*);'
     expect(getParsedSql(sql)).to.equal('SELECT COUNT(*)')

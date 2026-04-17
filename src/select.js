@@ -54,6 +54,18 @@ function forXmlToSQL(stmt) {
   return `${result.join(' ')}(${exprToSQL(expr)})`
 }
 
+// T-SQL: render the final OPTION (query_hint [, ...]) clause.
+// Returns undefined when there are no hints, so the caller can
+// safely filter it out of the assembled SELECT string.
+function queryHintsToSQL(hints) {
+  if (!Array.isArray(hints) || hints.length === 0) return
+  const parts = hints.map(hint => {
+    const suffix = hint.value !== undefined && hint.value !== null ? ` ${hint.value}` : ''
+    return `${hint.name}${suffix}`
+  })
+  return `OPTION (${parts.join(', ')})`
+}
+
 function selectToSQL(stmt) {
   const {
     as_struct_val: asStructVal,
@@ -73,6 +85,7 @@ function selectToSQL(stmt) {
     orderby,
     parentheses_symbol: parentheses,
     qualify,
+    query_hints: queryHints,
     top,
     window: windowInfo,
     with: withInfo,
@@ -105,6 +118,7 @@ function selectToSQL(stmt) {
   clauses.push(toUpper(lockingRead))
   if (position === 'end') clauses.push(intoSQL)
   clauses.push(forXmlToSQL(forXml))
+  clauses.push(queryHintsToSQL(queryHints))
   const sql = clauses.filter(hasVal).join(' ')
   return parentheses ? `(${sql})` : sql
 }
