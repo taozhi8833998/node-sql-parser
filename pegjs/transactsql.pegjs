@@ -1370,18 +1370,22 @@ select_stmt_nake
   }
 
 top_clause
-  = KW_TOP __ LPAREN __ n:number __ RPAREN __ p:('PERCENT'i)? {
-    return {
+  = KW_TOP __ LPAREN __ n:number __ RPAREN __ p:('PERCENT'i)? __ t:with_ties_clause? {
+    const result = {
       value: n,
       percent: p && p.toLowerCase(),
       parentheses: true,
     }
+    if (t) result.with_ties = true
+    return result
   }
-  / KW_TOP __ n:number __ p:('PERCENT'i)? {
-    return {
+  / KW_TOP __ n:number __ p:('PERCENT'i)? __ t:with_ties_clause? {
+    const result = {
       value: n,
       percent: p && p.toLowerCase()
     }
+    if (t) result.with_ties = true
+    return result
   }
 
 // T-SQL: final OPTION (query_hint [, ...]) clause, accepted at the end of
@@ -1412,6 +1416,12 @@ tsql_query_hint
   / 'MAXDOP'i __ v:number                               { return { type: 'query_hint', name: 'MAXDOP', value: v } }
   / 'MAXRECURSION'i __ v:number                         { return { type: 'query_hint', name: 'MAXRECURSION', value: v } }
   / 'FAST'i __ v:number                                 { return { type: 'query_hint', name: 'FAST', value: v } }
+
+// T-SQL: optional WITH TIES modifier for TOP clause.
+// Accepted both with and without parentheses around the TOP expression,
+// e.g. `SELECT TOP (10) WITH TIES ...` and `SELECT TOP 10 WITH TIES ...`.
+with_ties_clause
+  = KW_WITH __ 'TIES'i { return true }
 
 // MySQL extensions to standard SQL
 option_clause

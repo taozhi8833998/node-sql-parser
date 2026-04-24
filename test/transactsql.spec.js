@@ -71,6 +71,15 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (RECOMPILE, MAXDOP 2)')
   })
 
+  it('should support select top n with ties', () => {
+    let sql = 'SELECT TOP 10 WITH TIES col FROM myTable ORDER BY col'
+    expect(getParsedSql(sql)).to.equal('SELECT TOP 10 WITH TIES [col] FROM [myTable] ORDER BY [col] ASC')
+    sql = 'SELECT TOP (10) WITH TIES col FROM myTable ORDER BY col'
+    expect(getParsedSql(sql)).to.equal('SELECT TOP (10) WITH TIES [col] FROM [myTable] ORDER BY [col] ASC')
+    sql = 'SELECT TOP 5 PERCENT WITH TIES col FROM myTable ORDER BY col'
+    expect(getParsedSql(sql)).to.equal('SELECT TOP 5 PERCENT WITH TIES [col] FROM [myTable] ORDER BY [col] ASC')
+  })
+
   it('should support select count', () => {
     let sql = 'select count(*);'
     expect(getParsedSql(sql)).to.equal('SELECT COUNT(*)')

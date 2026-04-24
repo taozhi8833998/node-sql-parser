@@ -121,11 +121,12 @@ function setParserOpt(opt) {
 
 function topToSQL(opt) {
   if (!opt) return
-  const { value, percent, parentheses } = opt
+  const { value, percent, parentheses, with_ties: withTies } = opt
   const val = parentheses ? `(${value})` : value
-  const prefix = `TOP ${val}`
-  if (!percent) return prefix
-  return `${prefix} ${percent.toUpperCase()}`
+  const segments = [`TOP ${val}`]
+  if (percent) segments.push(percent.toUpperCase())
+  if (withTies) segments.push('WITH TIES')
+  return segments.join(' ')
 }
 
 function columnIdentifierToSql(ident) {
