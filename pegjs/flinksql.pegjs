@@ -307,7 +307,6 @@
     'SET': true,
     'SHOW': true,
     'SIMILAR': true,
-    'SIMILAR': true,
     'SKIP': true,
     'SMALLINT': true,
     'SOME': true,
