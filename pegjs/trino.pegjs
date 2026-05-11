@@ -4178,6 +4178,12 @@ array_type
     return { ...t, array: { keyword: 'array' } }
   }
 
+interval_type
+  = KW_INTERVAL __ f:interval_unit __ KW_TO __ t:interval_unit {
+    return { dataType: 'INTERVAL ' + f.toUpperCase() + ' TO ' + t.toUpperCase() };
+  }
+  / t:KW_INTERVAL { return { dataType: t }; }
+
 @import 'common/keyword/signedness.pegjs'
 @import 'common/datatype/dialects/trino.pegjs'
 @import 'common/datatype/size.pegjs'
@@ -4191,5 +4197,4 @@ array_type
 @import 'common/datatype/json.pegjs'
 @import 'common/datatype/geometry.pegjs'
 @import 'common/datatype/serial.pegjs'
-@import 'common/datatype/interval.pegjs'
 @import 'common/datatype/uuid.pegjs'
