@@ -1,102 +1,105 @@
 {
   const reservedMap = {
     'ALTER': true,
-    'ALL': true,
-    'ADD': true,
     'AND': true,
     'AS': true,
-    'ASC': true,
+    'AUTO': true,
 
     'BETWEEN': true,
     'BY': true,
 
-    'CALL': true,
     'CASE': true,
+    'CAST': true,
+    'CONSTRAINT': true,
     'CREATE': true,
-    'CONTAINS': true,
+    'CROSS': true,
+    'CUBE': true,
+    'CURRENT_CATALOG': true,
     'CURRENT_DATE': true,
+    'CURRENT_PATH': true,
+    'CURRENT_ROLE': true,
+    'CURRENT_SCHEMA': true,
     'CURRENT_TIME': true,
     'CURRENT_TIMESTAMP': true,
     'CURRENT_USER': true,
 
+    'DEALLOCATE': true,
     'DELETE': true,
-    'DESC': true,
     'DESCRIBE': true,
     'DISTINCT': true,
     'DROP': true,
 
     'ELSE': true,
     'END': true,
+    'ESCAPE': true,
+    'EXCEPT': true,
     'EXISTS': true,
-    'EXPLAIN': true,
+    'EXTRACT': true,
 
     'FALSE': true,
+    'FOR': true,
     'FROM': true,
     'FULL': true,
 
     'GROUP': true,
+    'GROUPING': true,
 
     'HAVING': true,
 
     'IN': true,
     'INNER': true,
     'INSERT': true,
+    'INTERSECT': true,
     'INTO': true,
     'IS': true,
 
     'JOIN': true,
     'JSON': true,
-
-    // 'KEY': true,
+    'JSON_ARRAY': true,
+    'JSON_EXISTS': true,
+    'JSON_OBJECT': true,
+    'JSON_QUERY': true,
+    'JSON_TABLE': true,
+    'JSON_VALUE': true,
 
     'LEFT': true,
     'LIKE': true,
-    'LIMIT': true,
+    'LISTAGG': true,
+    'LOCALTIME': true,
+    'LOCALTIMESTAMP': true,
 
+    'NATURAL': true,
+    'NORMALIZE': true,
     'NOT': true,
     'NULL': true,
-    'NULLS': true,
 
-    'OFFSET': true,
     'ON': true,
     'OR': true,
     'ORDER': true,
     'OUTER': true,
 
+    'PREPARE': true,
+
     'RECURSIVE': true,
-    'RENAME': true,
-    // 'REPLACE': true,
     'RIGHT': true,
-    'ROW': true,
-    'ROWS': true,
+    'ROLLUP': true,
 
     'SELECT': true,
-    'SESSION_USER': true,
-    'SET': true,
-    'SHOW': true,
-    'SYSTEM_USER': true,
+    'SKIP': true,
 
     'TABLE': true,
     'THEN': true,
+    'TRIM': true,
     'TRUE': true,
-    'TRUNCATE': true,
 
     'UNION': true,
-    'UPDATE': true,
+    'UNNEST': true,
     'USING': true,
 
-    // 'VALUES': true,
+    'VALUES': true,
 
-    'WITH': true,
     'WHEN': true,
     'WHERE': true,
-    'WINDOW': true,
-
-    'GLOBAL': true,
-    'SESSION': true,
-    'LOCAL': true,
-    'PERSIST': true,
-    'PERSIST_ONLY': true,
   };
 
   const reservedFunctionName = {
