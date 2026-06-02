@@ -2438,9 +2438,29 @@ count_arg
   }
   / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause?  { return { distinct: d, expr: c, orderby: or, ...getLocationObject() }; }
 
+array_agg_arg
+  = d:KW_DISTINCT? __ LPAREN __ c:expr __ RPAREN tail:(__ (KW_AND / KW_OR) __ expr)* __ or:order_by_clause? __ lc:limit_clause? {
+    const len = tail.length
+    let result = c
+    result.parentheses = true
+    for (let i = 0; i < len; ++i) {
+      result = createBinaryExpr(tail[i][1], result, tail[i][3])
+    }
+    return {
+      distinct: d,
+      expr: result,
+      orderby: or,
+      limit: lc,
+      ...getLocationObject()
+    };
+  }
+  / d:KW_DISTINCT? __ c:or_and_expr __ or:order_by_clause? __ lc:limit_clause? {
+    return { distinct: d, expr: c, orderby: or, limit: lc, ...getLocationObject() };
+  }
+
 aggr_array_agg
-  = pre:(ident __ DOT)? __ name:(KW_ARRAY_AGG / KW_STRING_AGG) __ LPAREN __ arg:expr __ RPAREN {
-    // => { type: 'aggr_func'; args:count_arg; name: 'ARRAY_AGG' | 'STRING_AGG';  }
+  = pre:(ident __ DOT)? __ name:(KW_ARRAY_AGG / KW_STRING_AGG) __ LPAREN __ arg:array_agg_arg __ RPAREN {
+    // => { type: 'aggr_func'; args: { distinct?: 'DISTINCT'; expr: expr; orderby?: order_by_clause; limit?: limit_clause }; name: 'ARRAY_AGG' | 'STRING_AGG'; }
       return {
         type: 'aggr_func',
         name: pre ? `${pre[0]}.${name}` : name,
