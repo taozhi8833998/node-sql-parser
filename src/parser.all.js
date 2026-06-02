@@ -1,3 +1,6 @@
+// Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 import { parse as bigquery } from '../pegjs/bigquery.pegjs'
 import { parse as db2 } from '../pegjs/db2.pegjs'
 import { parse as hive } from '../pegjs/hive.pegjs'

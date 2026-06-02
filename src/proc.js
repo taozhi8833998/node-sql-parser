@@ -1,3 +1,6 @@
+// Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 import { assignToSQL } from './assign'
 import { exprToSQL } from './expr'
 import { toUpper } from './util'

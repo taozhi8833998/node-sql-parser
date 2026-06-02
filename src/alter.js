@@ -1,3 +1,6 @@
+// Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 import { columnDefinitionToSQL, columnRefToSQL } from './column'
 import { createDefinitionToSQL } from './create'
 import { indexTypeAndOptionToSQL } from './index-definition'

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 import { alterArgsToSQL, alterExprToSQL } from './alter'
 import { exprToSQL } from './expr'
 import { indexDefinitionToSQL, indexOptionListToSQL, indexTypeToSQL } from './index-definition'
