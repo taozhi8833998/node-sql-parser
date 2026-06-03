@@ -5294,10 +5294,10 @@ cast_expr
       }]
     };
   }
-  / LPAREN __ e:(or_expr / column_ref_array_index / param) __ RPAREN __ c:cast_double_colon?  {
+  / LPAREN __ e:(or_expr / column_ref_array_index / var_decl / param) __ RPAREN __ c:cast_double_colon?  {
     /* => {
         type: 'cast';
-        expr: or_expr | column_ref | param
+        expr: or_expr | column_ref | var_decl | param
           | expr;
         keyword: 'cast';
       } & cast_double_colon
@@ -5311,10 +5311,10 @@ cast_expr
       expr: e,
     }
   }
-  / e:(interval_expr / aggr_func / window_func / func_call / column_ref_quoted / literal / case_expr / column_ref_array_index / param) __ c:cast_double_colon? {
+  / e:(interval_expr / aggr_func / window_func / func_call / column_ref_quoted / literal / case_expr / column_ref_array_index / var_decl / param) __ c:cast_double_colon? {
     /* => ({
         type: 'cast';
-        expr: literal | jsonb_expr | aggr_func | func_call | case_expr | interval_expr | column_ref | param
+        expr: literal | jsonb_expr | aggr_func | func_call | case_expr | interval_expr | column_ref | var_decl | param
           | expr;
         keyword: 'cast';
       } & cast_double_colon)

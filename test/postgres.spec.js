@@ -2072,6 +2072,37 @@ describe('Postgres', () => {
         'CREATE TABLE "test_table" (id INT NOT NULL, vector TSVECTOR)'
       ]
     },
+    {
+      title: 'cast on dollar parameter placeholder inside a function argument',
+      sql: [
+        `SELECT jsonb_array_elements_text($1::jsonb)`,
+        `SELECT jsonb_array_elements_text($1::JSONB)`
+      ]
+    },
+    {
+      title: 'cast on parameter placeholder in WHERE clause',
+      sql: [
+        `SELECT * FROM "t" WHERE a = $1::jsonb`,
+        `SELECT * FROM "t" WHERE a = $1::JSONB`
+      ]
+    },
+    {
+      title: 'cast on parenthesized parameter placeholder',
+      sql: [
+        `SELECT ($1)::int`,
+        `SELECT $1::INT`
+      ]
+    },
+    {
+      title: 'cast on parameter placeholder with nested function casts in CTE',
+      sql: [
+        `WITH input_deals AS (
+           SELECT (jsonb_array_elements_text($1::jsonb))::int AS deal_no
+         )
+         SELECT * FROM input_deals`,
+        `WITH "input_deals" AS (SELECT (jsonb_array_elements_text($1::JSONB))::INT AS "deal_no") SELECT * FROM "input_deals"`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
