@@ -2072,6 +2072,41 @@ describe('Postgres', () => {
         'CREATE TABLE "test_table" (id INT NOT NULL, vector TSVECTOR)'
       ]
     },
+    {
+      title: 'LIKE with string concatenation starting with a literal',
+      sql: [
+        `SELECT * FROM "MES-TimeStamps" WHERE "Task" LIKE '%' || 'step' || '%'`,
+        `SELECT * FROM "MES-TimeStamps" WHERE "Task" LIKE '%' || 'step' || '%'`
+      ]
+    },
+    {
+      title: 'LIKE with string concatenation starting with a column',
+      sql: [
+        `SELECT * FROM "t" WHERE "Task" LIKE prefix || '%'`,
+        `SELECT * FROM "t" WHERE "Task" LIKE prefix || '%'`
+      ]
+    },
+    {
+      title: 'NOT LIKE with string concatenation',
+      sql: [
+        `SELECT * FROM "t" WHERE "Task" NOT LIKE '%' || 'x'`,
+        `SELECT * FROM "t" WHERE "Task" NOT LIKE '%' || 'x'`
+      ]
+    },
+    {
+      title: 'LIKE concatenation with ESCAPE clause',
+      sql: [
+        `SELECT * FROM "t" WHERE "Task" LIKE '%' || 'x' || '%' ESCAPE '!'`,
+        `SELECT * FROM "t" WHERE "Task" LIKE '%' || 'x' || '%' ESCAPE '!'`
+      ]
+    },
+    {
+      title: 'regex match with string concatenation starting with a literal',
+      sql: [
+        `SELECT * FROM "t" WHERE "Task" ~ '^' || 'abc'`,
+        `SELECT * FROM "t" WHERE "Task" ~ '^' || 'abc'`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
