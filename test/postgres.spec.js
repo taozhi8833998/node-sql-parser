@@ -2072,6 +2072,13 @@ describe('Postgres', () => {
         'CREATE TABLE "test_table" (id INT NOT NULL, vector TSVECTOR)'
       ]
     },
+    {
+      title: 'cast to uuid array type',
+      sql: [
+        `SELECT string_to_array('a,b', ',')::uuid[]`,
+        `SELECT string_to_array('a,b', ',')::UUID[]`
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
