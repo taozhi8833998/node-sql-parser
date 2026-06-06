@@ -2072,6 +2072,13 @@ describe('Postgres', () => {
         'CREATE TABLE "test_table" (id INT NOT NULL, vector TSVECTOR)'
       ]
     },
+    {
+      title: 'select from set-returning function WITH ORDINALITY',
+      sql: [
+        `SELECT t.v, t.ord FROM unnest(ARRAY[1, 2, 3]) WITH ORDINALITY AS t`,
+        'SELECT "t".v, "t".ord FROM unnest(ARRAY[1,2,3]) WITH ORDINALITY AS "t"'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
