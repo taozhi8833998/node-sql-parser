@@ -344,14 +344,76 @@ describe('sqlite', () => {
   });
   
   it('should support VALUES in a CTE', () => {
-    const sql = `WITH table1 (name, match_strategy) AS (
-      VALUES ('Name1', 'exact'), ('Name2', 'exact')
+    const sql = `WITH cte1 (col1, col2) AS (
+      VALUES ('Name1', 'type1'), ('Name2', 'type1')
     )
     SELECT a.name
-    FROM table2 a
-    JOIN table1 m ON lower(a.name) = lower(m.name)`;
+    FROM table1 a
+    JOIN cte1 c ON lower(a.name) = lower(c.col1)`;
     expect(getParsedSql(sql)).to.be.equal(
-      `WITH "table1"("name", "match_strategy") AS (VALUES ('Name1','exact'), ('Name2','exact')) SELECT "a"."name" FROM "table2" AS "a" INNER JOIN "table1" AS "m" ON lower("a"."name") = lower("m"."name")`
+      `WITH "cte1"("col1", "col2") AS (VALUES ('Name1','type1'), ('Name2','type1')) SELECT "a"."name" FROM "table1" AS "a" INNER JOIN "cte1" AS "c" ON lower("a"."name") = lower("c"."col1")`
+    );
+  });
+
+  it('should support single-column VALUES in a CTE', () => {
+    const sql = `WITH cte1 (col1) AS (
+      VALUES ('Value1'), ('Value2')
+    )
+    SELECT a.name FROM table1 a JOIN cte1 c ON lower(a.name) = lower(c.col1)`;
+    expect(getParsedSql(sql)).to.be.equal(
+      `WITH "cte1"("col1") AS (VALUES ('Value1'), ('Value2')) SELECT "a"."name" FROM "table1" AS "a" INNER JOIN "cte1" AS "c" ON lower("a"."name") = lower("c"."col1")`
+    );
+  });
+
+  it('should support VALUES in a CTE without an explicit column list', () => {
+    const sql = `WITH cte1 AS (
+      VALUES ('Value1'), ('Value2')
+    )
+    SELECT * FROM cte1`;
+    expect(getParsedSql(sql)).to.be.equal(
+      `WITH "cte1" AS (VALUES ('Value1'), ('Value2')) SELECT * FROM "cte1"`
+    );
+  });
+
+  it('should support VALUES in a CTE with a trailing semicolon', () => {
+    const sql = `WITH cte1 (col1) AS (
+      VALUES ('Value1'), ('Value2')
+    )
+    SELECT a.name FROM table1 a JOIN cte1 c ON lower(a.name) = lower(c.col1);`;
+    expect(getParsedSql(sql)).to.be.equal(
+      `WITH "cte1"("col1") AS (VALUES ('Value1'), ('Value2')) SELECT "a"."name" FROM "table1" AS "a" INNER JOIN "cte1" AS "c" ON lower("a"."name") = lower("c"."col1")`
+    );
+  });
+
+  it('should support multiple CTEs with VALUES and SELECT', () => {
+    const sql = `WITH cte1 (col1) AS (
+        VALUES ('Value1'), ('Value2')
+      ),
+      cte2 AS (
+        SELECT name FROM table1 WHERE name IS NOT NULL
+      )
+    SELECT f.name, c.col1
+    FROM cte2 f
+    JOIN cte1 c ON lower(f.name) = lower(c.col1)`;
+    expect(getParsedSql(sql)).to.be.equal(
+      `WITH "cte1"("col1") AS (VALUES ('Value1'), ('Value2')), "cte2" AS (SELECT "name" FROM "table1" WHERE "name" IS NOT NULL) SELECT "f"."name", "c"."col1" FROM "cte2" AS "f" INNER JOIN "cte1" AS "c" ON lower("f"."name") = lower("c"."col1")`
+    );
+  });
+
+  it('should support VALUES and UNION ALL CTEs in the same query', () => {
+    const sql = `WITH cte1 (col1, col2) AS (
+        VALUES ('Name1', 'type1')
+      ),
+      cte2 AS (
+        SELECT 'Name2' AS col1, 'type1' AS col2
+        UNION ALL
+        SELECT 'Name3', 'type1'
+      )
+    SELECT v.col1 FROM cte1 v
+    UNION ALL
+    SELECT u.col1 FROM cte2 u`;
+    expect(getParsedSql(sql)).to.be.equal(
+      `WITH "cte1"("col1", "col2") AS (VALUES ('Name1','type1')), "cte2" AS (SELECT 'Name2' AS "col1", 'type1' AS "col2" UNION ALL SELECT 'Name3', 'type1') SELECT "v"."col1" FROM "cte1" AS "v" UNION ALL SELECT "u"."col1" FROM "cte2" AS "u"`
     );
   });
 })
