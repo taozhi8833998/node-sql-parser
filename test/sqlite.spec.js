@@ -342,4 +342,16 @@ describe('sqlite', () => {
       'SELECT * FROM "t1" CROSS JOIN "t2" INNER JOIN "t3" ON "t2"."id" = "t3"."id"'
     );
   });
+  
+  it('should support VALUES in a CTE', () => {
+    const sql = `WITH table1 (name, match_strategy) AS (
+      VALUES ('Name1', 'exact'), ('Name2', 'exact')
+    )
+    SELECT a.name
+    FROM table2 a
+    JOIN table1 m ON lower(a.name) = lower(m.name)`;
+    expect(getParsedSql(sql)).to.be.equal(
+      `WITH "table1"("name", "match_strategy") AS (VALUES ('Name1','exact'), ('Name2','exact')) SELECT "a"."name" FROM "table2" AS "a" INNER JOIN "table1" AS "m" ON lower("a"."name") = lower("m"."name")`
+    );
+  });
 })

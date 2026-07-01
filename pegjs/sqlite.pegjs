@@ -1316,7 +1316,7 @@ with_clause
     }
 
 cte_definition
-  = name:(literal_string / ident_name / table_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:union_stmt __ RPAREN {
+  = name:(literal_string / ident_name / table_name) __ columns:cte_column_definition? __ KW_AS __ LPAREN __ stmt:(value_clause / union_stmt) __ RPAREN {
     if (typeof name === 'string') name = { type: 'default', value: name }
     if (name.table) name = { type: 'default', value: name.table }
     return { name, stmt, columns };
