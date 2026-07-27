@@ -817,6 +817,48 @@ describe('BigQuery', () => {
       ]
     },
     {
+      title: 'ARRAY_AGG DISTINCT modifier',
+      sql: [
+        'SELECT ARRAY_AGG(DISTINCT x) AS a FROM t',
+        'SELECT ARRAY_AGG(DISTINCT x) AS a FROM t',
+      ]
+    },
+    {
+      title: 'ARRAY_AGG LIMIT modifier',
+      sql: [
+        'SELECT ARRAY_AGG(x LIMIT 5) AS a FROM t',
+        'SELECT ARRAY_AGG(x LIMIT 5) AS a FROM t',
+      ]
+    },
+    {
+      title: 'ARRAY_AGG ORDER BY modifier',
+      sql: [
+        'SELECT ARRAY_AGG(x ORDER BY y) AS a FROM t',
+        'SELECT ARRAY_AGG(x ORDER BY y ASC) AS a FROM t',
+      ]
+    },
+    {
+      title: 'ARRAY_AGG DISTINCT ORDER BY LIMIT combined',
+      sql: [
+        'SELECT ARRAY_AGG(DISTINCT x ORDER BY x LIMIT 5) AS a FROM t',
+        'SELECT ARRAY_AGG(DISTINCT x ORDER BY x ASC LIMIT 5) AS a FROM t',
+      ]
+    },
+    {
+      title: 'STRING_AGG LIMIT modifier',
+      sql: [
+        'SELECT STRING_AGG(x LIMIT 3) AS a FROM t',
+        'SELECT STRING_AGG(x LIMIT 3) AS a FROM t',
+      ]
+    },
+    {
+      title: 'STRING_AGG DISTINCT ORDER BY combined',
+      sql: [
+        'SELECT STRING_AGG(DISTINCT x ORDER BY x) AS a FROM t',
+        'SELECT STRING_AGG(DISTINCT x ORDER BY x ASC) AS a FROM t',
+      ]
+    },
+    {
       title: 'if multiple parentheses',
       sql: [
         'select if(((a)), b, null)',
@@ -940,7 +982,7 @@ describe('BigQuery', () => {
         JOIN thingie10 tc ON pt.thingie2 = tc.thingie2
         ORDER BY pt.thingie9 DESC
         LIMIT 20`,
-        "WITH thingie AS (SELECT thingie2, thingie3, COUNT(*) AS thingie4 FROM thingie5.thingie6 WHERE thingie7 BETWEEN '2025-10-24' AND '2025-10-30' AND thingie8 = TRUE AND thingie2 IS NOT NULL GROUP BY thingie2, thingie3), path_totals AS (SELECT thingie2, SUM(thingie4) AS thingie9 FROM thingie GROUP BY thingie2), thingie13 AS (SELECT SUM(thingie9) AS overall_total FROM path_totals), thingie10 AS (SELECT thingie2, ARRAY_AGG(undefined) AS thingie11 FROM thingie GROUP BY thingie2) SELECT pt.thingie2, pt.thingie9 AS thingie4, ROUND(100.0 * pt.thingie9 / tar.overall_total, 2) AS thingie12, tc.thingie11 FROM path_totals AS pt CROSS JOIN thingie13 AS tar JOIN thingie10 AS tc ON pt.thingie2 = tc.thingie2 ORDER BY pt.thingie9 DESC LIMIT 20"
+        "WITH thingie AS (SELECT thingie2, thingie3, COUNT(*) AS thingie4 FROM thingie5.thingie6 WHERE thingie7 BETWEEN '2025-10-24' AND '2025-10-30' AND thingie8 = TRUE AND thingie2 IS NOT NULL GROUP BY thingie2, thingie3), path_totals AS (SELECT thingie2, SUM(thingie4) AS thingie9 FROM thingie GROUP BY thingie2), thingie13 AS (SELECT SUM(thingie9) AS overall_total FROM path_totals), thingie10 AS (SELECT thingie2, ARRAY_AGG(STRUCT(thingie3, thingie4)LIMIT 3) AS thingie11 FROM thingie GROUP BY thingie2) SELECT pt.thingie2, pt.thingie9 AS thingie4, ROUND(100.0 * pt.thingie9 / tar.overall_total, 2) AS thingie12, tc.thingie11 FROM path_totals AS pt CROSS JOIN thingie13 AS tar JOIN thingie10 AS tc ON pt.thingie2 = tc.thingie2 ORDER BY pt.thingie9 DESC LIMIT 20"
       ]
     },
   ]
@@ -949,6 +991,57 @@ describe('BigQuery', () => {
     const { title, sql } = sqlInfo
     it(`should support ${title}`, () => {
       expect(getParsedSql(sql[0], opt)).to.equal(sql[1])
+    })
+  })
+
+  describe('ARRAY_AGG / STRING_AGG aggregate modifiers', () => {
+    function getAggrArgs(sql) {
+      const ast = parser.astify(sql, opt)
+      return ast.columns[0].expr.args
+    }
+
+    it('ARRAY_AGG(DISTINCT x) sets distinct on args', () => {
+      const args = getAggrArgs('SELECT ARRAY_AGG(DISTINCT x) AS a FROM t')
+      expect(args.distinct).to.equal('DISTINCT')
+      expect(args.expr.type).to.equal('column_ref')
+      expect(args.orderby).to.be.null
+      expect(args.limit).to.be.null
+    })
+
+    it('ARRAY_AGG(x LIMIT n) sets limit on args', () => {
+      const args = getAggrArgs('SELECT ARRAY_AGG(x LIMIT 5) AS a FROM t')
+      expect(args.distinct).to.be.null
+      expect(args.expr.type).to.equal('column_ref')
+      expect(args.orderby).to.be.null
+      expect(args.limit.value[0].value).to.equal(5)
+    })
+
+    it('ARRAY_AGG(x ORDER BY y) sets orderby on args', () => {
+      const args = getAggrArgs('SELECT ARRAY_AGG(x ORDER BY y) AS a FROM t')
+      expect(args.distinct).to.be.null
+      expect(args.expr.type).to.equal('column_ref')
+      expect(args.orderby).to.be.an('array').with.lengthOf(1)
+      expect(args.orderby[0].expr.type).to.equal('column_ref')
+      expect(args.limit).to.be.null
+    })
+
+    it('ARRAY_AGG(DISTINCT x ORDER BY x LIMIT n) sets all three', () => {
+      const args = getAggrArgs('SELECT ARRAY_AGG(DISTINCT x ORDER BY x LIMIT 5) AS a FROM t')
+      expect(args.distinct).to.equal('DISTINCT')
+      expect(args.expr.type).to.equal('column_ref')
+      expect(args.orderby).to.be.an('array').with.lengthOf(1)
+      expect(args.limit.value[0].value).to.equal(5)
+    })
+
+    it('STRING_AGG(x LIMIT n) sets limit on args', () => {
+      const args = getAggrArgs('SELECT STRING_AGG(x LIMIT 3) AS a FROM t')
+      expect(args.limit.value[0].value).to.equal(3)
+    })
+
+    it('STRING_AGG(DISTINCT x ORDER BY x) sets distinct and orderby', () => {
+      const args = getAggrArgs('SELECT STRING_AGG(DISTINCT x ORDER BY x) AS a FROM t')
+      expect(args.distinct).to.equal('DISTINCT')
+      expect(args.orderby).to.be.an('array').with.lengthOf(1)
     })
   })
 
