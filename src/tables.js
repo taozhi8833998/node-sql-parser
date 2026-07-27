@@ -114,7 +114,7 @@ function generateVirtualTable(stmt) {
 
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
-  const { table, db, as, expr, operator, prefix: prefixStr, schema, server, suffix, tablesample, temporal_table, table_hint, surround = {} } = tableInfo
+  const { table, db, as, expr, operator, ordinality, prefix: prefixStr, schema, server, suffix, tablesample, temporal_table, table_hint, surround = {} } = tableInfo
   const serverName = identifierToSql(server, false, surround.server)
   const database = identifierToSql(db, false, surround.db)
   const schemaStr = identifierToSql(schema, false, surround.schema)
@@ -147,6 +147,7 @@ function tableToSQL(tableInfo) {
     const tableSampleSQL = ['TABLESAMPLE', exprToSQL(tablesample.expr), literalToSQL(tablesample.repeatable)].filter(hasVal).join(' ')
     result.push(tableSampleSQL)
   }
+  if (ordinality) result.push('WITH ORDINALITY')
   result.push(temporalTableToSQL(temporal_table), commonOptionConnector('AS', typeof as === 'string' ? identifierToSql : exprToSQL, as), operatorToSQL(operator))
   if (table_hint) result.push(toUpper(table_hint.keyword), `(${table_hint.expr.map(tableHintToSQL).filter(hasVal).join(', ')})`)
   const tableSQL = result.filter(hasVal).join(' ')
