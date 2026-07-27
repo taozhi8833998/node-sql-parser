@@ -4505,8 +4505,8 @@ regex_op
   = "!~*" / "~*" / "~" / "!~"
 
 regex_op_right
-= op:regex_op __ right:(literal / comparison_expr) {
-     // => { op: regex_op; right: literal | comparison_expr}
+= op:regex_op __ right:(additive_expr / literal / comparison_expr) {
+     // => { op: regex_op; right: additive_expr | literal | comparison_expr}
       return { op: op, right: right };
     }
 
@@ -4524,8 +4524,8 @@ in_op
   / KW_IN
 
 like_op_right
-  = op:like_op __ right:(literal / comparison_expr) __ es:escape_op? {
-     // => { op: like_op; right: (literal | comparison_expr) & { escape?: escape_op }; }
+  = op:like_op __ right:(additive_expr / literal / comparison_expr) __ es:escape_op? {
+     // => { op: like_op; right: (additive_expr | literal | comparison_expr) & { escape?: escape_op }; }
       if (es) right.escape = es
       return { op: op, right: right };
     }
