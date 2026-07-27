@@ -4393,6 +4393,36 @@ or_and_where_expr
     return result
   }
 
+func_call_args
+	= head:func_call_arg tail:(__ (KW_AND / KW_OR / COMMA) __ func_call_arg)* {
+    // => binary_expr | { type: 'expr_list'; value: expr[] }
+    const len = tail.length
+    let result = head;
+    let seperator = ''
+    for (let i = 0; i < len; ++i) {
+      if (tail[i][1] === ',') {
+        seperator = ','
+        if (!Array.isArray(result)) result = [result]
+        result.push(tail[i][3])
+      } else {
+        result = createBinaryExpr(tail[i][1], result, tail[i][3]);
+      }
+    }
+    if (seperator === ',') {
+      const el = { type: 'expr_list' }
+      el.value = result
+      return el
+    }
+    return result
+  }
+
+func_call_arg
+  = name:ident_name __ s:(':=' / '=>') __ v:expr {
+    // => { type: 'func_arg'; value: { name: ident_name; symbol: string; expr: expr; } }
+    return { type: 'func_arg', value: { name, symbol: s, expr: v } }
+  }
+  / expr
+
 or_expr
   = head:and_expr tail:(___ KW_OR __ and_expr)* {
       // => binary_expr
@@ -5173,7 +5203,7 @@ func_call
     }
     return result
   }
-  / name:proc_func_name __ LPAREN __ l:or_and_where_expr? __ RPAREN {
+  / name:proc_func_name __ LPAREN __ l:func_call_args? __ RPAREN {
       // => { type: 'function'; name: proc_func_name; args: expr_list; }
       if (l && l.type !== 'expr_list') l = { type: 'expr_list', value: [l] }
       return {

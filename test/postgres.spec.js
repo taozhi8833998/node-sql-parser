@@ -2098,6 +2098,20 @@ describe('Postgres', () => {
       expect(getParsedSql(sql, opt)).to.equal(sql.slice(0, -1))
     })
   })
+  describe('named function arguments', () => {
+    it('should support := named argument notation', () => {
+      const sql = 'SELECT * FROM sales.get_delivery_order_detail_v2(p_deal_id := NULL)'
+      expect(getParsedSql(sql, opt)).to.equal(sql)
+    })
+    it('should support => named argument notation', () => {
+      const sql = 'SELECT * FROM sales.get_order(p_deal_id => 5)'
+      expect(getParsedSql(sql, opt)).to.equal(sql)
+    })
+    it('should support mixed positional and named arguments', () => {
+      const sql = 'SELECT myfunc(1, b := 2, c => 3)'
+      expect(getParsedSql(sql, opt)).to.equal(sql)
+    })
+  })
   describe('tables to sql', () => {
     it('should parse object tables', () => {
       const ast = parser.astify(SQL_LIST[113].sql[0], opt)
