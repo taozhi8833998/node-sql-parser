@@ -2085,6 +2085,20 @@ describe('Postgres', () => {
         'SELECT "pid"."id" FROM (SELECT ARRAY[1,2]::INTEGER[] AS "Parent ids") AS "e" LEFT JOIN LATERAL unnest(COALESCE("e"."Parent ids", ARRAY[]::INTEGER[])) AS "pid"("id") ON TRUE'
       ]
     },
+    {
+      title: 'function table with multi-column alias list',
+      sql: [
+        'SELECT * FROM unnest(a, b) AS "t"("x", "y")',
+        'SELECT * FROM unnest(a, b) AS "t"("x", "y")'
+      ]
+    },
+    {
+      title: 'function table with mixed quoted and bare column alias list',
+      sql: [
+        'SELECT * FROM unnest(a) AS "t"(x, "y")',
+        'SELECT * FROM unnest(a) AS "t"(x, "y")'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

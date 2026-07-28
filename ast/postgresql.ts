@@ -1024,7 +1024,7 @@ export type table_join = table_base & {join: join_op; using: ident_without_kw_ty
       on?: on_clause;
     };
 
-export type table_base = { type: 'dual' } | { expr: value_clause; as?: alias_clause; } | { prefix?: string; expr: union_stmt | value_clause; as?: alias_clause; } | { prefix?: string; expr: table_ref_list; as?: alias_clause; } | { prefix?: string; type: 'expr'; expr: expr; as?: alias_clause; } | table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;} | table_name & { as?: alias_clause; };
+export type table_base = { type: 'dual' } | { expr: value_clause; as?: alias_clause; } | { prefix?: string; expr: union_stmt | value_clause; as?: alias_clause; } | { prefix?: string; expr: table_ref_list; as?: alias_clause; } | { prefix?: string; type: 'expr'; expr: expr; as?: alias_clause; columns?: cte_column_definition; } | table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;} | table_name & { as?: alias_clause; };
 
 
 
