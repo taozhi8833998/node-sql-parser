@@ -114,7 +114,7 @@ function generateVirtualTable(stmt) {
 
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
-  const { table, db, as, expr, operator, prefix: prefixStr, schema, server, suffix, tablesample, temporal_table, table_hint, surround = {} } = tableInfo
+  const { table, db, as, columns, expr, operator, prefix: prefixStr, schema, server, suffix, tablesample, temporal_table, table_hint, surround = {} } = tableInfo
   const serverName = identifierToSql(server, false, surround.server)
   const database = identifierToSql(db, false, surround.db)
   const schemaStr = identifierToSql(schema, false, surround.schema)
@@ -147,7 +147,9 @@ function tableToSQL(tableInfo) {
     const tableSampleSQL = ['TABLESAMPLE', exprToSQL(tablesample.expr), literalToSQL(tablesample.repeatable)].filter(hasVal).join(' ')
     result.push(tableSampleSQL)
   }
-  result.push(temporalTableToSQL(temporal_table), commonOptionConnector('AS', typeof as === 'string' ? identifierToSql : exprToSQL, as), operatorToSQL(operator))
+  const asSQL = commonOptionConnector('AS', typeof as === 'string' ? identifierToSql : exprToSQL, as)
+  const columnsSQL = Array.isArray(columns) ? `(${columns.map(columnRefToSQL).join(', ')})` : ''
+  result.push(temporalTableToSQL(temporal_table), [asSQL, columnsSQL].filter(hasVal).join(''), operatorToSQL(operator))
   if (table_hint) result.push(toUpper(table_hint.keyword), `(${table_hint.expr.map(tableHintToSQL).filter(hasVal).join(', ')})`)
   const tableSQL = result.filter(hasVal).join(' ')
   return tableInfo.parentheses ? `(${tableSQL})` : tableSQL
