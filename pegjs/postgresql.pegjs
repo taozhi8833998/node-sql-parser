@@ -3705,9 +3705,9 @@ table_base
       as: alias
     };
   }
-  / l:('LATERAL'i)? __ e:func_call __ alias:alias_clause? {
-    // => { prefix?: string; type: 'expr'; expr: expr; as?: alias_clause; }
-      return { prefix: l, type: 'expr', expr: e, as: alias };
+  / l:('LATERAL'i)? __ e:func_call __ alias:alias_clause? __ columns:cte_column_definition? {
+    // => { prefix?: string; type: 'expr'; expr: expr; as?: alias_clause; columns?: cte_column_definition; }
+      return { prefix: l, type: 'expr', expr: e, as: alias, columns };
     }
   / t:table_name __ 'TABLESAMPLE'i __ f:func_call __ re:('REPEATABLE'i __ LPAREN __ literal_numeric __ RPAREN)? __ alias:alias_clause? {
     // => table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;}

@@ -2072,6 +2072,19 @@ describe('Postgres', () => {
         'CREATE TABLE "test_table" (id INT NOT NULL, vector TSVECTOR)'
       ]
     },
+    {
+      title: 'lateral unnest with column alias list',
+      sql: [
+        `SELECT "pid"."id"
+        FROM (
+          SELECT ARRAY[1, 2]::integer[] AS "Parent ids"
+        ) AS "e"
+        LEFT JOIN LATERAL unnest(
+          COALESCE("e"."Parent ids", ARRAY[]::integer[])
+        ) AS "pid"("id") ON TRUE;`,
+        'SELECT "pid"."id" FROM (SELECT ARRAY[1,2]::INTEGER[] AS "Parent ids") AS "e" LEFT JOIN LATERAL unnest(COALESCE("e"."Parent ids", ARRAY[]::INTEGER[])) AS "pid"("id") ON TRUE'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
