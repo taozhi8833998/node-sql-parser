@@ -2610,6 +2610,22 @@ describe('Postgres', () => {
       const fun = parser.astify.bind(parser, sql, opt)
       expect(fun).to.throw(`Expected "--", "/*", "\\"", [ \\t\\n\\r], or [A-Za-z_一-龥À-ſ] but "'" found.`)
     })
+    it('should keep backslash sequences literal in single-quoted strings', () => {
+      const literals = [
+        [String.raw`SELECT 'a\n' AS v`, String.raw`a\n`],
+        [String.raw`SELECT 'a\t' AS v`, String.raw`a\t`],
+        [String.raw`SELECT 'a\b' AS v`, String.raw`a\b`],
+        [String.raw`SELECT 'a\r\f' AS v`, String.raw`a\r\f`],
+        [String.raw`SELECT 'a\u0041' AS v`, String.raw`a\u0041`],
+        [String.raw`SELECT 'C:\Users\bob' AS v`, String.raw`C:\Users\bob`],
+      ]
+      literals.forEach(([sql, value]) => {
+        const ast = parser.astify(sql, opt)
+        expect(ast.columns[0].expr.value).to.equal(value)
+        expect(getParsedSql(sql, opt)).to.equal(`SELECT '${value}' AS "v"`)
+      })
+      expect(parser.astify("SELECT 'O''Brien' AS v", opt).columns[0].expr.value).to.equal("O''Brien")
+    })
   })
   describe('pg parse speed', function () {
     this.timeout(30)
