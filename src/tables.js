@@ -3,7 +3,7 @@ import { columnRefToSQL } from './column'
 import { exprToSQL } from './expr'
 import { valuesToSQL } from './insert'
 import { intervalToSQL } from './interval'
-import { commonOptionConnector, commonTypeValue, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
+import { commonOptionConnector, commonTypeValue, dataTypeToSQL, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
 
 function unnestToSQL(unnestExpr) {
   const { type, as, expr, with_offset: withOffset } = unnestExpr
@@ -17,6 +17,40 @@ function unnestToSQL(unnestExpr) {
     ),
   ]
   return result.filter(hasVal).join(' ')
+}
+
+function jsonTableOnClauseToSQL(clause, keyword) {
+  if (!clause) return ''
+  const { type, value } = clause
+  const prefix = type === 'default' ? `DEFAULT ${exprToSQL(value)}` : toUpper(type)
+  return `${prefix} ON ${keyword}`
+}
+
+function jsonTableColumnToSQL(column) {
+  const { type } = column
+  if (type === 'nested') {
+    const { path, columns } = column
+    return `NESTED PATH ${exprToSQL(path)} COLUMNS (${columns.map(jsonTableColumnToSQL).join(', ')})`
+  }
+  if (type === 'ordinality') return `${identifierToSql(column.column)} FOR ORDINALITY`
+  const { column: name, dataType, exists, path, on_empty: onEmpty, on_error: onError } = column
+  const result = [
+    identifierToSql(name),
+    dataTypeToSQL(dataType),
+    exists && 'EXISTS',
+    'PATH',
+    exprToSQL(path),
+    jsonTableOnClauseToSQL(onEmpty, 'EMPTY'),
+    jsonTableOnClauseToSQL(onError, 'ERROR'),
+  ]
+  return result.filter(hasVal).join(' ')
+}
+
+function jsonTableToSQL(tableInfo) {
+  const { expr, path, columns, as } = tableInfo
+  const sql = [`JSON_TABLE(${exprToSQL(expr)}, ${exprToSQL(path)} COLUMNS (${columns.map(jsonTableColumnToSQL).join(', ')}))`]
+  sql.push(commonOptionConnector('AS', typeof as === 'string' ? identifierToSql : exprToSQL, as))
+  return sql.filter(hasVal).join(' ')
 }
 
 function pivotOperatorToSQL(operator) {
@@ -114,6 +148,7 @@ function generateVirtualTable(stmt) {
 
 function tableToSQL(tableInfo) {
   if (toUpper(tableInfo.type) === 'UNNEST') return unnestToSQL(tableInfo)
+  if (toUpper(tableInfo.type) === 'JSON_TABLE') return jsonTableToSQL(tableInfo)
   const { table, db, as, expr, operator, prefix: prefixStr, schema, server, suffix, tablesample, temporal_table, table_hint, surround = {} } = tableInfo
   const serverName = identifierToSql(server, false, surround.server)
   const database = identifierToSql(db, false, surround.db)
@@ -216,6 +251,7 @@ function tableOptionToSQL(tableOption) {
 }
 
 export {
+  jsonTableToSQL,
   operatorToSQL,
   tableHintToSQL,
   tableTumbleToSQL,

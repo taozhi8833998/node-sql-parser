@@ -2546,6 +2546,10 @@ table_base
         type: 'dual'
       };
   }
+  / e:json_table_expr __ alias:alias_clause? {
+      if (alias) e.as = alias
+      return e
+    }
   / t:table_name __ alias:alias_clause? {
       if (t.type === 'var') {
         t.as = alias;
@@ -2587,6 +2591,77 @@ table_base
       }
       if (l) result.prefix = l;
       return result
+    }
+
+// JSON_TABLE(expr, path COLUMNS (column[, column]...)) [AS] alias
+json_table_expr
+  = 'JSON_TABLE'i __ LPAREN __ e:expr __ COMMA __ p:literal_string __ c:json_table_columns __ RPAREN {
+      return {
+        type: 'json_table',
+        expr: e,
+        path: p,
+        columns: c,
+        ...getLocationObject(),
+      };
+    }
+
+json_table_columns
+  = 'COLUMNS'i __ LPAREN __ l:json_table_column_list __ RPAREN { return l; }
+
+json_table_column_list
+  = head:json_table_column tail:(__ COMMA __ json_table_column)* {
+      return createList(head, tail);
+    }
+
+// column:
+//   name FOR ORDINALITY
+// | name type [EXISTS] PATH string_path [on_empty] [on_error]
+// | NESTED [PATH] path COLUMNS (column[, column]...)
+json_table_column
+  = 'NESTED'i __ ('PATH'i __)? p:literal_string __ c:json_table_columns {
+      return {
+        type: 'nested',
+        path: p,
+        columns: c,
+      };
+    }
+  / col:column __ 'FOR'i __ 'ORDINALITY'i {
+      return {
+        type: 'ordinality',
+        column: col,
+      };
+    }
+  / col:column __ dt:data_type __ ex:(KW_EXISTS __)? 'PATH'i __ p:literal_string __ oee:json_table_on_clause_list? {
+      const result = {
+        type: 'column',
+        column: col,
+        dataType: dt,
+        path: p,
+      };
+      if (ex) result.exists = true;
+      if (oee) Object.assign(result, oee);
+      return result;
+    }
+
+// {NULL | DEFAULT json_string | ERROR} ON {EMPTY | ERROR}
+json_table_on_clause_list
+  = head:json_table_on_clause tail:(__ json_table_on_clause)* {
+      const result = {};
+      createList(head, tail, 1).forEach(item => {
+        if (item.keyword === 'EMPTY') result.on_empty = item;
+        else result.on_error = item;
+      });
+      return result;
+    }
+
+json_table_on_clause
+  = v:(
+      KW_NULL { return { type: 'null' }; }
+      / KW_DEFAULT __ d:literal_string { return { type: 'default', value: d }; }
+      / 'ERROR'i { return { type: 'error' }; }
+    ) __ KW_ON __ k:('EMPTY'i / 'ERROR'i) {
+      v.keyword = k.toUpperCase();
+      return v;
     }
 
 join_op

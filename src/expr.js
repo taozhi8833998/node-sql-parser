@@ -14,7 +14,7 @@ import { selectToSQL } from './select'
 import { showToSQL } from './show'
 import { arrayStructExprToSQL } from './array-struct'
 import { loadDataToSQL } from './load'
-import { tablesToSQL, unnestToSQL } from './tables'
+import { jsonTableToSQL, tablesToSQL, unnestToSQL } from './tables'
 import { unionToSQL } from './union'
 import { namedWindowExprListToSQL, windowFuncToSQL } from './window'
 
@@ -42,6 +42,7 @@ const exprToSQLConvertFn = {
   interval          : intervalToSQL,
   json              : jsonExprToSQL,
   json_object_arg   : jsonObjectArgToSQL,
+  json_table        : jsonTableToSQL,
   json_visitor      : jsonVisitorExprToSQL,
   func_arg          : funcArgToSQL,
   show              : showToSQL,

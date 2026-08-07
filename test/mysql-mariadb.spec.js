@@ -1405,6 +1405,50 @@ describe('mysql', () => {
       expect(parser.astify.bind(parser, sql, mariadb)).to.throw('Expected "#", ")", ",", "--", "/*", "AUTO_INCREMENT", "CHARACTER", "CHECK", "COLLATE", "COLUMN_FORMAT", "COMMENT", "CONSTRAINT", "DEFAULT", "KEY", "NOT NULL", "NULL", "PRIMARY", "REFERENCES", "STORAGE", "UNIQUE", or [ \\t\\n\\r] but "O" found.')
     })
 
+    describe('json_table', () => {
+      it('should support basic JSON_TABLE in from clause', () => {
+        const sql = `SELECT * FROM JSON_TABLE('[{"c1":1,"c2":2},{"c1":3,"c2":4}]', '$[*]' COLUMNS(c1 INT PATH '$.c1', c2 INT PATH '$.c2')) AS jt`
+        const result = "SELECT * FROM JSON_TABLE('[{\"c1\":1,\"c2\":2},{\"c1\":3,\"c2\":4}]', '$[*]' COLUMNS (`c1` INT PATH '$.c1', `c2` INT PATH '$.c2')) AS `jt`"
+        expect(getParsedSql(sql)).to.equal(result)
+      })
+
+      it('should support JSON_TABLE with a column reference as the json doc', () => {
+        const sql = "SELECT * FROM t1, JSON_TABLE(t1.data, '$[*]' COLUMNS(c1 INT PATH '$.c1')) AS jt"
+        const result = 'SELECT * FROM `t1`, JSON_TABLE(`t1`.`data`, \'$[*]\' COLUMNS (`c1` INT PATH \'$.c1\')) AS `jt`'
+        expect(getParsedSql(sql)).to.equal(result)
+      })
+
+      it('should support FOR ORDINALITY column', () => {
+        const sql = "SELECT * FROM JSON_TABLE('[1,2,3]', '$[*]' COLUMNS(seq FOR ORDINALITY, val INT PATH '$')) AS jt"
+        const result = "SELECT * FROM JSON_TABLE('[1,2,3]', '$[*]' COLUMNS (`seq` FOR ORDINALITY, `val` INT PATH '$')) AS `jt`"
+        expect(getParsedSql(sql)).to.equal(result)
+      })
+
+      it('should support EXISTS PATH column', () => {
+        const sql = "SELECT * FROM JSON_TABLE('[{\"c1\":1}]', '$[*]' COLUMNS(c1 INT EXISTS PATH '$.c1')) AS jt"
+        const result = "SELECT * FROM JSON_TABLE('[{\"c1\":1}]', '$[*]' COLUMNS (`c1` INT EXISTS PATH '$.c1')) AS `jt`"
+        expect(getParsedSql(sql)).to.equal(result)
+      })
+
+      it('should support DEFAULT ... ON EMPTY and ON ERROR clauses', () => {
+        const sql = "SELECT * FROM JSON_TABLE('[{}]', '$[*]' COLUMNS(c1 VARCHAR(10) PATH '$.c1' DEFAULT '0' ON EMPTY NULL ON ERROR)) AS jt"
+        const result = "SELECT * FROM JSON_TABLE('[{}]', '$[*]' COLUMNS (`c1` VARCHAR(10) PATH '$.c1' DEFAULT '0' ON EMPTY NULL ON ERROR)) AS `jt`"
+        expect(getParsedSql(sql)).to.equal(result)
+      })
+
+      it('should support NESTED PATH columns', () => {
+        const sql = `SELECT * FROM JSON_TABLE(data, '$[*]' COLUMNS(id FOR ORDINALITY, c1 INT PATH '$.c1', NESTED PATH '$.items[*]' COLUMNS (item VARCHAR(50) PATH '$'))) AS jt`
+        const result = "SELECT * FROM JSON_TABLE(`data`, '$[*]' COLUMNS (`id` FOR ORDINALITY, `c1` INT PATH '$.c1', NESTED PATH '$.items[*]' COLUMNS (`item` VARCHAR(50) PATH '$'))) AS `jt`"
+        expect(getParsedSql(sql)).to.equal(result)
+      })
+
+      it('should be able to sqlify twice with the same result', () => {
+        const sql = "SELECT * FROM JSON_TABLE('[1,2,3]', '$[*]' COLUMNS(val INT PATH '$')) AS jt"
+        const onceSQL = getParsedSql(sql)
+        expect(getParsedSql(onceSQL)).to.equal(onceSQL)
+      })
+    })
+
     describe('column clause', () => {
       it('should support fulltext search', () => {
         const sqlList = [
