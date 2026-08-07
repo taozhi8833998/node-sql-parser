@@ -65,7 +65,30 @@ export interface Dual {
   type: "dual";
   loc?: LocationRange;
 }
-export type From = BaseFrom | Join | TableExpr | Dual;
+export interface JsonTableOnClause {
+  type: "null" | "default" | "error";
+  value?: Value;
+  keyword: "EMPTY" | "ERROR";
+}
+export interface JsonTableColumn {
+  type: "column" | "ordinality" | "nested";
+  column?: string;
+  dataType?: any;
+  exists?: boolean;
+  path?: Value;
+  on_empty?: JsonTableOnClause;
+  on_error?: JsonTableOnClause;
+  columns?: JsonTableColumn[];
+}
+export interface JsonTable {
+  type: "json_table";
+  expr: ExpressionValue;
+  path: Value;
+  columns: JsonTableColumn[];
+  as?: string | null;
+  loc?: LocationRange;
+}
+export type From = BaseFrom | Join | TableExpr | Dual | JsonTable;
 export interface LimitValue {
   type: string;
   value: number;
