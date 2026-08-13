@@ -113,6 +113,20 @@ describe('trino', () => {
       title: "DESCRIBE statement with fully qualified name",
       sql: ['DESCRIBE my_catalog.my_schema.my_table', 'DESCRIBE "my_catalog"."my_schema"."my_table"'],
     },
+    {
+      title: 'CAST to INTERVAL DAY TO SECOND',
+      sql: [
+        'SELECT CAST(s.duration AS INTERVAL DAY TO SECOND) FROM t',
+        'SELECT CAST("s".duration AS INTERVAL DAY TO SECOND) FROM "t"',
+      ],
+    },
+    {
+      title: 'CAST to INTERVAL YEAR TO MONTH',
+      sql: [
+        'SELECT CAST(s.age AS INTERVAL YEAR TO MONTH) FROM t',
+        'SELECT CAST("s".age AS INTERVAL YEAR TO MONTH) FROM "t"',
+      ],
+    },
   ];
   SQL_LIST.forEach((sqlInfo) => {
     const { title, sql } = sqlInfo;
