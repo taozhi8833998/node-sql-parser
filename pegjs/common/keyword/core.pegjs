@@ -115,8 +115,9 @@ KW_TOP      = "TOP"i        !ident_start { return 'TOP'; }
 KW_ASC      = "ASC"i        !ident_start { return 'ASC'; }
 KW_DESC     = "DESC"i       !ident_start { return 'DESC'; }
 
-KW_ALL      = "ALL"i        !ident_start { return 'ALL'; }
-KW_DISTINCT = "DISTINCT"i   !ident_start { return 'DISTINCT'; }
+KW_ALL         = "ALL"i         !ident_start { return 'ALL'; }
+KW_DISTINCT    = "DISTINCT"i    !ident_start { return 'DISTINCT'; }
+KW_DISTINCTROW = "DISTINCTROW"i !ident_start { return 'DISTINCTROW'; }
 
 // ============================================================================
 // Comparison/Logical Keywords

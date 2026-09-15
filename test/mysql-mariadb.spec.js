@@ -1379,6 +1379,17 @@ describe('mysql', () => {
       })
     })
 
+    it('should support DISTINCTROW select modifier', () => {
+      const sql = 'SELECT DISTINCTROW a FROM b'
+      const ast = parser.astify(sql)
+      expect(ast.distinct).to.equal('DISTINCTROW')
+      expect(parser.sqlify(ast)).to.equal('SELECT DISTINCTROW `a` FROM `b`')
+
+      const mariadbAst = parser.astify(sql, mariadb)
+      expect(mariadbAst.distinct).to.equal('DISTINCTROW')
+      expect(parser.sqlify(mariadbAst, mariadb)).to.equal('SELECT DISTINCTROW `a` FROM `b`')
+    })
+
     it('should throw error when args is not right', () => {
       let sql = `select convert(json_unquote(json_extract('{"thing": "252"}', "$.thing")));`
       expect(parser.astify.bind(parser, sql)).to.throw('Expected "!=", "#", "#-", "#>", "#>>", "%", "&", "&&", "*", "+", ",", "-", "--", "->", "->>", "/", "/*", "<", "<<", "<=", "<=>", "<>", "<@", "=", ">", ">=", ">>", "?", "?&", "?|", "@>", "AND", "BETWEEN", "COLLATE", "IN", "IS", "LIKE", "NOT", "ON", "OR", "OVER", "REGEXP", "RLIKE", "USING", "XOR", "^", "div", "mod", "|", "||", or [ \\t\\n\\r] but ")" found.')

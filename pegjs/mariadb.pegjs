@@ -25,6 +25,7 @@
     'DELETE': true,
     'DESC': true,
     'DISTINCT': true,
+    'DISTINCTROW': true,
     'DROP': true,
 
     'ELSE': true,
@@ -1997,7 +1998,7 @@ locking_read
 select_stmt_nake
   = __ cte:with_clause? __ KW_SELECT __
     opts:option_clause? __
-    d:KW_DISTINCT?      __
+    d:(KW_DISTINCT / KW_DISTINCTROW)? __
     c:column_clause     __
     ci:into_clause?      __
     f:from_clause?      __
