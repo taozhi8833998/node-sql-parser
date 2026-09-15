@@ -2251,8 +2251,6 @@ locking_read
     return t + (lo ? ` ${lo}` : '')
   }
 
-KW_DISTINCTROW = "DISTINCTROW"i !ident_start { return 'DISTINCTROW'; }
-
 select_stmt_nake
   = __ cte:with_clause? __ KW_SELECT __
     opts:option_clause? __
