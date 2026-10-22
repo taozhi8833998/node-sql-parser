@@ -621,6 +621,13 @@ describe('mysql', () => {
         ],
       },
       {
+        title: 'national character types',
+        sql: [
+          'CREATE TABLE t (a nvarchar(50), b nchar(10), c NCHAR)',
+          'CREATE TABLE `t` (`a` NVARCHAR(50), `b` NCHAR(10), `c` NCHAR)'
+        ]
+      },
+      {
         title: 'remove type keyword',
         sql: [
           `ALTER TABLE test ADD
