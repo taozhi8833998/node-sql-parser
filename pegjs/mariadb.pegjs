@@ -3755,6 +3755,7 @@ mem_chain
 
 data_type
   = character_string_type
+  / national_character_type
   / numeric_type
   / datetime_type
   / json_type
@@ -3774,6 +3775,16 @@ data_type
 @import 'common/datatype/boolean.pegjs'
 @import 'common/datatype/blob.pegjs'
 @import 'common/datatype/binary.pegjs'
+national_character_type
+  = t:(KW_NCHAR / KW_NVARCHAR) num:(__ LPAREN __ [0-9]+ __ RPAREN)? {
+    const result = { dataType: t }
+    if (num) {
+      result.length = parseInt(num[3].join(''), 10)
+      result.parentheses = true
+    }
+    return result
+  }
+
 @import 'common/datatype/character.pegjs'
 @import 'common/datatype/datetime.pegjs'
 @import 'common/datatype/numeric.pegjs'
