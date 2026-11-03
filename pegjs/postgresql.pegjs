@@ -3461,7 +3461,7 @@ column_item_suffix
 column_list_item
   = c:string_constants_escape {
     // => { expr: expr; as: null; }
-    return { expr: c, as: null }
+    return { expr: c, as: null, ...getLocationObject(), }
   }
   / e:column_ref __ c:cast_double_colon __ cs:column_item_suffix+ __ alias:alias_clause? {
     // => { type: 'cast'; expr: expr; symbol: '::'; target: cast_data_type[];  as?: null; }
@@ -3472,6 +3472,7 @@ column_list_item
       type: 'cast',
       expr: e,
       suffix: cs.flat(),
+      ...getLocationObject(),
     }
   }
   / e:(column_ref_quoted / expr_item) __ c:cast_double_colon __ tail:(__ (additive_operator / multiplicative_operator) __ expr_item)* __ cs:column_item_suffix* __ alias:alias_clause? {
@@ -3485,6 +3486,7 @@ column_list_item
       type: 'cast',
       expr: e,
       tail: tail && tail[0] && { operator: tail[0][1], expr: tail[0][3] },
+      ...getLocationObject(),
     }
   }
   / tbl:ident_type __ DOT pro:(ident_without_kw_type __ DOT)? __ STAR {
@@ -3504,7 +3506,8 @@ column_list_item
           schema,
           column,
         },
-        as: null
+        as: null,
+        ...getLocationObject(),
       }
     }
   / tbl:(ident_type __ DOT)? __ STAR {
@@ -3517,7 +3520,8 @@ column_list_item
           table: table,
           column: '*'
         },
-        as: null
+        as: null,
+        ...getLocationObject(),
       };
     }
   / e:expr_item __ alias:alias_clause? {
@@ -3525,7 +3529,7 @@ column_list_item
       if (e.type === 'double_quote_string' || e.type === 'single_quote_string') {
         columnList.add(`select::null::${e.value}`)
       }
-      return { type: 'expr', expr: e, as: alias };
+      return { type: 'expr', expr: e, as: alias, ...getLocationObject(), };
     }
 
 value_alias_clause
@@ -3668,7 +3672,8 @@ table_join
       expr: stmt,
       as: alias,
       join: op,
-      on: expr
+      on: expr,
+      ...getLocationObject(),
     };
   }
 
@@ -3677,14 +3682,16 @@ table_base
   = KW_DUAL {
     // => { type: 'dual' }
       return {
-        type: 'dual'
+        type: 'dual',
+        ...getLocationObject(),
       };
   }
   / stmt:value_clause __ alias:value_alias_clause? {
     // => { expr: value_clause; as?: alias_clause; }
     return {
       expr: stmt,
-      as: alias
+      as: alias,
+      ...getLocationObject(),
     };
   }
   / l:('LATERAL'i)? __ LPAREN __ stmt:(union_stmt / value_clause) __ RPAREN __ alias:value_alias_clause? {
@@ -3693,7 +3700,8 @@ table_base
     return {
       prefix: l,
       expr: stmt,
-      as: alias
+      as: alias,
+      ...getLocationObject(),
     };
   }
   / l:('LATERAL'i)? __ LPAREN __ stmt:table_ref_list __ RPAREN __ alias:value_alias_clause? {
@@ -3702,12 +3710,13 @@ table_base
     return {
       prefix: l,
       expr: stmt,
-      as: alias
+      as: alias,
+      ...getLocationObject(),
     };
   }
   / l:('LATERAL'i)? __ e:func_call __ alias:alias_clause? {
     // => { prefix?: string; type: 'expr'; expr: expr; as?: alias_clause; }
-      return { prefix: l, type: 'expr', expr: e, as: alias };
+      return { prefix: l, type: 'expr', expr: e, as: alias, ...getLocationObject(), };
     }
   / t:table_name __ 'TABLESAMPLE'i __ f:func_call __ re:('REPEATABLE'i __ LPAREN __ literal_numeric __ RPAREN)? __ alias:alias_clause? {
     // => table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;}
@@ -3717,7 +3726,8 @@ table_base
       tablesample: {
         expr: f,
         repeatable: re && re[4],
-      }
+      },
+      ...getLocationObject(),
     }
   }
   / t:table_name __ alias:alias_clause? {
@@ -3728,7 +3738,8 @@ table_base
       } else {
         return {
           ...t,
-          as: alias
+          as: alias,
+          ...getLocationObject(),
         };
       }
     }
@@ -3941,7 +3952,7 @@ partition_by_clause
 order_by_element
   = e:expr __ d:(KW_DESC / KW_ASC)? __ nl:('NULLS'i __ ('FIRST'i / 'LAST'i)?)? {
     // => { expr: expr; type: 'ASC' | 'DESC' | undefined;  nulls: 'NULLS FIRST' | 'NULLS LAST' | undefined }
-    const obj = { expr: e, type: d };
+    const obj = { expr: e, type: d, ...getLocationObject(), };
     obj.nulls = nl && [nl[0], nl[2]].filter(v => v).join(' ')
     return obj;
   }
@@ -3959,7 +3970,8 @@ limit_clause
       if (tail) res.push(tail[2]);
       return {
         seperator: tail && tail[0] && tail[0].toLowerCase() || '',
-        value: res
+        value: res,
+        ...(res.length ? getLocationObject() : {}),
       };
     }
 
@@ -4250,6 +4262,7 @@ interval_expr
         type: 'interval',
         expr: e,
         unit: u.toLowerCase(),
+        ...getLocationObject(),
       }
     }
   / KW_INTERVAL __
@@ -4259,6 +4272,7 @@ interval_expr
         type: 'interval',
         expr: e,
         unit: '',
+        ...getLocationObject(),
       }
     }
 
@@ -4277,7 +4291,8 @@ case_expr
       return {
         type: 'case',
         expr: null,
-        args: condition_list
+        args: condition_list,
+        ...getLocationObject(),
       };
     }
   / KW_CASE                        __
@@ -4295,7 +4310,8 @@ case_expr
       return {
         type: 'case',
         expr: expr,
-        args: condition_list
+        args: condition_list,
+        ...getLocationObject(),
       };
     }
 
@@ -4311,13 +4327,14 @@ case_when_then
     return {
       type: 'when',
       cond: condition,
-      result: result
+      result: result,
+      ...getLocationObject(),
     };
   }
 
 case_else = KW_ELSE __ result:expr {
     // => { type: 'else'; condition?: never; result: expr; }
-    return { type: 'else', result: result };
+    return { type: 'else', result: result, ...getLocationObject(), };
   }
 
 /**
@@ -4630,7 +4647,8 @@ column_ref
       return {
           type: 'column_ref',
           table: table,
-          column: '*'
+          column: '*',
+          ...getLocationObject(),
       }
     }
   / schema:ident tbl:(__ DOT __ ident) col:(__ DOT __ column_without_kw_type)+ ce:(__ collate_expr)? {
@@ -4650,6 +4668,7 @@ column_ref
           table: tbl[3],
           column: { expr: col[0][3] },
           collate: ce && ce[1],
+          ...getLocationObject(),
         };
       }
       const left = createBinaryExpr('.', schema, tbl[3])
@@ -4657,6 +4676,7 @@ column_ref
         type: 'column_ref',
         column: { expr: createBinaryExprChain(left, col) },
         collate: ce && ce[1],
+        ...getLocationObject(),
       };
     }
   / tbl:ident __ DOT __ col:column_without_kw_type ce:(__ collate_expr)? {
@@ -4672,6 +4692,7 @@ column_ref
         table: tbl,
         column: { expr: col },
         collate: ce && ce[1],
+        ...getLocationObject(),
       };
     }
   / col:column_type !LPAREN ce:(__ collate_expr)? {
@@ -4682,6 +4703,7 @@ column_ref
         table: null,
         column: { expr: col },
         collate: ce && ce[1],
+        ...getLocationObject(),
       };
     }
 
@@ -4692,7 +4714,8 @@ column_ref_quoted
       return {
         type: 'column_ref',
         table: null,
-        column: { expr: col }
+        column: { expr: col },
+        ...getLocationObject(),
       };
     }
 
@@ -4844,7 +4867,8 @@ window_fun_rank
     return {
       type: 'window_func',
       name: name,
-      over: over
+      over: over,
+      ...getLocationObject(),
     }
   }
 
@@ -4856,7 +4880,8 @@ window_fun_laglead
       name: name,
       args: l,
       over: over,
-      consider_nulls: cn
+      consider_nulls: cn,
+      ...getLocationObject(),
     };
   }
 
@@ -4870,7 +4895,8 @@ window_fun_firstlast
         type: 'expr_list', value: [l]
       },
       over: over,
-      consider_nulls: cn
+      consider_nulls: cn,
+      ...getLocationObject(),
     };
   }
 
@@ -4915,7 +4941,8 @@ aggr_fun_count
         type: 'aggr_func',
         name: name,
         args: arg,
-        over: bc
+        over: bc,
+        ...getLocationObject(),
       };
     }
   / name:('percentile_cont'i / 'percentile_disc'i) __ LPAREN __ arg:(literal_numeric / literal_array) __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
@@ -4927,7 +4954,8 @@ aggr_fun_count
           expr: arg
         },
         within_group_orderby: or,
-        over: bc
+        over: bc,
+        ...getLocationObject(),
       };
   }
   / name:('mode'i) __ LPAREN __ RPAREN __ 'within'i __ KW_GROUP __ LPAREN __ or:order_by_clause __ RPAREN __ bc:over_partition? {
@@ -4937,7 +4965,8 @@ aggr_fun_count
         name: name.toUpperCase(),
         args: { expr: {} },
         within_group_orderby: or,
-        over: bc
+        over: bc,
+        ...getLocationObject(),
       };
   }
 
@@ -4982,11 +5011,12 @@ aggr_array_agg
         type: 'aggr_func',
         name: pre ? `${pre[0]}.${name}` : name,
         args: arg,
+        ...getLocationObject(),
       };
     }
 
 star_expr
-  = "*" { /* => { type: 'star'; value: '*' } */ return { type: 'star', value: '*' }; }
+  = "*" { /* => { type: 'star'; value: '*' } */ return { type: 'star', value: '*', ...getLocationObject() }; }
 
 position_func_args
   = s:literal_string __ KW_IN __ e:expr start:(__ KW_FROM __ literal_numeric)? {
@@ -5345,7 +5375,8 @@ literal_array
       expr_list: c || { type: 'origin', value: '' },
       type: 'array',
       keyword: 'array',
-      brackets: true
+      brackets: true,
+      ...getLocationObject(),
     }
   }
 
@@ -5367,8 +5398,8 @@ literal_array
 // PostgreSQL specific: number has special structure (double_float / integer)
 literal_numeric
   = n:number {
-      if (n && typeof n === 'object') return n
-      return { type: 'number', value: n };
+      if (n && typeof n === 'object') return { ...n, ...getLocationObject() }
+      return { type: 'number', value: n, ...getLocationObject() };
     }
 
 integer

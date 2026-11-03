@@ -15,7 +15,7 @@ value_item
 
 expr_list
   = head:expr tail:(__ COMMA __ expr)* {
-      const el = { type: 'expr_list' };
+      const el = { type: 'expr_list', ...getLocationObject() };
       el.value = createList(head, tail);
       return el;
     }

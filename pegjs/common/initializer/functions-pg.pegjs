@@ -15,7 +15,8 @@
     return {
       type: 'unary_expr',
       operator: op,
-      expr: e
+      expr: e,
+      ...getLocationObject(),
     };
   }
 
