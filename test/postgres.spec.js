@@ -2605,6 +2605,64 @@ describe('Postgres', () => {
         }
       })
     })
+    describe('loc on expression and clause nodes', () => {
+      const locOpt = { database: 'postgresql', parseOptions: { includeLocations: true } }
+      const sql = `SELECT a, t.b AS bb, t.*, COUNT(*), ROW_NUMBER() OVER (ORDER BY a), -a, 1, 2.5, 's', TRUE, NULL, DATE '2024-01-01', INTERVAL '1 day', CASE WHEN a > 1 THEN 'x' ELSE 'y' END, ARRAY[1, 2] FROM t JOIN u ON t.id = u.id WHERE a IN (1, 2) ORDER BY a DESC LIMIT 10 OFFSET 5`
+      const ast = parser.astify(sql, locOpt)
+      const textOf = node => sql.slice(node.loc.start.offset, node.loc.end.offset).trim()
+      const [a, bb, star, count, rowNumber, neg, int, float, str, bool, nul, date, interval, caseExpr, arr] = ast.columns
+
+      it('should locate select columns and their expressions', () => {
+        expect(textOf(a)).to.equal('a')
+        expect(textOf(a.expr)).to.equal('a')
+        expect(textOf(bb)).to.equal('t.b AS bb')
+        expect(textOf(bb.expr)).to.equal('t.b')
+        expect(textOf(star)).to.equal('t.*')
+      })
+
+      it('should locate functions and unary expressions', () => {
+        expect(textOf(count)).to.equal('COUNT(*)')
+        expect(textOf(count.expr.args.expr)).to.equal('*')
+        expect(textOf(rowNumber.expr)).to.equal('ROW_NUMBER() OVER (ORDER BY a)')
+        expect(textOf(neg.expr)).to.equal('-a')
+      })
+
+      it('should locate literals', () => {
+        expect(textOf(int.expr)).to.equal('1')
+        expect(textOf(float.expr)).to.equal('2.5')
+        expect(textOf(str.expr)).to.equal("'s'")
+        expect(textOf(bool.expr)).to.equal('TRUE')
+        expect(textOf(nul.expr)).to.equal('NULL')
+        expect(textOf(date.expr)).to.equal("DATE '2024-01-01'")
+        expect(textOf(interval.expr)).to.equal("INTERVAL '1 day'")
+        expect(textOf(arr.expr)).to.equal('ARRAY[1, 2]')
+        expect(textOf(arr.expr.expr_list)).to.equal('1, 2')
+      })
+
+      it('should locate case branches', () => {
+        expect(textOf(caseExpr.expr)).to.equal("CASE WHEN a > 1 THEN 'x' ELSE 'y' END")
+        expect(textOf(caseExpr.expr.args[0])).to.equal("WHEN a > 1 THEN 'x'")
+        expect(textOf(caseExpr.expr.args[1])).to.equal("ELSE 'y'")
+      })
+
+      it('should locate from entries, in lists, order by and limit', () => {
+        expect(textOf(ast.from[0])).to.equal('t')
+        expect(textOf(ast.from[1])).to.equal('u')
+        expect(textOf(ast.from[1].on.left)).to.equal('t.id')
+        expect(textOf(ast.where.right)).to.equal('1, 2')
+        expect(textOf(ast.orderby[0])).to.equal('a DESC')
+        expect(textOf(ast.limit)).to.equal('LIMIT 10 OFFSET 5')
+        expect(textOf(ast.limit.value[0])).to.equal('10')
+      })
+
+      it('should not set loc on an absent limit or without the option', () => {
+        expect(parser.astify('SELECT a FROM t', locOpt).limit).to.not.have.property('loc')
+        const plain = parser.astify(sql, opt)
+        expect(plain.columns[0]).to.not.have.property('loc')
+        expect(plain.columns[0].expr).to.not.have.property('loc')
+        expect(plain.from[0]).to.not.have.property('loc')
+      })
+    })
     it('should throw error', () => {
       const sql = "select 1 as 'one'"
       const fun = parser.astify.bind(parser, sql, opt)

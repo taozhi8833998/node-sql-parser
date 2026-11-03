@@ -3,7 +3,7 @@
 
 literal_null
   = KW_NULL {
-      return { type: 'null', value: null };
+      return { type: 'null', value: null, ...getLocationObject() };
     }
 
 literal_not_null
@@ -11,15 +11,16 @@ literal_not_null
     return {
       type: 'not null',
       value: 'not null',
+      ...getLocationObject(),
     }
   }
 
 literal_bool
   = KW_TRUE {
-      return { type: 'bool', value: true };
+      return { type: 'bool', value: true, ...getLocationObject() };
     }
   / KW_FALSE {
-      return { type: 'bool', value: false };
+      return { type: 'bool', value: false, ...getLocationObject() };
     }
 
 literal_list
