@@ -1,3 +1,4 @@
-const Parser = require('../../../output/prod/build/mysql.js').Parser;
+import { createRequire } from 'module';
 
-exports.Parser = Parser;
+const require = createRequire(import.meta.url);
+export const { Parser } = require('../../../build/mysql.js');

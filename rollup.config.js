@@ -1,18 +1,46 @@
 const path = require('path')
 const esbuild = require('rollup-plugin-esbuild').default
+const peggy = require('rollup-plugin-peggy')
 const commonjs = require('@rollup/plugin-commonjs')
 const { nodeResolve } = require('@rollup/plugin-node-resolve')
 const replace = require('@rollup/plugin-replace')
 const pkg = require('./package.json')
-const { dialects } = require('./gulp/config.json')
+const { DIALECTS, GRAMMAR_DIR, renderGrammar } = require('./scripts/grammar')
 
 const root = __dirname
 const srcGlobs = [path.join(root, 'src/**'), path.join(root, 'index.js')]
 const UMD_NAME = 'NodeSQLParser'
 
+// Expands `@import 'fragment.pegjs';` lines so peggy receives one complete grammar.
+// Must run before rollup-plugin-peggy, which compiles the transformed source.
+const pegjsImports = () => ({
+  name: 'pegjs-imports',
+  transform(code, id) {
+    if (!id.endsWith('.pegjs')) return null
+    return { code: renderGrammar(code), map: null }
+  },
+})
+
+// rollup-plugin-peggy runs peggy on every grammar in every config. Rollup runs all configs in
+// one process, so reuse each compiled grammar instead of regenerating it per bundle.
+const compiledGrammars = new Map()
+const cachedPeggy = () => {
+  const plugin = peggy({ target: 'es2015' })
+  return {
+    name: 'cached-peggy',
+    transform(code, id) {
+      const key = `${id}\0${code}`
+      if (!compiledGrammars.has(key)) {
+        compiledGrammars.set(key, plugin.transform.call(this, code, id))
+      }
+      return compiledGrammars.get(key)
+    },
+  }
+}
+
 // Full bundle when dialect is null. Otherwise the bundle only includes the parser
 // for that dialect: `./parser.all` (imported by src/parser.js) is replaced with a
-// virtual module that exposes only the single pre-generated parser.
+// virtual module that exposes only that dialect's grammar.
 const parserVariant = (dialect) => {
   const virtualId = `\0parser-variant:${dialect}`
   const parserAll = path.join(root, 'src', 'parser.js')
@@ -24,10 +52,10 @@ const parserVariant = (dialect) => {
     },
     load(id) {
       if (id !== virtualId) return null
-      const parserFile = path.join(root, 'lib', 'parser', `${dialect}.js`)
+      const grammarFile = path.join(GRAMMAR_DIR, `${dialect}.pegjs`)
       return [
-        `import { parse } from ${JSON.stringify(parserFile)}`,
-        `export default { ${dialect}: parse }`,
+        `import grammar from ${JSON.stringify(grammarFile)}`,
+        `export default { ${dialect}: grammar.parse }`,
       ].join('\n')
     },
   }
@@ -43,6 +71,8 @@ const createPlugins = (dialect) => [
     values: { PARSER_NAME: dialect ? JSON.stringify(dialect) : 'null' },
   }),
   ...(dialect ? [parserVariant(dialect)] : []),
+  pegjsImports(),
+  cachedPeggy(),
   nodeResolve({ extensions: ['.js'] }),
   commonjs(),
   esbuild({
@@ -77,7 +107,7 @@ const umdConfig = (name, dialect) => ({
 
 const variants = [
   { name: 'index', dialect: null },
-  ...dialects.map(dialect => ({ name: dialect, dialect })),
+  ...DIALECTS.map(dialect => ({ name: dialect, dialect })),
 ]
 
 module.exports = [
