@@ -235,12 +235,16 @@ describe('sqlite', () => {
   })
 
   it('should support INSERT ... RETURNING *', () => {
-    const sql = `INSERT INTO users (email) VALUES (?) RETURNING *`
+    let sql = `INSERT INTO users (email) VALUES (?) RETURNING *`
     expect(getParsedSql(sql)).to.be.equal(`INSERT INTO "users" (email) VALUES (?) RETURNING *`)
+    sql = `INSERT INTO users VALUES (2, "example", "example@example.com") RETURNING *;`
+    expect(getParsedSql(sql)).to.be.equal(`INSERT INTO "users" VALUES (2,"example","example@example.com") RETURNING *`)
   })
   it('should support INSERT ... RETURNING specific columns', () => {
-    const sql = `INSERT INTO users (email) VALUES (?) RETURNING id, email as email_address`
+    let sql = `INSERT INTO users (email) VALUES (?) RETURNING id, email as email_address`
     expect(getParsedSql(sql)).to.be.equal(`INSERT INTO "users" (email) VALUES (?) RETURNING "id", "email" AS "email_address"`)
+    sql = `INSERT INTO users VALUES (2, "example", "example@example.com") RETURNING id, email;`
+    expect(getParsedSql(sql)).to.be.equal(`INSERT INTO "users" VALUES (2,"example","example@example.com") RETURNING "id", "email"`)
   })
   it('should support UPDATE ... RETURNING *', () => {
     const sql = `UPDATE users SET email = ? RETURNING *`
@@ -295,5 +299,121 @@ describe('sqlite', () => {
         const sql = `SELECT * FROM "table_name" WHERE "column_name" ${operator} 5 = 10`
         expect(getParsedSql(sql)).to.be.equal(sql)
       });
+  });
+
+  it('should support cross join with table aliases', () => {
+    const sql = 'SELECT * FROM users AS u CROSS JOIN products AS p';
+    expect(getParsedSql(sql)).to.be.equal(
+      'SELECT * FROM "users" AS "u" CROSS JOIN "products" AS "p"'
+    );
+  });
+
+  it('should support cross join with using clause', () => {
+    const sql = 'SELECT * FROM users CROSS JOIN products USING (id)';
+    expect(getParsedSql(sql)).to.be.equal(
+      'SELECT * FROM "users" CROSS JOIN "products" USING (id)'
+    );
+  });
+
+  it('should support cross join with on clause', () => {
+    const sql = 'SELECT * FROM t1 CROSS JOIN t2 ON t1.id = t2.id';
+    expect(getParsedSql(sql)).to.be.equal(
+      'SELECT * FROM "t1" CROSS JOIN "t2" ON "t1"."id" = "t2"."id"'
+    );
+  });
+
+  it('should support multiple cross joins', () => {
+    const sql = 'SELECT * FROM t1 CROSS JOIN t2 CROSS JOIN t3';
+    expect(getParsedSql(sql)).to.be.equal(
+      'SELECT * FROM "t1" CROSS JOIN "t2" CROSS JOIN "t3"'
+    );
+  });
+
+  it('should support cross join with subquery', () => {
+    const sql = 'SELECT * FROM users CROSS JOIN (SELECT * FROM products WHERE price > 50) AS p';
+    expect(getParsedSql(sql)).to.be.equal(
+      'SELECT * FROM "users" CROSS JOIN (SELECT * FROM "products" WHERE "price" > 50) AS "p"'
+    );
+  });
+
+  it('should support cross join mixed with INNER JOIN', () => {
+    const sql = 'SELECT * FROM t1 CROSS JOIN t2 INNER JOIN t3 ON t2.id = t3.id';
+    expect(getParsedSql(sql)).to.be.equal(
+      'SELECT * FROM "t1" CROSS JOIN "t2" INNER JOIN "t3" ON "t2"."id" = "t3"."id"'
+    );
+  });
+  
+  it('should support VALUES in a CTE', () => {
+    const sql = `WITH cte1 (col1, col2) AS (
+      VALUES ('Name1', 'type1'), ('Name2', 'type1')
+    )
+    SELECT a.name
+    FROM table1 a
+    JOIN cte1 c ON lower(a.name) = lower(c.col1)`;
+    expect(getParsedSql(sql)).to.be.equal(
+      `WITH "cte1"("col1", "col2") AS (VALUES ('Name1','type1'), ('Name2','type1')) SELECT "a"."name" FROM "table1" AS "a" INNER JOIN "cte1" AS "c" ON lower("a"."name") = lower("c"."col1")`
+    );
+  });
+
+  it('should support single-column VALUES in a CTE', () => {
+    const sql = `WITH cte1 (col1) AS (
+      VALUES ('Value1'), ('Value2')
+    )
+    SELECT a.name FROM table1 a JOIN cte1 c ON lower(a.name) = lower(c.col1)`;
+    expect(getParsedSql(sql)).to.be.equal(
+      `WITH "cte1"("col1") AS (VALUES ('Value1'), ('Value2')) SELECT "a"."name" FROM "table1" AS "a" INNER JOIN "cte1" AS "c" ON lower("a"."name") = lower("c"."col1")`
+    );
+  });
+
+  it('should support VALUES in a CTE without an explicit column list', () => {
+    const sql = `WITH cte1 AS (
+      VALUES ('Value1'), ('Value2')
+    )
+    SELECT * FROM cte1`;
+    expect(getParsedSql(sql)).to.be.equal(
+      `WITH "cte1" AS (VALUES ('Value1'), ('Value2')) SELECT * FROM "cte1"`
+    );
+  });
+
+  it('should support VALUES in a CTE with a trailing semicolon', () => {
+    const sql = `WITH cte1 (col1) AS (
+      VALUES ('Value1'), ('Value2')
+    )
+    SELECT a.name FROM table1 a JOIN cte1 c ON lower(a.name) = lower(c.col1);`;
+    expect(getParsedSql(sql)).to.be.equal(
+      `WITH "cte1"("col1") AS (VALUES ('Value1'), ('Value2')) SELECT "a"."name" FROM "table1" AS "a" INNER JOIN "cte1" AS "c" ON lower("a"."name") = lower("c"."col1")`
+    );
+  });
+
+  it('should support multiple CTEs with VALUES and SELECT', () => {
+    const sql = `WITH cte1 (col1) AS (
+        VALUES ('Value1'), ('Value2')
+      ),
+      cte2 AS (
+        SELECT name FROM table1 WHERE name IS NOT NULL
+      )
+    SELECT f.name, c.col1
+    FROM cte2 f
+    JOIN cte1 c ON lower(f.name) = lower(c.col1)`;
+    expect(getParsedSql(sql)).to.be.equal(
+      `WITH "cte1"("col1") AS (VALUES ('Value1'), ('Value2')), "cte2" AS (SELECT "name" FROM "table1" WHERE "name" IS NOT NULL) SELECT "f"."name", "c"."col1" FROM "cte2" AS "f" INNER JOIN "cte1" AS "c" ON lower("f"."name") = lower("c"."col1")`
+    );
+  });
+
+  it('should support VALUES and UNION ALL CTEs in the same query', () => {
+    const sql = `WITH cte1 (col1, col2) AS (
+        VALUES ('Name1', 'type1')
+      ),
+      cte2 AS (
+        SELECT 'Name2' AS col1, 'type1' AS col2
+        UNION ALL
+        SELECT 'Name3', 'type1'
+      )
+    SELECT v.col1 FROM cte1 v
+    UNION ALL
+    SELECT u.col1 FROM cte2 u`;
+    expect(getParsedSql(sql)).to.be.equal(
+      `WITH "cte1"("col1", "col2") AS (VALUES ('Name1','type1')), "cte2" AS (SELECT 'Name2' AS "col1", 'type1' AS "col2" UNION ALL SELECT 'Name3', 'type1') SELECT "v"."col1" FROM "cte1" AS "v" UNION ALL SELECT "u"."col1" FROM "cte2" AS "u"`
+    );
   });
 })

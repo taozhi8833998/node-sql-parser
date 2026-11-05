@@ -1,7 +1,7 @@
 import { arrayIndexToSQL, columnOffsetToSQL } from './column'
 import { collateToSQL } from './collate'
 import { exprToSQL, orderOrPartitionByToSQL } from './expr'
-import { hasVal, identifierToSql, literalToSQL, toUpper } from './util'
+import { arrayStructTypeToSQL, hasVal, identifierToSql, literalToSQL, toUpper } from './util'
 import { overToSQL } from './over'
 
 function anyValueFuncToSQL(stmt) {
@@ -34,7 +34,23 @@ function castToSQL(expr) {
   const result = []
   for (let i = 0, len = targets.length; i < len; ++i) {
     const target = targets[i]
-    const { angle_brackets: angleBrackets, length, dataType, parentheses, quoted, scale, suffix: dataTypeSuffix, expr: targetExpr } = target
+    const { angle_brackets: angleBrackets, length, dataType, parentheses, quoted, scale, suffix: dataTypeSuffix, expr: targetExpr, definition } = target
+    // Handle ARRAY(TYPE) and STRUCT types with definition
+    if (definition) {
+      const typeStr = arrayStructTypeToSQL(target)
+      let symbolChar = '::'
+      let suffix = ''
+      const targetResult = []
+      if (symbol === 'as') {
+        if (i === 0) prefix = `${toUpper(keyword)}(${prefix}`
+        suffix = ')'
+        symbolChar = ` ${symbol.toUpperCase()} `
+      }
+      if (i === 0) targetResult.push(prefix)
+      targetResult.push(symbolChar, quoted, typeStr, quoted, suffix)
+      result.push(targetResult.filter(hasVal).join(''))
+      continue
+    }
     let str = targetExpr ? exprToSQL(targetExpr) : ''
     if (length != null) str = scale ? `${length}, ${scale}` : length
     if (parentheses) str = `(${str})`

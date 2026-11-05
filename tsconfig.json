@@ -1,21 +1,55 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "lib": ["ES2020"],
-    "strict": true,
+    "rootDirs": [
+      "src"
+    ],
+    "outDir": "lib",
+    "allowJs": false,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "baseUrl": ".",
+    "declaration": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "exactOptionalPropertyTypes": true,
     "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "lib": [
+      "esnext"
+    ],
+    "module": "CommonJS",
     "moduleResolution": "node",
+    "noEmit": true,
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "pretty": true,
     "resolveJsonModule": true,
-    "noEmit": true
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2021"
   },
+  "include": [
+    "src",
+    "test"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
   "ts-auto-guard": {
     "export-guards": true,
     "guard-name": "is%s",
     "path-mode": "relative"
-  },
-  "include": ["types.d.ts"],
-  "exclude": ["node_modules", "test", "lib", "build"]
+  }
 }

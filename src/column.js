@@ -29,7 +29,17 @@ function arrayIndexToSQL(arrayIndexList) {
   if (!arrayIndexList || arrayIndexList.length === 0) return ''
   const result = []
   for (const arrayIndex of arrayIndexList) {
-    let arrayIndexStr = arrayIndex.brackets ? `[${exprToSQL(arrayIndex.index)}]` : `${arrayIndex.notation}${exprToSQL(arrayIndex.index)}`
+    let arrayIndexStr = ''
+    if (arrayIndex.type === 'slice') {
+      // Array slice notation: [start:end], [:end], [start:], or [:]
+      const startStr = arrayIndex.start ? exprToSQL(arrayIndex.start) : ''
+      const endStr = arrayIndex.end ? exprToSQL(arrayIndex.end) : ''
+      arrayIndexStr = `[${startStr}:${endStr}]`
+    } else if (arrayIndex.brackets) {
+      arrayIndexStr = `[${exprToSQL(arrayIndex.index)}]`
+    } else {
+      arrayIndexStr = `${arrayIndex.notation}${exprToSQL(arrayIndex.index)}`
+    }
     if (arrayIndex.property) arrayIndexStr = `${arrayIndexStr}.${literalToSQL(arrayIndex.property)}`
     result.push(arrayIndexStr)
   }

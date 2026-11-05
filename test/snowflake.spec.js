@@ -127,6 +127,69 @@ describe('snowflake', () => {
       ],
     },
     {
+      title: 'cast to VARIANT type',
+      sql: [
+        `SELECT col::VARIANT AS variant_col FROM t`,
+        `SELECT "col"::VARIANT AS "variant_col" FROM t`,
+      ],
+    },
+    {
+      title: 'cast to OBJECT type',
+      sql: [
+        `SELECT col::OBJECT AS object_col FROM t`,
+        `SELECT "col"::OBJECT AS "object_col" FROM t`,
+      ],
+    },
+    {
+      title: 'cast to ARRAY type (untyped)',
+      sql: [
+        `SELECT col::ARRAY AS array_col FROM t`,
+        `SELECT "col"::ARRAY AS "array_col" FROM t`,
+      ],
+    },
+    {
+      title: 'cast to ARRAY(TYPE) type (typed)',
+      sql: [
+        `SELECT col::ARRAY(VARCHAR) AS typed_array_col FROM t`,
+        `SELECT "col"::ARRAY(VARCHAR) AS "typed_array_col" FROM t`,
+      ],
+    },
+    {
+      title: 'cast to ARRAY(NUMBER) type',
+      sql: [
+        `SELECT col::ARRAY(NUMBER) AS num_array FROM t`,
+        `SELECT "col"::ARRAY(NUMBER) AS "num_array" FROM t`,
+      ],
+    },
+    {
+      title: 'cast to TIMESTAMP_LTZ type',
+      sql: [
+        `SELECT col::TIMESTAMP_LTZ AS ts_ltz FROM t`,
+        `SELECT "col"::TIMESTAMP_LTZ AS "ts_ltz" FROM t`,
+      ],
+    },
+    {
+      title: 'CAST AS VARIANT',
+      sql: [
+        `SELECT CAST(col AS VARIANT) AS variant_col FROM t`,
+        `SELECT CAST("col" AS VARIANT) AS "variant_col" FROM t`,
+      ],
+    },
+    {
+      title: 'CAST AS ARRAY',
+      sql: [
+        `SELECT CAST(col AS ARRAY) AS array_col FROM t`,
+        `SELECT CAST("col" AS ARRAY) AS "array_col" FROM t`,
+      ],
+    },
+    {
+      title: 'CAST AS ARRAY(INTEGER)',
+      sql: [
+        `SELECT CAST(col AS ARRAY(INTEGER)) AS int_array_col FROM t`,
+        `SELECT CAST("col" AS ARRAY(INTEGER)) AS "int_array_col" FROM t`,
+      ],
+    },
+    {
       title: 'regexp operator',
       sql: [
         `SELECT v
@@ -160,6 +223,13 @@ describe('snowflake', () => {
       sql: [
         'SELECT src:customer[0].name, src:vehicle[0] FROM car_sales ORDER BY 1;',
         'SELECT "src"."customer"[0].name, "src"."vehicle"[0] FROM car_sales ORDER BY 1 ASC',
+      ]
+    },
+    {
+      title: 'array index followed by object accessor',
+      sql: [
+        'SELECT column[0]:field, data[1]:nested:value FROM test_table',
+        'SELECT "column"[0] :field, "data"[1] :nested :value FROM test_table',
       ]
     },
     {
@@ -459,7 +529,49 @@ describe('snowflake', () => {
       title: 'listagg function',
       sql: [
         'select listagg(distinct id, ", ") as ids from foo;',
-        'SELECT listagg(DISTINCT "id", ", ") AS "ids" FROM foo'
+        'SELECT LISTAGG(DISTINCT "id", ", ") AS "ids" FROM foo'
+      ]
+    },
+    {
+      title: 'ARRAY_AGG with WITHIN GROUP',
+      sql: [
+        'SELECT ARRAY_AGG(O_ORDERKEY) WITHIN GROUP (ORDER BY O_ORDERKEY ASC) FROM orders',
+        'SELECT ARRAY_AGG("O_ORDERKEY") WITHIN GROUP (ORDER BY "O_ORDERKEY" ASC) FROM orders'
+      ]
+    },
+    {
+      title: 'ARRAY_AGG with DISTINCT and WITHIN GROUP',
+      sql: [
+        'SELECT ARRAY_AGG(DISTINCT O_ORDERSTATUS) WITHIN GROUP (ORDER BY O_ORDERSTATUS ASC) FROM orders',
+        'SELECT ARRAY_AGG(DISTINCT "O_ORDERSTATUS") WITHIN GROUP (ORDER BY "O_ORDERSTATUS" ASC) FROM orders'
+      ]
+    },
+    {
+      title: 'STRING_AGG with WITHIN GROUP',
+      sql: [
+        "SELECT STRING_AGG(name, ', ') WITHIN GROUP (ORDER BY name ASC) FROM users",
+        `SELECT STRING_AGG("name", ', ') WITHIN GROUP (ORDER BY "name" ASC) FROM users`
+      ]
+    },
+    {
+      title: 'STRING_AGG with DISTINCT and WITHIN GROUP',
+      sql: [
+        'SELECT STRING_AGG(DISTINCT category) WITHIN GROUP (ORDER BY category DESC) FROM products',
+        'SELECT STRING_AGG(DISTINCT "category") WITHIN GROUP (ORDER BY "category" DESC) FROM products'
+      ]
+    },
+    {
+      title: 'LISTAGG with WITHIN GROUP',
+      sql: [
+        "SELECT LISTAGG(o_clerk, ', ') WITHIN GROUP (ORDER BY o_totalprice DESC) FROM orders",
+        `SELECT LISTAGG("o_clerk", ', ') WITHIN GROUP (ORDER BY "o_totalprice" DESC) FROM orders`
+      ]
+    },
+    {
+      title: 'LISTAGG with DISTINCT and WITHIN GROUP',
+      sql: [
+        'SELECT LISTAGG(DISTINCT o_clerk) WITHIN GROUP (ORDER BY o_clerk ASC) FROM orders',
+        'SELECT LISTAGG(DISTINCT "o_clerk") WITHIN GROUP (ORDER BY "o_clerk" ASC) FROM orders'
       ]
     },
     {
@@ -558,6 +670,13 @@ describe('snowflake', () => {
       sql: [
         "SELECT trim(col, ' ') FROM DUAL;",
         `SELECT trim("col", ' ') FROM DUAL`
+      ]
+    },
+    {
+      title: 'trailing comma in column list',
+      sql: [
+        'SELECT col1, col2, FROM my_table',
+        'SELECT "col1", "col2" FROM my_table'
       ]
     }
   ]

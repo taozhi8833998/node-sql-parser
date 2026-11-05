@@ -27,6 +27,59 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal('SELECT TOP 10 * FROM [myTable]')
   })
 
+  it('should support select OPTION query hints', () => {
+    // Argument-less hints
+    let sql = 'SELECT col FROM myTable OPTION (RECOMPILE)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (RECOMPILE)')
+    sql = 'SELECT col FROM myTable OPTION (FORCE ORDER)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (FORCE ORDER)')
+    sql = 'SELECT col FROM myTable OPTION (LOOP JOIN)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (LOOP JOIN)')
+    sql = 'SELECT col FROM myTable OPTION (HASH JOIN)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (HASH JOIN)')
+    sql = 'SELECT col FROM myTable OPTION (MERGE JOIN)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (MERGE JOIN)')
+    sql = 'SELECT col FROM myTable OPTION (OPTIMIZE FOR UNKNOWN)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (OPTIMIZE FOR UNKNOWN)')
+
+    // KEEPFIXED PLAN must be parsed before KEEP PLAN; verify both variants.
+    sql = 'SELECT col FROM myTable OPTION (KEEPFIXED PLAN)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (KEEPFIXED PLAN)')
+    sql = 'SELECT col FROM myTable OPTION (KEEP PLAN)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (KEEP PLAN)')
+
+    // Numeric-argument hints
+    sql = 'SELECT col FROM myTable OPTION (MAXDOP 8)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (MAXDOP 8)')
+    sql = 'SELECT col FROM myTable OPTION (MAXRECURSION 100)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (MAXRECURSION 100)')
+    sql = 'SELECT col FROM myTable OPTION (FAST 10)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (FAST 10)')
+
+    // Multiple hints in a single OPTION clause
+    sql = 'SELECT col FROM myTable OPTION (RECOMPILE, MAXDOP 4)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (RECOMPILE, MAXDOP 4)')
+    sql = 'SELECT col FROM myTable ORDER BY col OPTION (RECOMPILE, MAXDOP 8, FORCE ORDER)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] ORDER BY [col] ASC OPTION (RECOMPILE, MAXDOP 8, FORCE ORDER)')
+
+    // OPTION must appear after ORDER BY
+    sql = 'SELECT TOP 10 col FROM myTable ORDER BY col OPTION (MAXRECURSION 0)'
+    expect(getParsedSql(sql)).to.equal('SELECT TOP 10 [col] FROM [myTable] ORDER BY [col] ASC OPTION (MAXRECURSION 0)')
+
+    // Case-insensitive input is normalized to canonical upper-case form
+    sql = 'select col from myTable option (recompile, maxdop 2)'
+    expect(getParsedSql(sql)).to.equal('SELECT [col] FROM [myTable] OPTION (RECOMPILE, MAXDOP 2)')
+  })
+
+  it('should support select top n with ties', () => {
+    let sql = 'SELECT TOP 10 WITH TIES col FROM myTable ORDER BY col'
+    expect(getParsedSql(sql)).to.equal('SELECT TOP 10 WITH TIES [col] FROM [myTable] ORDER BY [col] ASC')
+    sql = 'SELECT TOP (10) WITH TIES col FROM myTable ORDER BY col'
+    expect(getParsedSql(sql)).to.equal('SELECT TOP (10) WITH TIES [col] FROM [myTable] ORDER BY [col] ASC')
+    sql = 'SELECT TOP 5 PERCENT WITH TIES col FROM myTable ORDER BY col'
+    expect(getParsedSql(sql)).to.equal('SELECT TOP 5 PERCENT WITH TIES [col] FROM [myTable] ORDER BY [col] ASC')
+  })
+
   it('should support select count', () => {
     let sql = 'select count(*);'
     expect(getParsedSql(sql)).to.equal('SELECT COUNT(*)')
@@ -223,6 +276,14 @@ describe('transactsql', () => {
     expect(getParsedSql(sql)).to.equal(`CREATE TABLE [test] ([id] BIGINT NOT NULL IDENTITY(1, 1), [session_id] INT NOT NULL, PRIMARY KEY CLUSTERED ([id] ASC) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 90, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]`)
   })
 
+  it('should support foreign key references in create table', () => {
+    const sql = `CREATE TABLE [T] (
+      [Id] INT NOT NULL,
+      CONSTRAINT [FK_T_P] FOREIGN KEY ([Id]) REFERENCES [P] ([Id])
+    )`
+    expect(getParsedSql(sql)).to.equal('CREATE TABLE [T] ([Id] INT NOT NULL, CONSTRAINT [FK_T_P] FOREIGN KEY ([Id]) REFERENCES [P] ([Id]))')
+  })
+
   it('should support alter table', () => {
     const sql = `ALTER TABLE [Class]
     ADD CONSTRAINT [chk_quizId_or_QuizLink]
@@ -231,6 +292,25 @@ describe('transactsql', () => {
         ([quizId] IS NULL AND [QuizLink] IS NOT NULL)
     );`
     expect(getParsedSql(sql)).to.equal(`ALTER TABLE [Class] ADD CONSTRAINT [chk_quizId_or_QuizLink] CHECK (([quizId] IS NOT NULL AND [QuizLink] IS NULL) OR ([quizId] IS NULL AND [QuizLink] IS NOT NULL))`)
+  })
+
+  it('should support foreign key references in alter table', () => {
+    const sql = `ALTER TABLE [ADRABC]
+    ADD CONSTRAINT [FK_ADRABC_ADRESSEN]
+    FOREIGN KEY ([ROWADRESSEN]) REFERENCES [ADRESSEN] ([ROWADRESSEN])
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE`
+    expect(getParsedSql(sql)).to.equal('ALTER TABLE [ADRABC] ADD CONSTRAINT [FK_ADRABC_ADRESSEN] FOREIGN KEY ([ROWADRESSEN]) REFERENCES [ADRESSEN] ([ROWADRESSEN]) ON UPDATE NO ACTION ON DELETE CASCADE')
+  })
+
+  it('should reject aliases in references targets', () => {
+    const sql = 'CREATE TABLE [T] ([Id] INT, FOREIGN KEY ([Id]) REFERENCES [P] AS [Alias] ([Id]))'
+    expect(() => parser.astify(sql, tsqlOpt)).to.throw()
+  })
+
+  it('should reject table hints in references targets', () => {
+    const sql = 'CREATE TABLE [T] ([Id] INT, FOREIGN KEY ([Id]) REFERENCES [P] WITH (NOLOCK) ([Id]))'
+    expect(() => parser.astify(sql, tsqlOpt)).to.throw()
   })
 
   it('should support pviot and unpviot clause', () => {

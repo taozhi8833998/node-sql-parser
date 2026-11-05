@@ -121,11 +121,12 @@ function setParserOpt(opt) {
 
 function topToSQL(opt) {
   if (!opt) return
-  const { value, percent, parentheses } = opt
+  const { value, percent, parentheses, with_ties: withTies } = opt
   const val = parentheses ? `(${value})` : value
-  const prefix = `TOP ${val}`
-  if (!percent) return prefix
-  return `${prefix} ${percent.toUpperCase()}`
+  const segments = [`TOP ${val}`]
+  if (percent) segments.push(percent.toUpperCase())
+  if (withTies) segments.push('WITH TIES')
+  return segments.join(' ')
 }
 
 function columnIdentifierToSql(ident) {
@@ -303,7 +304,7 @@ function dataTypeToSQL(expr) {
 
 function arrayStructTypeToSQL(expr) {
   if (!expr) return
-  const { dataType, definition, anglebracket } = expr
+  const { dataType, definition, anglebracket, parentheses } = expr
   const dataTypeUpper = toUpper(dataType)
   const isNotArrayOrStruct = dataTypeUpper !== 'ARRAY' && dataTypeUpper !== 'STRUCT'
   if (isNotArrayOrStruct) return dataTypeUpper
@@ -314,7 +315,9 @@ function arrayStructTypeToSQL(expr) {
     const fieldResult = [fieldName, arrayStructTypeToSQL(fieldType)]
     return fieldResult.filter(hasVal).join(' ')
   }).join(', ')
-  return anglebracket ? `${dataTypeUpper}<${result}>` : `${dataTypeUpper} ${result}`
+  if (anglebracket) return `${dataTypeUpper}<${result}>`
+  if (parentheses) return `${dataTypeUpper}(${result})`
+  return `${dataTypeUpper} ${result}`
 }
 
 function commentToSQL(comment) {
