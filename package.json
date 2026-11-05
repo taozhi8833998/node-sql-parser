@@ -2,15 +2,156 @@
   "name": "node-sql-parser",
   "version": "5.4.0",
   "description": "simple node sql parser",
-  "main": "index.js",
+  "main": "build/index.js",
+  "module": "build/index.mjs",
   "types": "types.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types.d.ts",
+      "import": "./build/index.mjs",
+      "require": "./build/index.js"
+    },
+    "./package.json": "./package.json",
+    "./umd": {
+      "types": "./types.d.ts",
+      "default": "./umd/index.umd.js"
+    },
+    "./build/athena": {
+      "types": "./types/athena.d.ts",
+      "import": "./build/athena.mjs",
+      "require": "./build/athena.js"
+    },
+    "./build/bigquery": {
+      "types": "./types/bigquery.d.ts",
+      "import": "./build/bigquery.mjs",
+      "require": "./build/bigquery.js"
+    },
+    "./build/db2": {
+      "types": "./types/db2.d.ts",
+      "import": "./build/db2.mjs",
+      "require": "./build/db2.js"
+    },
+    "./build/flinksql": {
+      "types": "./types/flinksql.d.ts",
+      "import": "./build/flinksql.mjs",
+      "require": "./build/flinksql.js"
+    },
+    "./build/hive": {
+      "types": "./types/hive.d.ts",
+      "import": "./build/hive.mjs",
+      "require": "./build/hive.js"
+    },
+    "./build/mariadb": {
+      "types": "./types/mariadb.d.ts",
+      "import": "./build/mariadb.mjs",
+      "require": "./build/mariadb.js"
+    },
+    "./build/mysql": {
+      "types": "./types/mysql.d.ts",
+      "import": "./build/mysql.mjs",
+      "require": "./build/mysql.js"
+    },
+    "./build/noql": {
+      "types": "./types/noql.d.ts",
+      "import": "./build/noql.mjs",
+      "require": "./build/noql.js"
+    },
+    "./build/postgresql": {
+      "types": "./types/postgresql.d.ts",
+      "import": "./build/postgresql.mjs",
+      "require": "./build/postgresql.js"
+    },
+    "./build/redshift": {
+      "types": "./types/redshift.d.ts",
+      "import": "./build/redshift.mjs",
+      "require": "./build/redshift.js"
+    },
+    "./build/snowflake": {
+      "types": "./types/snowflake.d.ts",
+      "import": "./build/snowflake.mjs",
+      "require": "./build/snowflake.js"
+    },
+    "./build/sqlite": {
+      "types": "./types/sqlite.d.ts",
+      "import": "./build/sqlite.mjs",
+      "require": "./build/sqlite.js"
+    },
+    "./build/transactsql": {
+      "types": "./types/transactsql.d.ts",
+      "import": "./build/transactsql.mjs",
+      "require": "./build/transactsql.js"
+    },
+    "./build/trino": {
+      "types": "./types/trino.d.ts",
+      "import": "./build/trino.mjs",
+      "require": "./build/trino.js"
+    },
+    "./umd/athena": {
+      "types": "./types/athena.d.ts",
+      "default": "./umd/athena.umd.js"
+    },
+    "./umd/bigquery": {
+      "types": "./types/bigquery.d.ts",
+      "default": "./umd/bigquery.umd.js"
+    },
+    "./umd/db2": {
+      "types": "./types/db2.d.ts",
+      "default": "./umd/db2.umd.js"
+    },
+    "./umd/flinksql": {
+      "types": "./types/flinksql.d.ts",
+      "default": "./umd/flinksql.umd.js"
+    },
+    "./umd/hive": {
+      "types": "./types/hive.d.ts",
+      "default": "./umd/hive.umd.js"
+    },
+    "./umd/mariadb": {
+      "types": "./types/mariadb.d.ts",
+      "default": "./umd/mariadb.umd.js"
+    },
+    "./umd/mysql": {
+      "types": "./types/mysql.d.ts",
+      "default": "./umd/mysql.umd.js"
+    },
+    "./umd/noql": {
+      "types": "./types/noql.d.ts",
+      "default": "./umd/noql.umd.js"
+    },
+    "./umd/postgresql": {
+      "types": "./types/postgresql.d.ts",
+      "default": "./umd/postgresql.umd.js"
+    },
+    "./umd/redshift": {
+      "types": "./types/redshift.d.ts",
+      "default": "./umd/redshift.umd.js"
+    },
+    "./umd/snowflake": {
+      "types": "./types/snowflake.d.ts",
+      "default": "./umd/snowflake.umd.js"
+    },
+    "./umd/sqlite": {
+      "types": "./types/sqlite.d.ts",
+      "default": "./umd/sqlite.umd.js"
+    },
+    "./umd/transactsql": {
+      "types": "./types/transactsql.d.ts",
+      "default": "./umd/transactsql.umd.js"
+    },
+    "./umd/trino": {
+      "types": "./types/trino.d.ts",
+      "default": "./umd/trino.umd.js"
+    },
+    "./ast/postgresql": {
+      "types": "./ast/postgresql.ts"
+    }
+  },
   "scripts": {
-    "start": "npm run build:pegjs && webpack --config webpack.config.js",
-    "build": "npm run lint && npm run build:pegjs && webpack --config webpack.config.js --mode production",
+    "start": "npm run build:pegjs && rollup -c -w",
+    "build": "npm run lint && npm run build:pegjs && node typegen.js && rollup -c",
     "build:pegjs": "gulp render && gulp generate",
-    "compile": "babel src -d lib",
-    "test": "npm run lint && npm run build:pegjs && mochapack --reporter-option maxDiffSize=1000000 \"test/**/*.spec.js\"",
-    "test:only": "mochapack --reporter-option maxDiffSize=1000000 \"test/**/*.spec.js\"",
+    "test": "npm run lint && npm run build:pegjs && npm run test:only",
+    "test:only": "mocha --require tsx/cjs --require ./test/setup.js --reporter-option maxDiffSize=1000000 \"test/**/*.spec.js\"",
     "test:types:mysql": "npm run generate:guards:mysql && npx tsx --test test/types/mysql/*.spec.ts",
     "test:types:mysql:single": "npm run generate:guards:mysql && npx tsx --test",
     "lint": "eslint src",
@@ -18,8 +159,7 @@
     "coverLocal": "npm run build:pegjs && cross-env NODE_ENV=coverage nyc --reporter=lcov --reporter=text npm run test:only",
     "cover:run": "npm run build:pegjs && cross-env NODE_ENV=coverage nyc --reporter=text-lcov npm run test:only",
     "cover": "npm run cover:run && nyc report --reporter=text-lcov | coveralls",
-    "test:only": "mochapack --reporter-option maxDiffSize=1000000 \"test/**/*.spec.js\"",
-    "release": "npm run build && npm publish output/prod"
+    "release": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
@@ -40,16 +180,12 @@
   "author": "taozhi8833998 <taozhi8833998@163.com>",
   "files": [
     "ast/",
-    "build",
-    "lib",
-    "umd/",
-    "index.d.ts",
-    "index.js",
-    "index.js.map",
+    "build/",
     "LICENSE",
-    "package.json",
     "README.md",
-    "types.d.ts"
+    "types/",
+    "types.d.ts",
+    "umd/"
   ],
   "license": "Apache-2.0",
   "bugs": {
@@ -60,51 +196,43 @@
     "node": ">=8"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.10.5",
-    "@babel/plugin-bugfix-firefox-class-in-computed-class-key": "^7.28.5",
-    "@babel/preset-env": "^7.10.4",
-    "@babel/register": "^7.10.5",
-    "@types/chai": "^4.1.7",
-    "@types/mocha": "^10.0.1",
-    "babel-loader": "^8.1.0",
-    "browserify": "^17.0.0",
+    "@rollup/plugin-commonjs": "^29.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-replace": "^6.0.3",
     "chai": "^4.4.1",
-    "copy-webpack-plugin": "^6.0.3",
     "coveralls": "^3.0.13",
     "cross-env": "^7.0.2",
+    "esbuild": "^0.28.2",
     "eslint": "^8.3.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-strict": "^14.0.1",
-    "eslint-plugin-filenames": "^1.3.2",
     "eslint-plugin-import": "^2.16.0",
-    "filemanager-webpack-plugin": "^3.1.1",
     "gulp": "^4.0.2",
-    "istanbul-instrumenter-loader": "^3.0.1",
     "mocha": "^10.0.0",
-    "mochapack": "^2.0.3",
     "nyc": "15.1.0",
     "peggy": "^3.0.2",
     "pre-commit": "^1.2.2",
     "rimraf": "^5.0.1",
-    "source-map-support": "^0.5.19",
-    "tinyify": "^4.0.0",
+    "rollup": "^4.67.5",
+    "rollup-plugin-esbuild": "^6.2.1",
     "ts-auto-guard": "^5.1.3",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "vscode-mocha-hmr": "^1.0.0",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^4.7.0",
-    "webpack-node-externals": "^3.0.0"
+    "typescript": "^5.9.3"
   },
   "nyc": {
     "include": [
       "src/**/*.js"
     ],
-    "instrument": false,
-    "sourceMap": false
+    "instrument": true,
+    "sourceMap": false,
+    "require": [
+      "tsx/cjs"
+    ]
   },
   "dependencies": {
     "big-integer": "^1.6.48"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }
