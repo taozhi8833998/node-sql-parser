@@ -1,0 +1,14 @@
+USE mydb;
+USE test_db;
+USE db123;
+USE _database;
+USE database_name;
+USE `database`;
+USE `my-database`;
+USE `my database`;
+USE `123db`;
+USE 'database';
+USE "database";
+USE `select`;
+USE `use`;
+USE `table`;

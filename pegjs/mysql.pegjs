@@ -3191,8 +3191,8 @@ primary
   / cast_expr
   / case_expr
   / literal_basic
+  / n:literal_numeric !ident_part { return n }
   / column_ref
-  / literal_numeric
   / param
   / LPAREN __ list:or_and_where_expr __ RPAREN {
     list.parentheses = true
@@ -3796,27 +3796,16 @@ escape_char
 // MySQL specific: number rules with bigint support
 number
   = int_:int frac:frac exp:exp {
-    const numStr = int_ + frac + exp
-    return {
-      type: 'bigint',
-      value: numStr
-    }
+    return int_ + frac + exp;
   }
   / int_:int frac:frac {
-    const numStr = int_ + frac
-    if (isBigInt(int_)) return {
-      type: 'bigint',
-      value: numStr
-    }
-    const fixed = frac.length >= 1 ? frac.length - 1 : 0
-    return parseFloat(numStr).toFixed(fixed);
+    const numStr = int_ + frac;
+    const num = parseFloat(numStr);
+    if (num.toString() === numStr) return num;
+    return numStr;
   }
   / int_:int exp:exp {
-    const numStr = int_ + exp
-    return {
-      type: 'bigint',
-      value: numStr
-    }
+    return int_ + exp;
   }
   / int_:int {
     if (isBigInt(int_)) return {
@@ -4067,6 +4056,7 @@ mem_chain
 data_type
   = character_string_type
   / numeric_type
+  / mysql_datetime_suffix_type
   / datetime_type
   / json_type
   / text_type
@@ -4084,6 +4074,13 @@ data_type
 @import 'common/datatype/binary.pegjs'
 @import 'common/datatype/character.pegjs'
 @import 'common/datatype/datetime.pegjs'
+
+// MySQL specific: date/time types with a precision and UNSIGNED/SIGNED/ZEROFILL suffix,
+// e.g. TIMESTAMP(6) UNSIGNED. Only matches when a suffix is present, otherwise common datetime_type applies.
+mysql_datetime_suffix_type
+  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP / KW_YEAR) __ LPAREN __ l:[0-6] __ RPAREN __ s:numeric_type_suffix &{ return s.length > 0 } {
+    return { dataType: t, length: parseInt(l, 10), parentheses: true, suffix: s }
+  }
 @import 'common/datatype/numeric.pegjs'
 @import 'common/datatype/enum.pegjs'
 @import 'common/datatype/json.pegjs'

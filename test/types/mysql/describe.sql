@@ -1,0 +1,14 @@
+DESCRIBE users;
+DESC users;
+DESCRIBE my_table;
+DESC my_table;
+DESCRIBE "quoted_table";
+DESC "quoted_table";
+DESCRIBE 'single_quoted';
+DESC 'single_quoted';
+DESCRIBE `backtick_table`;
+DESC `backtick_table`;
+DESCRIBE table123;
+DESC table123;
+DESCRIBE _underscore_table;
+DESC _underscore_table;
