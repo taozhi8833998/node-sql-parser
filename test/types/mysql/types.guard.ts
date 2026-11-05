@@ -2,7 +2,7 @@
  * Generated type guards for "mysql.d.ts".
  * WARNING: Do not manually change this file.
  */
-import { With, ParseOptions, Option, TableColumnAst, BaseFrom, Join, Values, TableExpr, Dual, From, LimitValue, Limit, OrderBy, ValueExpr, StringValue, OriginValue, DefaultValue, NumberValue, IntervalExprValue, SeparatorValue, SortDirection, ColumnRefItem, ColumnRef, SetList, InsertReplaceValue, Star, Case, Cast, AggrFunc, FunctionNameValue, FunctionName, Function, FulltextSearch, Column, Interval, Param, Var, Assign, Binary, Unary, Expr, ExtractFunc, ExpressionValue, ExprList, PartitionBy, WindowSpec, WindowFrameClause, AsWindowSpec, NamedWindowExpr, WindowExpr, Select, Insert_Replace, Update, Delete, Alter, AlterExpr, AlterColumnPosition, AlterAddColumn, AlterDropColumn, AlterModifyColumn, AlterChangeColumn, AlterRenameTable, AlterRenameColumn, AlterAddIndex, AlterDropIndex, AlterDropKey, AlterAddConstraint, AlterDropConstraint, AlterEnableConstraint, AlterDisableConstraint, AlterAddPartition, AlterDropPartition, AlterOperatePartition, AlterAlgorithm, AlterLock, AlterTableOption, Use, KeywordComment, CollateExpr, MysqlType, ConvertDataType, DataType, OnUpdateCurrentTimestamp, LiteralNotNull, LiteralNull, ColumnConstraint, ColumnDefinitionOptList, ReferenceDefinition, OnReference, CreateColumnDefinition, IndexType, IndexOption, CreateIndexDefinition, CreateFulltextSpatialIndexDefinition, ConstraintName, CreateConstraintPrimary, CreateConstraintUnique, CreateConstraintForeign, CreateConstraintCheck, CreateConstraintDefinition, CreateDefinition, CreateTable, DatabaseOption, CreateDatabase, CreateSchema, CreateIndex, CreateView, CreateTrigger, CreateUser, Create, TriggerEvent, UserAuthOption, RequireOption, ResourceOption, PasswordOption, TableOption, DropTable, DropDatabase, DropView, DropIndex, DropTrigger, Drop, ShowLogs, ShowTables, ShowSimple, ShowProcedureFunctionStatus, ShowBinlogEvents, ShowCharacterSet, ShowCollationDatabases, ShowColumnsIndexes, ShowCreateTable, ShowCreateView, ShowCreateEvent, ShowCreateTrigger, ShowCreateProcedure, ShowGrants, Show, Desc, Explain, Call, SetAssign, SetStatement, Lock, LockTable, Unlock, Grant, LoadData, LoadDataField, LoadDataLine, Truncate, Rename, Transaction, AST } from "./mysql";
+import { With, Location, LocationRange, ParseOptions, Option, TableColumnAst, BaseFrom, Join, Values, TableExpr, Dual, From, LimitValue, Limit, OrderBy, ValueExpr, StringValue, OriginValue, DefaultValue, NumberValue, IntervalExprValue, SeparatorValue, SortDirection, ColumnRefItem, ColumnRef, SetList, InsertReplaceValue, Star, Case, Cast, AggrFunc, FunctionNameValue, FunctionName, Function, FulltextSearch, Column, Interval, Param, Var, Assign, Binary, Unary, Expr, ExtractFunc, ExpressionValue, ExprList, PartitionBy, WindowSpec, WindowFrameClause, AsWindowSpec, NamedWindowExpr, WindowExpr, Select, Insert_Replace, Update, Delete, Alter, AlterExpr, AlterColumnPosition, AlterAddColumn, AlterDropColumn, AlterModifyColumn, AlterChangeColumn, AlterRenameTable, AlterRenameColumn, AlterAddIndex, AlterDropIndex, AlterDropKey, AlterAddConstraint, AlterDropConstraint, AlterEnableConstraint, AlterDisableConstraint, AlterAddPartition, AlterDropPartition, AlterOperatePartition, AlterAlgorithm, AlterLock, AlterTableOption, Use, KeywordComment, CollateExpr, MysqlType, ConvertDataType, DataType, OnUpdateCurrentTimestamp, LiteralNotNull, LiteralNull, ColumnConstraint, ColumnDefinitionOptList, ReferenceDefinition, OnReference, CreateColumnDefinition, IndexType, IndexOption, CreateIndexDefinition, CreateFulltextSpatialIndexDefinition, ConstraintName, CreateConstraintPrimary, CreateConstraintUnique, CreateConstraintForeign, CreateConstraintCheck, CreateConstraintDefinition, CreateDefinition, CreateTable, DatabaseOption, CreateDatabase, CreateSchema, CreateIndex, CreateView, CreateTrigger, CreateUser, Create, TriggerEvent, UserAuthOption, RequireOption, ResourceOption, PasswordOption, TableOption, DropTable, DropDatabase, DropView, DropIndex, DropTrigger, Drop, ShowLogs, ShowTables, ShowSimple, ShowProcedureFunctionStatus, ShowBinlogEvents, ShowCharacterSet, ShowCollationDatabases, ShowColumnsIndexes, ShowCreateTable, ShowCreateView, ShowCreateEvent, ShowCreateTrigger, ShowCreateProcedure, ShowGrants, Show, Desc, Explain, Call, SetAssign, SetStatement, Lock, LockTable, Unlock, Grant, LoadData, LoadDataField, LoadDataLine, Truncate, Rename, Transaction, AST } from "./mysql";
 
 export function isWith(obj: unknown): obj is With {
     const typedObj = obj as With
@@ -34,6 +34,35 @@ export function isWith(obj: unknown): obj is With {
             typedObj["columns"].every((e: any) =>
                 isColumnRefItem(e) as boolean
             ))
+    )
+}
+
+export function isLocation(obj: unknown): obj is Location {
+    const typedObj = obj as Location
+    return (
+        (typedObj !== null &&
+            typeof typedObj === "object" ||
+            typeof typedObj === "function") &&
+        typeof typedObj["line"] === "number" &&
+        typeof typedObj["column"] === "number" &&
+        typeof typedObj["offset"] === "number"
+    )
+}
+
+export function isLocationRange(obj: unknown): obj is LocationRange {
+    const typedObj = obj as LocationRange
+    return (
+        (typedObj !== null &&
+            typeof typedObj === "object" ||
+            typeof typedObj === "function") &&
+        (typeof typedObj["source"] === "undefined" ||
+            typeof typedObj["source"] === "string" ||
+            (typedObj["source"] !== null &&
+                typeof typedObj["source"] === "object" ||
+                typeof typedObj["source"] === "function") &&
+            typeof typedObj["source"]["toString"] === "function") &&
+        isLocation(typedObj["start"]) as boolean &&
+        isLocation(typedObj["end"]) as boolean
     )
 }
 
@@ -133,7 +162,9 @@ export function isTableColumnAst(obj: unknown): obj is TableColumnAst {
             typedObj["parentheses"] === true) &&
         (typeof typedObj["collate"] === "undefined" ||
             typedObj["collate"] === null ||
-            isCollateExpr(typedObj["collate"]) as boolean)
+            isCollateExpr(typedObj["collate"]) as boolean) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -152,7 +183,9 @@ export function isBaseFrom(obj: unknown): obj is BaseFrom {
             typeof typedObj["schema"] === "string") &&
         (typeof typedObj["addition"] === "undefined" ||
             typedObj["addition"] === false ||
-            typedObj["addition"] === true)
+            typedObj["addition"] === true) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -222,7 +255,9 @@ export function isDual(obj: unknown): obj is Dual {
         (typedObj !== null &&
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
-        typedObj["type"] === "dual"
+        typedObj["type"] === "dual" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -243,7 +278,9 @@ export function isLimitValue(obj: unknown): obj is LimitValue {
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
         typeof typedObj["type"] === "string" &&
-        typeof typedObj["value"] === "number"
+        typeof typedObj["value"] === "number" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -257,7 +294,9 @@ export function isLimit(obj: unknown): obj is Limit {
         Array.isArray(typedObj["value"]) &&
         typedObj["value"].every((e: any) =>
             isLimitValue(e) as boolean
-        )
+        ) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -270,7 +309,9 @@ export function isOrderBy(obj: unknown): obj is OrderBy {
         (typedObj["type"] === null ||
             typedObj["type"] === "ASC" ||
             typedObj["type"] === "DESC") &&
-        isExpressionValue(typedObj["expr"]) as boolean
+        isExpressionValue(typedObj["expr"]) as boolean &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -367,7 +408,9 @@ export function isIntervalExprValue(obj: unknown): obj is IntervalExprValue {
             typedObj["type"] === "single_quote_string" ||
             typedObj["type"] === "double_quote_string") &&
         (typeof typedObj["value"] === "string" ||
-            typeof typedObj["value"] === "number")
+            typeof typedObj["value"] === "number") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -406,6 +449,8 @@ export function isColumnRefItem(obj: unknown): obj is ColumnRefItem {
         typeof typedObj["column"] === "string" &&
         (typeof typedObj["options"] === "undefined" ||
             isExprList(typedObj["options"]) as boolean) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean) &&
         (typeof typedObj["collate"] === "undefined" ||
             typedObj["collate"] === null ||
             isCollateExpr(typedObj["collate"]) as boolean) &&
@@ -431,6 +476,8 @@ export function isColumnRef(obj: unknown): obj is ColumnRef {
         typeof typedObj["column"] === "string" &&
         (typeof typedObj["options"] === "undefined" ||
             isExprList(typedObj["options"]) as boolean) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean) &&
         (typeof typedObj["collate"] === "undefined" ||
             typedObj["collate"] === null ||
             isCollateExpr(typedObj["collate"]) as boolean) &&
@@ -464,7 +511,9 @@ export function isSetList(obj: unknown): obj is SetList {
             isUnary(typedObj["value"]) as boolean ||
             isExtractFunc(typedObj["value"]) as boolean) &&
         (typedObj["table"] === null ||
-            typeof typedObj["table"] === "string")
+            typeof typedObj["table"] === "string") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -480,7 +529,9 @@ export function isInsertReplaceValue(obj: unknown): obj is InsertReplaceValue {
             isExpressionValue(e) as boolean
         ) &&
         (typedObj["prefix"] === null ||
-            typeof typedObj["prefix"] === "string")
+            typeof typedObj["prefix"] === "string") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -492,7 +543,9 @@ export function isStar(obj: unknown): obj is Star {
             typeof typedObj === "function") &&
         typedObj["type"] === "star" &&
         (typedObj["value"] === "" ||
-            typedObj["value"] === "*")
+            typedObj["value"] === "*") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -661,6 +714,8 @@ export function isAggrFunc(obj: unknown): obj is AggrFunc {
                 typeof typedObj["args"]["separator"] === "function") &&
             typeof typedObj["args"]["separator"]["keyword"] === "string" &&
             isSeparatorValue(typedObj["args"]["separator"]["value"]) as boolean) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean) &&
         (typedObj["over"] === null ||
             (typedObj["over"] !== null &&
                 typeof typedObj["over"] === "object" ||
@@ -723,7 +778,9 @@ export function isFunction(obj: unknown): obj is Function {
             isAsWindowSpec(typedObj["over"]["as_window_specification"]) as boolean) &&
         (typeof typedObj["collate"] === "undefined" ||
             typedObj["collate"] === null ||
-            isCollateExpr(typedObj["collate"]) as boolean)
+            isCollateExpr(typedObj["collate"]) as boolean) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -778,7 +835,9 @@ export function isColumn(obj: unknown): obj is Column {
         (typedObj["as"] === null ||
             typeof typedObj["as"] === "string") &&
         (typeof typedObj["type"] === "undefined" ||
-            typeof typedObj["type"] === "string")
+            typeof typedObj["type"] === "string") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -804,7 +863,9 @@ export function isParam(obj: unknown): obj is Param {
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
         typedObj["type"] === "param" &&
-        typeof typedObj["value"] === "string"
+        typeof typedObj["value"] === "string" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -820,7 +881,9 @@ export function isVar(obj: unknown): obj is Var {
         typedObj["members"].every((e: any) =>
             typeof e === "string"
         ) &&
-        typeof typedObj["prefix"] === "string"
+        typeof typedObj["prefix"] === "string" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -833,7 +896,9 @@ export function isAssign(obj: unknown): obj is Assign {
         typedObj["type"] === "assign" &&
         isVar(typedObj["left"]) as boolean &&
         typedObj["symbol"] === ":=" &&
-        isExpressionValue(typedObj["right"]) as boolean
+        isExpressionValue(typedObj["right"]) as boolean &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -873,6 +938,8 @@ export function isBinary(obj: unknown): obj is Binary {
             isUnary(typedObj["right"]) as boolean ||
             isExtractFunc(typedObj["right"]) as boolean ||
             isExprList(typedObj["right"]) as boolean) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean) &&
         (typeof typedObj["parentheses"] === "undefined" ||
             typedObj["parentheses"] === false ||
             typedObj["parentheses"] === true)
@@ -888,6 +955,8 @@ export function isUnary(obj: unknown): obj is Unary {
         typedObj["type"] === "unary_expr" &&
         typeof typedObj["operator"] === "string" &&
         isExpressionValue(typedObj["expr"]) as boolean &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean) &&
         (typeof typedObj["parentheses"] === "undefined" ||
             typedObj["parentheses"] === false ||
             typedObj["parentheses"] === true)
@@ -913,7 +982,9 @@ export function isExtractFunc(obj: unknown): obj is ExtractFunc {
             typeof typedObj["args"] === "object" ||
             typeof typedObj["args"] === "function") &&
         typeof typedObj["args"]["field"] === "string" &&
-        isExpressionValue(typedObj["args"]["source"]) as boolean
+        isExpressionValue(typedObj["args"]["source"]) as boolean &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -960,6 +1031,8 @@ export function isExprList(obj: unknown): obj is ExprList {
                 isExprList(e) as boolean ||
                 isConvertDataType(e) as boolean)
             )) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean) &&
         (typeof typedObj["parentheses"] === "undefined" ||
             typedObj["parentheses"] === false ||
             typedObj["parentheses"] === true) &&
@@ -1175,6 +1248,8 @@ export function isSelect(obj: unknown): obj is Select {
         (typeof typedObj["_parentheses"] === "undefined" ||
             typedObj["_parentheses"] === false ||
             typedObj["_parentheses"] === true) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean) &&
         (typeof typedObj["_next"] === "undefined" ||
             isSelect(typedObj["_next"]) as boolean) &&
         (typeof typedObj["set_op"] === "undefined" ||
@@ -1239,7 +1314,9 @@ export function isInsert_Replace(obj: unknown): obj is Insert_Replace {
             Array.isArray(typedObj["on_duplicate_update"]["set"]) &&
             typedObj["on_duplicate_update"]["set"].every((e: any) =>
                 isSetList(e) as boolean
-            ))
+            )) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -1275,7 +1352,9 @@ export function isUpdate(obj: unknown): obj is Update {
                 isOrderBy(e) as boolean
             )) &&
         (typedObj["limit"] === null ||
-            isLimit(typedObj["limit"]) as boolean)
+            isLimit(typedObj["limit"]) as boolean) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -1338,7 +1417,9 @@ export function isDelete(obj: unknown): obj is Delete {
                 isOrderBy(e) as boolean
             )) &&
         (typedObj["limit"] === null ||
-            isLimit(typedObj["limit"]) as boolean)
+            isLimit(typedObj["limit"]) as boolean) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -1361,7 +1442,9 @@ export function isAlter(obj: unknown): obj is Alter {
         Array.isArray(typedObj["expr"]) &&
         typedObj["expr"].every((e: any) =>
             isAlterExpr(e) as boolean
-        )
+        ) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -2391,7 +2474,9 @@ export function isUse(obj: unknown): obj is Use {
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
         typedObj["type"] === "use" &&
-        typeof typedObj["db"] === "string"
+        typeof typedObj["db"] === "string" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3076,7 +3161,9 @@ export function isCreateTable(obj: unknown): obj is CreateTable {
             Array.isArray(typedObj["table_options"]) &&
             typedObj["table_options"].every((e: any) =>
                 isTableOption(e) as boolean
-            ))
+            )) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3124,7 +3211,9 @@ export function isCreateDatabase(obj: unknown): obj is CreateDatabase {
             Array.isArray(typedObj["create_definitions"]) &&
             typedObj["create_definitions"].every((e: any) =>
                 isDatabaseOption(e) as boolean
-            ))
+            )) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3153,7 +3242,9 @@ export function isCreateSchema(obj: unknown): obj is CreateSchema {
             Array.isArray(typedObj["create_definitions"]) &&
             typedObj["create_definitions"].every((e: any) =>
                 isDatabaseOption(e) as boolean
-            ))
+            )) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3241,7 +3332,9 @@ export function isCreateIndex(obj: unknown): obj is CreateIndex {
             typedObj["lock_option"]["resource"] === "lock" &&
             (typedObj["lock_option"]["symbol"] === null ||
                 typedObj["lock_option"]["symbol"] === "=") &&
-            typeof typedObj["lock_option"]["lock"] === "string")
+            typeof typedObj["lock_option"]["lock"] === "string") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3279,7 +3372,9 @@ export function isCreateView(obj: unknown): obj is CreateView {
         (typedObj["with"] === null ||
             typedObj["with"] === "with check option" ||
             typedObj["with"] === "with cascaded check option" ||
-            typedObj["with"] === "with local check option")
+            typedObj["with"] === "with local check option") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3331,7 +3426,9 @@ export function isCreateTrigger(obj: unknown): obj is CreateTrigger {
             isSetList(e) as boolean
         ) &&
         (typedObj["if_not_exists"] === null ||
-            typeof typedObj["if_not_exists"] === "string")
+            typeof typedObj["if_not_exists"] === "string") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3393,7 +3490,9 @@ export function isCreateUser(obj: unknown): obj is CreateUser {
                 typeof typedObj["attribute"] === "object" ||
                 typeof typedObj["attribute"] === "function") &&
             (typeof typedObj["attribute"]["prefix"] === "undefined" ||
-                typeof typedObj["attribute"]["prefix"] === "string"))
+                typeof typedObj["attribute"]["prefix"] === "string")) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3698,7 +3797,9 @@ export function isDropTable(obj: unknown): obj is DropTable {
             isFrom(e) as boolean
         ) &&
         (typedObj["prefix"] === null ||
-            typedObj["prefix"] === "if exists")
+            typedObj["prefix"] === "if exists") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3713,7 +3814,9 @@ export function isDropDatabase(obj: unknown): obj is DropDatabase {
             typedObj["keyword"] === "schema") &&
         typeof typedObj["name"] === "string" &&
         (typedObj["prefix"] === null ||
-            typedObj["prefix"] === "if exists")
+            typedObj["prefix"] === "if exists") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3740,7 +3843,9 @@ export function isDropView(obj: unknown): obj is DropView {
                 e["type"] === "origin" &&
                 (e["value"] === "restrict" ||
                     e["value"] === "cascade")
-            ))
+            )) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3784,7 +3889,9 @@ export function isDropIndex(obj: unknown): obj is DropIndex {
                 e["resource"] === "lock" &&
                 e["symbol"] === "=" &&
                 typeof e["lock"] === "string")
-            ))
+            )) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3806,7 +3913,9 @@ export function isDropTrigger(obj: unknown): obj is DropTrigger {
             typeof e["trigger"] === "string"
         ) &&
         (typedObj["prefix"] === null ||
-            typedObj["prefix"] === "if exists")
+            typedObj["prefix"] === "if exists") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3830,7 +3939,9 @@ export function isShowLogs(obj: unknown): obj is ShowLogs {
         typedObj["type"] === "show" &&
         (typedObj["keyword"] === "binary" ||
             typedObj["keyword"] === "master") &&
-        typedObj["suffix"] === "logs"
+        typedObj["suffix"] === "logs" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3841,7 +3952,9 @@ export function isShowTables(obj: unknown): obj is ShowTables {
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
         typedObj["type"] === "show" &&
-        typedObj["keyword"] === "tables"
+        typedObj["keyword"] === "tables" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3854,7 +3967,9 @@ export function isShowSimple(obj: unknown): obj is ShowSimple {
         typedObj["type"] === "show" &&
         (typedObj["keyword"] === "triggers" ||
             typedObj["keyword"] === "status" ||
-            typedObj["keyword"] === "processlist")
+            typedObj["keyword"] === "processlist") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3867,7 +3982,9 @@ export function isShowProcedureFunctionStatus(obj: unknown): obj is ShowProcedur
         typedObj["type"] === "show" &&
         (typedObj["keyword"] === "function" ||
             typedObj["keyword"] === "procedure") &&
-        typedObj["suffix"] === "status"
+        typedObj["suffix"] === "status" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3893,7 +4010,9 @@ export function isShowBinlogEvents(obj: unknown): obj is ShowBinlogEvents {
                 isFrom(e) as boolean
             )) &&
         (typedObj["limit"] === null ||
-            isLimit(typedObj["limit"]) as boolean)
+            isLimit(typedObj["limit"]) as boolean) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3913,7 +4032,9 @@ export function isShowCharacterSet(obj: unknown): obj is ShowCharacterSet {
                 typeof typedObj["expr"] === "function") &&
             (typedObj["expr"]["op"] === "LIKE" ||
                 typedObj["expr"]["op"] === "NOT LIKE") &&
-            isExpressionValue(typedObj["expr"]["right"]) as boolean)
+            isExpressionValue(typedObj["expr"]["right"]) as boolean) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3933,7 +4054,9 @@ export function isShowCollationDatabases(obj: unknown): obj is ShowCollationData
                 typeof typedObj["expr"] === "function") &&
             (typedObj["expr"]["op"] === "LIKE" ||
                 typedObj["expr"]["op"] === "NOT LIKE") &&
-            isExpressionValue(typedObj["expr"]["right"]) as boolean)
+            isExpressionValue(typedObj["expr"]["right"]) as boolean) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3950,7 +4073,9 @@ export function isShowColumnsIndexes(obj: unknown): obj is ShowColumnsIndexes {
         Array.isArray(typedObj["from"]) &&
         typedObj["from"].every((e: any) =>
             isFrom(e) as boolean
-        )
+        ) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3968,7 +4093,9 @@ export function isShowCreateTable(obj: unknown): obj is ShowCreateTable {
             typeof typedObj["table"] === "function") &&
         (typedObj["table"]["db"] === null ||
             typeof typedObj["table"]["db"] === "string") &&
-        typeof typedObj["table"]["table"] === "string"
+        typeof typedObj["table"]["table"] === "string" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -3986,7 +4113,9 @@ export function isShowCreateView(obj: unknown): obj is ShowCreateView {
             typeof typedObj["view"] === "function") &&
         (typedObj["view"]["db"] === null ||
             typeof typedObj["view"]["db"] === "string") &&
-        typeof typedObj["view"]["table"] === "string"
+        typeof typedObj["view"]["table"] === "string" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4004,7 +4133,9 @@ export function isShowCreateEvent(obj: unknown): obj is ShowCreateEvent {
             typeof typedObj["event"] === "function") &&
         (typedObj["event"]["db"] === null ||
             typeof typedObj["event"]["db"] === "string") &&
-        typeof typedObj["event"]["table"] === "string"
+        typeof typedObj["event"]["table"] === "string" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4022,7 +4153,9 @@ export function isShowCreateTrigger(obj: unknown): obj is ShowCreateTrigger {
             typeof typedObj["trigger"] === "function") &&
         (typedObj["trigger"]["db"] === null ||
             typeof typedObj["trigger"]["db"] === "string") &&
-        typeof typedObj["trigger"]["table"] === "string"
+        typeof typedObj["trigger"]["table"] === "string" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4040,7 +4173,9 @@ export function isShowCreateProcedure(obj: unknown): obj is ShowCreateProcedure 
             typeof typedObj["procedure"] === "function") &&
         (typedObj["procedure"]["db"] === null ||
             typeof typedObj["procedure"]["db"] === "string") &&
-        typeof typedObj["procedure"]["table"] === "string"
+        typeof typedObj["procedure"]["table"] === "string" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4063,7 +4198,9 @@ export function isShowGrants(obj: unknown): obj is ShowGrants {
                 Array.isArray(typedObj["for"]["role_list"]) &&
                 typedObj["for"]["role_list"].every((e: any) =>
                     typeof e === "string"
-                )))
+                ))) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4094,7 +4231,9 @@ export function isDesc(obj: unknown): obj is Desc {
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
         typedObj["type"] === "desc" &&
-        typeof typedObj["table"] === "string"
+        typeof typedObj["table"] === "string" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4110,7 +4249,9 @@ export function isExplain(obj: unknown): obj is Explain {
             isUpdate(typedObj["expr"]) as boolean ||
             isDelete(typedObj["expr"]) as boolean) &&
         (typeof typedObj["format"] === "undefined" ||
-            typeof typedObj["format"] === "string")
+            typeof typedObj["format"] === "string") &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4121,7 +4262,9 @@ export function isCall(obj: unknown): obj is Call {
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
         typedObj["type"] === "call" &&
-        isFunction(typedObj["expr"]) as boolean
+        isFunction(typedObj["expr"]) as boolean &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4174,7 +4317,9 @@ export function isSetStatement(obj: unknown): obj is SetStatement {
         Array.isArray(typedObj["expr"]) &&
         typedObj["expr"].every((e: any) =>
             isSetAssign(e) as boolean
-        )
+        ) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4189,7 +4334,9 @@ export function isLock(obj: unknown): obj is Lock {
         Array.isArray(typedObj["tables"]) &&
         typedObj["tables"].every((e: any) =>
             isLockTable(e) as boolean
-        )
+        ) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4219,7 +4366,9 @@ export function isUnlock(obj: unknown): obj is Unlock {
             typeof typedObj === "object" ||
             typeof typedObj === "function") &&
         typedObj["type"] === "unlock" &&
-        typedObj["keyword"] === "tables"
+        typedObj["keyword"] === "tables" &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4296,7 +4445,9 @@ export function isGrant(obj: unknown): obj is Grant {
         ) &&
         (typeof typedObj["with"] === "undefined" ||
             typedObj["with"] === null ||
-            isOriginValue(typedObj["with"]) as boolean)
+            isOriginValue(typedObj["with"]) as boolean) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4381,7 +4532,9 @@ export function isLoadData(obj: unknown): obj is LoadData {
             Array.isArray(typedObj["set"]) &&
             typedObj["set"].every((e: any) =>
                 isSetList(e) as boolean
-            ))
+            )) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4446,7 +4599,9 @@ export function isTruncate(obj: unknown): obj is Truncate {
         Array.isArray(typedObj["name"]) &&
         typedObj["name"].every((e: any) =>
             isFrom(e) as boolean
-        )
+        ) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4472,7 +4627,9 @@ export function isRename(obj: unknown): obj is Rename {
             (e[1]["db"] === null ||
                 typeof e[1]["db"] === "string") &&
             typeof e[1]["table"] === "string"
-        )
+        ) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 
@@ -4496,7 +4653,9 @@ export function isTransaction(obj: unknown): obj is Transaction {
             Array.isArray(typedObj["expr"]["modes"]) &&
             typedObj["expr"]["modes"].every((e: any) =>
                 isOriginValue(e) as boolean
-            ))
+            )) &&
+        (typeof typedObj["loc"] === "undefined" ||
+            isLocationRange(typedObj["loc"]) as boolean)
     )
 }
 

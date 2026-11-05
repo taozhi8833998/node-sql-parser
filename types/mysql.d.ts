@@ -14,9 +14,25 @@ export interface With {
   };
   columns: ColumnRef[] | null;
 }
-import { LocationRange } from "pegjs";
+/** Position within the parsed source. */
+export interface Location {
+  /** Line in the parsed source (1-based). */
+  readonly line: number;
+  /** Column in the parsed source (1-based). */
+  readonly column: number;
+  /** Offset in the parsed source (0-based). */
+  readonly offset: number;
+}
 
-export { LocationRange, Location } from "pegjs";
+/** Start and end positions of a parsed node. */
+export interface LocationRange {
+  /** Source passed to the parser, such as a file name. Omitted when no grammarSource is given. */
+  readonly source?: string | { readonly toString: () => string };
+  /** Position at the beginning of the node. */
+  readonly start: Location;
+  /** Position after the end of the node. */
+  readonly end: Location;
+}
 
 export interface ParseOptions {
   includeLocations?: boolean;
