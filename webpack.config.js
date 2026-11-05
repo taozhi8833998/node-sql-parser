@@ -60,10 +60,7 @@ const getPlugins = (parserName, target, plugins = []) => {
           'package.json',
           'types.d.ts',
           'ast/**',
-          {
-            from: `types/${parserName || 'index'}.d.ts`,
-            to: tsFileName,
-          }
+          ...(parserName ? [{ from: `types/${parserName}.d.ts`, to: tsFileName }] : []),
         ],
       }),
     )
@@ -80,7 +77,6 @@ const getPlugins = (parserName, target, plugins = []) => {
         ]
         fileConfig.events.onEnd.move = [
           { source: `${outputPath}/index.umd.js`, destination: `${outputPath}/umd/index.umd.js` },
-          { source: `${outputPath}/index.umd.d.ts`, destination: `${outputPath}/umd/index.umd.d.ts` },
           { source: `${outputPath}/index.umd.js.map`, destination: `${outputPath}/umd/index.umd.js.map` },
         ]
       }
@@ -152,7 +148,7 @@ if (isProd) {
                         ),
                         new webpack.NormalModuleReplacementPlugin(
                             /lib\/parser\/mysql/,
-                            '../lib/parser/' + parser
+                            path.resolve(__dirname, 'lib/parser', parser + '.js')
                         ),
                     ])
                 ))

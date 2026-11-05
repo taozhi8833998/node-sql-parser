@@ -4056,6 +4056,7 @@ mem_chain
 data_type
   = character_string_type
   / numeric_type
+  / mysql_datetime_suffix_type
   / datetime_type
   / json_type
   / text_type
@@ -4073,6 +4074,13 @@ data_type
 @import 'common/datatype/binary.pegjs'
 @import 'common/datatype/character.pegjs'
 @import 'common/datatype/datetime.pegjs'
+
+// MySQL specific: date/time types with a precision and UNSIGNED/SIGNED/ZEROFILL suffix,
+// e.g. TIMESTAMP(6) UNSIGNED. Only matches when a suffix is present, otherwise common datetime_type applies.
+mysql_datetime_suffix_type
+  = t:(KW_DATE / KW_DATETIME / KW_TIME / KW_TIMESTAMP / KW_YEAR) __ LPAREN __ l:[0-6] __ RPAREN __ s:numeric_type_suffix &{ return s.length > 0 } {
+    return { dataType: t, length: parseInt(l, 10), parentheses: true, suffix: s }
+  }
 @import 'common/datatype/numeric.pegjs'
 @import 'common/datatype/enum.pegjs'
 @import 'common/datatype/json.pegjs'
