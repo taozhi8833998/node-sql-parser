@@ -39,7 +39,7 @@ jobs:
 
       - run: npm run build
 
-      - run: cd output/prod && npm publish
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PUBLISH_NPM_TOKEN }}
 
@@ -63,6 +63,6 @@ jobs:
 
       - run: npm run build
 
-      - run: cd output/prod && npm publish
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PUBLISH_GITHUB_TOKEN }}

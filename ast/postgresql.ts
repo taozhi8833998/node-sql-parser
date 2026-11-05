@@ -1851,6 +1851,8 @@ type KW_TIMESTAMP_TZ = never;
 
 type KW_TIMESTAMP_NTZ = never;
 
+type KW_TIMESTAMP_LTZ = never;
+
 type KW_YEAR = never;
 
 type KW_GEOMETRY = never;
@@ -2012,6 +2014,10 @@ type KW_VAR_PRE_DOLLAR = never;
 type KW_VAR_PRE_DOLLAR_DOUBLE = never;
 
 type KW_VAR_PRE = never;
+
+type KW_VARIANT = never;
+
+type KW_OBJECT = never;
 
 type KW_ASSIGN = never;
 

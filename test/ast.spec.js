@@ -760,6 +760,41 @@ describe('AST', () => {
             expect(getParsedSql('SELECT -042')).equal('SELECT -42');
         });
 
+        it('should parse integer as number',  () => {
+            const ast = parser.astify('SELECT 3');
+            expect(ast.columns[0].expr.type).to.equal('number');
+            expect(ast.columns[0].expr.value).to.equal(3);
+        });
+
+        it('should parse decimal as number',  () => {
+            const ast = parser.astify('SELECT 2.2');
+            expect(ast.columns[0].expr.type).to.equal('number');
+            expect(ast.columns[0].expr.value).to.equal(2.2);
+        });
+
+        it('should parse scientific notation as number',  () => {
+            const ast = parser.astify('SELECT 1e1');
+            expect(ast.columns[0].expr.type).to.equal('number');
+            expect(ast.columns[0].expr.value).to.equal('1e1');
+        });
+
+        it('should parse very large scientific notation as number',  () => {
+            const ast = parser.astify('SELECT 1e999');
+            expect(ast.columns[0].expr.type).to.equal('number');
+            expect(ast.columns[0].expr.value).to.equal('1e999');
+        });
+
+        it('should parse very large integer as bigint',  () => {
+            const ast = parser.astify('SELECT 222222222222222222222222');
+            expect(ast.columns[0].expr.type).to.equal('bigint');
+            expect(ast.columns[0].expr.value).to.equal('222222222222222222222222');
+        });
+
+        it('should parse very large decimal as number with string value',  () => {
+            const ast = parser.astify('SELECT 222222222222222222222222.2');
+            expect(ast.columns[0].expr.type).to.equal('number');
+            expect(ast.columns[0].expr.value).to.equal('222222222222222222222222.2');
+        });
 
         describe('datetime', () => {
             const literals = {

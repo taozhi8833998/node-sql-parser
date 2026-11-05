@@ -2,7 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const peg = require('peggy');
 
-const syntax = fs.readFileSync(path.resolve(__dirname, './pegjs/postgresql-build.pegjs'), 'utf-8')
+const { dialectGrammar } = require('./scripts/grammar')
+
+const syntax = dialectGrammar('postgresql')
 const ast = peg.parser.parse(syntax);
 
 

@@ -60,7 +60,7 @@ function forXmlToSQL(stmt) {
 function queryHintsToSQL(hints) {
   if (!Array.isArray(hints) || hints.length === 0) return
   const parts = hints.map(hint => {
-    const suffix = hint.value !== undefined && hint.value !== null ? ` ${hint.value}` : ''
+    const suffix = hint.value == null ? '' : ` ${hint.value}`
     return `${hint.name}${suffix}`
   })
   return `OPTION (${parts.join(', ')})`
