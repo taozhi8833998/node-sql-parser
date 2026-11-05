@@ -5512,7 +5512,9 @@ export function isTransaction(obj: unknown): obj is Transaction {
             typeof typedObj["expr"] === "function") &&
         isOriginValue(typedObj["expr"]["action"]) as boolean &&
         (typeof typedObj["expr"]["keyword"] === "undefined" ||
-            typedObj["expr"]["keyword"] === "TRANSACTION") &&
+            typedObj["expr"]["keyword"] === null ||
+            typedObj["expr"]["keyword"] === "TRANSACTION" ||
+            typedObj["expr"]["keyword"] === "WORK") &&
         (typeof typedObj["expr"]["modes"] === "undefined" ||
             typedObj["expr"]["modes"] === null ||
             Array.isArray(typedObj["expr"]["modes"]) &&

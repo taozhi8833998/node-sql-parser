@@ -530,3 +530,6 @@ CREATE TABLE t (id INT) collate = utf8mb4_unicode_ci;
 CREATE TABLE t (id INT) Collate = utf8mb4_unicode_ci;
 CREATE TABLE t (id INT) default collate = utf8mb4_unicode_ci;
 CREATE TABLE t (id INT) Default Collate = utf8mb4_unicode_ci;
+CREATE TABLE _dynamodb.ctas_where (id VARCHAR(256) PRIMARY KEY, other INT) AS SELECT id, other FROM _dynamodb.foo WHERE other > 100;
+CREATE TABLE _dynamodb.ctas_expr (id VARCHAR(256) PRIMARY KEY, doubled INT) AS SELECT id, other * 2 AS doubled FROM _dynamodb.foo WHERE other IS NOT NULL;
+CREATE TABLE _dynamodb.ctas_join (id VARCHAR(256) PRIMARY KEY, foo_other INT, bar_other INT) AS SELECT foo.id, foo.other AS foo_other, bar.other AS bar_other FROM _dynamodb.foo JOIN _dynamodb.bar ON foo.id = bar.id;

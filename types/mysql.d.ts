@@ -1321,8 +1321,9 @@ export interface Rename {
 export interface Transaction {
   type: "transaction";
   expr: {
+    // START TRANSACTION, or the BEGIN / BEGIN WORK aliases (BEGIN has no keyword, BEGIN WORK has "WORK")
     action: OriginValue;
-    keyword?: "TRANSACTION";
+    keyword?: "TRANSACTION" | "WORK" | null;
     modes?: OriginValue[] | null;
   };
   loc?: LocationRange;

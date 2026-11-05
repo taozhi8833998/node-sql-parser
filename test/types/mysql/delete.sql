@@ -144,3 +144,6 @@ DELETE FROM users WHERE DATE_FORMAT(created_at, '%Y-%m-%d') = '2020-01-01';
 DELETE FROM users WHERE STR_TO_DATE('2020-01-01', '%Y-%m-%d') = created_at;
 DELETE FROM users WHERE UNIX_TIMESTAMP(created_at) < 1577836800;
 DELETE FROM users WHERE FROM_UNIXTIME(1577836800) = created_at;
+DELETE FROM _dynamodb.foo WHERE id IN ("tx1", "tx5", "tx6");
+DELETE FROM _dynamodb.foo WHERE id = "4" AND comment = "missing";
+DELETE FROM type_test WHERE str_col IS NULL AND int_col IS NOT NULL;

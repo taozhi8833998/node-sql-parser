@@ -225,3 +225,6 @@ SET @var = CuRrEnT_tImEsTaMp() ON UPDATE CuRrEnT_tImEsTaMp();
 SET @var = now() ON UPDATE now();
 SET @var = Now() ON UPDATE Now();
 SET @var = NoW() ON UPDATE NoW();
+SET @myvar = "1"/2;
+SET @bigname = 222222222222222222;
+SET @result = (SELECT 42);

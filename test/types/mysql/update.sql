@@ -198,3 +198,5 @@ UPDATE users AS u SET u.name = "John";
 UPDATE users u SET u.name = "John";
 UPDATE t1 AS a, t2 AS b SET a.col = b.col WHERE a.id = b.id;
 UPDATE t1 a, t2 b SET a.col = b.col WHERE a.id = b.id;
+UPDATE _dynamodb.foo SET comment = CONCAT(comment, " updated") WHERE id = "edge1";
+UPDATE _dynamodb.foo SET comment = LEFT(comment, LENGTH(comment) - 7) WHERE id = "111";

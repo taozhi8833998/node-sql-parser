@@ -6,7 +6,8 @@ import { join } from 'path';
 import { Parser } from './parser-loader.mjs';
 import {
   isSelect, isInsert_Replace, isUpdate, isDelete, isCreate, isDrop, isAlter, isTruncate,
-  isRename, isGrant, isDesc, isShow, isUse, isSetStatement, isLock, isUnlock, isCall, isLoadData, isExplain
+  isRename, isGrant, isDesc, isShow, isUse, isSetStatement, isLock, isUnlock, isCall, isLoadData, isExplain,
+  isTransaction
 } from './types.guard';
 
 const parser = new Parser();
@@ -79,6 +80,38 @@ test('desc.sql statements', () => {
   for (const sql of statements) {
     const ast = astify(sql);
     assertType(isDesc, ast, `isDesc: ${sql}`);
+  }
+});
+
+test('describe.sql statements', () => {
+  const statements = readSqlFile('describe.sql');
+  for (const sql of statements) {
+    const ast = astify(sql);
+    assertType(isDesc, ast, `isDesc: ${sql}`);
+  }
+});
+
+test('start.sql statements', () => {
+  const statements = readSqlFile('start.sql');
+  for (const sql of statements) {
+    const ast = astify(sql);
+    assertType(isTransaction, ast, `isTransaction: ${sql}`);
+  }
+});
+
+test('commit.sql statements', () => {
+  const statements = readSqlFile('commit.sql');
+  for (const sql of statements) {
+    const ast = astify(sql);
+    assertType(isTransaction, ast, `isTransaction: ${sql}`);
+  }
+});
+
+test('rollback.sql statements', () => {
+  const statements = readSqlFile('rollback.sql');
+  for (const sql of statements) {
+    const ast = astify(sql);
+    assertType(isTransaction, ast, `isTransaction: ${sql}`);
   }
 });
 
