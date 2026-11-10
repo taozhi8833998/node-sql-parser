@@ -353,7 +353,40 @@ describe('create', () => {
       })
     })
 
+    it('should preserve float aliases and suffixes in MySQL and MariaDB', () => {
+      for (const database of ['mysql', 'mariadb']) {
+        expect(getParsedSql('CREATE TABLE foo (x float8 UNSIGNED, y float4)', { database }))
+          .to.equal('CREATE TABLE `foo` (`x` FLOAT8 UNSIGNED, `y` FLOAT4)')
+      }
+    })
+
+    it('should preserve float aliases in Snowflake', () => {
+      expect(getParsedSql('CREATE TABLE foo (x float8, y float4)', { database: 'snowflake' }))
+        .to.equal('CREATE TABLE foo ("x" FLOAT8, "y" FLOAT4)')
+    })
+
     describe('create table using pg', () => {
+      it('should preserve pg float4 and float8 column types', () => {
+        for (const type of ['float8', 'float4', 'FlOaT8', 'FlOaT4']) {
+          const ast = parser.astify(`CREATE TABLE foo (value ${type} NOT NULL DEFAULT 0.1)`, PG_OPT)
+          expect(ast.create_definitions[0].definition.dataType).to.equal(type.toUpperCase())
+          expect(ast.create_definitions[0].definition).not.to.have.property('length')
+          expect(parser.sqlify(ast, PG_OPT)).to.equal(`CREATE TABLE "foo" (value ${type.toUpperCase()} NOT NULL DEFAULT 0.1)`)
+        }
+      })
+
+      it('should preserve pg float aliases in array column types', () => {
+        expect(getParsedSql('CREATE TABLE foo (x float8[], y float4[][])', PG_OPT))
+          .to.equal('CREATE TABLE "foo" (x FLOAT8[], y FLOAT4[][])')
+      })
+
+      it('should keep pg float precision distinct from float aliases', () => {
+        for (const type of ['float', 'float(4)', 'float(8)', 'float(24)', 'float(25)', 'float(53)', 'real', 'double precision']) {
+          expect(getParsedSql(`CREATE TABLE foo (value ${type})`, PG_OPT))
+            .to.equal(`CREATE TABLE "foo" (value ${type.toUpperCase()})`)
+        }
+      })
+
       it ('supports basic things', () => {
         expect(getParsedSql(`CREATE TABLE foo (id uuid)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" (id UUID)')
         expect(getParsedSql(`CREATE TABLE foo (value text unique)`, { database: 'postgresql' })).to.equal('CREATE TABLE "foo" (value TEXT UNIQUE)')
