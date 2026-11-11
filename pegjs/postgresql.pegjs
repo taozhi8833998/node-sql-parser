@@ -5720,7 +5720,10 @@ mem_chain
 
 data_type
   = array_type
-  / character_string_type
+  / data_type_without_array
+
+data_type_without_array
+  = character_string_type
   / numeric_type
   / datetime_type
   / json_type
@@ -5742,15 +5745,11 @@ data_type
 
 
 array_type
-  = t:(numeric_type / character_string_type / text_type) __ LBRAKE __ RBRAKE __ LBRAKE __ RBRAKE {
+  = t:data_type_without_array d:(__ LBRAKE __ literal_numeric? __ RBRAKE)+ {
     /* => data_type */
-    return { ...t, array: { dimension: 2 } }
+    return { ...t, array: { dimension: d.length, length: d.map(dimension => dimension[3]) } }
   }
-  / t:(numeric_type / character_string_type / text_type) __ LBRAKE __ l:literal_numeric? __ RBRAKE {
-    /* => data_type */
-    return { ...t, array: { dimension: 1,  length: [l] } }
-  }
-  / t:(numeric_type / character_string_type / text_type) __ KW_ARRAY {
+  / t:data_type_without_array __ KW_ARRAY {
     /* => data_type */
     return { ...t, array: { keyword: 'array' } }
   }
@@ -5772,7 +5771,7 @@ text_type
     /* =>  data_type */
     return { dataType: `${t}${s ? '[]' : ''}` }
   }
-  / t:(KW_TSVECTOR / KW_TSQUERY) {/* =>  data_type */  return { dataType: t }; }
+  / t:(KW_TSVECTOR / KW_TSQUERY / KW_CITEXT) {/* =>  data_type */  return { dataType: t }; }
 
 
 @import 'common/keyword/signedness.pegjs'

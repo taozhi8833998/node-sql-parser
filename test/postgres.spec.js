@@ -2072,6 +2072,39 @@ describe('Postgres', () => {
         'CREATE TABLE "test_table" (id INT NOT NULL, vector TSVECTOR)'
       ]
     },
+    {
+      title: 'array of any data type',
+      sql: [
+        `CREATE TABLE test_table (
+            ids uuid[],
+            other_ids uuid array,
+            flags boolean[],
+            dates date[],
+            times timestamptz[],
+            docs jsonb[],
+            matrix int[3][3]
+        );`,
+        'CREATE TABLE "test_table" (ids UUID[], other_ids UUID ARRAY, flags BOOLEAN[], dates DATE[], times TIMESTAMPTZ[], docs JSONB[], matrix INT[3][3])'
+      ]
+    },
+    {
+      title: 'cast to uuid array type',
+      sql: [
+        `SELECT string_to_array('a,b', ',')::uuid[]`,
+        `SELECT string_to_array('a,b', ',')::UUID[]`
+      ]
+    },
+    {
+      title: 'citext and timetz data types',
+      sql: [
+        `CREATE TABLE test_table (
+            email citext,
+            aliases citext[],
+            opens_at timetz
+        );`,
+        'CREATE TABLE "test_table" (email CITEXT, aliases CITEXT[], opens_at TIMETZ)'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {

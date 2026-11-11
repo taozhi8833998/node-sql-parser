@@ -199,6 +199,7 @@ KW_NTEXT    = "NTEXT"i      !ident_start { return 'NTEXT'; }
 KW_TINYTEXT = "TINYTEXT"i   !ident_start { return 'TINYTEXT'; }
 KW_MEDIUMTEXT = "MEDIUMTEXT"i !ident_start { return 'MEDIUMTEXT'; }
 KW_LONGTEXT = "LONGTEXT"i   !ident_start { return 'LONGTEXT'; }
+KW_CITEXT   = "CITEXT"i     !ident_start { return 'CITEXT'; }
 KW_BYTES    = "BYTES"i      !ident_start { return 'BYTES'; }
 KW_BYTEA    = "BYTEA"i      !ident_start { return 'BYTEA'; }
 
@@ -271,6 +272,7 @@ KW_DATETIMEOFFSET = "DATETIMEOFFSET"i !ident_start { return 'DATETIMEOFFSET'; }
 KW_SMALLDATETIME = "SMALLDATETIME"i !ident_start { return 'SMALLDATETIME'; }
 KW_TIME     = "TIME"i       !ident_start { return 'TIME'; }
 KW_TIMESTAMP = "TIMESTAMP"i !ident_start { return 'TIMESTAMP'; }
+KW_TIMETZ   = "TIMETZ"i     !ident_start { return 'TIMETZ'; }
 KW_TIMESTAMPTZ = "TIMESTAMPTZ"i !ident_start { return 'TIMESTAMPTZ'; }
 KW_TIMESTAMP_TZ = "TIMESTAMP_TZ"i !ident_start { return 'TIMESTAMP_TZ'; }
 KW_TIMESTAMP_NTZ = "TIMESTAMP_NTZ"i !ident_start { return 'TIMESTAMP_NTZ'; }
