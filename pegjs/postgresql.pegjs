@@ -3709,9 +3709,9 @@ table_base
     // => { prefix?: string; type: 'expr'; expr: expr; as?: alias_clause; }
       return { prefix: l, type: 'expr', expr: e, as: alias };
     }
-  / t:table_name __ 'TABLESAMPLE'i __ f:func_call __ re:('REPEATABLE'i __ LPAREN __ literal_numeric __ RPAREN)? __ alias:alias_clause? {
-    // => table_name & { expr: expr, repeatable: literal_numeric; as?: alias_clause;}
-    return {
+  / o:table_only_prefix? t:table_name __ 'TABLESAMPLE'i __ f:func_call __ re:('REPEATABLE'i __ LPAREN __ literal_numeric __ RPAREN)? __ alias:alias_clause? {
+    // => table_name & { prefix?: 'ONLY'; expr: expr, repeatable: literal_numeric; as?: alias_clause;}
+    const result = {
       ...t,
       as: alias,
       tablesample: {
@@ -3719,19 +3719,31 @@ table_base
         repeatable: re && re[4],
       }
     }
+    if (o) result.prefix = o
+    return result
   }
-  / t:table_name __ alias:alias_clause? {
-    // => table_name & { as?: alias_clause; }
+  / o:table_only_prefix? t:table_name __ alias:alias_clause? {
+    // => table_name & { prefix?: 'ONLY'; as?: alias_clause; }
       if (t.type === 'var') {
         t.as = alias;
         return t;
       } else {
-        return {
+        const result = {
           ...t,
           as: alias
         };
+        if (o) result.prefix = o
+        return result
       }
     }
+
+table_only_prefix
+  = 'ONLY'i !ident_start __ &table_name {
+    // ONLY reads the table without its inheritance children / partitions.
+    // Only taken as a modifier when a table name follows, so a table named ONLY still parses.
+    // => 'ONLY'
+    return 'ONLY'
+  }
 
 
 join_op

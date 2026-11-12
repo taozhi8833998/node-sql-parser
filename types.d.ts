@@ -47,6 +47,7 @@ export interface BaseFrom {
   table: string;
   as: string | null;
   schema?: string;
+  prefix?: string;
   loc?: LocationRange;
 }
 export interface Join extends BaseFrom {
