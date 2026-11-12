@@ -1368,6 +1368,27 @@ describe('mysql', () => {
           "SELECT * FROM `T1` WHERE `a` <=> NULL"
         ]
       },
+      {
+        title: 'double dash not followed by whitespace as minus minus',
+        sql: [
+          "SELECT 5--1 AS x, 2 AS y",
+          "SELECT 5 - -1 AS `x`, 2 AS `y`"
+        ]
+      },
+      {
+        title: 'double dash not followed by whitespace in where clause',
+        sql: [
+          "SELECT a FROM t WHERE b--1 > 0",
+          "SELECT `a` FROM `t` WHERE `b` - -1 > 0"
+        ]
+      },
+      {
+        title: 'double dash comment followed by whitespace or control character',
+        sql: [
+          "SELECT a -- comment\nFROM t --\tcomment\nWHERE b > 0 --",
+          "SELECT `a` FROM `t` WHERE `b` > 0"
+        ]
+      },
     ]
     SQL_LIST.forEach(sqlInfo => {
       const { title, sql } = sqlInfo
