@@ -3583,7 +3583,7 @@ LOGIC_OPERATOR = OPERATOR_CONCATENATION / OPERATOR_AND / OPERATOR_XOR
 // Import common modules
 @import 'common/keyword/core.pegjs'
 @import 'common/symbol.pegjs'
-@import 'common/comment.pegjs'
+@import 'common/comment-mysql.pegjs'
 @import 'common/expression/case.pegjs'
 
 // MariaDB specific: interval_unit with WEEK
