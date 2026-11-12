@@ -2072,6 +2072,41 @@ describe('Postgres', () => {
         'CREATE TABLE "test_table" (id INT NOT NULL, vector TSVECTOR)'
       ]
     },
+    {
+      title: 'select from only table',
+      sql: [
+        'SELECT * FROM ONLY parent WHERE id = 1',
+        'SELECT * FROM ONLY "parent" WHERE id = 1'
+      ]
+    },
+    {
+      title: 'select from only schema table with alias and join',
+      sql: [
+        'select p.id from only public.parent p join only child c on c.pid = p.id',
+        'SELECT "p".id FROM ONLY "public"."parent" AS "p" INNER JOIN ONLY "child" AS "c" ON "c".pid = "p".id'
+      ]
+    },
+    {
+      title: 'update only table',
+      sql: [
+        'UPDATE ONLY parent SET a = 1 WHERE id = 2',
+        'UPDATE ONLY "parent" SET a = 1 WHERE id = 2'
+      ]
+    },
+    {
+      title: 'delete from only table',
+      sql: [
+        'DELETE FROM ONLY parent WHERE id = 2',
+        'DELETE FROM ONLY "parent" WHERE id = 2'
+      ]
+    },
+    {
+      title: 'table named only',
+      sql: [
+        'SELECT * FROM "only" WHERE id = 1',
+        'SELECT * FROM "only" WHERE id = 1'
+      ]
+    },
   ]
   function neatlyNestTestedSQL(sqlList){
     sqlList.forEach(sqlInfo => {
@@ -2515,6 +2550,13 @@ describe('Postgres', () => {
   })
 
   describe('pg ast', () => {
+    it('should keep ONLY as a table modifier, not a table name', () => {
+      expect(parser.tableList('SELECT * FROM ONLY parent WHERE id = 1', opt)).to.be.eql(['select::null::parent'])
+      expect(parser.tableList('DELETE FROM ONLY public.parent WHERE id = 1', opt)).to.be.eql(['delete::public::parent'])
+      const ast = parser.astify('SELECT * FROM ONLY parent', opt)
+      expect(ast.from[0]).to.include({ table: 'parent', prefix: 'ONLY', as: null })
+    })
+
     it('should get correct columns and tables', () => {
       let sql = 'SELECT "Id" FROM "Test";'
       let ast = parser.parse(sql, opt)

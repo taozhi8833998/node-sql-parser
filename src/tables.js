@@ -140,9 +140,9 @@ function tableToSQL(tableInfo) {
         tableName = exprToSQL(expr)
     }
   }
-  tableName = [toUpper(prefixStr), tableName, toUpper(suffix)].filter(hasVal).join(' ')
+  tableName = [tableName, toUpper(suffix)].filter(hasVal).join(' ')
   const str = [serverName, database, schemaStr, tableName].filter(hasVal).join('.')
-  const result = [str]
+  const result = [[toUpper(prefixStr), str].filter(hasVal).join(' ')]
   if (tablesample) {
     const tableSampleSQL = ['TABLESAMPLE', exprToSQL(tablesample.expr), literalToSQL(tablesample.repeatable)].filter(hasVal).join(' ')
     result.push(tableSampleSQL)
